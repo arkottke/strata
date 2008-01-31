@@ -1,0 +1,528 @@
+\documentclass[11pt]{report}         
+\usepackage{pxfonts}
+\usepackage{makeidx}
+\usepackage[plainpages=false,pdfpagelabels]{hyperref}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{pdflscape}
+\usepackage[round,sort]{natbib}
+
+\bibliographystyle{abbrvnat}
+
+\title{Technical Manual for University of Texas Site Response (UTSR)}
+\author{Albert R. Kottke and Ellen M. Rathje}
+\date{\today}
+
+% Create the index
+\makeindex
+
+\begin{document}
+\maketitle
+\tableofcontents
+\listoffigures
+\listoftables
+
+\chapter{Introduction}
+The computer program University of Texas Site Response (UTSR) was written in 2007 by Albert Kottke
+and Professor Ellen M. Rathje.  (mention financial support?) UTSR performs equivalent linear site
+response analysis in the frequency domain using time domain input motions or random vibration theory
+(RVT) methods, and allows for randomization of the site properties. The following document provides
+instruction on using UTSR, as well as the computational details of the analysis.
+
+UTSR is distributed under the GNU General Public License which can be found here:
+\texttt{http://www.gnu.org/licenses/}.
+
+\chapter{Equivalent Linear Site Response Analysis}
+UTSR uses an iterative linear wave propagation with strain dependent dynamic properties.  This
+method is referred as equivalent linear and was first used in the computer program SHAKE (ref?).
+UTSR only computes the response for vertically propagating, horizontally polarized shear waves
+propagated through a site with horizontal layers.
+
+The following chapter introduces strain dependent soil properties, linear wave propagation through a
+layered medium, and the equivalent linear site response analysis method.
+
+\section{Linear Wave Propagation}\label{ch:sra:waveProp}
+For linear elastic, one-dimensional wave propagation, the soil is assumed to behave as a
+Kelvin-Voigt solid, in which the dynamic response is described using a purely elastic spring and a
+purely viscous dashpot \citep{kramer:96}.  The solution to the one-dimensional wave
+equation\index{wave equation} for a single wave frequency ($\omega$) provides displacement ($u$) as
+a function of depth ($z$) and time ($t$):
+\begin{equation}
+  u(z,t) = A\exp\left[i\left( \omega t + k^* z \right)\right] + B\exp\left[i\left( \omega t - k^* z
+  \right)\right] 
+  \label{eq:waveEq}
+\end{equation}
+In equation (\ref{eq:waveEq}), $A$ and $B$ represent the respective amplitudes of the upward ($-z$)
+and downward ($+z$) waves, respectively (Figure~\ref{fig:sraSimpleWave}).  The complex wave number
+($k^*$) in equation (\ref{eq:complexWaveNo}) is related to the shear modulus ($G$), damping ratio
+($\xi$), and mass density ($\rho$) of the soil using:
+\begin{equation}
+ 	k^* 	= \frac{\omega}{v_s^*} \\
+	\label{eq:complexWaveNo}
+\end{equation}
+\begin{equation}
+	v_s^*	= \sqrt{ \frac{G^*}{\rho} } \\
+\end{equation}
+\begin{equation}
+	G^* 	= G \left( 1 - 2\xi^2 + \imath 2 \xi \sqrt{ 1 - \xi^2 }\right) 
+		\simeq G ( 1 + \imath 2 \xi ) \\
+	\label{eq:complexShear}
+\end{equation}
+$G^*$ and $v_s^*$ are called the complex shear modulus\index{shear modulus!complex}and complex
+shear-wave velocity, respectively.  If the damping ratio ($\xi$) is small ($<10-20\%$), then the
+approximation of the complex shear modulus in equation (\ref{eq:complexShear}) is appropriate.  UTSR
+uses the complete definition of the complex shear-modulus, not the approximation, in the
+calculations.
+
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=0.7\linewidth]{figures/sraSimpleWave.pdf}
+  \end{center}
+  \caption{The notation used in the wave equation}
+  \label{fig:sraSimpleWave}
+\end{figure}
+
+Equation (\ref{eq:waveEq}) applies only to a single layer with uniform soil properties and the
+wave amplitudes ($A$ and $B$) can be computed from the layer boundary conditions.  For a layered
+system, shown in Figure~\ref{fig:sraNomenclature}, the wave amplitudes are calculated using
+recursive formulas developed by maintaining: compatibility of displacement and shear stress at the
+layer boundaries.  Using these assumptions, the following recursive formulas are developed:
+\begin{equation}
+  \begin{array}{rcl}
+	A_{m+1} & = & \frac{1}{2} A_m \left( 1 + \alpha_m^* \right) \exp\left(\imath k_m^* h_m \right) +
+		\frac{1}{2} B_m \left( 1 - \alpha_m^* \right) \exp\left(-\imath k_m^* h_m \right)\\
+	B_{m+1} & = & \frac{1}{2} A_m \left( 1 - \alpha_m^* \right) \exp\left(\imath k_m^* h_m\right) +
+		\frac{1}{2} B_m \left( 1 + \alpha_m^* \right) \exp\left(-\imath k_m^* h_m \right)\\
+  \end{array}
+\end{equation}
+where $h_m$ is the layer height and $\alpha_m^*$ is the complex impedance ratio.  The complex
+impedance ratio is defined as:
+\begin{equation}
+  \alpha_m^* = \frac{k_m^* G_m^*}{k_{m+1}^* G_{m+1}^*} = \frac{\rho_m ( v_s^* )_m }{\rho_{m+1} (
+  v_s^* )_{m+1} } 
+\end{equation}
+and quantifies the relative amplitudes of the upward and downward waves.  At the surface of the soil
+column ($m=1$), the shear stress must equal zero, therefore the amplitudes of the upward and
+downward waves must be equal ($A_1=B_1$).  
+
+\begin{figure}
+  \begin{center}
+    \setlength{\unitlength}{0.6cm}
+	\begin{picture}(12,9)
+	  % Layers
+	  \put(0,1){\line(1,0){12}}
+	  \put(0,3){\line(1,0){12}}
+	  \put(0,4){\line(1,0){12}}
+	  \put(0,5){\line(1,0){12}}
+	  \put(0,7){\line(1,0){12}}
+	  \put(0,8){\line(1,0){12}}
+	  \put(0,9){\line(1,0){12}}
+	  % Wave Vectors
+	  \thicklines
+	  \put(3.9,1){\vector(0,-1){0.75}}
+	  \put(3.9,4){\vector(0,-1){0.75}}
+	  \put(3.9,5){\vector(0,-1){0.75}}
+	  \put(3.9,8){\vector(0,-1){0.75}}
+	  \put(3.9,9){\vector(0,-1){0.75}}
+	  \put(3.4,0.25){\vector(0,1){0.75}}
+	  \put(3.4,3.25){\vector(0,1){0.75}}
+	  \put(3.4,4.25){\vector(0,1){0.75}}
+	  \put(3.4,7.25){\vector(0,1){0.75}}
+	  \put(3.4,8.25){\vector(0,1){0.75}}
+	  \put(2.2,8.3){$A_1$}
+	  \put(2.2,7.3){$A_2$}
+	  \put(2.2,4.3){$A_m$}
+	  \put(1.9,3.3){$A_{m+1}$}
+	  \put(2.2,0.3){$A_n$}
+	  \put(4.1,8.3){$B_1$}
+	  \put(4.1,7.3){$B_2$}
+	  \put(4.1,4.3){$B_m$}
+	  \put(4.1,3.3){$B_{m+1}$}
+	  \put(4.1,0.3){$B_n$}
+
+	  % Layer indicators
+	  \put(0.0,8.3){$1$}
+	  \put(0.0,7.3){$2$}
+	  \put(0.0,4.3){$m$}
+	  \put(0.0,3.3){$m+1$}
+	  \put(0.0,0.3){$n$}
+	  % Layer properties
+	  \put(6,8.3){\(\rho_{1} \  h_{1} \  G_{1} \  \xi_{1} \)}
+	  \put(6,7.3){\(\rho_{2} \  h_{2} \  G_{2} \  \xi_{2} \)}
+	  \put(6,4.3){\(\rho_{m} \  h_{m} \  G_{m} \  \xi_{m} \)}
+	  \put(6,3.3){\(\rho_{{m+1}} \  h_{{m+1}} \  G_{{m+1}} \  \xi_{{m+1}} \)}
+	  \put(6,0.3){\(\rho_{n} \  h_{n} \  G_{n} \  \xi_{n} \)}
+	\end{picture}
+  \end{center}
+  \caption{Nomenclature for the theoretical wave propagation.}
+  \label{fig:sraNomenclature}
+\end{figure}
+
+The wave amplitudes ($A$ and $B$) within the soil profile are calculated at each frequency (assuming
+known stiffness and damping within each layer) and used to computed the response at the surface of a
+site.  This calculation is performed by setting $A_{1}=B_{1}=1.0$ at the surface and iteratively
+calculating the wave amplitudes ($A_{m+1}$,$B_{m+1}$) in successive layers until the input (base)
+layer is reached.  The transfer function between the motion in the layer of interest ($m$) and in
+the rock layer ($n$) at the base of the deposit is defined as:
+\begin{equation}
+  TF_{m,n}(\omega) = \frac{u_m(\omega)}{u_n(\omega)}= \frac{A_m + B_m}{A_n + B_n}
+  \label{eq:transFunc}
+\end{equation}
+where $\omega$ is the frequency of the harmonic wave.  The transfer function is the ratio of the
+amplitude of motion--either displacement, velocity, or acceleration--between two layers of interest
+and varies with frequency.  The transfer function for the site with the properties presented in
+Table~\ref{tab:sraSite} is shown in Figure~\ref{fig:sraAccelTfOutcropWithin}.  The locations of the
+peaks in the transfer function are controlled by the modes of vibration of the soil deposit.  The
+peak at the lowest frequency represents the fundamental (i.e. first) mode of vibration and results
+in the largest amplification.  The peaks at higher frequencies are the higher vibrational modes of
+the site.  The first natural frequency of a site is inversely related to the site period, where the
+site period is defined as \citep{kramer:96}:
+\begin{equation}
+  T_s = \frac{4\cdot h_{soil}}{\overline{v}_s}\\ 
+  \label{eq:sitePeriod}
+\end{equation}
+In equation (\ref{eq:sitePeriod}), $h_{soil}$ is the total height of the soil and $\overline{v}_s$
+average velocity of the site.  For the example site (Table~\ref{tab:sraSite}), the site period is
+calculated to be 0.57 s which corresponds to a natural frequency of 1.75 Hz.  In the transfer
+function (Figure~\ref{fig:sraAccelTfOutcropWithin}), the peak with the highest amplification occurs
+at this frequency.  The amplitudes of the peaks are controlled by the damping within the soil.  As
+the damping of the system increases, the amplitudes of the peaks decrease, which results in less
+amplification at the surface.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{llc}
+	\hline\hline
+	\textbf{Property} & \textbf{Rock} & \textbf{Soil} \\
+	\hline
+	Mass Density ($\rho$) 		& 2.24 g/cm$^3$ & 1.93 g/cm$^3$ \\
+	Height ($h$)				& $\inf$		& 50 m \\
+	Shear-wave Velocity ($v_s$)	& 1500 m/s		& 350 m/s \\
+	Damping ratio ($\xi$)		& 1\%			& 7\% \\
+	\hline
+  \end{tabular}
+  \caption{The site properties of an example site.}
+  \label{tab:sraSite}
+\end{table}
+\begin{figure}[t]
+  \begin{center}
+	\includegraphics[width=\linewidth]{figures/sraAccelTfOutcropWithin.pdf}
+  \end{center}
+  \caption{The input (\emph{within}) to surface (\emph{outcrop}) transfer function site in
+  Table~\ref{tab:sraSite}.}
+  \label{fig:sraAccelTfOutcropWithin}
+\end{figure}
+
+
+The response at the layer of interested is computed by multiplying the Fourier spectrum of the
+input rock motion by the transfer function\index{transfer function!acceleration}:
+\begin{equation}
+  Y_m(\omega) = TF_{m,n}(\omega) \cdot Y_n(\omega)
+  \label{eq:tfApplication}
+\end{equation}
+where $Y_n$ is the input Fourier amplitude spectrum at layer $n$ and $Y_m$ is the Fourier amplitude
+spectrum at the top of the layer of interest.  The Fourier Spectrum of the input motion can defined
+a variety of methods and is discussed further in Section FIXME.
+
+One issue that must be considered is that the input Fourier spectrum is typically the response at
+the ground surface, where the upgoing and downgoing wave amplitudes are equal, not at the base of a
+soil deposit, where the wave amplitudes are not equal (Figure~\ref{fig:sraOutcropWithin}). However,
+the motion is applied as input at the base of a soil deposit and the change in boundary conditions (
+$A_n = B_n$ for the surface, $A_n \ne B_n$ at the base of a soil deposit) must be taken into
+account.  The motions at any free surface are referred to as \emph{outcrop}\index{motion
+type!outcrop} records and their amplitudes are described by twice the amplitude of the upward wave
+($2A$).  To apply equation (\ref{eq:transFunc}) to an \emph{outcrop} motion a second transfer
+function is required to translate from an \emph{outcrop} motion to a \emph{within} motion.  The
+combined transfer function is defined as:
+\begin{equation}
+  TF_{m,n}(\omega) = \underbrace{\frac{A_n + B_n}{2\cdot A_n}}_{outcrop \to within} \cdot
+  \underbrace{\frac{A_m + B_m}{A_n + B_n}}_{within \to layer_n} = \underbrace{\frac{A_m + B_m}{ 2
+  \cdot A_n }}_{outcrop \to layer_n}
+\end{equation}
+Motions recorded at depth (e.g. recorded in a borehole) are referred to as
+\emph{within}\index{motion type!within} motions and for these motions the transfer function given in
+equation (\ref{eq:transFunc}) can be used.  Figure~\ref{fig:sraAccelTfOutcropOutcrop}, shows the
+transfer function for the site profile presented in Table~\ref{tab:sraSite} and applying the motions
+as if it were an outcrop recording.  In comparison with \emph{within}-to-\emph{outcrop} transfer
+(Figure~\ref{fig:sraAccelTfOutcropWithin}), the amplification for all modes is decreased
+substantially. In the same manner, the response at the layer of interest can be computed as an
+\emph{outcrop} or a \emph{within} response by using the appropriate wave amplitudes.  
+
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=0.7\linewidth]{figures/sraWithinOutcrop.pdf}
+  \end{center}
+  \caption{\emph{Outcrop} describes upward and downward waves being equal, \emph{within} is used
+  when the upward and downward waves are not equal.}
+  \label{fig:sraOutcropWithin}
+\end{figure}
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=\linewidth]{figures/sraAccelTfOutcropOutcrop.pdf}
+  \end{center}
+  \caption{The input (\emph{outcrop}) to surface (\emph{outcrop}) transfer function site in
+  Table~\ref{tab:sraSite}.}
+  \label{fig:sraAccelTfOutcropOutcrop}
+\end{figure}
+\clearpage
+
+\section{Equivalent-Linear Analysis}\label{ch:sra:equivLinear}
+The previous section assumed that the soil was linear-elastic. However, soil is nonlinear, such that
+the properties of soil (shear modulus, $G$, and damping ratio, $\xi$) vary with shear strain, and
+thus the intensity of shaking.  In equivalent-linear site response analysis, the nonlinear response
+of the soil is approximated by modifying the linear elastic properties of the soil based on the
+induced strain level.  Because the induced strains depend on the soil properties, the strain
+compatible shear modulus and damping ratio values are iteratively calculated based on the computed
+strain.  
+
+A transfer function is used to compute the shear strain in the layer.  In the calculation of the
+transfer function, the shear strain is computed at the middle of the layer ($z=h_m/2$) and used to
+select the strain compatible soil properties.  Unlike the previous transfer functions that merely
+amplified the Fourier amplitude spectrum, the strain transfer function\index{transfer
+function!strain} amplifies the motion and converts acceleration into strain.  The strain transfer
+function based on an outcropping input motion is defined by:
+\begin{equation}
+  TF_{mn}^{strain}(\omega) = \frac{\gamma(\omega, z=h_m/2)}{\ddot{u}_{n,outcrop}(\omega)} =
+  \frac{\imath k_m \left[
+  A_m \exp\left( \imath k_m^* h_m / 2 \right) - B_m \exp\left( -\imath k_m^* h_m / 2 \right) \right]
+  }{-\omega^2 \left( 2 \cdot A_n \right)}
+  \label{eq:strain_tf}
+\end{equation}
+The strain Fourier amplitude spectrum within a layer is calculated by applying the strain transfer
+function to the Fourier amplitude spectrum of the input motion.  The maximum strain within the layer
+is computed from this Fourier amplitude spectrum (further discussed in Chapter~\ref{ch:srm}).  However, it
+is not appropriate to use the maximum strain within the layer to compute the strain-compatible soil
+properties, because the maximum strain only occurs for an instant in time.  Instead, an effective
+strain ($\gamma_{\mathrm{eff}}$) is calculated from the maximum strain.  Typically, the effective
+strain is 65\% of the maximum strain. 
+
+Equivalent-linear site response analysis requires that the strain dependent nonlinear properties
+(i.e. $G$ and $\xi$) be defined.  The initial (small strain) shear modulus\index{shear
+modulus!maximum (small strain)} ($G_{max}$) is calculated by:
+\begin{equation}
+  G_{max} = \rho v_s ^ 2
+\end{equation}
+where $\rho$ is the mass density of the soil, and $v_s$ is the measured shear-wave velocity.
+Characterizing the nonlinear behavior of $G$ and $\xi$ is achieved through modulus reduction and
+damping curves that describe the variation of $G/G_{max}$ and $\xi$ with shear strain (discussed in
+the next section).  Using the initial dynamic properties of the soil, equivalent-linear site
+response analysis involves the following steps:
+\begin{enumerate}
+  \item The wave amplitudes ($A$ and $B$) are computed for each of the layers
+  \item The strain transfer function is calculated for each of the layers.
+  \item The maximum strain within each layer is computed by applying the strain transfer function
+	to the input Fourier amplitude spectrum and finding the maximum response (see
+	Chapter~\ref{ch:srm}).
+  \item The effective strain ($\gamma_{\mathrm{eff}}$) is calculated from the maximum strain within
+	each layer.
+  \item The strain compatible shear modulus and damping ratio are recalculated based on the new
+	  estimate of the effective strain within each layer.
+  \item The new nonlinear properties ($G$ and $\xi$) are compared to the previous iteration and an
+	error is calculated.  If the error for all layers is below a defined threshold the calculation
+	stops.
+\end{enumerate}
+After the iterative portion of the program finishes, the dynamic response of the soil deposit is
+computed.  
+
+One method of looking at the response of the soil deposit is with a acceleration response
+spectrum\index{response spectrum}, a tool used in structural analysis and to assess the frequency
+content of the response.  An acceleration response spectrum is defined as the maximum responses of
+single-degree-of-freedom oscillators with a range of natural periods and a specific damping ratio,
+excited by a given acceleration-time history.  The acceleration response spectrum transfer function
+is defined as:
+\begin{equation}
+	  H(f) = \frac{-f_n^2}{(f^2-f_n^2) - 2 \cdot \imath \cdot \xi \cdot f_n \cdot f}
+\end{equation}
+where $f_n$ is the natural frequency of the oscillator, $\xi$ is the damping ratio, and $f$ is the
+frequency. (FIXME uses $f$ instead of $\omega$) The damping ratio is typically defined at 5\% as
+this corresponds to the approximate damping of an undamaged building.  The response at
+single period by applying the transfer function to the Fourier spectrum of interest and 
+computing the maximum response.  The response spectrum is computed by varying the natural frequency
+of the oscillator over a range of interest, typically 0.01 to 10 seconds.
+
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=\linewidth]{figures/sraAccelSa.pdf}
+  \end{center}
+  \caption{The input and surface acceleration response spectrum ($\xi$=5\%).}
+  \label{fig:sraAccelSa}
+\end{figure}
+
+\section{Dynamic Soil Properties}\label{ch:sra:dynprops}
+In a dynamic system,  the properties that govern the response are the mass, stiffness, and damping.
+In soil under seismic shear loading, the mass of the system is characterized by the mass density
+($\rho$) and the layer height ($h$), the stiffness is characterized by the shear modulus ($G$), and
+the damping is characterized by the viscous damping ratio ($\xi$).  The dynamic behavior of soil is
+challenging to model because it is nonlinear, such that, both the stiffness and damping of the
+system change with shear strain.  Section~\ref{ch:sra:equivLinear} introduced equivalent-linear
+site response analysis in which the nonlinear response of the soil was simplified into a linear
+system that used strain-compatible dynamic properties ($G$ and $\xi$).  The analysis requires that
+the strain dependence of the nonlinear properties within a layer be fully characterized.
+
+Defining the mass density of the system is a straight forward process because the density falls
+within a limited range for soil and a good estimate of the mass density can be made based on soil
+type alone.  Characterization of the stiffness and damping properties of soil is more complicated,
+the most rigorous approach requiring testing in both the field and laboratory.  
+
+The shear modulus and material damping of the soil are characterized using the small strain shear
+modulus ($G_{max}$), modulus reduction curves that relate $G/G_{max}$ to shear strain, and damping
+ratio curves that relate $\xi$ to shear strain.  The small strain shear modulus is best
+characterized by in situ measurement of the shear-wave velocity as a function of depth.  An example
+shear-wave velocity profile is shown in Figure~\ref{fig:sraVsProfile}. The profile tends to be
+separated into discrete layers associated with different geologic strata with a generally increasing
+shear-wave velocity with increasing depth.  Examples of modulus reduction and damping curves for
+soil are shown in Figure~\ref{fig:sraNLLab}.  These curves show a decrease in the soil stiffness and
+an increase in the damping ratio with an increase in shear strain. 
+
+\begin{figure}[tb]
+	\begin{center}
+		\includegraphics{figures/sraVsProfile.pdf}
+	\end{center}
+	\caption{An example shear-wave velocity profile}
+	\label{fig:sraVsProfile}
+\end{figure}
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=\textwidth]{figures/sraNLLab.pdf}
+	\caption{Examples of shear modulus reduction and material damping curves for soil.}
+	\label{fig:sraNLLab}
+\end{figure}
+
+The modulus reduction and damping curves may be obtained from laboratory measurements on soil
+samples or derived from empirical models based on soil type and other variables.  One of the most
+comprehensive empirical models was developed by \citet{darendeli:01}.  The model expands on the
+hyperbolic model presented by \citet{hardin:72} and accounts for the effects of confining pressure
+($\sigma_0'$), plasticity index ($PI$), over-consolidation ratio ($OCR$), frequency ($f$), and
+number of cycles of loading ($N$) on the modulus reduction and damping curves. 
+
+In the \citet{darendeli:01} model, the shear modulus reduction curve is a hyperbola defined by:
+\begin{equation}
+  \frac{G}{G_{max}} = \frac{1}{1 + \left( \frac{\gamma}{\gamma_r} \right)^{a}}
+  \label{eq:shearmod}
+\end{equation}
+where $a$ is 0.9190, $\gamma$ is the shear strain and $\gamma_r$ is the reference shear strain.  The reference
+shear strain is computed from:
+\begin{equation}
+  \gamma_r = \left(\frac{\sigma_0'}{p_a}\right)^{0.3483} \left( 0.0352 + 0.0010 \cdot PI \cdot OCR^{0.3246} \right)
+\end{equation}
+where $\sigma_0'$ is the mean effective stress and $p_a$ is the atmospheric pressure in atm. In the
+model, the damping ratio is calculated from the minimum damping ratio at small strains ($\xi_{min}$)
+and from the damping associated with hysteretic Masing behavior ($\xi_{Masing}$).  The minimum damping is
+calculated from:
+\begin{equation}
+  \xi_{min}(\%) = (\sigma_0')^{-0.2889} \left( 0.8005 + 0.0129 \cdot PI \cdot OCR ^{-0.1069} \right) \left[
+  1 + 0.2919 \ln\left( f \right) \right]
+  \label{eq:dmin}
+\end{equation}
+where $f$ is the excitation frequency (Hz). The computation of the Masing damping requires the
+calculation of the area within the stress-strain curve predicted by the shear modulus reduction
+curve.  The integration can be approximated by:
+\begin{equation}
+  \xi_{Masing}(\%) = c_1 \xi_{Masing,a=1} + c_2 \xi_{Masing,a=1} + c_3 \xi_{Masing,a=1}
+  \label{eq:dmasing}
+\end{equation}
+where:
+\begin{equation}
+  	\xi_{masing,a=1}(\%) = \frac{100}{\pi} \left\{ 4 \left[ \frac{\gamma - \gamma_r\ln\left( \frac{\gamma +
+	\gamma_r}{\gamma_r} \right)}{\frac{\gamma^2}{\gamma+\gamma_r}} \right] - 2 \right\} \\
+\end{equation}
+\begin{equation}
+  \begin{array}{rcl}
+  	c_1 & = & -1.1143 a^2 + 1.8618 a + 0.2533 \\
+	c_2 & = & 0.0805 a^2 - 0.0710 a - 0.0095 \\
+	c_3 & = & -0.0005 a^2 + 0.0002 a + 0.0003 \\
+  \end{array}
+\end{equation}
+The minimum damping ratio in equation (\ref{eq:dmin}) and the Masing damping in equation
+(\ref{eq:dmasing}) are combined to compute the total damping ($\xi$) using:
+\begin{equation}
+  \xi = b  \left( \frac{G}{G_{max}} \right)^{0.1} \cdot \xi_{Masing} + \xi_{min} 
+  \label{eq:damping}
+\end{equation}
+where $b$ is defined as:
+\begin{equation}
+  b = 0.6329 - 0.0057 \ln\left( N \right)
+\end{equation}
+where $N$ is the number of cycles of loading.  In most site response applications, the number of
+cycles ($N$) and the excitation frequency ($f$) in the model are typically defined as 10 and 1,
+respectively.  Figure~\ref{fig:sraNLEmpirical} shows the predicted nonlinear curves for a sand
+($PI=0, OCR=1$) at an effective confining pressure of 1 atm.
+
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=\linewidth]{figures/sraNLEmpirical.pdf}
+  \end{center}
+  \caption{The nonlinear soil properties predicted by the \citet{darendeli:01} model.}
+  \label{fig:sraNLEmpirical}
+\end{figure}
+
+A Bayesian approach was used in the \citet{darendeli:01} model to calculate the model coefficients.
+One of the unique aspects of this model is that the scatter of the data about the mean estimate is
+quantified.  In the \citet{darendeli:01} model, the uncertainty about the mean value is assumed to
+be normally distributed.  The normal distribution is described using a mean and standard deviation.
+The mean values are calculated from equations (\ref{eq:shearmod}) and (\ref{eq:damping}). The
+standard deviation is a function of the amplitude of the nonlinear property (i.e. $G/G_{max}$ and
+$\xi$).  The standard deviation of the normalized shear modulus ($\sigma_{NG}$) is computed by:
+\begin{equation}
+  \sigma_{NG} = \exp(-4.23) + \sqrt{ \frac{0.25}{\exp(3.62)} - \frac{\left(G/G_{max} -
+  0.5\right)^2}{\exp(3.62)} }
+  \label{eq:sigmaShear}
+\end{equation}
+This model results in small $\sigma_{NG}$ when $G/G_{max}$ is close to 1 or 0 and relatively large
+$\sigma_{NG}$ when $G/G_{max}$ is equal to 0.5. The standard deviation of the damping
+($\sigma_{\xi}$) is computed by:
+\begin{equation}
+  \sigma_{\xi} = \exp(-5.0) + \exp(-0.25) \sqrt{\xi (\%)}
+  \label{eq:sigmaDamping}
+\end{equation}
+In the damping uncertainty model, the $\sigma_{\xi}$ increases with increasing damping.  Using these
+definitions for the standard deviation, the $\pm\sigma$ modulus reduction and damping curve for sand
+at a confining pressure of 1 atm are shown in Figure~\ref{fig:sraNLEmpiricalSigma}.
+
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=\linewidth]{figures/sraNLEmpiricalSigma.pdf}
+  \end{center}
+  \caption{The mean and mean $\pm\sigma$ nonlinear soil properties predicted by \citet{darendeli:01}.}
+  \label{fig:sraNLEmpiricalSigma}
+\end{figure}
+\clearpage 
+
+\chapter{Site Response Methods}\label{ch:srm}
+\section{Time Domain}
+By applying the
+inverse FFT to the strain Fourier amplitude spectrum, the strain-time history is computed
+(Figure~\ref{fig:sraStrainTH}).  From this strain-time history, the maximum strain ($\gamma_{max}$)
+is found.  
+
+
+\begin{figure}[tb]
+  \begin{center}
+	\includegraphics[width=\linewidth]{figures/sraStrainTH.pdf}
+  \end{center}
+  \caption{An example of the strain-time history and effective strain ($\gamma_{\mathrm{eff}}$).}
+  \label{fig:sraStrainTH}
+\end{figure}
+
+The acceleration response spectra for the input and surface acceleration-time histories in Figure
+FIXME are shown in Figure~\ref{fig:sraAccelSa}.  Comparing the response spectra indicates that there
+is significant amplification of the input motion at periods less than 1 second.  The largest
+amplification is observed at 0.57 s, which represents the fundamental period of the site.
+
+
+\section{Random Vibration Theory}
+
+
+%% Force Bibliography to appear in contents
+\newpage
+\addcontentsline{toc}{chapter}{Bibliography} 
+\bibliography{references}
+
+%% Create an index and add it to the table of contents
+\newpage
+\addcontentsline{toc}{chapter}{Index} 
+\printindex
+
+\end{document}
+
+
