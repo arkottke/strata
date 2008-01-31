@@ -1,0 +1,622 @@
+<ui version="4.0" >
+ <class>MotionDialog</class>
+ <widget class="QDialog" name="MotionDialog" >
+  <property name="enabled" >
+   <bool>true</bool>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>926</width>
+    <height>642</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Recorded Motion Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="fileButton" >
+       <property name="whatsThis" >
+        <string>Selects the file that contains the recorded time series</string>
+       </property>
+       <property name="text" >
+        <string>File...</string>
+       </property>
+       <property name="icon" >
+        <iconset/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="pathNameLineEdit" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>7</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_1" >
+       <property name="text" >
+        <string>Description:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>infoLineEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="infoLineEdit" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>7</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="whatsThis" >
+        <string>A description of the ground motion</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>Time Step (s):</string>
+       </property>
+       <property name="buddy" >
+        <cstring>timeStepLineEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="timeStepLineEdit" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>0</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="whatsThis" >
+        <string>The time step of the  time series  which can be typically found in the data file</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>30</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3" >
+       <property name="text" >
+        <string>Number of points:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>nptsLineEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="nptsLineEdit" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>0</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="whatsThis" >
+        <string>The number of data points in the time series</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>30</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4" >
+       <property name="text" >
+        <string>Scale Factor:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>scaleLineEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="scaleLineEdit" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>0</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip" >
+        <string/>
+       </property>
+       <property name="statusTip" >
+        <string/>
+       </property>
+       <property name="whatsThis" >
+        <string>The scale factor that is applied to the time series.  The resulting values should be in units of gravity.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>16</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_5" >
+       <property name="text" >
+        <string>Data Format:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>rowsRadioButton</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="rowsRadioButton" >
+       <property name="whatsThis" >
+        <string>The data is formatted in a series of rows.  Each row contains only time series data.</string>
+       </property>
+       <property name="text" >
+        <string>Rows</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="columnsRadioButton" >
+       <property name="whatsThis" >
+        <string>The data is found is a certain column of the data file.  The column number needs to be set.</string>
+       </property>
+       <property name="text" >
+        <string>Columns</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_6" >
+       <property name="text" >
+        <string>Data Column:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>dataColumnSpinBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="dataColumnSpinBox" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="minimum" >
+        <number>1</number>
+       </property>
+       <property name="value" >
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>30</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Data Deliminator:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>delimiterComboBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="delimiterComboBox" >
+       <property name="whatsThis" >
+        <string>The type of character that delimits data points in the time series</string>
+       </property>
+       <property name="editable" >
+        <bool>false</bool>
+       </property>
+       <item>
+        <property name="text" >
+         <string>White Space (\s)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Comma (,)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Semicolon (;)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>41</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_7" >
+       <property name="text" >
+        <string>Number of Header Lines:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>headerLinesSpinBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="headerLinesSpinBox" >
+       <property name="whatsThis" >
+        <string>Number of header lines prior to the time series data.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_8" >
+       <property name="text" >
+        <string>Number of Data Lines:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>dataLinesSpinBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="dataLinesSpinBox" >
+       <property name="whatsThis" >
+        <string>The number of data lines.  If this is set to zero the data is read until the end of the file.</string>
+       </property>
+       <property name="maximum" >
+        <number>20000</number>
+       </property>
+       <property name="minimum" >
+        <number>0</number>
+       </property>
+       <property name="value" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>171</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QTextEdit" name="filePreview" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>7</hsizetype>
+         <vsizetype>7</vsizetype>
+         <horstretch>6</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font" >
+        <font>
+         <family>Courier New</family>
+        </font>
+       </property>
+       <property name="whatsThis" >
+        <string>A view of the input data file.</string>
+       </property>
+       <property name="lineWrapMode" >
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly" >
+        <bool>true</bool>
+       </property>
+       <property name="acceptRichText" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="helpButton" >
+       <property name="text" >
+        <string/>
+       </property>
+       <property name="icon" >
+        <iconset/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>404</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="viewDataButton" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="whatsThis" >
+        <string>Preview of the time series data.</string>
+       </property>
+       <property name="text" >
+        <string>Preview Data</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okayButton" >
+       <property name="whatsThis" >
+        <string>Accept the time series</string>
+       </property>
+       <property name="text" >
+        <string>Okay</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../resources/resources.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>columnsRadioButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dataColumnSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>216</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>399</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rowsRadioButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dataColumnSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>117</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>412</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

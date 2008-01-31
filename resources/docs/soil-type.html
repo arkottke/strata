@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+
+<h1>Soil Type</h1>
+
+<p>The <i>Soil Type</i> tab allows for the definition of soil types used in the <a href="soil-layer.html">Soil Layer</a> page.  For each soil type the following parameters can be defined:
+<ul>
+    <li>Name</li>
+    <li>Unit weight</li>
+    <li>Initial damping</li>
+    <li>Normalized shear modulus (G/G<sub>max</sub>) degradation model</li>
+    <li>Damping model</li>
+    <li>Notes</li>
+</ul></p>
+
+<h2><a name="stdev-models">Defining Standard Deviation Models</a></h2>
+
+<p>The uncertainty of the non-linear curves is characterized by a truncated
+normal distribution.  The distribution is truncated with a minimum value to
+prevent errorneous negative values.  UTSR allows the user flexibility in the
+definition of the standard deviation.  In the simplest manner, a constant
+standard deviation can defined.  However, the user also has access to the
+strain and magnitude of the property, and a variety of mathimatical functions.</p>
+
+<p>In the formula for the standard deviation of the shear modulus, the following variables can be used:
+<ul>
+	<li>strain -- shear strain in percent</li>
+	<li>shearMod -- normalized shear modulus</li>
+</ul>
+Likewise, the following variables are available in the definition of the standard deviation of the damping:
+<ul>
+	<li>strain -- shear strain in percent</li>
+	<li>damping -- damping in decimal</li>
+</ul>
+The following functions are available:
+<ul>
+	<li>
+	<li>abs(x)</li>
+	<li>acos(x)</li>
+	<li>asin(x)</li>
+	<li>atan(x)</li>
+	<li>atan2(y, x)</li>
+	<li>ceil(x)</li>
+	<li>cos(x)</li>
+	<li>exp(x)</li>
+	<li>floor(x)</li>
+	<li>log(x)</li>
+	<li>max([value1 [, value2 [, ...]]])</li>
+	<li>min([value1 [, value2 [, ...]]])</li>
+	<li>pow(x, y)</li>
+	<li>random()</li>
+	<li>round(x)</li>
+	<li>sin(x)</li>
+	<li>sqrt(x)</li>
+	<li>tan(x)</li>
+</ul><p>
+
+</html>

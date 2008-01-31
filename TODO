@@ -1,0 +1,22 @@
+Fix the input/output names
+
+Soil Profile Page
+    -- enable distribution of the shear-wave velocity to be varied Uniform, Normal, Log-Normal
+
+Add settings object to remember plot format for types of plots.
+
+RVT
+    - check the extrapolated slope at low frequencies -- should be 2:1 because
+      of the omega squared relationship
+    - look at implications of extrapolation during the inversion and
+      calculation of the response
+    - add the option of providing calculation of time series for the RVT site
+      response. The time series would be computed with the phase angles from a
+      selected motion.
+
+Output
+    -- better algorithm for searching for nearest curves
+    -- allow for outputting of the maximum error profile.
+
+Questions:
+    -- how to generate coorelated random variables with a uniform distribution
