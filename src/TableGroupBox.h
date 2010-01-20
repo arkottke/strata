@@ -22,32 +22,35 @@
 #ifndef TABLE_GROUP_BOX_H_
 #define TABLE_GROUP_BOX_H_
 
+#include "MyAbstractTableModel.h"
 #include "MyTableView.h"
 
 #include <QGroupBox>
-#include <QString>
-#include <QAbstractTableModel>
-#include <QPushButton>
+#include <QHBoxLayout>
 #include <QItemDelegate>
 #include <QModelIndex>
+#include <QPushButton>
+#include <QString>
 
 class TableGroupBox : public QGroupBox
 {
     Q_OBJECT
 
     public:
-        TableGroupBox( QAbstractTableModel * model, const QString & title, QWidget * parent = 0 );
+        TableGroupBox( MyAbstractTableModel * model, const QString & title, QWidget * parent = 0 );
 
         MyTableView * table();
         QAbstractTableModel * model();
 
-        bool editable() const;
+        bool readOnly() const;
 
         bool lastRowFixed() const;
         void setLastRowFixed(bool lastRowFixed);
 
+        void addButton( QPushButton * pushButton);
+
     public slots:
-        void setEditable(bool editable);
+        void setReadOnly(bool readOnly);
 
     private slots:
         void addRow();
@@ -61,17 +64,21 @@ class TableGroupBox : public QGroupBox
         void dataChanged();
 
     private:
-        //! If the size of the table can be adjusted
-        bool m_editable;
+        //! If table is read only
+        bool m_readOnly;
 
         //! If the last row of the table should not be removed
         bool m_lastRowFixed;
+
+        QHBoxLayout * m_buttonRow;
 
         QPushButton * m_addButton;
         QPushButton * m_insertButton;
         QPushButton * m_removeButton;
 
-        QAbstractTableModel * m_model;
+        QList<QPushButton*> m_addedButtons;
+
         MyTableView * m_table;
+        MyAbstractTableModel * m_model;
 };
 #endif

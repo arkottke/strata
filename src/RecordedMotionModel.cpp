@@ -21,11 +21,13 @@
 
 #include "RecordedMotionModel.h"
 #include "RecordedMotionDialog.h"
+
 #include <QBrush>
+#include <QApplication>
 #include <QDebug>
 
 RecordedMotionModel::RecordedMotionModel(  QList<RecordedMotion*> & motions, QObject * parent)
-    : QAbstractTableModel(parent), m_motions(motions)
+    : MyAbstractTableModel(false, parent), m_motions(motions)
 {
 }
 
@@ -36,7 +38,7 @@ int RecordedMotionModel::rowCount ( const QModelIndex & /*parent*/) const
 
 int RecordedMotionModel::columnCount ( const QModelIndex & /*parent*/) const
 {
-    return 5;
+    return 6;
 }
 
 QVariant RecordedMotionModel::data ( const QModelIndex & index, int role) const
@@ -48,41 +50,41 @@ QVariant RecordedMotionModel::data ( const QModelIndex & index, int role) const
     if (role==Qt::BackgroundRole && !m_motions.at(index.row())->isEnabled())
             return QVariant(QBrush(QColor(170,170,170)));
     else if (role==Qt::BackgroundRole && !(flags(index) & Qt::ItemIsEditable))
-            return QVariant(QBrush(QColor(200,200,200)));
+        return QVariant(QBrush(QColor(200,200,200)));
 
-	if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
-	{
-		switch (index.column())
-		{
-            case 0:
-                // Filename
-                return QVariant(m_motions.at(index.row())->toString());
-            case 1:
-                // Description
-                return QVariant(m_motions.at(index.row())->description());
-            case 2:
-                // Type
-                if ( role == Qt::DisplayRole )
-                    // Return a simple label
-                    return QVariant( Motion::typeList().at((int)m_motions.at(index.row())->type()));
-                else {
-                    // Return a map that can be edited with the StringListDelegate
-                    QMap<QString,QVariant> map;
-                    map.insert("list", QVariant(Motion::typeList()));
-                    map.insert("index", QVariant((int) m_motions.at(index.row())->type()));
-                    return QVariant(map);
-                }
-            case 3:
-                // Scale
-                return QVariant(QString::number(m_motions.at(index.row())->scale()));
-            case 4:
-                // PGA
-                return QVariant(QString::number(m_motions.at(index.row())->pga()));
-			default:
-				return QVariant();
-		}
-	} else if ( index.column() == 0 && role == Qt::CheckStateRole )
-    {
+    if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
+        switch (index.column()) {
+        case 0:
+            // Filename
+            return m_motions.at(index.row())->toString();
+        case 1:
+            // Description
+            return m_motions.at(index.row())->description();
+        case 2:
+            // Type
+            if ( role == Qt::DisplayRole )
+                // Return a simple label
+                return Motion::typeList().at((int)m_motions.at(index.row())->type());
+            else {
+                // Return a map that can be edited with the StringListDelegate
+                QMap<QString,QVariant> map;
+                map.insert("list", QVariant(Motion::typeList()));
+                map.insert("index", QVariant((int) m_motions.at(index.row())->type()));
+                return map;
+            }
+        case 3:
+            // Scale
+            return QString::number(m_motions.at(index.row())->scale());
+        case 4:
+            // PGA
+            return QString::number(m_motions.at(index.row())->pga());
+        case 5:
+            // Maximum frequency
+            return QString::number(m_motions.at(index.row())->maxEngFreq());
+        default:
+            return QVariant();
+        }
+    } else if ( index.column() == 0 && role == Qt::CheckStateRole ) {
         if ( m_motions.at(index.row())->isEnabled() )
             return QVariant( Qt::Checked );
         else
@@ -118,6 +120,10 @@ bool RecordedMotionModel::setData ( const QModelIndex &index, const QVariant &va
             case 4:
                 // PGA
                 m_motions[index.row()]->setPga(value.toDouble());
+                break;
+            case 5:
+                // Maximum frequency
+                m_motions[index.row()]->setMaxEngFreq(value.toDouble());
                 break;
             default:
                 return false;
@@ -161,6 +167,9 @@ QVariant RecordedMotionModel::headerData ( int section, Qt::Orientation orientat
                 case 4:
                     // PGA
                     return QVariant(tr("PGA (g)"));
+                case 5:
+                    // Maximum frequency
+                    return QVariant(tr("Max. Freq (Hz)"));
             }
 		case Qt::Vertical:
 			return QVariant(section+1);
@@ -171,12 +180,17 @@ QVariant RecordedMotionModel::headerData ( int section, Qt::Orientation orientat
 
 Qt::ItemFlags RecordedMotionModel::flags ( const QModelIndex & index ) const
 {
-    if (index.column() == 0)
-	    return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
-    else if ( index.column() == 2 || index.column() == 3 || index.column() == 4)
-        return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
-    else
+    if (m_readOnly) {
         return QAbstractTableModel::flags(index);
+    }
+
+    if (index.column() == 0)
+        return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
+    else if (index.column() < 2)
+        return QAbstractTableModel::flags(index);
+    else
+        return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
+
 }
 
 bool RecordedMotionModel::insertRows ( int row, int count, const QModelIndex & parent)
@@ -186,7 +200,7 @@ bool RecordedMotionModel::insertRows ( int row, int count, const QModelIndex & p
 	for (int i=0; i < count; ++i) {
         RecordedMotion * motion = new RecordedMotion;
         // Create a dialog to define the motion properties
-        RecordedMotionDialog * dialog = new RecordedMotionDialog(motion, m_workingDir);
+        RecordedMotionDialog * dialog = new RecordedMotionDialog(motion, m_workingDir, QApplication::activeWindow() );
         //dialog->setWindowModality(Qt::WindowModal); 
 
         if (dialog->exec())
@@ -215,9 +229,3 @@ bool RecordedMotionModel::removeRows ( int row, int count, const QModelIndex & p
 	
 	return true;
 }
-
-void RecordedMotionModel::resetModel()
-{
-    reset();
-}
-

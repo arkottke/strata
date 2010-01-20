@@ -23,7 +23,6 @@
 #define ROCK_LAYER_H_
 
 #include "VelocityLayer.h"
-#include "Units.h"
 
 #include <QMap>
 #include <QString>
@@ -33,35 +32,40 @@
 
 class RockLayer : public VelocityLayer
 {
+    Q_OBJECT
+
 	public:
-		RockLayer();
+		RockLayer(QObject * parent = 0);
         ~RockLayer();
         
         //! Reset the object to the default values
         void reset();
 
-        //! Set the units of the layer
-        void setUnits(const Units * units);
-        
         double untWt() const;
-        void setUntWt(double untWt);
-        
         double density() const;
-
-        //! Randomized damping
+        
+        //! Randomized damping and strain dependent damping
         double damping() const;
-        //! Set only the varied damping
+
+        //! Set the varied damping and strain dependent damping
         void setDamping( double damping );
 
+        //! Set the average damping only
         double avgDamping() const;
-        //! Set both the average and varied damping
-        void setAvgDamping( double damping );
-
+        
         //! A description of the layer for tables
         QString toString() const;
 
 		QMap<QString, QVariant> toMap() const;
 		void fromMap( const QMap<QString, QVariant> & map );
+
+    public slots:
+        void setUntWt(double untWt);
+        //! Set both the average and varied damping
+        void setAvgDamping( double damping );
+
+    signals:
+        void wasModified();
 
     private:
         //! Unit weight of the rock
@@ -72,8 +76,5 @@ class RockLayer : public VelocityLayer
         
         //! Damping of the rock -- average
         double m_avgDamping;
-        
-        //! Units system 
-        const Units * m_units;
 };
 #endif

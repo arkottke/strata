@@ -23,16 +23,19 @@
 #define SOIL_TYPE_PAGE_H_
 
 #include "SiteResponseModel.h"
-#include "NonLinearProperty.h"
+#include "NonlinearProperty.h"
 #include "TableGroupBox.h"
 
 #include <QWidget>
 #include <QLineEdit>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
+#include <QPointer>
 #include <QRadioButton>
 #include <QCheckBox>
 #include <QComboBox>
+
+//! Widget for the Soil Type Page.
 
 class SoilTypePage : public QWidget
 {
@@ -41,16 +44,14 @@ class SoilTypePage : public QWidget
 	public:
 		SoilTypePage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
         
-        void setModel( SiteResponseModel * model );
-
 	public slots:
-        void setIsVaried(bool);
+        void setIsVaried(bool b);
+        void setReadOnly(bool b);
         
         void unselectSoil(); 
         void setSelectedSoil( const QModelIndex & current, const QModelIndex & previous );
         void refreshSoilDetails();
 
-        void save();
         void load();
 
     protected slots: 
@@ -58,10 +59,10 @@ class SoilTypePage : public QWidget
     
         void loadStdevModels();
 
-        void saveSoilProperties();
         void loadSoilProperties();
+
     signals:
-        void hasChanged();
+        void soilTypesChanged();
         void linkActivated(const QString & link);
 
 	private:
@@ -80,21 +81,22 @@ class SoilTypePage : public QWidget
 		QDoubleSpinBox * m_shearModMaxSpinBox;
 		QDoubleSpinBox * m_shearModMinSpinBox;
         QLineEdit * m_dampingStdevLineEdit;
+		QDoubleSpinBox * m_dampingMaxSpinBox;
 		QDoubleSpinBox * m_dampingMinSpinBox;
 		QDoubleSpinBox * m_correlSpinBox;
 
         QGroupBox * m_soilPropsGroupBox;
-	    QLineEdit * m_stressLineEdit;
-	    QLineEdit * m_piLineEdit;
-	    QLineEdit * m_ocrLineEdit;
-	    QLineEdit * m_freqLineEdit;
-	    QLineEdit * m_nCyclesLineEdit;
+	    QDoubleSpinBox * m_stressSpinBox;
+	    QDoubleSpinBox * m_piSpinBox;
+	    QDoubleSpinBox * m_ocrSpinBox;
+	    QDoubleSpinBox * m_freqSpinBox;
+	    QSpinBox * m_nCyclesSpinBox;
 
 		TableGroupBox * m_nlPropTableBox;
     
         QModelIndex m_selectedIndex;
-        SoilType * m_selectedSoilType;
-        NonLinearProperty * m_selectedNonLinearProperty;
+        QPointer<SoilType> m_selectedSoilType;
+        QPointer<NonlinearProperty> m_selectedNonlinearProperty;
 
 		// Functions to set up the various group boxes
 		void createLayersGroupBox();

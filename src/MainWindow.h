@@ -22,9 +22,20 @@
 #ifndef MAIN_WINDOW_H_
 #define MAIN_WINDOW_H_
 
-#include "InputWidget.h"
-#include "OutputWidget.h"
+#include "SiteResponseModel.h"
+
+#include "GeneralPage.h"
+#include "SoilTypePage.h"
+#include "SoilProfilePage.h"
+#include "MotionPage.h"
+#include "OutputPage.h"
+#include "ComputePage.h"
+#include "ResultsPage.h"
+
 #include "HelpDialog.h"
+#include "ConfiningStressDialog.h"
+#include "OutputExportDialog.h"
+#include "ConfigurePlotDialog.h"
 
 #include <QMainWindow>
 #include <QCloseEvent>
@@ -40,103 +51,116 @@
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		MainWindow(QMainWindow *parent = 0);
+        public:
+    MainWindow(QMainWindow *parent = 0);
 
-        enum Window{
-            InputWindow, //!< Input Window
-            OutputWindow //!< Output Window
-        };
+protected:
+    void closeEvent(QCloseEvent * event);
 
-    protected:
-        void closeEvent(QCloseEvent * event);
-       
-    public slots:
-        void setModified(bool modified = true);
+    enum Pages {
+        COMPUTE_PAGE = 5,
+        RESULTS_PAGE = 6 };
 
-	protected slots:
-        void reset();
-        void open( const QString & fileName = "" );
-        
-        bool save();
-        bool saveAs();
+public slots:
 
-        void exportData();
+protected slots:
+    //! Reset the window the default values
+    void reset();
+    void open( const QString & fileName = "" );
 
-        void print();
-        void printToPdf();
-        // void pageSetup();
+    bool save();
+    bool saveAs();
 
-        void copy();
-        void paste();
+    void exportData();
 
-        void showNonLinearDialog();
+    void print();
+    void printToPdf();
+    // void pageSetup();
 
-        void switchView();
+    void showNonlinearDialog();
+    void showConfiningStressDialog();
 
-        void help();
-        void about();
+    void help();
+    void update();
+    void about();
 
-        void updateMenus(int widgetIndex);
+    void setIsWorking(bool isWorking);
+    void setReadOnly(bool readOnly = false);
 
-	private:
-        //! Create the actions
-        void createActions();
+    void tabChanged(int tab);
 
-        //! Create the tab widget and pages
-		void createPage();
-        
-        //! Create the menus
-        void createMenus();
+        private:
+    //! Create the actions
+    void createActions();
 
-        //! Set the current file of the application
-        void setCurrentFile(const QString & fileName);
+    //! Create the tab widget and pages
+    void createPage();
 
-        //! Allow the user to save changes before things happen
-        /*!
+    //! Create the menus
+    void createMenus();
+
+    //! Create the toolbar
+    void createToolbar();
+
+    //! Set the current file of the application
+    void setCurrentFile(const QString & fileName);
+
+    //! Allow the user to save changes before things happen
+    /*!
          * \return true to continue
          */
-        bool okToClose();
-        
-        //! Filename of the model
-        QString m_fileName;
+    bool okToClose();
 
-        //! Whether the model has been modified since the last save
-        bool m_modified;
+    //! Filename of the model
+    QString m_fileName;
 
-        //! Help dialog
-        HelpDialog * m_helpDialog;
-        
-        QAction * m_resetAction;
-        QAction * m_openAction;
+    //! Help dialog
+    HelpDialog * m_helpDialog;
 
-        QAction * m_exportAction;
+    ConfiningStressDialog * m_confiningStressDialog;
 
-        QAction * m_printAction;
-        QAction * m_printToPdfAction;
+    QAction * m_readOnlyAction;
 
-        QAction * m_saveAction;
-        QAction * m_saveAsAction;
-        QAction * m_exitAction;
-        
-        QAction * m_copyAction;
-        QAction * m_pasteAction;
+    QAction * m_resetAction;
+    QAction * m_openAction;
 
-        QAction * m_nlCurveDatabaseAction;
+    QAction * m_exportAction;
 
-        QAction * m_switchViewAction;
-        
-        QAction * m_helpAction;
-        QAction * m_aboutAction;
+    QAction * m_printAction;
+    QAction * m_printToPdfAction;
 
-        QStackedWidget * m_stackedWidget;
-        InputWidget * m_inputWidget;
-        OutputWidget * m_outputWidget;
+    QAction * m_saveAction;
+    QAction * m_saveAsAction;
+    QAction * m_exitAction;
 
-        QPrinter * m_printer;
+    QAction * m_nlCurveDatabaseAction;
+    QAction * m_confiningStressDialogAction;
 
-        QSettings * m_settings;
+    QAction * m_helpAction;
+    QAction * m_updateAction;
+    QAction * m_aboutAction;
+
+    QToolBar * m_toolBar;
+
+    QTabWidget * m_tabWidget;
+
+    QPrinter * m_printer;
+
+    QSettings * m_settings;
+    
+    GeneralPage * m_generalPage;
+    SoilTypePage * m_soilTypePage;
+    SoilProfilePage * m_soilProfilePage;
+    MotionPage * m_motionPage;
+    OutputPage * m_outputPage;
+    ComputePage * m_computePage;
+    ResultsPage * m_resultsPage;
+
+    SiteResponseModel * m_model;
+
+    //! Input values are in a read-only state
+    bool m_readOnly;
 };
 #endif

@@ -26,15 +26,18 @@
 #include "TableGroupBox.h"
 #include "DepthComboBox.h"
 
-#include <QWidget>
+#include <QCheckBox>
 #include <QComboBox>
+#include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QLineEdit>
-#include <QDoubleSpinBox>
-#include <QCheckBox>
+#include <QPointer>
 #include <QPushButton>
 #include <QStackedWidget>
-#include <QPointer>
+#include <QTabWidget>
+#include <QWidget>
+
+//! Widget for the Motion Page.
 
 class MotionPage : public QWidget
 {
@@ -43,26 +46,34 @@ class MotionPage : public QWidget
     public:
         MotionPage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
-        void setModel( SiteResponseModel * model );
-
     public slots:
         void setMethod(int);
+        
+        void setReadOnly(bool b);
 
         void load();
-        void save();
 
     signals:
         void updateFas();
 
-        void hasChanged();
-
     protected slots:
         void setSource(int);
+        void setLocation(int);
+
 
         void previewData();
         void previewPlot();
+        void previewCrustalAmp();
+
+        void loadSuite();
+
+        void setEnableCrustalTab(bool enabled = false );
 
     private:
+        //! Load point source paramters
+        void loadPointSourceParams();
+
+
         SiteResponseModel * m_model;
 
         QStackedWidget * m_stackedWidget;
@@ -74,14 +85,35 @@ class MotionPage : public QWidget
         
         QComboBox * m_typeComboBox;
         QDoubleSpinBox * m_durationSpinBox;
-        QDoubleSpinBox * m_strainFactorSpinBox;
-        QDoubleSpinBox * m_soilFactorSpinBox;
+        QCheckBox * m_limitFasCheckBox;
         QComboBox * m_sourceComboBox;
         QDoubleSpinBox * m_dampingSpinBox;
+        QDoubleSpinBox * m_maxEngFreqSpinBox;
 
-        QStackedWidget * m_spectraStackedWidget;
+        QStackedWidget * m_rvtSourceStackedWidget;
         TableGroupBox * m_fourierSpecTableBox;
         TableGroupBox * m_respSpecTableBox;
+
+        QGroupBox * m_rvtPropsGroupBox;
+
+        QGroupBox * m_pointSourceGroupBox;
+        QDoubleSpinBox * m_momentMagSpinBox;
+        QDoubleSpinBox * m_distanceSpinBox;
+        QDoubleSpinBox * m_depthSpinBox;
+        QComboBox * m_locationComboBox;
+        QDoubleSpinBox * m_stressDropSpinBox;
+        QDoubleSpinBox * m_geoAttenSpinBox;
+        QDoubleSpinBox * m_pathDurSpinBox;
+        QDoubleSpinBox * m_pathAttenCoeffSpinBox;
+        QDoubleSpinBox * m_pathAttenPowerSpinBox;
+        QDoubleSpinBox * m_shearVelSpinBox;
+        QDoubleSpinBox * m_densitySpinBox;
+        QDoubleSpinBox * m_siteAttenSpinBox;
+        QCheckBox * m_specificCrustalAmpCheckBox;
+        QPushButton * m_computeCrustalAmpButton;
+        QTabWidget * m_siteTabWidget;
+        TableGroupBox * m_siteAmpTableGroupBox; 
+        TableGroupBox * m_crustalTableGroupBox; 
 
         QPointer<QDialog> m_dataDialog;
         QPointer<QDialog> m_plotDialog;
@@ -90,6 +122,7 @@ class MotionPage : public QWidget
         void createInputLayer();
         void createRecordedPage();
         void createRvtPage();
+        void createPointSourceGroupBox();
 
         //! Compute the Reponse Spectrum and Fourier Amplitude spectrum of the RvtMotion
         bool computeRvtResponse();

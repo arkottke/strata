@@ -30,7 +30,8 @@
 #include <QVariant>
 #include <QDebug>
 
-VelocityLayer::VelocityLayer()
+VelocityLayer::VelocityLayer( QObject * parent )
+    : QObject(parent)
 {
     m_depth = 0;
     m_isVaried = true;
@@ -43,7 +44,8 @@ VelocityLayer::VelocityLayer()
 	m_distribution = LogNormal;
 }
 
-VelocityLayer::VelocityLayer( const VelocityLayer & other )
+VelocityLayer::VelocityLayer( const VelocityLayer & other)
+    :QObject(other.parent())
 {
     m_depth = other.depth();
     m_isVaried = other.isVaried();
@@ -89,7 +91,6 @@ void VelocityLayer::setShearVel(double shearVel)
     // shear-wave velocity of the layer
 	if (!m_isVaried)
         return;
-
 
     m_shearVel = shearVel;
     // Check that the shear-wave velocity is within the specified bounds
@@ -184,6 +185,11 @@ double VelocityLayer::isVaried() const
 void VelocityLayer::setIsVaried(bool isVaried)
 {
 	m_isVaried = isVaried;
+}
+
+void VelocityLayer::reset()
+{
+    m_shearVel = m_avg;
 }
 
 QString VelocityLayer::toString() const

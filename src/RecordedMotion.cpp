@@ -33,19 +33,64 @@
 
 #include <gsl/gsl_multifit.h>
 
-RecordedMotion::RecordedMotion()
+RecordedMotion::RecordedMotion(const QString & fileName, double scale, bool * successful )
+        : m_fileName(QDir::cleanPath(fileName)), m_scale(scale)
 { 
-    // Initialize the values
+    // Initialize the values -- appropriate values for an AT2 file
     m_type = Outcrop;
     m_isEnabled = true;
     m_isLoaded = false;
     m_timeStep = 0;
     m_pointCount = 0;
-    m_scale = 1;
     m_format = Rows;
     m_dataColumn = 2;
     m_startLine = 4;
     m_stopLine = 0;
+
+    // Check somethings
+    if ( !m_fileName.isEmpty() ) {
+        if (successful) {
+            *successful = false;
+        }
+
+        if ( !m_fileName.endsWith(".AT2", Qt::CaseInsensitive) ) {
+            qCritical() << m_fileName << tr("does not end in .AT2");
+            return;
+        }
+        if ( !QFile::exists(m_fileName) ) {
+            qCritical() << m_fileName << tr("does not exist");
+            return;
+        } 
+        
+        // Load the file
+        QFile file( m_fileName );
+        if (!file.open( QIODevice::ReadOnly | QIODevice::Text )) {
+            qCritical() <<  tr("Unable to open file:") << m_fileName;
+            return;
+        }
+
+        QTextStream fin( &file );
+        
+        // Skip the first line
+        QString line = fin.readLine();
+        // Read the event information and trim the white space
+        setDescription(fin.readLine().trimmed());
+        // Skip the third line
+        line = fin.readLine();
+        // Read the number of data points and timestep
+        QStringList list = fin.readLine().split(QRegExp("[\\s-]"), QString::SkipEmptyParts);
+        
+        setPointCount(list.at(0).toInt());
+        setTimeStep(list.at(1).toDouble());
+
+        // Load the file
+        if (load() && successful)
+            *successful = true;
+    }
+}
+
+RecordedMotion::~RecordedMotion()
+{
 }
 
 QStringList RecordedMotion::formatList()
@@ -71,8 +116,7 @@ void RecordedMotion::setFileName(const QString & fileName)
 {
     // Save the relative path
     QFileInfo fileInfo(fileName);
-
-    m_fileName = fileInfo.absoluteFilePath();
+    m_fileName = QDir::cleanPath(fileInfo.absoluteFilePath());
     // Reset loaded flag 
     m_isLoaded = false;
 }
@@ -101,6 +145,16 @@ void RecordedMotion::setTimeStep(double timeStep)
     m_isLoaded = false;
 }
 
+double RecordedMotion::nyquistFreq() const
+{
+    return 1. / (2 * m_timeStep);
+}
+
+double RecordedMotion::freqStep() const
+{
+    return nyquistFreq() / (m_fas.size() - 1);
+}
+
 int RecordedMotion::pointCount() const
 {
     return m_pointCount;
@@ -124,11 +178,13 @@ void RecordedMotion::setScale(double scale)
         // Compute the ratio and apply this to the acceleration
         double ratio = scale / m_scale;
         // Compute the scaled acceleration, fas, and PGA
-        for (int i=0; i < m_accel.size(); ++i)
+        for (int i = 0; i < m_accel.size(); ++i) {
             m_accel[i] = ratio * m_accel.at(i);
+        }
 
-        for (int i=0; i < m_fas.size(); ++i)
+        for (int i = 0; i < m_fas.size(); ++i) {
             m_fas[i] = ratio * m_fas.at(i);
+        }
         
         m_pga = ratio * m_pga;
     } 
@@ -217,8 +273,8 @@ const QVector<double> & RecordedMotion::accel() const
 }
 
 void RecordedMotion::timeSeries( const QVector<std::complex<double> > & tf,
-                QVector<double> & accel,  QVector<double> & vel,
-                QVector<double> & disp, const bool baselineCorrect )
+                                 QVector<double> & accel,  QVector<double> & vel,
+                                 QVector<double> & disp, const bool baselineCorrect )
 {
     accel = timeSeries(tf);
     // Compute the velocity and displacement from the original acceleration
@@ -233,14 +289,17 @@ void RecordedMotion::timeSeries( const QVector<std::complex<double> > & tf,
         // Compute the coeffs to be applied to the acceleration time series
         QVector<double> accelCoeffs;
 
-        for ( int i = 2; i < dispCoeffs.size(); ++i )
+        for ( int i = 2; i < dispCoeffs.size(); ++i ) {
             accelCoeffs << i * (i-1) * dispCoeffs.at(i);
+        }
 
         for ( int i = 0; i < accel.size(); ++i ) {
             double value = 0;
 
-            for ( int j = 0; j < accelCoeffs.size(); ++j)
+            for ( int j = 0; j < accelCoeffs.size(); ++j) {
                 value += accelCoeffs.at(j) * pow(m_time.at(i),j);
+            }
+
             // correct the accel
             accel[i] -= value;
         }
@@ -251,40 +310,21 @@ void RecordedMotion::timeSeries( const QVector<std::complex<double> > & tf,
 
     return;
 }
-    
+
 const QVector<double> RecordedMotion::timeSeries(const QVector<std::complex<double> > & tf) const
 {
     // Resize the response vector
     QVector<std::complex<double> > Y(m_fas.size());
     // Apply the transfer function to the motion
-    for ( int i = 0; i < m_fas.size(); i++ )
+    for ( int i = 0; i < m_fas.size(); i++ ) {
         Y[i] = tf.at(i) * m_fas.at(i);
+    }
     // Compute the time series
     QVector<double> ts;
     ifft( Y, ts );
 
     // Resize the time series to the length of the original record
     ts.resize( m_pointCount );
-
-
-    /*
-    QFile data("output.csv");
-    if (data.open(QFile::WriteOnly | QFile::Truncate)) {
-        QTextStream out(&data);
-
-        for (int i = 0; i < m_freq.size(); ++i )
-            out << m_freq.at(i) << ","
-                << tf.at(i).real() << ","
-                << tf.at(i).imag() << ","
-                << m_fas.at(i).real() << ","
-                << m_fas.at(i).imag() << ","
-                << Y.at(i).real() << ","
-                << Y.at(i).imag() << ","
-                << endl;
-    } 
-
-    exit(2);
-    */
 
     return ts;
 }
@@ -304,7 +344,7 @@ QString RecordedMotion::toString() const
 QMap<QString, QVariant> RecordedMotion::toMap(bool saveData) const
 {
     QMap<QString, QVariant> map;
-	
+
     map.insert("enabled", m_isEnabled);
     map.insert("fileName", m_fileName);
     map.insert("description", m_description);
@@ -312,6 +352,7 @@ QMap<QString, QVariant> RecordedMotion::toMap(bool saveData) const
     map.insert("timeStep", m_timeStep);
     map.insert("pointCount", m_pointCount);
     map.insert("scale", m_scale);
+    map.insert("maxEngFreq", m_maxEngFreq);
     map.insert("type", m_type);
 
     map.insert("format", m_format);
@@ -337,6 +378,7 @@ void RecordedMotion::fromMap( const QMap<QString, QVariant> & map)
     m_timeStep = map.value("timeStep").toDouble();
     m_pointCount = map.value("pointCount").toInt();
     m_scale = map.value("scale").toDouble();
+    m_maxEngFreq = map.value("maxEngFreq", 25.).toDouble();
     m_type = (Motion::Type)map.value("type").toInt();
 
     m_format = (Format)map.value("format").toInt();
@@ -360,19 +402,19 @@ QString RecordedMotion::toHtml() const
     QString html;
 
     html += QString(
-                "<tr>"
-                "<td>%1</td>"
-                "<td>%2</td>"
-                "<td>%3</td>"
-                "<td>%4</td>"
-                "<td>%5</td>"
-                "</tr>"
+            "<tr>"
+            "<td>%1</td>"
+            "<td>%2</td>"
+            "<td>%3</td>"
+            "<td>%4</td>"
+            "<td>%5</td>"
+            "</tr>"
             )
-        .arg(toString())
-        .arg(m_description)
-        .arg(typeList().at(m_type))
-        .arg(m_scale)
-        .arg(m_pga);
+            .arg(toString())
+            .arg(m_description)
+            .arg(typeList().at(m_type))
+            .arg(m_scale)
+            .arg(m_pga);
 
     return html;
 }
@@ -384,105 +426,117 @@ bool RecordedMotion::load()
         return true;
 
     if ( m_accel.isEmpty() ) {
-            // Load the file
-    
-            // Check the values
-            if (m_timeStep <= 0) {
+        // Load the file
+
+        // Check the values
+        if (m_timeStep <= 0) {
             qCritical("Time step must be greater than one");
             return false;
-            }
-            if (m_startLine < 0) {
+        }
+        if (m_startLine < 0) {
             qCritical("Number of header lines must be positive");
             return false;
-            }
+        }
 
-            // Load the file
-            QFile file(m_fileName);
-            if (!file.open( QIODevice::ReadOnly | QIODevice::Text )) {
+        // Load the file
+        QFile file(m_fileName);
+        if (!file.open( QIODevice::ReadOnly | QIODevice::Text )) {
             qCritical() << "Unable to open the time series file:" << qPrintable(m_fileName);
             return false;
+        }
+
+        // Create the textstream
+        QTextStream stream( &file );
+
+        int lineNum = 0;
+        // Skip the header lines
+        while ( lineNum < m_startLine ) {
+            stream.readLine();
+            ++lineNum;
+        }
+
+        // Initialize the length of m_accel
+        m_accel.resize(m_pointCount);
+        m_time.resize(m_pointCount);
+
+        // Process each of the lines
+        int index = 0;
+        // Read the first line
+        QString line =stream.readLine();
+
+        bool finished = false;
+
+        while( !finished && !line.isNull())
+        {
+            // Stop if line exceeds number of lines.  The line number has
+            // to be increased by one because the user display starts at
+            // line number 1 instead of 0
+            if ( m_stopLine > 0 &&  m_stopLine <= lineNum+1 ) {
+                break;
             }
 
-            // Create the textstream
-            QTextStream stream( &file );
+            // Read the line and split the line
+            QRegExp rx("(-?\\d+.\\d+(?:[eE]-?\\d+)?)");
+            int pos = 0;
+            QStringList row;
 
-            int lineNum = 0;
-            // Skip the header lines
-            while ( lineNum < m_startLine ) {
-                stream.readLine();
-                ++lineNum;
+            while ((pos = rx.indexIn(line, pos)) != -1) {
+                row << rx.cap(1);
+                pos += rx.matchedLength();
             }
 
-            // Initialize the length of m_accel
-            m_accel.resize(m_pointCount);
-            m_time.resize(m_pointCount);
-
-            // Process each of the lines
-            int index = 0;
-            // Read the first line
-            QString line =stream.readLine();
-            // Using the first line, the delimeter can be found.  Right now we just
-            // assume that the delimeter is whitespace, comma, or semi-colon
-            QRegExp delimeter("[ ,;]");
-
-            while(!line.isNull()) 
+            // Process the row based on the format
+            bool ok;
+            switch (m_format)
             {
-                // Stop if line exceeds number of lines;
-                if ( m_stopLine > 0 &&  lineNum >= m_stopLine )
-                    break;
-
-                // Read the line and split the line based on the deliminator        
-                QStringList row = line.split(delimeter, QString::SkipEmptyParts);
-
-                // Process the row based on the format
-                bool ok;
-                switch (m_format)
-                {
                     case Rows:
-                        // Use all parts of the data 
-                        for(int i = 0; i < row.size(); ++i) {
-                            if ( index == m_pointCount ) {
-                                qWarning("Point count reached before end of data!");
-                                break;
-                            }
-                            // Apply the scale factor and read the acceleration
-                            m_accel[index] = m_scale * row.at(i).trimmed().toDouble(&ok);
-                            // Increment the index
-                            ++index;
-                            // Stop if there was an error in the conversion
-                            if (!ok)
-                                continue;
-                        }
+                // Use all parts of the data
+                for(int i = 0; i < row.size(); ++i) {
+                    if ( index == m_pointCount ) {
+                        qWarning("Point count reached before end of data!");
+                        finished = true;
                         break;
+                    }
+                    // Apply the scale factor and read the acceleration
+                    m_accel[index] = m_scale * row.at(i).trimmed().toDouble(&ok);
+                    // Increment the index
+                    ++index;
+                    // Stop if there was an error in the conversion
+                    if (!ok) {
+                        continue;
+                    }
+                }
+                break;
                     case Columns:
-                        // Use only the important column, however at the end of the
-                        // file that column may not exist -- this only happens when the
-                        // row format is applied, but it still causes the program to
-                        // crash.
-                        if ( m_dataColumn - 1 < row.size() )
-                            m_accel[index] = row.at(m_dataColumn-1).trimmed().toDouble(&ok);
-                            
-                        // Increment the index
-                        ++index;
-                        break;
+                // Use only the important column, however at the end of the
+                // file that column may not exist -- this only happens when the
+                // row format is applied, but it still causes the program to
+                // crash.
+                if ( m_dataColumn - 1 < row.size() ) {
+                    m_accel[index] = m_scale * row.at(m_dataColumn-1).trimmed().toDouble(&ok);
                 }
 
-                // Throw an error if there was a problem
-                if (!ok) {
-                    qCritical("Error converting string to double. Check starting line.");
-                    return false;
-                }
+                // Increment the index
+                ++index;
+                break;
+            }
 
-                // Read the next line
-                ++lineNum;
-                line = stream.readLine();
-            } 
-
-            // Check that the number of points matches the number specified
-            if ( index != m_pointCount ) {
-                qCritical("Number of points read does not match specified number of points");
+            // Throw an error if there was a problem
+            if (!ok) {
+                qCritical("Error converting string to double. Check starting line.");
                 return false;
             }
+
+            // Read the next line
+            ++lineNum;
+            line = stream.readLine();
+        }
+
+        // Check that the number of points matches the number specified
+        if ( index != m_pointCount ) {
+            qCritical("Number of points read does not match specified number of points");
+            return false;
+        }
     } else {
         // Use stored acceleration values
         m_time.resize(m_accel.size());
@@ -497,71 +551,98 @@ bool RecordedMotion::load()
 
     // Compute the next largest power of two
     int n = 1;
-    while ( n < m_accel.size() ) n <<= 1;
+    while (n <= m_accel.size()) {
+        n <<= 1;
+    }
 
     // Pad the fft data with zeroes
     QVector<double> data(n);
-   
-    for ( int i = 0; i < data.size(); ++i )
-        data[i] = (i < m_accel.size()) ? m_accel.at(i) : 0.0;
 
+    for ( int i = 0; i < data.size(); ++i ) {
+        data[i] = (i < m_accel.size()) ? m_accel.at(i) : 0.0;
+    }
+
+    // The FAS is scaled by the time-step when it is compared with another motion
+    m_fasScale = m_timeStep;
+
+    m_freq.resize(data.size() / 2 + 1);
+
+    const double delta = 1 / ( 2 * m_timeStep * (m_freq.size()-1) );
+
+    for (int i=0; i < m_freq.size(); ++i) {
+        m_freq[i] = i * delta;
+    }
+    
     // Compute the Fourier amplitude spectrum.  The FAS computed through this
     // method is only the postive frequencies and is of length n/2+1 where n is
     // the lenght of the acceleration time history.
-	fft( data, m_fas );
-    // The frequency step is based on the sampling rate and the number of data
-    // points. 
-    m_freq.resize(m_fas.size());
-   
-	double delta = 1 / ( 2 * m_timeStep * (m_freq.size()-1) );
-
-    for (int i=0; i < m_freq.size(); ++i)
-            m_freq[i] = i * delta;
+    fft( data, m_fas );
 
     m_isLoaded = true;
     return true;
 }
 
-double RecordedMotion::findMaxAbs( const QVector<double> & vector ) const
+double RecordedMotion::findMaxAbs(const QVector<double> & vector ) const
 {
     //  Assume the first value is the largest
-    double max = fabs( vector.at(0) );
+    double max = fabs(vector.at(0));
     // Check the remaining values
-    for ( int i = 1; i < vector.size(); i++ )
-        if ( fabs( vector.at(i) ) > max )
+    for ( int i = 1; i < vector.size(); i++ ) {
+        if ( fabs( vector.at(i) ) > max ) {
             max = fabs( vector.at(i) );
+        }
+    }
     // Return the maximum
     return max;
 }
 
-double RecordedMotion::max( Motion::DurationType /*durationType*/, const QVector<std::complex<double> > & tf ) const
+double RecordedMotion::max(const QVector<std::complex<double> > & tf) const
 {
-	// Return the maximum value in the time history
-	return findMaxAbs(timeSeries(tf));
+    // Return the maximum value in the time history
+    return findMaxAbs(timeSeries(tf));
 } 	
 
-QVector<double> RecordedMotion::computeSa( Motion::DurationType durationType, const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf )
+QVector<double> RecordedMotion::computeSa(const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf )
 {
-    // Compute the SDOF
-    computeSdofTf( period, damping );
+    Q_ASSERT(accelTf.size() == m_freq.size());
 
     QVector<double> sa(period.size());
-    QVector<std::complex<double> > tf(m_freq.size());
+
     // Compute the response at each period
     for ( int i = 0; i < sa.size(); ++i ) {
+        QVector<std::complex<double> > tf = calcSdofTf(period.at(i), damping);
+
         // If there is an acceleration transfer function combine the SDOF and
         // acceleration transfer functions
-        if ( !accelTf.isEmpty() ) {
-            for (int j = 0; j < tf.size(); ++j)
-                tf[j] = accelTf.at(j) * m_sdofTf.at(i).at(j);
-        } else
-            tf = m_sdofTf.at(i);
+        if (!accelTf.isEmpty()) {
+            for (int j = 0; j < tf.size(); ++j) {
+                tf[j] *= accelTf.at(j);
+            }
+        }
 
         // Compute the maximum response
-        sa[i] = max( durationType, tf);
+        sa[i] = max(tf);
     }
 
     return sa;
+}
+
+const QVector<double> RecordedMotion::absFas( const QVector<std::complex<double> > & tf) const
+{
+    QVector<double> absFas(m_fas.size());
+    
+    if ( !tf.isEmpty() ) {
+        // Apply the transfer function to the fas
+        for (int i = 0; i < m_fas.size(); ++i) {
+            absFas[i] = abs(tf.at(i) * m_fas.at(i)) * m_fasScale;
+        }
+    } else {
+        for (int i = 0; i < m_fas.size(); ++i) {
+            absFas[i] = abs(m_fas.at(i)) * m_fasScale ;
+        }
+    }
+
+    return absFas;
 }
 
 void RecordedMotion::integrate( const QVector<double> & in, QVector<double> & out ) const
@@ -570,9 +651,9 @@ void RecordedMotion::integrate( const QVector<double> & in, QVector<double> & ou
 
     out[0] = 0.0;
     
-    for ( int i = 1; i < in.size(); ++i )
+    for ( int i = 1; i < in.size(); ++i ) {
         out[i] = out.at(i-1) + m_timeStep * ( in.at(i) + in.at(i-1) ) / 2;
-
+    }
 }
 
 const QVector<double> RecordedMotion::baselineFit( const int term, const QVector<double> & series ) const
@@ -610,8 +691,9 @@ const QVector<double> RecordedMotion::baselineFit( const int term, const QVector
     // Copy coefficients over to m_coeffs
     QVector<double> coeffs(term);
 
-    for ( int i = 0; i < term; ++i )
+    for ( int i = 0; i < term; ++i ) {
         coeffs[i] = gsl_vector_get( c, i );
+    }
 
     // Clear the variables
     gsl_matrix_free( X );
@@ -626,60 +708,68 @@ const QVector<double> RecordedMotion::baselineFit( const int term, const QVector
 
 void RecordedMotion::fft( const QVector<double>& in, QVector<std::complex<double> >& out ) const
 {
-	// The number of elements in the double array is 2 * n, but only the first
-	// n are filled with data.  For the complex array, n/2 + 1 elements are
-	// required.
+    // The number of elements in the double array is 2 * n, but only the first
+    // n are filled with data.  For the complex array, n/2 + 1 elements are
+    // required.
 
-	// Copy the input QVector into a double array
-	double* inArray = (double*) fftw_malloc( sizeof(double) * 2 * in.size() );
+    // Copy the input QVector into a double array
+    double* inArray = (double*) fftw_malloc( sizeof(double) * 2 * in.size() );
 
-	for( int i = 0; i < in.size(); i++ )
-		inArray[i] = in.at(i);
+    for( int i = 0; i < in.size(); i++ ) {
+        inArray[i] = in.at(i);
+    }
 
-	// Allocate the space for the output
-	int n = in.size()/2 + 1;
-	fftw_complex* outArray = (fftw_complex*)fftw_malloc( sizeof(fftw_complex) * n );
+    // Allocate the space for the output
+    int n = in.size()/2 + 1;
+    fftw_complex * outArray = (fftw_complex*)fftw_malloc( sizeof(fftw_complex) * n );
 
-	// Create the plan and execute the FFT
-	fftw_plan p = fftw_plan_dft_r2c_1d( in.size(), inArray, outArray, FFTW_ESTIMATE );
-	fftw_execute(p);
+    // Create the plan and execute the FFT
+    fftw_plan p = fftw_plan_dft_r2c_1d( in.size(), inArray, outArray, FFTW_ESTIMATE );
+    fftw_execute(p);
 
-	// Copy the data to the output QVector
-	out.resize( n );
-	for( int i = 0; i < n; i++ )
-		out[i] = std::complex<double>( outArray[i][0], outArray[i][1] );
+    // Copy the data to the output QVector
+    out.resize(n);
+    for( int i = 0; i < n; i++ ) {
+        out[i] = std::complex<double>(outArray[i][0], outArray[i][1]);
+    }
 
-	// Free the memory
-	fftw_destroy_plan(p);
-	fftw_free(inArray);
-	fftw_free(outArray);
+    // Free the memory
+    fftw_destroy_plan(p);
+    fftw_free(inArray);
+    fftw_free(outArray);
 }
-	
+
 void RecordedMotion::ifft( const QVector<std::complex<double> >& in, QVector<double>& out ) const
 {
-	// Copy the input QVector into a double array
-	fftw_complex* inArray = (fftw_complex*) fftw_malloc( sizeof(fftw_complex) * in.size() );
+    // Copy the input QVector into a double array
+    fftw_complex* inArray = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * in.size());
 
-	for( int i = 0; i < in.size(); i++ ) {
-		inArray[i][0] = in.at(i).real();
-		inArray[i][1] = in.at(i).imag();
-	}
+    for( int i = 0; i < in.size(); i++ ) {
+        if (m_freq.at(i) < m_maxEngFreq) {
+            inArray[i][0] = in.at(i).real();
+            inArray[i][1] = in.at(i).imag();
+        } else {
+            inArray[i][0] = 0.;
+            inArray[i][1] = 0.;
+        }
+    }
 
-	// Allocate the space for the output
-	int n = 2 * ( in.size() - 1 );
-	double* outArray = (double*)fftw_malloc( sizeof(double) * n );
+    // Allocate the space for the output
+    int n = 2 * ( in.size() - 1 );
+    double* outArray = (double*)fftw_malloc( sizeof(double) * n );
 
-	// Create the plan and execute the FFT
-	fftw_plan p = fftw_plan_dft_c2r_1d( n, inArray, outArray, FFTW_ESTIMATE );
-	fftw_execute(p);
+    // Create the plan and execute the FFT
+    fftw_plan p = fftw_plan_dft_c2r_1d( n, inArray, outArray, FFTW_ESTIMATE );
+    fftw_execute(p);
 
-	// Copy the data to the output QVector and normalize by QVector length
-	out.resize( 2 * ( in.size() - 1 ) );
-	for( int i = 0; i < out.size(); i++ ) 
-		out[i] = outArray[i] / out.size();
+    // Copy the data to the output QVector and normalize by QVector length
+    out.resize(2 * ( in.size() - 1 ));
+    for( int i = 0; i < out.size(); i++ ) {
+        out[i] = outArray[i] / out.size();
+    }
 
-	// Free the memory
-	fftw_destroy_plan(p);
-	fftw_free(inArray);
-	fftw_free(outArray);
+    // Free the memory
+    fftw_destroy_plan(p);
+    fftw_free(inArray);
+    fftw_free(outArray);
 }

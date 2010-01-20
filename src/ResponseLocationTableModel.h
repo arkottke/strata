@@ -22,10 +22,10 @@
 #ifndef RESPONSE_LOCATION_TABLE_MODEL_H_
 #define RESPONSE_LOCATION_TABLE_MODEL_H_
 
+#include "MyAbstractTableModel.h"
 #include "SiteResponseOutput.h"
-#include <QAbstractTableModel>
 
-class ResponseLocationTableModel : public QAbstractTableModel
+class ResponseLocationTableModel : public MyAbstractTableModel
 {
 	Q_OBJECT
 	
@@ -43,12 +43,8 @@ class ResponseLocationTableModel : public QAbstractTableModel
 
 		bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-
-    public slots:
-        void resetModel();
-
-	private:
+	
+    private:
         SiteResponseOutput * m_model;
 };
-
 #endif

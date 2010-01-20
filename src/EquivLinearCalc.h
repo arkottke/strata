@@ -24,38 +24,49 @@
 
 #include "Motion.h"
 #include "SiteProfile.h"
-#include "TextLog.h"
 
-#include <QVector>
+#include <complex>
+
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QVariant>
-#include <complex>
+#include <QVector>
+
+//! Calculates the site response using the equivalent linear framework.
 	
-class EquivLinearCalc
+class EquivLinearCalc : public QObject
 {
+    Q_OBJECT
+
     public:
-        EquivLinearCalc();
+        EquivLinearCalc( bool * okToContinue = 0, QObject * parent = 0);
         
         //! Reset the object to the default values
         void reset();
 
-        void setMaxIterations( int maxIterations);	
         int maxIterations() const;
-
-        void setStrainRatio( double strainRatio );
         double strainRatio() const;
-
-        void setErrorTolerance( double errorTolerance );
         double errorTolerance() const;
 
-        void run( TextLog & textLog, Motion * motion, SiteProfile * site);
+        bool converged() const;
+
+        //! Set text log to record calculation steps
+        void setTextLog(TextLog * textLog);
+
+        bool run( Motion * motion, SiteProfile * site);
 
         SiteProfile * site() const;
         Motion * motion() const; 
 
+        //! Compute the peak ground acceleration at the surface
+        double surfacePGA() const;
+
         //! Compute the maximum acceleration profile
         const QVector<double> maxAccelProfile() const;
+
+        //! Compute the maximum velocity profile -- not baseline corrected
+        const QVector<double> maxVelProfile() const;
 
         /*! Compute the acceleration transfer functions for a specific layer.
          *
@@ -71,18 +82,43 @@ class EquivLinearCalc
 
         /*! Compute the acceleration to strain transfer function.
          *
-         * \param location location of the desired transfer fucntion
+         * \param inLocation input location
+         * \param inputType type of input
+         * \param outKocation location of the desired transfer fucntion
          * \param tf the strain transfer function
+         * \return if the calculation is successful
          */
-        void calcStrainTf( const Location & location, QVector<std::complex<double> > & tf ) const;
-
-        //! Strain transfer function of a layer
-        const QVector<std::complex<double> > & strainTfAt(int layer) const;
+        bool calcStrainTf( const Location & inLocation, const Motion::Type inputType,
+                           const Location & outLocation, QVector<std::complex<double> > & tf ) const;
 
         QMap<QString, QVariant> toMap() const;
         void fromMap(const QMap<QString, QVariant> & map);
 
+    signals:
+        void wasModified();
+
+    public slots:
+        void stop();
+        void setMaxIterations( int maxIterations);	
+        void setStrainRatio( double strainRatio );
+        void setErrorTolerance( double errorTolerance );
+
     private:
+        //! Compute the complex shear modulus
+        std::complex<double> calcCompShearMod( const double shearMod, const double damping ) const;
+
+        /*! Compute the up-going and down-going waves
+         * \return if the calculation is successful
+         */
+        bool calcWaves();
+
+        /*! Return the combined waves for a given set of conditions
+         * \param freqIdx index of the frequency
+         * \param location the location in the site profile
+         * \param type type of motion
+         */
+        const std::complex<double> waves( const int freqIdx, const Location & location, const Motion::Type type ) const;
+
         //! Maximum number of iterations in the equivalent linear loop
         int m_maxIterations;
 
@@ -104,6 +140,12 @@ class EquivLinearCalc
         //! Number of frequency points in the motion
         int m_nf;
 
+        //! If the error tolerance was achieved
+        bool m_converged;
+
+        //! If the calculation should continue
+        bool m_okToContinue;
+
         /*! @name Wave propagation parameters
          *
          * The first dimension of the vectors are the number of soil layers, the
@@ -121,22 +163,9 @@ class EquivLinearCalc
 
         //! Complex wave number
         QVector<QVector<std::complex<double> > > m_waveNum;
-
-        //! Strain transfer function
-        QVector<QVector<std::complex<double> > > m_strainTf;
         //@}
-
-        //! Compute the complex shear modulus
-        std::complex<double> calcCompShearMod( const double shearMod, const double damping ) const;
-
-        //! Compute the up-going and down-going waves
-        void calcWaves();
-
-        /*! Return the combined waves for a given set of conditions
-         * \param freqIdx index of the frequency
-         * \param location the location in the site profile
-         * \param type type of motion
-         */
-        const std::complex<double> waves( const int freqIdx, const Location & location, const Motion::Type type ) const;
+        
+        //! Text log to record calculation steps
+        TextLog * m_textLog;
 };
 #endif

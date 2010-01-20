@@ -24,6 +24,8 @@
 
 #include <QComboBox>
 
+//! ComboBox used to specify a location either a depth or Bedrock.
+
 class DepthComboBox : public QComboBox
 {
     Q_OBJECT
@@ -34,7 +36,11 @@ class DepthComboBox : public QComboBox
         double depth() const;
         void setDepth(double depth);
 
+    signals:
+        void depthChanged(double depth);
+
     protected slots:
         void updateEditable(int index);
+        void toDouble(const QString & string);
 };
 #endif

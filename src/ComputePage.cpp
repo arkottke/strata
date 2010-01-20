@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "ComputePage.h"
+#include "SiteResponseOutput.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -33,6 +34,8 @@ ComputePage::ComputePage( SiteResponseModel * model, QWidget * parent, Qt::Windo
     // Progress bar
     m_progressBar = new QProgressBar;
     connect( m_progressBar, SIGNAL(valueChanged(int)), this, SLOT(updateEta(int)));
+    connect( m_model, SIGNAL(progressRangeChanged(int,int)), m_progressBar, SLOT(setRange(int,int)));
+    connect( m_model, SIGNAL(progressChanged(int)), m_progressBar, SLOT(setValue(int)));
 
     layout->addWidget( m_progressBar, 0, 0);
 
@@ -41,23 +44,32 @@ ComputePage::ComputePage( SiteResponseModel * model, QWidget * parent, Qt::Windo
     m_etaLineEdit->setReadOnly(true);
     m_etaLineEdit->setFixedWidth(80);
 
-    layout->addWidget( new QLabel(tr("ETA:")), 0, 1);
+    layout->addWidget( new QLabel(tr("ETC:")), 0, 1);
     layout->addWidget( m_etaLineEdit, 0, 2);
 
     // Buttons
-    m_cancelButton = new QPushButton(tr("Cancel"));
+    m_cancelButton = new QPushButton(QIcon(":/images/process-stop.svg"), tr("Cancel"));
     m_cancelButton->setEnabled(false);
-    connect(m_cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    m_cancelButton->setCursor(Qt::ArrowCursor);
+    connect(m_cancelButton, SIGNAL(clicked()), m_model, SLOT(stop()));
 
+    //m_computeButton = new QPushButton(QIcon(":/images/system-run.svg"), tr("Compute"));
     m_computeButton = new QPushButton(tr("Compute"));
     m_computeButton->setDefault(true);
-    connect(m_computeButton, SIGNAL(clicked()), this, SLOT(started()));
+    connect(m_computeButton, SIGNAL(clicked()), SLOT(compute()));
+    connect(m_model, SIGNAL(finished()), SLOT(finished()));
 
     layout->addWidget(m_cancelButton, 0, 3);
     layout->addWidget(m_computeButton, 0, 4);
     
     // Text area
-    layout->addWidget( &(m_model->textLog()), 1, 0, 1, 5);
+    m_logView = new QTextEdit;
+    m_logView->setReadOnly(true);
+    m_logView->setTabStopWidth(20);
+    connect( m_model->output()->textLog(), SIGNAL(textChanged(QString)), m_logView, SLOT(append(QString)));
+    connect( m_model->output()->textLog(), SIGNAL(textCleared()), m_logView, SLOT(clear()));
+
+    layout->addWidget( m_logView, 1, 0, 1, 5);
 
     // Set stretch row and column
     layout->setColumnStretch(0,1);
@@ -66,52 +78,40 @@ ComputePage::ComputePage( SiteResponseModel * model, QWidget * parent, Qt::Windo
     setLayout(layout);
 }
 
-void ComputePage::setModel( SiteResponseModel * model )
+void ComputePage::setReadOnly(bool b)
 {
-    m_model = model;
+    m_computeButton->setDisabled(b);
 }
 
 void ComputePage::reset()
 {
-    m_model->textLog().clear();
+    m_logView->clear();
     m_etaLineEdit->clear();
     m_progressBar->reset();
 }
 
-void ComputePage::started()
+void ComputePage::compute()
 {
-    emit computing();
-    // Set that is okay to continue
-    m_model->setOkToContinue(true);
+    // Prompt to save the file
+    emit saveRequested();
+
     // Disable the compute button
     m_computeButton->setEnabled(false);
     m_cancelButton->setEnabled(true);
-
-    emit busy(true);
-
-    // Start the computation
-    m_model->compute(m_progressBar);
-
-    // Update the page reflecting that the computation is finished.
-    stopped();
-}
-
-void ComputePage::stopped()
-{
-    // Disable the compute button
-    m_computeButton->setEnabled(true);
-    m_cancelButton->setEnabled(false);
     
-    emit busy(false);
-    emit finished();
+    // Start the calculation
+    m_model->start();
 }
 
-void ComputePage::cancel() 
+void ComputePage::finished()
 {
-    m_model->setOkToContinue(false);
+    m_cancelButton->setEnabled(false);
 
-    // Update the page reflecting that the computation has stopped
-    stopped();
+    // compute button is turned off by setReadOnly() called from MainWindow.cpp
+    // if the calculation was successful.
+    if (!m_model->wasSucessful()) {
+        m_computeButton->setEnabled(true);
+    }
 }
 
 void ComputePage::updateEta(int value)
@@ -119,11 +119,12 @@ void ComputePage::updateEta(int value)
     if ( value == m_progressBar->minimum() )
         m_timer.restart();
     else {
-        double ratio = (m_progressBar->maximum() - m_progressBar->minimum()) /
-            ( value - m_progressBar->minimum());
-    
-        QTime eta = QTime::currentTime().addMSecs( int(m_timer.elapsed() * ratio) );
+        // Compute the average time per step of the progress bar
+        double avgRate = double(m_timer.elapsed()) / double(value - m_progressBar->minimum());
 
-        m_etaLineEdit->setText(eta.toString("h:mm:ss ap"));
+        // The estimated time of completion is computed by multiplying the average rate by the number of remaining increments
+        QTime eta = QTime::currentTime().addMSecs(int(avgRate * (m_progressBar->maximum()-value)));
+
+        m_etaLineEdit->setText(eta.toString(Qt::LocalDate));
     }
 }

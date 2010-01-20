@@ -21,7 +21,8 @@
 
 #include "SoilLayer.h"
 
-SoilLayer::SoilLayer()
+SoilLayer::SoilLayer( QObject * parent )
+    : VelocityLayer(parent)
 {
     m_thickness = 0;
     m_soilType = 0;

@@ -31,33 +31,33 @@
 #include <QPushButton>
 #include <QTime>
 
+//! A class for starting the computation and tracking the progress.
+
 class ComputePage : public QWidget
 {
     Q_OBJECT
 
     public:
         ComputePage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
-
-        void setModel( SiteResponseModel * model );
         
     public slots:
+        void setReadOnly(bool b);
         void reset();
     
     protected slots:
-        void started();
-        void stopped();
-        void cancel();
+
+        void compute();
+        void finished();
 
         void updateEta(int value);
 
     signals:
-        void computing();
-        void busy(bool);
-
-        void finished();
+        void saveRequested();
 
     protected:
         SiteResponseModel * m_model;
+
+        QTextEdit * m_logView;
 
         QProgressBar * m_progressBar;
         QLineEdit * m_etaLineEdit;

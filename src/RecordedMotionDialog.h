@@ -34,48 +34,48 @@
 
 class RecordedMotionDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		RecordedMotionDialog(RecordedMotion * motion, QString & workingDir, QWidget * parent=0, Qt::WindowFlags f = 0);
+public:
+    RecordedMotionDialog(RecordedMotion * motion, QString & workingDir, QWidget * parent=0, Qt::WindowFlags f = 0);
 
-	public slots:
-		void openFile();
-        void updateTextEdit();
-        void updatePosition();
-        void updateDataColumn(int);
-        void plot();
+public slots:
+    void openFile();
+    void updateTextEdit();
+    void updatePosition();
+    void updateDataColumn(int);
+    void plot();
 
-        void help();
-        
-        void tryAccept();
-	private:
-        RecordedMotion * m_motion;
-        QString & m_workingDir;
+    void help();
 
-        QLineEdit * m_fileLineEdit;
-        QLineEdit * m_descripLineEdit;
-        QLineEdit * m_timeStepLineEdit;
-        QLineEdit * m_countLineEdit;
-        QLineEdit * m_scaleLineEdit;
-        
-        QComboBox * m_formatComboBox;
-        QSpinBox * m_dataColumnSpinBox;
+    void tryAccept();
 
-        QSpinBox * m_startLineSpinBox;
-        QSpinBox * m_stopLineSpinBox;
+private:
+    RecordedMotion * m_motion;
 
-        QLineEdit * m_positionLineEdit;
-        QTextEdit * m_textEdit;
-        
-        QPointer<QwtPlot> m_plot;
+    QLineEdit * m_fileLineEdit;
+    QLineEdit * m_descripLineEdit;
+    QLineEdit * m_timeStepLineEdit;
+    QLineEdit * m_countLineEdit;
+    QLineEdit * m_scaleLineEdit;
 
-        int m_totalLines;
+    QComboBox * m_formatComboBox;
+    QSpinBox * m_dataColumnSpinBox;
 
-        // Setup the dialog
-        void setup();
+    QSpinBox * m_startLineSpinBox;
+    QSpinBox * m_stopLineSpinBox;
 
-        // Save the values to the model
-        void save();
+    QLineEdit * m_positionLineEdit;
+    QTextEdit * m_textEdit;
+
+    QPointer<QwtPlot> m_plot;
+
+    int m_totalLines;
+
+    // Setup the dialog
+    void setup();
+
+    // Save the values to the model
+    void save();
 };
 #endif

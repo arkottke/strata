@@ -19,23 +19,40 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "Algorithms.h"
 #include "SiteResponseModel.h"
 #include "SiteResponseOutput.h"
-#include "Algorithms.h"
+#include "Units.h"
+
 #include <QFile>
 #include <QDataStream>
 #include <QApplication>
+#include <QTimer>
+
 #include <QDebug>
 
 SiteResponseModel::SiteResponseModel(QObject * parent)
-    : QObject(parent)
+    : QThread(parent)
 {
-    m_units = new Units;
-    m_siteProfile.setUnits(m_units);
-    m_output = new SiteResponseOutput(m_units);
-    m_rvtMotion = new RvtMotion;
+    connect(Units::instance(), SIGNAL(systemChanged()), SLOT(setModified()));
 
-    m_nlPropertyLibrary = new NonLinearPropertyLibrary;
+    m_output = new SiteResponseOutput;
+    connect(m_output, SIGNAL(wasModified()), SLOT(setModified()));
+    
+    m_calculator = new EquivLinearCalc;
+    m_calculator->setTextLog(m_output->textLog());
+    connect(m_calculator, SIGNAL(wasModified()), SLOT(setModified()));
+
+    m_siteProfile = new SiteProfile;
+    connect( m_siteProfile, SIGNAL(wasModified()), SLOT(setModified()));
+
+    m_notes = new QTextDocument;
+    connect( m_notes, SIGNAL(contentsChanged()), SLOT(setModified()));
+
+    m_rvtMotion = new RvtMotion;
+    connect(m_rvtMotion, SIGNAL(wasModified()), SLOT(setModified()));
+
+    m_nlPropertyLibrary = new NonlinearPropertyLibrary;
 
     // Load the default values
     reset();
@@ -43,10 +60,12 @@ SiteResponseModel::SiteResponseModel(QObject * parent)
 
 SiteResponseModel::~SiteResponseModel()
 {
-    delete m_units;
     delete m_output;
     delete m_rvtMotion;
     delete m_nlPropertyLibrary;
+    delete m_notes;
+    delete m_calculator;
+    delete m_output;
 }
         
 QStringList SiteResponseModel::methodList()
@@ -59,20 +78,20 @@ QStringList SiteResponseModel::methodList()
 
 void SiteResponseModel::reset()
 {
-    m_title = "";
-    m_notes = "";
-    m_filePrefix = "";
+    m_isLoaded = false;
+    m_modified = false;
+    m_notes->clear();
     m_fileName = "";
     m_saveMotionData = true;
     m_okToContinue = true;
 
-    m_units->reset();
+    Units::instance()->reset();
 
 	m_method = RecordedMotions;
 
-    m_siteProfile.reset();
+    m_siteProfile->reset();
 
-    m_calculator.reset();
+    m_calculator->reset();
   
     for ( int i = 0; i < m_recordedMotions.size(); ++i )
         delete m_recordedMotions.takeFirst();
@@ -80,10 +99,20 @@ void SiteResponseModel::reset()
     emit recordedMotionsChanged();
 
     m_rvtMotion->reset();
-
     m_output->reset();
 
-    m_textLog.reset();
+    // Wait until all events have been processed and then reset the modified flag
+    QTimer::singleShot(10, this, SLOT(setIsLoaded()));
+}
+
+bool SiteResponseModel::readOnly() const
+{
+    return m_readOnly;
+}
+
+void SiteResponseModel::setReadOnly(bool readOnly)
+{
+    m_readOnly = readOnly;
 }
 
 QString SiteResponseModel::fileName() const
@@ -91,24 +120,9 @@ QString SiteResponseModel::fileName() const
     return m_fileName;
 }
 
-QString SiteResponseModel::title() const
-{
-	return m_title;
-}
-
-void SiteResponseModel::setTitle(const QString & title)
-{
-	m_title = title;
-}
-
-QString SiteResponseModel::notes() const
+QTextDocument * SiteResponseModel::notes() const
 {
 	return m_notes;
-}
-
-void SiteResponseModel::setNotes(const QString & notes)
-{
-	m_notes = notes;
 }
 
 SiteResponseModel::Method SiteResponseModel::method() const
@@ -118,7 +132,16 @@ SiteResponseModel::Method SiteResponseModel::method() const
 
 void SiteResponseModel::setMethod(Method method)
 {
-	m_method = method;
+    if ( m_method != method ) {
+        setModified(true);
+    }
+
+    m_method = method;
+}
+
+void SiteResponseModel::setMethod(int method)
+{
+    setMethod((Method)method);
 }
         
 bool SiteResponseModel::saveMotionData() const
@@ -129,6 +152,34 @@ bool SiteResponseModel::saveMotionData() const
 void SiteResponseModel::setSaveMotionData(bool saveData)
 {
     m_saveMotionData = saveData;
+    setModified(true);
+}
+
+void SiteResponseModel::stop()
+{
+    m_okToContinue = false;
+    m_calculator->stop();
+}
+
+bool SiteResponseModel::modified() const
+{
+    return m_modified;
+}
+
+void SiteResponseModel::setModified( bool modified)
+{
+    // FIXME When opening a previously saved document, the QTextDocument
+    // containing the notes signals that it has been modified.  This happens
+    // before the modified flag is reset.
+    if (m_isLoaded) {
+        m_modified = modified;
+        emit modifiedChanged(modified);
+    }
+}
+
+void SiteResponseModel::setIsLoaded(bool isLoaded)
+{
+    m_isLoaded = isLoaded;
 }
 
 bool SiteResponseModel::okToContinue() const
@@ -136,27 +187,22 @@ bool SiteResponseModel::okToContinue() const
     return m_okToContinue;
 }
 
+bool SiteResponseModel::wasSucessful() const
+{
+    return m_wasSuccessful;
+}
+
 void SiteResponseModel::setOkToContinue(bool okToContinue)
 {
     m_okToContinue = okToContinue;
 }
 
-Units * SiteResponseModel::units()
-{
-    return m_units;
-}
-
-TextLog & SiteResponseModel::textLog()
-{
-    return m_textLog;
-}
-
-SiteProfile & SiteResponseModel::siteProfile()
+SiteProfile * SiteResponseModel::siteProfile()
 {
 	return m_siteProfile;
 }
 
-EquivLinearCalc & SiteResponseModel::calculator()
+EquivLinearCalc * SiteResponseModel::calculator()
 {
 	return m_calculator;
 }
@@ -171,7 +217,7 @@ RvtMotion * SiteResponseModel::rvtMotion()
     return m_rvtMotion;
 }
 
-NonLinearPropertyLibrary * SiteResponseModel::nlPropertyLibrary()
+NonlinearPropertyLibrary * SiteResponseModel::nlPropertyLibrary()
 {
     return m_nlPropertyLibrary;
 }
@@ -197,9 +243,15 @@ bool SiteResponseModel::load(const QString & fileName)
     // Read the map from the file 
     QMap<QString,QVariant> map;
     inStream >> map;
+
+    setModified(false);
+    m_isLoaded = false;
     // Load the model from the map
     fromMap(map); 
 
+    // Wait until all events have been processed and then reset the modified flag
+    QTimer::singleShot(10, this, SLOT(setIsLoaded()));
+   
     return true;
 }
 
@@ -219,20 +271,25 @@ bool SiteResponseModel::save(const QString & fileName)
     // Create a map of the model and save the map
     outStream << toMap();
 
+    m_modified = false;
     return true;
 }
         
-void SiteResponseModel::compute( QProgressBar * progressBar)
+void SiteResponseModel::run()
 {
-    m_textLog.clear();
-    m_textLog << tr("<b>Starting Strata Calculation</b>");
+    emit isWorkingChanged(true);
+
+    m_okToContinue = true;
+    m_output->textLog()->clear();
+    m_output->textLog()->append(tr("<b>Starting Strata Calculation</b>"));
 
     // Determine the number of sites to be used in the computation
     int siteCount;
-    if (m_siteProfile.isSiteVaried())
-        siteCount =  m_siteProfile.profileCount();
-    else
+    if (m_siteProfile->isSiteVaried()) {
+        siteCount =  m_siteProfile->profileCount();
+    } else {
         siteCount = 1;
+    }
 
     // Create a list of the motions used in the analysis
     QList<Motion*> motions;
@@ -245,89 +302,108 @@ void SiteResponseModel::compute( QProgressBar * progressBar)
     else if ( m_method == RandomVibrationTheory ){
         // Invert the motion
         if ( m_rvtMotion->source() == RvtMotion::DefinedResponseSpectrum ) {
-            m_textLog << QString(tr("Computing the Fourier Amplitude Spectrum from the Response spectrum"));
-            m_rvtMotion->invert( &m_okToContinue, progressBar);
+            m_output->textLog()->append(tr("Calculation the Fourier Amplitude Spectrum from the Response spectrum"));
+            m_rvtMotion->invert();
+        } else if ( m_rvtMotion->source() == RvtMotion::CalculatedFourierSpectrum ) {
+            m_output->textLog()->append(tr("Calculation the Fourier Amplitude Spectrum from the Point Source Model"));
+            m_rvtMotion->calcPointSource();
         }
-
         motions << m_rvtMotion;
     }
 
     // Initialize the output
-    m_output->initialize( m_method, siteCount, motions, m_siteProfile.soilTypes());
+    m_output->initialize( m_method, siteCount, motions, m_siteProfile->soilTypes());
 
     // Setup the progress bar with the number of steps
     int totalCount = motions.size() * siteCount;
-    progressBar->setMaximum(totalCount);
-    progressBar->setMinimum(0);
-    progressBar->setValue(0);
+    emit progressRangeChanged( 0, totalCount );
+    emit progressChanged(0);
 
-    if (m_okToContinue) 
-        m_textLog << QString(tr("%1 Trials (%2 Sites and %3 Motions )"))
+    if (m_okToContinue) {
+        m_output->textLog()->append(QString(tr("%1 Trials (%2 Sites and %3 Motions )"))
             .arg(totalCount)
             .arg(siteCount)
-            .arg(motions.size());
+            .arg(motions.size()));
+    }
 
     int count = 0;
-    for (int i = 0; i < siteCount; ++i)
-    {
+    for (int i = 0; i < siteCount; ++i) {
         // Break if not okay to continue
         if ( !m_okToContinue )
             break;
 
-        m_textLog << QString(tr("[%1 of %2] Generating site and soil properties")).arg(i+1).arg(siteCount);
+        m_output->textLog()->append((QString(tr("[%1 of %2] Generating site and soil properties")).arg(i+1).arg(siteCount)));
         
         // Create the sublayers -- this randomizes the properties
-        m_siteProfile.createSubLayers(m_textLog);
+        m_siteProfile->createSubLayers(m_output->textLog());
 
         // Save the profile to the output
         m_output->saveProfile(m_siteProfile);
 
+        // FIXME -- check the site profile to ensure that the waves can be computed for the intial coniditions
+
         for (int j = 0; j < motions.size(); ++j ) {
             // Break if not okay to continue
-            if ( !m_okToContinue )
+            if ( !m_okToContinue ) {
                 break;
+            }
 
             // Output status
-            m_textLog << QString(tr("\t[%1 of %2] Computing site response for motion: %3"))
+            m_output->textLog()->append(QString(tr("\t[%1 of %2] Computing site response for motion: %3"))
                 .arg(j+1)
                 .arg(motions.size())
-                .arg(motions.at(j)->toString());
+                .arg(motions.at(j)->toString()));
 
             // Compute the site response
-            m_calculator.run( m_textLog, motions[j], &m_siteProfile);
+            if (!m_calculator->run( motions[j], m_siteProfile) && m_okToContinue) {
+                m_output->textLog()->append(tr("\tWave propagation error -- removing site."));
+                // Error in the calculation -- need to remove the site
+                m_output->removeLastSite();
+                // Reset site count
+                --i;
+                break;
+            }
+
             // Generate the output
             m_output->saveResults(m_calculator);
 
             // Increment the progress bar
             ++count;
-
-            progressBar->setValue(count);
+            emit progressChanged(count);
 
             // Reset the sublayers
-            m_siteProfile.resetSubLayers();
+            m_siteProfile->resetSubLayers();
         }
     }
 
-    if (m_okToContinue)
+    if (m_okToContinue) {
         // Compute the statistics of the output
         m_output->computeStats();
-    else 
-        m_textLog << tr("<b>Canceled by the user.</b>");
+        m_wasSuccessful = true;
+    } else {
+        m_output->textLog()->append(tr("<b>Canceled by the user.</b>"));
+        m_wasSuccessful = false;
+        m_output->clear();
+    }
+    
+    emit isWorkingChanged(false);
 }
 
 QMap<QString, QVariant> SiteResponseModel::toMap() const
 {
 	QMap<QString, QVariant> map;
 
-	map.insert("title", m_title);
-	map.insert("notes", m_notes);
-	map.insert("units", m_units->toMap());
-	map.insert("textLog", m_textLog.toMap());
+    disconnect( m_notes, 0, this, 0 );
+	map.insert("notes", m_notes->toHtml());
+    connect( m_notes, SIGNAL(contentsChanged()), SLOT(setModified()));
+
+
+	map.insert("units", Units::instance()->toMap());
 	map.insert("method", m_method);
     map.insert("saveMotionData", m_saveMotionData);
 
-	map.insert("siteProfile",m_siteProfile.toMap());
-	map.insert("calculator",m_calculator.toMap());
+	map.insert("siteProfile",m_siteProfile->toMap());
+	map.insert("calculator",m_calculator->toMap());
     
     map.insert("rvtMotion", m_rvtMotion->toMap());
 
@@ -335,22 +411,20 @@ QMap<QString, QVariant> SiteResponseModel::toMap() const
 		map.insertMulti("recordedMotion", (m_recordedMotions.at(i)->toMap(m_saveMotionData)));
 
     // Output settings
-    map.insert("output", m_output->toMap(false));
+    map.insert("output", m_output->toMap());
 
 	return map;
 }
 
 void SiteResponseModel::fromMap(const QMap<QString, QVariant> & map )
 {
-	m_title = map.value("title").toString();
-	m_notes = map.value("notes").toString();
-	m_units->fromMap(map.value("units").toMap());
-    m_textLog.fromMap(map.value("textLog").toMap());
+	m_notes->setHtml(map.value("notes").toString());
+	Units::instance()->fromMap(map.value("units").toMap());
 	m_method = (Method)map.value("method").toInt();
     m_saveMotionData = map.value("saveMotionData").toBool();
     
-	m_siteProfile.fromMap(map.value("siteProfile").toMap());
-	m_calculator.fromMap(map.value("calculator").toMap());
+	m_siteProfile->fromMap(map.value("siteProfile").toMap());
+	m_calculator->fromMap(map.value("calculator").toMap());
    
     m_rvtMotion->fromMap(map.value("rvtMotion").toMap());
     emit rvtMotionChanged();
@@ -433,10 +507,10 @@ QString SiteResponseModel::toHtml()
                 "</table>"
                 "</li>"
                 ))
-        .arg(m_title)
-        .arg(m_notes)
-        .arg(m_filePrefix)
-        .arg(m_units->systemList().at(m_units->system()));
+        .arg(m_output->title())
+        .arg(m_notes->toHtml())
+        .arg(m_output->filePrefix())
+        .arg(Units::instance()->systemList().at(Units::instance()->system()));
 
   
     // Type of Analysis
@@ -449,22 +523,22 @@ QString SiteResponseModel::toHtml()
                 "</li>"
                 ))
         .arg(methodList().at(m_method))
-        .arg(boolToString(m_siteProfile.isSiteVaried()));
+        .arg(boolToString(m_siteProfile->isSiteVaried()));
 
     // Site Variation
-    if ( m_siteProfile.isSiteVaried() )
+    if ( m_siteProfile->isSiteVaried() )
         html += QString(tr(
                 "<li>Site Property Variation"
                 "<table border=\"0\">"
                 "<tr><td><strong>Number of realizations:</strong></td><td>%1</td></tr>"
-                "<tr><td><strong>Vary the non-linear soil properties:</strong></td><td>%2</td></tr>"
+                "<tr><td><strong>Vary the nonlinear soil properties:</strong></td><td>%2</td></tr>"
                 "<tr><td><strong>Vary the site profile:</strong></td><td>%3</td></tr>"
                 "</table>"
                 "</li>"
                 ))
-            .arg(m_siteProfile.profileCount())
-            .arg(boolToString(m_siteProfile.nonLinearPropertyVariation().enabled()))
-            .arg(boolToString(m_siteProfile.profileVariation().enabled()));
+            .arg(m_siteProfile->profileCount())
+            .arg(boolToString(m_siteProfile->nonLinearPropertyVariation()->enabled()))
+            .arg(boolToString(m_siteProfile->profileVariation()->enabled()));
 
     // Layer Discretization
     html += QString(tr(
@@ -475,8 +549,8 @@ QString SiteResponseModel::toHtml()
                 "</table>"
                 "</li>"
                 ))
-        .arg(m_siteProfile.maxFreq())
-        .arg(m_siteProfile.waveFraction());
+        .arg(m_siteProfile->maxFreq())
+        .arg(m_siteProfile->waveFraction());
    
     // Equivalent Linear Parameters
     html += QString(tr(
@@ -488,23 +562,23 @@ QString SiteResponseModel::toHtml()
                 "</table>"
                 "</li>"
                 ))
-        .arg(m_calculator.strainRatio())
-        .arg(m_calculator.errorTolerance())
-        .arg(m_calculator.maxIterations());
+        .arg(m_calculator->strainRatio())
+        .arg(m_calculator->errorTolerance())
+        .arg(m_calculator->maxIterations());
     
     html += "</ol>";
 
     // Site profile
-    html += m_siteProfile.toHtml();
+    html += m_siteProfile->toHtml();
 
     // Motions
     html += tr("<li>Motion(s)");
 
     QString loc;
-    if ( m_siteProfile.inputDepth() < 0 )
+    if ( m_siteProfile->inputDepth() < 0 )
         loc = "Bedrock";
     else
-        loc = QString("%1 %2").arg(m_siteProfile.inputDepth()).arg(m_units->length());
+        loc = QString("%1 %2").arg(m_siteProfile->inputDepth()).arg(Units::instance()->length());
 
     html += QString(tr("<table border=\"0\"><tr><td><strong>Input Location:</strong></td><td>%1</td></tr></table>"))
         .arg(loc);

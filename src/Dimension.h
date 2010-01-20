@@ -25,13 +25,18 @@
 #include <QVector>
 #include <QStringList>
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QVariant>
 
-class Dimension
+//! Class to create vectors of evening spaced values in either log or linear space.
+
+class Dimension : public QObject
 {
+    Q_OBJECT
+
     public:
-        Dimension();
+        Dimension(QObject * parent = 0);
 
         enum Spacing{
             Linear, //!< Equally spaced in linear space
@@ -41,15 +46,15 @@ class Dimension
         static QStringList spacingList();
 
         double min() const;
-        void setMin(double min);
 
         double max() const;
-        void setMax(double max);
 
-        int npts() const; void setNpts(int npts);
+        int size() const;
 
-        Spacing spacing() const;
+        double at(int i) const;
+
         void setSpacing(Spacing spacing);
+        Spacing spacing() const;
 
         QVector<double> & data();
 
@@ -73,6 +78,16 @@ class Dimension
         static QVector<double> linSpace( double min, double max, int size );
         static QVector<double> logSpace( double min, double max, int size );
 
+    public slots:
+        void setMin(double min);
+        void setMax(double max);
+        void setSize(int npts);
+        void setSpacing(int spacing);
+
+
+    signals:
+        void wasModified();
+
     private:
         //! Minimum value
         double m_min;
@@ -81,7 +96,7 @@ class Dimension
         double m_max;
 
         //! Number of points
-        int m_npts;
+        int m_size;
 
         //! Spacing
         Spacing m_spacing;

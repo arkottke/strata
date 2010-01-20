@@ -27,9 +27,8 @@
 #include "RockLayer.h"
 #include "SubLayer.h"
 #include "Location.h"
-#include "NonLinearPropertyVariation.h"
+#include "NonlinearPropertyVariation.h"
 #include "ProfileVariation.h"
-#include "Units.h"
 #include "TextLog.h"
 
 #include <gsl/gsl_rng.h>
@@ -49,20 +48,18 @@ class SiteProfile : public QObject
     public:
         SiteProfile(QObject * parent = 0);
         ~SiteProfile();
-        
+
         QList<SoilType*> & soilTypes();
         QList<SoilLayer*> & soilLayers();
         QList<SubLayer> & subLayers();
         RockLayer * bedrock();
-        
+
         //! Reset the object to the default values
         void reset();
 
-		bool isSiteVaried() const;
-		void setIsSiteVaried(bool isSiteVaried);
-        
+        bool isSiteVaried() const;
+
         double inputDepth() const;
-        void setInputDepth(double depth);
 
         const Location & inputLocation() const;
 
@@ -76,20 +73,22 @@ class SiteProfile : public QObject
         QStringList soilLayerNameList() const;
 
         int profileCount() const;
-		void setProfileCount(int count);
-        
-        ProfileVariation & profileVariation();
-        NonLinearPropertyVariation & nonLinearPropertyVariation();
-        
+
+        ProfileVariation * profileVariation();
+        NonlinearPropertyVariation * nonLinearPropertyVariation();
+
         double maxFreq() const;
-        void setMaxFreq(double maxFreq);
 
         double waveFraction() const;
-        void setWaveFraction(double waveFraction);
 
-		//! Create the sublayers for a given realization
-		void createSubLayers(TextLog & textLog);
-        
+        /*! Insert a new soil type and listen to its wasModified() signal.
+         * @param row location of new SoilType
+         */
+        void insertSoilType( int index = 0 );
+
+        //! Create the sublayers for a given realization
+        void createSubLayers(TextLog * textLog);
+
         //! Reset the properties of the SubLayers to their initial properties
         void resetSubLayers();
 
@@ -106,7 +105,7 @@ class SiteProfile : public QObject
         double shearMod( int layer) const;
         double damping( int layer ) const;
         //@}
-        
+
         //! Return the shear-wave velocity of the sublayers and bedrock
         QVector<double> depthProfile() const;
         QVector<double> depthToMidProfile() const;
@@ -114,14 +113,17 @@ class SiteProfile : public QObject
         QVector<double> shearModProfile() const;
         QVector<double> dampingProfile() const;
         QVector<double> vTotalStressProfile() const;
+        /*! Profile of the stress reduction coefficient (r_d).
+         * The stress reduction coefficient relates the maximum shear stress of
+         * a rigid block to the maximum shear stress in the deformable soil.
+         * \param pga peak ground acceleration in g
+         * \return a list of cofficients at the top of each layer.
+         */
+        QVector<double> stressReducCoeffProfile(const double pga ) const;
         QVector<double> maxShearStrainProfile() const;
         QVector<double> shearStressProfile() const;
         QVector<double> stressRatioProfile() const;
         QVector<double> maxErrorProfile() const;
-
-        //! Units system
-        const Units * units() const;
-        void setUnits( const Units * units);
 
         //! Set the thickness of the layer and update the depths below it
         void setThicknessAt(int layer, double depth);
@@ -136,17 +138,31 @@ class SiteProfile : public QObject
         QString toHtml() const;
 
     public slots:
+        void setMaxFreq(double maxFreq);
+        void setProfileCount(int count);
+        void setIsSiteVaried(bool isSiteVaried);
+        void setInputDepth(double depth);
+        void setWaveFraction(double waveFraction);
+        
         //! Refresh depths of the layers
         void updateDepths();
 
     signals:
-        void soilTypeChanged();
+        void soilTypesChanged();
         void soilLayersChanged();
         void depthsChanged();
 
+        void wasModified();
+
     private:
-        //! Units system 
-        const Units * m_units;
+        //! Whether or not the different properties are varied
+        //{@
+        bool areNonlinearPropsVaried() const;
+        bool isBedrockDampingVaried() const;
+        bool isVelocityVaried() const;
+        bool isLayerThicknessVaried() const;
+        bool isBedrockDepthVaried() const;	
+        //}@
 
         //! Return the layer with the longest travel time between the two depths
         SoilLayer * representativeSoilLayer( double top, double base);
@@ -166,7 +182,7 @@ class SiteProfile : public QObject
         RockLayer * m_bedrock; 
 
         /*! @name Input motion specification
-         */
+        */
         //{@
         //! Location where the motion is applied
         /*! The motions are applied at a certain depth and propagated to the
@@ -180,26 +196,26 @@ class SiteProfile : public QObject
         //@}
 
         /*! @name Variation parameter
-         */
+        */
         //{@
         //! Variation of the velocity profile
-        ProfileVariation m_profileVariation;
-        
+        ProfileVariation * m_profileVariation;
+
         //! Variation of the soil properites
-        NonLinearPropertyVariation m_nonLinearPropertyVariation;
+        NonlinearPropertyVariation * m_nonLinearPropertyVariation;
 
         //! If the site is varied
         bool m_isSiteVaried;
 
         //! Number of artificial profiles to generate
-		int m_profileCount;
+        int m_profileCount;
 
         //! Random number generator
         gsl_rng * m_rng;
         //@}
 
         /*! @name Layer discretization parameters
-         */
+        */
         //@{
         //! Maximum frequency of interest
         double m_maxFreq;

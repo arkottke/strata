@@ -29,12 +29,12 @@ ListGroupBox::ListGroupBox( QAbstractListModel * model, const QString & title, Q
     QGridLayout * layout = new QGridLayout;
 
     // Add push button
-    m_addButton = new QPushButton(tr("Add"));
+    m_addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
     connect( m_addButton, SIGNAL(clicked()), this, SLOT(addRow()));
     layout->addWidget( m_addButton, 0, 0);
 
     // Remove push button
-    m_removeButton = new QPushButton(tr("Remove"));
+    m_removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
     m_removeButton->setEnabled(false);
     connect( m_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
     layout->addWidget( m_removeButton, 0, 1);
@@ -47,7 +47,7 @@ ListGroupBox::ListGroupBox( QAbstractListModel * model, const QString & title, Q
     connect( m_view->selectionModel(), SIGNAL(selectionChanged( QItemSelection, QItemSelection)),
             this, SLOT(selectionChanged()));
 
-    layout->addWidget(m_view, 1, 0, 1, 2);
+    layout->addWidget(m_view, 1, 0, 1, 3);
 
     setLayout(layout);
 }

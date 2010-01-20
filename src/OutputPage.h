@@ -34,6 +34,8 @@
 #include <QComboBox>
 #include <QModelIndex>
 
+//! Widget for the Output Specification page.
+
 class OutputPage : public QWidget
 {
     Q_OBJECT
@@ -41,18 +43,16 @@ class OutputPage : public QWidget
     public:
         OutputPage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
-        void setModel( SiteResponseModel * model );
-
     public slots:
         void refresh();
 
         void setMethod(int);
+        void setReadOnly(bool b);
 
         void load();
-        void save();
 
-    signals:
-        void hasChanged();
+    private slots:
+        void updateWidget();
 
     private:
         SiteResponseModel * m_model;
@@ -70,8 +70,10 @@ class OutputPage : public QWidget
         QCheckBox * m_finalDampingCheckBox;
         QCheckBox * m_vTotalStressCheckBox;
         QCheckBox * m_maxShearStressCheckBox;
+        QCheckBox * m_stressReducCoeffCheckBox;
         QCheckBox * m_maxShearStrainCheckBox;
         QCheckBox * m_maxAccelCheckBox;
+        QCheckBox * m_maxVelCheckBox;
         QCheckBox * m_stressRatioCheckBox;
         QCheckBox * m_maxErrorCheckBox;
 

@@ -32,6 +32,8 @@
 #include <QCheckBox>
 #include <QSpinBox>
 
+//! Widget for the General Page.
+
 class GeneralPage : public QWidget
 {
 	Q_OBJECT
@@ -47,16 +49,15 @@ class GeneralPage : public QWidget
         void setIsVelocityVaried(int);
         void setMethod(int);
 
-        void save();
         void load();
+
+        void setReadOnly(bool b);
 
     signals:
         void isSoilVariedChanged(bool);
         void isVelocityVariedChanged(bool);
         
         void methodChanged(int);
-
-        void hasChanged();
 
 	private:
         SiteResponseModel * m_model;
@@ -78,14 +79,13 @@ class GeneralPage : public QWidget
 		QCheckBox * m_velIsVariedCheckBox;
 
 		QGroupBox * m_equivLinearGroupBox;
-		QLineEdit * m_strainRatioLineEdit;
-		QLineEdit * m_errorTolLineEdit;
+		QDoubleSpinBox * m_strainRatioSpinBox;
+		QDoubleSpinBox * m_errorTolSpinBox;
 		QSpinBox * m_iterationsSpinBox;
         
         QGroupBox * m_discretizationGroupBox;
-        QLineEdit * m_maxFreqLineEdit;
-        QLineEdit * m_waveFractionLineEdit;
-       
+        QDoubleSpinBox * m_maxFreqSpinBox;
+        QDoubleSpinBox * m_waveFractionSpinBox;
 
 		// Construct the various group boxes
 		void createProjectGroupBox();

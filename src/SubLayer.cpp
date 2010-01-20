@@ -23,7 +23,7 @@
 #include <cmath>
 #include <QDebug>
 
-SubLayer::SubLayer( double thickness, double depth, double vTotalStress, SoilLayer * soilLayer )
+SubLayer::SubLayer(double thickness, double depth, double vTotalStress, SoilLayer * soilLayer)
     : m_thickness(thickness), m_depth(depth), m_soilLayer(soilLayer)
 {
     m_vTotalStress = vTotalStress + untWt() * m_thickness/2;
@@ -120,7 +120,7 @@ double SubLayer::stressRatio() const
     return shearStress() / vTotalStress();
 }
 
-void SubLayer::setStrain( double effStrain, double maxStrain )
+void SubLayer::setStrain(double effStrain, double maxStrain)
 {
 	m_effStrain = effStrain;
     m_maxStrain = maxStrain;
@@ -129,20 +129,20 @@ void SubLayer::setStrain( double effStrain, double maxStrain )
 	m_oldDamping = m_damping;
 
 	// Compute the new values
-    m_normShearMod = m_soilLayer->soilType()->normShearMod().interp(effStrain);
+    m_normShearMod = m_soilLayer->soilType()->normShearMod()->interp(effStrain);
 	m_shearMod = initialShearMod() * m_normShearMod; 
-	m_damping = m_soilLayer->soilType()->damping().interp(effStrain);
+	m_damping = m_soilLayer->soilType()->damping()->interp(effStrain);
 
 	// Check that the values are non-negative
-	if ( m_shearMod < 0 || m_damping < 0 )
+	if (m_shearMod < 0 || m_damping < 0)
 		qCritical("Negative nonlinear properties!");
 
 	// Update the shear-wave velocity
-	m_shearVel = sqrt( m_shearMod / m_soilLayer->untWt() );
+	m_shearVel = sqrt(m_shearMod / m_soilLayer->density());
 	
 	// Compute the error between old and new values of the damping and shear modulus
-	m_shearModError = 100 * fabs( m_shearMod - m_oldShearMod ) / m_shearMod;
-	m_dampingError  = 100 * fabs( m_damping - m_oldDamping ) / m_damping;
+	m_shearModError = 100 * fabs(m_shearMod - m_oldShearMod) / m_shearMod;
+	m_dampingError  = 100 * fabs(m_damping - m_oldDamping) / m_damping;
 }
 
 double SubLayer::shearVel() const
@@ -203,7 +203,7 @@ double SubLayer::initialShearMod() const
 double SubLayer::error() const
 {
 	// Return the larger of the two errors
-	if ( m_shearModError > m_dampingError )
+	if (m_shearModError > m_dampingError)
 		return m_shearModError;
 	else
 		return m_dampingError; 

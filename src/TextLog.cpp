@@ -22,8 +22,9 @@
 #include "TextLog.h"
 #include <QApplication>
 
-TextLog::TextLog( QWidget * parent )
-    : QTextEdit(parent)
+#include <QDebug>
+
+TextLog::TextLog( QObject * parent )
 {
     reset();
 }
@@ -32,16 +33,28 @@ QStringList TextLog::levelList()
 {
     QStringList list;
     list << tr("Low")
-        << tr("Medium")
-        << tr("High");
+            << tr("Medium")
+            << tr("High");
 
     return list;
 }
 
+void TextLog::append(const QString & text)
+{
+    m_text << text;
+    emit textChanged(text); 
+    emit wasModified();
+}
+
+void TextLog::clear()
+{
+    m_text.clear();
+    emit textCleared();
+}
+
 void TextLog::reset()
 {
-    setTabStopWidth(20);
-    setReadOnly(true);
+    clear();
     m_level = Low;
 }
 
@@ -52,29 +65,47 @@ TextLog::Level TextLog::level() const
 
 void TextLog::setLevel( TextLog::Level level )
 {
+    if ( m_level != level ) {
+        emit wasModified();
+    }
+
     m_level = level;
+}
+
+void TextLog::setLevel(int level)
+{
+    setLevel((TextLog::Level)level);
 }
 
 QMap<QString, QVariant> TextLog::toMap() const
 {
-	QMap<QString, QVariant> map;
+    QMap<QString, QVariant> map;
 
-	map.insert("level", m_level);
+    map.insert("level", m_level);
+    map.insert("text", m_text);
 
-	return map;
+    return map;
 }
 
 void TextLog::fromMap(const QMap<QString, QVariant> & map )
 {
-	m_level = (Level)map.value("level").toInt();
+    m_level = (Level)map.value("level").toInt();
+
+    QList<QVariant> list = map.value("text").toList();
+
+    m_text.clear();
+    emit textCleared();
+
+    QString text;
+
+    foreach( QVariant var, list ) {
+        emit textChanged(var.toString());
+        m_text << var.toString();
+    }
 }
 
 TextLog & operator<<( TextLog & log, const QString & string )
 {
     log.append(string);
-   
-    // Update the log
-    QApplication::processEvents();
-
     return log;
 }

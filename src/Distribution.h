@@ -23,16 +23,20 @@
 #define DISTRIBUTION_H_
 
 #include <gsl/gsl_rng.h>
+
+#include <QMap>
+#include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QMap>
 #include <QVariant>
 
 
-class Distribution
+class Distribution : public QObject
 {
+    Q_OBJECT
+
     public:
-        Distribution();
+        Distribution(QObject * parent = 0);
 
         enum Type {
             Uniform, //!< Uniform distribution
@@ -46,22 +50,11 @@ class Distribution
         void setType(Type type);
 
         double avg() const;
-        void setAvg(double avg);
-
         double stdev() const;
-        void setStdev(double stdev);
-
         bool hasMin() const;
-        void setHasMin(bool hasMin);
-
         double min() const;
-        void setMin(double min);
-
         bool hasMax() const;
-        void setHasMax(bool hasMax);
-
         double max() const;
-        void setMax(double max);
 
         //! Set the random number generator
         void setRandomNumberGenerator(gsl_rng * rng);
@@ -71,6 +64,18 @@ class Distribution
 		
         QMap<QString, QVariant> toMap() const;
 		void fromMap( const QMap<QString, QVariant> & map );
+
+    public slots:
+        void setType(int type);
+        void setAvg(double avg);
+        void setStdev(double stdev);
+        void setHasMin(bool hasMin);
+        void setMin(double min);
+        void setHasMax(bool hasMax);
+        void setMax(double max);
+
+    signals:
+        void wasModified();
 
     private:
         //! Type of distribution

@@ -43,6 +43,6 @@ class HelpDialog : public QDialog
 
     private:
         QTextBrowser * m_textBrowser;
-        QLineEdit * m_addressLineEdit;
+        QLineEdit * m_urlLineEdit;
 };
 #endif

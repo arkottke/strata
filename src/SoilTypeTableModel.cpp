@@ -20,18 +20,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "SoilTypeTableModel.h"
+#include "Units.h"
+
+#include <QBrush>
+#include <QColor>
 #include <QDebug>
 
-SoilTypeTableModel::SoilTypeTableModel( NonLinearPropertyLibrary * library, SiteProfile & siteProfile, Units * units, QObject *parent )
-	: QAbstractTableModel(parent), m_library(library), m_siteProfile(siteProfile), m_units(units)
+SoilTypeTableModel::SoilTypeTableModel( NonlinearPropertyLibrary * library, SiteProfile * siteProfile, QObject *parent )
+	: MyAbstractTableModel(false, parent), m_library(library), m_siteProfile(siteProfile)
 {
-    connect(&m_siteProfile, SIGNAL(soilTypeChanged()), this, SLOT(resetModel()));
-    connect( m_units, SIGNAL(systemChanged()), this, SLOT(resetModel()));
+    connect( m_siteProfile, SIGNAL(soilTypesChanged()), SLOT(resetModel()));
+    connect( Units::instance(), SIGNAL(systemChanged()), SLOT(resetModel()));
 }
 
 int SoilTypeTableModel::rowCount ( const QModelIndex& /* index */ ) const
 {
-	return m_siteProfile.soilTypes().size();
+	return m_siteProfile->soilTypes().size();
 }
 
 int SoilTypeTableModel::columnCount ( const QModelIndex& /* parent */ ) const
@@ -43,6 +47,11 @@ QVariant SoilTypeTableModel::data ( const QModelIndex &index, int role ) const
 {
 	if (index.parent()!=QModelIndex())
 		return QVariant();
+    
+    // Color the background light gray for cells that are not editable
+    if (role==Qt::BackgroundRole && !(flags(index) & Qt::ItemIsEditable)) {
+        return QVariant(QBrush(QColor(200,200,200)));
+    }
 
 	if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
 	{
@@ -50,17 +59,17 @@ QVariant SoilTypeTableModel::data ( const QModelIndex &index, int role ) const
 		{
             case 0:
 				// Name Column
-				return QVariant( m_siteProfile.soilTypes().at(index.row())->name() );
+				return m_siteProfile->soilTypes().at(index.row())->name();
             case 1:
                 // Unit Weight
-                return QVariant( QString::number(m_siteProfile.soilTypes().at(index.row())->untWt() ));
+                return QString::number(m_siteProfile->soilTypes().at(index.row())->untWt());
 			case 2:
                 // Initial damping
-                return QVariant( QString::number(m_siteProfile.soilTypes().at(index.row())->initialDamping()));
+                return QString::number(m_siteProfile->soilTypes().at(index.row())->initialDamping());
 			case 3:
 				// Shear-modulus model
                 if ( role == Qt::DisplayRole ) 
-				    return QVariant( m_siteProfile.soilTypes().at(index.row())->normShearMod().name() );
+				    return m_siteProfile->soilTypes().at(index.row())->normShearMod()->name();
                 else
                 {
                     QMap<QString,QVariant> map;
@@ -68,13 +77,13 @@ QVariant SoilTypeTableModel::data ( const QModelIndex &index, int role ) const
                     map.insert("list", m_library->modulusList());
                     map.insert("index", QVariant(
                                 m_library->modulusList().indexOf(
-                                    m_siteProfile.soilTypes().at(index.row())->normShearMod().name())));
-                    return QVariant(map);
+                                    m_siteProfile->soilTypes().at(index.row())->normShearMod()->name())));
+                    return map;
                 }
 			case 4:
 				// Damping model
                 if ( role == Qt::DisplayRole ) 
-				    return QVariant( m_siteProfile.soilTypes().at(index.row())->damping().name() );
+				    return m_siteProfile->soilTypes().at(index.row())->damping()->name();
                 else
                 {
                     QMap<QString,QVariant> map;
@@ -82,13 +91,13 @@ QVariant SoilTypeTableModel::data ( const QModelIndex &index, int role ) const
                     map.insert("list", m_library->dampingList());
                     map.insert("index", QVariant(
                                 m_library->dampingList().indexOf(
-                                    m_siteProfile.soilTypes().at(index.row())->damping().name())));
+                                    m_siteProfile->soilTypes().at(index.row())->damping()->name())));
 
-                    return QVariant(map);
+                    return map;
                 }
 			case 5:
                 // Notes
-				return QVariant( m_siteProfile.soilTypes().at(index.row())->notes() );
+				return m_siteProfile->soilTypes().at(index.row())->notes();
             case 6:
 				// Is Varied Check box
 			default:
@@ -96,10 +105,10 @@ QVariant SoilTypeTableModel::data ( const QModelIndex &index, int role ) const
 		}
 	} else if ( index.column() == 6 && role == Qt::CheckStateRole )
     {
-        if ( m_siteProfile.soilTypes().at(index.row())->isVaried() )
-            return QVariant( Qt::Checked );
+        if ( m_siteProfile->soilTypes().at(index.row())->isVaried() )
+            return Qt::Checked;
         else
-            return QVariant( Qt::Unchecked );
+            return Qt::Unchecked;
     }
 	
 	return QVariant();
@@ -116,22 +125,22 @@ bool SoilTypeTableModel::setData( const QModelIndex &index, const QVariant &valu
 		{
             case 0:
 				// Name Column
-				m_siteProfile.soilTypes()[index.row()]->setName(value.toString());
+				m_siteProfile->soilTypes()[index.row()]->setName(value.toString());
 				break;
             case 1:
                 // Unit Weight
-                m_siteProfile.soilTypes()[index.row()]->setUntWt(value.toDouble());
+                m_siteProfile->soilTypes()[index.row()]->setUntWt(value.toDouble());
                 break;
 			case 2:
                 // Initial damping
-                m_siteProfile.soilTypes()[index.row()]->setInitialDamping(value.toDouble());
+                m_siteProfile->soilTypes()[index.row()]->setInitialDamping(value.toDouble());
                 break;
 			case 3:
 				// Shear modulus
                 if ( value.toInt() < 0 )
                     return false;
 
-                m_siteProfile.soilTypes()[index.row()]->setNormShearMod(
+                m_siteProfile->soilTypes()[index.row()]->setNormShearMod(
                         m_library->modulus().at(value.toInt()));
 
 				break;
@@ -140,12 +149,12 @@ bool SoilTypeTableModel::setData( const QModelIndex &index, const QVariant &valu
                 if ( value.toInt() < 0 )
                     return false;
 
-                m_siteProfile.soilTypes()[index.row()]->setDamping(
+                m_siteProfile->soilTypes()[index.row()]->setDamping(
                         m_library->damping().at(value.toInt()));
 				break;
             case 5:
                 // Notes
-				m_siteProfile.soilTypes()[index.row()]->setNotes(value.toString());
+				m_siteProfile->soilTypes()[index.row()]->setNotes(value.toString());
 				break;
             case 6:
 				// Is Varied Check box
@@ -154,7 +163,7 @@ bool SoilTypeTableModel::setData( const QModelIndex &index, const QVariant &valu
 		}
 	} 
     else if ( index.column() == 6 && role == Qt::CheckStateRole )
-		m_siteProfile.soilTypes()[index.row()]->setIsVaried(value.toBool());
+		m_siteProfile->soilTypes()[index.row()]->setIsVaried(value.toBool());
 	else 
 		return false;
     
@@ -174,29 +183,29 @@ QVariant SoilTypeTableModel::headerData( int section, Qt::Orientation orientatio
 			{
                 case 0:
 					// Name Column
-					return QVariant(tr("Name"));
+					return tr("Name");
                 case 1:
                     // Unit weight
-                    return QVariant(QString(tr("Unit Weight (%1)")).arg(m_units->untWt()));
+                    return QString(tr("Unit Weight (%1)")).arg(Units::instance()->untWt());
 				case 2:
                     // Initial damping
-					return QVariant(tr("Initial Damping (%)"));
+					return tr("Initial Damping (%)");
 				case 3:
 					// Shear-modulus model
-					return QVariant(tr("G/G_max Model"));
+					return tr("G/G_max Model");
 				case 4:
 					// Damping model
-					return QVariant(tr("Damping Model"));
+					return tr("Damping Model");
                 case 5:
                     // Notes
-                    return QVariant(tr("Notes"));
+                    return tr("Notes");
 				case 6:
 					// Is varied Check box
-					return QVariant(tr("Varied"));
+					return tr("Varied");
 			}
 		
 		case Qt::Vertical:
-			return QVariant(section+1);
+			return section+1;
 		default:
 			return QVariant();
 	}
@@ -204,18 +213,23 @@ QVariant SoilTypeTableModel::headerData( int section, Qt::Orientation orientatio
 
 Qt::ItemFlags SoilTypeTableModel::flags ( const QModelIndex &index ) const
 {
-    if ( index.column() == 6 )
+    if (m_readOnly) {
+        return QAbstractTableModel::flags(index);
+    }
+
+    if ( index.column() == 6 ) {
         return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
-    else
+    } else {
         return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
+    }
 }
 
 bool SoilTypeTableModel::insertRows ( int row, int count, const QModelIndex &parent )
 {
 	emit beginInsertRows( parent, row, row+count-1  );
 	
-    for (int i=0; i < count; ++i) 
-		m_siteProfile.soilTypes().insert( row, new SoilType(m_siteProfile.units()) ); 	
+    for (int i=0; i < count; ++i)
+		m_siteProfile->soilTypes().insert( row, new SoilType ); 	
 
 	emit endInsertRows();
 
@@ -227,7 +241,7 @@ bool SoilTypeTableModel::removeRows ( int row, int count, const QModelIndex &par
 	emit beginRemoveRows( parent, row, row+count-1);
 	
     for (int i=0; i < count; ++i)
-		delete m_siteProfile.soilTypes().takeAt(row); 	
+		delete m_siteProfile->soilTypes().takeAt(row); 	
 	
 	emit endRemoveRows();
 	
@@ -236,10 +250,5 @@ bool SoilTypeTableModel::removeRows ( int row, int count, const QModelIndex &par
 	
 SoilType * SoilTypeTableModel::soilType(int row)
 {
-	return m_siteProfile.soilTypes()[row];
-}
-
-void SoilTypeTableModel::resetModel()
-{
-    reset();
+	return m_siteProfile->soilTypes()[row];
 }

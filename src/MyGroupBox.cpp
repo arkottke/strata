@@ -28,7 +28,7 @@ MyGroupBox::MyGroupBox( const QString & title, QWidget * parent)
     // Box is checkable
     setCheckable(true);
 
-    connect( this, SIGNAL(clicked(bool)), this, SIGNAL(hasChanged()));
+    connect( this, SIGNAL(clicked(bool)), this, SIGNAL(wasModified()));
     connect( this, SIGNAL(toggled(bool)), this, SLOT(setChildrenEnabled(bool)));
 }
 

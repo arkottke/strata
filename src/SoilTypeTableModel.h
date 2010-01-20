@@ -22,18 +22,19 @@
 #ifndef SOIL_TYPE_TABLE_MODEL_H_
 #define SOIL_TYPE_TABLE_MODEL_H_
 
+#include "MyAbstractTableModel.h"
+#include "NonlinearPropertyLibrary.h"
 #include "SiteProfile.h"
-#include "Units.h"
-#include "NonLinearPropertyLibrary.h"
+
 #include <QAbstractTableModel>
 #include <QList>
 
-class SoilTypeTableModel : public QAbstractTableModel 
+class SoilTypeTableModel : public MyAbstractTableModel
 {
 	Q_OBJECT
 	
 	public:
-		SoilTypeTableModel( NonLinearPropertyLibrary * library, SiteProfile & siteProfile, Units * units, QObject *parent = 0);
+		SoilTypeTableModel( NonlinearPropertyLibrary * library, SiteProfile * siteProfile, QObject *parent = 0);
 
 		int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
 		int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
@@ -48,18 +49,12 @@ class SoilTypeTableModel : public QAbstractTableModel
 		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 		
 		SoilType * soilType(int row);
-
-    protected slots:
-        void resetModel();
     
 	private:
         //! Factory for creating the nonlinear properties
-        NonLinearPropertyLibrary * m_library;
+        NonlinearPropertyLibrary * m_library;
 
         //! Data for the model
-		SiteProfile & m_siteProfile;
-
-        //! Units system for the header information
-        Units * m_units;
+		SiteProfile * m_siteProfile;
 };
 #endif

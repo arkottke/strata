@@ -24,13 +24,12 @@
 
 #include "ResponseLocation.h"
 #include "RatioLocation.h"
-#include "NonLinearPropertyOutput.h"
+#include "NonlinearPropertyOutput.h"
 #include "Dimension.h"
 #include "Motion.h"
 #include "SubLayer.h"
 #include "EquivLinearCalc.h"
 #include "SiteResponseModel.h"
-#include "Units.h"
 
 #include <QObject>
 #include <QList>
@@ -47,7 +46,7 @@ class SiteResponseOutput : public QObject
     friend class OutputTableModel;
 
     public:
-        SiteResponseOutput( Units * units = 0, QObject * parent = 0);
+        SiteResponseOutput( QObject * parent = 0);
         ~SiteResponseOutput();
 
         //! Reset the object to the default values
@@ -55,25 +54,26 @@ class SiteResponseOutput : public QObject
 
         QStringList & motionNames();
 
+        const QString & title() const;
+
         const QString & filePrefix() const;
-        void setFilePrefix(const QString & prefix);
 
         bool seriesEnabledAt(int i) const;
 
         bool motionEnabledAt(int index) const;
-        void setMotionEnabledAt(int index, bool enabled);
 
         bool siteEnabledAt(int index) const;
-        void setSiteEnabledAt(int index, bool enabled);
 
         QString siteNameAt(int index) const;
         QString motionNameAt(int index) const;
 
         QString fileName() const;
-        void setFileName(QString & fileName);
 
-        Dimension & period();
-        Dimension & freq();
+        bool periodIsNeeded();
+        bool freqIsNeeded();
+
+        Dimension * period();
+        Dimension * freq();
 
         const QVector<QVector<double> > & times() const;
         const QVector<double> & depths() const;
@@ -93,16 +93,16 @@ class SiteResponseOutput : public QObject
         Output * vTotalStress();
         Output * maxError();
         Output * maxShearStress();
+        Output * stressReducCoeff();
         Output * maxShearStrain();
         Output * maxAccel();
+        Output * maxVel();
         Output * stressRatio();
         //@}
 
         double damping() const;
-        void setDamping(double damping);
 
-        const Units * units() const;
-        void setUnits( Units * units );
+        TextLog * textLog();
 
         int siteCount() const;
         int motionCount() const;
@@ -137,12 +137,17 @@ class SiteResponseOutput : public QObject
         /*! Save the layering of the site profile.
          * \param siteProfile the randomized site profile
          */
-        void saveProfile(SiteProfile & siteProfile);
+        void saveProfile(SiteProfile * siteProfile);
 
         /*! Save the results for a run of the program.
          * \param calc the site response calculator
          */
-        void saveResults( EquivLinearCalc & calc );
+        void saveResults( EquivLinearCalc * calc );
+
+        /*! Remove the last site.
+         * Used to remove all runs with a given site.
+         */
+        void removeLastSite();
 
         /*! Export the data to files
          *
@@ -152,33 +157,44 @@ class SiteResponseOutput : public QObject
          */
         void exportData( const QString & path, const QString & separator = ",", const QString & prefix = "" );
 
-        QMap<QString, QVariant> toMap(bool saveData = false) const;
+        QMap<QString, QVariant> toMap() const;
         void fromMap( QMap<QString, QVariant> map );
 
+        bool hasResults() const;
+        
+        //! Clear the results
+        void clear();
+
     public slots:
+        void setTitle(const QString & title);
+        void setFilePrefix(const QString & prefix);
+        void setMotionEnabledAt(int index, bool enabled);
+        void setSiteEnabledAt(int index, bool enabled);
+        void setFileName(const QString & fileName);
+       
+        //! Set the damping of the response spectra
+        void setDamping(double damping);
+        
         //! Compute the statistics of the output
         void computeStats();
 
     protected:
         QList<bool> & seriesEnabled();
 
-        //! Clear the data vectors
-        void clear();
-
     signals:
         void responseLocationsChanged();
         void ratioLocationsChanged();
         void nlPropertiesChanged();
 
-        void dataChanged();
+        void wasModified();
 
         void outputListChanged();
 
         void enabledChanged();
 
     private:
-        //! Units system
-        Units * m_units;
+        //! Title of the project
+		QString m_title;
 
         //! Filename that the binary is saved to
         QString m_fileName;
@@ -198,6 +214,9 @@ class SiteResponseOutput : public QObject
         //! If the output can provide time series
         bool m_hasTime;
 
+        //! If there are computed results
+        bool m_hasResults;
+
         //! Names of input motions
         QStringList m_motionNames;
 
@@ -208,7 +227,7 @@ class SiteResponseOutput : public QObject
          *
          */
         //@{
-        /*! Strain values for the non-linear curves.
+        /*! Strain values for the nonlinear curves.
          * Each curve has a different strain values.
          */
         QVector<QVector<double> > m_strains;
@@ -223,13 +242,13 @@ class SiteResponseOutput : public QObject
          * The period array does not change for motions or realizations of the
          * site profile and soil properties.
          */
-        Dimension m_period;
+        Dimension * m_period;
         
-        /*! Frequency points for the transfer function.
-         * The frequency length()ension does not change for motions or realizations
+        /*! Frequency points for the transfer function and the FAS.
+         * The frequency Dimension does not change for motions or realizations
          * of the site profile and soil properties.
          */
-        Dimension m_freq;
+        Dimension * m_freq;
 
         //! Depth values for a given site
         QVector<double> m_depths;
@@ -242,7 +261,7 @@ class SiteResponseOutput : public QObject
         //! The ratio of the response at two different locations
         QList<RatioLocation*> m_ratioLocations;
 
-        //! Non-linear soil properties
+        //! Nonlinear soil properties
         QList<Output*> m_nlProperties;
 
         /*! @name Profiles
@@ -282,6 +301,11 @@ class SiteResponseOutput : public QObject
          * Located at the middle of the layer
          */
         Output * m_maxShearStress;
+        
+        /*! Stress reduction coefficient.
+         * Located at the top of the layer.
+         */
+        Output * m_stressReducCoeff;
 
         /*! Maximum shear strain.
          * Located at the middle of the layer
@@ -299,6 +323,12 @@ class SiteResponseOutput : public QObject
          * Located at the top of the layer
          */
         Output * m_maxAccel;
+        
+        //! Maximum velocity
+        /*!
+         * Located at the top of the layer
+         */
+        Output * m_maxVel;
         //@}
         
         //! Damping of the response spectra in percent
@@ -325,5 +355,8 @@ class SiteResponseOutput : public QObject
          * \param maxDepth maximum depth of the vector units of Units->system()
          */
         void computeDepthVector( double maxDepth );
+
+        //! Log of the calculation
+        TextLog * m_textLog;
 };
 #endif

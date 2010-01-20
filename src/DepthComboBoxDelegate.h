@@ -24,6 +24,8 @@
 
 #include <QItemDelegate>
 
+//! Delegate to allow for the DepthComboBox to be used in a table view.
+
 class DepthComboBoxDelegate : public QItemDelegate
 {
     Q_OBJECT

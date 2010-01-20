@@ -22,11 +22,11 @@
 #ifndef OUTPUT_H_
 #define OUTPUT_H_
 
-#include "Units.h"
 #include "SubLayer.h"
 
 #include <QVector>
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QVariant>
 #include <Qt>
@@ -37,8 +37,10 @@
 class SiteResponseOutput; // Forward declaration of SiteResponseOutput
 
 //! A class to contain an switch and data for output
-class Output 
+class Output : public QObject
 {
+    Q_OBJECT
+
     public:
         //! Types of output
         enum Type {
@@ -49,12 +51,16 @@ class Output
             DispTimeSeries, //!< Displacement time series
             StrainTimeSeries, //!< Shear-strain time series
             StressTimeSeries, //!< Shear-stress time series
+            FourierSpectrum, //!< Absolute value of the Fourier Spectrum
             ResponseSpectrum, //!< Acceleration response spectrum
             SpectralRatio, //!< Acceleration response spectrum ratio
-            TransferFunction, //!< Transfer function
+            TransferFunction, //!< Acceleration transfer function
+            StrainTransferFunction, //!< Strain transfer function
             MaxAccelProfile, //!< Maximum acceleration profile
+            MaxVelProfile, //!< Maximum velocity profile
             MaxStrainProfile, //!< Maximum shear-strain profile
             MaxStressProfile, //!< Maximum shear-stress profile
+            StressReducCoeffProfile, //!< Stress reduction coefficient profile
             MaxErrorProfile, //!< Maximum error profile
             StressRatioProfile, //!< Shear-stress to vertical stress ratio profile
             VerticalStressProfile, //!< Vertical total stress
@@ -65,13 +71,14 @@ class Output
             Undefined   //!< Not defined
         };
 
-        Output( Type type = Undefined, int refIndex = -1 );
+        Output( Type type = Undefined, int refIndex = -1, QObject * parent = 0 );
 
         //! Reset the object to the default values
         void reset();
+        
+        Type type() const;
 
         bool enabled() const;
-        void setEnabled(bool b);
 
         bool exportEnabled() const;
         void setExportEnabled(bool b);
@@ -111,6 +118,9 @@ class Output
          */
         void addInterpData( const QVector<double> & magnitude, const QList<SubLayer> & subLayers, const QVector<double> & interpDepths);
 
+        //! Remove the last result
+        void removeLast();
+
         //! Compute statistics
         void computeStats();
 
@@ -127,7 +137,7 @@ class Output
         bool constantWithinLayer() const;
 
         //! If the output is a time series
-        bool isTimeSeries() const;
+        bool hasMotionSpecificReference() const;
 
         //! Independent of motion
         bool isMotionIndependent() const;
@@ -140,9 +150,9 @@ class Output
          * \param path location to save the files
          * \param motionIndex index of the motion file for the time series
          * \param separator character used to separate the columns of data
-         * \param prefix prefix to append to the start of filenames
+         * \param prefix prefix to append to the start of filename
          */
-        void toTextFile( QString path, const int motionIndex = -1 , const QString & separator = ",",  const QString & prefix = "" ) const;
+        void toTextFile( QString path, const int motionIndex = -1 , const QString & separator = ",",  const QString & prefix = "") const;
         
         /*! If data is log-normally distributed.
          *
@@ -158,8 +168,14 @@ class Output
         // //! Determine the index of the closest reference point
         // const int indexOfClosestRef(const double value) const;
 
-        QMap<QString, QVariant> toMap(bool saveData = false) const;
+        QMap<QString, QVariant> toMap() const;
 		void fromMap(const QMap<QString, QVariant> & map);
+
+    public slots:
+        void setEnabled(bool b);
+
+    signals:
+        void wasModified();
 
     protected:
         //! Type of data series
@@ -197,7 +213,7 @@ class Output
         QVector<QVector<double> > m_data;
 
         //! File name
-        const QString fileName() const;
+        const QString fileName(const int motionIndex = -1) const;
 
         //! Name of the reference label
         const QString referenceLabel() const;
@@ -212,6 +228,6 @@ class Output
         const QVector<double> & yData( const int motionIndex = -1, const int siteIndex = -1) const;
 
         //! Size of the data
-        const int dataSize( const int motionIndex = -1, const int siteIndex = -1 ) const;
+        int dataSize( const int motionIndex = -1, const int siteIndex = -1 ) const;
 };
 #endif

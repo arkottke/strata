@@ -22,11 +22,12 @@
 #ifndef SOIL_TYPE_OUTPUT_TABLE_MODEL_H_
 #define SOIL_TYPE_OUTPUT_TABLE_MODEL_H_
 
+#include "MyAbstractTableModel.h"
 #include "SoilType.h"
-#include <QAbstractTableModel>
+
 #include <QList>
 
-class SoilTypeOutputTableModel : public QAbstractTableModel
+class SoilTypeOutputTableModel : public MyAbstractTableModel
 {
     Q_OBJECT
 
@@ -41,9 +42,6 @@ class SoilTypeOutputTableModel : public QAbstractTableModel
 
 		QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 		Qt::ItemFlags flags ( const QModelIndex &index ) const;
-
-    public slots:
-        void resetModel();
 
     private:
         QList<SoilType*> & m_soilTypes; 

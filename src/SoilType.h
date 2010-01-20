@@ -22,8 +22,7 @@
 #ifndef SOIL_TYPE_H_
 #define SOIL_TYPE_H_
 
-#include "NonLinearProperty.h"
-#include "Units.h"
+#include "NonlinearProperty.h"
 
 #include <QObject>
 #include <QList>
@@ -36,7 +35,7 @@ class SoilType : public QObject
     Q_OBJECT
 
 	public:
-		SoilType( const Units * units = 0, QObject * parent = 0);
+		SoilType(QObject * parent = 0);
         ~SoilType();
         
         double untWt() const;
@@ -61,26 +60,20 @@ class SoilType : public QObject
         void setSaveData(bool saveData);
         bool saveData() const;
 
-        NonLinearProperty & normShearMod();
-        void setNormShearMod(const NonLinearProperty & normShearMod);
+        NonlinearProperty * normShearMod();
+        void setNormShearMod(NonlinearProperty * normShearMod);
 
-        NonLinearProperty & damping();
-        void setDamping(const NonLinearProperty & damping);
+        NonlinearProperty * damping();
+        void setDamping(NonlinearProperty * damping);
 
 		double meanStress() const;
-		void setMeanStress(double meanStress);
-
 		double PI() const;
-		void setPI(double pi);
-
 		double OCR() const;
-		void setOCR(double ocr);
-
 		double freq() const;
-		void setFreq(double freq);
+		int nCycles() const;
 
-		double nCycles() const;
-		void setNCycles(double nCycles);
+        //! Reset the curves back to the average values.
+        void reset();
 
 		QMap<QString, QVariant> toMap() const;
 		void fromMap( const QMap<QString, QVariant> & map );
@@ -91,10 +84,20 @@ class SoilType : public QObject
         //! Compute the shear modulus-reduction and damping curves
 		void computeDarendeliCurves();
 
-	private:
-        //! Units system 
-        const Units * m_units;
+    public slots:
+		void setPI(double pi);
+		void setMeanStress(double meanStress);
+		void setOCR(double ocr);
+		void setFreq(double freq);
+		void setNCycles(int nCycles);
+    
+    signals:
+        void dampingModelChanged();
+        void shearModModelChanged();
 
+        void wasModified();
+
+	private:
         //! Unit weight of the layer
 		double m_untWt;
 
@@ -110,7 +113,7 @@ class SoilType : public QObject
         //! Switch which controls if the soil layer is varied
 		bool m_isVaried;
 
-        //! Save the non-linear curve data during the trials
+        //! Save the nonlinear curve data during the trials
         bool m_saveData;
 		
 		/*
@@ -130,12 +133,12 @@ class SoilType : public QObject
 		double m_freq;
 
         //! Number of cycles of excitation
-		double m_nCycles;
+		int m_nCycles;
         //@}
         //! Shear modulus reduction
-        NonLinearProperty m_normShearMod;
+        NonlinearProperty * m_normShearMod;
 
         //! Damping
-        NonLinearProperty m_damping;
+        NonlinearProperty * m_damping;
 };
 #endif

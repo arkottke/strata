@@ -22,14 +22,17 @@
 #ifndef VELOCITY_LAYER_H_
 #define VELOCITY_LAYER_H_
 
+#include <QObject>
 #include <QStringList>
 
 //! A virtual class that describes the shear-wave velocity of a specific layer
 
-class VelocityLayer
+class VelocityLayer : public QObject
 {
+    Q_OBJECT
+
 	public:
-		VelocityLayer();
+		VelocityLayer( QObject * parent = 0);
         VelocityLayer( const VelocityLayer & other );
         virtual ~VelocityLayer() = 0;
     
@@ -77,6 +80,9 @@ class VelocityLayer
 
 		double isVaried() const;
 		void setIsVaried(bool isVaried);
+
+        //! Reset the shear-wave velocity back to the average value
+        void reset();
         
         //! A description of the layer for tables
         virtual QString toString() const = 0;

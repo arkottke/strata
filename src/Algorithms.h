@@ -27,6 +27,11 @@
 
 //! Various algorithms that are used repeatedly
 
+//! Interpolate in linear space
+QVector<double> interp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi );
+
+//! Interpolate in log-log space
+QVector<double> logLoginterp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi );
 
 //! Return the string corresponding to a boolean
 QString boolToString(bool b);

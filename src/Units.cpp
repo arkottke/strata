@@ -23,9 +23,21 @@
 #include <QChar>
 #include <QDebug>
 
-Units::Units()
+Units * Units::m_instance = 0;
+
+Units::Units( QObject * parent )
+    : QObject(parent)
 {
     reset();
+}
+
+Units * Units::instance()
+{
+    if ( m_instance == 0 ) {
+        m_instance = new Units;
+    }
+
+    return m_instance;
 }
 
 QStringList Units::systemList()
@@ -68,6 +80,39 @@ double Units::gravity() const
     return -1;
 }
 
+double Units::waterUntWt() const
+{
+    if ( m_system == Metric )
+        return 9.81;
+    else if ( m_system == English )
+        return 62.4;
+        
+    return -1;
+}
+
+double Units::toAtm() const
+{
+    if ( m_system == Metric )
+        return 9.868233e-3;
+    else if ( m_system == English )
+        return 4.725451e-4;
+        
+    return -1;
+}
+
+double Units::toMeters() const
+{
+    switch ( m_system )
+    {
+        case Metric:
+            return 1.0;
+        case English:
+            return 0.3048;
+        default:
+            return -1;
+    }
+}
+
 double Units::tsConv() const
 {
     double conv = 0;
@@ -81,7 +126,6 @@ double Units::tsConv() const
 
     return conv;
 }
-
 
 QString Units::length() const
 {
@@ -139,10 +183,11 @@ QString Units::vel() const
 
 QString Units::wt() const
 {
-    if ( m_system == Metric )
+    if ( m_system == Metric ) {
         return "kN";
-    else if ( m_system == English )
+    } else if ( m_system == English ) {
         return "lb";
+    }
 
     return "";
 }

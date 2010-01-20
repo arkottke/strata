@@ -19,12 +19,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <Distribution.h>
+#include "Distribution.h"
 #include <QObject>
 #include <gsl/gsl_randist.h>
+
 #include <cmath>
 
-Distribution::Distribution()
+Distribution::Distribution( QObject * parent)
+    : QObject(parent)
 {
     m_type = LogNormal;
 
@@ -51,8 +53,17 @@ Distribution::Type Distribution::type() const
     return m_type;
 }
 
+void Distribution::setType(int type)
+{
+    setType((Type)type);
+}
+
 void Distribution::setType(Distribution::Type type)
 {
+    if ( m_type != type ) {
+        emit wasModified();
+    }
+
     m_type = type;
 }
 
@@ -63,6 +74,10 @@ double Distribution::avg() const
 
 void Distribution::setAvg(double avg)
 {
+    if ( m_avg != avg ) {
+        emit wasModified();
+    }
+
     m_avg = avg;
 }
         
@@ -73,6 +88,10 @@ double Distribution::stdev() const
 
 void Distribution::setStdev(double stdev)
 {
+    if ( m_stdev != stdev ) {
+        emit wasModified();
+    }
+
     m_stdev = stdev;
 }
 
@@ -83,6 +102,10 @@ bool Distribution::hasMin() const
 
 void Distribution::setHasMin(bool hasMin)
 {
+    if ( m_hasMin != hasMin ) {
+        emit wasModified();
+    }
+
     m_hasMin = hasMin;
 }
 
@@ -93,6 +116,10 @@ double Distribution::min() const
 
 void Distribution::setMin(double min)
 {
+    if ( m_min != min ) {
+        emit wasModified();
+    }
+
     m_min = min;
 }
 
@@ -103,6 +130,10 @@ bool Distribution::hasMax() const
 
 void Distribution::setHasMax(bool hasMax)
 {
+    if ( m_hasMax != hasMax ) {
+        emit wasModified();
+    }
+
     m_hasMax = hasMax;
 }
 
@@ -113,6 +144,10 @@ double Distribution::max() const
 
 void Distribution::setMax(double max)
 {
+    if ( m_max != max ) {
+        emit wasModified();
+    }
+
     m_max = max;
 }
 
@@ -123,7 +158,7 @@ void Distribution::setRandomNumberGenerator( gsl_rng * rng )
 
 double Distribution::rand()
 {
-    double value;
+    double value = 0;
 
     switch(m_type)
     {
@@ -135,18 +170,20 @@ double Distribution::rand()
             value = m_avg + gsl_ran_gaussian( m_rng, m_stdev);
             break;
         case LogNormal:
-            value = m_avg * exp(gsl_ran_gaussian( m_rng, m_stdev));
+            value = gsl_ran_lognormal( m_rng, log(m_avg), m_stdev);
             break;
         default:
             return -1;
     }
 
     // Check if the generated depth is less than the minimum
-    if ( m_hasMin && value < m_min )
+    if ( m_hasMin && value < m_min ) {
         value = m_min;
+    }
     // Or if the generated depth is greater than the maximum
-    if ( m_hasMax && value > m_max )
+    if ( m_hasMax && value > m_max ) {
         value = m_max;
+    }
 
     return value;
 }

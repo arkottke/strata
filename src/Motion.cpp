@@ -21,130 +21,124 @@
 
 #include "Motion.h"
 #include <QDebug>
+
 #include <cmath>
+
 
 #include <iostream>
 
 Motion::Motion(QObject * parent)
-  : QObject(parent)
+    : QObject(parent), m_maxEngFreq(25.)
 {
-  m_sdofTfIsComputed = false;
-  m_respSpec = new ResponseSpectrum;
+    m_respSpec = new ResponseSpectrum(true);
+    connect(m_respSpec, SIGNAL(wasModified()), SLOT(setModified()));
 }
 
 Motion::~Motion()
 {
-  delete m_respSpec;
+    delete m_respSpec;
 }
 
 QStringList Motion::typeList()
 {
-  QStringList list;
-  list << "Outcrop" << "Within";
+    QStringList list;
+    list << "Outcrop" << "Within";
 
-  return list;
+    return list;
 }
 
 bool Motion::modified() const
 {
-  return m_modified;
+    return m_modified;
 }
 
 void Motion::setModified(bool modified)
 {
-  m_modified = modified;
+    m_modified = modified;
+
+    if (m_modified)
+        emit wasModified();
 }
 
 Motion::Type Motion::type() const
 { 
-  return m_type;
+    return m_type;
+}
+
+void Motion::setType(int type)
+{
+    setType((Type)type);
+    setModified(true);
 }
 
 void Motion::setType(Motion::Type type)
 {
-  m_type = type;
+    m_type = type;
+    setModified(true);
 }
 
 ResponseSpectrum * Motion::respSpec() 
 {
-  return m_respSpec;
+    return m_respSpec;
 }
 
 QVector<double> & Motion::freq()
 {
-  return m_freq;
+    return m_freq;
 }
 
-const double Motion::freqMin() const
+void Motion::setMaxEngFreq(double maxEngFreq)
 {
-  return ( m_freq.first() < m_freq.last() ) ? m_freq.first() : m_freq.last();
+    m_maxEngFreq = maxEngFreq;
+    setModified(true);
 }
 
-const double Motion::freqMax() const
+double Motion::maxEngFreq() const
 {
-  return ( m_freq.first() < m_freq.last() ) ? m_freq.last() : m_freq.first();
+    return m_maxEngFreq;
+}
+
+double Motion::freqMin() const
+{
+    return ( m_freq.first() < m_freq.last() ) ? m_freq.first() : m_freq.last();
+}
+
+double Motion::freqMax() const
+{
+    return ( m_freq.first() < m_freq.last() ) ? m_freq.last() : m_freq.first();
 }
 
 int Motion::freqCount() const
 {
-  return m_freq.size();
+    return m_freq.size();
 }
 
 double Motion::angFreqAt( int i ) const
 {
-  return 2 * M_PI * m_freq.at(i);
+    return 2 * M_PI * m_freq.at(i);
 }
 
 double Motion::freqAt( int i ) const
 {
-  return m_freq.at(i);
+    return m_freq.at(i);
 }
 
-void Motion::computeSdofTf( const QVector<double> & period, double damping )
+QVector<std::complex<double> > Motion::calcSdofTf(const double period, const double damping) const
 {
-  // Check if the SDOF needs to be computed
-  if ( m_sdofTfIsComputed ) {
-    // Check if the periods are different
-    bool periodsMatch = true;
+    QVector<std::complex<double> > tf(m_freq.size());
 
-    if ( period.size() == m_respSpec->period().size() ) {
-      for ( int i = 0; i < period.size(); ++i ) {
-        if ( period.at(i) != m_respSpec->period().at(i) ) {
-          periodsMatch = false;
-          break;
-        }
-      }
-    } else 
-      periodsMatch = false;
+    // Natural frequency of the oscillator
+    const double fn = 1 / period;
 
-    // Do not recompute if damping  and periods are the dame
-    if ( damping == m_respSpec->damping() && periodsMatch )
-      return;
-  }
-
-  m_respSpec->period() = period;
-  m_respSpec->setDamping(damping);
-
-  // Resize the transfer function
-  m_sdofTf.resize( period.size() );
-
-  for ( int i = 0; i < period.size(); i++ )
-  {
-    m_sdofTf[i].resize( m_freq.size() );    	
-    // Compute the natural frequency of the oscillator
-    double fn = 1 / period.at(i);
-
-    for ( int j = 0; j < m_freq.size(); j++ )
-    {
-      // 
-      // The single degree of freedom transfer function
-      //                          - fn^2
-      //  H = -------------------------------------------------
-      //       ( f^2 - fn^2 ) - 2 * sqrt(-1) * damping * fn * f
-      // 
-      m_sdofTf[i][j] = ( -fn * fn ) / std::complex<double>( m_freq.at(j) * m_freq.at(j) - fn * fn, -2 * (damping / 100) * fn * m_freq.at(j) );            
+    for (int i = 0; i < m_freq.size(); i++) {
+        //
+        // The single degree of freedom transfer function
+        //                          - fn^2
+        //  H = -------------------------------------------------
+        //       ( f^2 - fn^2 ) - 2 * sqrt(-1) * damping * fn * f
+        //
+        tf[i] = (-fn * fn) / std::complex<double>(m_freq.at(i) * m_freq.at(i) - fn * fn, -2 * (damping / 100) * fn * m_freq.at(i));
     }
-  }
 
-  m_sdofTfIsComputed = true;
+    return tf;
 }

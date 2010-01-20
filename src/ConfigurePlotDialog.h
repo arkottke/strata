@@ -32,6 +32,8 @@
 #include <qwt_scale_engine.h>
 #include <qwt_scale_div.h>
 
+//! A QGroupBox contain the options to customize a plot axis.
+
 class AxisOptions : public QGroupBox
 {
     Q_OBJECT
@@ -63,6 +65,8 @@ class AxisOptions : public QGroupBox
         QLineEdit * m_maxLineEdit;
 };
 
+//! Dialog used to configure the axes of a QwtPlot.
+
 class ConfigurePlotDialog : public QDialog
 {
     Q_OBJECT
@@ -80,8 +84,8 @@ class ConfigurePlotDialog : public QDialog
     private:
         QwtPlot * m_plot;
 
-        AxisOptions * m_xAxisOptions;
-        AxisOptions * m_yAxisOptions;
+        AxisOptions* m_xAxisOptions;
+        AxisOptions* m_yAxisOptions;
 };
 
 #endif

@@ -32,7 +32,7 @@ class MyGroupBox : public QGroupBox
         MyGroupBox( const QString & title = QString(), QWidget * parent = 0);
 
     signals:
-        void hasChanged();
+        void wasModified();
 
     protected slots:
         void setChildrenEnabled(bool enabled);

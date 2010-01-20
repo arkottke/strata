@@ -20,16 +20,24 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "ProfileVariation.h"
+#include "Units.h"
 
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
+
 #include <cmath>
+#include <algorithm>
 
 #include <QObject>
 #include <QDebug>
         
-ProfileVariation::ProfileVariation()
+ProfileVariation::ProfileVariation(QObject * parent)
+    : QObject(parent)
 {
+    m_bedrockDepth = new Distribution;
+
+    connect( m_bedrockDepth, SIGNAL(wasModified()), SIGNAL(wasModified()));
+
     reset();
 }
 
@@ -37,15 +45,25 @@ QStringList ProfileVariation::velocityModelList()
 {
     QStringList list;
     
-    list << QObject::tr("Custom")
-        << QObject::tr("GeoMatrix A&B")
-        << QObject::tr("GeoMatrix C&D")
-        << QObject::tr("USGS A&B")
-        << QObject::tr("USGS C&D")
-        << QObject::tr("USGS A")
-        << QObject::tr("USGS B")
-        << QObject::tr("USGS C")
-        << QObject::tr("USGS D");
+    list << tr("Custom")
+        << tr("GeoMatrix A&B, Rock & Shallow Soil")
+        << tr("GeoMatrix C&D, Deep Narrow/Broad Soil");
+
+    if (Units::instance()->system() == Units::Metric ) {
+        list << tr("USGS A&B, >360 m/s")
+            << tr("USGS C&D, <360 m/s")
+            << tr("USGS A, >750 m/s")
+            << tr("USGS B, 360-750 m/s")
+            << tr("USGS C, 180 to 360 m/s")
+            << tr("USGS D, <180 m/s");
+    } else {
+        list << tr("USGS A&B, >1200 ft/s")
+            << tr("USGS C&D, <1200 ft/s")
+            << tr("USGS A, >2500 ft/s")
+            << tr("USGS B, 1200-2500 ft/s")
+            << tr("USGS C, 600 to 1200 ft/s")
+            << tr("USGS D, <600 ft/s");
+    }
 
     return list;
 }
@@ -54,8 +72,8 @@ QStringList ProfileVariation::layeringModelList()
 {
     QStringList list;
     
-    list << QObject::tr("Custom")
-        << QObject::tr("Default (Toro 95)");
+    list << tr("Custom")
+        << tr("Default (Toro 95)");
 
     return list;
 }
@@ -76,11 +94,6 @@ void ProfileVariation::reset()
     setLayeringModel(DefaultLayering);
 }
 
-void ProfileVariation::setUnits(const Units * units)
-{
-    m_units = units;
-}
-
 bool ProfileVariation::enabled() const
 {
     return m_enabled;
@@ -88,6 +101,10 @@ bool ProfileVariation::enabled() const
 
 void ProfileVariation::setEnabled(bool enabled)
 {
+    if ( m_enabled != enabled ) {
+        emit wasModified();
+    }
+
     m_enabled = enabled;
 }
 
@@ -98,6 +115,10 @@ bool ProfileVariation::isVelocityVaried() const
 
 void ProfileVariation::setVaryVelocity(bool isVelocityVaried)
 {
+    if ( m_isVelocityVaried != isVelocityVaried ) {
+        emit wasModified();
+    }
+
     m_isVelocityVaried = isVelocityVaried;
 }
 
@@ -108,6 +129,10 @@ bool ProfileVariation::isLayeringVaried() const
 
 void ProfileVariation::setVaryLayering(bool isLayeringVaried)
 {
+    if ( m_isLayeringVaried != isLayeringVaried ) {
+        emit wasModified();
+    }
+
     m_isLayeringVaried = isLayeringVaried;
 }
 
@@ -118,6 +143,10 @@ bool ProfileVariation::isBedrockDepthVaried() const
 
 void ProfileVariation::setVaryBedrockDepth(bool isBedrockDepthVaried)
 {
+    if ( m_isBedrockDepthVaried != isBedrockDepthVaried ) {
+        emit wasModified();
+    }
+
     m_isBedrockDepthVaried = isBedrockDepthVaried;
 }
 
@@ -126,8 +155,17 @@ ProfileVariation::VelocityModel ProfileVariation::stdevModel() const
     return m_stdevModel;
 }
 
+void ProfileVariation::setStdevModel(int model)
+{
+    setStdevModel((VelocityModel)model);
+}
+
 void ProfileVariation::setStdevModel(VelocityModel model)
 {
+    if ( m_stdevModel != model ) {
+        emit wasModified();
+    }
+
     m_stdevModel = model;
 
     switch (model)
@@ -168,7 +206,11 @@ bool ProfileVariation::stdevIsLayerSpecific() const
 
 void ProfileVariation::setStdevIsLayerSpecific(bool stdevIsLayerSpecific)
 {
-   m_stdevIsLayerSpecific = stdevIsLayerSpecific;
+    if ( m_stdevIsLayerSpecific != stdevIsLayerSpecific ) {
+        emit wasModified();
+    }
+
+    m_stdevIsLayerSpecific = stdevIsLayerSpecific;
 }
 
 double ProfileVariation::stdev() const
@@ -178,6 +220,10 @@ double ProfileVariation::stdev() const
 
 void ProfileVariation::setStdev(double stdev)
 {
+    if ( m_stdev != stdev ) {
+        emit wasModified();
+    }
+
     m_stdev = stdev;
 }
 
@@ -186,8 +232,17 @@ ProfileVariation::VelocityModel ProfileVariation::correlModel() const
     return m_correlModel;
 }
 
+void ProfileVariation::setCorrelModel(int model)
+{
+    setCorrelModel((VelocityModel)model);
+}
+
 void ProfileVariation::setCorrelModel(VelocityModel model)
 {
+    if ( m_correlModel != model ) {
+        emit wasModified();
+    }
+    
     m_correlModel = model;
 
     switch (model)
@@ -260,6 +315,10 @@ double ProfileVariation::correlInitial() const
 
 void ProfileVariation::setCorrelInitial(double correlInitial)
 {
+    if ( m_correlInitial != correlInitial ) {
+        emit wasModified();
+    }
+
     m_correlInitial = correlInitial;
 }
 
@@ -270,6 +329,10 @@ double ProfileVariation::correlFinal() const
 
 void ProfileVariation::setCorrelFinal(double correlFinal)
 {
+    if ( m_correlFinal != correlFinal ) {
+        emit wasModified();
+    }
+
     m_correlFinal = correlFinal;
 }
 
@@ -280,6 +343,10 @@ double ProfileVariation::correlDelta() const
 
 void ProfileVariation::setCorrelDelta(double correlDelta)
 {
+    if ( m_correlDelta != correlDelta ) {
+        emit wasModified();
+    }
+
     m_correlDelta = correlDelta;
 }
 
@@ -290,6 +357,10 @@ double ProfileVariation::correlIntercept() const
 
 void ProfileVariation::setCorrelIntercept(double correlIntercept)
 {
+    if ( m_correlIntercept != correlIntercept ) {
+        emit wasModified();
+    }
+
     m_correlIntercept = correlIntercept;
 }
 
@@ -300,6 +371,10 @@ double ProfileVariation::correlExponent() const
 
 void ProfileVariation::setCorrelExponent(double correlExponent)
 {
+    if ( m_correlExponent != correlExponent ) {
+        emit wasModified();
+    }
+
     m_correlExponent = correlExponent;
 }
 
@@ -308,8 +383,17 @@ ProfileVariation::LayeringModel ProfileVariation::layeringModel() const
     return ProfileVariation::m_layeringModel;
 }
 
-void ProfileVariation::setLayeringModel(ProfileVariation::LayeringModel model)
+void ProfileVariation::setLayeringModel(int model)
 {
+    setLayeringModel((LayeringModel)model);
+}
+
+void ProfileVariation::setLayeringModel(LayeringModel model)
+{
+    if ( m_layeringModel != model ) {
+        emit wasModified();
+    }
+
     m_layeringModel = model;
 
     // Load the default values
@@ -327,6 +411,10 @@ double ProfileVariation::layeringCoeff() const
 
 void ProfileVariation::setLayeringCoeff(double layeringCoeff)
 {
+    if ( m_layeringCoeff != layeringCoeff ) {
+        emit wasModified();
+    }
+
     m_layeringCoeff = layeringCoeff;
 }
 
@@ -337,6 +425,10 @@ double ProfileVariation::layeringInitial() const
 
 void ProfileVariation::setLayeringInitial(double layeringInitial)
 {
+    if ( m_layeringInitial != layeringInitial ) {
+        emit wasModified();
+    }
+
     m_layeringInitial = layeringInitial;
 }
 
@@ -347,10 +439,14 @@ double ProfileVariation::layeringExponent() const
 
 void ProfileVariation::setLayeringExponent(double layeringExponent)
 {
+    if ( m_layeringExponent != layeringExponent ) {
+        emit wasModified();
+    }
+
     m_layeringExponent = layeringExponent;
 }
 
-Distribution & ProfileVariation::bedrockDepth() 
+Distribution * ProfileVariation::bedrockDepth() 
 {
     return m_bedrockDepth;
 }
@@ -359,7 +455,7 @@ void ProfileVariation::setRandomNumberGenerator(gsl_rng * rng)
 {
     m_rng = rng;
     // Use the same random number generator for the bedrock distribution
-    m_bedrockDepth.setRandomNumberGenerator(m_rng);
+    m_bedrockDepth->setRandomNumberGenerator(m_rng);
 }
 
 QList<double> ProfileVariation::varyLayering(double depthToBedrock) const
@@ -367,58 +463,87 @@ QList<double> ProfileVariation::varyLayering(double depthToBedrock) const
     // The thickness of the layers
     QList<double> thickness;
 
-    double depth = 0;
 
-    while ( depth < depthToBedrock ) {
-        // Compute the depth dependent rate
-        double rate = m_layeringCoeff * pow( depth + m_layeringInitial, m_layeringExponent );
-        // Using a random probability, the thickness is computing using the inverse CDF.
-        thickness << log( 1 - gsl_rng_uniform(m_rng)) / -rate;
-        
-        depth += thickness.last();
+    // The layering is generated using a non-homogenous Poisson process.  The
+    // following routine is used to generate the layering.  The rate function,
+    // \lambda(t), is integrated from 0 to t to generate cumulative rate
+    // function, \Lambda(t).  This function is then inverted producing
+    // \Lambda^-1(t).  Random variables are produced using the a exponential
+    // random variation with mu = 1 and converted to the nonhomogenous
+    // variables using the inverted function.
+
+    // Random variable that is a sum of exponential random variables
+    double sum  = 0;
+   
+    // Previously computed depth
+    double prevDepth = 0;
+
+    while ( prevDepth < depthToBedrock ) {
+        // Add a random increment
+        sum += gsl_ran_exponential( m_rng, 1.0 );
+
+        // Convert between x and depth using the inverse of \Lambda(t)
+        double depth =
+            pow( 
+                    (m_layeringExponent * sum ) / m_layeringCoeff 
+                    + sum / m_layeringCoeff 
+                    + pow(m_layeringInitial, m_layeringExponent + 1 )
+                    , 1 / ( m_layeringExponent + 1 )
+               ) - m_layeringInitial;
+
+        // Add the thickness
+        thickness << depth - prevDepth;
+       
+        prevDepth = depth;
     }
 
     // Correct the last layer of thickness so that the total depth is equal to the maximum depth
-    thickness.last() = thickness.last() - (depth - depthToBedrock);
+    thickness.last() = thickness.last() - (prevDepth - depthToBedrock);
         
     return thickness;
 }
   
 void ProfileVariation::varyVelocity( QList<SoilLayer*> & soilLayers, RockLayer * bedrock ) const
 {
-    // The first layer has no correlation
-    double prevRandVar = gsl_ran_gaussian(m_rng, m_stdev);
+    double stdev = m_stdevIsLayerSpecific ? soilLayers.first()->stdev() : m_stdev;
 
-    soilLayers[0]->setShearVel( soilLayers.first()->avg() * exp(prevRandVar));
+    // The first layer has no correlation
+    double prevRandVar = gsl_ran_gaussian(m_rng, stdev);
+    
+    if (soilLayers.first()->isVaried()) {
+        soilLayers[0]->setShearVel( soilLayers.first()->avg() * exp(prevRandVar));
+    } else {
+        soilLayers[0]->setShearVel( soilLayers.first()->avg());
+    }
 
     for (int i = 1; i < soilLayers.size(); ++i) {
+        if (!soilLayers.at(i)->isVaried()) {
+            // Use average velocity for the layer
+            soilLayers[i]->setShearVel(soilLayers.at(i)->avg());
+            continue;
+        }
+
         // Depth at the middle of the layer
         double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
 
         // If the English units are used convert the depthToMid to meters
-        if ( m_units->system() == Units::English )
-            depthToMid *= 0.3048;
+        depthToMid *= Units::instance()->toMeters();
 
         // Depth dependent correlation
-        double depthCorrel = 0;
-
-        if ( depthToMid < 200)
-            depthCorrel = m_correlFinal * pow( (depthToMid + m_correlInitial) /
-                    (200 + m_correlInitial), m_correlExponent);
-        else
-            depthCorrel = m_correlFinal;
+        double dCorrel = depthCorrel(depthToMid);
 
         // Thickness dependent correlation
         double thicknessCorrel = m_correlInitial * exp(-soilLayers.at(i)->thickness() / m_correlDelta );
 
         // Combine the correlations
-        double correl = (1 - depthCorrel) * thicknessCorrel + depthCorrel;
+        double correl = (1 - dCorrel) * thicknessCorrel + dCorrel;
 
         /* 
          * Compute the random variable taking into account the correlation from
          * the previous layer.  
          */
-        double randVar = correl * prevRandVar + gsl_ran_gaussian(m_rng, m_stdev) * sqrt( 1 - correl * correl);
+        stdev = m_stdevIsLayerSpecific ? soilLayers.at(i)->stdev() : m_stdev;
+        double randVar = correl * prevRandVar + gsl_ran_gaussian(m_rng, stdev) * sqrt( 1 - correl * correl);
         
         // Vary the layer using the random variable
         soilLayers[i]->setShearVel( soilLayers.at(i)->avg() * exp(randVar));
@@ -428,14 +553,27 @@ void ProfileVariation::varyVelocity( QList<SoilLayer*> & soilLayers, RockLayer *
     }
 
     // Randomize the bedrock layer
-    /* The thickness dependent correlation is assumed to be zero because the
-     * layer is infinitely thick.  Therefore the correl with the previous layer
-     * is based on depth alone.  The depth dependent correlation is assumed to
-     * be the final correlation (or correlation at 200m).
-     */
-    double randVar = m_correlFinal * prevRandVar + gsl_ran_gaussian(m_rng, m_stdev) * sqrt( 1 - m_correlFinal * m_correlFinal );
+    //
+    // The bedrock layer is assumed to be perfectly correlated to the previous
+    // soil layer.  In addition the velocity is set to be at least as fast as
+    // the velocity of the last soil layer.
+    //
+    if (bedrock->isVaried()) {
+        double randVar = prevRandVar;
         
-    bedrock->setShearVel( bedrock->avg() * exp(randVar));
+        // Adjust the random variable by the ratio of the standard deviation
+        if (m_stdevIsLayerSpecific) {
+            randVar *= bedrock->stdev() / soilLayers.last()->stdev();
+        }
+
+        bedrock->setShearVel(std::max(
+                    bedrock->avg() * exp(randVar),
+                    soilLayers.last()->shearVel()));
+
+    } else {
+        // Use average velocity for the layer
+        bedrock->setShearVel(bedrock->avg());
+    }
 }
 
 QMap<QString, QVariant> ProfileVariation::toMap() const
@@ -464,7 +602,7 @@ QMap<QString, QVariant> ProfileVariation::toMap() const
     map.insert("layeringInitial", m_layeringInitial);
     map.insert("layeringExponent", m_layeringExponent);
     
-    map.insert("bedrockDepth", m_bedrockDepth.toMap());
+    map.insert("bedrockDepth", m_bedrockDepth->toMap());
 
     return map;
 }
@@ -493,5 +631,17 @@ void ProfileVariation::fromMap( const QMap<QString, QVariant> & map )
 	m_layeringInitial = map.value("layeringInitial").toDouble();
 	m_layeringExponent = map.value("layeringExponent").toDouble();
 
-    m_bedrockDepth.fromMap( map.value("bedrockDepth").toMap() );
+    m_bedrockDepth->fromMap( map.value("bedrockDepth").toMap() );
 }
+
+double ProfileVariation::depthCorrel( double depth ) const
+{
+    if ( depth < 200) {
+        return m_correlFinal * pow( (depth + m_correlInitial) /
+                (200 + m_correlInitial), m_correlExponent);
+    } else {
+        return m_correlFinal;
+    }
+}
+
+

@@ -22,17 +22,28 @@
 #ifndef SOIL_PROFILE_MODEL_H_
 #define SOIL_PROFILE_MODEL_H_
 
+#include "MyAbstractTableModel.h"
 #include "SiteProfile.h"
-#include "Units.h"
+
 #include <QAbstractTableModel>
 #include <QList>
 
-class SoilProfileModel : public QAbstractTableModel 
+class SoilProfileModel : public MyAbstractTableModel 
 {
 	Q_OBJECT
 	
 	public:
-		SoilProfileModel( SiteProfile & siteProfile, Units * units, QObject *parent = 0);
+        enum Columns {
+            DEPTH_COLUMN,
+            THICKNESS_COLUMN,
+            SOIL_TYPE_COLUMN,
+            VELOCITY_COLUMN,
+            STDEV_COLUMN,
+            MIN_COLUMN,
+            MAX_COLUMN,
+            VARIED_COLUMN };
+
+		SoilProfileModel( SiteProfile * siteProfile, QObject *parent = 0);
 
 		int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
 		int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
@@ -46,11 +57,7 @@ class SoilProfileModel : public QAbstractTableModel
 		bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 
-    protected slots:
-        void resetModel();
-		
 	private:
-        SiteProfile & m_siteProfile;
-        Units * m_units;
+        SiteProfile * m_siteProfile;
 };
 #endif

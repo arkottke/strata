@@ -21,75 +21,76 @@
 
 #include "RecordedMotionDialog.h"
 
-#include <QFileInfo>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QIntValidator>
+#include <QDebug>
+#if QT_VERSION >= 0x040400
+    #include <QDesktopServices>
+#endif
+#include <QDialogButtonBox>
 #include <QDoubleValidator>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QGridLayout>
+#include <QIntValidator>
+#include <QLabel>
+#include <QPushButton>
+#include <QSettings>
 #include <QTextCursor>
 #include <QTextBlock>
-#include <QFileDialog>
 #include <QTextStream>
 #include <QWhatsThis>
-#include <QDebug>
-#include <QSettings>
+
 #include <qwt_plot_curve.h>
 
 
 RecordedMotionDialog::RecordedMotionDialog(RecordedMotion * motion, QString & workingDir, QWidget *parent, Qt::WindowFlags f)
-	: QDialog(parent, f), m_motion(motion), m_workingDir(workingDir)
+        : QDialog(parent, f), m_motion(motion)
 {
     setup();
 }
 
 void RecordedMotionDialog::setup()
 {
-    int space = 20;
+    QGridLayout * layout = new QGridLayout;
+    layout->setColumnStretch( 6, 1 );
+
     // Create the file row
     QPushButton * filePushButton = new QPushButton(tr("&File..."));
     filePushButton->setWhatsThis(tr("Opens a dialog to select the file."));
+    connect(filePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
+    layout->addWidget( filePushButton, 0, 0 );
 
     m_fileLineEdit = new QLineEdit;
     m_fileLineEdit->setWhatsThis(tr("Currently selected file"));
     m_fileLineEdit->setReadOnly(true);
-
-    QHBoxLayout * row_1 = new QHBoxLayout;
-    row_1->addWidget(filePushButton);
-    row_1->addWidget(m_fileLineEdit);
+    layout->addWidget( m_fileLineEdit, 0, 1, 1, 8);
 
     // Create the description row
     m_descripLineEdit = new QLineEdit;
     m_descripLineEdit->setWhatsThis(tr("A description of the time series file (optional)."));
-    QHBoxLayout * row_2 = new QHBoxLayout;
-    row_2->addWidget(new QLabel(tr("Description:")));
-    row_2->addWidget(m_descripLineEdit);
+    layout->addWidget(new QLabel(tr("Description:")), 1, 0); 
+    layout->addWidget(m_descripLineEdit, 1, 1, 1, 8);
 
     // Create the time step, point count, and scale row
-    m_timeStepLineEdit = new QLineEdit;
-    m_timeStepLineEdit->setWhatsThis(tr("The time step between data points."));
-    m_timeStepLineEdit->setValidator(new QDoubleValidator(m_timeStepLineEdit));
-    
     m_countLineEdit = new QLineEdit;
     m_countLineEdit->setWhatsThis(tr("The number of data points in the file."));
     m_countLineEdit->setValidator(new QIntValidator(m_countLineEdit));
+    layout->addWidget(new QLabel(tr("Number of points:")), 2, 0);
+    layout->addWidget( m_countLineEdit, 2, 1 );
+
+
+    m_timeStepLineEdit = new QLineEdit;
+    m_timeStepLineEdit->setWhatsThis(tr("The time step between data points."));
+    m_timeStepLineEdit->setValidator(new QDoubleValidator(m_timeStepLineEdit));
+    layout->addWidget(new QLabel(tr("Time step (s):")), 2, 2);
+    layout->addWidget(m_timeStepLineEdit, 2, 3 );
    
     m_scaleLineEdit = new QLineEdit;
     m_scaleLineEdit->setWhatsThis(tr("The scale factor that is applied to the motion."));
     m_scaleLineEdit->setValidator(new QDoubleValidator(m_scaleLineEdit));
     m_scaleLineEdit->setText("1");
-
-    QHBoxLayout * row_3  = new QHBoxLayout;
-    row_3->addWidget(new QLabel(tr("Number of points:")));
-    row_3->addWidget(m_countLineEdit);
-    row_3->addSpacing(space);
-    row_3->addWidget(new QLabel(tr("Time step (s):")));
-    row_3->addWidget(m_timeStepLineEdit);
-    row_3->addSpacing(space);
-    row_3->addWidget(new QLabel(tr("Scale factor:")));
-    row_3->addWidget(m_scaleLineEdit);
-    row_3->addStretch(1);
+    
+    layout->addWidget(new QLabel(tr("Scale factor:")), 2, 4);
+    layout->addWidget(m_scaleLineEdit, 2, 5 );
 
     // Data format row
     m_formatComboBox = new QComboBox;
@@ -97,6 +98,10 @@ void RecordedMotionDialog::setup()
                 "reads every number on every row.  <i>Columns</i> reads data "
                 "from a specific column."));
     m_formatComboBox->addItems(RecordedMotion::formatList());
+    connect(m_formatComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDataColumn(int)));
+
+    layout->addWidget( new QLabel(tr("Format:")), 3, 0);
+    layout->addWidget(m_formatComboBox, 3, 1);
     
     m_dataColumnSpinBox = new QSpinBox;
     m_dataColumnSpinBox->setWhatsThis(tr("The column of the acceleration data."));
@@ -104,41 +109,26 @@ void RecordedMotionDialog::setup()
     m_dataColumnSpinBox->setMinimum(1);
     m_dataColumnSpinBox->setValue(1);
 
-    QHBoxLayout * row_4 = new QHBoxLayout;
-    row_4->addWidget(new QLabel(tr("Format:")));
-    row_4->addWidget(m_formatComboBox);
-    row_4->addSpacing(space);
-    row_4->addWidget(new QLabel(tr("Data column:")));
-    row_4->addWidget(m_dataColumnSpinBox);
-    row_4->addSpacing(space);
-    row_4->addStretch(1);
+    layout->addWidget(new QLabel(tr("Data column:")), 3, 2);
+    layout->addWidget(m_dataColumnSpinBox, 3, 3);
 
     // Lines row
     m_startLineSpinBox = new QSpinBox;
     m_startLineSpinBox->setMinimum(1);
     m_startLineSpinBox->setWhatsThis(tr("The line number at which to start reading the data"));
+    layout->addWidget(new QLabel(tr("Data:   Start line:")), 4, 0);
+    layout->addWidget(m_startLineSpinBox, 4, 1);
 
     m_stopLineSpinBox = new QSpinBox;
     m_stopLineSpinBox->setWhatsThis(tr("The line number to stop reading the data. If set to 0 the entire file is processed."));
+    layout->addWidget(new QLabel(tr("Stop line:")), 4, 2);
+    layout->addWidget( m_stopLineSpinBox, 4, 3 );
 
     m_positionLineEdit = new QLineEdit;
     m_positionLineEdit->setFixedWidth(40);
     m_positionLineEdit->setWhatsThis(tr("Current line number"));
-
-    QPushButton * refreshButton = new QPushButton(tr("Refresh"));
-    refreshButton->setWhatsThis(tr("Refresh the colorization of the file preview."));
-
-    QHBoxLayout * row_5 = new QHBoxLayout;
-    row_5->addWidget(new QLabel(tr("Data:   Start line:")));
-    row_5->addWidget(m_startLineSpinBox);
-    row_5->addSpacing(space);
-    row_5->addWidget(new QLabel(tr("Stop line:")));
-    row_5->addWidget(m_stopLineSpinBox);
-    row_5->addSpacing(space);
-    row_5->addWidget(new QLabel(tr("Current Line:")));
-    row_5->addWidget(m_positionLineEdit);
-    row_5->addStretch(1);
-    row_5->addWidget(refreshButton);
+    layout->addWidget(new QLabel(tr("Current Line:")), 4, 4);
+    layout->addWidget( m_positionLineEdit, 4, 5);
 
     // Text edit
     m_textEdit = new QTextEdit;
@@ -147,71 +137,44 @@ void RecordedMotionDialog::setup()
     m_textEdit->setLineWrapMode(QTextEdit::NoWrap);
     m_textEdit->setReadOnly(true);
     m_textEdit->setFontFamily("Courier New");
-
-    // Button Row
-    QPushButton * helpPushButton = new QPushButton(tr("&Help"));
-    QPushButton * plotPushButton = new QPushButton(tr("&Plot"));
-    QPushButton * cancelPushButton = new QPushButton(tr("&Cancel"));
-    QPushButton * okayPushButton = new QPushButton(tr("&Ok"));
-    okayPushButton->setDefault(true);
-
-    QHBoxLayout * buttonRow = new QHBoxLayout;
-    buttonRow->addWidget(helpPushButton);
-    buttonRow->addStretch(1);
-    buttonRow->addWidget(plotPushButton);
-    buttonRow->addSpacing(space);
-    buttonRow->addWidget(cancelPushButton);
-    buttonRow->addWidget(okayPushButton);
-
-    // For the layout
-    QVBoxLayout * layout = new QVBoxLayout;
-
-    layout->addItem(row_1);
-    layout->addItem(row_2);
-    layout->addItem(row_3);
-    layout->addItem(row_4);
-    layout->addItem(row_5);
-    layout->addWidget(m_textEdit);
-    layout->addItem(buttonRow);
-    setLayout(layout);
-
-    // Connections
-    connect(filePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
-    connect(refreshButton, SIGNAL(clicked()), this, SLOT(updateTextEdit()));
-   
-    connect(m_formatComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDataColumn(int)));
-
     connect(m_textEdit, SIGNAL(cursorPositionChanged()), this, SLOT(updatePosition()));
 
-    connect(helpPushButton, SIGNAL(clicked()), this, SLOT(help()));
+    layout->addWidget( m_textEdit, 5, 0, 1, 7 );
+
+    // Button Row
+    QDialogButtonBox * buttonBox = new QDialogButtonBox( QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Help, Qt::Horizontal, this);
+    connect( buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
+    connect( buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
+    connect( buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+    QPushButton * plotPushButton = new QPushButton(tr("&Plot"));
+    plotPushButton->setWhatsThis(tr("Plot the acceleration time series."));
     connect(plotPushButton, SIGNAL(clicked()), this, SLOT(plot()));
-    connect(okayPushButton, SIGNAL(clicked()), this, SLOT(tryAccept()));
-	connect(cancelPushButton, SIGNAL(clicked()), this, SLOT(reject()));
+    buttonBox->addButton( plotPushButton, QDialogButtonBox::ActionRole );
+    
+    QPushButton * refreshButton = new QPushButton(tr("Refresh"));
+    refreshButton->setWhatsThis(tr("Refresh the colorization of the file preview."));
+    connect(refreshButton, SIGNAL(clicked()), this, SLOT(updateTextEdit()));
+    buttonBox->addButton( refreshButton, QDialogButtonBox::ActionRole );
+
+    layout->addWidget( buttonBox, 6, 0, 1, 7 );
+
+    setLayout(layout);
 }
 
 void RecordedMotionDialog::openFile()
 {
     QSettings settings;
     // Prompt for a fileName
-    QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setViewMode(QFileDialog::Detail);
+    QString fileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Select time series..."),
+            settings.value("motionDirectory",
+                           QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString());
 
-    if (settings.contains("mainwindow-motion-dialog"))
-        dialog.restoreState( settings.value("mainwindow-motion-dialog").toByteArray() );
-
-    if (dialog.exec()) {
-        QString fileName = dialog.selectedFiles().at(0);
-        // Save the state
-        settings.setValue( "mainwindow-motion-dialog", dialog.saveState() );
-
-        // Set the starting line for AT2 files if the start line hasn't been changed.
-        if (fileName.endsWith(".AT2", Qt::CaseInsensitive) && m_startLineSpinBox->value() == 1)
-            m_startLineSpinBox->setValue(5);
-
-        // Save the working directory
+    if (!fileName.isEmpty()) {
         QFileInfo fileInfo = QFileInfo(fileName);
-        m_workingDir = fileInfo.filePath();
+        settings.setValue("motionDirectory", fileInfo.filePath());
 
         // Read the file
         QFile data(fileName);
@@ -222,6 +185,27 @@ void RecordedMotionDialog::openFile()
         } else {
             qCritical("Error opening file: %s", qPrintable(fileName));
             return;
+        }
+        
+        // Set the starting line for AT2 files if the start line hasn't been changed.
+        if (fileName.endsWith(".AT2", Qt::CaseInsensitive)){
+            QTextCursor cursor(m_textEdit->document());
+            // Second line has the properties
+            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, 1);
+            m_descripLineEdit->setText(cursor.block().text());
+           
+            // 4th line has the time step and point count
+            cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, 2);
+            QStringList parts = cursor.block().text().split(QRegExp("\\s+"));
+
+            m_countLineEdit->setText(parts.at(0));
+            m_timeStepLineEdit->setText(parts.at(1));
+
+            // Start line should be 5
+            m_startLineSpinBox->setValue(5);
+
+            // Color the text edit
+            updateTextEdit();
         }
     
         // Update the text field

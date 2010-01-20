@@ -22,6 +22,7 @@
 #ifndef RESPONSE_LOCATION_H_
 #define RESPONSE_LOCATION_H_
 
+#include "Dimension.h"
 #include "Output.h"
 #include "Motion.h"
 #include "EquivLinearCalc.h"
@@ -39,7 +40,8 @@ class ResponseLocation
 
         bool isBaselineCorrected() const;
         void setBaselineCorrected(bool baselineCorrected);
-        
+
+        Output * fourierSpec();
         Output * respSpec();
         Output * accelTs();
         Output * velTs();
@@ -50,6 +52,9 @@ class ResponseLocation
         //! Check if any of the time series are enabled
         bool needsTime() const;
 
+        //! Check if the raw frequency is required
+        bool needsRawFreq() const;
+
         //! Check if the response spectrum is enabled
         bool needsPeriod() const;
 
@@ -57,9 +62,12 @@ class ResponseLocation
         void clear();
 
         //! Save the results
-        void saveResults( const EquivLinearCalc & calc, const QVector<double> & period, double damping );
+        void saveResults( const EquivLinearCalc * calc, const QVector<double> & freq, const QVector<double> & period, double damping );
         
-        QMap<QString, QVariant> toMap(bool saveData = false) const;
+        //! Remove the last result
+        void removeLast();
+        
+        QMap<QString, QVariant> toMap() const;
 		void fromMap(const QMap<QString, QVariant> & map);
 
     protected:
@@ -79,6 +87,9 @@ class ResponseLocation
         /*! @name Responses
          */
         //@{
+        //! Fourier spectrum of the acceleration
+        Output * m_fourierSpec;
+
         //! Acceleration response spectrum
         Output * m_respSpec;
         

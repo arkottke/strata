@@ -23,6 +23,8 @@
 #include <QtAlgorithms>
 #include <QApplication>
 #include <QClipboard>
+#include <QDomDocument>
+#include <QDomElement>
 #include <QDebug>
 
 MyTableView::MyTableView( QWidget * parent)
@@ -30,8 +32,8 @@ MyTableView::MyTableView( QWidget * parent)
 {
     // Create the context menu
     m_contextMenu = new QMenu;
-    m_contextMenu->addAction(tr("Copy"), this, SLOT(copy()), QKeySequence(tr("Ctrl+c")));
-    m_contextMenu->addAction(tr("Paste"), this, SLOT(paste()), QKeySequence(tr("Ctrl+v")));
+    m_contextMenu->addAction( QIcon(":/images/edit-copy.svg"), tr("Copy"), this, SLOT(copy()), QKeySequence(tr("Ctrl+c")));
+    m_contextMenu->addAction( QIcon(":/images/edit-paste.svg"), tr("Paste"), this, SLOT(paste()), QKeySequence(tr("Ctrl+v")));
 }
 
 void MyTableView::copy()
@@ -64,12 +66,51 @@ void MyTableView::copy()
 
 void MyTableView::paste()
 {
-    // Grab the text from the clipboard and split it into lines
-    QStringList rows = QApplication::clipboard()->text().split(QRegExp("\\n"), QString::SkipEmptyParts);
+    QList<QList<QString> > data;
+    
+    bool hasHtml = QApplication::clipboard()->mimeData()->hasHtml();
+    bool htmlValid = true;
 
-    // Return if the row list is empty
-    if (rows.size() == 0) 
-        return;
+    if ( hasHtml ) {
+
+        QDomDocument doc;
+        if (doc.setContent(QApplication::clipboard()->mimeData()->html())) {
+
+        // All rows of the table
+        QDomNodeList nodeList = doc.elementsByTagName("tr");
+
+        if (nodeList.isEmpty())
+            return;
+
+        for ( int i = 0; i < nodeList.size(); ++i ) {
+            data << QStringList();
+
+            // All columns of the table
+            QDomElement e = nodeList.at(i).firstChildElement("td");
+
+            // Grab the data for each of the columns
+            while (!e.isNull()) {
+                data.last() << e.text();
+                e = e.nextSiblingElement();
+            }
+        }
+        } else {
+            htmlValid = false;
+        } 
+    }
+
+    if ( !hasHtml || !htmlValid )  {
+        // Grab the text from the clipboard and split it into lines
+        QStringList rows = QApplication::clipboard()->text().split(QRegExp("\\n"), QString::SkipEmptyParts);
+
+        // Return if the row list is empty
+        if (rows.size() == 0) 
+            return;
+
+        foreach( QString row, rows ) {
+            data << row.split(QRegExp("[\t,;]"), QString::SkipEmptyParts);
+        }
+    }
 
     // Get the currently selected items
     QModelIndex initial = currentIndex();
@@ -78,33 +119,32 @@ void MyTableView::paste()
     // current index and the required number of rows.
     if ( initial.row() < 0 ) {
         // No row selected
-        model()->insertRows(model()->rowCount(), rows.size() - model()->rowCount());
+        model()->insertRows(model()->rowCount(), data.size() - model()->rowCount());
         initial = model()->index(0,0);
-    } else if (model()->rowCount() < initial.row() + rows.size())
-        model()->insertRows(model()->rowCount(), initial.row() + rows.size() - model()->rowCount());
+    } else if (model()->rowCount() < initial.row() + data.size())
+        model()->insertRows(model()->rowCount(), initial.row() + data.size() - model()->rowCount());
 
     // Stop the model from updating the view
     model()->blockSignals(true);
     // Set the data in the rows
-    for( int i = 0; i < rows.size(); ++i )
+    for( int i = 0; i < data.size(); ++i )
     {
-        // Split the row text into cells based on tabs
-        QStringList cell = rows.at(i).split(QRegExp("\\t"), QString::SkipEmptyParts);
-
-        for( int j = 0; j < cell.size(); ++j )
+        for( int j = 0; j < data.at(i).size(); ++j )
         {
             //Skip if the string is empty
-            if ( cell.at(j) != "" )
-                model()->setData( initial.sibling( initial.row() + i, initial.column() + j),
-                        cell.at(j).trimmed(), Qt::EditRole);
+            model()->setData( initial.sibling( initial.row() + i, initial.column() + j),
+                    data.at(i).at(j), Qt::EditRole);
         }
     }
     // Re-enable the model to send signals
     model()->blockSignals(false);
 
-    // Signal that the data needs to be changed
+    // Signal that the data has changed
     dataChanged( initial.sibling( initial.row(), initial.column() ), 
-            initial.sibling( initial.row() + rows.size(), model()->columnCount()));
+            initial.sibling( initial.row() + data.size(), model()->columnCount()));
+
+    resizeColumnsToContents();
+    resizeRowsToContents();
 
     emit dataPasted();
 }

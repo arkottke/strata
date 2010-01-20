@@ -21,41 +21,38 @@
 
 #include "TableGroupBox.h"
 
-#include <QHBoxLayout>
-#include <QMetaObject>
 #include <QDebug>
 
-TableGroupBox::TableGroupBox( QAbstractTableModel * model, const QString & title, QWidget * parent)
-    :QGroupBox(title, parent), m_model(model)
+TableGroupBox::TableGroupBox( MyAbstractTableModel * model, const QString & title, QWidget * parent)
+    : QGroupBox(title, parent), m_model(model)
 {
-    m_editable = true;
+    m_readOnly = true;
     m_lastRowFixed = false;
     // Create the buttons
-    m_addButton = new QPushButton(tr("Add"));
+    m_addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
     m_insertButton = new QPushButton(tr("Insert"));
-    m_removeButton = new QPushButton(tr("Remove"));
+    m_removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
     // Disable the insert and remove buttons
     m_removeButton->setEnabled(false);
     m_insertButton->setEnabled(false);
     // Create the button row
-    QHBoxLayout * buttonRow = new QHBoxLayout;
-    buttonRow->addWidget(m_addButton);
-    buttonRow->addSpacing(5);
-    buttonRow->addWidget(m_insertButton);
-    buttonRow->addSpacing(5);
-    buttonRow->addWidget(m_removeButton);
-    buttonRow->addStretch(1);
+    m_buttonRow = new QHBoxLayout;
+    m_buttonRow->addWidget(m_addButton);
+    m_buttonRow->addSpacing(5);
+    m_buttonRow->addWidget(m_insertButton);
+    m_buttonRow->addSpacing(5);
+    m_buttonRow->addWidget(m_removeButton);
+    m_buttonRow->addStretch(1);
 
     // Create the tableview
     m_table = new MyTableView;
     m_table->setModel(m_model);
     //m_table->setEditTriggers(QAbstractItemView::AllEditTriggers);
     m_table->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    m_table->resizeColumnsToContents();
 
     // Create the layout of the group box
     QVBoxLayout * layout = new QVBoxLayout;
-    layout->addItem(buttonRow);
+    layout->addItem(m_buttonRow);
     layout->addWidget(m_table);
 
     setLayout(layout);
@@ -66,8 +63,14 @@ TableGroupBox::TableGroupBox( QAbstractTableModel * model, const QString & title
     connect(m_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
     //connect(m_table->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(cellSelected(QModelIndex,QModelIndex)));
     connect(m_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(cellSelected()));
-    connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SIGNAL(dataChanged()));
-    connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_table, SLOT(resizeColumnsToContents()));
+
+    connect(m_table, SIGNAL(dataPasted()), SIGNAL(dataChanged()));
+    connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), SIGNAL(dataChanged()));
+    connect(m_table->model(), SIGNAL(rowsRemoved(QModelIndex,int,int)), SIGNAL(dataChanged()));
+    connect(m_table->model(), SIGNAL(rowsInserted(QModelIndex,int,int)), SIGNAL(dataChanged()));
+
+    //connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_table, SLOT(resizeColumnsToContents()));
+    //connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_table, SLOT(resizeRowsToContents()));
 }
 
 MyTableView * TableGroupBox::table()
@@ -80,9 +83,9 @@ QAbstractTableModel * TableGroupBox::model()
     return m_model;
 }
 
-bool TableGroupBox::editable() const
+bool TableGroupBox::readOnly() const
 {
-    return m_editable;
+    return m_readOnly;
 }
 
 bool TableGroupBox::lastRowFixed() const
@@ -93,6 +96,14 @@ bool TableGroupBox::lastRowFixed() const
 void TableGroupBox::setLastRowFixed(bool lastRowFixed)
 {
     m_lastRowFixed = lastRowFixed;
+}
+
+void TableGroupBox::addButton(QPushButton * pushButton )
+{
+    m_addedButtons << pushButton;
+
+    pushButton->setParent(this);
+    m_buttonRow->addWidget(pushButton);
 }
 
 void TableGroupBox::addRow()
@@ -154,13 +165,17 @@ void TableGroupBox::cellSelected()//const QModelIndex & /* current */, const QMo
     }
 }
 
-void TableGroupBox::setEditable(bool editable)
+void TableGroupBox::setReadOnly(bool readOnly)
 { 
-    m_editable = editable;
+    m_readOnly = readOnly;
     // Hide the buttons
-    m_addButton->setVisible(editable);
-    m_insertButton->setVisible(editable);
-    m_removeButton->setVisible(editable);
-    // Set the table is un-editable
-    QMetaObject::invokeMethod( m_model, "setEditable", Q_ARG( bool, editable) );
+    m_addButton->setHidden(readOnly);
+    m_insertButton->setHidden(readOnly);
+    m_removeButton->setHidden(readOnly);
+    
+    for (int i = 0; i < m_addedButtons.size(); ++i) {
+        m_addedButtons.at(i)->setHidden(readOnly); 
+    }
+    // Set the table is readOnly
+    m_model->setReadOnly(readOnly);
 }

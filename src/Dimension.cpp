@@ -24,7 +24,8 @@
 #include <QDebug>
 #include <cmath>
 
-Dimension::Dimension()
+Dimension::Dimension(QObject * parent)
+        : QObject(parent)
 {
 }
 
@@ -44,6 +45,10 @@ double Dimension::min() const
 
 void Dimension::setMin(double min)
 {
+    if ( m_min != min ) {
+        emit wasModified();
+    }
+
     m_min = min;
 }
 
@@ -54,17 +59,30 @@ double Dimension::max() const
 
 void Dimension::setMax(double max)
 {
+    if ( m_max != max ) {
+        emit wasModified();
+    }
+    
     m_max = max;
 }
 
-int Dimension::npts() const
+int Dimension::size() const
 {
-    return m_npts;
+    return m_size;
 }
 
-void Dimension::setNpts(int npts)
+double Dimension::at(int i) const
 {
-    m_npts = npts;
+    return m_data.at(i);
+}
+
+void Dimension::setSize(int size)
+{
+    if ( m_size != size ) {
+        emit wasModified();
+    }
+
+    m_size = size;
 }
 
 Dimension::Spacing Dimension::spacing() const
@@ -74,7 +92,16 @@ Dimension::Spacing Dimension::spacing() const
 
 void Dimension::setSpacing(Dimension::Spacing spacing)
 {
+    if ( m_spacing != spacing ) {
+        emit wasModified();
+    }
+
     m_spacing = spacing;
+}
+
+void Dimension::setSpacing(int spacing)
+{
+    setSpacing((Dimension::Spacing)spacing);
 }
 
 QVector<double> & Dimension::data()
@@ -98,74 +125,73 @@ void Dimension::init( bool hasMin, double minValue, bool hasMax, double maxValue
         maxValue = m_max;
 
     if ( m_spacing == Linear )
-        m_data = linSpace( minValue, maxValue, m_npts);
+        m_data = linSpace( minValue, maxValue, m_size);
     else if ( m_spacing == Log )
-        m_data = logSpace( minValue, maxValue, m_npts);
+        m_data = logSpace( minValue, maxValue, m_size);
 }
 
 QVector<double> Dimension::linSpace( double min, double max, int size )
 {
-	QVector<double> vec(size);
+    QVector<double> vec(size);
 
-	double delta = (max-min)/(size-1);
+    double delta = (max-min)/double(size-1);
 
-	for (int i = 0; i < size; ++i)
-		vec[i] = min + i * delta;
+    for (int i = 0; i < size; ++i) {
+        vec[i] = min + i * delta;
+    }
 
-	return vec;
+    return vec;
 }
 
 QVector<double> Dimension::logSpace( double min, double max, int size )
 {
-	QVector<double> vec(size);
+    QVector<double> vec(size);
 
-	double logMin = log10( min );
-	double logMax = log10( max );
+    double logMin = log10( min );
+    double logMax = log10( max );
 
-	double delta = pow(10, (logMax-logMin)/(size-1));
+    double delta = pow(10, (logMax-logMin)/(size-1));
 
     vec[0] = min;
-	for (int i = 1; i < size; ++i)
-		vec[i] = delta * vec[i-1];
+    for (int i = 1; i < size; ++i)
+        vec[i] = delta * vec[i-1];
 
-	return vec;
+    return vec;
 }
-        
+
 QMap<QString, QVariant> Dimension::toMap(bool saveData) const
 {
+    Q_UNUSED(saveData);
+
     QMap<QString, QVariant> map;
 
     map.insert("min", m_min);
     map.insert("max", m_max);
-    map.insert("npts", m_npts);
+    map.insert("size", m_size);
     map.insert("spacing", m_spacing);
-
-    if (saveData) {
-        QList<QVariant> list;
-
-        for (int i = 0; i < m_data.size(); ++i)
-            list << m_data.at(i);
-
-        map.insert("data", list);
-    }
 
     return map;
 }
 
-
 void Dimension::fromMap(const QMap<QString, QVariant> & map)
 {
-	m_min = map.value("min").toDouble();
-	m_max = map.value("max").toDouble();
-	m_npts = map.value("npts").toInt();
-	m_spacing = (Spacing)map.value("spacing").toInt();
+    m_min = map.value("min").toDouble();
+    m_max = map.value("max").toDouble();
 
-    if (map.contains("data")) {
-        QList<QVariant> list = map.value("data").toList();
+    if (map.contains("npts"))
+        m_size = map.value("npts").toInt();
+    else
+        m_size = map.value("size").toInt();
 
-        m_data.resize(list.size()); 
+    m_spacing = (Spacing)map.value("spacing").toInt();
 
-        for (int i = 0; i < m_data.size(); ++i)
-            m_data[i] = list.at(i).toDouble();
-    } 
+    switch(m_spacing)
+    {
+    case Linear:
+        m_data = linSpace(m_min, m_max, m_size);
+        break;
+    case Log:
+        m_data = logSpace(m_min, m_max, m_size);
+        break;
+    }
 }

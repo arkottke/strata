@@ -27,12 +27,13 @@
 
 #include <QWidget>
 #include <QGroupBox>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QTableView>
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
+
+//! Widget for the Soil Profile Page.
 
 class SoilProfilePage : public QWidget
 {
@@ -41,12 +42,12 @@ class SoilProfilePage : public QWidget
     public:
         SoilProfilePage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
-        void setModel( SiteResponseModel * model );
-
     public slots:
         void setIsVaried(bool);
         void setVelocityIsVaried(bool);
         void setIsLayerSpecific(bool);
+
+        void setReadOnly(bool);
 
         void updateStdevModel(int model);
         void updateCorrelModel(int model);
@@ -54,13 +55,9 @@ class SoilProfilePage : public QWidget
         void updateBedrockModel(int model);
 
         void load();
-        void save();
 
     protected slots:
         void updateUnits();
-
-    signals:
-        void hasChanged();
 
     private:
         SiteResponseModel * m_model;
@@ -77,24 +74,24 @@ class SoilProfilePage : public QWidget
         QComboBox * m_correlModelComboBox;
         QCheckBox * m_layerSpecificCheckBox;
         QGroupBox * m_correlGroupBox;
-        QLineEdit * m_stdevLineEdit;
-        QLineEdit * m_correlInitialLineEdit;
-        QLineEdit * m_correlFinalLineEdit;
-        QLineEdit * m_correlDeltaLineEdit;
-        QLineEdit * m_depthInterceptLineEdit;
-        QLineEdit * m_exponentLineEdit;
+        QDoubleSpinBox * m_stdevSpinBox;
+        QDoubleSpinBox * m_correlInitialSpinBox;
+        QDoubleSpinBox * m_correlFinalSpinBox;
+        QDoubleSpinBox * m_correlDeltaSpinBox;
+        QDoubleSpinBox * m_depthInterceptSpinBox;
+        QDoubleSpinBox * m_exponentSpinBox;
         
         QCheckBox * m_isLayeringVariedCheckBox;
         QGroupBox * m_layerVariationGroupBox;
         QComboBox * m_layeringModelComboBox;
-        QLineEdit * m_layeringCoeffLineEdit;
-        QLineEdit * m_layeringInitialLineEdit;
-        QLineEdit * m_layeringExponentLineEdit;
+        QDoubleSpinBox * m_layeringCoeffSpinBox;
+        QDoubleSpinBox * m_layeringInitialSpinBox;
+        QDoubleSpinBox * m_layeringExponentSpinBox;
 
         QCheckBox * m_isBedrockDepthVariedCheckBox;
         QGroupBox * m_bedrockDepthGroupBox;
         QComboBox * m_bedrockModelComboBox;
-        QLineEdit * m_bedrockStdevLineEdit;
+        QDoubleSpinBox * m_bedrockStdevSpinBox;
         QCheckBox * m_bedrockDepthMinCheckBox;
         QDoubleSpinBox * m_bedrockDepthMinSpinBox;
         QCheckBox * m_bedrockDepthMaxCheckBox;

@@ -66,7 +66,7 @@ AxisOptions::AxisOptions( const QString & title, QWidget * parent )
     connect( m_autoCheckBox, SIGNAL(toggled(bool)), m_minLineEdit, SLOT(setDisabled(bool)));
     connect( m_autoCheckBox, SIGNAL(toggled(bool)), m_maxLineEdit, SLOT(setDisabled(bool)));
 
-    this->setLayout(layout);
+    setLayout(layout);
 }
 
 void AxisOptions::setDefaults( const QwtScaleEngine * scaleEngine, bool autoScale, const QwtScaleDiv * scaleDiv )
@@ -81,8 +81,8 @@ void AxisOptions::setDefaults( const QwtScaleEngine * scaleEngine, bool autoScal
     else
         m_autoCheckBox->setChecked(false);
 
-    m_minLineEdit->setText( QString::number( scaleDiv->lBound() ) );
-    m_maxLineEdit->setText( QString::number( scaleDiv->hBound() ) );
+    m_minLineEdit->setText( QString::number( scaleDiv->lowerBound() ) );
+    m_maxLineEdit->setText( QString::number( scaleDiv->upperBound() ) );
 }
 
 bool AxisOptions::linearSpacing() const
@@ -139,7 +139,7 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
 
     layout->addWidget( buttonBox, 2, 0 );
 
-    this->setLayout(layout);
+    setLayout(layout);
 }
 
 void ConfigurePlotDialog::tryAccept()

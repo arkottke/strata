@@ -20,9 +20,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "RockLayer.h"
+#include "Units.h"
+
 #include <QDebug>
 
-RockLayer::RockLayer()
+RockLayer::RockLayer(QObject * parent)
+    : VelocityLayer(parent)
 {
     reset();
 }
@@ -37,11 +40,6 @@ void RockLayer::reset()
     m_untWt = 22;
 }
 
-void RockLayer::setUnits(const Units * units)
-{
-    m_units = units;
-}
-
 double RockLayer::untWt() const
 {
     return m_untWt;
@@ -49,12 +47,16 @@ double RockLayer::untWt() const
 
 void RockLayer::setUntWt(double untWt)
 {
+    if ( m_untWt != untWt ) {
+        emit wasModified();
+    }
+
     m_untWt = untWt;
 }
 
 double RockLayer::density() const
 {
-    return m_untWt / m_units->gravity();
+    return m_untWt / Units::instance()->gravity();
 }
 
 QString RockLayer::toString() const
@@ -79,6 +81,10 @@ double RockLayer::avgDamping() const
 
 void RockLayer::setAvgDamping( double damping )
 {
+    if ( m_avgDamping != damping ) {
+        emit wasModified();
+    }
+
     m_damping = damping;
     m_avgDamping = damping;
 }

@@ -25,25 +25,26 @@
 #include "SoilLayer.h"
 #include "RockLayer.h"
 #include "Distribution.h"
-#include "Units.h"
 
 #include <gsl/gsl_rng.h>
 
+#include <QObject>
 #include <QStringList>
 #include <QString>
 #include <QMap>
 #include <QVariant>
 
-//! Variation of the layer thickness and shear-wave velocity
-/*!
+/*! Variation of the layer thickness and shear-wave velocity.
  * The variation of the layer thickness and the shear-wave velocity of these
  * layers is varied using the Toro (1995) model.
  */
 
-class ProfileVariation
+class ProfileVariation : public QObject
 {
+    Q_OBJECT
+
     public:
-        ProfileVariation();
+        ProfileVariation( QObject * parent  = 0);
 
         enum VelocityModel{ Custom, GeoMatrix_AB, GeoMatrix_CD, USGS_AB, USGS_CD, USGS_A, USGS_B, USGS_C, USGS_D };
 
@@ -57,62 +58,31 @@ class ProfileVariation
         
         //! Reset the object to the default values
         void reset();
-        
-        //! Units system
-        void setUnits( const Units * units);
 
         bool enabled() const;
-        void setEnabled(bool enabled);
-
         bool isVelocityVaried() const;
-        void setVaryVelocity(bool isVelocityVaried);
-
         bool isLayeringVaried() const;
-        void setVaryLayering(bool isLayeringVaried);
-        
         bool isBedrockDepthVaried() const;
-        void setVaryBedrockDepth(bool bedrockDepth);
-
         VelocityModel stdevModel() const;
         void setStdevModel(VelocityModel model);
-
         bool stdevIsLayerSpecific() const;
-        void setStdevIsLayerSpecific(bool stdevIsLayerSpecific);
-
         double stdev() const;
-        void setStdev(double stdev);
-
         VelocityModel correlModel() const;
         void setCorrelModel(VelocityModel model);
-
         double correlInitial() const;
-        void setCorrelInitial(double correlInitial);
-
         double correlFinal() const;
-        void setCorrelFinal(double correlFinal);
-
         double correlDelta() const;
-        void setCorrelDelta(double correlDelta);
-
         double correlIntercept() const;
-        void setCorrelIntercept(double correlIntercept);
-
         double correlExponent() const;
-        void setCorrelExponent(double correlExponent);
 
         LayeringModel layeringModel() const;
         void setLayeringModel(LayeringModel model);
 
         double layeringCoeff() const;
-        void setLayeringCoeff(double layeringCoeff);
-
         double layeringInitial() const;
-        void setLayeringInitial(double layeringInitial);
-        
         double layeringExponent() const;
-        void setLayeringExponent(double layeringExponent);
 
-        Distribution & bedrockDepth();
+        Distribution * bedrockDepth();
 
         void setRandomNumberGenerator(gsl_rng * rng);
 
@@ -125,12 +95,33 @@ class ProfileVariation
 		QMap<QString, QVariant> toMap() const;
 		void fromMap( const QMap<QString, QVariant> & map );
 
+    public slots:
+        void setEnabled(bool enabled);
+        void setVaryVelocity(bool isVelocityVaried);
+        void setVaryLayering(bool isLayeringVaried);
+        void setVaryBedrockDepth(bool bedrockDepth);
+        void setStdevIsLayerSpecific(bool stdevIsLayerSpecific);
+        void setStdev(double stdev);
+        void setStdevModel(int model);
+        void setCorrelModel(int model);
+        void setCorrelInitial(double correlInitial);
+        void setCorrelFinal(double correlFinal);
+        void setCorrelDelta(double correlDelta);
+        void setCorrelIntercept(double correlIntercept);
+        void setCorrelExponent(double correlExponent);
+        void setLayeringModel(int model);
+        void setLayeringCoeff(double layeringCoeff);
+        void setLayeringInitial(double layeringInitial);
+        void setLayeringExponent(double layeringExponent);
+
+    signals: 
+        void wasModified();
+
     private:
+        double depthCorrel( double depth ) const;
+
         //! Enable variation of the profile
         bool m_enabled;
-        
-        //! Units system 
-        const Units * m_units;
 
         /*
          * Switches for controlling what is varied
@@ -200,7 +191,7 @@ class ProfileVariation
         //@}
 
         //! Variation of the bedrock layer
-        Distribution m_bedrockDepth;
+        Distribution * m_bedrockDepth;
        
         //! Random number generator
         gsl_rng * m_rng;

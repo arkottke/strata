@@ -33,7 +33,7 @@ class Units : public QObject
     Q_OBJECT
 
     public:
-        Units();
+        static Units * instance();
 
         //! System of the units
 		enum System { 
@@ -52,6 +52,15 @@ class Units : public QObject
         //! The gravity in ft/s/s or m/s/s
         double gravity() const;
 
+        //! The unit weight of water in lb/ft^3 or kN/m^3
+        double waterUntWt() const;
+
+        //! Convert to Meters
+        double toMeters() const;
+        
+        //! Convert from appropriate pressure to atm
+        double toAtm() const;
+
         //! Time series conversion factor
         double tsConv() const;
 
@@ -64,10 +73,10 @@ class Units : public QObject
         //! Volume label
         QString vol() const;
         
-        //! Displacement time series label
+        //! Displacement time series label -- in or cm
         QString dispTs() const;
 
-        //! Velocity time series label
+        //! Velocity time series label -- in/s or cm/s
         QString velTs() const;
 
         //! Acceleration label
@@ -94,7 +103,11 @@ class Units : public QObject
     signals:
         void systemChanged();
 
-    private:
+    protected:
+        Units(QObject * parent = 0);
+
+        static Units * m_instance;
+        
         System m_system;
 };
 #endif

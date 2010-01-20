@@ -23,9 +23,9 @@
 #include <QDebug>
 
 OutputTableModel::OutputTableModel( SiteResponseOutput * model, QObject *parent )
-	: QAbstractTableModel(parent), m_model(NULL), m_selectedOutput(NULL)
+        : QAbstractTableModel(parent), m_model(model), m_selectedOutput(NULL)
 {
-    setModel(model);
+    connect( m_model, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
 }
 
 int OutputTableModel::rowCount ( const QModelIndex& /* index */ ) const
@@ -42,61 +42,65 @@ int OutputTableModel::rowCount ( const QModelIndex& /* index */ ) const
 
 int OutputTableModel::columnCount ( const QModelIndex& /* parent */ ) const
 {
-	return 2;
+    return 2;
 }
 
 QVariant OutputTableModel::data ( const QModelIndex &index, int role ) const
 {
-	if ( !m_model || !m_selectedOutput || index.parent()!=QModelIndex())
-		return QVariant();
+    if ( !m_model || !m_selectedOutput || index.parent()!=QModelIndex())
+        return QVariant();
 
-	if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
-	{
-		switch (index.column())
-		{
-            case 0:
-				// Site number
-                if ( m_selectedOutput->isMotionIndependent() ) 
-                    return QVariant( 1 + index.row() );
-                else if ( m_selectedOutput->isSiteIndependent() )
-                    return QVariant("---");
-                else
-                    return QVariant( 1 + index.row() % m_model->siteCount() );
-            case 1:
-                // Motion number
-                if ( m_selectedOutput->isMotionIndependent() ) 
-                    return QVariant("---");
-                else if ( m_selectedOutput->isSiteIndependent() )
-                    return QVariant( m_model->motionNames().at(index.row()) );
-                else
-                return QVariant( m_model->motionNames().at(index.row() % m_model->motionCount()) );
-			default:
-				return QVariant();
-		}
-	} else if ( index.column() == 0 && role == Qt::CheckStateRole )
+    if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
+    {
+        switch (index.column())
+        {
+        case 0:
+            // Site number
+            if ( m_selectedOutput->isMotionIndependent() ) {
+                return 1 + index.row();
+            } else if ( m_selectedOutput->isSiteIndependent() ) {
+                return "---";
+            } else {
+                return 1 + index.row() / m_model->motionCount();
+            }
+        case 1:
+            // Motion number
+            if ( m_selectedOutput->isMotionIndependent() ) {
+                return "---";
+            } else if ( m_selectedOutput->isSiteIndependent() ) {
+                return m_model->motionNames().at(index.row());
+            } else {
+                return m_model->motionNames().at(index.row() % m_model->motionCount());
+            }
+                        default:
+            return QVariant();
+        }
+    } else if ( index.column() == 0 && role == Qt::CheckStateRole )
     {
         bool enabled;
 
-        if ( m_selectedOutput->isMotionIndependent() ) 
+        if ( m_selectedOutput->isMotionIndependent() ) {
             enabled = m_model->siteEnabledAt( index.row() );
-        else if ( m_selectedOutput->isSiteIndependent() )
+        } else if ( m_selectedOutput->isSiteIndependent() ) {
             enabled = m_model->motionEnabledAt( index.row() );
-        else
+        } else {
             enabled = m_model->seriesEnabled().at(index.row());
+        }
 
-        if ( enabled )
+        if ( enabled ) {
             return QVariant( Qt::Checked );
-        else
+        } else {
             return QVariant( Qt::Unchecked );
+        }
     }
-	
-	return QVariant();
+
+    return QVariant();
 }
 
 bool OutputTableModel::setData( const QModelIndex &index, const QVariant &value, int role )
 {
-	if(index.parent()!=QModelIndex())
-		return false;
+    if(index.parent()!=QModelIndex())
+        return false;
 
     if ( index.column() == 0 && role == Qt::CheckStateRole ) {
         if ( m_selectedOutput->isMotionIndependent() ) 
@@ -108,7 +112,7 @@ bool OutputTableModel::setData( const QModelIndex &index, const QVariant &value,
 
         emit enabledChanged();
     } else 
-		return false;
+        return false;
     
     emit dataChanged(index, index);
 
@@ -117,26 +121,26 @@ bool OutputTableModel::setData( const QModelIndex &index, const QVariant &value,
 
 QVariant OutputTableModel::headerData( int section, Qt::Orientation orientation, int role ) const
 {
-	if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
-		return QVariant();
+    if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
+        return QVariant();
 
-	switch( orientation )
-	{
-		case Qt::Horizontal:
-			switch (section)
-			{
+    switch( orientation )
+    {
+                case Qt::Horizontal:
+        switch (section)
+        {
                 case 0:
-                    // Site number
-                    return QVariant(tr("Site Realization"));
+            // Site number
+            return QVariant(tr("Site Realization"));
                 case 1:
-                    // Motion number
-                    return QVariant(tr("Input Motion"));
-			}
-		case Qt::Vertical:
-			return QVariant(section+1);
-		default:
-			return QVariant();
-	}
+            // Motion number
+            return QVariant(tr("Input Motion"));
+        }
+                case Qt::Vertical:
+        return QVariant(section+1);
+                default:
+        return QVariant();
+    }
 }
 
 Qt::ItemFlags OutputTableModel::flags ( const QModelIndex &index ) const
@@ -147,21 +151,6 @@ Qt::ItemFlags OutputTableModel::flags ( const QModelIndex &index ) const
         return QAbstractTableModel::flags(index);
 }
 
-void OutputTableModel::setModel( SiteResponseOutput * model )
-{
-    // Disconnect old connections
-    if (m_model)
-        disconnect(m_model, 0, this, 0);
-
-    // Save the model
-    m_model = model;
-
-    // Reform connections
-    connect( m_model, SIGNAL(enabledChanged()), this, SLOT(updateEnabled()));
-
-    // Signal that the data must be reset
-    reset();
-}
 
 void OutputTableModel::setSelectedOutput( const Output * selectedOutput )
 {

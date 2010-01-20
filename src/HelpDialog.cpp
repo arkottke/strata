@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "HelpDialog.h"
+#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QPushButton>
@@ -28,52 +29,50 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
     : QDialog(parent, f)
 {
     QGridLayout * layout = new QGridLayout;
-    layout->setColumnStretch( 3, 1);
+    layout->setColumnStretch(3,1);
 
-    // Back button
-    QPushButton * backButton = new QPushButton( QIcon(":/images/go-previous.svg"), tr("Back"));
-    backButton->setEnabled(false);
+    QPushButton * backPushButton = new QPushButton(QIcon(":/images/go-previous.svg"), tr("Back"));
+    layout->addWidget( backPushButton, 0, 0);
+    
+    QPushButton * forwardPushButton = new QPushButton(QIcon(":/images/go-next.svg"), tr("Forward"));
+    layout->addWidget( forwardPushButton, 0, 1);
 
-    layout->addWidget( backButton, 0, 0);
+    QPushButton * homePushButton = new QPushButton(QIcon(":/images/go-home.svg"), tr("Home"));
+    layout->addWidget( homePushButton, 0, 2);
 
-    // Foward button
-    QPushButton * forwardButton = new QPushButton( QIcon(":/images/go-next.svg"), tr("Forward"));
-    forwardButton->setEnabled(false);
+    m_urlLineEdit = new QLineEdit;
+    m_urlLineEdit->setReadOnly(true);
+    layout->addWidget( m_urlLineEdit, 0, 3, 1, 2);
 
-    layout->addWidget( forwardButton, 0, 1);
 
-    // Home button
-    QPushButton * homeButton = new QPushButton( QIcon(":/images/go-home.svg"), tr("Home"));
+    // QHBoxLayout * rowLayout = new QHBoxLayout;
+    // Table of contents
+    // QTextBrowser * tocBrowser = new QTextBrowser;
+    // tocBrowser->setSource(QUrl("qrc:/doc/manual2.html"));
+    // tocBrowser->setOpenLinks(false);
 
-    layout->addWidget( homeButton, 0, 2);
+    // rowLayout->addWidget( tocBrowser );
 
-    // Address line edit
-    m_addressLineEdit = new QLineEdit;
-    m_addressLineEdit->setReadOnly(true);
-
-    layout->addWidget( m_addressLineEdit, 0, 3, 1, 2);
-
-    // Browser area
+    // Main view
     m_textBrowser = new QTextBrowser;
-    m_textBrowser->setOpenExternalLinks(true);
+    // m_textBrowser->setSource(QUrl("qrc:/doc/manual3.html"));
     m_textBrowser->setSource(QUrl("qrc:/docs/index.html"));
+    // connect( tocBrowser, SIGNAL(anchorClicked(QUrl)), m_textBrowser, SLOT(setSource(QUrl)));
+    connect( backPushButton, SIGNAL(clicked()), m_textBrowser, SLOT(backward()));
+    connect( m_textBrowser, SIGNAL(backwardAvailable(bool)), backPushButton, SLOT(setEnabled(bool)));
+    connect( forwardPushButton, SIGNAL(clicked()), m_textBrowser, SLOT(forward()));
+    connect( m_textBrowser, SIGNAL(forwardAvailable(bool)), forwardPushButton, SLOT(setEnabled(bool)));
+    connect( homePushButton, SIGNAL(clicked()), m_textBrowser, SLOT(home()));
+    connect( m_textBrowser, SIGNAL(sourceChanged(QUrl)), SLOT(setCurrentAddress(QUrl)));
 
+    // rowLayout->addWidget( m_textBrowser, 1 );
+
+    // layout->addLayout( rowLayout, 1, 0, 1, 5);
     layout->addWidget( m_textBrowser, 1, 0, 1, 5);
 
-    // Close button
-    QPushButton * closeButton = new QPushButton(tr("Close"));
-
-    layout->addWidget( closeButton, 2, 4);
-
-    // Connections
-    connect( backButton, SIGNAL(clicked()), m_textBrowser, SLOT(backward()));
-    connect( forwardButton, SIGNAL(clicked()), m_textBrowser, SLOT(forward()));
-    connect( homeButton, SIGNAL(clicked()), m_textBrowser, SLOT(home()));
-
-    connect( m_textBrowser, SIGNAL(backwardAvailable(bool)), backButton, SLOT(setEnabled(bool)));
-    connect( m_textBrowser, SIGNAL(forwardAvailable(bool)), forwardButton, SLOT(setEnabled(bool)));
-
-    connect( m_textBrowser, SIGNAL(sourceChanged(QUrl)), this, SLOT(setCurrentAddress(QUrl)));
+    QPushButton * closePushButton = new QPushButton(tr("Close"));
+    connect( closePushButton, SIGNAL(clicked()), SLOT(close()));
+    layout->addWidget( closePushButton, 2, 4);
 
     // Add the layout to the dialog
     setLayout(layout);
@@ -85,7 +84,7 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
 
 void HelpDialog::setCurrentAddress(const QUrl & url)
 {
-    m_addressLineEdit->setText(url.toString(QUrl::RemovePath));
+    m_urlLineEdit->setText(url.toString());
 }
 
 void HelpDialog::gotoLink(const QString & link)

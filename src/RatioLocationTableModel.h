@@ -22,10 +22,10 @@
 #ifndef RATIO_LOCATION_TABLE_MODEL_H_
 #define RATIO_LOCATION_TABLE_MODEL_H_
 
+#include "MyAbstractTableModel.h"
 #include "SiteResponseOutput.h"
-#include <QAbstractTableModel>
 
-class RatioLocationTableModel : public QAbstractTableModel
+class RatioLocationTableModel : public MyAbstractTableModel
 {
 	Q_OBJECT
 	
@@ -43,11 +43,8 @@ class RatioLocationTableModel : public QAbstractTableModel
 
 		bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-
-    public slots:
-        void resetModel();
-
-	private:
+	
+    private:
         SiteResponseOutput * m_model;
 };
 #endif

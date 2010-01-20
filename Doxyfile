@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = UTSR
+PROJECT_NAME           = Strata
 PROJECT_NUMBER         = prealpha
 OUTPUT_DIRECTORY       = ./doc
 CREATE_SUBDIRS         = NO

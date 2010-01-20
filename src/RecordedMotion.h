@@ -29,62 +29,74 @@
 
 class RecordedMotion : public Motion
 {
-    public:
-        RecordedMotion();
-        
-        //! Format of the text file
-        enum Format{ 
-            Rows,   /*!< Data is in rows */
-            Columns /*!< Data is in columns */ 
-        };
+    Q_OBJECT
 
-        static QStringList formatList();
-        
-		double max( DurationType duration, const QVector<std::complex<double> > & tf = QVector<std::complex<double> >() ) const;
 
-        QVector<double> computeSa( DurationType durationType, const QVector<double> & period, double damping,
-                const QVector<std::complex<double> > & accelTf = QVector<std::complex<double> >() );
+public:
+    RecordedMotion(const QString & fileName = "", double scale = 1.0, bool * successful = 0);
+    ~RecordedMotion();
 
-        //! Clear the acceleration data
-        void clear();
+    //! Format of the text file
+    enum Format{
+        Rows,   /*!< Data is in rows */
+        Columns /*!< Data is in columns */
+    };
 
-        QString fileName() const;
-        void setFileName(const QString & fileName);
+    static QStringList formatList();
 
-        QString description() const;
-        void setDescription(const QString & description);
+    double max(const QVector<std::complex<double> > & tf = QVector<std::complex<double> >() ) const;
 
-        double timeStep() const;
-        void setTimeStep(double timeStep);
+    QVector<double> computeSa(const QVector<double> & period, double damping,
+                               const QVector<std::complex<double> > & accelTf = QVector<std::complex<double> >() );
 
-        int pointCount() const;
-        void setPointCount(int count); 
+    const QVector<double> absFas( const QVector<std::complex<double> > & tf = QVector<std::complex<double> >()) const;
 
-        double scale() const;
-        void setScale(double scale);
+    //! Clear the acceleration data
+    void clear();
 
-        Format format() const;
-        void setFormat(Format format);
+    QString fileName() const;
+    void setFileName(const QString & fileName);
 
-        int dataColumn() const;
-        void setDataColumn(int column);        
+    QString description() const;
+    void setDescription(const QString & description);
 
-        int startLine() const;
-        void setStartLine(int lines);
-        
-        int stopLine() const;
-        void setStopLine(int lines);
+    double timeStep() const;
+    void setTimeStep(double timeStep);
 
-        double pga() const;
-        void setPga(double pga);        // Allow users to define a PGA and scale the motion appropriately
+    //! Nyquist frequency
+    double nyquistFreq() const;
 
-        bool isEnabled() const;
-        void setIsEnabled(bool isEnabled);
+    //! Frequency step of the FAS
+    double freqStep() const;
 
-        const QVector<double> & time() const;
-        const QVector<double> & accel() const;
+    int pointCount() const;
+    void setPointCount(int count);
 
-        /*! Compute the acceleration, velocity, and displacement time series.
+    double scale() const;
+    void setScale(double scale);
+
+    Format format() const;
+    void setFormat(Format format);
+
+    int dataColumn() const;
+    void setDataColumn(int column);
+
+    int startLine() const;
+    void setStartLine(int lines);
+
+    int stopLine() const;
+    void setStopLine(int lines);
+
+    double pga() const;
+    void setPga(double pga);        // Allow users to define a PGA and scale the motion appropriately
+
+    bool isEnabled() const;
+    void setIsEnabled(bool isEnabled);
+
+    const QVector<double> & time() const;
+    const QVector<double> & accel() const;
+
+    /*! Compute the acceleration, velocity, and displacement time series.
          *
          * \param tf transfer function to be applied to the Fourier amplitude spectrum
          * \param accel reference to the acceleration time series
@@ -92,97 +104,100 @@ class RecordedMotion : public Motion
          * \param disp reference to the displacement time series
          * \param baselineCorrect if the time series should be baseline corrected
          */
-        void timeSeries( const QVector<std::complex<double> > & tf,
-                QVector<double> & accel,  QVector<double> & vel,
-                QVector<double> & disp, const bool baselineCorrect );
+    void timeSeries( const QVector<std::complex<double> > & tf,
+                     QVector<double> & accel,  QVector<double> & vel,
+                     QVector<double> & disp, const bool baselineCorrect );
 
-        /*! Compute the acceleration time series for a given transfer function.
+    /*! Compute the acceleration time series for a given transfer function.
          * \param tf transfer function to be applied to the Fourier amplitude spectrum
          */
-        const QVector<double> timeSeries( const QVector<std::complex<double> > & tf) const;
-        
-        //! If the motion can provide a time series
-        bool hasTime() const;
+    const QVector<double> timeSeries( const QVector<std::complex<double> > & tf) const;
 
-        QString toString() const; 
+    //! If the motion can provide a time series
+    bool hasTime() const;
 
-        QMap<QString, QVariant> toMap(bool saveData = false) const;
-        void fromMap( const QMap<QString, QVariant> & map);
-        
-        //! Create a html document containing the information of the model
-        QString toHtml() const;
-        
-        //! Load the file
-        bool load();
+    QString toString() const;
 
-    private:
-        //! States if the file has been loaded or not 
-        bool m_isLoaded;
+    QMap<QString, QVariant> toMap(bool saveData = false) const;
+    void fromMap( const QMap<QString, QVariant> & map);
 
-        //! Controls if the RecordedMotion is to be used
-        bool m_isEnabled;
+    //! Create a html document containing the information of the model
+    QString toHtml() const;
 
-        //! The filename of the time series
-        QString m_fileName;
+    //! Load the file
+    bool load();
 
-        //! The description of the time series
-        QString m_description;
+private:
+    //! States if the file has been loaded or not
+    bool m_isLoaded;
 
-        //! The time step of the time series
-        double m_timeStep;
+    //! Controls if the RecordedMotion is to be used
+    bool m_isEnabled;
 
-        //! The number of points in the time series
-        int m_pointCount;
+    //! The filename of the time series
+    QString m_fileName;
 
-        //! The scale factor that is applied to the motion 
-        double m_scale;
+    //! The description of the time series
+    QString m_description;
 
-        //! The format of the text file
-        Format m_format;
+    //! The time step of the time series
+    double m_timeStep;
 
-        //! The column of the acceleration data
-        int m_dataColumn;
+    //! The number of points in the time series
+    int m_pointCount;
 
-        //! The line the data starts on
-        int m_startLine;            
+    //! The scale factor that is applied to the motion
+    double m_scale;
 
-        //! The line the data stops on, 0 for complete file.
-        int m_stopLine;             
+    //! The format of the text file
+    Format m_format;
 
-        //! The time values associated with the acceleration
-        QVector<double> m_time;	    
+    //! The column of the acceleration data
+    int m_dataColumn;
 
-        //! The acceleration data points in g
-        QVector<double> m_accel;	
+    //! The line the data starts on
+    int m_startLine;
 
-		//! The complex Fourier Amplitude Spectrum
-        QVector<std::complex<double> > m_fas;  
+    //! The line the data stops on, 0 for complete file.
+    int m_stopLine;
 
-        //! The maximum acceleration of the record
-        double m_pga;
+    //! The time values associated with the acceleration
+    QVector<double> m_time;
 
-        //! Call the readFile and computeSpecAccel functions
-        void processFile( std::ifstream* );
+    //! The acceleration data points in g
+    QVector<double> m_accel;
 
-        //! Find the maximum absolute value of a vector
-        double findMaxAbs( const QVector<double> & vector ) const;
+    //! Scalar factor to apply to the FAS when the magnitude is important, e.g. absFas()
+    double m_fasScale;
 
-        /*! Compute the integral of the time series using the trapezoid rule.
+    //! The complex Fourier Amplitude Spectrum
+    QVector<std::complex<double> > m_fas;
+
+    //! The maximum acceleration of the record
+    double m_pga;
+
+    //! Call the readFile and computeSpecAccel functions
+    void processFile( std::ifstream* );
+
+    //! Find the maximum absolute value of a vector
+    double findMaxAbs( const QVector<double> & vector ) const;
+
+    /*! Compute the integral of the time series using the trapezoid rule.
          * \param in time series to be integrated
          * \param out integrated time series
          */
-        void integrate( const QVector<double> & in, QVector<double> & out ) const;
+    void integrate( const QVector<double> & in, QVector<double> & out ) const;
 
-        /*! Fit a polynomial to the time series using least squares regression.
+    /*! Fit a polynomial to the time series using least squares regression.
          * \param term number of terms in the polynomial (order + 1)
          * \param series the time series
          */
-        const QVector<double> baselineFit( const int term, const QVector<double> & series ) const;
-        
-        //! Compute the Fast Fourier Transform from real to complex using the FFTW
-        void fft( const QVector<double>& in, QVector< std::complex<double> >& out) const;
+    const QVector<double> baselineFit( const int term, const QVector<double> & series ) const;
 
-        //! Compute the Inverse Fast Fourier Transformation from complex to real using
-        void ifft( const QVector< std::complex<double> >& in, QVector<double>& out ) const;
+    //! Compute the Fast Fourier Transform from real to complex using the FFTW
+    void fft( const QVector<double>& in, QVector< std::complex<double> >& out) const;
+
+    //! Compute the Inverse Fast Fourier Transformation from complex to real using
+    void ifft( const QVector< std::complex<double> >& in, QVector<double>& out ) const;
 };
 #endif

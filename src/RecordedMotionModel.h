@@ -22,12 +22,12 @@
 #ifndef RECORDED_MOTION_MODEL_H_
 #define RECORDED_MOTION_MODEL_H_
 
+#include "MyAbstractTableModel.h"
 #include "RecordedMotion.h"
 
-#include <QAbstractTableModel>
 #include <QList>
 
-class RecordedMotionModel : public QAbstractTableModel 
+class RecordedMotionModel : public MyAbstractTableModel
 {
 	Q_OBJECT
 	
@@ -45,9 +45,6 @@ class RecordedMotionModel : public QAbstractTableModel
 
 		bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-
-    public slots:
-        void resetModel();
 
 	private:
         QList<RecordedMotion*> & m_motions;

@@ -42,7 +42,6 @@ class OutputTableModel : public QAbstractTableModel
 		QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 		Qt::ItemFlags flags ( const QModelIndex &index ) const;
 
-        void setModel( SiteResponseOutput * model );
         void setSelectedOutput( const Output * selectedOutput );
 
     signals:

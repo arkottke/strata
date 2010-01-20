@@ -22,17 +22,18 @@
 #ifndef TEXT_LOG_H_
 #define TEXT_LOG_H_
 
-#include <QTextEdit>    
+#include <QObject>    
 #include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 
-class TextLog : public QTextEdit
+class TextLog : public QObject
 {
     Q_OBJECT
 
     public:
-        TextLog( QWidget * parent = 0 );
+        TextLog( QObject * parent = 0 );
         
         //! Level of detail of the logging
         enum Level {
@@ -42,6 +43,12 @@ class TextLog : public QTextEdit
         };
         
         static QStringList levelList();
+
+        //! Append text to the log
+        void append(const QString & text);
+        
+        //! Clear the log
+        void clear();
         
         //! Reset the object to the default values
         void reset();
@@ -52,9 +59,21 @@ class TextLog : public QTextEdit
 		QMap<QString, QVariant> toMap() const;
 		void fromMap(const QMap<QString, QVariant> & map);
 
+    public slots:
+        void setLevel(int level);
+
+    signals:
+        void textCleared();
+        void textChanged(const QString & text);
+
+        void wasModified();
+
     private:
         //! Level of detail in the log
         Level m_level;
+
+        //! Text
+        QStringList m_text;
 };
         
 TextLog & operator<< ( TextLog & log, const QString & string );

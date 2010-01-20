@@ -22,18 +22,19 @@
 #ifndef RESPONSE_SPECTRUM_H_
 #define RESPONSE_SPECTRUM_H_
 
-#include <QObject>
+#include "MyAbstractTableModel.h"
+
 #include <QVector>
 #include <QMap>
 #include <QString>
 #include <QVariant>
 
-class ResponseSpectrum : public QObject
+class ResponseSpectrum : public MyAbstractTableModel
 {
     Q_OBJECT
 
     public:
-        ResponseSpectrum(QObject * parent = 0);
+        ResponseSpectrum(bool readOnly = false, QObject * parent = 0);
         
         //! Reset the object to the default values
         void reset();
@@ -41,10 +42,12 @@ class ResponseSpectrum : public QObject
         bool modified() const;
 
         double damping() const;
-        void setDamping(double damping);
 
-        QVector<double> & period();
-        QVector<double> & sa();
+        const QVector<double> & period() const;
+        void setPeriod(const QVector<double> & period);
+
+        const QVector<double> & sa() const;
+        void setSa(const QVector<double> & sa);
         
         //! Convert the ResponseSpectrum to a QMap for saving
         QMap<QString, QVariant> toMap() const;
@@ -52,11 +55,24 @@ class ResponseSpectrum : public QObject
         //! Load the ResponseSpectrum from a QMap
         void fromMap( const QMap<QString, QVariant> & map);
 
+        int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
+        int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+
+        QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+        bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
+
+        QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+        Qt::ItemFlags flags ( const QModelIndex &index ) const;
+
+        bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
+        bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
+
     signals:
-        void dataChanged();
+        void wasModified();
 
     public slots:
         void setModified(bool modified = true);
+        void setDamping(double damping);
 
     private:
         //! If the data has been modified

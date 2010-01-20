@@ -25,14 +25,18 @@
 #include "VelocityLayer.h"
 #include "SoilType.h"
 
+#include <QPointer>
+
 //! Describes the velocity variation and nonlinear response of soil
 
 class SoilLayer : public VelocityLayer
 {
+    Q_OBJECT
+
     friend class SiteProfile;
 
     public:
-        SoilLayer();
+        SoilLayer( QObject * parent = 0);
         SoilLayer( const SoilLayer & soilLayer);
 
         SoilType * soilType() const;
@@ -55,7 +59,7 @@ class SoilLayer : public VelocityLayer
         
     private:
         //! Soil type of the layer
-        SoilType * m_soilType;
+        QPointer<SoilType> m_soilType;
         
         //! Total thickness of the layer
         double m_thickness;

@@ -21,27 +21,37 @@
 
 #include "SiteProfile.h"
 #include "Algorithms.h"
+#include "Units.h"
+
 #include <cmath>
 #include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QStringList>
+#include <QDateTime>
 #include <QVariant>
 
 SiteProfile::SiteProfile( QObject * parent)
     : QObject(parent)
 {
     m_bedrock = new RockLayer;
+    connect( m_bedrock, SIGNAL(wasModified()), SIGNAL(wasModified()));
+
+    m_profileVariation = new ProfileVariation;
+    connect( m_profileVariation, SIGNAL(wasModified()), SIGNAL(wasModified()));
+
+    m_nonLinearPropertyVariation = new NonlinearPropertyVariation;
+    connect( m_nonLinearPropertyVariation, SIGNAL(wasModified()), SIGNAL(wasModified()));
 
     // Allocate the random number generator with the "Mersenne Twister" algorithm
     m_rng = gsl_rng_alloc( gsl_rng_mt19937 );
 
     // Initialize the seed of the generator using the time
-    gsl_rng_set(m_rng, time(0));
+    gsl_rng_set(m_rng, QDateTime().currentDateTime().toTime_t());
 
     // Set the generator of the dynamicPropertyVariation and the profileVariation
-    m_nonLinearPropertyVariation.setRandomNumberGenerator(m_rng);
-    m_profileVariation.setRandomNumberGenerator(m_rng);
+    m_nonLinearPropertyVariation->setRandomNumberGenerator(m_rng);
+    m_profileVariation->setRandomNumberGenerator(m_rng);
 
     // reset the values
     reset();
@@ -49,6 +59,8 @@ SiteProfile::SiteProfile( QObject * parent)
 
 SiteProfile::~SiteProfile()
 {
+    delete m_profileVariation;
+    delete m_nonLinearPropertyVariation;
     delete m_bedrock;
     gsl_rng_free(m_rng);
 }
@@ -64,7 +76,7 @@ void SiteProfile::reset()
     m_waveFraction = 0.20;
 
     m_soilTypes.clear();
-    emit soilTypeChanged();
+    emit soilTypesChanged();
    
     m_soilLayers.clear();
     emit soilLayersChanged();
@@ -72,9 +84,8 @@ void SiteProfile::reset()
     m_subLayers.clear();
 
     m_bedrock->reset();
-
-    m_profileVariation.reset();
-    m_nonLinearPropertyVariation.reset();
+    m_profileVariation->reset();
+    m_nonLinearPropertyVariation->reset();
 }
 
 int SiteProfile::profileCount() const
@@ -84,17 +95,40 @@ int SiteProfile::profileCount() const
 
 void SiteProfile::setProfileCount(int count)
 {
+    if ( m_profileCount != count ) {
+        emit wasModified();
+    }
+
 	m_profileCount = count;
 }
 
 bool SiteProfile::isSiteVaried() const
 {
-	return SiteProfile::m_isSiteVaried;
+	return m_isSiteVaried;
 }
 
 void SiteProfile::setIsSiteVaried(bool isSiteVaried)
 {
+    if ( m_isSiteVaried != isSiteVaried ) {
+        emit wasModified();
+    }
+
 	m_isSiteVaried = isSiteVaried;
+
+    if (!m_isSiteVaried) {
+        // Reset values back to average values
+        foreach( SoilType * st, m_soilTypes ) {
+            st->reset();
+        }
+        
+        foreach( SoilLayer * sl, m_soilLayers ) {
+            sl->reset();
+        }
+
+        m_bedrock->reset();
+
+        m_subLayers.clear();
+    }
 }
 
 QList<SoilType*> & SiteProfile::soilTypes()
@@ -124,6 +158,10 @@ double SiteProfile::inputDepth() const
 
 void SiteProfile::setInputDepth(double depth)
 {
+    if ( m_inputDepth != depth ) {
+        emit wasModified();
+    }
+
     m_inputDepth = depth;
 }
         
@@ -146,21 +184,22 @@ const Location SiteProfile::depthToLocation(const double depth) const
         // Use the layer whose bottom depth is deeper
         index = 0;
 
-        while ( index < m_subLayers.size() && m_subLayers.at(index).depthToBase() < depth )
+        while ( index < m_subLayers.size() && m_subLayers.at(index).depthToBase() < depth ) {
             ++index;
+        }
 
         interDepth = depth - m_subLayers.at(index).depth();
     }
 
-    return Location( index, interDepth);
+    return Location(index, interDepth);
 }
 
-ProfileVariation & SiteProfile::profileVariation()
+ProfileVariation * SiteProfile::profileVariation()
 {
     return m_profileVariation;
 }
 
-NonLinearPropertyVariation & SiteProfile::nonLinearPropertyVariation()
+NonlinearPropertyVariation * SiteProfile::nonLinearPropertyVariation()
 {
     return m_nonLinearPropertyVariation;
 }
@@ -172,6 +211,10 @@ double SiteProfile::maxFreq() const
 
 void SiteProfile::setMaxFreq(double maxFreq)
 {
+    if ( m_maxFreq != maxFreq ) {
+        emit wasModified();
+    }
+
     m_maxFreq = maxFreq;
 }
 
@@ -182,6 +225,10 @@ double SiteProfile::waveFraction() const
 
 void SiteProfile::setWaveFraction(double waveFraction)
 {
+    if ( m_waveFraction != waveFraction ) {
+        emit wasModified();
+    }
+
     m_waveFraction = waveFraction;
 }
 
@@ -205,75 +252,98 @@ QStringList SiteProfile::soilLayerNameList() const
     return list;
 }
 
-void SiteProfile::createSubLayers( TextLog & textLog )
+void SiteProfile::insertSoilType(int index) 
 {
-    // Clear the previously generated subLayers
-    if ( !m_subLayers.isEmpty() && m_profileVariation.isLayeringVaried() ) {
+    m_soilTypes.insert( index, new SoilType);
+
+    connect( m_soilTypes.at(index), SIGNAL(wasModified()), SIGNAL(wasModified()));
+}
+
+void SiteProfile::createSubLayers( TextLog * textLog )
+{
+    // Clear the previously generated sublayers and delete the soillayers if
+    // they are not the used defined values.  This could be improved as it runs
+    // regardless of it is really needed. FIXME
+    if (!m_subLayers.isEmpty()) {
         QList<SoilLayer*> soilLayers;
 
         // Create a list of unique soilLayers
-        for ( int i = 0; i < m_subLayers.size(); ++i)
-            if ( !soilLayers.contains( m_subLayers[i].soilLayer() ) )
+        for ( int i = 0; i < m_subLayers.size(); ++i) {
+            if ( !soilLayers.contains(m_subLayers[i].soilLayer())) { 
                 soilLayers << m_subLayers[i].soilLayer();
-
-        // Delete the sublayers that were created
-        for ( int i = 0; i < soilLayers.size(); ++i)
-            delete soilLayers.takeFirst();
+            }
+        }
+        // Delete the sublayers that were created. Not original soil layers
+        while (soilLayers.size()) {
+            if (!m_soilLayers.contains(soilLayers.first())) {
+                // Delete the soil layer
+                delete soilLayers.takeFirst();
+            } else {
+                // Do not delete the object, just remove it from the list
+                soilLayers.removeFirst();
+            }
+        }
     }
     m_subLayers.clear();
 
-    // Vary the non-linear properties of the SoilTypes
-    if ( m_isSiteVaried && m_nonLinearPropertyVariation.enabled() && textLog.level() > TextLog::Low ) 
-        textLog << QObject::tr("Varying dynamic properties of soil types");
-
+    // Vary the nonlinear properties of the SoilTypes
+    if ( areNonlinearPropsVaried() && textLog->level() > TextLog::Low ) {
+	        textLog->append(QObject::tr("Varying dynamic properties of soil types"));
+    }
+   
     for( int i = 0; i < m_soilTypes.size(); ++i) {
-        if ( m_isSiteVaried && m_nonLinearPropertyVariation.enabled() && m_soilTypes.at(i)->isVaried()) {
-
-            if ( textLog.level() > TextLog::Low )
-                textLog << QString(QObject::tr("\t%1")).arg(m_soilTypes.at(i)->name());
-
-            m_nonLinearPropertyVariation.vary(*m_soilTypes[i]);
-        } else if (m_soilTypes.at(i)->normShearMod().prop().isEmpty() ||
-                m_soilTypes.at(i)->damping().prop().isEmpty()) {
+        if ( areNonlinearPropsVaried() && m_soilTypes.at(i)->isVaried()) {
+            // Vary the properties
+            if ( textLog->level() > TextLog::Low )
+                textLog->append(QString(QObject::tr("\t%1")).arg(m_soilTypes.at(i)->name()));
+            m_nonLinearPropertyVariation->vary(*m_soilTypes[i]);
+        } else if (m_soilTypes.at(i)->normShearMod()->prop().isEmpty() ||
+                m_soilTypes.at(i)->damping()->prop().isEmpty()) {
             // Use average as property if it has not been copied over already
-            m_soilTypes[i]->normShearMod().prop() = m_soilTypes.at(i)->normShearMod().avg();
-            m_soilTypes[i]->damping().prop() = m_soilTypes.at(i)->damping().avg();
+            m_soilTypes[i]->normShearMod()->prop() = m_soilTypes.at(i)->normShearMod()->avg();
+            m_soilTypes[i]->damping()->prop() = m_soilTypes.at(i)->damping()->avg();
         }
     }
-
+    
     // Vary the damping of the bedrock
-    if (  m_isSiteVaried && m_nonLinearPropertyVariation.enabled() && m_nonLinearPropertyVariation.bedrockIsEnabled() ) {
-        if ( textLog.level() > TextLog::Low )
-            textLog << QString(QObject::tr("Varying damping of bedrock"));
+    if (  isBedrockDampingVaried() ) {
+        if ( textLog->level() > TextLog::Low ) {
+            textLog->append(QObject::tr("Varying damping of bedrock"));
+        }
 
-        m_nonLinearPropertyVariation.vary(*m_bedrock);
+        m_nonLinearPropertyVariation->vary(*m_bedrock);
     }
     
     // Vary the depth to the bedrock
     double depthToBedrock;
 
-    if ( m_isSiteVaried && m_profileVariation.isBedrockDepthVaried() ) {
-        if ( textLog.level() > TextLog::Low )
-            textLog << QString(QObject::tr("Varying depth to bedrock"));
+    if ( isBedrockDepthVaried() ) {
+        if ( textLog->level() > TextLog::Low ) {
+            textLog->append(QObject::tr("Varying depth to bedrock"));
+        }
 
-        m_profileVariation.bedrockDepth().setAvg(m_bedrock->depth());
-
-        depthToBedrock = m_profileVariation.bedrockDepth().rand();
-    } else
+        m_profileVariation->bedrockDepth()->setAvg(m_bedrock->depth());
+        depthToBedrock = m_profileVariation->bedrockDepth()->rand();
+        
+        if (depthToBedrock < 0) {
+            depthToBedrock = 0;
+        }
+    } else {
         depthToBedrock = m_bedrock->depth();
+    }
 
     // Vary the layering 
     QList<SoilLayer*> soilLayers;
-
-    if ( m_isSiteVaried && m_profileVariation.isLayeringVaried()) {
-        if ( textLog.level() > TextLog::Low )
-            textLog << QString(QObject::tr("Varying the layering"));
+    if ( isLayerThicknessVaried() ) {
+        if ( textLog->level() > TextLog::Low ) {
+            textLog->append(QObject::tr("Varying the layering"));
+        }
 
         // Compute the depths for each of the layers
         updateDepths();
 
         // Randomize the layer thicknesses
-        QList<double> thickness = m_profileVariation.varyLayering(depthToBedrock);
+        QList<double> thickness = m_profileVariation->varyLayering(depthToBedrock);
 
         // For each thickness, determine the representative soil layer
         double depth = 0;
@@ -286,13 +356,38 @@ void SiteProfile::createSubLayers( TextLog & textLog )
             // Increment the depth
             depth += thickness.at(i);
         }
-    } else
-        // Use thickness of the SoilLayers -- so just copy the list over
-        soilLayers = m_soilLayers;
+    } else {
+        if ( isBedrockDepthVaried() ) {
+            foreach (SoilLayer * layer, m_soilLayers) {
+                soilLayers << layer;
+
+                if (soilLayers.last()->depthToBase() > depthToBedrock) {
+                    double thickness = depthToBedrock - soilLayers.last()->depth();
+                    soilLayers.last()->setThickness(thickness);
+                    break;
+                }
+            }
+        } else {
+            // Copy over previous soil layers
+            soilLayers = m_soilLayers;
+        }
+    }
 
     // Vary the shear-wave velocity
-    if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() )
-        m_profileVariation.varyVelocity(soilLayers, m_bedrock);
+    if ( isVelocityVaried() ) {
+        if ( textLog->level() > TextLog::Low ) {
+            textLog->append(QObject::tr("Varying the shear-wave velocity"));
+        }
+
+        m_profileVariation->varyVelocity( soilLayers, m_bedrock);
+    } else {
+        // Reset the values
+        for (int i = 0; i < soilLayers.size(); ++i ) {
+            soilLayers[i]->setShearVel( soilLayers.at(i)->avg() );
+        }
+
+        m_bedrock->setShearVel( m_bedrock->avg() );
+    }
 
     /* Create the SubLayers by dividing the thicknesses.  The height of the
      * sublayer is determined by computing the shortest wavelength of interest
@@ -316,15 +411,16 @@ void SiteProfile::createSubLayers( TextLog & textLog )
             vTotalStress += subThickness * soilLayers.at(i)->untWt();
         }
     }
-
+    
     // Compute the SubLayer index associated with the input depth
     m_inputLocation = depthToLocation(m_inputDepth);
 }
 
 void SiteProfile::resetSubLayers()
 {
-    for ( int i = 0; i < m_subLayers.size(); ++i )
+    for ( int i = 0; i < m_subLayers.size(); ++i ) {
         m_subLayers[i].reset();
+    }
 }
 
 int SiteProfile::subLayerCount() const
@@ -334,42 +430,47 @@ int SiteProfile::subLayerCount() const
 
 double SiteProfile::untWt( int layer ) const
 {
-	if ( layer < m_subLayers.size() )
+	if ( layer < m_subLayers.size() ) {
 		return m_subLayers.at(layer).untWt();
-	else
+    } else {
 		return m_bedrock->untWt();
+    }
 }
 
 double SiteProfile::density( int layer ) const
 {
-	if ( layer < m_subLayers.size() )
+	if ( layer < m_subLayers.size() ) {
 		return m_subLayers.at(layer).density();
-	else
+    } else {
 		return m_bedrock->density();
+    }
 }
 
 double SiteProfile::shearVel( int layer ) const
 {
-	if ( layer < m_subLayers.size() )
+	if ( layer < m_subLayers.size() ) {
 		return m_subLayers.at(layer).shearVel();
-	else
+    } else {
 		return m_bedrock->shearVel();
+    }
 }
 
 double SiteProfile::shearMod( int layer) const
 {
-	if ( layer < m_subLayers.size() )
+	if ( layer < m_subLayers.size() ) {
 		return m_subLayers.at(layer).shearMod();
-	else
+    } else {
 		return m_bedrock->shearMod();
+    }
 }
 
 double SiteProfile::damping( int layer ) const
 {
-	if ( layer < m_subLayers.size() )
+	if ( layer < m_subLayers.size() ) {
 		return m_subLayers.at(layer).damping();
-	else
+    } else {
 		return m_bedrock->damping();
+    }
 }
 
 QVector<double> SiteProfile::depthProfile() const
@@ -398,8 +499,9 @@ QVector<double> SiteProfile::shearVelProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < m_subLayers.size(); ++i)
+    for (int i = 0; i < m_subLayers.size(); ++i) {
         profile << m_subLayers.at(i).shearVel();
+    }
 
     profile << m_bedrock->shearVel();
 
@@ -449,6 +551,38 @@ QVector<double> SiteProfile::maxErrorProfile() const
     return profile;
 }
 
+QVector<double> SiteProfile::stressReducCoeffProfile(const double pga) const
+{
+    // The stress reduction cofficient is used to compare the maximum shear
+    // stress of the soil to the maximum shear stress of a rigid block for a
+    // given acceleration at the ground surface.  PGA needs to be in units of
+    // g.
+    QVector<double> profile;
+
+    // The total weight of all of the soil layers above the current
+    double totalWeight = 0;
+
+    // Defined to be 1 at surface
+    profile << 1.0;
+
+    for (int i = 0; i < m_subLayers.size(); ++i) {
+        // Add the half layer to the total weight 
+        totalWeight += m_subLayers.at(i).untWt() *
+            m_subLayers.at(i).thickness() / 2.;
+
+        const double rigidStress = totalWeight * pga;
+
+        profile << m_subLayers.at(i).shearStress() / rigidStress;
+
+        // Add the half layer to the total weight 
+        totalWeight += m_subLayers.at(i).untWt() *
+            m_subLayers.at(i).thickness() / 2.;
+
+    }
+
+    return profile;
+}
+
 QVector<double> SiteProfile::maxShearStrainProfile() const
 {
     QVector<double> profile;
@@ -463,10 +597,10 @@ QVector<double> SiteProfile::shearStressProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
+    for (int i = 0; i < m_subLayers.size(); ++i) {
         profile << m_subLayers.at(i).shearStress();
-
-
+    }
+    qDebug() << "shearStressProfile() done";
     return profile;
 }
 
@@ -474,25 +608,13 @@ QVector<double> SiteProfile::stressRatioProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
+    for (int i = 0; i < m_subLayers.size(); ++i) {
         profile << m_subLayers.at(i).stressRatio();
-
+    }
 
     return profile;
 }
 
-const Units * SiteProfile::units() const
-{
-    return m_units;
-}
-        
-void SiteProfile::setUnits( const Units * units)
-{
-    m_units = units;
-    m_bedrock->setUnits(m_units);
-    m_profileVariation.setUnits(m_units);
-}
-        
 void SiteProfile::setThicknessAt( int layer, double thickness )
 {
     if ( layer < m_soilLayers.size() )
@@ -500,6 +622,8 @@ void SiteProfile::setThicknessAt( int layer, double thickness )
     
     // Compute the new depths
     updateDepths();
+    
+    emit wasModified();
 }
 
 QMap<QString, QVariant> SiteProfile::toMap() const
@@ -539,8 +663,8 @@ QMap<QString, QVariant> SiteProfile::toMap() const
     map.insert("bedrock", bedrockMap);
     
     // Variation
-    map.insert("profileVariation", m_profileVariation.toMap());
-    map.insert("dynamicPropertyVariation", m_nonLinearPropertyVariation.toMap());
+    map.insert("profileVariation", m_profileVariation->toMap());
+    map.insert("dynamicPropertyVariation", m_nonLinearPropertyVariation->toMap());
     
     // Individual variables
     map.insert("inputDepth",m_inputDepth);
@@ -562,11 +686,11 @@ void SiteProfile::fromMap(const QMap<QString, QVariant> & map)
 	list = map.value("soilTypes").toList();
 	for (int i = 0; i < list.size(); ++i) {
         // Values are stored last first
-		m_soilTypes << new SoilType(m_units);
+		m_soilTypes << new SoilType;
 		m_soilTypes.last()->fromMap(list.at(i).toMap());
 	}
 
-    emit soilTypeChanged();
+    emit soilTypesChanged();
 
     // Velocity Layers
     m_soilLayers.clear();
@@ -595,8 +719,8 @@ void SiteProfile::fromMap(const QMap<QString, QVariant> & map)
     m_bedrock->fromMap(bedrockMap);
    
     // Variation
-    m_nonLinearPropertyVariation.fromMap(map.value("dynamicPropertyVariation").toMap());
-    m_profileVariation.fromMap( map.value("profileVariation").toMap() );
+    m_nonLinearPropertyVariation->fromMap(map.value("dynamicPropertyVariation").toMap());
+    m_profileVariation->fromMap( map.value("profileVariation").toMap() );
 
     // Inividual variables
     m_inputDepth = map.value("inputDepth").toDouble();
@@ -703,7 +827,7 @@ QString SiteProfile::toHtml() const
                 "<tr><td><strong>Unit weight:</strong></td><td>%1 %2</td></tr>"
                 "<tr><td><strong>Damping:</strong></td><td>%3</td></tr>"))
         .arg(m_bedrock->untWt())
-        .arg(m_units->untWt())
+        .arg(Units::instance()->untWt())
         .arg(m_bedrock->damping());
 
 
@@ -727,18 +851,18 @@ QString SiteProfile::toHtml() const
             "<th>Soil Type</th>"
             "<th>Average Vs (%2)</th>"
             ))
-        .arg(m_units->length())
-        .arg(m_units->vel());
+        .arg(Units::instance()->length())
+        .arg(Units::instance()->vel());
 
-    if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() && m_profileVariation.stdevIsLayerSpecific() )
+    if ( m_isSiteVaried && m_profileVariation->isVelocityVaried() && m_profileVariation->stdevIsLayerSpecific() )
         html += tr("<th>Stdev.</th>");
 
-    if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() )
+    if ( m_isSiteVaried && m_profileVariation->isVelocityVaried() )
         html += QString(tr(
                     "<th>Minimum Vs. (%1)</th>"
                     "<th>Maximum Vs. (%1)</th>"
                     "<th>Varied</th>"
-                    )).arg(m_units->vel());
+                    )).arg(Units::instance()->vel());
 
     html += "</tr>";
 
@@ -750,10 +874,10 @@ QString SiteProfile::toHtml() const
             .arg(m_soilLayers.at(i)->soilType()->name())
             .arg(m_soilLayers.at(i)->avg());
     
-        if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() && m_profileVariation.stdevIsLayerSpecific() )
+        if ( m_isSiteVaried && m_profileVariation->isVelocityVaried() && m_profileVariation->stdevIsLayerSpecific() )
             html += QString("<td>%1</td>").arg(m_soilLayers.at(i)->stdev());
 
-        if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() )
+        if ( m_isSiteVaried && m_profileVariation->isVelocityVaried() )
             html += QString("<td>%1</td><td>%2</td><td>%3</td>")
                 .arg(m_soilLayers.at(i)->min())
                 .arg(m_soilLayers.at(i)->max())
@@ -767,10 +891,10 @@ QString SiteProfile::toHtml() const
         .arg(m_bedrock->depth())
         .arg(m_bedrock->avg());
 
-    if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() && m_profileVariation.stdevIsLayerSpecific() )
+    if ( m_isSiteVaried && m_profileVariation->isVelocityVaried() && m_profileVariation->stdevIsLayerSpecific() )
         html += QString("<td>%1</td>").arg(m_bedrock->stdev());
 
-    if ( m_isSiteVaried && m_profileVariation.isVelocityVaried() )
+    if ( m_isSiteVaried && m_profileVariation->isVelocityVaried() )
         html += QString("<td>%1</td><td>%2</td><td>%3</td>")
             .arg(m_bedrock->min())
             .arg(m_bedrock->max())
@@ -848,3 +972,33 @@ SoilLayer * SiteProfile::representativeSoilLayer( double top, double base)
     return selectedLayer;
 }
 
+bool SiteProfile::areNonlinearPropsVaried() const
+{
+    return m_isSiteVaried && m_nonLinearPropertyVariation->enabled();
+}
+
+bool SiteProfile::isBedrockDampingVaried() const
+{
+    return m_isSiteVaried && m_nonLinearPropertyVariation->enabled() && m_nonLinearPropertyVariation->bedrockIsEnabled();
+}
+
+bool SiteProfile::isVelocityVaried() const
+{
+    return m_isSiteVaried 
+        && m_profileVariation->enabled() 
+        && m_profileVariation->isVelocityVaried();
+}
+
+bool SiteProfile::isLayerThicknessVaried() const
+{
+    return m_isSiteVaried 
+        && m_profileVariation->enabled() 
+        && m_profileVariation->isLayeringVaried();
+}
+
+bool SiteProfile::isBedrockDepthVaried() const
+{
+    return m_isSiteVaried 
+        && m_profileVariation->enabled() 
+        && m_profileVariation->isBedrockDepthVaried();
+}

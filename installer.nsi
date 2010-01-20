@@ -8,8 +8,13 @@
 
 ;--------------------------------
 ;Revision of the respository
-  !system 'svnversion.exe . | perl.exe -pne"s/(?:\d+:)?(\d+)(?:[MS]+)?$/!define REVISION \1/" > %TEMP%\revision.nsh'
+  ;!system 'svnversion.exe . | perl.exe -pne"s/(?:\d+:)?(\d+)(?:[MS]+)?$/!define REVISION \1/" > %TEMP%\revision.nsh'
+  !system '"C:\Program Files\TortoiseSVN\bin\SubWCRev.exe" . | perl.exe -ne"if (/^Last/){s/\D+/!define REVISION \1/; print;}" > %TEMP%\revision.nsh'
   !include "$%TEMP%\revision.nsh"
+
+;--------------------------------
+; Path to Qt
+!Define QT_PATH "C:\devel\Qt\2009.05\qt"
 
 ;--------------------------------
 ;Variables
@@ -21,7 +26,7 @@
 
   ;Name and file
   Name "Strata"
-  OutFile "StrataInstaller-rev-${REVISION}.exe"
+  OutFile "Strata-rev-${REVISION}.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Strata"
@@ -98,31 +103,31 @@ Section "!Core Files" SecProgram
   SetOutPath "$INSTDIR"
 
   ;Main Strata files
-  file "bin\strata.exe"
+  file "release\strata.exe"
   file "/oname=$INSTDIR\readme.txt" "README"
 
   ;Icons
   file "/oname=$INSTDIR\strata.ico" "resources\images\application-icon.ico"
-  file "/oname=$INSTDIR\strata-input.ico" "resources\images\file-input.ico"
-  file "/oname=$INSTDIR\strata-output.ico" "resources\images\file-output.ico"
+  file "/oname=$INSTDIR\strata-data.ico" "resources\images\file-data.ico"
 
   ;Main libraries
-  file "C:\devel\fftw-3.1.2\libfftw3-3.dll"
+  file "C:\devel\fftw-3.2.2\libfftw3-3.dll"
   file "C:\devel\GnuWin32\bin\libgsl.dll"
   file "C:\devel\GnuWin32\bin\libgslcblas.dll"
-  file "C:\devel\Qt-4.3.3\bin\mingwm10.dll"
-  file "c:\devel\Qt-4.3.3\bin\QtCore4.dll"
-  file "c:\devel\Qt-4.3.3\bin\QtGui4.dll"
-  file "c:\devel\Qt-4.3.3\bin\QtScript4.dll"
-  file "c:\devel\Qt-4.3.3\bin\QtSvg4.dll"
-  file "c:\devel\Qt-4.3.3\bin\QtXml4.dll"
-  file "C:\devel\qwt-5.0\lib\qwt5.dll"
+  file "${QT_PATH}\bin\mingwm10.dll"
+  file "${QT_PATH}\bin\QtCore4.dll"
+  file "${QT_PATH}\bin\QtGui4.dll"
+  file "${QT_PATH}\bin\QtNetwork4.dll"
+  file "${QT_PATH}\bin\QtScript4.dll"
+  file "${QT_PATH}\bin\QtSvg4.dll"
+  file "${QT_PATH}\bin\QtXml4.dll"
+  file "C:\devel\qwt-5.2\lib\qwt5.dll"
   
   ;Plugins for SVG icons
   SetOutPath "$INSTDIR\iconengines" 
-  file "c:\devel\Qt-4.3.3\plugins\iconengines\qsvg4.dll"
+  file "${QT_PATH}\plugins\iconengines\qsvgicon4.dll"
   SetOutPath "$INSTDIR\imageformats" 
-  file "c:\devel\Qt-4.3.3\plugins\imageformats\qsvg4.dll"
+  file "${QT_PATH}\plugins\imageformats\qsvg4.dll"
   
   ;Store installation folder
   WriteRegStr HKCU "Software\Strata" "" $INSTDIR
@@ -131,8 +136,7 @@ Section "!Core Files" SecProgram
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
   ;File associations
-  !insertmacro APP_ASSOCIATE "stri" "strata.inputfile" "Strata Input" "$INSTDIR\strata-input.ico" "Edit/Run with Strata" "$INSTDIR\strata.exe $\"%1$\""
-  !insertmacro APP_ASSOCIATE "stro" "strata.outputfile" "Strata Output" "$INSTDIR\strata-output.ico" "View with Strata" "$INSTDIR\strata.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "strata" "strata.data" "Strata Data" "$INSTDIR\strata-data.ico" "Edit/Run with Strata" "$INSTDIR\strata.exe $\"%1$\""
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Strata
     ;Create shortcuts
@@ -147,6 +151,7 @@ Section "Documentation" SecDocumentation
 	SetOutPath $INSTDIR
 
 	file "manual\manual.pdf"
+	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Manual.lnk" "$INSTDIR\manual.pdf"
 
 SectionEnd
 
@@ -155,10 +160,15 @@ Section "Examples" SecExamples
 	SetOutPath "$INSTDIR\examples"
 
 	;Files to install
-	file "example\NIS090.AT2"
-	file "example\shake-example.stri"
-	file "example\shake-example-fas.stri"
-	file "example\shake-example-rvt.stri"
+	file "example\example-1-td.strata"
+	file "example\example-2-td.strata"
+	file "example\example-3-rvt.strata"
+	file "example\example-3-rvt.strata"
+	file "example\suite-10-1.csv"
+	file "example\response-spectrum.csv"
+	file /r "example\*.AT2"
+
+	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Examples.lnk" "$INSTDIR\examples\"
 
 SectionEnd
 
@@ -170,6 +180,9 @@ Section /o "Source" SecSource
 	file "/oname=..\strata.pro" "strata.pro"
 	file "src\*.h"
 	file "src\*.cpp"
+
+	; 13:07 <Dirm> I normally just do something like exec("cmd /c start http://www.google.com")
+	; CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Source Documentation.lnk" "cmd.exe" "/c weee"
 SectionEnd
 
 ;--------------------------------
@@ -194,26 +207,35 @@ SectionEnd
 
 Section "Uninstall"
   ;Remove the files
+  Delete "$INSTDIR\strata.exe"
+  Delete "$INSTDIR\readme.txt"
+  Delete "$INSTDIR\manual.pdf"
   Delete "$INSTDIR\libfftw3-3.dll"
   Delete "$INSTDIR\libgsl.dll"
   Delete "$INSTDIR\libgslcblas.dll"
   Delete "$INSTDIR\mingwm10.dll"
   Delete "$INSTDIR\QtCore4.dll"
   Delete "$INSTDIR\QtGui4.dll"
+  Delete "$INSTDIR\QtNetwork4.dll"
   Delete "$INSTDIR\QtScript4.dll"
   Delete "$INSTDIR\QtSvg4.dll"
   Delete "$INSTDIR\QtXml4.dll"
   Delete "$INSTDIR\qwt5.dll"
-  Delete "$INSTDIR\iconengines\qsvg4.dll"
+  Delete "$INSTDIR\iconengines\qsvgicon4.dll"
   RMDir  "$INSTDIR\iconengines"
   Delete "$INSTDIR\imageformats\qsvg4.dll"
   RMDir  "$INSTDIR\imageformats"
-  Delete "$INSTDIR\example\NIS090.AT2"
-  Delete "$INSTDIR\example\shake-example.stri"
-  Delete "$INSTDIR\example\shake-example-fas.stri"
-  Delete "$INSTDIR\example\shake-example-rvt.stri"
-  RMDir  "$INSTDIR\example\"
+  Delete "$INSTDIR\examples\example-1-td.strata"
+  Delete "$INSTDIR\examples\example-2-td.strata"
+  Delete "$INSTDIR\examples\example-3-rvt.strata"
+  Delete "$INSTDIR\examples\suite-10-1.csv"
+  Delete "$INSTDIR\examples\response-spectrum.csv"
+  RMDIR /r "$INSTDIR\examples\motions"
+  RMDir  "$INSTDIR\examples"
   Delete "$INSTDIR\strata.pro"
+  Delete "$INSTDIR\strata.ico"
+  Delete "$INSTDIR\strata-data.ico"
+  Delete "$INSTDIR\Uninstall.exe"
 
   ;Remove all source files
   RMDir /r "$INSTDIR\src"
@@ -222,8 +244,7 @@ Section "Uninstall"
   RMDir $INSTDIR
 
   ;Remove the association with Strata
-  !insertmacro APP_UNASSOCIATE "stri" "strata.inputfile"
-  !insertmacro APP_UNASSOCIATE "stro" "strata.outputfile"
+  !insertmacro APP_UNASSOCIATE "strata" "strata.datafile"
 
   ;Remove the Start menu items
   !insertmacro MUI_STARTMENU_GETFOLDER Strata $MUI_TEMP
@@ -231,6 +252,8 @@ Section "Uninstall"
   ;Delete the shortcuts
   Delete "$SMPROGRAMS\$MUI_TEMP\Strata.lnk"
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$MUI_TEMP\Manual.lnk"
+  Delete "$SMPROGRAMS\$MUI_TEMP\Examples.lnk"
   
   ;Delete empty start menu parent diretories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"

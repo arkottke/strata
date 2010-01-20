@@ -24,7 +24,7 @@
 #include <QBrush>
 
 SoilTypeOutputTableModel::SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent )
-    : QAbstractTableModel(parent), m_soilTypes(soilTypes)
+    : MyAbstractTableModel(false, parent), m_soilTypes(soilTypes)
 {
 }
 
@@ -64,16 +64,22 @@ QVariant SoilTypeOutputTableModel::data ( const QModelIndex &index, int role) co
 	if (index.parent()!=QModelIndex())
 		return QVariant();
     
-    // Color the background to red and green for the check state
-    if (role==Qt::BackgroundRole && flags(index) & Qt::ItemIsUserCheckable) {
-        if ( data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked) 
-            return QVariant(QBrush(QColor(200,200,200)));
-        else 
-            return QVariant(QBrush(QColor(50,200,50)));
+    if (role==Qt::BackgroundRole) {
+        // Color the background light gray for cells that are not editable
+        if (!( flags(index) & Qt::ItemIsEditable || flags(index) & Qt::ItemIsUserCheckable )) {
+                return QVariant(QBrush(QColor(200,200,200)));
+        }
+       
+        // Color the background to red and green for the check state
+        if ( flags(index) & Qt::ItemIsUserCheckable) {
+            if ( data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked) 
+                return QBrush(QColor(200,200,200));
+            else 
+                return QBrush(QColor(50,200,50));
+        }
     }
 
-
-	if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
+	if ( role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
 	{
 		switch (index.column())
 		{
@@ -100,17 +106,16 @@ bool SoilTypeOutputTableModel::setData ( const QModelIndex &index, const QVarian
 		m_soilTypes[index.row()]->setSaveData(value.toBool());
         emit dataChanged( index, index);
         return true;
-    } else
+    } else {
         return false;
-
+    }
 }
 
 Qt::ItemFlags SoilTypeOutputTableModel::flags ( const QModelIndex &index ) const
 {
-    return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
-}
+    if (m_readOnly) {
+        return QAbstractTableModel::flags(index);
+    }
 
-void SoilTypeOutputTableModel::resetModel()
-{
-    reset();
+    return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
 }

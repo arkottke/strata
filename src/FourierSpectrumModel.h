@@ -22,16 +22,19 @@
 #ifndef FOURIER_SPECTRUM_MODEL_H_
 #define FOURIER_SPECTRUM_MODEL_H_
 
+#include "MyAbstractTableModel.h"
 #include "RvtMotion.h"
-#include <QAbstractTableModel>
+
 #include <QList>
 
-class FourierSpectrumModel : public QAbstractTableModel 
+//! Table model for the Fourier spectrum table view.
+
+class FourierSpectrumModel : public MyAbstractTableModel 
 {
 	Q_OBJECT
 	
 	public:
-		FourierSpectrumModel( RvtMotion * rvtMotion, bool isEditable = true, QObject *parent = 0);
+		FourierSpectrumModel( RvtMotion * rvtMotion, bool readOnly = false, QObject *parent = 0);
 
 		int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
 		int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
@@ -45,15 +48,7 @@ class FourierSpectrumModel : public QAbstractTableModel
 		bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 
-        void setIsEditable(bool editable);
-
-    public slots:
-        void resetModel();
-		
 	private:
         RvtMotion * m_rvtMotion;
-
-        //! If the table can be edited by the user
-        bool m_isEditable;
 };
 #endif

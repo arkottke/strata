@@ -37,7 +37,8 @@ DepthComboBox::DepthComboBox( QWidget * parent)
     setValidator(new QDoubleValidator(this));
     setCurrentIndex(-1);
 
-    connect( this, SIGNAL(currentIndexChanged(int)), this, SLOT(updateEditable(int)));
+    connect( this, SIGNAL(currentIndexChanged(int)), SLOT(updateEditable(int)));
+    connect( this, SIGNAL(editTextChanged(QString)), SLOT(toDouble(QString)));
 }
 
 double DepthComboBox::depth() const
@@ -76,5 +77,17 @@ void DepthComboBox::updateEditable(int index)
         // Depth is the bedrock depth and is uneditable
         setEditable(false);
         unsetCursor();
+    }
+}
+
+void DepthComboBox::toDouble(const QString & string )
+{
+    bool ok = false;
+    double d = string.toDouble(&ok);
+
+    if (ok) {
+        emit depthChanged(d);
+    } else {
+        emit depthChanged(-1);
     }
 }

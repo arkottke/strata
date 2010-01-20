@@ -22,30 +22,41 @@
 #include "RvtMotion.h"
 #include "Serializer.h"
 #include "Dimension.h"
+#include "MinimumFinder.h"
 
 #include <QDebug>
-#include <QApplication>
 
+// FIXME
 #include <gsl/gsl_interp.h>
-
-#include <cmath>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_math.h>
 
 #include <QFile>
 #include <QTextStream>
 
+// QTextStream fout(stdout);
+
 RvtMotion::RvtMotion()
 {
+    m_oscCorrection = LiuPezeshk;
+    m_workspace = gsl_integration_workspace_alloc(1024);
     m_targetRespSpec = new ResponseSpectrum;
+    m_pointSourceModel = new PointSourceModel;
     reset();
+}
+
+RvtMotion::~RvtMotion()
+{
+    gsl_integration_workspace_free(m_workspace);
 }
 
 void RvtMotion::reset()
 {
+    m_type = Motion::Outcrop;
     m_sdofTfIsComputed = false;
     m_duration = 10;
-    m_strainFactor = 1;
-    m_soilFactor = 1;
-    m_source = DefinedFourierSpectrum;
+    m_limitFas = true;
+   m_source = DefinedFourierSpectrum;
 
     m_respSpec->reset();
     m_targetRespSpec->reset();
@@ -58,12 +69,12 @@ QStringList RvtMotion::sourceList()
 {
     QStringList list;
 
-    list << "Fourier Spectrum" << "Response Spectrum";
+    list << "Defined Fourier Spectrum" << "Defined Response Spectrum" << "Calculated Fourier Spectrum";
 
     return list;
 }
 
-double RvtMotion::max( Motion::DurationType durationType, const QVector<std::complex<double> > & tf ) const
+double RvtMotion::max(const QVector<std::complex<double> > & tf ) const
 {
     QVector<double> fas(m_fas.size());
 
@@ -71,10 +82,25 @@ double RvtMotion::max( Motion::DurationType durationType, const QVector<std::com
         // Apply the transfer function to the fas
         for (int i = 0; i < m_fas.size(); ++i)
             fas[i] = abs(tf.at(i)) * m_fas.at(i);
-    } else
+    } else {
         fas = m_fas;
+    }
 
-    return rvt( fas, durationOfGm(durationType) );
+    return calcMax(fas, m_duration);
+}
+
+const QVector<double> RvtMotion::absFas( const QVector<std::complex<double> > & tf ) const
+{
+    QVector<double> absFas(m_fas.size());
+
+    if ( !tf.isEmpty() ) {
+        // Apply the transfer function to the fas
+        for (int i = 0; i < m_fas.size(); ++i)
+            absFas[i] = abs(tf.at(i)) * m_fas.at(i);
+    } else
+        absFas = m_fas;
+
+    return absFas;
 }
 
 QVector<double> & RvtMotion::fas()
@@ -89,27 +115,23 @@ double RvtMotion::duration() const
 
 void RvtMotion::setDuration(double duration)
 {
+    setModified(true);
     m_duration = duration;
 }
 
-double RvtMotion::strainFactor() const
+bool RvtMotion::limitFas() const
 {
-    return m_strainFactor;
+    return m_limitFas;
 }
 
-void RvtMotion::setStrainFactor(double strainFactor)
+void RvtMotion::setLimitFas(bool limitFas)
 {
-    m_strainFactor = strainFactor;
-}
+    if ( m_limitFas != limitFas ) {
+        m_modified = true;
+        emit wasModified(); 
+    }
 
-double RvtMotion::soilFactor() const
-{
-    return m_soilFactor;
-}
-
-void RvtMotion::setSoilFactor(double soilFactor)
-{
-    m_soilFactor = soilFactor;
+    m_limitFas = limitFas;
 }
 
 RvtMotion::Source RvtMotion::source() const
@@ -117,14 +139,28 @@ RvtMotion::Source RvtMotion::source() const
     return m_source;
 }
 
+void RvtMotion::setSource(int source)
+{
+    setSource((Source)source);
+}
+
 void RvtMotion::setSource( RvtMotion::Source source )
 {
+    if ( m_source != source ) {
+        emit wasModified();
+    }
+
     m_source = source;
 }
 
 ResponseSpectrum * RvtMotion::targetRespSpec()
 {
     return m_targetRespSpec;
+}
+
+PointSourceModel * RvtMotion::pointSourceModel()
+{
+    return m_pointSourceModel;
 }
 
 //! Basic linear interpolation/extrapolation in log-log space
@@ -151,10 +187,8 @@ bool logLogInterp( const QVector<double> & x, const QVector<double> & y,
         logY[i] = log10(y.at(i));
     }
 
-    for (int i = 0; i < xi.size(); ++i) {
+    for (int i = 0; i < xi.size(); ++i)
         logXi[i] = log10(xi.at(i));
-        logYi[i] = log10(yi.at(i));
-    }
 
     // Interpolate -- Extrapolate
     for ( int i = 0; i < logXi.size(); ++i )
@@ -217,7 +251,7 @@ void smooth(QVector<double> & data, int window)
         // Number of indexes to the left of a point
         int left = i;
         // Number of indexes to the right of a point
-        int right = data.size() - i;
+        int right = data.size() - 1 - i;
 
         if ( window < left && window < right )
             // Enough room on either side of the given point
@@ -225,10 +259,12 @@ void smooth(QVector<double> & data, int window)
         else if ( window >= left && window < right )
             // Not enough room on the left side
             adjustedWindow = left;
-        else if ( window < left && window >= right )
+        else if ( window < left && window >= right ) {
             // Not enough room on the right side
             adjustedWindow = right;
-        else {
+
+            // qDebug() << "not enough room on the right side, adjusted window:" << adjustedWindow;
+        } else {
             // Not enough room on either side -- use the short side
             if ( left < right )
                 adjustedWindow = left;
@@ -248,104 +284,38 @@ void smooth(QVector<double> & data, int window)
     data = smoothData;
 }
 
-void RvtMotion::forceDown(int dir)
+QVector<double> RvtMotion::computeSa(const QVector<double> & period, double damping, const QVector<std::complex<double> > & tf )
 {
-    Q_ASSERT( m_freq.at(0) > m_freq.at(1) );
-    // Direction should be either 1 or -1
-    dir = ( dir > 0 ) ? 1 : -1;
-
-    // Find the maximum value of the FAS
-    double max = 0;
-    int maxPos = 0;
-
-    for ( int i = 0; i < m_fas.size(); ++i ) {
-        if ( m_fas.at(i) > max ) {
-            max = m_fas.at(i);
-            maxPos = i;
-        }
-    }
-
-    // Determine the final index
-    int stop = ( dir > 0 ) ? m_fas.size() : -1;
-
-    // Previous slope
-    double minSlope = -0.16;
-    double maxSlope = 0;
-    double x0 = 0;
-    double y0 = 0;
-
-    int i = maxPos;
-
-    while ( i+dir != stop ) {
-        x0 = log10(m_freq.at(i));
-        y0 = log10(m_fas.at(i));
-
-        // Compute the slope is log-log space
-        double slope = dir * ( log10(m_fas.at(i+dir)) - y0 ) / (log10(m_freq.at(i+dir)) - x0 );
-
-        if ( i != maxPos && slope < minSlope ) {
-            // qDebug() << "min slope:" << minSlope << "slope:" << slope;
-            // qDebug() << "applying correction from" << i << "to" << stop << "slope:" << maxSlope;
-            // Correct the curve using the previous slope
-            while ( i != stop ) {
-                m_fas[i] = pow( 10, dir * maxSlope * (log10(m_freq.at(i)) - x0) + y0);
-                i += dir;
-            }
-            return;
-        }
-
-        if ( slope > maxSlope )
-            maxSlope = slope;
-
-        // Advance the counter
-        i += dir;
-    }
-}
-
-QVector<double> RvtMotion::computeSa( DurationType durationType, const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf )
-{
-    double durationGm = durationOfGm(durationType);
-    // Compute the SDOF
-    computeSdofTf( period, damping );
-
     QVector<double> sa(period.size());
-    QVector<double> fas(m_fas.size());
+    QVector<double> fas = m_fas;
+
+    // Apply the transfer function to the motion
+    if (!tf.isEmpty()) {
+        Q_ASSERT(fas.size() == tf.size());
+
+        for (int i = 0; i < fas.size(); ++i) {
+            fas[i] *= abs(tf.at(i));
+        }
+    }
 
     // Compute the response at each period
     for ( int i = 0; i < sa.size(); ++i ) {
-        // If there is an acceleration transfer function combine the SDOF and
-        // acceleration transfer functions
-        if ( !accelTf.isEmpty() ) {
-            for (int j = 0; j < fas.size(); ++j)
-                fas[j] = abs(accelTf.at(j)) * abs(m_sdofTf.at(i).at(j)) * m_fas.at(j);
-        } else
-            for (int j = 0; j < fas.size(); ++j)
-                fas[j] = abs(m_sdofTf.at(i).at(j)) * m_fas.at(j);
-
-        // The duration is first increased by T0 to account for the fact peak
-        // response of a single-degree-of-freedom oscillator may occur ater short
-        // period motions.  The duration is then reduced by the correction by Boore
-        // (1984).  The reduction is too limit the _T0_ increase to acceptable
-        // values.
-        double T0 = period.at(i)/(2 * M_PI * damping / 100);
-        double durationRms = durationGm + T0 * pow(durationGm/period.at(i),3) / ( pow(durationGm/period.at(i),3) + 1/3 );
-
-        // Compute the maximum expected acceleration
-        sa[i] = rvt(fas, durationGm, durationRms);
+        sa[i] = calcOscillatorMax(fas, period.at(i), damping);
     }
 
     return sa;
 }
 
-bool RvtMotion::invert( const bool * okToContinue, QProgressBar * progress)
+bool RvtMotion::invert()
 {
     // Check that both period and sa have some length
     if ( m_targetRespSpec->period().size() == 0 ||
             m_targetRespSpec->sa().size() != m_targetRespSpec->period().size()
-            ) {
+       ) {
         qCritical("Both period and sa must be defined.");
         return false;
     }
+
     // Check that the given period is constantly increasing
     for( int i = 0; i < m_targetRespSpec->period().size() - 1; ++i) {
         if( m_targetRespSpec->period().at(i) > m_targetRespSpec->period().at(i+1) ) {
@@ -354,103 +324,169 @@ bool RvtMotion::invert( const bool * okToContinue, QProgressBar * progress)
         }
     }
 
-    // Use the same period and damping as the target FIXME
-    m_respSpec->period() = m_targetRespSpec->period();
-    m_respSpec->setDamping( m_targetRespSpec->damping() );
+    //
+    // Estimate the FAS using the methodology proposed by Vanmarcke
+    //
+    const QVector<double> estimateFas = vanmarckeInversion();
 
-    // Compute the frequency from the minimum and maximum periods
-    m_freq = Dimension::logSpace( 1 / m_respSpec->period().first(), 1 / m_respSpec->period().last(), 1024 );
+    // Interpolate the FAS using a cubic spline, extrapolate at low frequencies.
+    const double targetMinFreq = 1. / m_targetRespSpec->period().last();
+
+    m_freq = Dimension::logSpace( qMin(targetMinFreq / 2., 0.05), m_maxEngFreq, 1024 );
     m_fas.resize(m_freq.size());
+    int offset = 0;
 
-    // Compute the target reponse spectrum interpolated at each of the frequency values
-    gsl_interp * interpolator = gsl_interp_alloc(gsl_interp_linear, m_targetRespSpec->period().size());
-    gsl_interp_init( interpolator, m_targetRespSpec->period().data(), m_targetRespSpec->sa().data(), m_targetRespSpec->period().size());
-    gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
+    gsl_interp_accel * acc = gsl_interp_accel_alloc ();
+    gsl_spline * spline = gsl_spline_alloc(gsl_interp_cspline, m_targetRespSpec->period().size());
 
-    QVector<double> targetSa(m_freq.size());
-    for ( int i = 0; i < targetSa.size(); ++i )
-        targetSa[i] = gsl_interp_eval( interpolator, m_targetRespSpec->period().data(),
-                m_targetRespSpec->sa().data(), 1 / m_freq.at(i), accelerator);
+    gsl_spline_init (spline, m_targetRespSpec->period().data(),
+                     estimateFas.data(), m_targetRespSpec->period().size());
 
-    gsl_interp_free( interpolator );
-    gsl_interp_accel_free( accelerator );
+    const double logFas0 = log(estimateFas.first());
+    const double freq0 = 1 / m_targetRespSpec->period().last();
 
-    // The Fourier spectrum is initially computed base on a simple shape
-    //simpleFas();
-    // The Fourier spectrum is initially computed based on the Brune 
-    // brune();
-    // Compute the Fourier Spectrum using the spectral density and inversion
-    vanmarckeInversion(targetSa, m_targetRespSpec->damping());
+    for (int i = 0; i < m_freq.size(); ++i) {
+        if (m_freq.at(i) < targetMinFreq) {
+            // Linearly extrapolate in log-log space.  This extrapolation is
+            // not very rigorous, but it is just used to develop an initial
+            // estimate of the FAS.
+            m_fas[i] = exp(1.92 * log(m_freq.at(i)/freq0) + logFas0);
+            offset = i;
+        } else {
+            m_fas[i] = gsl_spline_eval(spline, 1. / m_freq.at(i), acc);
+        }
+    }
 
-    // Compute the response spectra
-    m_respSpec->sa() = computeSa( Motion::Rock, m_respSpec->period(), m_respSpec->damping());
+    ++offset;
 
-    // Prepare the interpolation 
-    interpolator = gsl_interp_alloc(gsl_interp_linear, m_respSpec->period().size());
-    gsl_interp_init( interpolator, m_respSpec->period().data(), m_respSpec->sa().data(), m_respSpec->period().size());
-    accelerator =  gsl_interp_accel_alloc();
+    gsl_spline_free (spline);
+    gsl_interp_accel_free (acc);
+
+    // Interpolation for the ratio between target and calculated response spectrum
+    acc = gsl_interp_accel_alloc();
+    spline = gsl_spline_alloc(gsl_interp_cspline, m_targetRespSpec->period().size());
 
     // Loop over ratio correction while the rmse error is larger than FIXME
+    m_okToContinue = true;
     double rmse = 0;
+    double maxError = 0;
     double oldRmse = 1;
-    int maxCount = 25;
-    double minRmse = 0.02;
-    double minRmseChange = 0.001;
+    int maxCount = 30;
+    //double minRmse = 0.02;
+    double minRmse = 0.005;
+    double minRmseChange = 0.0002;
     int count = 0;
+
+    // Initial response spectrum
+    m_respSpec->setDamping(m_targetRespSpec->damping());
+    m_respSpec->setPeriod(m_targetRespSpec->period());
+    m_respSpec->setSa(computeSa(m_targetRespSpec->period(), m_targetRespSpec->damping()));
+
+    QVector<double> ratio(m_respSpec->sa().size());
+
     // Set the maximum value of the progress
-    if (progress)
-        progress->setRange(0, maxCount);
+    emit progressRangeChanged(0, maxCount);
 
     do {
-        // Update the progress dialog
-        if (progress) {
-            progress->setValue(count);
-            QApplication::processEvents();
+        emit progressValueChanged(count);
+
+        for (int i = 0; i < ratio.size(); ++i) {
+            ratio[i] = m_targetRespSpec->sa().at(i) / m_respSpec->sa().at(i);
         }
 
-        // Correct the FAS by the ratio
-        for (int i = 0; i < m_fas.size(); ++i) {
-            double sa = gsl_interp_eval( interpolator,
-                    m_respSpec->period().data(), m_respSpec->sa().data(), 1 /
-                    m_freq.at(i), accelerator);
-            m_fas[i] = m_fas.at(i) * targetSa.at(i) / sa;
+        // Apply the ratio correction to the FAS
+        gsl_spline_init(spline, m_respSpec->period().data(), ratio.data(), ratio.size());
+
+        for (int i = offset; i < m_freq.size(); ++i) {
+            m_fas[i] *= gsl_spline_eval(spline, 1. / m_freq.at(i), acc);
         }
 
-        // Smooth the data
-        smooth( m_fas, int(m_fas.size()/100));
-        // Force the tails down
-        forceDown(1);
-        forceDown(-1);
+        // Extrapolate the low frequency values
+        double logFreq0 = log(m_freq.at(offset));
+        double logFas0 = log(m_fas.at(offset));
+
+        double slope = m_limitFas ? 1.92 :
+            (log(m_fas.at(offset)/m_fas.at(offset+1))
+             / log( m_freq.at(offset)/m_freq.at(offset+1)));
+
+        for (int i = 0; i < offset; ++i) {
+
+                m_fas[i] = exp( slope * (log(m_freq.at(i)) - logFreq0 ) + logFas0 );
+
+        }
+
+        // Force down the high frequency tail
+
+        // Find the minimum slope
+        if (m_limitFas) {
+            double minSlope = 0;
+            int minSlopeIdx = 0;
+            int i = offset;
+
+            while (i < m_freq.size()-1) {
+                const double slope = log(m_fas.at(i)/m_fas.at(i+1)) / log(m_freq.at(i)/m_freq.at(i+1));
+
+                if (slope < minSlope) {
+                    minSlope = slope;
+                    minSlopeIdx = i;
+                }
+                ++i;
+            }
+
+
+            // Extrapolate from deviation
+            i = minSlopeIdx;
+            double x0 = log(m_freq.at(i));
+            double y0 = log(m_fas.at(i));
+            //double kappa0 = exp( -M_PI * 0.01 * m_freq.at(idx) );
+
+            ++i;
+            while ( i < m_fas.size() ) {
+                // Extrapolate the value based, but reduce the value using a kappa filter
+                //m_fas[idx] = exp( cutoff * (log(m_freq.at(idx)) - x0 ) + y0 ) * exp(-M_PI * 0.01 * m_freq.at(idx) ) / kappa0 ;
+                m_fas[i] = exp( -slope * (log(m_freq.at(i)) - x0 ) + y0 );
+                ++i;
+            }
+        }
+
         // Re-compute the Sa
-        m_respSpec->sa() = computeSa( Motion::Rock, m_respSpec->period(), m_respSpec->damping());
+        m_respSpec->setSa(computeSa(m_targetRespSpec->period(), m_targetRespSpec->damping()));
 
         // Compute the root-mean-squared error
-        double error = 0;
-        for (int i = 0; i < m_respSpec->sa().size(); ++i)
-            error += pow( (m_respSpec->sa().at(i) - m_targetRespSpec->sa().at(i) ) / m_targetRespSpec->sa().at(i), 2 );
-        rmse = sqrt(error / m_respSpec->sa().size());
+        double sumError = 0;
+        for (int i = 0; i < m_respSpec->sa().size(); ++i) {
+            const double e = (m_respSpec->sa().at(i) - m_targetRespSpec->sa().at(i) ) / m_targetRespSpec->sa().at(i);
+
+            // Save the maximum error
+            if (fabs(maxError) < fabs(e)) {
+                maxError = e;
+            }
+
+            // Add the squared error to the sum
+            sumError += e * e;
+        }
+        rmse = sqrt(sumError / m_respSpec->sa().size());
 
         // Increment the count
         ++count;
 
-        //qDebug() << count << rmse;
+        qDebug() << count << maxError << rmse << minRmse << fabs(oldRmse-rmse) << minRmseChange;
         // Stop if the RMSE is below the specified RMSE
         if ( rmse < minRmse || fabs(oldRmse-rmse) < minRmseChange )
             break;
         // Allow the user to cancel the operation
-        if ( okToContinue && ! *okToContinue )
+        if ( !m_okToContinue )
             break;
         // Save old rmse
         oldRmse = rmse;
     } while( count < maxCount );
 
     // Delete the interpolators
-    gsl_interp_free( interpolator );
-    gsl_interp_accel_free( accelerator );
+    gsl_spline_free (spline);
+    gsl_interp_accel_free (acc);
 
     // Set progress at the maximum
-    if (progress)
-        progress->setValue(maxCount);
+    emit progressValueChanged(maxCount);
 
     // Reset the modified target flag
     m_targetRespSpec->setModified(false);
@@ -459,10 +495,16 @@ bool RvtMotion::invert( const bool * okToContinue, QProgressBar * progress)
     emit fourierSpectrumChanged();
 
     // If the rmse value is below  0.15 it was successful
-    if ( rmse < 0.15 )
+    if ( rmse < minRmse )
         return true;
-    else 
+    else
         return false;
+}
+
+void RvtMotion::calcPointSource()
+{
+    m_freq = Dimension::logSpace( 0.05, m_maxEngFreq, 1024 );
+    m_fas = m_pointSourceModel->calcFourierSpectrum(m_freq);
 }
 
 bool RvtMotion::hasTime() const
@@ -480,16 +522,17 @@ QMap<QString, QVariant> RvtMotion::toMap(bool /*saveData*/) const
     QMap<QString, QVariant> map;
 
     map.insert("duration", m_duration);
-    map.insert("strainFactor", m_strainFactor);
-    map.insert("soilFactor", m_soilFactor);
+    map.insert("limitFas", m_limitFas);
     map.insert("source", m_source);
     map.insert("type", m_type);
+    map.insert("maxEngFreq", m_maxEngFreq);
 
     map.insert("fas", Serializer::toVariantList(m_fas));
     map.insert("freq", Serializer::toVariantList(m_freq));
 
     map.insert("respSpec", m_respSpec->toMap());
     map.insert("targetRespSpec", m_targetRespSpec->toMap());
+    map.insert("pointSourceModel", m_pointSourceModel->toMap());
 
     return map;
 }
@@ -497,36 +540,40 @@ QMap<QString, QVariant> RvtMotion::toMap(bool /*saveData*/) const
 void RvtMotion::fromMap( const QMap<QString, QVariant> & map)
 {
     m_duration = map.value("duration").toDouble();
-    m_strainFactor = map.value("strainFactor").toDouble();
-    m_soilFactor = map.value("soilFactor").toDouble();
+    m_limitFas = map.value("limitFas").toBool();
     m_source = (RvtMotion::Source)map.value("source").toInt();
     m_type = (Motion::Type)map.value("type").toInt();
+    m_maxEngFreq = map.value("maxEngFreq", 25).toDouble();
 
     m_fas = Serializer::fromVariantList(map.value("fas").toList()).toVector();
     m_freq = Serializer::fromVariantList(map.value("freq").toList()).toVector();
 
     emit fourierSpectrumChanged();
-    
+
     m_respSpec->fromMap(map.value("respSpec").toMap());
     m_targetRespSpec->fromMap(map.value("targetRespSpec").toMap());
+    m_pointSourceModel->fromMap(map.value("pointSourceModel").toMap());
 }
 
 QString RvtMotion::toHtml() const
 {
     QString html;
 
-    html += QString(QObject::tr(
+    html += QString(tr(
                 "<table border=\"0\">"
                 "<tr><td><strong>Type:</strong></td><td>%1</td></tr>"
-                "<tr><td><strong>Duration:</strong></td><td>%1</td></tr>"
+                "<tr><td><strong>Duration:</strong></td><td>%2</td></tr>"
+                "<tr><td><strong>Source:</strong></td><td>%3</td></tr>"
+
                 ))
         .arg(typeList().at(m_type))
-        .arg(m_duration);
+        .arg(m_duration)
+        .arg(sourceList().at(m_source));
 
     switch (m_source)
     {
         case DefinedFourierSpectrum:
-            html += QObject::tr("</table><table><tr><th>Frequency (Hz)</th><th>FAS (g-s)</th></tr>");
+            html += tr("</table><table><tr><th>Frequency (Hz)</th><th>FAS (g-s)</th></tr>");
 
             for ( int i = 0; i < m_freq.size(); ++i )
                 html += QString("<tr><td>%1</td><td>%2</td></tr>")
@@ -536,10 +583,10 @@ QString RvtMotion::toHtml() const
             html += "</table>";
             break;
         case DefinedResponseSpectrum:
-            html += QString(QObject::tr("<tr><td><strong>Damping:</strong></td><td>%1</td></tr>"))
+            html += QString(tr("<tr><td><strong>Damping:</strong></td><td>%1</td></tr>"))
                 .arg(m_targetRespSpec->damping());
 
-            html += QObject::tr("</table><table><tr><th>Period (s)</th><th>Spectral Accel. (g)</th></tr>");
+            html += tr("</table><table><tr><th>Period (s)</th><th>Spectral Accel. (g)</th></tr>");
 
             for ( int i = 0; i < m_targetRespSpec->period().size(); ++i )
                 html += QString("<tr><td>%1</td><td>%2</td></tr>")
@@ -548,135 +595,56 @@ QString RvtMotion::toHtml() const
 
             html += "</table>";
             break;
+        case CalculatedFourierSpectrum:
+            html += m_pointSourceModel->toHtml();
+            break;
     }
     return html;
 }
-        
-double RvtMotion::durationOfGm(Motion::DurationType durationType) const
+
+void RvtMotion::stop()
 {
-    switch (durationType)
-    {
-        case Rock:
-            return m_duration;
-        case Soil:
-            return m_soilFactor * m_duration;
-        case Strain:
-            return m_strainFactor * m_duration;
-        default:
-            return 0;
-    }
+    m_okToContinue = false;
 }
 
-void RvtMotion::brune( double magnitude, double distance, double stressDrop, double kappa)
+QVector<double> RvtMotion::vanmarckeInversion() const
 {
-    // Constants
-    double rho          = 2.8;          // Soil density in grams per cubic centimeter
-    double beta         = 3.5;          // Shear wave velocity in km per second
-    double depth        = 10;           // Depth to the earthquake
-
-    // Compute the radius taking into account the depth
-    double radius = sqrt(distance*distance + depth*depth);
-    // Seismic moment
-    double seismicMoment = pow( 10, 1.5 * magnitude + 16.05 );
-    // Compute the corner frequency
-    double cornerFreq = 4.9e6 * beta * pow(stressDrop / seismicMoment, 1./3.);
-    // Compute the rock amplification
-    QVector<double> rockAmp(m_freq.size());
-    QVector<double> freq_i;
-    QVector<double> amp_i;
-    // Load the empirical arrays with the values based on the Western US
-    // Generic Rock amplification by Boore and Joyner
-    freq_i << 0.01 << 0.09 << 0.16 << 0.51 << 0.84 << 1.25 << 2.26 << 3.17 << 6.05 << 16.6 << 61.2 << 81.2 << 100 << 200;
-    amp_i << 1 << 1.1 << 1.18 << 1.42 << 1.58 << 1.74 << 2.06 << 2.25 << 2.58 << 3.13 << 4 << 4.39 << 4.77 << 5;
-    // Interpolate
-    logLogInterp(freq_i, amp_i, m_freq, rockAmp);
-
-    // Compute the geometric attenuation factor
-    double geometricAtten;
-    if ( radius > 40 )
-        geometricAtten = 1/sqrt(radius);
-    else
-        geometricAtten = 1/radius;
-
-
-    // Compute the FAS by assembling the different parts
-    for (int i=0; i < m_fas.size(); ++i) {
-        // Source effects
-        double source = 0.78 * (M_PI/(rho*pow(beta,3))) * seismicMoment * 
-            pow(m_freq.at(i),2) / ( 1 + pow(m_freq.at(i)/cornerFreq,2));
-        // Quality -- seismological damping
-        double quality = 200 * pow(m_freq.at(i), 0.60);
-        // Path effects
-        double path = geometricAtten * exp((-M_PI * m_freq.at(i) * radius)/(quality*beta));
-        // High frequency length()unution
-        double freqDim = exp( -M_PI * kappa * m_freq.at(i));
-
-        // Assemble the parts  FIXME the constant may need to get corrected
-        m_fas[i] = 10e-21/981 * source * path * freqDim * rockAmp.at(i);
-    }
-}
-
-void RvtMotion::simpleFas()
-{
-    // Create a simple Fourier amplitude spectrum
-    QVector<double> slope;
-    QVector<double> freq;
-    slope << 2 << 0 << -0.25;
-    freq << 10 << 0.7;
-    double initialLogY = log10(5e-5);
-    double initialLogX = log10(m_freq.first());
-    int idx = 0;
-
-    for (int i = 0; i < slope.size(); ++i)
-    {
-        if ( i < freq.size()) {
-            while ( m_freq.at(idx) > freq.at(i) ) {
-                m_fas[idx] = pow( 10, slope.at(i) * (initialLogX - log10(m_freq.at(idx))) + initialLogY);
-                ++idx;
-            }
-            // Save the final value as the next initial value
-            initialLogY = log10(m_fas[idx-1]);
-            initialLogX = log10(m_freq[idx-1]);
-
-        } else {
-            while ( idx < m_fas.size() ) {
-                // No ending frequency continue until the end
-                m_fas[idx] = pow( 10, slope.at(i) * (initialLogX - log10(m_freq.at(idx))) + initialLogY);
-                ++idx;
-            }
-        }
-    }
-} 
-
-void RvtMotion::vanmarckeInversion(const QVector<double> & sa, double damping )
-{
-    Q_ASSERT( sa.size() == m_fas.size() );
+    QVector<double> fas(m_targetRespSpec->period().size());
 
     // Assume a constant peak factor
-    double peakFactor = 3.5;
-    double prevSpecDensity = 0;
-    double specDensity = 0;
+    double peakFactor = 2.5;
+    double prevFasSqr = 0;
+    double fasSqr = 0;
     double sum = 0;
-    double duration = durationOfGm(Motion::Rock);
 
-    for ( int i = 0; i < m_fas.size(); ++i ) {
-        // Compute spectral density
-        specDensity = ((pow(sa.at(i),2) / pow(peakFactor,2)) - 2 * M_PI * sum ) /
-            ( angFreqAt(i) * ( M_PI / ( 4 * damping / 100 ) - 1) );
+    // Single degree of freedom factor
+    double sdofFactor = M_PI / ( 4 * m_targetRespSpec->damping() / 100. ) - 1;
+    const double damping = m_targetRespSpec->damping();
 
-        if ( specDensity < 0 )
-            specDensity = prevSpecDensity;
+    for ( int i = fas.size()-1; i > -1; --i ) {
+        double freq = 1 / m_targetRespSpec->period().at(i);
+        double sa = m_targetRespSpec->sa().at(i);
+        const double rmsDuration = calcRmsDuration(1/freq, damping);
+
+        // Compute the squared Fourier amplitude spectrum
+        fasSqr = ( ( rmsDuration * pow(sa,2) ) / ( 2 * pow( peakFactor, 2) ) - sum ) /
+            ( freq * sdofFactor );
+
+        if ( fasSqr < 0 )
+            fasSqr = prevFasSqr;
 
         // Convert from spectral density into FAS
-        m_fas[i] = sqrt(specDensity * M_PI * duration);
+        fas[i] = sqrt(fasSqr);
 
-        if ( i == 0 )
-            sum = specDensity * m_freq.at(i) / 2;
+        if ( i == fas.size()-1 )
+            sum = fasSqr * freq / 2;
         else
-            sum += ( specDensity - prevSpecDensity ) / 2 * ( m_freq.at(i) - m_freq.at(i-1) );
+            sum += ( fasSqr - prevFasSqr ) / 2 * ( freq - (1/m_targetRespSpec->period().at(i+1)) );
 
-        prevSpecDensity = specDensity;
+        prevFasSqr = fasSqr;
     }
+
+    return fas;
 }
 
 double RvtMotion::moment( int power, const QVector<double> & fasSqr) const
@@ -706,63 +674,155 @@ double RvtMotion::moment( int power, const QVector<double> & fasSqr) const
     return 2 * sum;
 }
 
-// The integral of this function is used to compute the peak factor
-double RvtMotion::calcPeakFactor( const double bandWidth, const double numExtrema) const
+struct peakFactorParams
 {
-    // Compute the peak factor
-    double peakFactor = 0;
-    double delta = 0.005;
-    double z = 0;
-    double last = 1.0;
-    double current = 0.0;
-    // Integrate using the trapezoid rule
-    do {
-        z += delta;
-        // Compute the current piece of the peak factor
-        current = 1 - pow( 1 - bandWidth * exp(-z*z), numExtrema);
-        peakFactor += delta * (last+current) / 2.0;
-        // Save the current value
-        last = current;
-    } while( last/peakFactor > 0.000001 );
+    double bandWidth;
+    double numExtrema;
+};
 
-    return M_SQRT2 * peakFactor;
+double RvtMotion::peakFactorEqn(double z, void * p)
+{
+    struct peakFactorParams * params = (struct peakFactorParams *)p;
+
+    return 1 - pow( 1 - params->bandWidth * exp(-z*z), params->numExtrema );
 }
 
-double RvtMotion::rvt( const QVector<double> & fas, double durationGm, double durationRms ) const
+double RvtMotion::calcMax( const QVector<double> & fas, double durationRms ) const
 {
-    if ( durationRms < 0 )
-        durationRms = durationGm;
+    if ( durationRms < 0 ) {
+        durationRms = m_duration;
+    }
 
+    // Square the Fourier amplitude spectrum
     QVector<double> fasSqr(fas.size());
-    for ( int i = 0; i < fasSqr.size(); ++i )
+    for ( int i = 0; i < fasSqr.size(); ++i ) {
         fasSqr[i] = fas.at(i) * fas.at(i);
+    }
 
-    // QFile file("output.csv");
-    // file.open(QIODevice::WriteOnly | QIODevice::Text);
-    // QTextStream out(&file);
-    // for ( int i = 0; i < m_freq.size(); ++i)
-    //     out << m_freq.at(i) << "," << fasSqr.at(i) << endl;
-    
     // The zero moment is the area of the spectral density computed by the
     // trapezoid rule.
-    double moment_0 = moment( 0, fasSqr);
-    double moment_2 = moment( 2, fasSqr);
-    double moment_4 = moment( 4, fasSqr);
+    double m0 = moment( 0, fasSqr);
+    // double m1 = moment( 1, fasSqr); // FIXME Remove this
+    double m2 = moment( 2, fasSqr);
+    double m4 = moment( 4, fasSqr);
 
     // Compute the bandwidth
-    double bandWidth = sqrt((moment_2 * moment_2 )/( moment_0 * moment_4));
+    double bandWidth = sqrt((m2 * m2 )/( m0 * m4));
 
     // Compute the number extrema 
-    double numExtrema = sqrt(moment_4/moment_2) * durationGm / M_PI;
+    double numExtrema = sqrt(m4/m2) * m_duration / M_PI;
 
     // If the number of extrema is less than 2, increase to 2.  There must be
     // one full cycle (two peaks)
-    if (numExtrema <2)
+    if (numExtrema <2) {
         numExtrema = 2;
+    }
 
-    // Compute the peak factor based on the bandwidth and number of extrema
-    double peakFactor = calcPeakFactor( bandWidth, numExtrema );
+    // Use GSL to integrate the peak factor equation
+    struct peakFactorParams params = { bandWidth, numExtrema };
+    gsl_function F = { &peakFactorEqn, &params};
+    double result;
+    double error;
+
+    // Try the adaptive integration without bounds
+    if ( bandWidth != bandWidth || numExtrema != numExtrema ) {
+        // We have issues!
+        QString fileName;
+        int i = 0;
+
+        do {
+            fileName = QString("rvtInfo-%1.dat").arg(i);
+        } while (QFile::exists(fileName));
+
+         QFile file(fileName);
+
+         if (file.open(QFile::WriteOnly)) {
+             QTextStream fout(&file);
+
+             fout << "durationGm: " << m_duration << endl;
+             fout << "durationRms: " << durationRms << endl;
+             fout << "m0: " << m0 << endl;
+             fout << "m2: " << m2 << endl;
+             fout << "m4: " << m4 << endl;
+             fout << "bandWidth: " << bandWidth << endl;
+             fout << "numExtrema: " << numExtrema << endl;
+
+             for (int i = 0; i < fas.size(); ++i) {
+                 fout << i << " " << fas.at(i) << endl;
+             }
+         }
+
+        result = 1.0;
+    } else {
+        gsl_integration_qagiu( &F, 0, 0, 1e-7, 1000, m_workspace, &result, &error);
+    }
+
+    const double peakFactor = sqrt(2) * result;
+
+    // fout << bandWidth << ","
+    //     << sqrt(1 - m1 * m1 / m0 / m2 ) << ","
+    //     << numExtrema << ","
+    //     << peakFactor << ","
+    //     << sqrt(m0/durationRms) << endl;
+
+    // FIXME Compute the peak factor using the asympototic solution
+    // double numZero = sqrt(m2/m0) * durationGm / M_PI;
+    // double peakFactor_asym = sqrt(2 * log(numZero)) + 0.5772 / sqrt(2 * log(numZero));
+    // qDebug() << peakFactor <<  peakFactor_asym;
 
     // Return the peak value which is found by multiplying the variation by the peakfactor
-    return sqrt(moment_0/durationRms) * peakFactor;
+    return sqrt(m0/durationRms) * peakFactor;
+}
+
+double RvtMotion::calcOscillatorMax(QVector<double> fas, const double period, const double damping) const
+{
+    const QVector<std::complex<double> > tf = calcSdofTf(period, damping);
+
+    Q_ASSERT(tf.size() == fas.size());
+
+    for (int i = 0; i < fas.size(); ++i) {
+        fas[i] *= abs(tf.at(i));
+    }
+
+    return calcMax(fas, calcRmsDuration(period, damping, fas));
+}
+
+double RvtMotion::calcRmsDuration(const double period, const double damping, const QVector<double> & fas) const
+{
+    // Use BooreJoyner if there is no FAS defined
+    OscillatorCorrection oscCorrection = fas.isEmpty() ? BooreJoyner : m_oscCorrection;
+
+    // Duration of the oscillator
+    const double durOsc = period / (2 * M_PI * damping / 100);
+
+    int power = 0;
+    double bar = 0;
+
+    switch (oscCorrection)  {
+    case BooreJoyner:
+        power = 3;
+        bar = 1. / 3.;
+        break;
+
+    case LiuPezeshk:          
+        QVector<double> fasSqr(fas.size());
+
+        for (int i = 0; i < fas.size(); ++i) {
+            fasSqr[i] = fas.at(i) * fas.at(i);
+        }
+
+        const double m0 = moment(0, fasSqr);
+        const double m1 = moment(1, fasSqr);
+        const double m2 = moment(2, fasSqr);
+
+        power = 2;
+        bar = sqrt( 2 * M_PI * ( 1 - (m1 * m1)/(m0 * m2)));
+        break;
+    }
+
+    const double foo = pow(m_duration / period, power);
+
+    const double durationRms = m_duration + durOsc * (foo / (foo + bar));
+
+    return durationRms;
 }

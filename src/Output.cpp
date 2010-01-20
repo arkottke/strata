@@ -22,6 +22,7 @@
 #include "Output.h"
 #include "SiteResponseOutput.h"
 #include "Serializer.h"
+#include "Units.h"
 
 #include <qwt_scale_engine.h>
 #include <qwt_symbol.h>
@@ -34,14 +35,14 @@
 
 #include <cmath>
 
-Output::Output( Output::Type type, int refIndex )
-    : m_type(type), m_refIndex(refIndex)
+Output::Output( Output::Type type, int refIndex, QObject * parent )
+    : QObject(parent), m_type(type), m_refIndex(refIndex)
 {
     m_enabled = false;
     m_exportEnabled = true;
 
     m_parent = 0;
-    
+
     m_prefix = "";
     m_suffix = "";
 }
@@ -51,17 +52,17 @@ void Output::reset()
     m_enabled = false;
     m_exportEnabled = true;
     m_refIndex = -1;
+    m_parent = 0;
 
     m_prefix = "";
     m_suffix = "";
 
-    m_average.clear();
-    m_stdev.clear();
+    clear();
+}
 
-    m_avgPlusStdev.clear();
-    m_avgMinusStdev.clear();
-    
-    m_data.clear();
+Output::Type Output::type() const
+{
+    return m_type;
 }
 
 bool Output::enabled() const
@@ -71,6 +72,10 @@ bool Output::enabled() const
 
 void Output::setEnabled(bool enabled)
 {
+    if ( m_enabled != enabled ) {
+        emit wasModified();
+    }
+
     m_enabled = enabled;
 }
 
@@ -114,10 +119,10 @@ const QString Output::name() const
     switch (m_type)
     {
         case ModulusCurve:
-            return QString(QObject::tr("Non-Linear Curve -- %1 -- Shear Modulus"))
+            return QString(QObject::tr("Nonlinear Curve -- %1 -- Shear Modulus"))
                 .arg(m_prefix);
         case DampingCurve:
-            return QString(QObject::tr("Non-Linear Curve -- %1 -- Damping"))
+            return QString(QObject::tr("Nonlinear Curve -- %1 -- Damping"))
                 .arg(m_prefix);
         case AccelTimeSeries:
             return QString(QObject::tr("Response -- %1 -- Accel. Time Series -- %2"))
@@ -129,10 +134,13 @@ const QString Output::name() const
             return QString(QObject::tr("Response -- %1 -- Disp. Time Series -- %2"))
                 .arg(m_prefix).arg(m_suffix);
         case StrainTimeSeries:
-            return QString(QObject::tr("Response -- %1 -- Shear Strain Time Series"))
-                .arg(m_prefix);
+            return QString(QObject::tr("Response -- %1 -- Shear Strain Time Series -- %2"))
+                .arg(m_prefix).arg(m_suffix);
         case StressTimeSeries:
-            return QString(QObject::tr("Response -- %1 -- Shear Stress Time Series"))
+            return QString(QObject::tr("Response -- %1 -- Shear Stress Time Series -- %2"))
+                .arg(m_prefix).arg(m_suffix);
+        case FourierSpectrum:
+            return QString(QObject::tr("Response -- %1 -- Fourier Spectrum"))
                 .arg(m_prefix);
         case ResponseSpectrum:
             return QString(QObject::tr("Response -- %1 -- Accel. Response Spectrum"))
@@ -143,12 +151,19 @@ const QString Output::name() const
         case TransferFunction:
             return QString(QObject::tr("Ratio -- %1 -- Transfer Function"))
                 .arg(m_prefix);
+        case StrainTransferFunction:
+            return QString(QObject::tr("Ratio -- %1 -- Strain Transfer Function"))
+                .arg(m_prefix);
         case MaxAccelProfile:
             return QObject::tr("Profile -- Max. Acceleration");
+        case MaxVelProfile:
+            return QObject::tr("Profile -- Max. Velocity");
         case MaxStrainProfile:
             return QObject::tr("Profile -- Max. Shear Strain");
         case MaxStressProfile:
             return QObject::tr("Profile -- Max. Shear Stress");
+        case StressReducCoeffProfile:
+            return QObject::tr("Profile -- Stress Reduction Coefficient (r_d)");
         case StressRatioProfile:
             return QObject::tr("Profile -- Stress Ratio");
         case VerticalStressProfile:
@@ -166,32 +181,32 @@ const QString Output::name() const
         case Undefined:
             return "";
     }
-    
+
     return QString();
     /*
-    switch (m_type)
-    {
-        case ModulusCurve:
-        case DampingCurve:
-        case AccelTimeSeries:
-        case VelTimeSeries:
-        case DispTimeSeries:
-        case StrainTimeSeries:
-        case StressTimeSeries:
-        case ResponseSpectrum:
-        case SpectralRatio:
-        case TransferFunction:
-        case MaxAccelProfile:
-        case MaxStrainProfile:
-        case MaxStressProfile:
-        case StressRatioProfile:
-        case VerticalStressProfile:
-        case InitialVelProfile:
-        case FinalVelProfile:
-        case ModulusProfile:
-        case DampingProfile:
-    }
-    */
+       switch (m_type)
+       {
+       case ModulusCurve:
+       case DampingCurve:
+       case AccelTimeSeries:
+       case VelTimeSeries:
+       case DispTimeSeries:
+       case StrainTimeSeries:
+       case StressTimeSeries:
+       case ResponseSpectrum:
+       case SpectralRatio:
+       case TransferFunction:
+       case MaxAccelProfile:
+       case MaxStrainProfile:
+       case MaxStressProfile:
+       case StressRatioProfile:
+       case VerticalStressProfile:
+       case InitialVelProfile:
+       case FinalVelProfile:
+       case ModulusProfile:
+       case DampingProfile:
+       }
+       */
 }
 
 void Output::configurePlot( QwtPlot * plot ) const
@@ -205,13 +220,16 @@ void Output::configurePlot( QwtPlot * plot ) const
         case StrainTimeSeries:
         case StressTimeSeries:
         case TransferFunction:
+        case StrainTransferFunction:
         case MaxErrorProfile:
+        case StressReducCoeffProfile:
             plot->setAxisScaleEngine( QwtPlot::xBottom, new QwtLinearScaleEngine);
             plot->setAxisScaleEngine( QwtPlot::yLeft, new QwtLinearScaleEngine);
             break;
         case ResponseSpectrum:
         case SpectralRatio:
         case MaxAccelProfile:
+        case MaxVelProfile:
         case MaxStrainProfile:
         case MaxStressProfile:
         case StressRatioProfile:
@@ -224,6 +242,10 @@ void Output::configurePlot( QwtPlot * plot ) const
         case DampingCurve:
             plot->setAxisScaleEngine( QwtPlot::xBottom, new QwtLog10ScaleEngine);
             plot->setAxisScaleEngine( QwtPlot::yLeft, new QwtLinearScaleEngine);
+            break;
+        case FourierSpectrum:
+            plot->setAxisScaleEngine( QwtPlot::xBottom, new QwtLog10ScaleEngine);
+            plot->setAxisScaleEngine( QwtPlot::yLeft, new QwtLog10ScaleEngine);
             break;
         case Undefined:
             break;
@@ -239,16 +261,20 @@ void Output::configurePlot( QwtPlot * plot ) const
         case DispTimeSeries:
         case StrainTimeSeries:
         case StressTimeSeries:
+        case FourierSpectrum:
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
             plot->setAxisTitle( QwtPlot::xBottom, referenceLabel() );
             plot->setAxisTitle( QwtPlot::yLeft, dataLabel() );
             break;
         case MaxAccelProfile:
+        case MaxVelProfile:
         case MaxStrainProfile:
         case MaxErrorProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case InitialVelProfile:
@@ -263,6 +289,11 @@ void Output::configurePlot( QwtPlot * plot ) const
     }
 
     // Modify the axis
+    // Reset conditions
+    plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Inverted, false);
+    plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Symmetric, false);
+    plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::IncludeReference, true);
+
     switch (m_type)
     {
         case AccelTimeSeries:
@@ -271,19 +302,21 @@ void Output::configurePlot( QwtPlot * plot ) const
         case StrainTimeSeries:
         case StressTimeSeries:
             plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Symmetric, true);
-            plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::IncludeReference, true);
             break;
         case ModulusCurve:
         case DampingCurve:
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
             plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::IncludeReference, true);
             break;
         case MaxAccelProfile:
+        case MaxVelProfile:
         case MaxErrorProfile:
         case MaxStrainProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case InitialVelProfile:
@@ -291,6 +324,9 @@ void Output::configurePlot( QwtPlot * plot ) const
         case ModulusProfile:
         case DampingProfile:
             plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Inverted, true);
+            break;
+        case FourierSpectrum:
+            plot->axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::IncludeReference, false);
             break;
         case Undefined:
             break;
@@ -300,15 +336,25 @@ void Output::configurePlot( QwtPlot * plot ) const
 void Output::dataToCurve( const int motionIndex, const int siteIndex, QwtPlotCurve * curve) const
 {
     curve->setPen(QPen(Qt::darkGray));
-    
-    // If strain is used skip the first point
-    int incr = usesStrain() ? 1 : 0;
+
+    // The first point in the data series is ignored if the output uses strain
+    int shift = 0;
+
+    // At surface strain is zero, so that causes problems for log-log plots.
+    if ( usesStrain() ) {
+        shift = 1;
+    }
+
+    // The Fourier spectrum of recored motions would include a zero frequency value that can't be plotted in log-log space. FIXME
+    if ( m_type == FourierSpectrum && xData(motionIndex,siteIndex).first() < 1e-5) {
+        shift = 1;
+    }
 
     curve->setData( 
-            xData( motionIndex, siteIndex ).data() + incr,
-            yData( motionIndex, siteIndex ).data() + incr,
-            dataSize( motionIndex, siteIndex ) - incr);
-        
+            xData( motionIndex, siteIndex ).data() + shift,
+            yData( motionIndex, siteIndex ).data() + shift,
+            dataSize( motionIndex, siteIndex ) - shift);
+
 
     if ( constantWithinLayer() )
         curve->setStyle(QwtPlotCurve::Steps);
@@ -331,31 +377,37 @@ void Output::quantilesToCurves( QList<QwtPlotCurve*> & quantiles ) const
 
         // Use steps for the curves
         /*
-        for ( int i = 0; i < quantiles.size(); ++i)
-            quantiles[i]->setStyle(QwtPlotCurve::Steps);
-            */
+           for ( int i = 0; i < quantiles.size(); ++i)
+           quantiles[i]->setStyle(QwtPlotCurve::Steps);
+           */
 
     } else {
         quantiles[0]->setData( xData().data() + incr, m_average.data() + incr, m_average.size() - incr);
         quantiles[1]->setData( xData().data() + incr, m_avgPlusStdev.data() + incr, m_stdev.size() - incr);
         quantiles[2]->setData( xData().data() + incr, m_avgMinusStdev.data() + incr, m_stdev.size() - incr);
-        
+
         // Use lines for the curves
         /*
-        for ( int i = 0; i < quantiles.size(); ++i)
-            quantiles[i]->setStyle(QwtPlotCurve::Lines);
-            */
+           for ( int i = 0; i < quantiles.size(); ++i)
+           quantiles[i]->setStyle(QwtPlotCurve::Lines);
+           */
     }
-    
+
     // Set their color
     quantiles[0]->setPen(QPen(QBrush(Qt::blue), 2, Qt::SolidLine));
     quantiles[1]->setPen(QPen(QBrush(Qt::blue), 2, Qt::DashLine));
     quantiles[2]->setPen(QPen(QBrush(Qt::blue), 2, Qt::DashLine));
 }    
-        
+
 void Output::clear()
 {
     m_data.clear();
+
+    m_average.clear();
+    m_stdev.clear();
+
+    m_avgPlusStdev.clear();
+    m_avgMinusStdev.clear();
 }
 
 void Output::addData( const QVector<double> & data )
@@ -367,7 +419,7 @@ void Output::addInterpData( const QVector<double> & data, const QList<SubLayer> 
 {
     // Interpolated data
     QVector<double> interpData;
-       
+
     // Index of the interpolated depth
     int interpIdx = 0;
 
@@ -376,7 +428,7 @@ void Output::addInterpData( const QVector<double> & data, const QList<SubLayer> 
         for (int i = 0; i < subLayers.size(); ++i ) {
             bool dataAdded = false;
 
-            // Add the data
+            // Add the data while the interpolated depth is less than the depth to the base of the sublayer
             while ( interpIdx < interpDepths.size() && interpDepths.at(interpIdx) < subLayers.at(i).depthToBase() ) {
                 // Add the data
                 interpData << data.at(i);
@@ -389,18 +441,17 @@ void Output::addInterpData( const QVector<double> & data, const QList<SubLayer> 
 
             if (!dataAdded) {
                 qDebug() << "Data point ignored!" << i;
-                ++interpIdx;
             }
         }
     } else {
         // Linearly interpolate
-        
+
         // The data needs to be modified to reflect the values at the top of
         // each of the layers
         QVector<double> modData;
         QVector<double> modDepth;
-        
-        if ( usesStrain() ) {
+
+        if (usesStrain()) {
             // The values are zero at the surface and equal at layer
             // boundaries.  The value at the base of the layer is found by
             // adding twice the difference  between the top and mid to the top
@@ -412,20 +463,37 @@ void Output::addInterpData( const QVector<double> & data, const QList<SubLayer> 
                 modDepth << subLayers.at(i).depthToMid();
                 modData << data.at(i);
             }
-
-            // Linearly exptrapolate to the base of the profile
-            int n = subLayers.size() - 1;
-            double diffDepth = subLayers.at(n).depthToMid() - subLayers.at(n-1).depthToMid();
-            double slope = ( data.at(n) - data.at(n-1) ) / diffDepth;
+            
 
             modDepth << subLayers.last().depthToBase();
-            modData << data.last() + slope * subLayers.last().thickness() / ( 2 * diffDepth );
+
+            if (subLayers.size() == 1) {
+                // Only one sublayer! Value at the base of the layer is twice
+                // the value at the surface of the layer.
+                modData << 2. * data.last();
+            } else {
+                // Compute the slope based on the last two layers and extrapolate.
+                int n = subLayers.size() - 1;
+                double slope = (data.at(n) - data.at(n-1)) / 
+                    (subLayers.at(n).depthToMid() - subLayers.at(n-1).depthToMid());
+
+                modData << data.last() + slope * subLayers.last().thickness() / 2.;
+            }
 
         } else {
             modData = data;
-            
-            for ( int i = 0; i < subLayers.size(); ++i )
-                modDepth << subLayers.at(i).depth();
+
+            if ( m_type == StressReducCoeffProfile ) {
+                modDepth << 0;
+                for ( int i = 0; i < subLayers.size(); ++i ) {
+                    modDepth << subLayers.at(i).depthToMid();
+                }
+            } else {
+                for ( int i = 0; i < subLayers.size(); ++i ) {
+                    modDepth << subLayers.at(i).depth();
+                }
+                modDepth << subLayers.last().depthToBase();
+            }
         }
 
         // Allocate the interpolator
@@ -434,27 +502,33 @@ void Output::addInterpData( const QVector<double> & data, const QList<SubLayer> 
         gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
 
         for ( int i = 0; i < interpDepths.size(); ++i) {
-            if ( interpDepths.at(i) < modDepth.last() )
+            if ( interpDepths.at(i) < modDepth.last() ) {
                 // Interpolate the values
                 interpData <<
                     gsl_interp_eval( interpolator, modDepth.data(), modData.data(), interpDepths.at(i), accelerator);
-            else
+            } else {
                 // Stop
                 break;
+            }
         }
 
         // Delete the interpolator and accelerator
         gsl_interp_free( interpolator );
         gsl_interp_accel_free( accelerator );
-
     }
 
     // Add bedrock stuff
-    if ( subLayers.size() < data.size() )
+    if ( subLayers.size() < data.size() ) {
         interpData << data.last();
+    }
 
     // Interpolate the data
     m_data.push_back( interpData );
+}
+        
+void Output::removeLast()
+{
+    m_data.remove(m_data.size()-1);
 }
 
 void Output::computeStats()
@@ -466,7 +540,7 @@ void Output::computeStats()
     // Clear the average and standard deviations
     m_average.clear();
     m_stdev.clear();
-    
+
     double dataPt = 0;
 
     // Compute the average and standard deviation value
@@ -547,8 +621,10 @@ bool Output::hasStats() const
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
         case MaxStrainProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case InitialVelProfile:
@@ -556,6 +632,8 @@ bool Output::hasStats() const
         case ModulusProfile:
         case DampingProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
+        case FourierSpectrum:
             return true;
         case MaxErrorProfile:
         case AccelTimeSeries:
@@ -573,9 +651,11 @@ bool Output::usesDepth() const
     switch (m_type)
     {
         case MaxAccelProfile:
+        case MaxVelProfile:
         case MaxErrorProfile:
         case MaxStrainProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case InitialVelProfile:
@@ -593,6 +673,8 @@ bool Output::usesDepth() const
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
+        case FourierSpectrum:
         default:
             return false;
     }
@@ -615,6 +697,8 @@ bool Output::usesStrain() const
         case ModulusCurve:
         case DampingCurve:
         case MaxAccelProfile:
+        case MaxVelProfile:
+        case StressReducCoeffProfile:
         case AccelTimeSeries:
         case VelTimeSeries:
         case DispTimeSeries:
@@ -623,6 +707,8 @@ bool Output::usesStrain() const
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
+        case FourierSpectrum:
         default:
             return false;
     }
@@ -639,9 +725,11 @@ bool Output::constantWithinLayer() const
         case FinalVelProfile:
             return true;
         case MaxAccelProfile:
+        case MaxVelProfile:
         case MaxStrainProfile:
         case MaxStressProfile:
         case StressRatioProfile:
+        case StressReducCoeffProfile:
         case VerticalStressProfile:
         case AccelTimeSeries:
         case VelTimeSeries:
@@ -651,6 +739,8 @@ bool Output::constantWithinLayer() const
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
+        case FourierSpectrum:
         default:
             return false;
     }
@@ -668,10 +758,12 @@ bool Output::isLogNormal() const
         case ModulusCurve:
         case DampingCurve:
         case MaxErrorProfile:
+        case StressReducCoeffProfile:
             return false;
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
         case MaxStrainProfile:
         case MaxStressProfile:
         case StressRatioProfile:
@@ -681,6 +773,8 @@ bool Output::isLogNormal() const
         case ModulusProfile:
         case DampingProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
+        case FourierSpectrum:
         default:
             return true;
     }
@@ -698,12 +792,15 @@ Qt::Orientation Output::orientation() const
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
         case ModulusCurve:
         case DampingCurve:
+        case FourierSpectrum:
             return Qt::Horizontal;
         case MaxStrainProfile:
         case MaxErrorProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case InitialVelProfile:
@@ -711,6 +808,7 @@ Qt::Orientation Output::orientation() const
         case ModulusProfile:
         case DampingProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
         default:
             return Qt::Vertical;
     }
@@ -721,30 +819,28 @@ const QVector<QVector<double> > & Output::data() const
     return m_data;
 }
 
-QMap<QString, QVariant> Output::toMap(bool saveData) const
+QMap<QString, QVariant> Output::toMap() const
 {
     QMap<QString, QVariant> map;
-   
+
     map.insert("refIndex", m_refIndex);
     map.insert("enabled", m_enabled);
     map.insert("exportEnabled", m_exportEnabled);
     map.insert("prefix", m_prefix);
     map.insert("suffix", m_suffix);
 
-    if (saveData) {
-        QList<QVariant> list;
-        // Save the data
-        list.clear(); 
-        for ( int i = 0; i < m_data.size(); ++i )
-            list << QVariant(Serializer::toVariantList(m_data.at(i)));
+    QList<QVariant> list;
+    // Save the data
+    list.clear(); 
+    for ( int i = 0; i < m_data.size(); ++i )
+        list << QVariant(Serializer::toVariantList(m_data.at(i)));
 
-        map.insert("data", list);
-        map.insert("average", Serializer::toVariantList(m_average));
-        map.insert("stdev", Serializer::toVariantList(m_stdev));
-        map.insert("avgPlusStdev", Serializer::toVariantList(m_avgPlusStdev));
-        map.insert("avgMinsStdev", Serializer::toVariantList(m_avgPlusStdev));
-    }
-    
+    map.insert("data", list);
+    map.insert("average", Serializer::toVariantList(m_average));
+    map.insert("stdev", Serializer::toVariantList(m_stdev));
+    map.insert("avgPlusStdev", Serializer::toVariantList(m_avgPlusStdev));
+    map.insert("avgMinsStdev", Serializer::toVariantList(m_avgPlusStdev));
+
     return map;
 }
 
@@ -752,7 +848,7 @@ void Output::fromMap(const QMap<QString, QVariant> & map)
 {
     m_refIndex = map.value("refIndex").toInt();
     m_enabled = map.value("enabled").toBool();
-    m_exportEnabled = map.value("exportEnabled").toBool();
+    m_exportEnabled = map.value("exportEnabled", true).toBool();
     m_prefix = map.value("prefix").toString();
     m_suffix = map.value("suffix").toString();
 
@@ -763,7 +859,7 @@ void Output::fromMap(const QMap<QString, QVariant> & map)
         QList<QVariant> list = map.value("data").toList();
         for ( int i = 0; i < list.size(); ++i)
             m_data << Serializer::fromVariantList(list.at(i).toList()).toVector();
-      
+
         m_average = Serializer::fromVariantList(map.value("average").toList()).toVector();
         m_stdev = Serializer::fromVariantList(map.value("stdev").toList()).toVector();
         m_avgPlusStdev = Serializer::fromVariantList(map.value("avgPlusStdev").toList()).toVector();
@@ -771,7 +867,7 @@ void Output::fromMap(const QMap<QString, QVariant> & map)
     }
 }
 
-bool Output::isTimeSeries() const
+bool Output::hasMotionSpecificReference() const
 {
     switch (m_type)
     {
@@ -781,19 +877,23 @@ bool Output::isTimeSeries() const
         case StrainTimeSeries:
         case StressTimeSeries:
             return true;
+        case FourierSpectrum:
         case InitialVelProfile:
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
         case MaxErrorProfile:
         case MaxStrainProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case ModulusProfile:
         case DampingProfile:
         case FinalVelProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
         case ModulusCurve:
         case DampingCurve:
         default:
@@ -809,23 +909,6 @@ bool Output::isMotionIndependent() const
         case ModulusCurve:
         case DampingCurve:
             return true;
-        case AccelTimeSeries:
-        case VelTimeSeries:
-        case DispTimeSeries:
-        case StrainTimeSeries:
-        case StressTimeSeries:
-        case ResponseSpectrum:
-        case SpectralRatio:
-        case TransferFunction:
-        case MaxStrainProfile:
-        case MaxErrorProfile:
-        case MaxStressProfile:
-        case StressRatioProfile:
-        case VerticalStressProfile:
-        case ModulusProfile:
-        case DampingProfile:
-        case FinalVelProfile:
-        case MaxAccelProfile:
         default:
             return false;
     }
@@ -835,26 +918,6 @@ bool Output::isSiteIndependent() const
 {
     switch (m_type)
     {
-        case ModulusCurve:
-        case DampingCurve:
-        case AccelTimeSeries:
-        case VelTimeSeries:
-        case DispTimeSeries:
-        case StrainTimeSeries:
-        case StressTimeSeries:
-        case ResponseSpectrum:
-        case SpectralRatio:
-        case TransferFunction:
-        case MaxStrainProfile:
-        case MaxErrorProfile:
-        case MaxStressProfile:
-        case StressRatioProfile:
-        case VerticalStressProfile:
-        case ModulusProfile:
-        case DampingProfile:
-        case InitialVelProfile:
-        case FinalVelProfile:
-        case MaxAccelProfile:
         default:
             return false;
     }
@@ -862,10 +925,11 @@ bool Output::isSiteIndependent() const
 
 void Output::toTextFile( QString path, const int motionIndex, const QString & separator, const QString & prefix) const
 {
-    if ( !path.endsWith( QDir::separator() ) )
+    if (!path.endsWith( QDir::separator())) {
         path += QDir::separator();
+    }
 
-    QFile file( path + prefix + fileName() );
+    QFile file( path + prefix + fileName(motionIndex));
 
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qCritical() << "Unable to open file:" << file.fileName();
@@ -877,56 +941,86 @@ void Output::toTextFile( QString path, const int motionIndex, const QString & se
 
     // Create the header
     out << "# Strata OUTPUT -- " << name();
-   
+
     if ( !(motionIndex < 0) )
         out << " -- " << m_parent->motionNames().at(motionIndex);
-   
-    out << endl << "# " << referenceLabel();
+
+    out << endl << "# " << m_parent->title() << endl;
+
+    out << "# " << referenceLabel();
 
     if ( !(motionIndex < 0) || isMotionIndependent() ) {
-        for (int i = 0; i < m_parent->siteCount(); ++i )
+        for (int i = 0; i < m_parent->siteCount(); ++i ) {
             out << separator << QString("S-%1").arg(i+1);
+
+            if (!m_parent->siteEnabledAt(i)) {
+                out << QObject::tr(" (disabled)");
+            }
+        }
     } else if ( isSiteIndependent() ) {
-        for (int i = 0; i < m_parent->motionCount(); ++i )
+        for (int i = 0; i < m_parent->motionCount(); ++i ) {
             out << separator << QString("M-%1").arg(m_parent->motionNames().at(i));
+
+            if (!m_parent->motionEnabledAt(i)) {
+                out << QObject::tr(" (disabled)");
+            }
+        }
     } else {
+        int idx = 0;
         for (int i = 0; i < m_parent->siteCount(); ++i ) {
             for (int j = 0; j < m_parent->motionCount(); ++j ) {
                 out << separator << QString("S-%1-M-%2").arg(i+1).arg(m_parent->motionNames().at(j));
+
+                if (!m_parent->seriesEnabledAt(idx)) {
+                    out << QObject::tr(" (disabled)");
+                }
+                ++idx;
             }
         }
     }
 
-    if ( hasStats() )
-        out << separator << "Median" << separator << "ln Stdev.";
+    if ( hasStats() ) {
+        if ( isLogNormal() ) {
+            out << separator << "Median" << separator << "ln Stdev.";
+        } else {
+            out << separator << "Mean" << separator << "Stdev.";
+        }
+    }
     // End the line
     out << endl;
 
     // Export the data
     const QVector<double> & ref = (usesDepth()) ? yData() : xData(motionIndex);
     int ini = (motionIndex < 0) ? 0 : motionIndex;
-    int inc = (motionIndex < 0) ? 1 : m_parent->motionCount();
+    // If we are outputting motions we should use an increment that is the size of the data series to end the loop after one iteration.
+    int inc = (motionIndex < 0) ? 1 : m_data.size();
 
-    for ( int i = 0; i < ref.size(); ++i ) {
+    for ( int i = 0; i < m_data.at(ini).size(); ++i) {
         out << ref.at(i);
         for ( int j = ini; j < m_data.size(); j += inc) {
-            if ( i < m_data.at(j).size() )
+            if ( i < m_data.at(j).size() ) {
                 out << separator << m_data.at(j).at(i);
-            else
-                out << separator;
+            } else {
+                out << separator << "NaN";;
+            }
         }
-    
-        if ( hasStats() )
+
+        if (hasStats()) {
             out << separator << m_average.at(i) << separator << m_stdev.at(i);
-           
+        }
+
         // End the line
         out << endl;
     }
+
+    file.close();
 }
 
-const QString Output::fileName() const
+const QString Output::fileName(const int motionIndex) const
 {
     QString name;
+            
+    const int fieldWidth = (int)ceil(log10(m_parent->motionCount()+1));
 
     switch (m_type)
     {
@@ -936,20 +1030,28 @@ const QString Output::fileName() const
         case DampingCurve:
             name = "nlCurve-" + m_prefix + "-damping.csv";
             break;
+        case FourierSpectrum:
+            name = m_prefix + "-fas.csv";
+            break;
         case AccelTimeSeries:
-            name = m_prefix + "-accelTs-" + m_suffix + ".csv";
+            name = QString("%1-accelTs-%2-M%3.csv").arg(m_prefix).arg(m_suffix)
+                .arg(motionIndex+1, fieldWidth, 10, QLatin1Char('0'));
             break;
         case VelTimeSeries:
-            name = m_prefix + "-velTs-" + m_suffix + ".csv";
+            name = QString("%1-velTs-%2-M%3.csv").arg(m_prefix).arg(m_suffix)
+                .arg(motionIndex+1, fieldWidth, 10, QLatin1Char('0'));
             break;
         case DispTimeSeries:
-            name = m_prefix + "-dispTs-" + m_suffix + ".csv";
+            name = QString("%1-dispTs-%2-M%3.csv").arg(m_prefix).arg(m_suffix)
+                .arg(motionIndex+1, fieldWidth, 10, QLatin1Char('0'));
             break;
         case StrainTimeSeries:
-            name = m_prefix + "-strainTs.csv";
+            name = QString("%1-strainTs-%2-M%3.csv").arg(m_prefix).arg(m_suffix)
+                .arg(motionIndex+1, fieldWidth, 10, QLatin1Char('0'));
             break;
         case StressTimeSeries:
-            name = m_prefix + "-stressTs.csv";
+            name = QString("%1-stressTs-%2-M%3.csv").arg(m_prefix).arg(m_suffix)
+                .arg(motionIndex+1, fieldWidth, 10, QLatin1Char('0'));
             break;
         case ResponseSpectrum:
             name = m_prefix + "-respSpec.csv";
@@ -960,11 +1062,17 @@ const QString Output::fileName() const
         case TransferFunction:
             name = m_prefix + "-transFunc.csv";
             break;
+        case StrainTransferFunction:
+            name = m_prefix + "-strainTransFunc.csv";
+            break;
         case MaxStrainProfile:
             name = "profile-maxStrain.csv";
             break;
         case MaxStressProfile:
             name = "profile-maxStress.csv";
+            break;
+        case StressReducCoeffProfile:
+            name = "profile-stressReducCoeff.csv";
             break;
         case StressRatioProfile:
             name = "profile-stressRatio.csv";
@@ -986,6 +1094,9 @@ const QString Output::fileName() const
             break;
         case MaxAccelProfile:
             name = "profile-maxAccel.csv";
+            break;
+        case MaxVelProfile:
+            name = "profile-maxVel.csv";
             break;
         case MaxErrorProfile:
             name = "profile-maxError.csv";
@@ -1013,10 +1124,13 @@ const QString Output::referenceLabel() const
         case ResponseSpectrum:
         case SpectralRatio:
             return QObject::tr("Period (s)");
+        case FourierSpectrum:
         case TransferFunction:
+        case StrainTransferFunction:
             return QObject::tr("Frequency (Hz)");
         case MaxStrainProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case MaxErrorProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
@@ -1024,8 +1138,9 @@ const QString Output::referenceLabel() const
         case ModulusProfile:
         case DampingProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
         case InitialVelProfile:
-            return QString(QObject::tr("Depth (%1)")).arg(m_parent->units()->length());
+            return QString(QObject::tr("Depth (%1)")).arg(Units::instance()->length());
         default:
             return "";
     }
@@ -1037,37 +1152,45 @@ const QString Output::dataLabel() const
     {
         case ModulusCurve:
             return QObject::tr("Normalized Shear Modulus (G/G_max)");
+        case FourierSpectrum:
+            return QString(QObject::tr("|FAS| (%1/s)").arg(Units::instance()->accel()));
         case AccelTimeSeries:
-            return QString(QObject::tr("Acceleration (%1)")).arg(m_parent->units()->accel());
+            return QString(QObject::tr("Acceleration (%1)")).arg(Units::instance()->accel());
         case VelTimeSeries:
-            return QString(QObject::tr("Velocity (%1)")).arg(m_parent->units()->velTs());
+            return QString(QObject::tr("Velocity (%1)")).arg(Units::instance()->velTs());
         case DispTimeSeries:
-            return QString(QObject::tr("Displacement (%1)")).arg(m_parent->units()->dispTs());
+            return QString(QObject::tr("Displacement (%1)")).arg(Units::instance()->dispTs());
         case StrainTimeSeries:
             return QObject::tr("Shear strain (%)");
         case StressTimeSeries:
-            return QObject::tr("Shear stress (%)");
+            return QObject::tr("Shear stress (%1)").arg(Units::instance()->stress());
         case ResponseSpectrum:
-            return QString(QObject::tr("Spec. Acceleration (%1)")).arg(m_parent->units()->accel());
+            return QString(QObject::tr("Spec. Acceleration (%1)")).arg(Units::instance()->accel());
         case SpectralRatio:
             return QObject::tr("Sa_j / Sa_k");
         case TransferFunction:
-            return QObject::tr("FAS_j / FAS_k");
+            return QObject::tr("FAS_j (strain) / FAS_k (accel)");
+        case StrainTransferFunction:
+            return QObject::tr("FAS_j (strain) / FAS_k (accel)");
         case MaxAccelProfile:
-            return QString(QObject::tr("Maximum Acceleration (%1)")).arg(m_parent->units()->accel());
+            return QString(QObject::tr("Maximum Acceleration (%1)")).arg(Units::instance()->accel());
+        case MaxVelProfile:
+            return QString(QObject::tr("Maximum Velocity (%1)")).arg(Units::instance()->velTs());
         case MaxStrainProfile:
             return QObject::tr("Maximum Shear Strain (%)");
         case MaxStressProfile:
-            return QString(QObject::tr("Maximum Shear Stress (%1)")).arg(m_parent->units()->stress());
+            return QString(QObject::tr("Maximum Shear Stress (%1)")).arg(Units::instance()->stress());
+        case StressReducCoeffProfile:
+            return QObject::tr("Stress Reduction Coefficient (r_d)");
         case StressRatioProfile:
             return QObject::tr("Stress Ratio");
         case VerticalStressProfile:
-            return QString(QObject::tr("Vertical Stress (%1)")).arg(m_parent->units()->stress());
+            return QString(QObject::tr("Vertical Stress (%1)")).arg(Units::instance()->stress());
         case InitialVelProfile:
         case FinalVelProfile:
-            return QString(QObject::tr("Shear-wave velocity (%1)")).arg(m_parent->units()->vel());
+            return QString(QObject::tr("Shear-wave velocity (%1)")).arg(Units::instance()->vel());
         case ModulusProfile:
-            return QString(QObject::tr("Shear modulus (%1)")).arg(m_parent->units()->stress());
+            return QString(QObject::tr("Shear modulus (%1)")).arg(Units::instance()->stress());
         case MaxErrorProfile:
             return QObject::tr("Maximum Error in Properties (%)");
         case DampingCurve:
@@ -1096,21 +1219,25 @@ const QVector<double> & Output::xData( const int motionIndex, const int siteInde
         case ResponseSpectrum:
         case SpectralRatio:
             // Use period
-            return m_parent->period().data();
+            return m_parent->period()->data();
+        case FourierSpectrum:
         case TransferFunction:
+        case StrainTransferFunction:
             // Use frequency
-            return m_parent->freq().data();
+            return m_parent->freq()->data();
         case InitialVelProfile:
             return m_data.at(siteIndex);
         case MaxStrainProfile:
         case MaxErrorProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case FinalVelProfile:
         case ModulusProfile:
         case DampingProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
         default:
             return m_data.at(m_parent->generalIndex(motionIndex,siteIndex));
     }
@@ -1131,10 +1258,13 @@ const QVector<double> & Output::yData( const int motionIndex, const int siteInde
         case ResponseSpectrum:
         case SpectralRatio:
         case TransferFunction:
+        case StrainTransferFunction:
+        case FourierSpectrum:
             return m_data.at(m_parent->generalIndex(motionIndex,siteIndex));
         case MaxStrainProfile:
         case MaxErrorProfile:
         case MaxStressProfile:
+        case StressReducCoeffProfile:
         case StressRatioProfile:
         case VerticalStressProfile:
         case InitialVelProfile:
@@ -1142,13 +1272,14 @@ const QVector<double> & Output::yData( const int motionIndex, const int siteInde
         case ModulusProfile:
         case DampingProfile:
         case MaxAccelProfile:
+        case MaxVelProfile:
         default:
             // Use top-depth
             return m_parent->depths();
     }
 }
 
-const int Output::dataSize( const int motionIndex, const int siteIndex ) const
+int Output::dataSize( const int motionIndex, const int siteIndex ) const
 {
     if ( isMotionIndependent() )
         return m_data.at(siteIndex).size();
