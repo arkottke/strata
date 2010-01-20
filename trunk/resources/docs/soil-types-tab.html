@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<h2 align="center">Soil Types</h2>
+
+	<p>The <em>Soil Types</em> tab is used to define the soil types found within
+	the profile.  If the soil properties are to be varied, then all layers for a
+	given soil type are varied by the same amount.  The following group boxes are
+	found on this tab.  
+	<ul>
+		<li><a href="#soil types">Soil Types</a></li>
+		<li><a href="#bedrock layer">Bedrock Layer</a></li>
+		<li><a href="#darendeli and stokoe model parameters">Darendeli and Stokoe Model Parameters</a></li>
+		<li><a href="#nonlinear property">Non-Linear Property</a></li>
+		<li><a href="#nonlinear curve variation parameters">Non-Linear Curve Variation Parameters</a></li>
+	</ul>
+	Note: The <em>Non-Linear Curve Variation Parameters</em> group box is only
+	shown when the variation of non-linear parameters is enabled.
+	</p>
+
+	<h3><a name="#soil types">Soil Types</a></h3>
+	<p><dl>
+		<dt>Name<dt>
+		<dd>The name of the soil used in drop down boxes to select the soil
+		type and in printing of output.</dd>
+		<dt>Unit Weight<dt>
+		<dd>The unit weight of the soil used in the dynamic response of the
+		system.</dd>
+		<dt>Initial Damping<dt>
+		<dd>The initial estimate of the material damping.  This damping is
+		used in the first iteration of the equivalent-linear site response
+		analysis.</dd>
+		<dt>G/G$_{max}$ Model<dt>
+		<dd>The model used for the shear-modulus reduction.</dd>
+		<dt>Damping Model<dt>
+		<dd>The model used for the material damping.</dd>
+		<dt>Notes<dt>
+		<dd>The notes are only present to preserve one's sanity and are not
+		used in any way.</dd>
+		<dt>Varied<dt>
+		<dd>The varied check box allows the non-linear properties of some
+		layers not to be varied.  This check box is only shown if variation of
+		the non-linear soil properties is enabled.</dd>
+	</dl></p>
+
+	<h3><a name="#bedrock layer">Bedrock Layer</a></h3>
+	<p>Basic properties of the half-space layer.  The damping of the half-space
+	layer does not change with strain so a good estimate of damping is
+	important.  The variation of the damping in the half-space layer is
+	governed by the same model as all of the other soil types.</p>
+
+	<h3><a name="#darendeli and stokoe model parameters">Darendeli and Stokoe Model Parameters</a></h3>
+	<p>When the <em>Darendeli & Stokoe</em> model is selected for either the
+	shear modulus reduction or material damping curve thie group box will
+	become enabled.  This properties are used to compue the Darendeli and
+	Stokoe non-linear curves.<p>
+	<h3><a name="#nonlinear property">Non-Linear Property</a></h3>
+	<p>Allows for editting of the non-linear property curves.  If you want to
+	make the curve permanent for use in other prrojects considering adding the
+	curve to the library with the <a href="nonlinear curve dialog">Non-Linear
+		Curve Dialog</a>.</p>
+	
+	<h3><a name="#nonlinear curve variation parameters">Non-Linear Curve Variation Parameters</a></h3>
+	<p>The non-linear properties are varied assuming a normal distribution with
+	the provided values as the mean.  The standard deviation can be computed
+	using the Darendeli and Stokoe model, or a custom model.  Regardless of the
+	model it is required that the maximum and minium normalized shear modulus
+	and minimum material damping values be considered and defined.  Strata
+	prevents the user from defined a shear modulus reduction less than 0.05 and
+	a damping less than 0.01%.</p>
+	
+	<p>When defining a custom model, the user can use a wide variety of
+	functions and variables.  In the formula for the standard deviation of the
+	shear modulus, the following variables can be used:
+	<dl>
+		<dt>strain</dt><dd>shear strain in percent</dd>
+		<dt>shearMod</dt><dd>normalized shear modulus</dd>
+	</dl>
+	Likewise, the following variables are available in the definition of the
+	standard deviation of the damping:
+	<dl>
+		<dt>strain</dt><dd>shear strain in percent</dd>
+		<dt>damping</dt><dd>damping in decimal</dd>
+	</dl>
+	The following functions are available:
+	<ul>
+		<li>
+		<li>abs(x)</li>
+		<li>acos(x)</li>
+		<li>asin(x)</li>
+		<li>atan(x)</li>
+		<li>atan2(y, x)</li>
+		<li>ceil(x)</li>
+		<li>cos(x)</li>
+		<li>exp(x)</li>
+		<li>floor(x)</li>
+		<li>log(x)</li>
+		<li>max([value1 [, value2 [, ...]]])</li>
+		<li>min([value1 [, value2 [, ...]]])</li>
+		<li>pow(x, y)</li>
+		<li>random()</li>
+		<li>round(x)</li>
+		<li>sin(x)</li>
+		<li>sqrt(x)</li>
+		<li>tan(x)</li>
+	</ul>
+	<p>
+</body>
+</html>
