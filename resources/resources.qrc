@@ -1,0 +1,45 @@
+<RCC>
+    <qresource>
+	<file>docs/classic.css</file>
+	<file>docs/index.html</file>
+	<file>docs/soil-layer.html</file>
+	<file>docs/soil-profile.html</file>
+	<file>docs/soil-type.html</file>
+	
+	<file>docs/general-settings-tab.html</file>
+	<file>docs/soil-types-tab.html</file>
+	<file>docs/soil-profile-tab.html</file>
+	<file>docs/motion-tab.html</file>
+	<file>docs/output-specification-tab.html</file>
+	<file>docs/compute-tab.html</file>
+	<file>docs/nonlinear-curve-dialog.html</file>
+	<file>docs/output-page.html</file>
+
+	<file>images/accessories-calculator.svg</file>
+	<file>images/application-icon.svg</file>
+	<file>images/applications-system.svg</file>
+	<file>images/document-import.svg</file>
+	<file>images/document-export.svg</file>
+	<file>images/document-new.svg</file>
+	<file>images/document-open.svg</file>
+	<file>images/document-print.svg</file>
+	<file>images/document-save-as.svg</file>
+	<file>images/document-save.svg</file>
+	<file>images/edit-clear.svg</file>
+	<file>images/edit-copy.svg</file>
+	<file>images/edit-cut.svg</file>
+	<file>images/edit-delete.svg</file>
+	<file>images/edit-paste.svg</file>
+	<file>images/edit-redo.svg</file>
+	<file>images/edit-undo.svg</file>
+	<file>images/go-home.svg</file>
+	<file>images/go-next.svg</file>
+	<file>images/go-previous.svg</file>
+	<file>images/help-browser.svg</file>
+	<file>images/list-add.svg</file>
+	<file>images/list-remove.svg</file>
+	<file>images/preferences-system.svg</file>
+	<file>images/process-stop.svg</file>
+	<file>images/system-file-manager.svg</file>
+    </qresource>
+</RCC>

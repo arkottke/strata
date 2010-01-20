@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<h2 align="center">General Settings</h2>
+
+	<p>The <em>General Settings</em> tab is used to control the basic properties of the current project.  The following sections are available
+	<ul>
+		<li><a href="#project">Project</a></li>
+		<li><a href="#type of analysis">Type of Analysis</a></li>
+		<li><a href="#site property variation">Site Property Variation</a></li>
+		<li><a href="#equivalent linear parameters">Equivalent Linear Parameters</a></li>
+		<li><a href="#layer discretization">Layer Discretization</a></li>
+	</ul>
+	</p>
+
+	<h3><a name="project">Project</a></h3>
+	<dl>
+		<dt>Title</dt>
+		<dd>The title is included header of all output files.</dd>
+		<dt>Notes</dt> 
+		<dd>The notes are only meant to help maintain one's sanity and are not used in any way.</dd>
+		<dt>Filename prefix</dt>
+		<dd>The filename prefix is prepended onto the standard filenames.  Allowing for
+		the filenames to be descriptive of the calculation.</dd>
+		<dt>Units</dt>
+		<dd>The units system changes the units of both the input and output between Metric and
+		English. Changing the units system does not provide conversion between the two different systems.</dd>
+		<dt>Save motion data within the input file check box</dt>
+		<dd>When this check box is checked, the
+		time-series data is included in the data file. This increases the size of the file, but allows for
+		the file to be easily transfered.</dd>
+	</dl>
+	<h3><a name="type of analysis">Type of Analysis</a></h3>
+	<dl>
+		<dt>Calculation Method<dt>
+		<dd> The calculation method switches between the time-domain and random
+		vibration theory methods.</dd>
+		<dt>Vary the properties check box<dt>
+		<dd> Allows the user to vary the properties of the site.</dd>
+	</dl>
+	<h3><a name="site property variation">Site Property Variation</a></h3>
+	<dl>
+		<dt>Number of realizations<dt>
+		<dd> The number of sites profiles that are generated.  For each site
+		profile all of the motions are propagated through the site.</dd>
+		<dt>Vary the non-linear soil properties check box<dt>
+		<dd> Determines whether or not the non-linear soil properties
+		(shear-modulus reduction and damping curves) are varied.</dd>
+		<dt>Vary the site profile<dt>
+		<dd> Determines whether or not the site profile (shear-wave velocity,
+		layer thickness, and depth to bedrock) are varied.</dd>
+	</dl>
+	<h3><a name="equivalent linear parameters">Equivalent Linear Parameters</a></h3>
+	<p>Strata performs equivalent-linear site response analysis which assumes
+	linear-elastic wave propagation with strain compatible properities.  The
+	analysis is an iterative procedure which changes the properties in the
+	layer such that properties use the previously computed effective strain for
+	the layer.
+	<dl>
+		<dt>Effective strain ratio<dt>
+		<dd>The effective strain ratio rates the maximum strain in the layer to
+		the effective strain used for the equivalent non-linear soil
+		properties. [Default value 0.65]</dd>
+		<dt>Error tolerance<dt>
+		<dd>The error tolerance is one of the exit conditions in the
+		equivalent-linear site response loop.  Once the error in both the
+		damping and shear-modulus in all layers is below this level the
+		iterative portion of the analysis stops. [Default value 1%]</dd>
+		<dt>Maximum number of iterations<dt>
+		<dd>The maximum number of iteration is the other exit conditions for
+		the equivalent-linear site response loop.  After reaching this number
+		of iterations, the loop exits and a warning message is printed. [Default value 8]</dd>
+	</dl>
+	</p>
+	<h3><a name="layer discretization">Layer Discretization</a></h3>
+	<p>Strata allows for variation of the layering thickness and shear-wave
+	velocity therefore it divides the velocity layers into sub-layers for the
+	wave propagation.  The thickness of these sublayers is controlled by the
+	maximum frequency and wavelength fraction. See technical manual for more
+	information.
+	<dl>
+		<dt>Maximum frequency</dt>
+		<dd>Maximum frequency of engineering interest. [Default value 20]</dd>
+		<dt>Wavelength fraction<dt>
+		<dd>The number of wavelengths contained within a sublayer. Typically
+		ranges from 1/5 to 1/10, values less than 1/3 are not recommended.
+		[Default value 0.2]</dd>
+	</dl>
+	</p>
+</body>
+</html>
