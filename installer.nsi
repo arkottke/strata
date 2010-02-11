@@ -14,7 +14,7 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\Qt\2009.05\qt"
+!Define QT_PATH "C:\devel\Qt\2010.01\qt"
 
 ;--------------------------------
 ;Variables
@@ -59,8 +59,9 @@
   !insertmacro MUI_PAGE_STARTMENU Strata $STARTMENU_FOLDER
   !insertmacro MUI_PAGE_INSTFILES
   ; Finish page configuration
-  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\readme.txt"
   !define MUI_FINISHPAGE_RUN "$INSTDIR\strata.exe"
+  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\readme.txt"
+  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !insertmacro MUI_PAGE_FINISH
   
   !insertmacro MUI_UNPAGE_CONFIRM
@@ -135,9 +136,6 @@ Section "!Core Files" SecProgram
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
-  ;File associations
-  !insertmacro APP_ASSOCIATE "strata" "strata.data" "Strata Data" "$INSTDIR\strata-data.ico" "Edit/Run with Strata" "$INSTDIR\strata.exe $\"%1$\""
-
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Strata
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
@@ -150,7 +148,7 @@ SectionEnd
 Section "Documentation" SecDocumentation
 	SetOutPath $INSTDIR
 
-	file "manual\manual.pdf"
+	file "..\manual\manual.pdf"
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Manual.lnk" "$INSTDIR\manual.pdf"
 
 SectionEnd
@@ -160,16 +158,21 @@ Section "Examples" SecExamples
 	SetOutPath "$INSTDIR\examples"
 
 	;Files to install
-	file "example\example-1-td.strata"
-	file "example\example-2-td.strata"
-	file "example\example-3-rvt.strata"
-	file "example\example-3-rvt.strata"
-	file "example\suite-10-1.csv"
-	file "example\response-spectrum.csv"
-	file /r "example\*.AT2"
+	file "..\example\example-1-td.strata"
+	file "..\example\example-2-td.strata"
+	file "..\example\example-3-rvt.strata"
+	file "..\example\example-3-rvt.strata"
+	file "..\example\suite-10-1.csv"
+	file "..\example\response-spectrum.csv"
+	file /r "..\example\*.AT2"
 
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Examples.lnk" "$INSTDIR\examples\"
 
+SectionEnd
+
+Section "File Associations" SecAssociation
+  ;File associations
+  !insertmacro APP_ASSOCIATE "strata" "strata.data" "Strata Data" "$INSTDIR\strata-data.ico" "Edit/Run with Strata" "$INSTDIR\strata.exe $\"%1$\""
 SectionEnd
 
 Section /o "Source" SecSource
@@ -191,6 +194,7 @@ SectionEnd
   LangString DESC_SecProgram ${LANG_ENGLISH} "Binaries required to run Strata."
   LangString DESC_SecDocumentation ${LANG_ENGLISH} "User manual."
   LangString DESC_SecExamples ${LANG_ENGLISH} "Example input files."
+  LangString DESC_SecAssociation ${LANG_ENGLISH} "Associate Strata data files with Strata."
   LangString DESC_SecSource ${LANG_ENGLISH} "Source code."
 
 
@@ -199,6 +203,7 @@ SectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecProgram} $(DESC_SecProgram)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDocumentation} $(DESC_SecDocumentation)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecExamples} $(DESC_SecExamples)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAssociation} $(DESC_SecAssociation)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSource} $(DESC_SecSource)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
