@@ -283,8 +283,9 @@ void SiteProfile::createSubLayers( TextLog * textLog )
                 soilLayers.removeFirst();
             }
         }
+
+        m_subLayers.clear();
     }
-    m_subLayers.clear();
 
     // Vary the nonlinear properties of the SoilTypes
     if ( areNonlinearPropsVaried() && textLog->level() > TextLog::Low ) {
@@ -297,9 +298,8 @@ void SiteProfile::createSubLayers( TextLog * textLog )
             if ( textLog->level() > TextLog::Low )
                 textLog->append(QString(QObject::tr("\t%1")).arg(m_soilTypes.at(i)->name()));
             m_nonLinearPropertyVariation->vary(*m_soilTypes[i]);
-        } else if (m_soilTypes.at(i)->normShearMod()->prop().isEmpty() ||
-                m_soilTypes.at(i)->damping()->prop().isEmpty()) {
-            // Use average as property if it has not been copied over already
+        } else {
+            // Use average as property
             m_soilTypes[i]->normShearMod()->prop() = m_soilTypes.at(i)->normShearMod()->avg();
             m_soilTypes[i]->damping()->prop() = m_soilTypes.at(i)->damping()->avg();
         }
