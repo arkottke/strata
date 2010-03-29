@@ -115,6 +115,7 @@ Section "!Core Files" SecProgram
   file "C:\devel\fftw-3.2.2\libfftw3-3.dll"
   file "C:\devel\GnuWin32\bin\libgsl.dll"
   file "C:\devel\GnuWin32\bin\libgslcblas.dll"
+  file "${QT_PATH}\bin\libgcc_s_dw2-1.dll"
   file "${QT_PATH}\bin\mingwm10.dll"
   file "${QT_PATH}\bin\QtCore4.dll"
   file "${QT_PATH}\bin\QtGui4.dll"
