@@ -744,6 +744,7 @@ void RecordedMotion::ifft( const QVector<std::complex<double> >& in, QVector<dou
     // Copy the input QVector into a double array
     fftw_complex* inArray = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * in.size());
 
+    // If the frequency is above the maximum frequency of engineering interest set the value to zero.
     for( int i = 0; i < in.size(); i++ ) {
         if (m_freq.at(i) < m_maxEngFreq) {
             inArray[i][0] = in.at(i).real();
