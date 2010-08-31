@@ -20,17 +20,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "ResultsPage.h"
-#include "OutputExportDialog.h"
-#include "ConfigurePlotDialog.h"
 
-#include <QLabel>
+#include "AbstractOutput.h"
+#include "ConfigurePlotDialog.h"
+#include "EditActions.h"
+#include "MyTableView.h"
+#include "OutputCatalog.h"
+#include "OutputExportDialog.h"
+#include "SiteResponseModel.h"
+
+#include <QApplication>
+#include <QDialogButtonBox>
+#include <QClipboard>
+#include <QDebug>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QDebug>
 #include <QImage>
-#include <QApplication>
-#include <QClipboard>
+#include <QLabel>
 #include <QPainter>
+#include <QSplitter>
 
 #include <qwt_symbol.h>
 #include <qwt_legend.h>
@@ -39,35 +47,54 @@
 #include <qwt_picker_machine.h>
 #include <qwt_scale_engine.h>
 
-ResultsPage::ResultsPage( SiteResponseOutput * model, QWidget * parent)
-    : QSplitter(parent), m_model(model)
+ResultsPage::ResultsPage(QWidget * parent)
+    : AbstractPage(parent), m_outputCatalog(0), m_selectedOutput(0)
 {
-    reset();
+    m_statsNeedUpdate = false;
 
-    createTableGroup();
-    createPlot();
+    QSplitter* splitter = new QSplitter;
+
+    splitter->addWidget(createOutputGroup());
+    splitter->setStretchFactor(0, 1);
+
+    splitter->addWidget(createDataTabWidget());
+    splitter->setStretchFactor(1, 4);
+
+    QHBoxLayout* layout = new QHBoxLayout;
+    layout->addWidget(splitter);
+    setLayout(layout);
+
     createContextMenu();
-
-    // Set the default sizes of the QSplitter
-    setStretchFactor( 0, 1 );
-    setStretchFactor( 1, 4 );
 }
 
-ResultsPage::~ResultsPage()
-{
-    for (int i = 0; i < m_quantileCurves.size(); ++i )
-        delete m_quantileCurves.takeFirst();
-
-    for (int i = 0; i < m_dataCurves.size(); ++i )
-        delete m_dataCurves.takeFirst();
-}
-    
-void ResultsPage::reset()
-{
+void ResultsPage::setModel(SiteResponseModel* model) {
     m_selectedOutput = 0;
     m_selectedRow = -1;
-    m_statsNeedUpdate = false;
-    m_zOrder = 20;
+
+    // Remove the previous model and delete the selectionModel
+    if (QItemSelectionModel* m = m_catalogTableView->selectionModel()) {
+        m_catalogTableView->setModel(0);
+        delete m;
+    }
+
+    // Need to check if the model has results -- otherwise there is a list of
+    // outputs with no data associated with them.
+    if (!model->hasResults())
+        return;
+
+    m_outputCatalog = model->outputCatalog();
+    m_catalogTableView->setModel(m_outputCatalog);
+
+    connect(m_outputCatalog, SIGNAL(enabledChanged(int)),
+            this, SLOT(enableSelectedCurve(int)));
+    connect(m_catalogTableView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+            this, SLOT(setSelectedSeries(QModelIndex,QModelIndex)));
+
+    m_outputComboBox->clear();
+    m_outputComboBox->addItems(m_outputCatalog->outputNames());
+
+    if (m_outputComboBox->count())
+        setSelectedOutput(0);
 }
 
 void ResultsPage::setStatsNeedUpdate()
@@ -78,54 +105,22 @@ void ResultsPage::setStatsNeedUpdate()
 
 void ResultsPage::exportData()
 {
-    OutputExportDialog dialog(m_model,this);
+    OutputExportDialog dialog(m_outputCatalog, this);
     dialog.exec();
 }
 
-void ResultsPage::print(QPrinter * printer)
+void ResultsPage::print(QPrinter* printer)
 {
-    uncolorSelectedCurve();
+    uncolorCurve(m_selectedRow);
 
-    if ( m_selectedOutput->orientation() == Qt::Horizontal )
-        printer->setOrientation(QPrinter::Landscape);
-    else if ( m_selectedOutput->orientation() == Qt::Vertical )
-        printer->setOrientation(QPrinter::Portrait);
+//    if (m_selectedOutput->orientation() == Qt::Horizontal )
+//        printer->setOrientation(QPrinter::Landscape);
+//    else if ( m_selectedOutput->orientation() == Qt::Vertical )
+//        printer->setOrientation(QPrinter::Portrait);
 
     m_plot->print(*printer);
 
-    colorSelectedCurve();
-}
-
-void ResultsPage::refreshWidget()
-{
-    // Set the table model
-    m_tableView->resizeColumnsToContents();
-    m_tableView->resizeRowsToContents();
-
-    // Delete the old data curves
-    while ( 0 < m_dataCurves.size())
-        delete m_dataCurves.takeFirst();
-   
-    // Create data curves
-    for (int i = 0; i < m_model->motionCount(); ++i) {
-        for (int j = 0; j < m_model->siteCount(); ++j) {
-            // Create a new curve
-            m_dataCurves << new QwtPlotCurve;
-            m_dataCurves.last()->setZ(m_zOrder);
-            // Attach the curve to the plot
-            m_dataCurves.last()->attach(m_plot);
-        }
-    }
-    
-    // Update the combobox
-    m_outputComboBox->clear();
-    m_outputComboBox->addItems(m_model->outputNames());
-
-    if ( m_outputComboBox->count() > 0 ) {
-        // Select the first item in the combo list
-        m_outputComboBox->setCurrentIndex(0);
-        plotOutput(0);
-    }
+    colorCurve(m_selectedRow);
 }
 
 void ResultsPage::showPlotContextMenu(const QPoint & point)
@@ -135,108 +130,131 @@ void ResultsPage::showPlotContextMenu(const QPoint & point)
 
 void ResultsPage::copyPlot()
 {
-    uncolorSelectedCurve();
+    uncolorCurve(m_selectedRow);
    
     // Set the clilpboard image
     QClipboard * clipboard = QApplication::clipboard();
     clipboard->setPixmap(QPixmap::grabWidget(m_plot));
     
-    colorSelectedCurve();
+    colorCurve(m_selectedRow);
 }
 
 void ResultsPage::configurePlot()
 {
     ConfigurePlotDialog * dialog = new ConfigurePlotDialog(m_plot);
 
-    if ( dialog->exec() )
+    if (dialog->exec())
         m_plot->replot();
+
+    // FIXME save properties to selected output
 }
 
-void ResultsPage::selectedChanged( const QModelIndex & current, const QModelIndex & /*previous*/ )
+void ResultsPage::setSelectedSeries(const QModelIndex & current, const QModelIndex & previous)
 {
-    // Set the old record to gray
-    uncolorSelectedCurve();
+    Q_UNUSED(previous);
+
+    if (m_selectedRow >= 0)
+        // Set the old record to gray
+        uncolorCurve(m_selectedRow);
     
     m_selectedRow = current.row();
 
+    Q_ASSERT(m_selectedOutput);
+    m_selectedOutput->setMotionIndex(
+            m_selectedOutput->intToMotion(m_selectedRow));
+
     // Colorized newly selected row
-    colorSelectedCurve();
+    colorCurve(m_selectedRow);
 
     m_plot->replot();
 
     // Update the buttons
-    bool enabled = m_model->siteEnabledAt(m_selectedRow);
-    m_enableSitePushButton->setChecked( enabled );
+    bool enabled = m_outputCatalog->siteEnabled(m_selectedRow);
+    m_enableSitePushButton->setChecked(enabled);
     m_enableSitePushButton->setText( QString(tr("%1 Site: %2"))
-            .arg( enabled ? tr("Disable") : tr("Enable") )
-            .arg( m_model->siteNameAt(m_selectedRow) ) );
+            .arg(enabled ? tr("Disable") : tr("Enable"))
+            .arg(m_outputCatalog->siteNumberAt(m_selectedRow)));
     
-
-    enabled = m_model->motionEnabledAt(m_selectedRow);
+    enabled = m_outputCatalog->motionEnabled(m_selectedRow);
     m_enableMotionPushButton->setChecked( enabled );
     m_enableMotionPushButton->setText( QString(tr("%1 Motion: %2"))
-            .arg( enabled ? tr("Disable") : tr("Enable") )
-            .arg( m_model->motionNameAt(m_selectedRow) ) );
+            .arg(enabled ? tr("Disable") : tr("Enable"))
+            .arg(m_outputCatalog->motionNameAt(m_selectedRow)));
+
+    // Select the appropriate column
+    if (m_selectedOutput->needsTime()) {
+        m_outputTableView->selectColumn(m_selectedRow / m_selectedOutput->motionCount() + 1);
+    } else {
+        m_outputTableView->selectColumn(m_selectedRow + 1);
+    }
 }
 
-void ResultsPage::plotOutput(int index)
+void ResultsPage::selectedDataChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    m_selectedOutput = m_model->output().at(index);
+    Q_UNUSED(previous);
 
-    m_tableModel->setSelectedOutput(m_selectedOutput);
-    m_tableView->selectRow(m_selectedRow);
+    int row = current.column() - 1;
 
-    // Set the labels of the axis
-    m_selectedOutput->configurePlot(m_plot);
+    if (row >= 0) {
+        if (m_selectedOutput->needsTime())
+            // Need to modify the row because only one time series is shown at a time
+            row = row * m_selectedOutput->motionCount() + m_selectedOutput->motionIndex();
 
-    // Create the curves of each of the objects
-    int idx = 0;
-    for (int i = 0; i < m_model->motionCount(); ++i) {
-        for (int j = 0; j < m_model->siteCount(); ++j) {
-            if ( ( m_selectedOutput->isMotionIndependent() && i != 0 ) 
-                    || ( m_selectedOutput->isSiteIndependent() && j != 0 ) )
-                // Clear the data from the curves
-                m_dataCurves[idx]->detach();
-            else  {
-                // Set the data
-                m_selectedOutput->dataToCurve( i, j, m_dataCurves[idx]);
-                m_dataCurves[idx]->attach(m_plot);
-            }
+        m_catalogTableView->selectRow(row);
+    }
+}
 
-            ++idx;
-        }
+void ResultsPage::setSelectedOutput(int index)
+{
+    if (m_selectedOutput)
+        disconnect(m_selectedOutput, 0, this, 0);
+
+    m_selectedOutput = m_outputCatalog->setSelectedOutput(index);
+
+    if (m_selectedOutput->rowCount() <= m_selectedRow)
+        m_selectedRow = -1;
+
+    m_selectedOutput->plot(m_plot, m_curves);
+
+    // Increase the width of the identifier
+    foreach (QWidget *widget, m_plot->legend()->legendItems()) {
+        if (QwtLegendItem *item = dynamic_cast<QwtLegendItem*>(widget))
+            item->setIdentifierWidth(30);
     }
 
-    // Hide the appropriate buttons if the output is site or motion independent
-    if ( m_selectedOutput->isSiteIndependent() ) {
-        m_tableView->hideColumn(0);
-        m_enableSitePushButton->hide();
+    m_catalogTableView->resizeColumnsToContents();
+    m_catalogTableView->resizeRowsToContents();
 
-        m_tableView->showColumn(1);
-        m_enableMotionPushButton->show();
-    } else if ( m_selectedOutput->isMotionIndependent() ) {
-        m_tableView->hideColumn(1);
-        m_enableMotionPushButton->hide();
-
-        m_tableView->showColumn(0);
-        m_enableSitePushButton->show();
-    } else {
-        m_tableView->showColumn(0);
-        m_tableView->showColumn(1);
-
-        m_enableSitePushButton->show();
-        m_enableMotionPushButton->show();
+    // Remove the previous model and delete the selectionModel
+    if (QItemSelectionModel *m = m_outputTableView->selectionModel()) {
+        m_outputTableView->setModel(0);
+        delete m;
     }
+    m_outputTableView->setModel(m_selectedOutput);
+    m_outputTableView->resizeColumnsToContents();
+    m_outputTableView->resizeRowsToContents();
 
+    // Need to remove the previous connections because otherwise it signals multiple times
+    disconnect(m_outputTableView->selectionModel(), 0, this, 0);
+    connect(m_outputTableView->selectionModel(), SIGNAL(currentColumnChanged(QModelIndex,QModelIndex)),
+               this, SLOT(selectedDataChanged(QModelIndex,QModelIndex)));
 
-    populateQuantiles();
+    // Site indepedent
+    m_catalogTableView->setColumnHidden(
+            OutputCatalog::SiteColumn,
+            m_selectedOutput->siteIndependent());
+    m_enableSitePushButton->setHidden(
+            m_selectedOutput->siteIndependent());
 
-    // Highlight selected row
-    if ( 0 <= m_selectedRow )
-        colorSelectedCurve();
+    // Motion independent
+    m_catalogTableView->setColumnHidden(
+            OutputCatalog::MotionColumn,
+            m_selectedOutput->motionIndependent());
+    m_enableMotionPushButton->setHidden(
+            m_selectedOutput->motionIndependent());
 
-    // Refresh the plot
-    m_plot->replot();
+    if (m_selectedOutput && m_selectedRow >= 0)
+        setSelectedSeries(m_outputCatalog->index(m_selectedRow, 0));
 }
 
 void ResultsPage::pointSelected(const QPoint & point)
@@ -246,73 +264,58 @@ void ResultsPage::pointSelected(const QPoint & point)
     double minDistance = -1;
     int minIndex = 0;
 
-    for ( int i = 0; i < m_dataCurves.size(); ++i ) {
-        if ( !m_dataCurves.at(i)->plot() )
-            // Continue if not attached to the plot
-            continue;
-
-        m_dataCurves.at(i)->closestPoint( point, &distance);
+    for (int i = 0; i < m_curves.size(); ++i) {
+        m_curves.at(i)->closestPoint(point, &distance);
     
-        if ( minDistance < 0 || distance < minDistance ) {
+        if (i == 0 || distance < minDistance) {
             minDistance = distance;
             minIndex = i;
         }
     }
+
     // Select this item from the table
-    m_tableView->selectRow(minIndex);
+    m_catalogTableView->selectRow(minIndex);
 }
 
-void ResultsPage::enableSelectedCurve()
+void ResultsPage::enableSelectedCurve(int index)
 {
-    colorSelectedCurve();
-
+    colorCurve(index);
     m_plot->replot();
-
     setStatsNeedUpdate();
 }
 
-void ResultsPage::colorSelectedCurve()
+void ResultsPage::colorCurve(int row)
 {
-    if ( !m_selectedOutput || m_selectedRow < 0 )
+    if (!m_selectedOutput || m_selectedRow < 0)
         return;
 
-    bool enabled;
-    
-    if (m_selectedOutput->isMotionIndependent() )
-        enabled = m_model->siteEnabledAt(m_selectedRow);
-    else if ( m_selectedOutput->isSiteIndependent() )
-        enabled = m_model->motionEnabledAt(m_selectedRow);
-    else 
-        enabled = m_model->seriesEnabledAt(m_selectedRow);
-
-    if ( enabled )
-        m_dataCurves[m_selectedRow]->setPen(QPen(QBrush(Qt::darkGreen), 2));
-    else
-        m_dataCurves[m_selectedRow]->setPen(QPen(QBrush(Qt::darkRed), 2));
-
-    m_dataCurves[m_selectedRow]->setZ(m_zOrder+1);
-}
-
-void ResultsPage::uncolorSelectedCurve()
-{
-    if ( !m_selectedOutput || m_selectedRow < 0 )
-        return;
+    QPen pen = m_outputCatalog->enabledAt(row) ?
+               QPen(QBrush(Qt::darkGreen), 2) : QPen(QBrush(Qt::darkRed), 2);
 
     // Turn the selected curve gray and set it to the regular zOrder
-    m_dataCurves[m_selectedRow]->setPen(QPen(Qt::darkGray));
-    m_dataCurves[m_selectedRow]->setZ(m_zOrder);
+    m_curves[row]->setPen(pen);
+    m_curves[row]->setZ(AbstractOutput::zOrder()+2);    
+}
+
+void ResultsPage::uncolorCurve(int row)
+{
+    Q_ASSERT(0 <= row && row < m_curves.size());
+
+    // Turn the selected curve gray and set it to the regular zOrder
+    m_curves[row]->setPen(QPen(Qt::darkGray));
+    m_curves[row]->setZ(AbstractOutput::zOrder());
 }
 
 void ResultsPage::setMotionEnabled(bool enabled)
 {
-    if (  0 <= m_selectedRow )
-        m_model->setMotionEnabledAt( m_selectedRow, enabled);
-    
-    m_enableMotionPushButton->setText( QString(tr("%1 Motion: %2"))
-            .arg( enabled ? tr("Disable") : tr("Enable") )
-            .arg( m_model->motionNameAt(m_selectedRow) ) );
+    m_outputCatalog->setMotionEnabled(
+            m_selectedOutput->intToMotion(m_selectedRow), enabled);
 
-    colorSelectedCurve();
+    m_enableMotionPushButton->setText( QString(tr("%1 Motion: %2"))
+            .arg(enabled ? tr("Disable") : tr("Enable"))
+            .arg(m_outputCatalog->motionNameAt(m_selectedRow)));
+
+    colorCurve(m_selectedRow);
     m_plot->replot();
 
     setStatsNeedUpdate();
@@ -320,15 +323,15 @@ void ResultsPage::setMotionEnabled(bool enabled)
 
 void ResultsPage::setSiteEnabled(bool enabled)
 {
-    if (  0 <= m_selectedRow )
-        m_model->setSiteEnabledAt( m_selectedRow, enabled);
-    
+    m_outputCatalog->setSiteEnabled(
+            m_selectedOutput->intToSite(m_selectedRow), enabled);
+
     m_enableSitePushButton->setText( QString(tr("%1 Site: %2"))
-            .arg( enabled ? tr("Disable") : tr("Enable") )
-            .arg( m_model->siteNameAt(m_selectedRow) ) );
+            .arg(enabled ? tr("Disable") : tr("Enable"))
+            .arg(m_outputCatalog->siteNumberAt(m_selectedRow)));
 
     // Re-color and re-plot selected curve incase the enable/disabled flag changed
-    colorSelectedCurve();
+    colorCurve(m_selectedRow);
     m_plot->replot();
 
     setStatsNeedUpdate();
@@ -336,34 +339,16 @@ void ResultsPage::setSiteEnabled(bool enabled)
 
 void ResultsPage::recomputeStats()
 {
-    m_model->computeStats();
+    m_outputCatalog->finalize();
 
-    populateQuantiles();
-
-    m_plot->replot();
+    // FIXME -- this is sloppy because only the curves from the statistics change
+    m_selectedOutput->plot(m_plot, m_curves);
    
     m_statsNeedUpdate = false;
     m_recomputePushButton->setEnabled(false);
 }
 
-void ResultsPage::populateQuantiles()
-{
-    if ( m_selectedOutput->hasStats() ) {
-        // Update the quantiles
-        m_selectedOutput->quantilesToCurves(m_quantileCurves);  
-
-        for (int i = 0; i < m_quantileCurves.size(); ++i ) {
-            m_quantileCurves[i]->attach(m_plot);
-            // Set the curves on top of the data
-            m_quantileCurves[i]->setZ(m_zOrder+10);
-        }
-    } else {
-        for (int i = 0; i < m_quantileCurves.size(); ++i )
-            m_quantileCurves[i]->detach();
-    }
-}
-
-void ResultsPage::createTableGroup() 
+QGroupBox* ResultsPage::createOutputGroup()
 {
     QGridLayout * layout = new QGridLayout;
     layout->setColumnStretch(2,1);
@@ -371,86 +356,99 @@ void ResultsPage::createTableGroup()
     // Type combo box
     m_outputComboBox = new QComboBox;
 
-    connect( m_outputComboBox, SIGNAL(activated(int)), this, SLOT(plotOutput(int)));
+    connect(m_outputComboBox, SIGNAL(activated(int)),
+            this, SLOT(setSelectedOutput(int)));
 
     layout->addWidget(new QLabel(tr("Output:")), 0, 0);
     layout->addWidget(m_outputComboBox, 0, 1, 1, 3);
     
     // Create the table view
-    m_tableView = new QTableView;
-    m_tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-
-    m_tableModel = new OutputTableModel(m_model);
-    m_tableView->setModel(m_tableModel);
+    m_catalogTableView = new QTableView;
+    m_catalogTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_catalogTableView->setSelectionMode(QAbstractItemView::SingleSelection);
     
-    connect( m_tableView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(selectedChanged(QModelIndex,QModelIndex)));
-
-    layout->addWidget( m_tableView, 1, 0, 1, 4);
+    layout->addWidget(m_catalogTableView, 1, 0, 1, 4);
 
     // Create Push buttons
     m_enableSitePushButton = new QPushButton;
     m_enableSitePushButton->setCheckable(true);
     
-    connect( m_enableSitePushButton, SIGNAL(clicked(bool)), this, SLOT(setSiteEnabled(bool)));
+    connect(m_enableSitePushButton, SIGNAL(clicked(bool)),
+             this, SLOT(setSiteEnabled(bool)));
 
     layout->addWidget( m_enableSitePushButton, 2, 0 );
     
     m_enableMotionPushButton = new QPushButton;
     m_enableMotionPushButton->setCheckable(true);
 
-    connect( m_enableMotionPushButton, SIGNAL(clicked(bool)), this, SLOT(setMotionEnabled(bool)));
+    connect(m_enableMotionPushButton, SIGNAL(clicked(bool)),
+             this, SLOT(setMotionEnabled(bool)));
 
     layout->addWidget( m_enableMotionPushButton, 2, 1 );
 
     m_recomputePushButton = new QPushButton(tr("Recompute Statistics"));
     m_recomputePushButton->setEnabled(false);
 
-    connect( m_recomputePushButton, SIGNAL(clicked()), this, SLOT(recomputeStats()));
+    connect(m_recomputePushButton, SIGNAL(clicked()),
+             this, SLOT(recomputeStats()));
 
-    layout->addWidget( m_recomputePushButton, 2, 3 );
+    layout->addWidget(m_recomputePushButton, 2, 3);
 
     // Create the group box
-    QGroupBox * group = new QGroupBox(tr("Data Selection"));
+    QGroupBox* groupBox = new QGroupBox(tr("Data Selection"));
+    groupBox->setLayout(layout);
 
-    group->setLayout(layout);
-
-    addWidget( group );
-    
-    connect( m_tableModel, SIGNAL(enabledChanged()), this, SLOT(enableSelectedCurve()));
+    return groupBox;
 }
 
-void ResultsPage::createPlot()
+QTabWidget* ResultsPage::createDataTabWidget()
 {
+    QTabWidget *tabWidget = new QTabWidget;
+
     // Plot
     m_plot = new QwtPlot;
     m_plot->setCanvasBackground(Qt::white);
     m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_plot->setAutoReplot(false);
 
-    connect( m_plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showPlotContextMenu(QPoint)));
+    connect(m_plot, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(showPlotContextMenu(QPoint)));
     
     // Picker to allow for selection of the closest curve and displays curve
     // coordinates with a cross rubber band.
-    QwtPlotPicker * picker = new QwtPlotPicker( 
+    QwtPlotPicker* picker = new QwtPlotPicker(
             QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection,
             QwtPicker::CrossRubberBand, QwtPicker::ActiveOnly, m_plot->canvas());
 
-    connect( picker, SIGNAL(appended(QPoint)), this, SLOT(pointSelected(QPoint)));
+    connect(picker, SIGNAL(appended(QPoint)), this, SLOT(pointSelected(QPoint)));
 
-    /*
     // Legend
-    QwtLegend * legend = new QwtLegend;
+    QwtLegend* legend = new QwtLegend;
     legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
     m_plot->insertLegend(legend, QwtPlot::BottomLegend);
-    */
 
-    addWidget(m_plot);
-    
-    // Create quantile curves
-    for (int i = 0; i < 3; ++i ) {
-        m_quantileCurves << new QwtPlotCurve;
-        m_quantileCurves.last()->attach(m_plot);
-    }
+    // Add the generic curves to the legend
+    QwtPlotCurve curveA(tr("Unselected Realization"));
+    curveA.setPen(QPen(Qt::darkGray));
+    curveA.updateLegend(legend);
+
+    QwtPlotCurve curveB(tr("Selected and Enabled Realization"));
+    curveB.setPen(QPen(QBrush(Qt::darkGreen), 2));
+    curveB.updateLegend(legend);
+
+    QwtPlotCurve curveC(tr("Selected and Disabled Realization"));
+    curveC.setPen(QPen(QBrush(Qt::darkRed), 2));
+    curveC.updateLegend(legend);
+
+    tabWidget->addTab(m_plot, tr("Plot"));
+
+
+    m_outputTableView = new MyTableView;
+    m_outputTableView->setReadOnly(true);
+
+    tabWidget->addTab(m_outputTableView, tr("Data Table"));
+
+    return tabWidget;
 }
 
 void ResultsPage::createContextMenu() 
@@ -461,4 +459,3 @@ void ResultsPage::createContextMenu()
     m_plotContextMenu->addSeparator();
     m_plotContextMenu->addAction(tr("Plot Options"), this, SLOT(configurePlot()));
 }
-

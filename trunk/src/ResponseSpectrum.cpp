@@ -22,19 +22,12 @@
 #include "ResponseSpectrum.h"
 #include "Serializer.h"
 
-ResponseSpectrum::ResponseSpectrum(bool readOnly, QObject * parent)
-        : MyAbstractTableModel(readOnly, parent)
+#include <QDebug>
+
+ResponseSpectrum::ResponseSpectrum(QObject * parent)
+        : MyAbstractTableModel(parent)
 {
     connect(this, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SIGNAL(wasModified()));
-}
-
-void ResponseSpectrum::reset()
-{
-    m_modified = false; 
-    m_damping = 5.0;
-
-    m_period.clear();
-    m_sa.clear();
 }
 
 bool ResponseSpectrum::modified() const
@@ -59,7 +52,7 @@ void ResponseSpectrum::setDamping(double damping)
         emit wasModified();
     }
 
-    m_damping = damping;
+    m_damping = damping;   
 }
 
 const QVector<double> & ResponseSpectrum::period() const
@@ -71,7 +64,8 @@ void ResponseSpectrum::setPeriod(const QVector<double> & period)
 {
     m_period = period;
     m_sa.clear();
-    emit wasModified();
+
+    reset();
 }
 
 const QVector<double> & ResponseSpectrum::sa() const
@@ -81,39 +75,33 @@ const QVector<double> & ResponseSpectrum::sa() const
 
 void ResponseSpectrum::setSa(const QVector<double> & sa)
 {
+    beginResetModel();
     m_sa = sa;
+    endResetModel();
+}
+
+void ResponseSpectrum::scaleBy(double scale)
+{
+    for (int i = 0; i < m_sa.size(); ++i) {
+        m_sa[i] *= scale;
+    }
+
+    emit dataChanged(index(0, SpecAccelColumn),
+                     index(rowCount(), SpecAccelColumn));
     emit wasModified();
 }
 
-QMap<QString, QVariant> ResponseSpectrum::toMap() const
+int ResponseSpectrum::rowCount(const QModelIndex &parent) const
 {
-    QMap<QString, QVariant> map;
+    Q_UNUSED(parent);
 
-    map.insert("modified", m_modified);
-    map.insert("damping", m_damping);
-    map.insert("period", Serializer::toVariantList(m_period));
-    map.insert("sa", Serializer::toVariantList(m_sa));
-
-    return map;
+    return qMin(m_period.size(), m_sa.size());
 }
 
-void ResponseSpectrum::fromMap( const QMap<QString, QVariant> & map)
+int ResponseSpectrum::columnCount(const QModelIndex &parent) const
 {
-    m_modified = map.value("modified").toBool();
-    m_damping = map.value("damping").toDouble();
-    m_period = Serializer::fromVariantList(map.value("period").toList()).toVector();
-    m_sa = Serializer::fromVariantList(map.value("sa").toList()).toVector();
+    Q_UNUSED(parent);
 
-    emit wasModified();
-}
-
-int ResponseSpectrum::rowCount ( const QModelIndex& /* index */ ) const
-{
-    return m_period.size();
-}
-
-int ResponseSpectrum::columnCount ( const QModelIndex& /* parent */ ) const
-{
     return 2;
 }
 
@@ -125,15 +113,13 @@ QVariant ResponseSpectrum::headerData( int section, Qt::Orientation orientation,
     switch( orientation ) {
     case Qt::Horizontal:
         switch (section) {
-        case 0:
-            // Period
-            return QVariant(tr("Period (s)"));
-        case 1:
-            // Spectral Acceleration
-            return QVariant(tr("Spec. Accel. (g)"));
+        case PeriodColumn:
+            return tr("Period (s)");
+        case SpecAccelColumn:
+            return tr("Spec. Accel. (g)");
         }
     case Qt::Vertical:
-        return QVariant(section+1);
+        return section+1;
     default:
         return QVariant();
     }
@@ -146,12 +132,10 @@ QVariant ResponseSpectrum::data ( const QModelIndex &index, int role ) const
 
     if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()) {
-        case 0:
-            // Period
-            return QVariant(QString::number(m_period.at(index.row())));
-        case 1:
-            // Spectral Acceleration
-            return QVariant(QString::number(m_sa.at(index.row())));
+        case PeriodColumn:
+            return QString::number(m_period.at(index.row()));
+        case SpecAccelColumn:
+            return QString::number(m_sa.at(index.row()));
         default:
             return QVariant();
         }
@@ -167,12 +151,10 @@ bool ResponseSpectrum::setData( const QModelIndex &index, const QVariant &value,
 
     if(role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()){
-        case 0:
-            // Period
+        case PeriodColumn:
             m_period[index.row()] = value.toDouble();
             break;
-        case 1:
-            // Spectral Acceleration
+        case SpecAccelColumn:
             m_sa[index.row()] = value.toDouble();
             break;
         default:
@@ -190,10 +172,6 @@ bool ResponseSpectrum::setData( const QModelIndex &index, const QVariant &value,
 
 Qt::ItemFlags ResponseSpectrum::flags ( const QModelIndex &index ) const
 {
-    if (m_readOnly) {
-        return QAbstractTableModel::flags(index);
-    }
-
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
@@ -222,4 +200,51 @@ bool ResponseSpectrum::removeRows ( int row, int count, const QModelIndex &paren
 
     emit endRemoveRows();
     return true;
+}
+
+QwtData* ResponseSpectrum::copy() const
+{
+    return new QwtArrayData(m_period, m_sa);
+}
+
+size_t ResponseSpectrum::size() const
+{
+
+    return rowCount();
+}
+
+double ResponseSpectrum::x(size_t i) const
+{
+    return m_period.at(i);
+}
+
+double ResponseSpectrum::y(size_t i) const
+{
+    return m_sa.at(i);
+}
+
+
+QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs)
+{
+    out << (quint8)1;
+
+    out << rs->m_modified
+            << rs->m_damping
+            << rs->m_period
+            << rs->m_sa;
+
+    return out;
+}
+
+QDataStream & operator>> (QDataStream & in, ResponseSpectrum* rs)
+{
+    quint8 ver;
+    in >> ver;
+
+    in >> rs->m_modified
+            >> rs->m_damping
+            >> rs->m_period
+            >> rs->m_sa;
+
+    return in;
 }

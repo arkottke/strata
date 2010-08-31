@@ -42,15 +42,12 @@ Units * Units::instance()
 
 QStringList Units::systemList()
 {
-    QStringList list;
-    list << tr("Metric") << tr("English");
-
-    return list;
+    return QStringList() << tr("Metric") << tr("English");
 }
 
 void Units::reset()
 {
-    m_system = Metric;
+    setSystem(Metric);
 }
 
 Units::System Units::system() const
@@ -60,9 +57,11 @@ Units::System Units::system() const
 
 void Units::setSystem(System system)
 {
-    m_system = system;
+    if (m_system != system) {
+        m_system = system;
 
-    emit systemChanged();
+        emit systemChanged((int)m_system);
+    }
 }
 
 void Units::setSystem(int system)
@@ -202,17 +201,24 @@ QString Units::stress() const
     return QString("%1/%2").arg(wt()).arg(area());
 }
 
-QMap<QString, QVariant> Units::toMap() const
+QDataStream & operator<< (QDataStream & out, const Units* units)
 {
-    QMap<QString, QVariant> map;
+    out << (quint8)1;
 
-    map.insert("system", m_system);
+    out << (int)units->m_system;
 
-    return map;
+    return out;
 }
 
-void Units::fromMap(const QMap<QString, QVariant> & map)
+QDataStream & operator>> (QDataStream & in, Units* units)
 {
-    m_system = (System)map.value("system").toInt();
-}
+    quint8 ver;
+    in >> ver;
 
+    int system;
+    in >> system;
+
+    units->setSystem(system);
+
+    return in;
+}

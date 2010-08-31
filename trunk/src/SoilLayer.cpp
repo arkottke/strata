@@ -21,18 +21,34 @@
 
 #include "SoilLayer.h"
 
-SoilLayer::SoilLayer( QObject * parent )
+#include "SoilType.h"
+#include "SoilTypeCatalog.h"
+
+SoilLayer::SoilLayer(QObject* parent)
     : VelocityLayer(parent)
 {
     m_thickness = 0;
     m_soilType = 0;
 }
 
-SoilLayer::SoilLayer( const SoilLayer & other)
-    : VelocityLayer( other )
+SoilLayer::SoilLayer(const SoilLayer* other)
 {
-    m_soilType = other.soilType();
-    m_thickness = other.thickness();
+    // Abstract Distribution
+    m_avg = other->avg();
+    m_varied = other->shearVel();
+    m_stdev = other->stdev();
+    m_hasMin = other->hasMin();
+    m_min = other->min();
+    m_hasMax = other->hasMax();
+    m_max = other->max();
+
+    // VelocityLayer Information
+    m_isVaried = other->isVaried();
+    m_depth = other->depth();
+
+    // SoilLayer Information
+    m_soilType = other->soilType();
+    m_thickness = other->thickness();
 }
 
 SoilType * SoilLayer::soilType() const
@@ -53,6 +69,8 @@ double SoilLayer::thickness() const
 void SoilLayer::setThickness(double thickness)
 {
     m_thickness = thickness;
+
+    emit wasModified();
 }
         
 double SoilLayer::depthToBase() const
@@ -62,7 +80,7 @@ double SoilLayer::depthToBase() const
 
 QString SoilLayer::toString() const
 {
-    return QString("%1 %2").arg(m_soilType->toString()).arg(m_shearVel);
+    return QString("%1 %2").arg(m_soilType->name()).arg(m_avg);
 }
 
 double SoilLayer::untWt() const
@@ -81,41 +99,23 @@ double SoilLayer::density() const
         return -1;
 }
 
-QMap<QString, QVariant> SoilLayer::toMap() const
+QDataStream & operator<< (QDataStream & out, const SoilLayer* sl)
 {
-    QMap<QString, QVariant> map;
+    out << (quint8)1;
 
-    // Members 
-	map.insert("thickness", QVariant(m_thickness));
-    // Members inherited from VelocityLayer	
-	map.insert("isVaried", QVariant(m_isVaried));
-	map.insert("distribution", QVariant((int)m_distribution));
-	map.insert("avg", QVariant(m_avg));
-	map.insert("stdev", QVariant(m_stdev));
-	map.insert("max", QVariant(m_max));
-	map.insert("hasMax", QVariant(m_hasMax));
-	map.insert("min", QVariant(m_min));
-	map.insert("hasMin", QVariant(m_hasMin));
-    map.insert("depth", QVariant(m_depth));
+    out << qobject_cast<const VelocityLayer*>(sl);
+    out << sl->m_thickness;
 
-    return map;
+    return out;
 }
 
-void SoilLayer::fromMap(const QMap<QString, QVariant>& map)
+QDataStream & operator>> (QDataStream & in, SoilLayer* sl)
 {
-    // Members
-	m_thickness     = map.value("thickness").toDouble();
-    // Members inherited from VelocityLayer
-	m_isVaried	    = map.value("isVaried").toBool();
-	m_distribution	= (VelocityLayer::Distribution)map.value("distribution").toInt();
-	m_avg	        = map.value("avg").toDouble();
-	m_stdev	        = map.value("stdev").toDouble();
-	m_max	        = map.value("max").toDouble();
-	m_hasMax        = map.value("hasMax").toBool();
-	m_min	        = map.value("min").toDouble();
-	m_hasMin        = map.value("hasMin").toBool();
-	m_depth	        = map.value("depth").toDouble();
+    quint8 ver;
+    in >> ver;
 
-    // If the layer is not randomized provide the average shear-wave velocity
-    m_shearVel = m_avg;
+    in >>  qobject_cast<VelocityLayer*>(sl);
+    in >>  sl->m_thickness;
+
+    return in;
 }

@@ -23,7 +23,7 @@
 #define ALGORITHMS_H_
 
 #include <QString>
-
+#include <QVector>
 
 //! Various algorithms that are used repeatedly
 
@@ -39,4 +39,4 @@ QString boolToString(bool b);
 //! Convert the location to a string, -1 converts to Bedrock
 QString locationToString(double loc);
 
-#endif
+#endif // ALGORITHMS_H_

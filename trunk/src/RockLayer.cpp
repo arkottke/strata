@@ -27,17 +27,8 @@
 RockLayer::RockLayer(QObject * parent)
     : VelocityLayer(parent)
 {
-    reset();
-}
-
-RockLayer::~RockLayer()
-{
-}
-
-void RockLayer::reset()
-{
+    m_untWt = 22.0;
     setAvgDamping(1.0);
-    m_untWt = 22;
 }
 
 double RockLayer::untWt() const
@@ -47,11 +38,10 @@ double RockLayer::untWt() const
 
 void RockLayer::setUntWt(double untWt)
 {
-    if ( m_untWt != untWt ) {
-        emit wasModified();
-    }
-
     m_untWt = untWt;
+
+    emit wasModified();
+    emit untWtChanged(m_untWt);
 }
 
 double RockLayer::density() const
@@ -69,7 +59,7 @@ double RockLayer::damping() const
     return m_damping;
 }
        
-void RockLayer::setDamping( double damping )
+void RockLayer::setDamping(double damping)
 {
     m_damping = damping;
 }
@@ -79,53 +69,37 @@ double RockLayer::avgDamping() const
     return m_avgDamping;
 }
 
-void RockLayer::setAvgDamping( double damping )
+void RockLayer::setAvgDamping(double damping )
 {
-    if ( m_avgDamping != damping ) {
-        emit wasModified();
-    }
 
     m_damping = damping;
     m_avgDamping = damping;
+
+    emit wasModified();
+    emit avgDampingChanged(m_avgDamping);
 }
 
-
-QMap<QString, QVariant> RockLayer::toMap() const
+QDataStream & operator<< (QDataStream & out, const RockLayer* rl)
 {
-	QMap<QString, QVariant> map;
-    // Members 
-	map.insert("avgDamping", m_avgDamping);
-	map.insert("untWt", m_untWt);
-    // Members inherited from VelocityLayer	
-	map.insert("isVaried", m_isVaried);
-	map.insert("distribution", (int)m_distribution);
-	map.insert("avg", m_avg);
-	map.insert("stdev", m_stdev);
-	map.insert("max", m_max);
-	map.insert("hasMax", m_hasMax);
-	map.insert("min", m_min);
-	map.insert("hasMin", m_hasMin);
-    map.insert("depth", m_depth);
-    
-	return map;
+    out << (quint8)1;
+
+    out << qobject_cast<const VelocityLayer*>(rl);
+    out << rl->m_untWt << rl->m_avgDamping;
+
+    return out;
 }
 
-void RockLayer::fromMap( const QMap<QString, QVariant> & map )
+QDataStream & operator>> (QDataStream & in, RockLayer* rl)
 {
-    // Members
-	setAvgDamping(map.value("avgDamping").toDouble());
-	m_untWt	        = map.value("untWt").toDouble();
-    // Members inherited from VelocityLayer
-	m_isVaried	    = map.value("isVaried").toBool();
-	m_distribution	= (VelocityLayer::Distribution)map.value("distribution").toInt();
-	m_avg           = map.value("avg").toDouble();
-	m_stdev	        = map.value("stdev").toDouble();
-	m_max	        = map.value("max").toDouble();
-	m_hasMax        = map.value("hasMax").toBool();
-	m_min	        = map.value("min").toDouble();
-	m_hasMin        = map.value("hasMin").toBool();
-	m_depth	        = map.value("depth").toDouble();
+    quint8 ver;
+    in >> ver;
 
-    // If the layer is not randomized provide the average shear-wave velocity
-    m_shearVel = m_avg;
-}	
+    double avgDamping;
+
+    in >> qobject_cast<VelocityLayer*>(rl);
+    in >> rl->m_untWt >> avgDamping;
+
+    rl->setAvgDamping(avgDamping);
+
+    return in;
+}

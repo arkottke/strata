@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
 // 
@@ -22,6 +22,8 @@
 #ifndef MY_TABLE_VIEW_H_
 #define MY_TABLE_VIEW_H_
 
+#include "SiteResponseModel.h"
+
 #include <QTableView>
 #include <QContextMenuEvent>
 #include <QMenu>
@@ -30,20 +32,17 @@ class MyTableView : public QTableView
 {
     Q_OBJECT
 
-    public:
-        MyTableView( QWidget * parent = 0 );
+public:
+    MyTableView(QWidget * parent = 0);
 
-    signals:
-        void dataPasted();
+public slots:
+    void copy();
+    void paste();
 
-    public slots:
-        void copy();
-        void paste();
+    void setReadOnly(bool readOnly);
+protected:
+    void contextMenuEvent(QContextMenuEvent* event);
 
-    protected:
-        void contextMenuEvent( QContextMenuEvent * event );
-
-    private:
-        QMenu * m_contextMenu;
+    bool m_readOnly;
 };
 #endif

@@ -23,6 +23,7 @@
 #include "ConfiningStressTableModel.h"
 #include "Units.h"
 #include "TableGroupBox.h"
+#include "MyTableView.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -31,7 +32,8 @@
 ConfiningStressDialog::ConfiningStressDialog( QWidget * parent, Qt::WindowFlags f )
     : QDialog(parent,f)
 {   
-    connect( Units::instance(), SIGNAL(systemChanged()), SLOT(updateLabels()));
+    connect( Units::instance(), SIGNAL(systemChanged(int)),
+             this, SLOT(updateLabels()));
 
     QGridLayout * layout = new QGridLayout;
     layout->setColumnStretch(0, 1);
@@ -54,7 +56,11 @@ ConfiningStressDialog::ConfiningStressDialog( QWidget * parent, Qt::WindowFlags 
     m_waterDepthSpinBox->setValue( tableModel->waterTableDepth() );
     connect( m_waterDepthSpinBox, SIGNAL(valueChanged(double)), tableModel, SLOT(setWaterTableDepth(double)));
 
-    layout->addWidget( new TableGroupBox( tableModel, tr("Soil Profile") ), ++row, 0, 1, 2 );
+    TableGroupBox* tgb = new TableGroupBox(tr("Soil Profile"));
+    tgb->setModel(tableModel);
+
+    layout->addWidget(tgb, ++row, 0, 1, 2 );
+
 
     // Button box
     QDialogButtonBox * buttonBox = new QDialogButtonBox( QDialogButtonBox::Close );

@@ -24,121 +24,120 @@
 
 #include "NonlinearProperty.h"
 
-#include <QObject>
+#include <QAbstractTableModel>
 #include <QList>
-#include <QString>
 #include <QMap>
+#include <QObject>
+#include <QString>
 #include <QVariant>
 
 class SoilType : public QObject
 {
     Q_OBJECT
 
-	public:
-		SoilType(QObject * parent = 0);
-        ~SoilType();
-        
-        double untWt() const;
-		void setUntWt(double untWt);
+    friend QDataStream & operator<< (QDataStream & out, const SoilType* soilType);
+    friend QDataStream & operator>> (QDataStream & in, SoilType* soilType);
 
-        double density() const;
+public:
+    SoilType(QObject * parent = 0);
 
-        double initialDamping() const;
-        void setInitialDamping(double initialDamping);
-       
-		void setName(const QString & name);
-		const QString & name() const;
+    double untWt() const;
+    void setUntWt(double untWt);
 
-        QString toString() const;
+    double density() const;
 
-        void setNotes(const QString & notes);
-        const QString & notes() const;
+    double damping() const;
+    void setDamping(double damping);
 
-		void setIsVaried(bool isVaried);
-		bool isVaried() const;
+    void setName(const QString & name);
+    const QString & name() const;
 
-        void setSaveData(bool saveData);
-        bool saveData() const;
+    void setNotes(const QString & notes);
+    const QString & notes() const;
 
-        NonlinearProperty * normShearMod();
-        void setNormShearMod(NonlinearProperty * normShearMod);
+    void setIsVaried(bool isVaried);
+    bool isVaried() const;
 
-        NonlinearProperty * damping();
-        void setDamping(NonlinearProperty * damping);
+    void setSaveData(bool saveData);
+    bool saveData() const;
 
-		double meanStress() const;
-		double PI() const;
-		double OCR() const;
-		double freq() const;
-		int nCycles() const;
+    NonlinearProperty* const modulusModel();
+    void setModulusModel(NonlinearProperty * model);
 
-        //! Reset the curves back to the average values.
-        void reset();
+    NonlinearProperty* const dampingModel();
+    void setDampingModel(NonlinearProperty * model);
 
-		QMap<QString, QVariant> toMap() const;
-		void fromMap( const QMap<QString, QVariant> & map );
+    //! If the soil properties are required
+    bool requiresSoilProperties() const;
 
-        //! Create a html document containing the information of the model
-        QString toHtml() const;
-        
-        //! Compute the shear modulus-reduction and damping curves
-		void computeDarendeliCurves();
+    double meanStress() const;
+    double pi() const;
+    double ocr() const;
+    double freq() const;
+    int nCycles() const;
 
-    public slots:
-		void setPI(double pi);
-		void setMeanStress(double meanStress);
-		void setOCR(double ocr);
-		void setFreq(double freq);
-		void setNCycles(int nCycles);
+    //! Create a html document containing the information of the model
+    QString toHtml() const;
+
+    //! Compute the shear modulus-reduction and damping curves
+    void computeDarendeliCurves();
+
+public slots:
+    void setPi(double pi);
+    void setMeanStress(double meanStress);
+    void setOcr(double ocr);
+    void setFreq(double freq);
+    void setNCycles(int nCycles);
     
-    signals:
-        void dampingModelChanged();
-        void shearModModelChanged();
+signals:
+    void nameChanged(const QString &name);
+    void dampingModelChanged(NonlinearProperty* damping);
+    void modulusModelChanged(NonlinearProperty* modulusReduction);
 
-        void wasModified();
+    void wasModified();
 
-	private:
-        //! Unit weight of the layer
-		double m_untWt;
+private:
+    //! Unit weight of the layer
+    double m_untWt;
 
-        //! Initial damping of the layer
-        double m_initialDamping;
-        
-        //! Name of the soil layer
-		QString m_name;
+    //! Damping of the layer
+    double m_damping;
 
-        //! Notes regarding the soil type
-        QString m_notes;
+    //! Name of the soil layer
+    QString m_name;
 
-        //! Switch which controls if the soil layer is varied
-		bool m_isVaried;
+    //! Notes regarding the soil type
+    QString m_notes;
 
-        //! Save the nonlinear curve data during the trials
-        bool m_saveData;
-		
-		/*
-		 * Soil properties used for the Darendeli empirical relationship
-		 */
-        //@{
-        //! Mean stress in atmospheres
-		double m_meanStress;
+    //! Switch which controls if the soil layer is varied
+    bool m_isVaried;
 
-        //! Plasticity Index
-		double m_pi;
+    //! Save the nonlinear curve data during the trials
+    bool m_saveData;
 
-        //! Over-consolidation ratio
-		double m_ocr;
+    /*
+     * Soil properties used for the Darendeli empirical relationship
+     */
+    //@{
+    //! Mean stress in atmospheres
+    double m_meanStress;
 
-        //! Frequency of excitation
-		double m_freq;
+    //! Plasticity Index
+    double m_pi;
 
-        //! Number of cycles of excitation
-		int m_nCycles;
-        //@}
-        //! Shear modulus reduction
-        NonlinearProperty * m_normShearMod;
+    //! Over-consolidation ratio
+    double m_ocr;
 
-        //! Damping
-        NonlinearProperty * m_damping;
+    //! Frequency of excitation
+    double m_freq;
+
+    //! Number of cycles of excitation
+    int m_nCycles;
+    //@}
+    //! Shear modulus reduction
+    NonlinearProperty* m_modulusModel;
+
+    //! Damping
+    NonlinearProperty* m_dampingModel;
 };
 #endif

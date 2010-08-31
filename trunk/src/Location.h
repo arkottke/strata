@@ -20,10 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef LOCATION_H_
-
-#include <QMap>
-#include <QString>
-#include <QVariant>
+#define LOCATION_H_
 
 class Location
 {
@@ -43,4 +40,4 @@ class Location
         //! Depth from the top of the layer
         double m_depth;
 };
-#endif
+#endif // LOCATION_H_

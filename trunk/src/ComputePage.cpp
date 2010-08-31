@@ -20,23 +20,24 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "ComputePage.h"
-#include "SiteResponseOutput.h"
+
+#include "SiteResponseModel.h"
+#include "OutputCatalog.h"
+#include "TextLog.h"
 
 #include <QGridLayout>
 #include <QLabel>
 #include <QDebug>
 
-ComputePage::ComputePage( SiteResponseModel * model, QWidget * parent, Qt::WindowFlags f )
-    : QWidget( parent, f), m_model(model)
+ComputePage::ComputePage(QWidget * parent, Qt::WindowFlags f )
+    : AbstractPage(parent, f), m_model(0)
 {
     QGridLayout * layout = new QGridLayout;
 
     // Progress bar
     m_progressBar = new QProgressBar;
-    connect( m_progressBar, SIGNAL(valueChanged(int)), this, SLOT(updateEta(int)));
-    connect( m_model, SIGNAL(progressRangeChanged(int,int)), m_progressBar, SLOT(setRange(int,int)));
-    connect( m_model, SIGNAL(progressChanged(int)), m_progressBar, SLOT(setValue(int)));
-
+    connect( m_progressBar, SIGNAL(valueChanged(int)),
+             this, SLOT(updateEta(int)));
     layout->addWidget( m_progressBar, 0, 0);
 
     // Completion time
@@ -50,24 +51,21 @@ ComputePage::ComputePage( SiteResponseModel * model, QWidget * parent, Qt::Windo
     // Buttons
     m_cancelButton = new QPushButton(QIcon(":/images/process-stop.svg"), tr("Cancel"));
     m_cancelButton->setEnabled(false);
-    m_cancelButton->setCursor(Qt::ArrowCursor);
-    connect(m_cancelButton, SIGNAL(clicked()), m_model, SLOT(stop()));
+
+    layout->addWidget(m_cancelButton, 0, 3);
 
     //m_computeButton = new QPushButton(QIcon(":/images/system-run.svg"), tr("Compute"));
     m_computeButton = new QPushButton(tr("Compute"));
     m_computeButton->setDefault(true);
-    connect(m_computeButton, SIGNAL(clicked()), SLOT(compute()));
-    connect(m_model, SIGNAL(finished()), SLOT(finished()));
+    connect(m_computeButton, SIGNAL(clicked()),
+            this, SLOT(compute()));
 
-    layout->addWidget(m_cancelButton, 0, 3);
     layout->addWidget(m_computeButton, 0, 4);
     
     // Text area
     m_logView = new QTextEdit;
     m_logView->setReadOnly(true);
     m_logView->setTabStopWidth(20);
-    connect( m_model->output()->textLog(), SIGNAL(textChanged(QString)), m_logView, SLOT(append(QString)));
-    connect( m_model->output()->textLog(), SIGNAL(textCleared()), m_logView, SLOT(clear()));
 
     layout->addWidget( m_logView, 1, 0, 1, 5);
 
@@ -78,47 +76,67 @@ ComputePage::ComputePage( SiteResponseModel * model, QWidget * parent, Qt::Windo
     setLayout(layout);
 }
 
-void ComputePage::setReadOnly(bool b)
+void ComputePage::setModel(SiteResponseModel *model)
 {
-    m_computeButton->setDisabled(b);
+    m_model = model;
+
+    connect(model, SIGNAL(progressRangeChanged(int,int)),
+            m_progressBar, SLOT(setRange(int,int)));
+
+    connect(model, SIGNAL(progressChanged(int)),
+            m_progressBar, SLOT(setValue(int)));
+
+    connect(m_cancelButton, SIGNAL(clicked()),
+            model, SLOT(stop()));
+
+    connect(this, SIGNAL(startCalculation()),
+            model, SLOT(start()));
+    connect(model, SIGNAL(finished()),
+            this, SLOT(reset()));
+
+    m_logView->clear();
+    foreach (const QString &line, model->outputCatalog()->log()->text())
+        m_logView->append(line);
+
+    connect( model->outputCatalog()->log(), SIGNAL(textChanged(QString)),
+             m_logView, SLOT(append(QString)));
+    connect( model->outputCatalog()->log(), SIGNAL(textCleared()),
+             m_logView, SLOT(clear()));
 }
 
-void ComputePage::reset()
+void ComputePage::setReadOnly(bool b)
 {
-    m_logView->clear();
-    m_etaLineEdit->clear();
-    m_progressBar->reset();
+    m_computeButton->setDisabled(b || m_model->hasResults());
+    // Only enabled by the compute button
+    m_cancelButton->setDisabled(true);
+
+    m_cancelButton->setCursor(Qt::ArrowCursor);
 }
 
 void ComputePage::compute()
 {
-    // Prompt to save the file
     emit saveRequested();
 
+    m_logView->clear();
     // Disable the compute button
     m_computeButton->setEnabled(false);
     m_cancelButton->setEnabled(true);
+
+    m_cancelButton->setCursor(Qt::BusyCursor);
     
-    // Start the calculation
     m_model->start();
 }
 
-void ComputePage::finished()
+void ComputePage::reset()
 {
-    m_cancelButton->setEnabled(false);
-
-    // compute button is turned off by setReadOnly() called from MainWindow.cpp
-    // if the calculation was successful.
-    if (!m_model->wasSucessful()) {
-        m_computeButton->setEnabled(true);
-    }
+    setReadOnly(false);
 }
 
 void ComputePage::updateEta(int value)
 {
-    if ( value == m_progressBar->minimum() )
+    if (value == m_progressBar->minimum()) {
         m_timer.restart();
-    else {
+    } else {
         // Compute the average time per step of the progress bar
         double avgRate = double(m_timer.elapsed()) / double(value - m_progressBar->minimum());
 

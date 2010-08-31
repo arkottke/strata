@@ -22,28 +22,28 @@
 #ifndef SOIL_TYPE_OUTPUT_TABLE_MODEL_H_
 #define SOIL_TYPE_OUTPUT_TABLE_MODEL_H_
 
-#include "MyAbstractTableModel.h"
 #include "SoilType.h"
 
+#include <QAbstractTableModel>
 #include <QList>
 
-class SoilTypeOutputTableModel : public MyAbstractTableModel
+class SoilTypeOutputTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
-    public:
-        SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent = 0 );
+public:
+    SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent = 0 );
 
-		int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
-		int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
+    int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
 
-		QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
-		bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
+    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+    bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
 
-		QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
-		Qt::ItemFlags flags ( const QModelIndex &index ) const;
+    QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    Qt::ItemFlags flags ( const QModelIndex &index ) const;
 
-    private:
-        QList<SoilType*> & m_soilTypes; 
+private:
+    QList<SoilType*> & m_soilTypes;
 };
 #endif

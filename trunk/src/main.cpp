@@ -31,33 +31,31 @@ void myMessageOutput(QtMsgType type, const char *msg)
     switch (type) {
         case QtDebugMsg:
             fprintf( stdout, "Debug: %s\n", msg );
-            // if ( logBox == 0 )
-            //		logBox = new QTextEdit;
-            // logBox->append( msg );
             break;
         case QtWarningMsg:
-            QMessageBox::warning( 0, "Strata", msg );
+            QMessageBox::warning(0, "Strata", msg);
             break;
         case QtCriticalMsg:
-            QMessageBox::critical( 0, "Strata", msg );
+            QMessageBox::critical(0, "Strata", msg);
             break;
         case QtFatalMsg:
-            QMessageBox::critical( 0, "Strata", msg );
+            QMessageBox::critical(0, "Strata", msg);
             abort();
         }
 }
 
 int main(int argc, char* argv[])
 {
-    //qInstallMsgHandler(myMessageOutput);
-    
+#ifndef DEBUG
+    qInstallMsgHandler(myMessageOutput);
+#endif
+
     QApplication app(argc, argv);
 
     // Set the window icon
     app.setWindowIcon(QIcon(":/images/application-icon.svg"));
 
-    QCoreApplication::setOrganizationName("Albert Kottke");
-    QCoreApplication::setOrganizationDomain("accipter.org");
+    QCoreApplication::setOrganizationName("accipter");
     QCoreApplication::setApplicationName("Strata");
 
     MainWindow * mainWindow = new MainWindow;

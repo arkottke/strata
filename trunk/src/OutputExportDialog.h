@@ -22,17 +22,19 @@
 #ifndef OUTPUT_EXPORT_DIALOG_H_
 #define OUTPUT_EXPORT_DIALOG_H_
 
-#include "SiteResponseOutput.h"
-
 #include <QDialog>
+
 #include <QLineEdit>
+#include <QTableWidget>
+
+class OutputCatalog;
 
 class OutputExportDialog : public QDialog
 {
     Q_OBJECT
 
     public:
-        OutputExportDialog( SiteResponseOutput * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+        OutputExportDialog(OutputCatalog * model, QWidget * parent = 0, Qt::WindowFlags f = 0);
 
     protected slots:
         void selectDirectory();
@@ -41,7 +43,10 @@ class OutputExportDialog : public QDialog
 
     private:
         //! Site response model information
-        SiteResponseOutput * m_model;
+        OutputCatalog* m_model;
+
+        //! Widget for display the output
+        QTableWidget* m_tableWidget;
 
         //! Selected destination directory
         QLineEdit * m_destDirLineEdit;

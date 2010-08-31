@@ -24,9 +24,11 @@
 
 #include <QDebug>
 
-TextLog::TextLog( QObject * parent )
+TextLog::TextLog(QObject * parent) :
+        QObject(parent)
+
 {
-    reset();
+    m_level = Low;
 }
 
 QStringList TextLog::levelList()
@@ -52,12 +54,6 @@ void TextLog::clear()
     emit textCleared();
 }
 
-void TextLog::reset()
-{
-    clear();
-    m_level = Low;
-}
-
 TextLog::Level TextLog::level() const
 {
     return m_level;
@@ -65,47 +61,48 @@ TextLog::Level TextLog::level() const
 
 void TextLog::setLevel( TextLog::Level level )
 {
-    if ( m_level != level ) {
+    if (m_level != level) {
+        m_level = level;
+
         emit wasModified();
     }
-
-    m_level = level;
 }
 
 void TextLog::setLevel(int level)
 {
-    setLevel((TextLog::Level)level);
+    setLevel((Level)level);
 }
 
-QMap<QString, QVariant> TextLog::toMap() const
+const QStringList& TextLog::text() const
 {
-    QMap<QString, QVariant> map;
-
-    map.insert("level", m_level);
-    map.insert("text", m_text);
-
-    return map;
-}
-
-void TextLog::fromMap(const QMap<QString, QVariant> & map )
-{
-    m_level = (Level)map.value("level").toInt();
-
-    QList<QVariant> list = map.value("text").toList();
-
-    m_text.clear();
-    emit textCleared();
-
-    QString text;
-
-    foreach( QVariant var, list ) {
-        emit textChanged(var.toString());
-        m_text << var.toString();
-    }
+    return m_text;
 }
 
 TextLog & operator<<( TextLog & log, const QString & string )
 {
     log.append(string);
     return log;
+}
+
+QDataStream & operator<< (QDataStream & out, const TextLog* tl)
+{
+    out << (quint8)1;
+
+    out << (int)tl->m_level << tl->m_text;
+
+    return out;
+}
+
+QDataStream & operator>> (QDataStream & in, TextLog* tl)
+{
+    quint8 ver;
+    in >> ver;
+
+    int level;
+
+    in >> level >> tl->m_text;
+
+    tl->m_level = (TextLog::Level)level;
+
+    return in;
 }

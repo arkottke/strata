@@ -24,9 +24,7 @@
 
 #include "VelocityLayer.h"
 
-#include <QMap>
 #include <QString>
-#include <QVariant>
 
 //! Describes the velocity variation and linear response of bedrock
 
@@ -34,47 +32,44 @@ class RockLayer : public VelocityLayer
 {
     Q_OBJECT
 
-	public:
-		RockLayer(QObject * parent = 0);
-        ~RockLayer();
-        
-        //! Reset the object to the default values
-        void reset();
+    friend QDataStream & operator<< (QDataStream & out, const RockLayer* rl);
+    friend QDataStream & operator>> (QDataStream & in, RockLayer* rl);
 
-        double untWt() const;
-        double density() const;
-        
-        //! Randomized damping and strain dependent damping
-        double damping() const;
+public:
+    RockLayer(QObject * parent = 0);
 
-        //! Set the varied damping and strain dependent damping
-        void setDamping( double damping );
+    double untWt() const;
+    double density() const;
 
-        //! Set the average damping only
-        double avgDamping() const;
-        
-        //! A description of the layer for tables
-        QString toString() const;
+    //! Randomized damping and strain dependent damping
+    double damping() const;
 
-		QMap<QString, QVariant> toMap() const;
-		void fromMap( const QMap<QString, QVariant> & map );
+    //! Set the varied damping and strain dependent damping
+    void setDamping(double damping);
 
-    public slots:
-        void setUntWt(double untWt);
-        //! Set both the average and varied damping
-        void setAvgDamping( double damping );
+    //! Set the average damping only
+    double avgDamping() const;
 
-    signals:
-        void wasModified();
+    //! A description of the layer for tables
+    QString toString() const;
 
-    private:
-        //! Unit weight of the rock
-        double m_untWt;
+public slots:
+    void setUntWt(double untWt);
+    //! Set both the average and varied damping
+    void setAvgDamping(double damping);
 
-        //! Damping of the rock -- randomized
-        double m_damping;
-        
-        //! Damping of the rock -- average
-        double m_avgDamping;
+signals:
+    void avgDampingChanged(double damping);
+    void untWtChanged(double untWt);
+
+private:
+    //! Unit weight of the rock
+    double m_untWt;
+
+    //! Damping of the rock -- randomized
+    double m_damping;
+
+    //! Damping of the rock -- average
+    double m_avgDamping;
 };
 #endif

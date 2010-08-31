@@ -32,6 +32,9 @@ class TextLog : public QObject
 {
     Q_OBJECT
 
+    friend QDataStream & operator<< (QDataStream & out, const TextLog* tl);
+    friend QDataStream & operator>> (QDataStream & in, TextLog* tl);
+
     public:
         TextLog( QObject * parent = 0 );
         
@@ -49,16 +52,11 @@ class TextLog : public QObject
         
         //! Clear the log
         void clear();
-        
-        //! Reset the object to the default values
-        void reset();
 
         Level level() const;
         void setLevel(Level level);
 
-		QMap<QString, QVariant> toMap() const;
-		void fromMap(const QMap<QString, QVariant> & map);
-
+        const QStringList& text() const;
     public slots:
         void setLevel(int level);
 

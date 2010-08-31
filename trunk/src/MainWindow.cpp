@@ -20,11 +20,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MainWindow.h"
-#include "UpdateDialog.h"
 
-#include "NonlinearPropertyLibraryDialog.h"
-
+#include "ComputePage.h"
+#include "ConfigurePlotDialog.h"
+#include "ConfiningStressDialog.h"
 #include "EditActions.h"
+#include "GeneralPage.h"
+#include "MotionPage.h"
+#include "HelpDialog.h"
+#include "NonlinearPropertyCatalogDialog.h"
+#include "OutputCatalog.h"
+#include "OutputPage.h"
+#include "OutputExportDialog.h"
+#include "ResultsPage.h"
+#include "SoilProfile.h"
+#include "SiteResponseModel.h"
+#include "SoilTypePage.h"
+#include "SoilTypeCatalog.h"
+#include "SoilProfilePage.h"
+#include "UpdateDialog.h"
 
 #include <QApplication>
 #include <QDialog>
@@ -43,10 +57,8 @@
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QMainWindow * parent) 
-	: QMainWindow(parent)
+    : QMainWindow(parent), m_model(0)
 {
-    m_model = new SiteResponseModel;
-
     // Initialize the help dialog, but keep it hidden
     m_helpDialog = new HelpDialog(this);
     m_confiningStressDialog = 0;
@@ -54,40 +66,39 @@ MainWindow::MainWindow(QMainWindow * parent)
     m_printer = new QPrinter;
     
     // Create the settings
-    m_settings = new QSettings;
+    m_settings = new QSettings(this);
 
     // Setup up the mainwindow
     createActions();
-    createPage();
+    createPages();
     createToolbar();
     createMenus();
 
-    // Reset the properties to the default values
-    reset();
-    
-    
     // Set the initial title
-    if ( QApplication::arguments().size() > 1 ) {
-        open( QApplication::arguments().last() );
+    if (QApplication::arguments().size() > 1) {
+        open(QApplication::arguments().last());
     } else {
-        setCurrentFile("");
-    }
-    
-    connect( m_model, SIGNAL(modifiedChanged(bool)), SLOT(setWindowModified(bool)));
+        newModel();
+    }   
 }
-        
+
+MainWindow::~MainWindow()
+{
+    delete m_printer;
+}
+
 void MainWindow::createActions()
 {
     // Read-only
     m_readOnlyAction = new QAction(QIcon(":/images/edit-delete.svg"), tr("Delete results"), this);
     m_readOnlyAction->setShortcut(tr("F2"));
     m_readOnlyAction->setEnabled(false);
-    connect(m_readOnlyAction, SIGNAL(triggered()), this, SLOT(setReadOnly()));
+
 
     // New
-    m_resetAction = new QAction(QIcon(":/images/document-new.svg"), tr("&New"),this);
-    m_resetAction->setShortcut(tr("Ctrl+n"));
-    connect(m_resetAction, SIGNAL(triggered()), this, SLOT(reset()));
+    m_newAction = new QAction(QIcon(":/images/document-new.svg"), tr("&New"),this);
+    m_newAction->setShortcut(tr("Ctrl+n"));
+    connect(m_newAction, SIGNAL(triggered()), this, SLOT(newModel()));
 
     // Open
     m_openAction = new QAction(QIcon(":/images/document-open.svg"), tr("&Open..."),this);
@@ -123,7 +134,7 @@ void MainWindow::createActions()
     // Non Linear Curve Database
     m_nlCurveDatabaseAction = new QAction(QIcon(":/images/system-file-manager.svg"), tr("Add/Remove Nonlinear Curves"), this);
     connect( m_nlCurveDatabaseAction, SIGNAL(triggered()), this, SLOT(showNonlinearDialog()));
-   
+
     // Confining Stress Calculator
     m_confiningStressDialogAction = new QAction(QIcon(":/images/accessories-calculator.svg"), tr("Confining Stress Calculator"), this);
     connect( m_confiningStressDialogAction, SIGNAL(triggered()), this, SLOT(showConfiningStressDialog()));
@@ -143,29 +154,39 @@ void MainWindow::createActions()
     connect(m_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 }
 
-void MainWindow::createPage()
+void MainWindow::createPages()
 {
     m_tabWidget = new QTabWidget;
-    connect( m_tabWidget, SIGNAL(currentChanged(int)), SLOT(tabChanged(int)));
+    connect( m_tabWidget, SIGNAL(currentChanged(int)),
+             this, SLOT(tabChanged(int)));
 
     // Create the pages
-    m_generalPage = new GeneralPage(m_model);
-    m_soilTypePage = new SoilTypePage(m_model);
-    m_soilProfilePage = new SoilProfilePage(m_model);
-    m_motionPage = new MotionPage(m_model);
-    m_outputPage = new OutputPage(m_model);
-    m_computePage = new ComputePage(m_model);
-    m_resultsPage = new ResultsPage(m_model->output());
+    m_pages << new GeneralPage;
+    m_tabWidget->addTab(m_pages.last(), tr("General Settings"));
 
-    m_tabWidget->addTab( m_generalPage, tr("General Settings"));
-    m_tabWidget->addTab( m_soilTypePage, tr("Soil Types"));
-    m_tabWidget->addTab( m_soilProfilePage, tr("Soil Profile"));
-    m_tabWidget->addTab( m_motionPage, tr("Motion(s)"));
-    m_tabWidget->addTab( m_outputPage, tr("Output Specification"));
-    m_tabWidget->addTab( m_computePage, tr("Compute"));
-    m_tabWidget->addTab( m_resultsPage, tr("Results"));
+    m_pages << new SoilTypePage;
+    connect(m_pages.last(), SIGNAL(linkActivated(QString)),
+            m_helpDialog, SLOT(gotoLink(QString)));
+    m_tabWidget->addTab(m_pages.last(), tr("Soil Types"));
 
-    m_tabWidget->setTabEnabled( RESULTS_PAGE, false);
+    m_pages << new SoilProfilePage;
+    m_tabWidget->addTab(m_pages.last(), tr("Soil Profile"));
+
+    m_pages <<  new MotionPage;
+    m_tabWidget->addTab(m_pages.last(), tr("Motion(s)"));
+
+    m_pages << new OutputPage;
+    m_tabWidget->addTab(m_pages.last(), tr("Output Specification"));
+
+    ComputePage* cp = new ComputePage;
+    connect(cp, SIGNAL(saveRequested()),
+            this, SLOT(save()));
+    m_pages << cp;
+    m_tabWidget->addTab(m_pages.last(), tr("Compute"));
+
+    m_resultsPage = new ResultsPage;
+    m_pages << m_resultsPage;
+    m_tabWidget->addTab(m_pages.last(), tr("Results"));
 
     // Place the tab widget in a scroll area
     QScrollArea * scrollArea = new QScrollArea;
@@ -173,24 +194,12 @@ void MainWindow::createPage()
     scrollArea->setWidgetResizable(true);
     
     setCentralWidget(scrollArea);
-
-
-    // Connections
-    connect( m_generalPage, SIGNAL(isSoilVariedChanged(bool)), m_soilTypePage, SLOT(setIsVaried(bool)));
-    connect( m_generalPage, SIGNAL(isVelocityVariedChanged(bool)), m_soilProfilePage, SLOT(setIsVaried(bool)));
-    connect( m_generalPage, SIGNAL(methodChanged(int)), m_motionPage, SLOT(setMethod(int)));
-    connect( m_generalPage, SIGNAL(methodChanged(int)), m_outputPage, SLOT(setMethod(int)));
-    connect( m_soilTypePage, SIGNAL(linkActivated(QString)), m_helpDialog, SLOT(gotoLink(QString)));
-    connect( m_soilTypePage, SIGNAL(soilTypesChanged()), m_outputPage, SLOT(refresh()));
-
-    connect( m_computePage, SIGNAL(saveRequested()), SLOT(save()));
-    connect( m_model, SIGNAL(isWorkingChanged(bool)), SLOT(setIsWorking(bool)));
 }
 
 void MainWindow::createMenus()
 {
     QMenu * fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(m_resetAction);
+    fileMenu->addAction(m_newAction);
     fileMenu->addAction(m_openAction);
     fileMenu->addSeparator();
     fileMenu->addAction(m_saveAction);
@@ -224,7 +233,7 @@ void MainWindow::createMenus()
     helpMenu->addAction(m_updateAction);
     helpMenu->addAction(m_aboutAction);
 }
-    
+
 void MainWindow::createToolbar()
 {
     m_toolBar = new QToolBar(tr("Main ToolBar"), this);
@@ -232,112 +241,72 @@ void MainWindow::createToolbar()
     m_toolBar->addAction( m_readOnlyAction );
 
     m_toolBar->addSeparator();
-    m_toolBar->addAction( m_resetAction );
-    m_toolBar->addAction( m_openAction );
-    m_toolBar->addAction( m_saveAction );
-    m_toolBar->addAction( m_saveAsAction );
+    m_toolBar->addAction(m_newAction);
+    m_toolBar->addAction(m_openAction);
+    m_toolBar->addAction(m_saveAction);
+    m_toolBar->addAction(m_saveAsAction);
 
     m_toolBar->addSeparator();
-    m_toolBar->addAction( m_printAction );
-    m_toolBar->addAction( m_exportAction );
+    m_toolBar->addAction(m_printAction);
+    m_toolBar->addAction(m_exportAction);
     
     m_toolBar->addSeparator();
-    m_toolBar->addAction( m_nlCurveDatabaseAction );
+    m_toolBar->addAction(m_nlCurveDatabaseAction);
 
     m_toolBar->addSeparator();
-    m_toolBar->addAction( m_helpAction );
+    m_toolBar->addAction(m_helpAction );
 
     addToolBar(m_toolBar);
 }
 
-void MainWindow::setCurrentFile(const QString & fileName)
+void MainWindow::newModel()
 {
-    m_fileName = fileName;
-    setWindowTitle(tr("%1 [*] - %2").arg(m_fileName.isEmpty() ? "untitled.strata" : m_fileName ).arg(tr("Strata")));
-    setWindowModified(false);
+    if (!okToClose()) {
+        return;
+    }
+
+    setModel(new SiteResponseModel);
 }
 
-void MainWindow::reset()
-{
-    // Set the initial title
-    setCurrentFile("");
-
-    m_model->reset();
-
-    // Reload all of the values from the model
-    m_generalPage->load();
-    m_soilTypePage->load();
-    m_soilProfilePage->load();
-    m_motionPage->load();
-    m_outputPage->load();
-    // FIXME
-    //m_computePage->load();
-    //m_resultsPage->load();
-}
-
-void MainWindow::open( const QString & fileName )
+void MainWindow::open(QString fileName)
 {
     if (!okToClose()) {
         return;
     }
 
     if (fileName.isEmpty()) {
+        QString dir = m_settings->value("projectDirectory",
+                                        QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+                                        ).toString();
         // Prompt for a fileName
-        QString _fileName = QFileDialog::getOpenFileName(
+        fileName = QFileDialog::getOpenFileName(
                 this,
                 tr("Select a Strata file..."),
-                m_settings->value("projectDirectory",
-                                  QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
-                                  ).toString(),
+                dir,
                 "Strata File (*.strata)");
 
-        if (!_fileName.isEmpty()) {
-            m_fileName = _fileName;
+        if (!fileName.isEmpty()) {
             // Save the state
-            m_settings->setValue( "projectDirectory", QFileInfo(_fileName).filePath());
+            m_settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
         } else {
             return;
         }
-    } else {
-        m_fileName = fileName;
-    }
-    
-    if (!m_fileName.isEmpty()) {
-        setCurrentFile(m_fileName);
+    }   
 
-        m_model->load(m_fileName);
-        
-        m_generalPage->load();
-        m_soilTypePage->load();
-        m_soilProfilePage->load();
-        m_motionPage->load();
-        m_outputPage->load();
+    SiteResponseModel* srm = new SiteResponseModel;
+    srm->load(fileName);
 
-        if (m_model->output()->hasResults()) {
-            setReadOnly(true);
-            // Refresh the data on the output tab
-            m_resultsPage->refreshWidget();
-            // Switch to the output tab
-            m_tabWidget->setCurrentIndex(RESULTS_PAGE);
-        } else {
-            setReadOnly(false);
-        }
-    
-        setWindowModified(false);
-    }
+    setModel(srm);
 }
 
 bool MainWindow::save()
 {
     // If no file name is selected run saveAs
-    if (m_fileName.isEmpty())
+    if (m_model->fileName().isEmpty())
         return saveAs();
     
     // Save the model
-    m_model->save(m_fileName);
-
-    // Reset the modified flag
-    setWindowModified(false);
+    m_model->save();
 
     return true;
 }
@@ -347,17 +316,19 @@ bool MainWindow::saveAs()
     // Prompt for a fileName
     QString fileName = QFileDialog::getSaveFileName(
             this,
-            tr("Select a Strata file..."),
-            m_settings->value("projectDirectory",
-                              QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
-                              ).toString(),
+            tr("Save file as..."),
+            (m_model->fileName().isEmpty() ?
+             m_settings->value("projectDirectory",
+                               QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+                               ).toString()
+                                   : m_model->fileName()),
             "Strata File (*.strata)");
 
     if (!fileName.isEmpty()) {
         // Save the state
-        m_settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
+        m_settings->setValue("projectDirectory", QFileInfo(fileName).path());
         // Update the document title
-        setCurrentFile(fileName);
+        m_model->setFileName(fileName);
         // Save the model if a file was selected
         return save();
     } else {
@@ -415,17 +386,17 @@ void MainWindow::printToPdf()
 }
 
 void MainWindow::showNonlinearDialog()
-{
-    NonlinearPropertyLibraryDialog dialog(m_model->nlPropertyLibrary(), this);
+{   
+    NonlinearPropertyCatalogDialog dialog(m_model->siteProfile()->soilTypeCatalog()->nlCatalog());
 
-    dialog.addAction( EditActions::instance()->cutAction() );
-    dialog.addAction( EditActions::instance()->copyAction() );
-    dialog.addAction( EditActions::instance()->pasteAction() );
+    dialog.addAction(EditActions::instance()->cutAction());
+    dialog.addAction(EditActions::instance()->copyAction());
+    dialog.addAction(EditActions::instance()->pasteAction());
 
     dialog.exec();
 
     // Save the modified library
-    m_model->nlPropertyLibrary()->save();
+    m_model->siteProfile()->soilTypeCatalog()->nlCatalog()->save();
 }
 
 void MainWindow::showConfiningStressDialog()
@@ -445,24 +416,19 @@ void MainWindow::help()
 
 void MainWindow::update()
 {
-    qDebug() << "Update!";
-    UpdateDialog ud;
+    UpdateDialog ud(this);
 
     ud.exec();
-    //UpdateDialog * ud = new UpdateDialog;
-    //ud->start();
-
 }
-
 
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Strata"),
-             QString(tr("<p><b>Strata</b> was written by Albert Kottke working with Professor"
-                 " Ellen Rathje at The University of Texas at Austin.</p>"
-                 "<p>For comments and suggestions contact Albert at "
-                 "<a href=\"mailto:albert@mail.utexas.edu\">albert@mail.utexas.edu</a></p>"
-                 "<p>Version: alpha, revision: %1</p>")).arg(REVISION));
+                       tr("<p><b>Strata</b> was written by Albert Kottke working with Professor"
+                          " Ellen Rathje at The University of Texas at Austin.</p>"
+                          "<p>For comments and suggestions contact Albert at "
+                          "<a href=\"mailto:albert@mail.utexas.edu\">albert@mail.utexas.edu</a></p>"
+                          "<p>Version: alpha, revision: %1</p>").arg(REVISION));
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)
@@ -474,124 +440,68 @@ void MainWindow::closeEvent(QCloseEvent * event)
     }
 }
 
-bool MainWindow::okToClose()
+void MainWindow::updateTabs()
 {
-    // Prompt that the input has been modified
-    if (m_model->modified()) {
-        QMessageBox msgBox(this);
-        msgBox.setText("The document has been modified.");
-        msgBox.setInformativeText("Do you want to save your changes?");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        
-        int ret = msgBox.exec();
-        
-        switch (ret) {
-            case QMessageBox::Save:
-                // Save was clicked
-                return save();
-            case QMessageBox::Discard:
-                // Don't Save was clicked
-                return true;
-            case QMessageBox::Cancel:
-                // Cancel was clicked
-                return false;
-            default:
-                // should never be reached
-                break;
-        }
-    }
-    
-    return true;
-}
-
-void MainWindow::setIsWorking(bool isWorking)
-{
-    if (isWorking) {
-        setCursor(Qt::WaitCursor);
-    } else {
-        setCursor(Qt::ArrowCursor);
-
-        if (m_model->wasSucessful()) {
-            setReadOnly(true);
-            // Refresh the data on the output tab
-            m_resultsPage->refreshWidget();
-            // Switch to the output tab
-            m_tabWidget->setCurrentIndex(RESULTS_PAGE);
-        }
-    }
+    const bool isBusy = m_model->isRunning();
 
     // Enable/Disable all actions and menus
-    foreach (QObject * object, children()) {
-        QAction * action = qobject_cast<QAction*>(object);
-        if (action) {
-            action->setDisabled(isWorking);
-        }
-
-        QMenu * menu = qobject_cast<QMenu*>(object);
-
-        if (menu) {
-            menu->setDisabled(isWorking);
-        }
+    foreach (QObject* object, children()) {
+        if (QAction* action = qobject_cast<QAction*>(object))
+            action->setDisabled(isBusy);
     }
-    
-    // Enable/Disable the input tabs
-    for (int i = 0; i < m_tabWidget->count(); ++i) {
-        if (i != COMPUTE_PAGE && i != RESULTS_PAGE ) {
-            m_tabWidget->setTabEnabled( i, !isWorking);
-        }
+
+    foreach (QObject* object, menuBar()->children()) {
+        if (QMenu* menu = qobject_cast<QMenu*>(object))
+            menu->setDisabled(isBusy);
     }
+
+    setCursor(isBusy ?
+              Qt::WaitCursor : Qt::ArrowCursor);
+
+    // Set all tabs to be enabled or disabled
+    for (int i = 0; i < m_tabWidget->count(); ++i)
+        m_tabWidget->setTabEnabled(i, !isBusy || i == COMPUTE_PAGE);
 }
-        
+
 void MainWindow::setReadOnly(bool readOnly)
 {
-    if (!readOnly && !okToClose()) {
-        return;
-    }
+    // Set all of the pages to be read only
+    foreach (AbstractPage* page, m_pages)
+        page->setReadOnly(readOnly);
 
-    m_readOnly = readOnly;
     // Change the icon and label of the button
     m_readOnlyAction->setEnabled(readOnly);
 
-    // Disable the widgets on the pages
-    m_generalPage->setReadOnly(readOnly);
-    m_soilTypePage->setReadOnly(readOnly);
-    m_soilProfilePage->setReadOnly(readOnly);
-    m_motionPage->setReadOnly(readOnly);
-    m_outputPage->setReadOnly(readOnly);
-    m_computePage->setReadOnly(readOnly);
-
-    // Move away from final tab
-    if ( !readOnly && m_tabWidget->currentIndex() == RESULTS_PAGE ) {
-        m_tabWidget->setCurrentIndex(0);
+    // readOnly means that the model has results and
+    // therefore the Results tab needs to be enabled.
+    m_tabWidget->setTabEnabled(RESULTS_PAGE, readOnly);
+    if (readOnly) {
+        m_tabWidget->setCurrentIndex(RESULTS_PAGE);
+        m_resultsPage->setModel(m_model);
     }
 
-    // Enable the output page and switch to it
-    m_tabWidget->setTabEnabled( RESULTS_PAGE, readOnly);
     m_exportAction->setEnabled(readOnly);
-
-    if ( !readOnly ) {
-        // Remove the results
-        m_model->output()->clear();
-    }
 }
 
 void MainWindow::tabChanged(int tab)
 {
     if ( m_settings->value("mainwindow/warnAboutReadOnly", true).toBool() 
-            && m_readOnly && m_model->output()->hasResults() && tab != RESULTS_PAGE  ) {
+        && m_model && m_model->hasResults() && tab != RESULTS_PAGE) {
 
         // Create a dialog box that reminds the user that they are in a
         // read-only environment.
 
-        QVBoxLayout * layout = new QVBoxLayout;
-    
-        layout->addWidget( new QLabel(tr(
-                        "Strata input fields are locked in a read-only state. "
-                        "To edit the fields\nyou must unlock the input by clicking "
-                        "on the lock button in the upper\nleft portion of the window. "
-                        "Unlocking Strata will delete all results.")));
-    
+        QVBoxLayout* layout = new QVBoxLayout;
+
+        QLabel* label = new QLabel(tr(
+                "Strata input fields are locked in a read-only state. "
+                "To edit the fields you must unlock the input by clicking "
+                "on the lock button in the upper left portion of the window. "
+                "Unlocking Strata will delete all results."));
+
+        label->setWordWrap(true);
+        layout->addWidget(label);
+
         QCheckBox * checkBox = new QCheckBox(tr("Stop reminding me."));
         layout->addWidget( checkBox );
 
@@ -602,8 +512,77 @@ void MainWindow::tabChanged(int tab)
         connect( buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
         dialog.setLayout(layout);
 
-        if (dialog.exec()) {
-            m_settings->setValue("mainwindow/warnAboutReadOnly", !checkBox->isChecked() );
+        if (dialog.exec())
+            m_settings->setValue("mainwindow/warnAboutReadOnly", !checkBox->isChecked());
+    }
+}
+
+void MainWindow::setModel(SiteResponseModel *model)
+{
+    if (m_model)
+        m_model->deleteLater();
+
+    m_model = model;
+
+    // Update all of the pages
+    foreach (AbstractPage* page, m_pages)
+        page->setModel(m_model);
+
+    updateTabs();
+    connect(m_readOnlyAction, SIGNAL(triggered()),
+            m_model, SLOT(clearResults()));
+    setReadOnly(m_model->hasResults());
+    connect(m_model, SIGNAL(hasResultsChanged(bool)),
+            this, SLOT(setReadOnly(bool)));
+
+    setWindowModified(false);
+    connect(m_model, SIGNAL(modifiedChanged(bool)),
+            this, SLOT(setWindowModified(bool)));
+
+    updateWindowTitle(m_model->fileName());
+    connect(m_model, SIGNAL(fileNameChanged(QString)),
+            this, SLOT(updateWindowTitle(QString)));
+
+    connect(m_model, SIGNAL(started()),
+            this, SLOT(updateTabs()));
+    connect(m_model, SIGNAL(finished()),
+            this, SLOT(updateTabs()));
+
+    // During this process clear() is called on the OutputCatalog which flags
+    // the SiteResponseModel as being modified. We should reset this flag.
+    // m_model->setModified(false);
+    // FIXME
+}
+
+void MainWindow::updateWindowTitle(const QString &fileName)
+{
+    setWindowTitle(tr("%1[*] - %2").arg(fileName.isEmpty() ? "untitled.strata" : fileName).arg("Strata"));
+}
+
+bool MainWindow::okToClose()
+{
+    // Prompt that the input has been modified
+    if (m_model && m_model->modified()) {
+        QMessageBox msgBox(this);
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+
+        int ret = msgBox.exec();
+
+        switch (ret) {
+        case QMessageBox::Save:
+            // Save was clicked
+            return save();
+        case QMessageBox::Discard:
+            // Don't Save was clicked
+            return true;
+        case QMessageBox::Cancel:
+        default:
+            // Cancel was clicked
+            return false;
         }
     }
+    return true;
 }

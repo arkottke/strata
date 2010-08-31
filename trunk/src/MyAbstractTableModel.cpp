@@ -15,26 +15,41 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MyAbstractTableModel.h"
 
+#include <QColor>
+#include <QBrush>
 
-MyAbstractTableModel::MyAbstractTableModel( bool readOnly, QObject * parent)
-    : QAbstractTableModel(parent), m_readOnly(readOnly)
+MyAbstractTableModel::MyAbstractTableModel(QObject * parent)
+    : QAbstractTableModel(parent)
 {
     m_readOnly = false;
 }
 
-void MyAbstractTableModel::resetModel()
+QVariant MyAbstractTableModel::data(const QModelIndex & index, int role) const
 {
-    reset();
+    // Color the background light gray for cells that are not editable
+    if (role==Qt::BackgroundRole &&
+        !(flags(index) & Qt::ItemIsEditable
+          || flags(index) & Qt::ItemIsUserCheckable))
+        return QVariant(QBrush(QColor(200,200,200)));
+
+    return QVariant();
 }
 
-void MyAbstractTableModel::setReadOnly(bool b)
+bool MyAbstractTableModel::readOnly() const
 {
-    m_readOnly = b;
-    reset();
+    return m_readOnly;
+}
+
+void MyAbstractTableModel::setReadOnly(bool readOnly)
+{
+    if (m_readOnly != readOnly) {
+        m_readOnly = readOnly;
+        reset();
+    }
 }

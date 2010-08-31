@@ -22,104 +22,107 @@
 #ifndef SOIL_PROFILE_PAGE_H_
 #define SOIL_PROFILE_PAGE_H_
 
-#include "SiteResponseModel.h"
-#include "TableGroupBox.h"
+#include "AbstractPage.h"
 
-#include <QWidget>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QTableView>
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFrame>
+#include <QGroupBox>
+#include <QSpinBox>
+#include <QToolBox>
+
+class SiteResponseModel;
+class SoilTypeDelegate;
+class TableGroupBox;
+class VelocityVariation;
 
 //! Widget for the Soil Profile Page.
 
-class SoilProfilePage : public QWidget
+class SoilProfilePage : public AbstractPage
 {
     Q_OBJECT
 
-    public:
-        SoilProfilePage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+public:
+    SoilProfilePage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
 
-    public slots:
-        void setIsVaried(bool);
-        void setVelocityIsVaried(bool);
-        void setIsLayerSpecific(bool);
+    void setModel(SiteResponseModel* model);
 
-        void setReadOnly(bool);
+public slots:
+    void setReadOnly(bool readOnly);
 
-        void updateStdevModel(int model);
-        void updateCorrelModel(int model);
-        void updateLayeringModel(int model);
-        void updateBedrockModel(int model);
-
-        void load();
-
-    protected slots:
-        void updateUnits();
-
-    private:
-        SiteResponseModel * m_model;
-    
-        TableGroupBox * m_tableGroupBox;
-
-        QGroupBox * m_profileVariationGroupBox;
-        
-        QCheckBox * m_isVelocityVariedCheckBox;
-        
-        QGroupBox * m_velocityVariationGroupBox;
-        QComboBox * m_distributionComboBox;
-        QComboBox * m_stdevModelComboBox;
-        QComboBox * m_correlModelComboBox;
-        QCheckBox * m_layerSpecificCheckBox;
-        QGroupBox * m_correlGroupBox;
-        QDoubleSpinBox * m_stdevSpinBox;
-        QDoubleSpinBox * m_correlInitialSpinBox;
-        QDoubleSpinBox * m_correlFinalSpinBox;
-        QDoubleSpinBox * m_correlDeltaSpinBox;
-        QDoubleSpinBox * m_depthInterceptSpinBox;
-        QDoubleSpinBox * m_exponentSpinBox;
-        
-        QCheckBox * m_isLayeringVariedCheckBox;
-        QGroupBox * m_layerVariationGroupBox;
-        QComboBox * m_layeringModelComboBox;
-        QDoubleSpinBox * m_layeringCoeffSpinBox;
-        QDoubleSpinBox * m_layeringInitialSpinBox;
-        QDoubleSpinBox * m_layeringExponentSpinBox;
-
-        QCheckBox * m_isBedrockDepthVariedCheckBox;
-        QGroupBox * m_bedrockDepthGroupBox;
-        QComboBox * m_bedrockModelComboBox;
-        QDoubleSpinBox * m_bedrockStdevSpinBox;
-        QCheckBox * m_bedrockDepthMinCheckBox;
-        QDoubleSpinBox * m_bedrockDepthMinSpinBox;
-        QCheckBox * m_bedrockDepthMaxCheckBox;
-        QDoubleSpinBox * m_bedrockDepthMaxSpinBox;
+protected slots:
+    void updateUnits();
+    void updateHiddenColumns();
 
 
-        //! Create the table group box
-        void createTableGroupBox();
+    void setVelocityItemEnabled(bool enabled);
+    void setLayeringItemEnabled(bool enabled);
+    void setBedrockDepthItemEnabled(bool enabled);
 
-        //! Create the profile variation group box
-        void createProfileVariationGroupBox();
-        
-        //! Create the velocity variation group box
-        void createVelocityVariationGroupBox();
+    void setBedrockDepthMin(double min);
+    void setBedrockDepthMax(double max);
 
-        //! Create the layering group box
-        void createLayeringGroupBox();
+private:
+    //! Create the table group box
+    QGroupBox* createTableGroupBox();
 
-        //! Create the bedrock depth variation group box
-        void createBedrockDepthGroupBox();
+    //! Create the profile variation group box
+    QGroupBox* createProfileRandomizerGroupBox();
 
-        //! Load the standard deviation parameters
-        void loadStdev();
+    //! Create the velocity variation group box
+    QFrame* createVelocityFrame();
 
-        //! Load the correlation parameters
-        void loadCorrel();
+    //! Create the layering group box
+    QFrame* createLayeringFrame();
 
-        //! Load the layering parameters
-        void loadLayering();
+    //! Create the bedrock depth variation group box
+    QFrame* createBedrockDepthFrame();
+
+    QToolBox* m_parameterToolBox;
+
+    enum Index {
+        VelocityIndex,
+        LayeringIndex,
+        BedrockDepthIndex
+    };
+
+    TableGroupBox* m_soilProfileTableGroup;
+    SoilTypeDelegate* m_soilTypeDelegate;
+
+    QGroupBox* m_profileVariationGroupBox;
+
+    QCheckBox* m_isVelocityVariedCheckBox;
+    QCheckBox* m_isLayeringVariedCheckBox;
+    QCheckBox* m_isBedrockDepthVariedCheckBox;
+
+    QFrame* m_velocityVariationFrame;
+    QCheckBox* m_layerSpecificCheckBox;
+    QComboBox* m_distributionComboBox;
+    QComboBox* m_stdevModelComboBox;
+    QDoubleSpinBox* m_stdevSpinBox;
+    QComboBox* m_correlModelComboBox;
+    QGroupBox* m_correlGroupBox;
+    QDoubleSpinBox* m_correlInitialSpinBox;
+    QDoubleSpinBox* m_correlFinalSpinBox;
+    QDoubleSpinBox* m_correlDeltaSpinBox;
+    QDoubleSpinBox* m_correlInterceptSpinBox;
+    QDoubleSpinBox* m_correlExponentSpinBox;
+
+    QFrame* m_layerVariationFrame;
+    QComboBox* m_layeringModelComboBox;
+    QDoubleSpinBox* m_layeringCoeffSpinBox;
+    QDoubleSpinBox* m_layeringInitialSpinBox;
+    QDoubleSpinBox* m_layeringExponentSpinBox;
+
+    QFrame* m_bedrockDepthFrame;
+    QComboBox* m_bedrockModelComboBox;
+    QDoubleSpinBox* m_bedrockStdevSpinBox;
+    QCheckBox* m_bedrockDepthMinCheckBox;
+    QDoubleSpinBox* m_bedrockDepthMinSpinBox;
+    QCheckBox* m_bedrockDepthMaxCheckBox;
+    QDoubleSpinBox* m_bedrockDepthMaxSpinBox;
+
+    VelocityVariation* m_velocityVariation;
 };
 #endif

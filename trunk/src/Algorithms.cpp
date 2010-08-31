@@ -21,6 +21,8 @@
 
 #include "Algorithms.h"
 
+#include "Units.h"
+
 #include <QDebug>
 #include <QObject>
 
@@ -90,9 +92,11 @@ QString boolToString(bool b)
 
 QString locationToString(double loc)
 {
-    if ( loc < 0 ) {
+    if (loc < 0) {
         return QObject::tr("Bedrock");
     } else {
-        return QString::number(loc, 'f', 2);
+        return QString("%1 %2")
+                .arg(loc, 0, 'f', 2)
+                .arg(Units::instance()->length());
     }
 }

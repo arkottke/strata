@@ -22,33 +22,52 @@
 #ifndef NONLINEAR_PROPERTY_OUTPUT_H_
 #define NONLINEAR_PROPERTY_OUTPUT_H_
 
-#include "Output.h"
-#include "SiteResponseOutput.h"
+#include "AbstractOutput.h"
 
-class NonlinearPropertyOutput
+class AbstractCalculator;
+class NonlinearProperty;
+class OutputCatalog;
+class OutputStatistics;
+
+class NonlinearPropertyOutput : public AbstractOutput
 {
-    public:
-        NonlinearPropertyOutput();
+    Q_OBJECT
 
-        //! Clear the data
-        void clear();
+public:
+    NonlinearPropertyOutput(NonlinearProperty* nonlinearProperty, OutputCatalog* catalog);
 
-        //! Define the location data -- clears the data vectors
-        void setStrain( const QVector<double> & strain );
-        
-        QMap<QString, QVariant> toMap(bool saveData = false) const;
-		void fromMap(const QMap<QString, QVariant> & map);
+    const QString& soilName() const;
+    virtual QString name() const;
+    virtual QString fullName() const;
 
-    protected:
-        const QVector<QVector<double> > & strain() const;
+    virtual bool motionIndependent() const;
 
-    private:
-        bool m_enabled;
+public slots:
+    void setNonlinearProperty(NonlinearProperty* nonlinearProperty);
+    void setSoilName(const QString &soilName);
 
-        //! Holds information about the strain of the data points
-        QVector<double> m_strain;
+signals:
+    void soilNameChanged(const QString& soilName);
 
-        //! Holds information about the property
-        QVector<QVector<double> > m_prop;
+protected:
+    virtual QString fileName(int motion = 0) const;
+    virtual QString shortName() const;
+
+    virtual QwtScaleEngine* xScaleEngine() const;
+    virtual QwtScaleEngine* yScaleEngine() const;
+    virtual const QString xLabel() const;
+    virtual const QString yLabel() const;
+    virtual const QVector<double>& ref(int motion = 0) const;
+    virtual const QString prefix() const;
+    virtual const QString suffix() const;
+
+    void extract(AbstractCalculator* const calculator,
+                             QVector<double> & ref, QVector<double> & data) const;
+
+    //! Name of the soil type associated with the nonlinear property
+    QString m_soilName;
+
+    //! Nonlinear property to save
+    NonlinearProperty* m_nonlinearProperty;
 };
-#endif
+#endif // NONLINEAR_PROPERTY_OUTPUT_H_

@@ -22,92 +22,87 @@
 #ifndef NONLINEAR_PROPERTY_H_
 #define NONLINEAR_PROPERTY_H_
 
+#include <QAbstractTableModel>
 #include <QList>
-#include <QMap>
-#include <QObject>
-#include <QString>
-#include <QVariant>
+#include <QVector>
 
-//! A class for the shear modulus reduction and damping curves
-
+#include "gsl/gsl_interp.h"
 
 class SoilType;
 
-class NonlinearProperty : public QObject
+//! A class for the shear modulus reduction and damping curves
+
+class NonlinearProperty : public QAbstractTableModel
 {
-    Q_OBJECT 
+    Q_OBJECT
 
-    public:
-        //! Type of model
-        enum Type {
-            Undefined, //!< No type of model defined
-            ModulusReduction, //!< Shear-modulus reduction (G/G_max)
-            Damping, //!< Damping curve
-        };
+    friend QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np);
+    friend QDataStream & operator>> (QDataStream & in, NonlinearProperty* np);
 
-        //! Source of model
-        enum Source {
-            Temporary, //!< Used for this analysis only
-            HardCoded, //!< Property is hardcoded into the program and does not need to be saved
-            UserDefined, //!< Property is defined by the user and needs to be saved
-            Computed, //!< Model needs to be computed by the soil type
-        };
-        
-        NonlinearProperty(  QString name = "", Type type = Undefined, Source source = Temporary, QObject * parent = 0);
-        NonlinearProperty( const QMap<QString, QVariant> & map );
+public:
+    //! Type of model
+    enum Type {
+        ModulusReduction, //!< Shear-modulus reduction (G/G_max)
+        Damping //!< Damping curve
+    };
 
+    enum Columns {
+        StrainColumn,
+        PropertyColumn
+    };
 
-        ~NonlinearProperty();
-        Type type() const;
-        void setType(Type type);
+    NonlinearProperty(QObject *parent = 0);
+    NonlinearProperty(const QString &name, Type type,
+                      const QVector<double> &strain, const QVector<double> &property,
+                      QObject *parent = 0);
+    ~NonlinearProperty();
 
-        QString typeLabel() const;
+    Type type() const;
+    const QString & name() const;
 
-        const QString & name() const;
-        void setName( const QString & name);
+    //! Linear interpolation of the prop for a given strain
+    double interp(const double strain) const;
 
-        Source source() const;        
-        void setSource(Source source);
- 
-        //! Reset the curve to the average value
-        void reset();
+    //! Create a html document containing the information of the model
+    QString toHtml() const;
 
-        //! Copy the vales from another NonlinearProperty
-        void copyValues( NonlinearProperty * other );
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-        //! Linear interpolation of the prop for a given strain
-        double interp(const double strain) const;
+    const QVector<double> & strain() const;
+    const QVector<double> & average() const;
 
-        //! Create a map from the object
-        QMap<QString, QVariant> toMap() const;
+    const QVector<double> & varied() const;
+    void setVaried(const QVector<double> &varied);
 
-        //! Load the object from a map
-        void fromMap(const QMap<QString, QVariant> & map);
-        
-        //! Create a html document containing the information of the model
-        QString toHtml() const;
-        
-        QList<double> & strain();
-        QList<double> & avg();
-        QList<double> & prop();
+    //! Return a duplicate of the NonlinearProperty
+    NonlinearProperty *duplicate() const;
 
-    private:
-        //! Name of the model
-        QString m_name;
+protected:    
+    //! Initialize the interpolation routine
+    void initialize();
 
-        //! Type of curve
-        Type m_type;
+    //! Name of the model
+    QString m_name;
 
-        //! Save if the object was defined by the user
-        Source m_source;
+    //! Type of curve
+    Type m_type;
 
-        //! Strain of the property
-        QList<double> m_strain;
+    //! Strain of the property
+    QVector<double> m_strain;
 
-        //! Average value of the property
-        QList<double> m_avg;
+    //! Average value of the property
+    QVector<double> m_average;
 
-        //! Varied value of the property
-        QList<double> m_prop;
+    //! Varied value of the property
+    QVector<double> m_varied;
+
+    //! Accelerator for the interpolation
+    gsl_interp_accel *m_acc;
+
+    //! GSL Spline for the interpolation
+    gsl_interp *m_interp;
 };
-#endif
+#endif // NONLINEAR_PROPERTY_H_

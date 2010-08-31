@@ -24,52 +24,54 @@
 #include <QBrush>
 
 SoilTypeOutputTableModel::SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent )
-    : MyAbstractTableModel(false, parent), m_soilTypes(soilTypes)
+    : QAbstractTableModel(parent), m_soilTypes(soilTypes)
 {
 }
 
-int SoilTypeOutputTableModel::rowCount ( const QModelIndex & /*parent*/ ) const
+int SoilTypeOutputTableModel::rowCount(const QModelIndex & parent) const
 {
+    Q_UNUSED(parent);
+
     return m_soilTypes.size();
 }
 
-int SoilTypeOutputTableModel::columnCount ( const QModelIndex & /*parent*/ ) const
+int SoilTypeOutputTableModel::columnCount(const QModelIndex & parent) const
 {
+    Q_UNUSED(parent);
+
     return 1;
 }
 
-QVariant SoilTypeOutputTableModel::headerData ( int section, Qt::Orientation orientation, int role) const
+QVariant SoilTypeOutputTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
-		return QVariant();
+    if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
+        return QVariant();
 
-	switch( orientation )
-	{
-		case Qt::Horizontal:
-			switch (section)
-			{
-                case 0:
-					// Name Column
-					return QVariant(tr("Name"));
-			}
-		case Qt::Vertical:
-			return QVariant(section+1);
-		default:
-			return QVariant();
-	}
+    switch (orientation) {
+    case Qt::Horizontal:
+        switch (section) {
+        case 0:
+            // Name Column
+            return tr("Name");
+        }
+    case Qt::Vertical:
+        return section+1;
+    default:
+        return QVariant();
+    }
 }
 
-QVariant SoilTypeOutputTableModel::data ( const QModelIndex &index, int role) const
+QVariant SoilTypeOutputTableModel::data(const QModelIndex &index, int role) const
 {
-	if (index.parent()!=QModelIndex())
-		return QVariant();
+    if (index.parent()!=QModelIndex())
+        return QVariant();
     
     if (role==Qt::BackgroundRole) {
         // Color the background light gray for cells that are not editable
         if (!( flags(index) & Qt::ItemIsEditable || flags(index) & Qt::ItemIsUserCheckable )) {
-                return QVariant(QBrush(QColor(200,200,200)));
+            return QVariant(QBrush(QColor(200,200,200)));
         }
-       
+
         // Color the background to red and green for the check state
         if ( flags(index) & Qt::ItemIsUserCheckable) {
             if ( data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked) 
@@ -79,31 +81,28 @@ QVariant SoilTypeOutputTableModel::data ( const QModelIndex &index, int role) co
         }
     }
 
-	if ( role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
-	{
-		switch (index.column())
-		{
-            case 0:
-				// Name Column
-				return QVariant( m_soilTypes.at(index.row())->name() );
-            default:
-                return QVariant();
+    if (role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
+        switch (index.column()) {
+        case 0:
+            // Name Column
+            return QVariant( m_soilTypes.at(index.row())->name() );
+        default:
+            return QVariant();
         }
-	} else if ( index.column() == 0 && role == Qt::CheckStateRole )
-    {
+    } else if (index.column() == 0 && role == Qt::CheckStateRole) {
         if ( m_soilTypes.at(index.row())->saveData() )
             return QVariant( Qt::Checked );
         else
             return QVariant( Qt::Unchecked );
     }
-	
-	return QVariant();
+
+    return QVariant();
 }
 
-bool SoilTypeOutputTableModel::setData ( const QModelIndex &index, const QVariant &value, int role )
+bool SoilTypeOutputTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if ( index.column() == 0 && role == Qt::CheckStateRole ) {
-		m_soilTypes[index.row()]->setSaveData(value.toBool());
+        m_soilTypes[index.row()]->setSaveData(value.toBool());
         emit dataChanged( index, index);
         return true;
     } else {
@@ -111,11 +110,7 @@ bool SoilTypeOutputTableModel::setData ( const QModelIndex &index, const QVarian
     }
 }
 
-Qt::ItemFlags SoilTypeOutputTableModel::flags ( const QModelIndex &index ) const
+Qt::ItemFlags SoilTypeOutputTableModel::flags(const QModelIndex &index) const
 {
-    if (m_readOnly) {
-        return QAbstractTableModel::flags(index);
-    }
-
     return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
 }

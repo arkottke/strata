@@ -22,7 +22,7 @@
 #ifndef COMPUTE_PAGE_H_
 #define COMPUTE_PAGE_H_
 
-#include "SiteResponseModel.h"
+#include "AbstractPage.h"
 
 #include <QWidget>
 #include <QTextEdit>
@@ -31,40 +31,43 @@
 #include <QPushButton>
 #include <QTime>
 
+class SiteResponseModel;
+
 //! A class for starting the computation and tracking the progress.
 
-class ComputePage : public QWidget
+class ComputePage : public AbstractPage
 {
     Q_OBJECT
 
-    public:
-        ComputePage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
-        
-    public slots:
-        void setReadOnly(bool b);
-        void reset();
+public:
+    ComputePage(QWidget* parent = 0, Qt::WindowFlags f = 0);
+
+    virtual void setModel(SiteResponseModel* model);
+
+public slots:
+    virtual void setReadOnly(bool readOnly);
+
+signals:
+    void startCalculation();
+    void saveRequested();
     
-    protected slots:
+protected slots:
+    void compute();
+    void updateEta(int value);
 
-        void compute();
-        void finished();
+    void reset();
 
-        void updateEta(int value);
+protected:
+    QTextEdit * m_logView;
 
-    signals:
-        void saveRequested();
+    QProgressBar * m_progressBar;
+    QLineEdit * m_etaLineEdit;
 
-    protected:
-        SiteResponseModel * m_model;
+    QPushButton * m_computeButton;
+    QPushButton * m_cancelButton;
 
-        QTextEdit * m_logView;
+    QTime m_timer;
 
-        QProgressBar * m_progressBar;
-        QLineEdit * m_etaLineEdit;
-
-        QPushButton * m_computeButton;
-        QPushButton * m_cancelButton;
-
-        QTime m_timer;
+    SiteResponseModel* m_model;
 };
 #endif

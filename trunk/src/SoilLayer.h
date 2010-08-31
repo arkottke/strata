@@ -23,9 +23,11 @@
 #define SOIL_LAYER_H_
 
 #include "VelocityLayer.h"
-#include "SoilType.h"
 
 #include <QPointer>
+
+class SoilTypeCatalog;
+class SoilType;
 
 //! Describes the velocity variation and nonlinear response of soil
 
@@ -33,35 +35,34 @@ class SoilLayer : public VelocityLayer
 {
     Q_OBJECT
 
-    friend class SiteProfile;
+    friend QDataStream & operator<< (QDataStream & out, const SoilLayer* sl);
+    friend QDataStream & operator>> (QDataStream & in, SoilLayer* sl);
+    friend class SoilProfile;
 
-    public:
-        SoilLayer( QObject * parent = 0);
-        SoilLayer( const SoilLayer & soilLayer);
+public:
+    SoilLayer(QObject* parent = 0);
+    SoilLayer(const SoilLayer* soilLayer);
 
-        SoilType * soilType() const;
-        void setSoilType(SoilType * soilType);
-        
-        double thickness() const;
+    SoilType* soilType() const;
+    void setSoilType(SoilType* soilType);
 
-        double depthToBase() const;
+    double thickness() const;
 
-        QString toString() const;
+    double depthToBase() const;
 
-        double untWt() const;
-        double density() const;
-        
-        QMap<QString, QVariant> toMap() const;
-        void fromMap(const QMap<QString, QVariant>& map);
+    QString toString() const;
 
-    protected:
-        void setThickness(double thickness);
-        
-    private:
-        //! Soil type of the layer
-        QPointer<SoilType> m_soilType;
-        
-        //! Total thickness of the layer
-        double m_thickness;
+    double untWt() const;
+    double density() const;    
+
+protected:
+    void setThickness(double thickness);
+
+private:
+    //! Soil type of the layer
+    QPointer<SoilType> m_soilType;
+
+    //! Total thickness of the layer
+    double m_thickness;
 };
 #endif

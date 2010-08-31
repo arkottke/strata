@@ -22,90 +22,66 @@
 #ifndef OUTPUT_PAGE_H_
 #define OUTPUT_PAGE_H_
 
-#include "SiteResponseModel.h"
-#include "TableGroupBox.h"
-#include "DepthComboBox.h"
+#include "AbstractPage.h"
 
-#include <QWidget>
-#include <QGroupBox>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include <QCheckBox>
 #include <QComboBox>
-#include <QModelIndex>
+#include <QDoubleSpinBox>
+#include <QGroupBox>
+#include <QFrame>
+#include <QSpinBox>
+#include <QSignalMapper>
+#include <QTabWidget>
+#include <QTableView>
+
+class DimensionLayout;
+class OutputTableFrame;
+class SiteResponseModel;
 
 //! Widget for the Output Specification page.
 
-class OutputPage : public QWidget
+class OutputPage : public AbstractPage
 {
     Q_OBJECT
 
-    public:
-        OutputPage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+public:
+    OutputPage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
 
-    public slots:
-        void refresh();
+    void setModel(SiteResponseModel* model);
 
-        void setMethod(int);
-        void setReadOnly(bool b);
+public slots:
+    void setReadOnly(bool b);
 
-        void load();
+protected slots:
+    void setApproach(int approach);
 
-    private slots:
-        void updateWidget();
+private:
+    QTabWidget* m_tabWidget;
 
-    private:
-        SiteResponseModel * m_model;
+    QTableView* m_profilesTableView;
+    OutputTableFrame* m_timeSeriesTableFrame;
+    OutputTableFrame* m_spectraTableFrame;
+    OutputTableFrame* m_ratiosTableFrame;
+    QTableView* m_soilTypesTableView;
 
-        TableGroupBox * m_responseTableBox;
-        TableGroupBox * m_ratioTableBox;
+    QGroupBox* m_respSpecGroupBox;
+    DimensionLayout* m_periodLayout;
+    QDoubleSpinBox* m_dampingSpinBox;
 
-        QGroupBox * m_soilTypesGroupBox;
-        QTableView * m_soilTypeTableView;
+    QGroupBox* m_freqGroupBox;
+    DimensionLayout* m_frequencyLayout;
 
-        QGroupBox * m_profilesGroupBox; 
-        QCheckBox * m_initialShearVelCheckBox;
-        QCheckBox * m_finalShearVelCheckBox;
-        QCheckBox * m_finalShearModCheckBox;
-        QCheckBox * m_finalDampingCheckBox;
-        QCheckBox * m_vTotalStressCheckBox;
-        QCheckBox * m_maxShearStressCheckBox;
-        QCheckBox * m_stressReducCoeffCheckBox;
-        QCheckBox * m_maxShearStrainCheckBox;
-        QCheckBox * m_maxAccelCheckBox;
-        QCheckBox * m_maxVelCheckBox;
-        QCheckBox * m_stressRatioCheckBox;
-        QCheckBox * m_maxErrorCheckBox;
+    QGroupBox* m_logGroupBox;
+    QComboBox* m_logLevelComboBox;
 
-        QGroupBox * m_respSpecGroupBox;
-        QDoubleSpinBox * m_dampingSpinBox;
-        QDoubleSpinBox * m_periodMinSpinBox;
-        QDoubleSpinBox * m_periodMaxSpinBox;
-        QSpinBox * m_periodNptsSpinBox;
-        QComboBox * m_periodSpacingComboBox;
-        
-        QGroupBox * m_freqGroupBox;
-        QDoubleSpinBox * m_freqMinSpinBox;
-        QDoubleSpinBox * m_freqMaxSpinBox;
-        QSpinBox * m_freqNptsSpinBox;
-        QComboBox * m_freqSpacingComboBox;
+    //! Create the response spectrum group box
+    QGroupBox* createRespSpecGroupBox();
 
-        QGroupBox * m_logGroupBox;
-        QComboBox * m_logLevelComboBox;
+    //! Create the frequency group box
+    QGroupBox* createFreqGroupBox();
 
-        //! Create the gropu box that contains the soil types
-        void createSoilTypesGroupBox();
+    //! Create the output group box
+    QGroupBox* createLogGroupBox();
 
-        //! Create the group box that contains the profile check boxes
-        void createProfilesGroupBox();
-
-        //! Create the response spectrum group box
-        void createRespSpecGroupBox();
-
-        //! Create the frequency group box
-        void createFreqGroupBox();
-
-        //! Create the output group box
-        void createLogGroupBox();
+    SiteResponseModel* m_model;
 };
 #endif

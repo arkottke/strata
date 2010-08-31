@@ -22,160 +22,136 @@
 #ifndef SITE_RESPONSE_MODEL_H_
 #define SITE_RESPONSE_MODEL_H_
 
-#include "SiteProfile.h"
-#include "EquivLinearCalc.h"
-#include "RecordedMotion.h"
-#include "RvtMotion.h"
-#include "NonlinearPropertyLibrary.h"
-
-#include <QList>
-#include <QMap>
-#include <QProgressBar>
-#include <QString>
-#include <QTextDocument>
 #include <QThread>
-#include <QVariant>
 
-class SiteResponseOutput; // Forward declaration of SiteResponseOutput
+class SoilProfile;
+class SiteResponseOutput;
+class AbstractCalculator;
+class MotionLibrary;
+class OutputCatalog;
+
+class QProgressBar;
+class QDataStream;
+class QTextDocument;
 
 class SiteResponseModel : public QThread
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		SiteResponseModel( QObject * parent = 0);
-        ~SiteResponseModel();
+    friend QDataStream & operator<< (QDataStream & out, const SiteResponseModel* srm);
+    friend QDataStream & operator>> (QDataStream & in, SiteResponseModel* srm);
 
-        //! Method used to compute the site response
-		enum Method { 
-            RecordedMotions,  //!< Recorded motions
-            RandomVibrationTheory //!< Random Vibration Theory
-        };
+public:
+    explicit SiteResponseModel( QObject * parent = 0);
 
-        static QStringList methodList();
+    //! Method used to compute the site response
+    enum Method {
+        LinearElastic,  //!< Linear elastic
+        EquivalentLinear, //!< Equivalent-linear (SHAKE type analysis)
+        FrequencyDependent //!< Equivalent-linear with frequency dependent properties
+    };
 
-        //! Reset the object to the default values
-        void reset();
-        
-        QString fileName() const;
-		QString title() const;
-		QTextDocument * notes() const;
-		QString filePrefix() const;
+    static QStringList methodList();
 
-		Method method() const;
-        void setMethod(Method method);
-        
-        bool saveMotionData() const;
-        bool okToContinue() const;
-        bool wasSucessful() const;
+    QString fileName() const;
+    QTextDocument* notes() const;
 
-        //! Set that it is okay to continue computing
-        void setOkToContinue(bool okToContinue);
+    Method method() const;
+    void setMethod(Method method);
 
-		SiteProfile * siteProfile();
-		EquivLinearCalc * calculator();
-        QList<RecordedMotion*> & recordedMotions();
-        RvtMotion * rvtMotion();
+    bool saveAbstractMotionData() const;
 
-        NonlinearPropertyLibrary * nlPropertyLibrary();
+    SoilProfile* siteProfile();
+    MotionLibrary* motionLibrary();
+    AbstractCalculator* calculator();
+    OutputCatalog* outputCatalog();
 
-        SiteResponseOutput * output();
+    bool modified() const;
 
-        //! Set read-only
-        bool readOnly() const;
+    bool dampingRequired() const;
+    bool nonlinearPropertiesRequired() const;
 
-        bool modified() const;
+    //! Load the model from a file
+    bool load(const QString & fileName);
 
-        //! Load the model from a file
-        bool load(const QString & fileName);
+    //! Save the model to a file
+    bool save();
 
-        //! Save the model to a file
-        bool save(const QString & fileName);
+    //! If the model has results from an analysis
+    bool hasResults() const;
 
-		QMap<QString, QVariant> toMap() const;
-		void fromMap(const QMap<QString, QVariant> & map);
+    //! Create a html document containing the information of the model
+    QString toHtml();
 
-        //! Create a html document containing the information of the model
-        QString toHtml();
+public slots:       
+    void setFileName(const QString &fileName);
+    void setMethod(int method);
+    void setModified(bool modified = true);
 
-    public slots:
-		void setMethod(int method);
-        void setSaveMotionData(bool saveData);
+    //! Stop the calculation
+    void stop();
 
-        //! Set the model is read only
-        void setReadOnly(bool readOnly);
+    //! Clear the results and allow the input to be modified
+    void clearResults();
 
-        void stop();
-        
-        //! Set if the model was modified
-        void setModified(bool modified = true);
+signals:
+    void fileNameChanged(const QString &fileName);
+    void methodChanged(int method);
+    void modifiedChanged(bool modified);
 
-    protected slots:
-        void setIsLoaded(bool isLoaded = true);
+    void calculatorChanged(AbstractCalculator* calculator);
 
-    signals:
-        void recordedMotionsChanged();
-        void rvtMotionChanged();
+    void progressChanged( int current );
+    void progressRangeChanged( int minimum, int maximum);
 
-        void modifiedChanged(bool modified);
-        
-        void progressChanged( int current );
-        void progressRangeChanged( int minimum, int maximum);
+    void dampingRequiredChanged(bool dampingRequired);
+    void nonlinearPropertiesRequiredChanged(bool nonlinearPropertiesRequired);
 
-        void readOnlyChanged(bool readOnly);
+    void hasResultsChanged(bool hasResults);
 
-        void isWorkingChanged(bool isWorking);
-	private:
-        //! Run the calculation
-        void run();
+protected slots:
+    void setIsLoaded(bool isLoaded = true);
 
-        //! If the model was modified since the last save
-        bool m_modified;
+    void setHasResults(bool hasResults);
 
-        //! If the model is read only
-        bool m_readOnly;
+private:
+    //! Set the calculator -- called by setMethod()
+    void setCalculator(AbstractCalculator* calculator);
 
-        //! The fileName that the model was saved too or loaded from
-        QString m_fileName;
+    //! Run the calculation
+    void run();
 
-        //! Notes on the project for sanity of the user
-		QTextDocument * m_notes;
-        
-        //! Type of analysis
-		Method m_method;
-        
-        //! Contains all information about the site
-		SiteProfile * m_siteProfile;
-        
-        //! The object responsible for computing the site response
-		EquivLinearCalc * m_calculator;
+    //! If the model was modified since the last save
+    bool m_modified;
 
-        //! Okay to continue calculation.
-        bool m_okToContinue;
-        
-        //! If the calculation was successful.
-        bool m_wasSuccessful;
-        
-        //! A list of recorded motions
-        /*! Both the recorded and random vibration theory motions are stored in
-         * the SiteResponseModel as it allows the same site to be easily
-         * analysis using the two different methods.
-         */
-        QList<RecordedMotion*> m_recordedMotions;
-        
-        //! Save the motion data in the input file
-        bool m_saveMotionData;
-        
-        //! The motion used for the random vibration theory analysis
-        RvtMotion * m_rvtMotion;
+    //! Filename that the binary is saved to
+    QString m_fileName;
 
-        //! Ouput from the analysis
-        SiteResponseOutput * m_output;
+    //! Notes on the project for sanity of the user
+    QTextDocument * m_notes;
 
-        //! Previously defined nonlinear curves
-        NonlinearPropertyLibrary * m_nlPropertyLibrary;
+    //! Method of analysis
+    Method m_method;
 
-        //! If the information a file is being loaded and should not influence the modified flag.
-        bool m_isLoaded;
+    //! Contains all information about the site
+    SoilProfile* m_siteProfile;
+
+    //! The object responsible for computing the site response
+    AbstractCalculator* m_calculator;
+
+    //! Okay to continue calculation.
+    bool m_okToContinue;
+
+    //! A list of motions
+    MotionLibrary* m_motionLibrary;
+
+    //! Catalog of the output
+    OutputCatalog* m_outputCatalog;
+
+    //! If the model is loaded from a file
+    bool m_isLoaded;
+
+    //! If the model has results from an analysis
+    bool m_hasResults;
 };
 #endif

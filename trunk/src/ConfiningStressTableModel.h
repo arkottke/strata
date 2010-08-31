@@ -37,37 +37,37 @@ struct Layer {
 
 class ConfiningStressTableModel : public MyAbstractTableModel
 {
-	Q_OBJECT
-	
-	public:
-		ConfiningStressTableModel( QObject *parent = 0);
-
-		int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
-		int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
-
-		QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
-		bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
-
-		QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
-		Qt::ItemFlags flags ( const QModelIndex &index ) const;
-
-		bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-		bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-
-        double waterTableDepth();
-
-    public slots:
-        void setWaterTableDepth(double depth);
-
-    protected slots:
-        void computeStress(int layer = 0);
-        void updateHeader();
-		
-	protected:
-        //! Layers
-        QList<Layer*> m_layers;
-
-        //! Depth to the water table
-        double m_waterTableDepth; 
+    Q_OBJECT
+    
+public:
+    ConfiningStressTableModel( QObject *parent = 0);
+    
+    int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
+    int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    
+    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+    bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
+    
+    QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    Qt::ItemFlags flags ( const QModelIndex &index ) const;
+    
+    bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
+    bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
+    
+    double waterTableDepth();
+    
+public slots:
+    void setWaterTableDepth(double depth);
+    
+protected slots:
+    void computeStress(int layer = 0);
+    void updateHeader();
+    
+protected:
+    //! Layers
+    QList<Layer*> m_layers;
+    
+    //! Depth to the water table
+    double m_waterTableDepth; 
 };
 #endif
