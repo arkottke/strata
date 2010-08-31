@@ -46,5 +46,5 @@ void DepthComboBoxDelegate::setEditorData( QWidget * editor, const QModelIndex &
 void DepthComboBoxDelegate::setModelData( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const
 {
     DepthComboBox * depthBox = static_cast<DepthComboBox*>(editor);
-    model->setData( index, depthBox->depth() );
+    model->setData(index, depthBox->depth());
 }

@@ -22,27 +22,30 @@
 #ifndef TABLE_GROUP_BOX_H_
 #define TABLE_GROUP_BOX_H_
 
-#include "MyAbstractTableModel.h"
-#include "MyTableView.h"
 
+#include <QAbstractTableModel>
+#include <QAbstractItemDelegate>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QItemDelegate>
+#include <QItemSelection>
 #include <QModelIndex>
 #include <QPushButton>
 #include <QString>
+
+class MyTableView;
+class MyAbstractTableModel;
 
 class TableGroupBox : public QGroupBox
 {
     Q_OBJECT
 
     public:
-        TableGroupBox( MyAbstractTableModel * model, const QString & title, QWidget * parent = 0 );
+        TableGroupBox(const QString & title, QWidget * parent = 0);
 
-        MyTableView * table();
-        QAbstractTableModel * model();
-
-        bool readOnly() const;
+        void setModel(QAbstractTableModel *model);
+        void setItemDelegateForColumn(int column, QAbstractItemDelegate* delegate);
+        void setColumnHidden(int column, bool hide);
 
         bool lastRowFixed() const;
         void setLastRowFixed(bool lastRowFixed);
@@ -63,6 +66,8 @@ class TableGroupBox : public QGroupBox
         void rowRemoved();
         void dataChanged();
 
+        void currentChanged(const QModelIndex & current, const QModelIndex & previous);
+
     private:
         //! If table is read only
         bool m_readOnly;
@@ -78,7 +83,6 @@ class TableGroupBox : public QGroupBox
 
         QList<QPushButton*> m_addedButtons;
 
-        MyTableView * m_table;
-        MyAbstractTableModel * m_model;
+        MyTableView* m_table;
 };
 #endif

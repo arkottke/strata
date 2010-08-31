@@ -22,87 +22,83 @@
 #ifndef SOIL_TYPE_PAGE_H_
 #define SOIL_TYPE_PAGE_H_
 
-#include "SiteResponseModel.h"
-#include "NonlinearProperty.h"
-#include "TableGroupBox.h"
+#include "AbstractPage.h"
 
-#include <QWidget>
-#include <QLineEdit>
 #include <QDoubleSpinBox>
-#include <QGroupBox>
-#include <QPointer>
-#include <QRadioButton>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QGroupBox>
+#include <QLineEdit>
+#include <QModelIndex>
+#include <QPointer>
+#include <QSpinBox>
+
+class NonlinearProperty;
+class NonlinearPropertyDelegate;
+class NonlinearPropertyStandardDeviationWidget;
+class SiteResponseModel;
+class SoilTypeCatalog;
+class TableGroupBox;
 
 //! Widget for the Soil Type Page.
 
-class SoilTypePage : public QWidget
+class SoilTypePage : public AbstractPage
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		SoilTypePage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
-        
-	public slots:
-        void setIsVaried(bool b);
-        void setReadOnly(bool b);
-        
-        void unselectSoil(); 
-        void setSelectedSoil( const QModelIndex & current, const QModelIndex & previous );
-        void refreshSoilDetails();
+public:
+    SoilTypePage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
 
-        void load();
+    void setModel(SiteResponseModel* model);
 
-    protected slots: 
-        void updateUnits();
-    
-        void loadStdevModels();
+signals:
+    void soilPropertiesNeeded(bool needed);
 
-        void loadSoilProperties();
+public slots:
+    void setReadOnly(bool readOnly);
 
-    signals:
-        void soilTypesChanged();
-        void linkActivated(const QString & link);
+protected slots:
+    void selectIndex(const QModelIndex &current, const QModelIndex &previous);
+    void setCurrentNonlinearProperty(NonlinearProperty* np);
+    void updateUnits();
 
-	private:
-		SiteResponseModel * m_model;
+    void updateDampingRequired(bool dampingRequired);
+    void updateNonlinearPropertiesRequired(bool nonlinearPropertiesRequired);
+    void updateVariedColumn(bool show);
 
-		TableGroupBox * m_layersTableBox;
+private:
+    // Functions to set up the various group boxes
+    QGroupBox* createLayersGroupBox();
+    QGroupBox* createBedrockGroupBox();
+    QGroupBox* createVariationGroupBox();
+    QGroupBox* createSoilPropsGroupBox();
+    QGroupBox* createNlPropTableBox();
 
-        QGroupBox * m_bedrockGroupBox;
-		QDoubleSpinBox * m_bedrockUntWtSpinBox;
-		QDoubleSpinBox * m_bedrockDampingSpinBox;
-        QCheckBox * m_varyBedrockDampingCheckBox;
-		
-		QGroupBox * m_variationGroupBox;
-        QComboBox * m_dynPropModelComboBox;
-        QLineEdit * m_shearModStdevLineEdit;
-		QDoubleSpinBox * m_shearModMaxSpinBox;
-		QDoubleSpinBox * m_shearModMinSpinBox;
-        QLineEdit * m_dampingStdevLineEdit;
-		QDoubleSpinBox * m_dampingMaxSpinBox;
-		QDoubleSpinBox * m_dampingMinSpinBox;
-		QDoubleSpinBox * m_correlSpinBox;
+    TableGroupBox* m_soilTypeTableBox;     
+    NonlinearPropertyDelegate* m_modulusDelegate;
+    NonlinearPropertyDelegate* m_dampingDelegate;
+    TableGroupBox* m_nlPropTableBox;
 
-        QGroupBox * m_soilPropsGroupBox;
-	    QDoubleSpinBox * m_stressSpinBox;
-	    QDoubleSpinBox * m_piSpinBox;
-	    QDoubleSpinBox * m_ocrSpinBox;
-	    QDoubleSpinBox * m_freqSpinBox;
-	    QSpinBox * m_nCyclesSpinBox;
+    QDoubleSpinBox* m_bedrockUntWtSpinBox;
+    QDoubleSpinBox* m_bedrockDampingSpinBox;
+    QCheckBox* m_varyBedrockDampingCheckBox;
 
-		TableGroupBox * m_nlPropTableBox;
-    
-        QModelIndex m_selectedIndex;
-        QPointer<SoilType> m_selectedSoilType;
-        QPointer<NonlinearProperty> m_selectedNonlinearProperty;
+    QGroupBox* m_randomizerGroupBox;
+    QComboBox* m_nprModelComboBox;
+    NonlinearPropertyStandardDeviationWidget* m_modulusStdevWidget;
+    NonlinearPropertyStandardDeviationWidget* m_dampingStdevWidget;
+    QDoubleSpinBox* m_correlSpinBox;
 
-		// Functions to set up the various group boxes
-		void createLayersGroupBox();
-        void createBedrockGroupBox();
-		void createVariationGroupBox();
-        void createSoilPropsGroupBox();
-		void createNlPropTableBox();
+    QGroupBox* m_soilPropsGroupBox;
+    QDoubleSpinBox* m_stressSpinBox;
+    QDoubleSpinBox* m_piSpinBox;
+    QDoubleSpinBox* m_ocrSpinBox;
+    QDoubleSpinBox* m_freqSpinBox;
+    QSpinBox* m_nCyclesSpinBox;
+
+    QPointer<SoilTypeCatalog> m_soilTypeCatalog;
+
+    //! If the widget is in read-only mode
+    bool m_readOnly;
 };
 #endif

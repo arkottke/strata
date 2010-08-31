@@ -21,33 +21,39 @@
 
 #include "TableGroupBox.h"
 
+#include "MyTableView.h"
+#include "MyAbstractTableModel.h"
+
 #include <QDebug>
 
-TableGroupBox::TableGroupBox( MyAbstractTableModel * model, const QString & title, QWidget * parent)
-    : QGroupBox(title, parent), m_model(model)
+TableGroupBox::TableGroupBox(const QString & title, QWidget * parent)
+    : QGroupBox(title, parent)
 {
-    m_readOnly = true;
     m_lastRowFixed = false;
+
+    m_buttonRow = new QHBoxLayout;
+    const int spacing = 5;
+
     // Create the buttons
     m_addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-    m_insertButton = new QPushButton(tr("Insert"));
-    m_removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
-    // Disable the insert and remove buttons
-    m_removeButton->setEnabled(false);
-    m_insertButton->setEnabled(false);
-    // Create the button row
-    m_buttonRow = new QHBoxLayout;
+    connect(m_addButton, SIGNAL(clicked()), this, SLOT(addRow()));
     m_buttonRow->addWidget(m_addButton);
-    m_buttonRow->addSpacing(5);
+    m_buttonRow->addSpacing(spacing);
+
+    m_insertButton = new QPushButton(tr("Insert"));
+    m_insertButton->setEnabled(false);
+    connect(m_insertButton, SIGNAL(clicked()), this, SLOT(insertRow()));
     m_buttonRow->addWidget(m_insertButton);
-    m_buttonRow->addSpacing(5);
+    m_buttonRow->addSpacing(spacing);
+
+    m_removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
+    m_removeButton->setEnabled(false);
+    connect(m_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
     m_buttonRow->addWidget(m_removeButton);
     m_buttonRow->addStretch(1);
 
     // Create the tableview
     m_table = new MyTableView;
-    m_table->setModel(m_model);
-    //m_table->setEditTriggers(QAbstractItemView::AllEditTriggers);
     m_table->setSelectionMode(QAbstractItemView::ContiguousSelection);
 
     // Create the layout of the group box
@@ -56,36 +62,28 @@ TableGroupBox::TableGroupBox( MyAbstractTableModel * model, const QString & titl
     layout->addWidget(m_table);
 
     setLayout(layout);
-
-    // Form connections
-    connect(m_addButton, SIGNAL(clicked()), this, SLOT(addRow()));
-    connect(m_insertButton, SIGNAL(clicked()), this, SLOT(insertRow()));
-    connect(m_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
-    //connect(m_table->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(cellSelected(QModelIndex,QModelIndex)));
-    connect(m_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(cellSelected()));
-
-    connect(m_table, SIGNAL(dataPasted()), SIGNAL(dataChanged()));
-    connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), SIGNAL(dataChanged()));
-    connect(m_table->model(), SIGNAL(rowsRemoved(QModelIndex,int,int)), SIGNAL(dataChanged()));
-    connect(m_table->model(), SIGNAL(rowsInserted(QModelIndex,int,int)), SIGNAL(dataChanged()));
-
-    //connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_table, SLOT(resizeColumnsToContents()));
-    //connect(m_table->model(), SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_table, SLOT(resizeRowsToContents()));
 }
 
-MyTableView * TableGroupBox::table()
+void TableGroupBox::setModel(QAbstractTableModel *model)
 {
-    return m_table;
+    m_table->setModel(model);    
+    m_table->resizeRowsToContents();
+    m_table->resizeColumnsToContents();
+
+    connect(m_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(cellSelected()));
+    connect(m_table->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+            this, SIGNAL(currentChanged(QModelIndex, QModelIndex)));
 }
 
-QAbstractTableModel * TableGroupBox::model()
+void TableGroupBox::setItemDelegateForColumn(int column, QAbstractItemDelegate* delegate)
 {
-    return m_model;
+    m_table->setItemDelegateForColumn(column, delegate);
 }
 
-bool TableGroupBox::readOnly() const
+void TableGroupBox::setColumnHidden(int column, bool hide)
 {
-    return m_readOnly;
+    m_table->setColumnHidden(column, hide);
 }
 
 bool TableGroupBox::lastRowFixed() const
@@ -109,11 +107,12 @@ void TableGroupBox::addButton(QPushButton * pushButton )
 void TableGroupBox::addRow()
 {
     QModelIndexList selectedRows = m_table->selectionModel()->selectedRows();
-	// Always add one layer at the end of the list
-    if ( selectedRows.isEmpty() )
-        m_model->insertRows( m_model->rowCount(), 1);
-    else
-        m_model->insertRows( m_model->rowCount(), selectedRows.size());
+    // Always add one layer at the end of the list
+    if (selectedRows.isEmpty()) {
+        m_table->model()->insertRows(m_table->model()->rowCount(), 1);
+    } else {
+        m_table->model()->insertRows(m_table->model()->rowCount(), selectedRows.size());
+    }
     // Signal that the data has changed
     emit dataChanged();
 }
@@ -123,7 +122,7 @@ void TableGroupBox::insertRow()
     QModelIndexList selectedRows = m_table->selectionModel()->selectedRows();
     // Insert a row above the previously selected row -- row previously defined
     // by updateSelectedRow().
-    m_model->insertRows( selectedRows.first().row(), selectedRows.size());
+    m_table->model()->insertRows(selectedRows.first().row(), selectedRows.size());
     // Signal that the data has changed
     emit dataChanged();
 }
@@ -132,7 +131,7 @@ void TableGroupBox::removeRow()
 {
     QModelIndexList selectedRows = m_table->selectionModel()->selectedRows();
 
-    m_model->removeRows( selectedRows.first().row(), selectedRows.size());
+    m_table->model()->removeRows( selectedRows.first().row(), selectedRows.size());
 	// Update the insert and remove buttons
     m_insertButton->setEnabled(false);
     m_removeButton->setEnabled(false);
@@ -147,7 +146,7 @@ void TableGroupBox::cellSelected()//const QModelIndex & /* current */, const QMo
 {
     QModelIndexList selectedRows = m_table->selectionModel()->selectedRows();
 
-    if ( !selectedRows.isEmpty() ) {
+    if (!selectedRows.isEmpty()) {
         // Enable the insert button if the entire row is selected
         m_insertButton->setEnabled(true);
 
@@ -167,15 +166,12 @@ void TableGroupBox::cellSelected()//const QModelIndex & /* current */, const QMo
 
 void TableGroupBox::setReadOnly(bool readOnly)
 { 
-    m_readOnly = readOnly;
+    m_table->setReadOnly(readOnly);
     // Hide the buttons
     m_addButton->setHidden(readOnly);
     m_insertButton->setHidden(readOnly);
     m_removeButton->setHidden(readOnly);
-    
-    for (int i = 0; i < m_addedButtons.size(); ++i) {
-        m_addedButtons.at(i)->setHidden(readOnly); 
-    }
-    // Set the table is readOnly
-    m_model->setReadOnly(readOnly);
+
+    foreach (QPushButton* button, m_addedButtons)
+        button->setHidden(readOnly);
 }

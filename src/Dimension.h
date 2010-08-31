@@ -35,73 +35,68 @@ class Dimension : public QObject
 {
     Q_OBJECT
 
-    public:
-        Dimension(QObject * parent = 0);
+    friend QDataStream & operator<< (QDataStream & out, const Dimension* d);
+    friend QDataStream & operator>> (QDataStream & in, Dimension* d);
 
-        enum Spacing{
-            Linear, //!< Equally spaced in linear space
-            Log, //!< Equally spaced in log space
-        };
+public:
+    Dimension(QObject * parent = 0);
 
-        static QStringList spacingList();
+    enum Spacing{
+        Linear, //!< Equally spaced in linear space
+        Log, //!< Equally spaced in log space
+    };
 
-        double min() const;
+    static QStringList spacingList();
 
-        double max() const;
+    double min() const;
+    double max() const;
+    int size() const;
+    double at(int i) const;
 
-        int size() const;
+    void setSpacing(Spacing spacing);
+    Spacing spacing() const;
 
-        double at(int i) const;
+    QVector<double> & data();
 
-        void setSpacing(Spacing spacing);
-        Spacing spacing() const;
+    //! If the dimension is populated with values
+    bool ready() const;
 
-        QVector<double> & data();
+    //! Calculate the values in the vector
+    void init();
 
-        /*! Compute the data -- must be called before data can be used.
-         * \param hasMin has a minimum value
-         * \param minValue minimum possible value
-         * \param hasMax has a maximum value
-         * \param maxValue maximum possible value
-         */
-        void init( bool hasMin = false, double minValue = 0, 
-                bool hasMax = false, double maxValue = 0);
-	
-        //! Save the object to a map
-        /*!
-         * \param saveData saves the m_data vector.
-         * \return a map of the object
-         */
-        QMap<QString, QVariant> toMap(bool saveData = false) const;
-		void fromMap(const QMap<QString, QVariant> & map);
-
-        static QVector<double> linSpace( double min, double max, int size );
-        static QVector<double> logSpace( double min, double max, int size );
-
-    public slots:
-        void setMin(double min);
-        void setMax(double max);
-        void setSize(int npts);
-        void setSpacing(int spacing);
+    static QVector<double> linSpace( double min, double max, int size );
+    static QVector<double> logSpace( double min, double max, int size );
 
 
-    signals:
-        void wasModified();
+public slots:
+    void setMin(double min);
+    void setMax(double max);
+    void setSize(int npts);
+    void setSpacing(int spacing);
 
-    private:
-        //! Minimum value
-        double m_min;
-        
-        //! Maximum value
-        double m_max;
+    void clear();
 
-        //! Number of points
-        int m_size;
+signals:
+    void minChanged(double min);
+    void maxChanged(double max);
+    void sizeChanged(int size);
+    void spacingChanged(int spacing);
+    void wasModified();
 
-        //! Spacing
-        Spacing m_spacing;
+private:
+    //! Minimum value
+    double m_min;
 
-        //! Data points
-        QVector<double> m_data;
+    //! Maximum value
+    double m_max;
+
+    //! Number of points
+    int m_size;
+
+    //! Spacing
+    Spacing m_spacing;
+
+    //! Data points
+    QVector<double> m_data;
 };
 #endif

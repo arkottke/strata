@@ -20,61 +20,137 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "NonlinearPropertyOutput.h"
-#include "Serializer.h"
 
-NonlinearPropertyOutput::NonlinearPropertyOutput()
+#include "AbstractCalculator.h"
+#include "NonlinearProperty.h"
+#include "OutputCatalog.h"
+#include "OutputStatistics.h"
+#include "SoilType.h"
+
+#include <qwt_scale_engine.h>
+
+NonlinearPropertyOutput::NonlinearPropertyOutput(
+        NonlinearProperty* nonlinearProperty, OutputCatalog* catalog)
+    : AbstractOutput(catalog), m_nonlinearProperty(nonlinearProperty)
 {
+    m_statistics = new OutputStatistics(this);
+    connect(m_statistics, SIGNAL(wasModified()),
+            this, SIGNAL(wasModified()));
 }
 
-void NonlinearPropertyOutput::clear()
-{
-    m_strain.clear();
-    m_prop.clear();
-}
 
-void NonlinearPropertyOutput::setStrain( const QVector<double> & strain )
+QString NonlinearPropertyOutput::name() const
 {
-    m_strain = strain;
-}
-        
-QMap<QString, QVariant> NonlinearPropertyOutput::toMap(bool saveData) const
-{
-    QMap<QString, QVariant> map;
-    
-    map.insert("enabled", m_enabled);
-
-    if (saveData) {
-        QList<QVariant> list;
-        // Save the data
-        for ( int i = 0; i < m_prop.size(); ++i )
-            list << QVariant(Serializer::toVariantList(m_prop.at(i)));
-
-        map.insert("prop", list);
-        
-        // Save the strain
-        map.insert("strain", Serializer::toVariantList(m_strain));
+    switch (m_nonlinearProperty->type()) {
+    case NonlinearProperty::Damping:
+        return tr("Damping Ratio");
+    case NonlinearProperty::ModulusReduction:
+        return tr("Shear Modulus Reduction");
+    default:
+        return "";
     }
-    
-    return map;
 }
 
-void NonlinearPropertyOutput::fromMap(const QMap<QString, QVariant> & map)
+QString NonlinearPropertyOutput::fullName() const
 {
-    m_enabled = map.value("enabled").toBool();
-    
-    if (map.contains("prop")) {
-        // Data
-        m_prop.clear();
+    return tr("Nonlinear Curve -- %1 -- %2")
+            .arg(prefix())
+            .arg(name());
+}
 
-        QList<QVariant> list = map.value("prop").toList();
-        for ( int i = 0; i < list.size(); ++i)
-            m_prop << Serializer::fromVariantList(list.at(i).toList()).toVector();
+QString NonlinearPropertyOutput::shortName() const
+{
+    switch (m_nonlinearProperty->type()) {
+    case NonlinearProperty::Damping:
+        return "damping";
+    case NonlinearProperty::ModulusReduction:
+        return "modulus";
+    default:
+        return "";
     }
-    
-    if (map.contains("strain")) {
-        // Strain
-        m_strain.clear();
-        
-        m_strain = Serializer::fromVariantList(map.value("strain").toList()).toVector();
+}
+
+bool NonlinearPropertyOutput::motionIndependent() const
+{
+    return true;
+}
+
+QString NonlinearPropertyOutput::fileName(int motion) const
+{
+    Q_UNUSED(motion);
+
+    return "nlCurve-" + prefix() + "-" + shortName();
+}
+
+const QString& NonlinearPropertyOutput::soilName() const
+{
+    return m_soilName;
+}
+
+void NonlinearPropertyOutput::setNonlinearProperty(NonlinearProperty* nonlinearProperty)
+{
+    m_nonlinearProperty = nonlinearProperty;
+}
+
+void NonlinearPropertyOutput::setSoilName(const QString &soilName)
+{
+    if (m_soilName != soilName) {
+        m_soilName = soilName;
+
+        emit soilNameChanged(m_soilName);
+        emit wasModified();
     }
+}
+
+QwtScaleEngine* NonlinearPropertyOutput::xScaleEngine() const
+{
+    return new QwtLog10ScaleEngine;
+}
+
+QwtScaleEngine* NonlinearPropertyOutput::yScaleEngine() const
+{
+    return new QwtLinearScaleEngine;
+}
+
+const QString NonlinearPropertyOutput::xLabel() const
+{
+    return tr("Strain (%)");
+}
+
+const QString NonlinearPropertyOutput::yLabel() const
+{
+    switch (m_nonlinearProperty->type()) {
+    case NonlinearProperty::Damping:
+        return tr("Damping (%)");
+    case NonlinearProperty::ModulusReduction:
+        return tr("Normalized Shear Modulus (G/G_max)");
+    default:
+        return "";
+    }
+}
+
+const QString NonlinearPropertyOutput::prefix() const
+{
+    return m_soilName;
+}
+
+const QString NonlinearPropertyOutput::suffix() const
+{
+    return "";
+}
+
+const QVector<double>& NonlinearPropertyOutput::ref(int motion) const
+{
+    Q_UNUSED(motion);
+
+    return m_nonlinearProperty->strain();
+}
+
+void NonlinearPropertyOutput::extract(AbstractCalculator* const calculator,
+                         QVector<double> & ref, QVector<double> & data) const
+{
+    Q_UNUSED(calculator);
+    Q_UNUSED(ref);
+
+    data = m_nonlinearProperty->varied();
 }

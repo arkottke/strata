@@ -22,109 +22,62 @@
 #ifndef MOTION_PAGE_H_
 #define MOTION_PAGE_H_
 
-#include "SiteResponseModel.h"
-#include "TableGroupBox.h"
-#include "DepthComboBox.h"
+#include "AbstractPage.h"
 
-#include <QCheckBox>
-#include <QComboBox>
-#include <QDoubleSpinBox>
 #include <QGroupBox>
-#include <QLineEdit>
-#include <QPointer>
+#include <QModelIndex>
 #include <QPushButton>
-#include <QStackedWidget>
-#include <QTabWidget>
-#include <QWidget>
 
-//! Widget for the Motion Page.
+class DepthComboBox;
+class MotionLibrary;
+class MyTableView;
+class SiteResponseModel;
 
-class MotionPage : public QWidget
+//! Widget for the AbstractMotion Page.
+
+class MotionPage : public AbstractPage
 {
     Q_OBJECT
 
-    public:
-        MotionPage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+public:
+    MotionPage(QWidget*  parent = 0, Qt::WindowFlags f = 0 );
 
-    public slots:
-        void setMethod(int);
-        
-        void setReadOnly(bool b);
+    void setModel(SiteResponseModel* model);
 
-        void load();
+public slots:
+    void setReadOnly(bool b);
+    void setApproach(int i);
 
-    signals:
-        void updateFas();
+private slots:
+    void add();
+    void remove();
+    void importSuite();
 
-    protected slots:
-        void setSource(int);
-        void setLocation(int);
+    void edit();
 
+    void updateButtons();
 
-        void previewData();
-        void previewPlot();
-        void previewCrustalAmp();
+private:
+    //! Create the group box for defining the input location
+    QGroupBox* createInputLocationGroupBox();
 
-        void loadSuite();
+    //! Create the group box for editting the input motions
+    QGroupBox* createMotionsTableGroupBox();
 
-        void setEnableCrustalTab(bool enabled = false );
+    QGroupBox* m_inputLocationGroupBox;
+    QGroupBox* m_motionsTableGroupBox;
 
-    private:
-        //! Load point source paramters
-        void loadPointSourceParams();
+    QPushButton* m_addButton;
+    QPushButton* m_removeButton;
+    QPushButton* m_editButton;
+    QPushButton* m_importButton;
+    MyTableView* m_tableView;
 
+    DepthComboBox* m_depthComboBox;
 
-        SiteResponseModel * m_model;
+    MotionLibrary* m_motionLibrary;
 
-        QStackedWidget * m_stackedWidget;
-        
-        QGroupBox * m_inputLocationGroupBox;
-        DepthComboBox * m_depthComboBox;
-
-        TableGroupBox * m_recordedMotionTableBox;
-        
-        QComboBox * m_typeComboBox;
-        QDoubleSpinBox * m_durationSpinBox;
-        QCheckBox * m_limitFasCheckBox;
-        QComboBox * m_sourceComboBox;
-        QDoubleSpinBox * m_dampingSpinBox;
-        QDoubleSpinBox * m_maxEngFreqSpinBox;
-
-        QStackedWidget * m_rvtSourceStackedWidget;
-        TableGroupBox * m_fourierSpecTableBox;
-        TableGroupBox * m_respSpecTableBox;
-
-        QGroupBox * m_rvtPropsGroupBox;
-
-        QGroupBox * m_pointSourceGroupBox;
-        QDoubleSpinBox * m_momentMagSpinBox;
-        QDoubleSpinBox * m_distanceSpinBox;
-        QDoubleSpinBox * m_depthSpinBox;
-        QComboBox * m_locationComboBox;
-        QDoubleSpinBox * m_stressDropSpinBox;
-        QDoubleSpinBox * m_geoAttenSpinBox;
-        QDoubleSpinBox * m_pathDurSpinBox;
-        QDoubleSpinBox * m_pathAttenCoeffSpinBox;
-        QDoubleSpinBox * m_pathAttenPowerSpinBox;
-        QDoubleSpinBox * m_shearVelSpinBox;
-        QDoubleSpinBox * m_densitySpinBox;
-        QDoubleSpinBox * m_siteAttenSpinBox;
-        QCheckBox * m_specificCrustalAmpCheckBox;
-        QPushButton * m_computeCrustalAmpButton;
-        QTabWidget * m_siteTabWidget;
-        TableGroupBox * m_siteAmpTableGroupBox; 
-        TableGroupBox * m_crustalTableGroupBox; 
-
-        QPointer<QDialog> m_dataDialog;
-        QPointer<QDialog> m_plotDialog;
-        
-        // Create pages
-        void createInputLayer();
-        void createRecordedPage();
-        void createRvtPage();
-        void createPointSourceGroupBox();
-
-        //! Compute the Reponse Spectrum and Fourier Amplitude spectrum of the RvtMotion
-        bool computeRvtResponse();
+    //! If the model is in read-only mode
+    bool m_readOnly;
 };
 #endif

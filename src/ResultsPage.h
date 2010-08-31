@@ -22,37 +22,39 @@
 #ifndef RESULTS_PAGE_H_
 #define RESULTS_PAGE_H_
 
-#include "SiteResponseOutput.h"
-#include "OutputTableModel.h"
+#include "AbstractPage.h"
 
+#include <QGroupBox>
 #include <QComboBox>
 #include <QLineEdit>
-#include <QPushButton>
-#include <QSplitter>
-#include <QTableView>
-#include <QPrinter>
 #include <QMenu>
+#include <QPrinter>
+#include <QPushButton>
+#include <QTableView>
+#include <QTabWidget>
 
+#include <qwt_legend.h>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+class AbstractOutput;
+class MyTableView;
+class OutputCatalog;
+
 //! Widget for the Results page.
 
-class ResultsPage : public QSplitter
+class ResultsPage : public AbstractPage
 {
     Q_OBJECT
 	
     public:
-        ResultsPage( SiteResponseOutput * model = 0, QWidget * parent = 0);
-        ~ResultsPage();
+        ResultsPage(QWidget * parent = 0);
 
-    signals:
+        virtual void setModel(SiteResponseModel* model);
 
     public slots:
         void exportData();
         void print(QPrinter * printer);
-
-        void refreshWidget();
 
     protected slots:
         //! Show the context menu
@@ -61,19 +63,22 @@ class ResultsPage : public QSplitter
         //! Copy the plot to the clipboard
         void copyPlot();
 
-        void configurePlot();
-
         //! Update the plot when a specific output is selected
-        void selectedChanged( const QModelIndex & current, const QModelIndex & previous);
+        void setSelectedSeries(const QModelIndex & current, const QModelIndex & previous = QModelIndex());
 
-        void plotOutput(int index);
+        //! Update the data when a data series is selected
+        void selectedDataChanged(const QModelIndex & current, const QModelIndex & previous);
+
+        void setSelectedOutput(int index);
 
         void pointSelected(const QPoint & point);
 
-        void enableSelectedCurve();
+        void enableSelectedCurve(int index);
         
-        void colorSelectedCurve();
-        void uncolorSelectedCurve();
+        void colorCurve(int index);
+        void uncolorCurve(int index);
+
+        void configurePlot();
 
         void setMotionEnabled(bool enabled);
         void setSiteEnabled(bool enabled);
@@ -82,49 +87,42 @@ class ResultsPage : public QSplitter
 
         void setStatsNeedUpdate();
 
-    protected:
-        void populateQuantiles();
-        void reset();
-
     private:
         //! Create the table goup box
-        void createTableGroup();
+        QGroupBox* createOutputGroup();
 
         //! Create the plot
-        void createPlot();
+        QTabWidget* createDataTabWidget();
         
         //! Create context menu for the chart
         void createContextMenu();
 
-        //! Data for the widget
-        SiteResponseOutput * m_model;
+        QComboBox *m_outputComboBox;
+        QTableView *m_catalogTableView;
 
-        QComboBox * m_outputComboBox;
-
-        QTableView * m_tableView;
-        OutputTableModel * m_tableModel;
-
-        QPushButton * m_enableMotionPushButton;
-        QPushButton * m_enableSitePushButton;
-        QPushButton * m_recomputePushButton;
+        QPushButton *m_enableMotionPushButton;
+        QPushButton *m_enableSitePushButton;
+        QPushButton *m_recomputePushButton;
+        QPushButton *m_viewDataPushButton;
 
         QwtPlot * m_plot; 
-        QList<QwtPlotCurve*> m_dataCurves;
-        QList<QwtPlotCurve*> m_quantileCurves;
+        QList<QwtPlotCurve*> m_curves;
 
         QMenu * m_plotContextMenu;
 
-        //! Currently selected output
-        const Output * m_selectedOutput;
+        MyTableView *m_outputTableView;
+
+        //! Catalog containing all of the output
+        OutputCatalog* m_outputCatalog;
+
+        //! Current selected output
+        AbstractOutput* m_selectedOutput;
 
         //! Currently selected row
         int m_selectedRow;
 
         //! If the statistics need to be re-computed
         bool m_statsNeedUpdate;
-
-        //! Default zOrder of all of the data curves
-        double m_zOrder;
 };
 #endif
 

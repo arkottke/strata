@@ -26,120 +26,116 @@
 #include <QColor>
 #include <QDebug>
 
-ConfiningStressTableModel::ConfiningStressTableModel( QObject * parent )
-	: MyAbstractTableModel(false, parent), m_waterTableDepth(0.0)
+ConfiningStressTableModel::ConfiningStressTableModel(QObject * parent)
+    : MyAbstractTableModel(parent), m_waterTableDepth(0.0)
 {
-    connect( Units::instance(), SIGNAL(systemChanged()), SLOT(computeStress()));
-    connect( Units::instance(), SIGNAL(systemChanged()), SLOT(updateHeader()));
+    connect( Units::instance(), SIGNAL(systemChanged(int)),
+             this, SLOT(computeStress()));
+    connect( Units::instance(), SIGNAL(systemChanged(int)),
+             this, SLOT(updateHeader()));
 }
 
 int ConfiningStressTableModel::rowCount ( const QModelIndex& /* index */ ) const
 {
-	return m_layers.size();
+    return m_layers.size();
 }
 
 int ConfiningStressTableModel::columnCount ( const QModelIndex& /* parent */ ) const
 {
-	return 4;
+    return 4;
 }
 
 QVariant ConfiningStressTableModel::headerData( int section, Qt::Orientation orientation, int role ) const
 {
-	if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
-		return QVariant();
+    if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
+        return QVariant();
 
-	switch( orientation )
-	{
-		case Qt::Horizontal:
-			switch (section)
-			{
-                case 0:
-					// Thickness
-					return QString(tr("Thickness (%1)")).arg(Units::instance()->length());
-                case 1:
-                    // Unit Weight
-					return QString(tr("Unit Wt. (%1)")).arg(Units::instance()->untWt());
-                case 2:
-                    // At Rest Coefficient
-					return tr("At Rest Coeff., k0");
-                case 3:
-                    // Mean Effective stress
-					return tr("Mean Eff. Stress (atm)");
-			}
-		case Qt::Vertical:
-			return section+1;
-		default:
-			return QVariant();
-	}
+    switch( orientation )
+    {
+    case Qt::Horizontal:
+        switch (section)
+        {
+        case 0:
+            // Thickness
+            return QString(tr("Thickness (%1)")).arg(Units::instance()->length());
+        case 1:
+            // Unit Weight
+            return QString(tr("Unit Wt. (%1)")).arg(Units::instance()->untWt());
+        case 2:
+            // At Rest Coefficient
+            return tr("At Rest Coeff., k0");
+        case 3:
+            // Mean Effective stress
+            return tr("Mean Eff. Stress (atm)");
+        }
+    case Qt::Vertical:
+        return section+1;
+    default:
+        return QVariant();
+    }
+
+
 }
 
 QVariant ConfiningStressTableModel::data ( const QModelIndex &index, int role ) const
 {
-	if (index.parent()!=QModelIndex())
-		return QVariant();
+    if (index.parent()!=QModelIndex())
+        return QVariant();
 
-    // Color the background light gray for cells that are not editable
-    if (role==Qt::BackgroundRole && !(flags(index) & Qt::ItemIsEditable))
-            return QBrush(QColor(200,200,200));
-
-	if(  role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
-    {
-        switch (index.column())
-        {
-            case 0:
-                // Thickness
-                return QString::number(m_layers.at(index.row())->thick);
-            case 1:
-                // Unit Weight
-                return QString::number(m_layers.at(index.row())->untWt);
-            case 2:
-                // At Rest Coefficient
-                return QString::number(m_layers.at(index.row())->atRestCoeff);
-            case 3:
-                // Mean Effective stress
-                return QString::number(m_layers.at(index.row())->mEffStress);
+    if (role==Qt::DisplayRole || role==Qt::EditRole) {
+        switch (index.column()) {
+        case 0:
+            // Thickness
+            return QString::number(m_layers.at(index.row())->thick);
+        case 1:
+            // Unit Weight
+            return QString::number(m_layers.at(index.row())->untWt);
+        case 2:
+            // At Rest Coefficient
+            return QString::number(m_layers.at(index.row())->atRestCoeff);
+        case 3:
+            // Mean Effective stress
+            return QString::number(m_layers.at(index.row())->mEffStress);
         }
     }
-		
-    return QVariant();
+
+    return MyAbstractTableModel::data(index, role);
 }
 
 bool ConfiningStressTableModel::setData( const QModelIndex &index, const QVariant &value, int role )
 {
-	if(index.parent()!=QModelIndex())
-		return false;
+    if(index.parent()!=QModelIndex())
+        return false;
 
-	if(role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole)
-	{
-		switch (index.column())
-		{
-            case 0:
-                // Thickness
-                m_layers[index.row()]->thick = value.toDouble();
-                computeStress(index.row());
-                break;
-            case 1:
-                // Unit Weight
-                m_layers[index.row()]->untWt = value.toDouble();
-                computeStress(index.row());
-                break;
-            case 2:
-                // At Rest Coefficient
-                m_layers[index.row()]->atRestCoeff = value.toDouble();
-                computeStress(index.row());
-                break;
-            case 3:
-                return false;
+    if (role==Qt::DisplayRole || role==Qt::EditRole) {
+        switch (index.column()){
+        case 0:
+            // Thickness
+            m_layers[index.row()]->thick = value.toDouble();
+            computeStress(index.row());
+            break;
+        case 1:
+            // Unit Weight
+            m_layers[index.row()]->untWt = value.toDouble();
+            computeStress(index.row());
+            break;
+        case 2:
+            // At Rest Coefficient
+            m_layers[index.row()]->atRestCoeff = value.toDouble();
+            computeStress(index.row());
+            break;
+        case 3:
+            return false;
         }
     } 
-        
+
     dataChanged(index, index);
     return true;
 }
 
 Qt::ItemFlags ConfiningStressTableModel::flags ( const QModelIndex &index ) const
 {
-    if (index.column() == 3 ) {
+    if (index.column() == 3) {
         // Mean effective stress column -- not editable
         return QAbstractTableModel::flags(index);
     } else {
@@ -149,10 +145,10 @@ Qt::ItemFlags ConfiningStressTableModel::flags ( const QModelIndex &index ) cons
 
 bool ConfiningStressTableModel::insertRows ( int row, int count, const QModelIndex &parent )
 {
-	emit beginInsertRows( parent, row, row+count-1 );
+    emit beginInsertRows( parent, row, row+count-1 );
 
-	for (int i=0; i < count; ++i)  {
-		m_layers.insert( row, new Layer );
+    for (int i=0; i < count; ++i)  {
+        m_layers.insert( row, new Layer );
 
         m_layers[row]->thick = 0.;
         m_layers[row]->untWt = 0.;
@@ -161,21 +157,21 @@ bool ConfiningStressTableModel::insertRows ( int row, int count, const QModelInd
     
     emit endInsertRows();
     
-	return true;
+    return true;
 }
 
 bool ConfiningStressTableModel::removeRows ( int row, int count, const QModelIndex &parent )
 {
-	emit beginRemoveRows( parent, row, row+count-1);
-		
-	for (int i=0; i < count; ++i) 
-		delete m_layers.takeAt(row);
+    emit beginRemoveRows( parent, row, row+count-1);
+
+    for (int i=0; i < count; ++i)
+        delete m_layers.takeAt(row);
     
     emit endRemoveRows();
-	
+
     return true;
 }
-        
+
 double ConfiningStressTableModel::waterTableDepth()
 {
     return m_waterTableDepth;
@@ -186,7 +182,7 @@ void ConfiningStressTableModel::setWaterTableDepth(double depth)
     m_waterTableDepth = depth;
     computeStress();
 }
-        
+
 void ConfiningStressTableModel::computeStress(int layer)
 {
     double depth = 0;

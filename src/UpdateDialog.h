@@ -16,11 +16,6 @@ class UpdateDialog : public QDialog
 
 public:
     UpdateDialog(QWidget * parent = 0, Qt::WindowFlags f = 0);
-    ~UpdateDialog();
-
-public slots:
-
-signals:
 
 protected slots:
     void replyFinished(QNetworkReply * reply);

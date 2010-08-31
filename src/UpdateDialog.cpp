@@ -13,12 +13,13 @@
 #include <QDebug>
 
 UpdateDialog::UpdateDialog(QWidget * parent, Qt::WindowFlags f)
+    : QDialog(parent, f)
 {
     m_url = QUrl("http://accipter.org/cgi-bin/strata.cgi");
     m_manager = new QNetworkAccessManager(this);
-    connect(m_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
-    m_file = new QFile;
-
+    connect(m_manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinished(QNetworkReply*)));
+    m_file = new QFile(this);
 
     // Create the layout
     QVBoxLayout * layout = new QVBoxLayout;
@@ -56,21 +57,16 @@ UpdateDialog::UpdateDialog(QWidget * parent, Qt::WindowFlags f)
     setLayout(layout);
 
     // Start the update process
-    QUrl url = m_url;
-    url.addQueryItem("action", "query");
-
     setMessage(tr("Checking if an update is available..."), Action);
 
     m_canceled = false;
     m_task = Query;
-    QNetworkReply * reply = m_manager->get(QNetworkRequest(url));
-    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateProgress(qint64,qint64)));
-}
+    QUrl url = m_url;
+    url.addQueryItem("action", "query");
 
-UpdateDialog::~UpdateDialog()
-{
-    delete m_manager;
-    delete m_file;
+    QNetworkReply* reply = m_manager->get(QNetworkRequest(url));
+    connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
+            this, SLOT(updateProgress(qint64,qint64)));
 }
 
 void UpdateDialog::updateProgress(qint64 bytesReceived, qint64 bytesTotal)
@@ -86,7 +82,7 @@ void UpdateDialog::updateProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void UpdateDialog::cancel()
 {
-    m_canceled = true;;
+    m_canceled = true;
 }
 
 void UpdateDialog::yes()
@@ -100,10 +96,9 @@ void UpdateDialog::yes()
             url.addQueryItem("action", "download");
             url.addQueryItem("version", "latest");
             m_task = FetchHead;
-            m_reply = m_manager->head(QNetworkRequest(url));
-            connect(m_reply, SIGNAL(downloadProgress(qint64,qint64)),
+            QNetworkReply* reply = m_manager->head(QNetworkRequest(url));
+            connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
                     this, SLOT(updateProgress(qint64,qint64)));
-
             break;
         }
     default:
@@ -121,7 +116,7 @@ void UpdateDialog::replyFinished(QNetworkReply * reply)
                 QFile::remove(m_pathName);
             }
         }
-        close();
+        reject();
         return;
     }
 
@@ -135,23 +130,31 @@ void UpdateDialog::replyFinished(QNetworkReply * reply)
             int currentRev = int(REVISION);
 
             if (currentRev < latestRev) {
-                setMessage(tr("A new version of Strata is available.\n"
+                setMessage(tr("A new version of Strata is available.\n\n"
                                "Do you want to download the updated version?"), Question);
             } else {
                 setMessage(tr("No updates currently available."), Closure);
             }
+            reply->deleteLater();
             break;
         }
     case FetchHead:
         {
             QUrl url = reply->header(QNetworkRequest::LocationHeader).toUrl();
+            reply->deleteLater();
+
             QString fileName = QFileInfo(url.path()).fileName();
 
             // Start the download
+            m_progressBar->setVisible(true);
             m_task = Download;
             m_reply = m_manager->get(QNetworkRequest(url));
 
-            // Prompt for a new fileName -- FIXME parent
+            connect(m_reply, SIGNAL(readyRead()), this, SLOT(writeToFile()));
+            connect(m_reply, SIGNAL(downloadProgress(qint64,qint64)),
+                    this, SLOT(updateProgress(qint64,qint64)));
+
+            // Prompt for a new fileName
             QString pathName = QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)
                                + QDir::separator() + fileName;
 
@@ -160,41 +163,28 @@ void UpdateDialog::replyFinished(QNetworkReply * reply)
             if (m_pathName.isEmpty()) {
                 // Cancel the download
                 m_reply->close();
+                reject();
                 return;
-            }
-
-            // Check if the file exists, and if so delete it
-            if (QFile::exists(m_pathName)) {
-                QFile::remove(m_pathName);
             }
 
             // Open the file for writing
             m_file->setFileName(m_pathName);
 
-            if (!m_file->open(QIODevice::WriteOnly)) {
-                qDebug() << "Error opening" << m_pathName;
+            if (!m_file->open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                qDebug() << "Error opening:" << m_pathName;
                 m_reply->close();
+                reject();
                 return;
             }
 
-            connect(m_reply, SIGNAL(readyRead()), this, SLOT(writeToFile()));
-            connect(m_reply, SIGNAL(downloadProgress(qint64,qint64)),
-                    this, SLOT(updateProgress(qint64,qint64)));
+            writeToFile();
 
             break;
         }
     case Download:
-        {
-            m_reply = 0;
-            m_file->close();
-
-            // Update the dialog
-            setMessage(tr("Please close Strata and then run the installer"), Closure);
-            break;
-        }
+        qDebug() << "download complete!";
+        break;
     }
-
-    delete reply;
 }
 
 void UpdateDialog::writeToFile()
@@ -202,15 +192,21 @@ void UpdateDialog::writeToFile()
     if (m_file->isOpen()) {
         m_file->write(m_reply->readAll());
     }
-}
 
+    if (m_reply->isFinished()) {
+        m_file->close();
+        m_reply->deleteLater();
+
+        // Update the dialog
+        setMessage(tr("Please close Strata and then run the installer"), Closure);
+    }
+}
 
 void UpdateDialog::setMessage(const QString & message, MessageType type)
 {
     m_label->setText(message);
 
-    switch(type)
-    {
+    switch(type) {
     case Question:
         m_progressBar->setShown(false);
         m_cancelPushButton->setShown(false);

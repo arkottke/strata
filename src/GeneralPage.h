@@ -22,79 +22,58 @@
 #ifndef GENERAL_PAGE_H_
 #define GENERAL_PAGE_H_
 
-#include "SiteResponseModel.h"
+#include "AbstractPage.h"
 
-#include <QWidget>
-#include <QTextEdit>
-#include <QLineEdit>
 #include <QComboBox>
-#include <QGroupBox>
 #include <QCheckBox>
+#include <QGroupBox>
+#include <QLineEdit>
 #include <QSpinBox>
+#include <QTextEdit>
+
+
+class MethodGroupBox;
 
 //! Widget for the General Page.
 
-class GeneralPage : public QWidget
+class GeneralPage : public AbstractPage
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		GeneralPage( SiteResponseModel * model, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+public:
+    GeneralPage(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
-        void setModel( SiteResponseModel * model );
+    void setModel(SiteResponseModel* model);
 
-    public slots:
-        void setIsSiteVaried(int);
-        void setIsSoilVaried(int);
-        void setIsVelocityVaried(int);
-        void setMethod(int);
+public slots:
+    void setReadOnly(bool readOnly);
 
-        void load();
+protected:
+    //@{ Construct the various group boxes
+    QGroupBox* createProjectGroupBox();
+    QGroupBox* createAnalysisGroupBox();
+    QGroupBox* createVariationGroupBox();
+    QGroupBox* createDiscretizationGroupBox();
+    //@}
 
-        void setReadOnly(bool b);
+    QLineEdit* m_titleLineEdit;
+    QTextEdit* m_notesTextEdit;
+    QLineEdit* m_prefixLineEdit;
+    QComboBox* m_unitsComboBox;
+    QCheckBox* m_saveMotionDataCheckBox;
 
-    signals:
-        void isSoilVariedChanged(bool);
-        void isVelocityVariedChanged(bool);
-        
-        void methodChanged(int);
+    QComboBox* m_methodComboBox;
+    QComboBox* m_approachComboBox;
+    QCheckBox* m_propertiesAreVariedCheckBox;
 
-	private:
-        SiteResponseModel * m_model;
+    QGroupBox* m_variationGroupBox;
+    QSpinBox* m_countSpinBox;
+    QCheckBox* m_nlPropertiesAreVariedCheckBox;
+    QCheckBox* m_siteIsVariedCheckBox;
 
-		QGroupBox * m_projectGroupBox;
-		QLineEdit * m_titleLineEdit;
-		QTextEdit * m_notesTextEdit;
-		QLineEdit * m_prefixLineEdit;
-		QComboBox * m_unitsComboBox;
-        QCheckBox * m_saveMotionDataCheckBox;
+    MethodGroupBox* m_methodGroupBox;
 
-        QGroupBox * m_analysisGroupBox;
-		QComboBox * m_methodComboBox;
-		QCheckBox * m_siteIsVariedCheckBox;
-
-		QGroupBox * m_siteVarGroupBox;
-		QSpinBox * m_countSpinBox;
-		QCheckBox * m_soilIsVariedCheckBox;
-		QCheckBox * m_velIsVariedCheckBox;
-
-		QGroupBox * m_equivLinearGroupBox;
-		QDoubleSpinBox * m_strainRatioSpinBox;
-		QDoubleSpinBox * m_errorTolSpinBox;
-		QSpinBox * m_iterationsSpinBox;
-        
-        QGroupBox * m_discretizationGroupBox;
-        QDoubleSpinBox * m_maxFreqSpinBox;
-        QDoubleSpinBox * m_waveFractionSpinBox;
-
-		// Construct the various group boxes
-		void createProjectGroupBox();
-
-        void createAnalysisGroupBox();
-		void createVariationGroupBox();
-		void createEquivLinearGroupBox();
-
-        //! Create the auto-discretization group box
-        void createDiscretizationGroupBox();
+    QDoubleSpinBox* m_maxFreqSpinBox;
+    QDoubleSpinBox* m_waveFractionSpinBox;
 };
 #endif

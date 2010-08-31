@@ -19,89 +19,173 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "NonlinearPropertyTableModel.h"
 #include "SoilTypePage.h"
-#include "SoilTypeTableModel.h"
-#include "StringListDelegate.h"
+
+#include "CustomNonlinearProperty.h"
+#include "DampingFactory.h"
+#include "DampingStandardDeviation.h"
+#include "ModulusFactory.h"
+#include "ModulusStandardDeviation.h"
+#include "MyTableView.h"
+#include "NonlinearProperty.h"
+#include "NonlinearPropertyCatalog.h"
+#include "NonlinearPropertyDelegate.h"
+#include "NonlinearPropertyRandomizer.h"
+#include "NonlinearPropertyStandardDeviationWidget.h"
+#include "RockLayer.h"
+#include "SiteResponseModel.h"
+#include "SoilProfile.h"
+#include "SoilTypeCatalog.h"
+#include "SoilType.h"
+#include "TableGroupBox.h"
 #include "Units.h"
 
-#include <QDoubleValidator>
-#include <QLabel>
-#include <QTableView>
-#include <QPushButton>
+#include <QDebug>
+#include <QFormLayout>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QDebug>
+#include <QLabel>
 
-SoilTypePage::SoilTypePage( SiteResponseModel * model, QWidget * parent, Qt::WindowFlags f )
-	: QWidget(parent, f), m_model(model)
+
+SoilTypePage::SoilTypePage(QWidget * parent, Qt::WindowFlags f )
+    : AbstractPage(parent, f)
 {
-    m_selectedNonlinearProperty = 0;
-    m_selectedSoilType = 0;
-	// Setup the Group Boxes
-	createLayersGroupBox();
-    createBedrockGroupBox();
-	createVariationGroupBox();
-    createSoilPropsGroupBox();
-	createNlPropTableBox();
-
     // Set the layout
     QGridLayout * layout = new QGridLayout;
     
-    layout->addWidget( m_layersTableBox, 0, 0, 2, 1);
-    layout->addWidget( m_bedrockGroupBox, 2, 0);
-    layout->addWidget( m_variationGroupBox, 3, 0);
-    layout->addWidget( m_soilPropsGroupBox, 0, 1);
-    layout->addWidget( m_nlPropTableBox, 1, 1, 3, 1);
+    layout->addWidget(createLayersGroupBox(), 0, 0, 2, 1);
+    layout->addWidget(createBedrockGroupBox(), 2, 0);
+    layout->addWidget(createVariationGroupBox(), 3, 0);
+    layout->addWidget(createSoilPropsGroupBox(), 0, 1);
+    layout->addWidget(createNlPropTableBox(), 1, 1, 3, 1);
 
-    layout->setColumnStretch( 0, 1 );
-    layout->setRowStretch( 1, 1 );
+    layout->setColumnStretch(0, 1);
+    layout->setRowStretch(1, 1);
 
-	setLayout(layout);
-
-    // Load the values
-    load();
-    
-    // Load the units
-    updateUnits();
-    
-    // Intially hide the columns on the table
-    setIsVaried(false);
-
+    setLayout(layout);
     // Connections
-    connect( Units::instance(), SIGNAL(systemChanged()), this, SLOT(updateUnits()));
+    connect( Units::instance(), SIGNAL(systemChanged(int)),
+             this, SLOT(updateUnits()));
 }
 
-void SoilTypePage::createLayersGroupBox()
+void SoilTypePage::setModel(SiteResponseModel *model)
 {
-    m_layersTableBox = new TableGroupBox(
-            new SoilTypeTableModel( m_model->nlPropertyLibrary(), m_model->siteProfile(), Units::instance()), tr("Soil Types"));
-    connect( m_layersTableBox, SIGNAL(dataChanged()), m_model, SLOT(setModified()));
-    connect( m_layersTableBox, SIGNAL(dataChanged()), SIGNAL(soilTypesChanged())); 
+    updateUnits();
 
-    m_layersTableBox->table()->setItemDelegateForColumn( 3, new StringListDelegate );
-    m_layersTableBox->table()->setItemDelegateForColumn( 4, new StringListDelegate );
+    m_soilTypeCatalog = model->siteProfile()->soilTypeCatalog();
+    m_soilTypeTableBox->setModel(m_soilTypeCatalog);
+    m_modulusDelegate->setModel(
+            m_soilTypeCatalog->nlCatalog()->modulusFactory());
+    m_dampingDelegate->setModel(
+            m_soilTypeCatalog->nlCatalog()->dampingFactory());
 
-	// Connections
-	connect(m_layersTableBox->table()->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            SLOT(setSelectedSoil(QModelIndex,QModelIndex)));
-    connect(m_layersTableBox, SIGNAL(rowRemoved()), SLOT(unselectSoil()));
-    connect(m_layersTableBox, SIGNAL(dataChanged()), SLOT(refreshSoilDetails()));
-    connect(m_layersTableBox, SIGNAL(dataChanged()), m_model, SLOT(setModified()));
+    connect(m_soilTypeTableBox, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+            this, SLOT(selectIndex(QModelIndex, QModelIndex)));
+
+    m_soilPropsGroupBox->setEnabled(false);
+    m_nlPropTableBox->setEnabled(false);
+
+    updateNonlinearPropertiesRequired(model->nonlinearPropertiesRequired());
+    connect(model, SIGNAL(nonlinearPropertiesRequiredChanged(bool)),
+            this, SLOT(updateNonlinearPropertiesRequired(bool)));
+
+    updateDampingRequired(model->dampingRequired());
+    connect(model, SIGNAL(dampingRequiredChanged(bool)),
+            this, SLOT(updateDampingRequired(bool)));
+
+    updateVariedColumn(model->siteProfile()->nonlinearPropertyRandomizer()->enabled());
+    connect(model->siteProfile()->nonlinearPropertyRandomizer(), SIGNAL(enabledChanged(bool)),
+            this, SLOT(updateVariedColumn(bool)));
+
+    RockLayer* rl = model->siteProfile()->bedrock();
+
+    m_bedrockUntWtSpinBox->setValue(rl->untWt());
+    connect(m_bedrockUntWtSpinBox, SIGNAL(valueChanged(double)),
+            rl, SLOT(setUntWt(double)));
+
+    m_bedrockDampingSpinBox->setValue(rl->avgDamping());
+    connect(m_bedrockDampingSpinBox, SIGNAL(valueChanged(double)),
+            rl, SLOT(setAvgDamping(double)));
+
+    NonlinearPropertyRandomizer* npr
+            = model->siteProfile()->nonlinearPropertyRandomizer();
+
+    m_varyBedrockDampingCheckBox->setChecked(npr->bedrockIsEnabled());
+    connect(m_varyBedrockDampingCheckBox, SIGNAL(toggled(bool)),
+            npr, SLOT(setBedrockIsEnabled(bool)));
+
+    m_varyBedrockDampingCheckBox->setVisible(npr->enabled());
+    connect(npr, SIGNAL(enabledChanged(bool)),
+            m_varyBedrockDampingCheckBox, SLOT(setVisible(bool)));
+
+    m_nprModelComboBox->setCurrentIndex(npr->model());
+    connect(m_nprModelComboBox, SIGNAL(currentIndexChanged(int)),
+            npr, SLOT(setModel(int)));
+
+    m_modulusStdevWidget->setModel(npr->modulusStdev());
+    m_modulusStdevWidget->setCustomEnabled(
+            npr->customEnabled());
+    connect(npr, SIGNAL(customEnabledChanged(bool)),
+            m_modulusStdevWidget, SLOT(setCustomEnabled(bool)));
+
+    m_dampingStdevWidget->setModel(npr->dampingStdev());
+    m_dampingStdevWidget->setCustomEnabled(
+            npr->customEnabled());
+    connect(npr, SIGNAL(customEnabledChanged(bool)),
+            m_dampingStdevWidget, SLOT(setCustomEnabled(bool)));
+
+    m_correlSpinBox->setValue(npr->correl());
+    connect(m_correlSpinBox, SIGNAL(valueChanged(double)),
+            npr, SLOT(setCorrel(double)));
+
+    m_randomizerGroupBox->setVisible(npr->enabled());
+    connect(npr, SIGNAL(enabledChanged(bool)),
+            m_randomizerGroupBox, SLOT(setVisible(bool)));
 }
 
-void SoilTypePage::createBedrockGroupBox()
+void SoilTypePage::setReadOnly(bool readOnly)
 {
+    m_readOnly = readOnly;
+
+    m_soilTypeTableBox->setReadOnly(readOnly);
+    m_nlPropTableBox->setReadOnly(readOnly);
+
+    m_bedrockUntWtSpinBox->setReadOnly(readOnly);
+    m_bedrockDampingSpinBox->setReadOnly(readOnly);
+    m_varyBedrockDampingCheckBox->setDisabled(readOnly);
+
+    m_nprModelComboBox->setDisabled(readOnly);
+    m_modulusStdevWidget->setReadOnly(readOnly);
+    m_dampingStdevWidget->setReadOnly(readOnly);
+    m_correlSpinBox->setReadOnly(readOnly);
+
+    m_stressSpinBox->setReadOnly(readOnly);
+    m_piSpinBox->setReadOnly(readOnly);
+    m_ocrSpinBox->setReadOnly(readOnly);
+    m_freqSpinBox->setReadOnly(readOnly);
+    m_nCyclesSpinBox->setReadOnly(readOnly);
+}
+
+QGroupBox* SoilTypePage::createLayersGroupBox()
+{
+    m_soilTypeTableBox = new TableGroupBox(tr("Soil Types"), this);
+    m_modulusDelegate = new NonlinearPropertyDelegate;
+    m_dampingDelegate = new NonlinearPropertyDelegate;
+
+    m_soilTypeTableBox->setItemDelegateForColumn(3, m_modulusDelegate);
+    m_soilTypeTableBox->setItemDelegateForColumn(4, m_dampingDelegate);
+
+    return m_soilTypeTableBox;
+}
+
+QGroupBox* SoilTypePage::createBedrockGroupBox()
+{  
     QHBoxLayout * layout = new QHBoxLayout;
 
     // Unit weight
-	m_bedrockUntWtSpinBox = new QDoubleSpinBox;
+    m_bedrockUntWtSpinBox = new QDoubleSpinBox;
     m_bedrockUntWtSpinBox->setRange(10,200);
     m_bedrockUntWtSpinBox->setDecimals(2);
-
-    connect(m_bedrockUntWtSpinBox, SIGNAL(valueChanged(double)), 
-            m_model->siteProfile()->bedrock(), SLOT(setUntWt(double)));
 
     layout->addWidget(new QLabel(tr("Unit weight:")));
     layout->addWidget(m_bedrockUntWtSpinBox);
@@ -112,126 +196,76 @@ void SoilTypePage::createBedrockGroupBox()
     m_bedrockDampingSpinBox->setDecimals(2);
     m_bedrockDampingSpinBox->setRange(0.1,5);
     m_bedrockDampingSpinBox->setSingleStep(0.1);
-    connect(m_bedrockDampingSpinBox, SIGNAL(valueChanged(double)), 
-            m_model->siteProfile()->bedrock(), SLOT(setAvgDamping(double)));
     
     layout->addWidget(new QLabel(tr("Damping:")));
     layout->addWidget(m_bedrockDampingSpinBox);
     
     // Damping variation in the bedrock
     m_varyBedrockDampingCheckBox = new QCheckBox(tr("Vary the damping of the bedrock"));
-    connect(m_varyBedrockDampingCheckBox, SIGNAL(toggled(bool)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setBedrockIsEnabled(bool)));
-
-	layout->addWidget( m_varyBedrockDampingCheckBox);
+    layout->addWidget(m_varyBedrockDampingCheckBox);
 
     // Add a stretch to the end
     layout->addStretch(1);
 
     // Create the group box
-    m_bedrockGroupBox = new QGroupBox(tr("Bedrock Layer"));
-    m_bedrockGroupBox->setLayout(layout);
+    QGroupBox* groupBox = new QGroupBox(tr("Bedrock Layer"));
+    groupBox->setLayout(layout);
+
+    return groupBox;
 }
 
-void SoilTypePage::createVariationGroupBox()
+QGroupBox* SoilTypePage::createVariationGroupBox()
 {
     QGridLayout * layout = new QGridLayout;
-    layout->setColumnStretch( 1, 1);
+    layout->setColumnStretch(3, 1);
 
     // Model for the standard deviation
-    m_dynPropModelComboBox = new QComboBox;
-    m_dynPropModelComboBox->addItems(NonlinearPropertyVariation::modelList());
-    connect(m_dynPropModelComboBox, SIGNAL(currentIndexChanged(int)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setModel(int)));
-    connect(m_dynPropModelComboBox, SIGNAL(currentIndexChanged(int)), SLOT(loadStdevModels()));
-    
-    
+    m_nprModelComboBox = new QComboBox;
+    m_nprModelComboBox->addItems(NonlinearPropertyRandomizer::modelList());
+
     // Link for help on standard deviation models
-    QLabel * stdevLabel = new QLabel(tr(
-                "Standard deviation model (<a href=\"qrc:/docs/soil-type.html#stdev-models\">more information</a>):"));
-    connect( stdevLabel, SIGNAL(linkActivated(QString)), this, SIGNAL(linkActivated(QString)));
+    QLabel* label = new QLabel(tr(
+            "Standard deviation model (<a href=\"qrc:/docs/soil-type.html#stdev-models\">more information</a>):"));
+    connect(label, SIGNAL(linkActivated(QString)), 
+            this, SIGNAL(linkActivated(QString)));
 
+    layout->addWidget(label, 0, 0, 1, 2);
+    layout->addWidget(m_nprModelComboBox, 0, 2);
 
-    layout->addWidget( stdevLabel, 0, 0, 1, 2);
-    layout->addWidget( m_dynPropModelComboBox, 0, 3);
+    // Modulus reduction parameters
+    m_modulusStdevWidget = new NonlinearPropertyStandardDeviationWidget(
+            tr("Normalized shear modulus (G/G_max):"), layout, this);
+    m_modulusStdevWidget->setDecimals(3);
+    m_modulusStdevWidget->setMaxRange(1, 2);
+    m_modulusStdevWidget->setMinRange(0.001, 0.40);
 
-    layout->addWidget( new QLabel(tr("Normalized shear modulus (G/G_max):")), 1, 0, 1, 2);
-
-    // Shear modulus standard deviation, maximum, and minimum
-    m_shearModStdevLineEdit = new QLineEdit;
-    connect(m_shearModStdevLineEdit, SIGNAL(textChanged(QString)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setShearModStdev(QString)));
+    m_dampingStdevWidget = new NonlinearPropertyStandardDeviationWidget(
+            tr("Damping:"), layout, this);
+    m_dampingStdevWidget->setSuffix(" %");
+    m_dampingStdevWidget->setMaxRange(10., 50.);
+    m_dampingStdevWidget->setMinRange(0.01, 2);
     
-    m_shearModMinSpinBox = new QDoubleSpinBox;
-    m_shearModMinSpinBox->setRange( 0.05, 0.40 );
-    m_shearModMinSpinBox->setDecimals(2);
-    m_shearModMinSpinBox->setSingleStep(0.05);
-    connect(m_shearModMinSpinBox, SIGNAL(valueChanged(double)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setShearModMin(double)));
-    
-    m_shearModMaxSpinBox = new QDoubleSpinBox;
-    m_shearModMaxSpinBox->setRange( 1.00, 2.00 );
-    m_shearModMaxSpinBox->setDecimals(2);
-    m_shearModMaxSpinBox->setSingleStep(0.05);
-    connect(m_shearModMaxSpinBox, SIGNAL(valueChanged(double)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setShearModMax(double)));
-
-    layout->addWidget( new QLabel(tr("Stdev:")), 2, 0);
-    layout->addWidget( m_shearModStdevLineEdit, 2, 1);
-    layout->addWidget( new QLabel(tr("Min:")), 2, 2);
-    layout->addWidget( m_shearModMinSpinBox, 2, 3);
-    layout->addWidget( new QLabel(tr("Max:")), 2, 4);
-    layout->addWidget( m_shearModMaxSpinBox, 2, 5);
-    
-    layout->addWidget( new QLabel(tr("Damping:")), 3, 0, 1, 2);
-    // Damping standard deviation and minimum
-    m_dampingStdevLineEdit = new QLineEdit;
-    connect(m_dampingStdevLineEdit, SIGNAL(textChanged(QString)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setDampingStdev(QString)));
-
-    m_dampingMinSpinBox = new QDoubleSpinBox;
-    m_dampingMinSpinBox->setSuffix(" %");
-    m_dampingMinSpinBox->setRange( 0.01, 1 );
-    m_dampingMinSpinBox->setDecimals(2);
-    m_dampingMinSpinBox->setSingleStep(0.01);
-    connect(m_dampingMinSpinBox, SIGNAL(valueChanged(double)),
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setDampingMin(double)));
-    
-    m_dampingMaxSpinBox = new QDoubleSpinBox;
-    m_dampingMaxSpinBox->setSuffix(" %");
-    m_dampingMaxSpinBox->setRange( 10, 40 );
-    m_dampingMaxSpinBox->setDecimals(1);
-    m_dampingMaxSpinBox->setSingleStep(1);
-    connect(m_dampingMaxSpinBox, SIGNAL(valueChanged(double)),
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setDampingMax(double)));
-
-    layout->addWidget( new QLabel(tr("Stdev:")), 4, 0);
-    layout->addWidget( m_dampingStdevLineEdit, 4, 1);
-    layout->addWidget( new QLabel(tr("Min:")), 4, 2);
-    layout->addWidget( m_dampingMinSpinBox, 4, 3);
-    layout->addWidget( new QLabel(tr("Max:")), 4, 4);
-    layout->addWidget( m_dampingMaxSpinBox, 4, 5);
-	
     // Correlation
-	m_correlSpinBox = new QDoubleSpinBox;
-    m_correlSpinBox->setRange( -1, 1 );
+    m_correlSpinBox = new QDoubleSpinBox;
+    m_correlSpinBox->setRange(-1, 1);
     m_correlSpinBox->setDecimals(2);
     m_correlSpinBox->setSingleStep(0.1);
-    connect(m_correlSpinBox, SIGNAL(valueChanged(double)), 
-            m_model->siteProfile()->nonLinearPropertyVariation(), SLOT(setCorrel(double)));
 
-	layout->addWidget( new QLabel(QString(tr("G/G_max, Damping Correlation Coefficent (%1):")).arg(QChar(0x03C1))), 5, 0, 1, 2);
-	layout->addWidget( m_correlSpinBox, 5, 3);
+    const int row = layout->rowCount();
+    layout->addWidget(new QLabel(tr("G/G_max, Damping Correlation Coefficent (%1):").arg(QChar(0x03C1))),
+                      row, 0, 1, 2);
+    layout->addWidget(m_correlSpinBox, row, 2);
     
-	// Group box
-	m_variationGroupBox = new QGroupBox(tr("Nonlinear Curve Variation Parameters"));
-	m_variationGroupBox->setLayout(layout);
-    m_variationGroupBox->setVisible(false);
+    // Group box
+    m_randomizerGroupBox = new QGroupBox(tr("Nonlinear Curve Variation Parameters"));
+    m_randomizerGroupBox->setLayout(layout);
+
+    return m_randomizerGroupBox;
 }
 
-void SoilTypePage::createSoilPropsGroupBox()
+QGroupBox* SoilTypePage::createSoilPropsGroupBox()
 {
-    QGridLayout * layout = new QGridLayout;
+    QFormLayout* layout = new QFormLayout;
     
     // Stress line
     m_stressSpinBox = new QDoubleSpinBox;
@@ -240,17 +274,15 @@ void SoilTypePage::createSoilPropsGroupBox()
     m_stressSpinBox->setSingleStep(1);
     m_stressSpinBox->setSuffix(" atm");
 
-    layout->addWidget(new QLabel(tr("Mean effective stress:")), 0, 0);
-    layout->addWidget(m_stressSpinBox, 0, 2);
+    layout->addRow(tr("Mean effective stress:"), m_stressSpinBox);
 
     // Plasticity line
-    m_piSpinBox = new QDoubleSpinBox; 
+    m_piSpinBox = new QDoubleSpinBox;
     m_piSpinBox->setDecimals(0);
     m_piSpinBox->setRange( 0, 200);
     m_piSpinBox->setSingleStep(1);
     
-    layout->addWidget(new QLabel(tr("Plasticity Index:")), 1, 0);
-    layout->addWidget(m_piSpinBox, 1, 2);
+    layout->addRow(tr("Plasticity Index:"), m_piSpinBox);
 
     // OCR line
     m_ocrSpinBox = new QDoubleSpinBox;
@@ -258,8 +290,7 @@ void SoilTypePage::createSoilPropsGroupBox()
     m_ocrSpinBox->setRange( 1, 20);
     m_ocrSpinBox->setSingleStep(1);
 
-    layout->addWidget(new QLabel(tr("Over-consolidation ratio:")), 2, 0);
-    layout->addWidget(m_ocrSpinBox, 2, 2);
+    layout->addRow(tr("Over-consolidation ratio:"), m_ocrSpinBox);
 
     // Frequency line
     m_freqSpinBox = new QDoubleSpinBox;
@@ -268,219 +299,133 @@ void SoilTypePage::createSoilPropsGroupBox()
     m_freqSpinBox->setSingleStep(1);
     m_freqSpinBox->setSuffix(" Hz");
 
-    layout->addWidget(new QLabel(tr("Excitation frequency:")), 3, 0);
-    layout->addWidget(m_freqSpinBox, 3, 2);
+    layout->addRow(tr("Excitation frequency:"), m_freqSpinBox);
     
     // Cycles line
     m_nCyclesSpinBox = new QSpinBox;
     m_nCyclesSpinBox->setRange( 1, 100);
 
-    layout->addWidget(new QLabel(tr("Number of cycles:")), 4, 0);
-    layout->addWidget(m_nCyclesSpinBox, 4, 2);
-    layout->setColumnStretch( 0, 1);
-
+    layout->addRow(tr("Number of cycles:"), m_nCyclesSpinBox);
 
     // Create the group box
     m_soilPropsGroupBox = new QGroupBox(tr("Darendeli and Stokoe Model Parameters"));
     m_soilPropsGroupBox->setLayout(layout);
-    m_soilPropsGroupBox->setEnabled(false);
+
+
+    connect(this, SIGNAL(soilPropertiesNeeded(bool)),
+            m_soilPropsGroupBox, SLOT(setEnabled(bool)));
+
+    return m_soilPropsGroupBox;
 }
 
-void SoilTypePage::createNlPropTableBox()
+QGroupBox* SoilTypePage::createNlPropTableBox()
 {
-    m_nlPropTableBox = new TableGroupBox(
-            new NonlinearPropertyTableModel( 0 ), tr("Nonlinear Property"));
-    connect( m_nlPropTableBox, SIGNAL(dataChanged()), m_model, SLOT(setModified()));
-    m_nlPropTableBox->setEnabled(false);
-}
+    m_nlPropTableBox = new TableGroupBox(tr("Nonlinear Property"));
 
-void SoilTypePage::setIsVaried(bool isVaried)
-{
-    if (isVaried) {
-        m_layersTableBox->table()->showColumn(6);
-    } else {
-        m_layersTableBox->table()->hideColumn(6);
-    }
-    
-    m_variationGroupBox->setVisible(isVaried);
-    m_varyBedrockDampingCheckBox->setVisible(isVaried);
-}
 
-void SoilTypePage::setReadOnly(bool b)
-{
-    m_layersTableBox->setReadOnly(b);
-
-    m_bedrockUntWtSpinBox->setReadOnly(b);
-    m_bedrockDampingSpinBox->setReadOnly(b);
-    m_varyBedrockDampingCheckBox->setDisabled(b);
-
-    m_dynPropModelComboBox->setDisabled(b);
-
-    m_shearModStdevLineEdit->setReadOnly(b);
-    m_shearModMaxSpinBox->setReadOnly(b);
-    m_shearModMinSpinBox->setReadOnly(b);
-
-    m_dampingStdevLineEdit->setReadOnly(b);
-    m_dampingMinSpinBox->setReadOnly(b);
-    m_dampingMaxSpinBox->setReadOnly(b);
-
-    m_correlSpinBox->setReadOnly(b);
-
-    m_stressSpinBox->setReadOnly(b);
-    m_piSpinBox->setReadOnly(b);
-    m_ocrSpinBox->setReadOnly(b);
-    m_freqSpinBox->setReadOnly(b);
-    m_nCyclesSpinBox->setReadOnly(b);
-
-    m_nlPropTableBox->setReadOnly(b);
+    return m_nlPropTableBox;
 }
 
 void SoilTypePage::updateUnits()
 {
-    m_bedrockUntWtSpinBox->setSuffix( " " + Units::instance()->untWt() );
+    m_bedrockUntWtSpinBox->setSuffix(" " + Units::instance()->untWt());
+
+    // Need to invalidate the size cache since setSuffix doesn't
+    m_bedrockUntWtSpinBox->setRange(
+            m_bedrockUntWtSpinBox->minimum(),
+            m_bedrockUntWtSpinBox->maximum());
 }
 
-void SoilTypePage::unselectSoil()
+void SoilTypePage::selectIndex(const QModelIndex &current, const QModelIndex &previous)
 {
-    m_nlPropTableBox->setEnabled(false);
-    m_soilPropsGroupBox->setEnabled(false);
-
-    m_selectedSoilType = 0;
-    m_selectedNonlinearProperty = 0;
-}
-
-void SoilTypePage::setSelectedSoil(const QModelIndex & current, const QModelIndex & /*previous*/)
-{
-    // if ( current.row() >= 0 ) {
-    if ( current.isValid() ) {
-        // Save the index 
-        m_selectedIndex = current;
-        // The selected soil type
-        m_selectedSoilType = m_model->siteProfile()->soilTypes().at(m_selectedIndex.row());
-    } else {
-        m_selectedSoilType = 0;
-    }
-
-    refreshSoilDetails();
-}
-
-void SoilTypePage::refreshSoilDetails()
-{
-    // Disable the nonlinear property group box
-    m_nlPropTableBox->setEnabled(false);
-    m_soilPropsGroupBox->setEnabled(false);
-    
-    if ( !m_selectedSoilType ) {
+    if (!m_soilTypeCatalog)
         return;
-    }
-     
-    if ( m_selectedIndex.column() == 3 || m_selectedIndex.column() == 4 ) {
 
-        // Set the model for the dynamic properties
-        if ( m_selectedIndex.column() == 3 )
-            m_selectedNonlinearProperty = m_selectedSoilType->normShearMod();
-        else if ( m_selectedIndex.column() == 4 )
-            m_selectedNonlinearProperty = m_selectedSoilType->damping();
-
-        // If the source is Darendeli and the curves are empty, re-compute the curves
-        if ( m_selectedNonlinearProperty->source() == NonlinearProperty::Computed
-                && m_selectedNonlinearProperty->avg().isEmpty() )
-            m_selectedSoilType->computeDarendeliCurves();
-
-
-        // Update the dynamic property group box
-        static_cast<NonlinearPropertyTableModel*>(m_nlPropTableBox->table()->model())->setNonlinearProperty(m_selectedNonlinearProperty);
-
-        // Enable the nonlinear property group box
-        m_nlPropTableBox->setEnabled(true);
-        
-        if (m_selectedNonlinearProperty->source() == NonlinearProperty::Temporary)
-            m_nlPropTableBox->setReadOnly(false);
-        else
-            m_nlPropTableBox->setReadOnly(true);
+    if (previous.isValid()) {
+        // Stop listening to the previous soil type
+        disconnect(m_soilTypeCatalog->soilType(previous.row()),
+                   SIGNAL(modulusModelChanged(NonlinearProperty*)), 0, 0);
+        disconnect(m_soilTypeCatalog->soilType(previous.row()),
+                   SIGNAL(dampingModelChanged(NonlinearProperty*)), 0, 0);
     }
 
-    // If the Stokoe-Darendeli option is selected for either model enable the
-    // soil properties box.
-    if ( m_selectedSoilType->normShearMod()->source() == NonlinearProperty::Computed 
-            || m_selectedSoilType->damping()->source() == NonlinearProperty::Computed ) 
-    {
-        m_soilPropsGroupBox->setEnabled(true);
-        // Clear the connections
-        disconnect(m_stressSpinBox, 0, 0, 0);
-        disconnect(m_piSpinBox, 0, 0, 0);
-        disconnect(m_ocrSpinBox, 0, 0, 0);
-        disconnect(m_freqSpinBox, 0, 0, 0);
-        disconnect(m_nCyclesSpinBox, 0, 0, 0);
-        // Load the soil properties
-        loadSoilProperties();
-        
-        // Form the connections
-        connect(m_stressSpinBox, SIGNAL(valueChanged(double)),  
-                m_selectedSoilType, SLOT(setMeanStress(double)));
-        connect(m_piSpinBox, SIGNAL(valueChanged(double)),
-                m_selectedSoilType, SLOT(setPI(double)));
-        connect(m_ocrSpinBox, SIGNAL(valueChanged(double)),
-                m_selectedSoilType, SLOT(setOCR(double)));
-        connect(m_freqSpinBox, SIGNAL(valueChanged(double)),
-                m_selectedSoilType, SLOT(setFreq(double)));
-        connect(m_nCyclesSpinBox, SIGNAL(valueChanged(int)),
-                m_selectedSoilType, SLOT(setNCycles(int)));
-    } 
-    else 
-    {
-        // Clear the line edits
-	    m_stressSpinBox->clear();
-	    m_piSpinBox->clear();
-	    m_ocrSpinBox->clear();
-	    m_freqSpinBox->clear();
-	    m_nCyclesSpinBox->clear();
+    if (current.isValid()) {
+        SoilType* const st = m_soilTypeCatalog->soilType(current.row());
+        NonlinearProperty* np = 0;
+
+        if (current.column() == SoilTypeCatalog::ModulusModelColumn) {
+            np = st->modulusModel();
+
+            connect(st, SIGNAL(modulusModelChanged(NonlinearProperty*)),
+                    this, SLOT(setCurrentNonlinearProperty(NonlinearProperty*)));
+        } else if (current.column() == SoilTypeCatalog::DampingModelColumn) {
+            np = st->dampingModel();
+
+            connect(st, SIGNAL(dampingModelChanged(NonlinearProperty*)),
+                    this, SLOT(setCurrentNonlinearProperty(NonlinearProperty*)));
+        }
+
+        m_nlPropTableBox->setEnabled(np);
+        if (np)
+            setCurrentNonlinearProperty(np);        
+
+        m_soilPropsGroupBox->setEnabled(st->requiresSoilProperties());
+
+        if (st->requiresSoilProperties()) {
+            // Clear the connections
+            disconnect(m_stressSpinBox, 0, 0, 0);
+
+            m_stressSpinBox->setValue(st->meanStress());
+            connect(m_stressSpinBox, SIGNAL(valueChanged(double)),
+                    st, SLOT(setMeanStress(double)));
+
+            disconnect(m_piSpinBox, 0, 0, 0);
+            m_piSpinBox->setValue(st->pi());
+            connect(m_piSpinBox, SIGNAL(valueChanged(double)),
+                    st, SLOT(setPi(double)));
+
+            disconnect(m_ocrSpinBox, 0, 0, 0);
+            m_ocrSpinBox->setValue(st->ocr());
+            connect(m_ocrSpinBox, SIGNAL(valueChanged(double)),
+                    st, SLOT(setOcr(double)));
+
+            disconnect(m_freqSpinBox, 0, 0, 0);
+            m_freqSpinBox->setValue(st->freq());
+            connect(m_freqSpinBox, SIGNAL(valueChanged(double)),
+                    st, SLOT(setFreq(double)));
+
+            disconnect(m_nCyclesSpinBox, 0, 0, 0);
+            m_nCyclesSpinBox->setValue(st->nCycles());
+            connect(m_nCyclesSpinBox, SIGNAL(valueChanged(int)),
+                    st, SLOT(setNCycles(int)));
+        }
     }
 }
 
-void SoilTypePage::load()
+void SoilTypePage::setCurrentNonlinearProperty(NonlinearProperty* np)
 {
-    // Bedrock parameters
-    m_bedrockUntWtSpinBox->setValue(m_model->siteProfile()->bedrock()->untWt());
-    m_bedrockDampingSpinBox->setValue(m_model->siteProfile()->bedrock()->avgDamping());
-    m_varyBedrockDampingCheckBox->setChecked(
-            m_model->siteProfile()->nonLinearPropertyVariation()->bedrockIsEnabled());
-
-    // Variation parameters
-    const NonlinearPropertyVariation * npv = m_model->siteProfile()->nonLinearPropertyVariation();
-    m_dynPropModelComboBox->setCurrentIndex(npv->model());
-    m_shearModMinSpinBox->setValue(npv->shearModMin());
-    m_shearModMaxSpinBox->setValue(npv->shearModMax());
-    m_dampingMinSpinBox->setValue(npv->dampingMin());
-    m_dampingMaxSpinBox->setValue(npv->dampingMax());
-    m_correlSpinBox->setValue(npv->correl());
-    
-    loadStdevModels();
+    m_nlPropTableBox->setModel(np);
+    m_nlPropTableBox->setReadOnly(
+            m_readOnly
+            || (!m_readOnly && !qobject_cast<CustomNonlinearProperty* const>(np)));
 }
 
-void SoilTypePage::loadStdevModels()
+void SoilTypePage::updateDampingRequired(bool b)
 {
-    m_shearModStdevLineEdit->setText(m_model->siteProfile()->nonLinearPropertyVariation()->shearModStdev());
-    m_dampingStdevLineEdit->setText(m_model->siteProfile()->nonLinearPropertyVariation()->dampingStdev());
+    m_soilTypeTableBox->setColumnHidden(
+            SoilTypeCatalog::DampingColumn, !b);
+}
 
-    // Disable the line edits for Darendeli and Stokoe
-    if ( m_dynPropModelComboBox->currentIndex() == NonlinearPropertyVariation::Darendeli ) {
-        m_shearModStdevLineEdit->setEnabled(false);
-        m_dampingStdevLineEdit->setEnabled(false);
-    } else {
-        m_shearModStdevLineEdit->setEnabled(true);
-        m_dampingStdevLineEdit->setEnabled(true);
-    }
-} 
-
-void SoilTypePage::loadSoilProperties()
+void SoilTypePage::updateNonlinearPropertiesRequired(bool b)
 {
-    if (!m_selectedSoilType)
-        return;
-    // Set the line edits
-    m_stressSpinBox->setValue(m_selectedSoilType->meanStress());
-    m_piSpinBox->setValue(m_selectedSoilType->PI());
-    m_ocrSpinBox->setValue(m_selectedSoilType->OCR());
-    m_freqSpinBox->setValue(m_selectedSoilType->freq());
-    m_nCyclesSpinBox->setValue(m_selectedSoilType->nCycles());
+    m_soilTypeTableBox->setColumnHidden(
+            SoilTypeCatalog::ModulusModelColumn, !b);
+    m_soilTypeTableBox->setColumnHidden(
+            SoilTypeCatalog::DampingModelColumn, !b);
+}
+
+void SoilTypePage::updateVariedColumn(bool show)
+{
+    m_soilTypeTableBox->setColumnHidden(
+            SoilTypeCatalog::IsVariedColumn, !show);
 }

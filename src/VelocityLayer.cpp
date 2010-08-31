@@ -21,54 +21,22 @@
 
 #include "VelocityLayer.h"
 
+#include <QDebug>
+
 #include <cmath> 
+#include <cfloat>
 
 #include <gsl/gsl_cdf.h>
 
-#include <QMap>
-#include <QString>
-#include <QVariant>
-#include <QDebug>
-
-VelocityLayer::VelocityLayer( QObject * parent )
-    : QObject(parent)
+VelocityLayer::VelocityLayer(QObject* parent)
+    : AbstractDistribution(parent)
 {
-    m_depth = 0;
     m_isVaried = true;
-    m_avg = 0;
-	m_min = 0;
-    m_hasMin = false;
-	m_max = 0;
-    m_hasMax = false;
-    m_stdev = 0;
-	m_distribution = LogNormal;
-}
-
-VelocityLayer::VelocityLayer( const VelocityLayer & other)
-    :QObject(other.parent())
-{
-    m_depth = other.depth();
-    m_isVaried = other.isVaried();
-    setAvg(other.avg());
-	m_min = other.min();
-    m_hasMin = other.hasMin();
-	m_max = other.max();
-    m_hasMax = other.hasMax();
-    m_stdev = other.stdev();
-	m_distribution = other.distribution();
+    m_depth = 0;
 }
 
 VelocityLayer::~VelocityLayer()
 {
-}
-
-QStringList VelocityLayer::distributionList()
-{
-    QStringList list;
-
-    list << "Normal" << "Log Normal" << "Uniform";
-
-    return list;
 }
 
 double VelocityLayer::depth() const
@@ -82,114 +50,22 @@ void VelocityLayer::setDepth(double depth)
 
 double VelocityLayer::shearVel() const
 {
-	return m_shearVel;
-}
-
-void VelocityLayer::setShearVel(double shearVel)
-{
-    // If the variation of the layer is disabled do not set the randomized
-    // shear-wave velocity of the layer
-	if (!m_isVaried)
-        return;
-
-    m_shearVel = shearVel;
-    // Check that the shear-wave velocity is within the specified bounds
-    if (m_hasMin && m_shearVel < m_min)
-        m_shearVel = m_min;
-
-    if ( m_hasMax && m_shearVel > m_max)
-        m_shearVel = m_max;
+    return m_varied;
 }
 
 double VelocityLayer::shearMod() const
 {
-    return density() * m_shearVel * m_shearVel;
+    return density() * shearVel() * shearVel();
 }
 
-double VelocityLayer::avg() const
+bool VelocityLayer::isVaried() const
 {
-	return m_avg;
-}
-
-void VelocityLayer::setAvg(double avg)
-{
-	m_avg = avg;
-    m_shearVel = avg;
-}
-
-VelocityLayer::Distribution VelocityLayer::distribution() const
-{
-	return m_distribution;
-}
-		
-void VelocityLayer::setDistribution(VelocityLayer::Distribution dist)
-{
-    m_distribution = dist;
-}
-
-double VelocityLayer::stdev() const
-{
-	return m_stdev;
-}
-
-void VelocityLayer::setStdev(double stdev)
-{
-	m_stdev = stdev;
-}
-
-bool VelocityLayer::hasMax() const
-{
-    return m_hasMax;
-}
-
-void VelocityLayer::setHasMax(bool hasMax) 
-{
-    m_hasMax = hasMax;
-}
-
-double VelocityLayer::max() const
-{
-	return m_max;
-}
-
-void VelocityLayer::setMax(double max)
-{
-	m_max = max;
-}
-
-bool VelocityLayer::hasMin() const
-{
-    return m_hasMin;
-}
-
-void VelocityLayer::setHasMin(bool hasMin) 
-{
-    m_hasMin = hasMin;
-}
-
-double VelocityLayer::min() const
-{
-	return m_min;
-}
-
-void VelocityLayer::setMin(double min)
-{
-	m_min = min;
-}
-
-double VelocityLayer::isVaried() const
-{
-	return m_isVaried;
+    return m_isVaried;
 }
 
 void VelocityLayer::setIsVaried(bool isVaried)
 {
-	m_isVaried = isVaried;
-}
-
-void VelocityLayer::reset()
-{
-    m_shearVel = m_avg;
+    m_isVaried = isVaried;
 }
 
 QString VelocityLayer::toString() const
@@ -197,21 +73,45 @@ QString VelocityLayer::toString() const
     return QString("%1").arg(m_avg);
 }
 
-void VelocityLayer::vary( double randVar  )
+void VelocityLayer::vary(double randVar)
 {
-	if (m_isVaried) {
-		// Randomize the velocity
-        switch (m_distribution)
-        {
-            case Normal:
-                return setShearVel( m_avg + gsl_cdf_gaussian_Pinv( randVar, m_stdev));
-                break;
-            case LogNormal:
-                return setShearVel( m_avg * exp(gsl_cdf_gaussian_Pinv( randVar, m_stdev)));
-            case Uniform:
-                return setShearVel( gsl_cdf_flat_Pinv( randVar, m_min, m_max));
-        }	
-	} else
-		// Don't randomize the velocity
-        setShearVel(m_avg);
+    if (m_isVaried) {
+        // Randomize the velocity
+        switch (m_type) {
+        case Normal:
+            setVaried(m_avg + gsl_cdf_gaussian_Pinv(randVar, m_stdev));
+            break;
+        case LogNormal:
+            setVaried(m_avg * exp(gsl_cdf_gaussian_Pinv(randVar, m_stdev)));
+            break;
+        case Uniform:
+            m_varied = gsl_cdf_flat_Pinv(randVar, m_min, m_max);
+            break;
+        }
+    } else {
+        m_varied = m_avg;
+    }
+}
+
+QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl)
+{
+    out << (quint8)1;
+
+    out << qobject_cast<const AbstractDistribution*>(vl);
+
+    out << vl->m_isVaried << vl->m_depth;
+
+    return out;
+}
+
+QDataStream & operator>> (QDataStream & in, VelocityLayer* vl)
+{
+    quint8 ver;
+    in >> ver;
+
+    in >> qobject_cast<AbstractDistribution*>(vl);
+
+    in >> vl->m_isVaried >> vl->m_depth;
+
+    return in;
 }

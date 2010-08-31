@@ -20,24 +20,24 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "OutputExportDialog.h"
-#include "OutputCsvSelectionTableModel.h"
+
+#include "AbstractOutput.h"
+#include "OutputCatalog.h"
 
 #include <QDebug>
-#if QT_VERSION >= 0x040400
-    #include <QDesktopServices>
-#endif
+
+#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QFileDialog>
+#include <QHeaderView>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
-#include <QTableView>
+#include <QTableWidgetItem>
 
-
-
-OutputExportDialog::OutputExportDialog( SiteResponseOutput * model, QWidget * parent, Qt::WindowFlags f)
+OutputExportDialog::OutputExportDialog(OutputCatalog * model, QWidget * parent, Qt::WindowFlags f)
     : QDialog(parent, f), m_model(model)
 {
     createDialog();
@@ -49,7 +49,7 @@ void OutputExportDialog::selectDirectory()
     // Prompt for a fileName
     QString dirName = QFileDialog::getExistingDirectory(
             this,
-            tr("Select directory... - Strata"),
+            tr("Select directory..."),
             settings.value("exportDirectory",
                            QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString());
 
@@ -78,8 +78,13 @@ void OutputExportDialog::exportData()
             destDir.mkpath(".");
     }
 
+    // Save the data to the model
+    for (int i = 0; i < m_model->outputs().size(); ++i)
+        m_model->outputs().at(i)->setExportEnabled(
+                m_tableWidget->item(i, 0)->checkState());
+
     // Output to CSV
-    m_model->exportData( destDir.path(), ",", m_prefixLineEdit->text() );
+    m_model->exportData(destDir.path(), ",", m_prefixLineEdit->text() );
 
     // Save the path
     QSettings settings;
@@ -102,11 +107,11 @@ void OutputExportDialog::createDialog()
 
     m_destDirLineEdit = new QLineEdit;
 
-#if QT_VERSION >= 0x040400
-    m_destDirLineEdit->setText( settings.value("outputExportDialog/path", QDesktopServices::storageLocation( QDesktopServices::DocumentsLocation )).toString());
-#else 
-    m_destDirLineEdit->setText( settings.value("outputExportDialog/path", QDir::homePath()).toString() );
-#endif
+    m_destDirLineEdit->setText(
+            settings.value(
+                    "outputExportDialog/path",
+                    QDesktopServices::storageLocation( QDesktopServices::DocumentsLocation )
+                    ).toString());
 
     layout->addWidget( selectDirPushButton, 0, 0);
     layout->addWidget( m_destDirLineEdit, 0, 1 );
@@ -117,19 +122,34 @@ void OutputExportDialog::createDialog()
     layout->addWidget( m_prefixLineEdit, 1, 1 );
 
     // View of possible output
-    QTableView * tableView = new QTableView;
-    tableView->setModel( new OutputCsvSelectionTableModel( m_model->output()));
-    tableView->resizeColumnsToContents();
-    tableView->resizeRowsToContents();
+    m_tableWidget = new QTableWidget(m_model->outputs().size(), 1, this);
+    m_tableWidget->setHorizontalHeaderLabels(QStringList() << tr("Output Name"));
 
-    layout->addWidget( tableView, 2, 0, 1, 2);
+    for (int i = 0; i < m_model->outputs().size(); ++i) {
+        AbstractOutput* ao = m_model->outputs().at(i);
+
+        QTableWidgetItem* item = new QTableWidgetItem(ao->fullName());
+
+        item->setCheckState(ao->exportEnabled() ?
+                            Qt::Checked : Qt::Unchecked);
+        item->setFlags(Qt::ItemIsSelectable
+                       | Qt::ItemIsUserCheckable
+                       | Qt::ItemIsEnabled);
+
+        m_tableWidget->setItem(i, 0, item);
+    }
+
+    m_tableWidget->resizeColumnsToContents();
+    m_tableWidget->resizeRowsToContents();
+
+    layout->addWidget(m_tableWidget, 2, 0, 1, 2);
 
     // Button box
     QDialogButtonBox * buttonBox = new QDialogButtonBox( 
             QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
-    connect( buttonBox, SIGNAL(accepted()), this, SLOT(exportData()));
-    connect( buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(exportData()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     layout->addWidget( buttonBox, 3, 0, 1, 2);
 

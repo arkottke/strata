@@ -61,7 +61,7 @@ void DepthComboBox::setDepth(double location)
     else {
         // Depth specified
         setCurrentIndex(0);
-        setItemText( 0, QString::number(location));
+        setItemText(0, QString::number(location));
     }
 }
 

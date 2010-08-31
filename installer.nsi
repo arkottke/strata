@@ -14,7 +14,7 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\Qt\2010.01\qt"
+!Define QT_PATH "C:\devel\Qt\2010.04\qt"
 
 ;--------------------------------
 ;Variables

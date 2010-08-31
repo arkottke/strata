@@ -24,67 +24,80 @@
 
 #include "MyAbstractTableModel.h"
 
-#include <QVector>
 #include <QMap>
 #include <QString>
 #include <QVariant>
+#include <QVector>
 
-class ResponseSpectrum : public MyAbstractTableModel
+#include <qwt_data.h>
+
+class ResponseSpectrum : public MyAbstractTableModel, public QwtData
 {
     Q_OBJECT
 
-    public:
-        ResponseSpectrum(bool readOnly = false, QObject * parent = 0);
-        
-        //! Reset the object to the default values
-        void reset();
+    friend QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs);
+    friend QDataStream & operator>> (QDataStream & in, ResponseSpectrum* rs);
 
-        bool modified() const;
+public:
+    ResponseSpectrum(QObject * parent = 0);
 
-        double damping() const;
+    bool modified() const;
 
-        const QVector<double> & period() const;
-        void setPeriod(const QVector<double> & period);
+    double damping() const;
 
-        const QVector<double> & sa() const;
-        void setSa(const QVector<double> & sa);
-        
-        //! Convert the ResponseSpectrum to a QMap for saving
-        QMap<QString, QVariant> toMap() const;
-        
-        //! Load the ResponseSpectrum from a QMap
-        void fromMap( const QMap<QString, QVariant> & map);
+    const QVector<double> & period() const;
+    void setPeriod(const QVector<double> & period);
 
-        int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
-        int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    const QVector<double> & sa() const;
+    void setSa(const QVector<double> & sa);
 
-        QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
-        bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
+    //! Scale the response spectrum by a factor
+    void scaleBy(double scale);
 
-        QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
-        Qt::ItemFlags flags ( const QModelIndex &index ) const;
+    void fromMap( const QMap<QString, QVariant> & map);
 
-        bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-        bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
+    int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
+    int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
 
-    signals:
-        void wasModified();
+    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+    bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
 
-    public slots:
-        void setModified(bool modified = true);
-        void setDamping(double damping);
+    QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    Qt::ItemFlags flags ( const QModelIndex &index ) const;
 
-    private:
-        //! If the data has been modified
-        bool m_modified;
+    bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
+    bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
 
-        //! Damping in percent
-        double m_damping;
+    //!@{ Methods for plotting working with the QwtData interface
+    virtual QwtData* copy() const;
+    virtual size_t size() const;
+    virtual double x(size_t i) const;
+    virtual double y(size_t i) const;
+    //!@}
 
-        //! Period values in seconds
-        QVector<double> m_period;
+signals:
+    void wasModified();
 
-        //! Spectral acceleration in gravity
-        QVector<double> m_sa;
+public slots:
+    void setModified(bool modified = true);
+    void setDamping(double damping);
+
+private:
+    enum Columns {
+        PeriodColumn,
+        SpecAccelColumn
+    };
+
+    //! If the data has been modified -- FIXME still needed?
+    bool m_modified;
+
+    //! Damping in percent
+    double m_damping;
+
+    //! Period values in seconds
+    QVector<double> m_period;
+
+    //! Spectral acceleration in gravity
+    QVector<double> m_sa;
 };
 #endif

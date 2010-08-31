@@ -20,43 +20,45 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "NonlinearProperty.h"
-#include "Serializer.h"
-#include <QObject>
+
+#include "Dimension.h"
+#include "SoilType.h"
+
+#include <QBrush>
+#include <QColor>
 #include <QDebug>
+
 #include <cmath>
 
-NonlinearProperty::NonlinearProperty(QString name, Type type, Source source, QObject * parent)
-    : QObject(parent), m_name(name), m_type(type), m_source(source)
+NonlinearProperty::NonlinearProperty(QObject *parent)
+    : QAbstractTableModel(parent)
 {
+    m_interp = 0;
+    m_acc = gsl_interp_accel_alloc();
 }
 
-NonlinearProperty::NonlinearProperty( const QMap<QString, QVariant> & map )
+NonlinearProperty::NonlinearProperty(
+        const QString &name, Type type, const QVector<double> &strain,
+        const QVector<double> &property, QObject *parent)
+            : QAbstractTableModel(parent), m_name(name), m_type(type), m_strain(strain),
+                                         m_average(property), m_varied(property)
 {
-    fromMap(map);
+    m_interp = 0;
+    m_acc = gsl_interp_accel_alloc();
+    initialize();
 }
 
 NonlinearProperty::~NonlinearProperty()
 {
+    gsl_interp_accel_free(m_acc);
+
+    if (m_interp)
+        gsl_interp_free(m_interp);
 }
-        
+
 NonlinearProperty::Type NonlinearProperty::type() const
 {
     return m_type;
-}
-
-void NonlinearProperty::setType(NonlinearProperty::Type type)
-{
-    m_type = type;
-}
-
-QString NonlinearProperty::typeLabel() const
-{
-    if (m_type == ModulusReduction)
-        return QObject::tr("G/G_max");
-    else if ( m_type == Damping )
-        return QObject::tr("Damping (%)");
-
-    return QObject::tr("Undefined");
 }
 
 const QString & NonlinearProperty::name() const
@@ -64,137 +66,187 @@ const QString & NonlinearProperty::name() const
     return m_name;
 }
 
-void NonlinearProperty::setName( const QString & name)
+double NonlinearProperty::interp(const double strain) const
 {
-    m_name = name;
+    double d;
+
+    if (strain < m_strain.first()) {
+        d = m_varied.first();
+    } else if (strain > m_strain.last()) {
+        d = m_varied.last();
+    } else if (m_strain.size() == 1) {
+        // Interpolater won't be intialized
+        d = m_varied.first();
+    } else {
+        Q_ASSERT(m_interp);
+        d = gsl_interp_eval(m_interp, m_strain.data(), m_varied.data(), strain, m_acc);
+    }
+
+    return d;
 }
 
-NonlinearProperty::Source NonlinearProperty::source() const
-{
-    return m_source;
+QString NonlinearProperty::toHtml() const
+{  
+    QString html = tr(
+            "<h4>%1</h4>"
+            "<table border = \"0\">"
+            "<tr><th>Type:</th><td>%1</td></tr>"
+            "<tr><th>Name:</th><td>%2</td></tr>"
+            "</table>")
+            .arg(m_type == ModulusReduction ?
+                 tr("Shear Modulus Reduction") : tr("Damping Ratio"))
+            .arg(m_name);
+
+
+    html += "<table border=\"1\"><tr>";
+
+    // Header
+    for (int i = 0; i < columnCount(); ++i)
+        html += "<th>" + headerData(i, Qt::Horizontal).toString() + "</th>";
+
+    html += "</tr>";
+
+    // Data
+    for (int r = 0; r < rowCount(); ++r) {
+        html += "<tr>";
+        for (int c = 0; c < columnCount(); ++c)
+            html += "<td>" + data(index(r, c)).toString() + "</td>";
+
+        html += "</tr>";
+    }
+    html += "</table>";
+
+    return html;
 }
 
-void NonlinearProperty::setSource(NonlinearProperty::Source source)
+int NonlinearProperty::rowCount(const QModelIndex &parent) const
 {
-    m_source = source;
+    Q_UNUSED(parent);
+
+    return m_strain.size();
 }
 
-QList<double> & NonlinearProperty::strain()
+int NonlinearProperty::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+
+    return 2;
+}
+
+QVariant NonlinearProperty::data(const QModelIndex &index, int role) const
+{
+    if (index.parent()!=QModelIndex())
+        return QVariant();
+
+    if (role==Qt::DisplayRole || role==Qt::EditRole) {
+        switch (index.column()) {
+        case StrainColumn:
+            return QString::number(m_strain.at(index.row()), 'e', 2);
+        case PropertyColumn:
+            return QString::number(m_average.at(index.row()), 'f', 3);
+        }
+    }
+
+    return QVariant();
+}
+
+QVariant NonlinearProperty::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    switch (orientation) {
+    case Qt::Horizontal:
+        switch (section) {
+        case StrainColumn:
+            return tr("Strain (%)");
+        case PropertyColumn:
+            switch (m_type) {
+            case ModulusReduction:
+                return tr("G/Gmax");
+            case Damping:
+                return tr("Damping (%)");
+            }
+        }
+    case Qt::Vertical:
+        return section + 1;
+    }
+
+    return QVariant();
+}
+
+
+const QVector<double> & NonlinearProperty::strain() const
 {
     return m_strain;
 }
 
-QList<double> & NonlinearProperty::avg()
+const QVector<double> & NonlinearProperty::average() const
 {
-    return m_avg;
+    return m_average;
 }
 
-QList<double> & NonlinearProperty::prop()
-{
-    return m_prop;
+const QVector<double> & NonlinearProperty::varied() const
+{    
+    return m_varied;
 }
 
-void NonlinearProperty::reset()
+void NonlinearProperty::setVaried(const QVector<double> &varied)
 {
-    m_prop = m_avg;
+    m_varied = varied;
+    gsl_interp_accel_reset(m_acc);
 }
 
-void NonlinearProperty::copyValues( NonlinearProperty * other )
-{
-    m_name = other->name();
-    m_source = other->source();
 
-    if ( other->source() != NonlinearProperty::Temporary ) {
-        m_strain = other->strain();
-        m_avg = other->avg();
+void NonlinearProperty::initialize()
+{
+    if (m_strain.size() > 2) {
+        if (m_interp)
+            gsl_interp_free(m_interp);
+
+        m_interp = gsl_interp_alloc(gsl_interp_linear, m_strain.size());
+        gsl_interp_init(m_interp, m_strain.data(), m_varied.data(), m_strain.size());
+        gsl_interp_accel_reset(m_acc);
     }
 }
 
-double NonlinearProperty::interp(const double strain) const
+NonlinearProperty *NonlinearProperty::duplicate() const
 {
-    // If the strain is smaller than the provided strain, return the lowest value
-    if ( strain < m_strain.first() )
-        return m_prop.first();
-    else if ( strain > m_strain.last() )
-        return m_prop.last();
-    
-	for ( int i = 0; i < m_strain.size() - 1; ++i)
-	{
-		if( m_strain.at(i) <= strain && strain <= m_strain.at(i+1) )
-		{
-			double slope = ( m_prop.at(i+1) - m_prop.at(i) ) / log10( m_strain.at(i+1) / m_strain.at(i) );
-			return m_prop.at(i) + slope * log10( strain / m_strain.at(i) );
-		}
-	}
-
-	// Nonlinear properties can not be negative, so this will cause an error
-	return -1;
+    return new NonlinearProperty(m_name, m_type, m_strain, m_average);
 }
 
-QMap<QString, QVariant> NonlinearProperty::toMap() const
+QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np)
 {
-    QMap<QString, QVariant> map;
+    out << (quint8)1;
 
-    map.insert("type", m_type);
-    map.insert("name", m_name);
-    map.insert("source", m_source);
-    map.insert("strain", Serializer::toVariantList(m_strain));
-    map.insert("avg", Serializer::toVariantList(m_avg));
+    out
+            << np->m_name
+            << (int)np->m_type
+            << np->m_strain
+            << np->m_average;
 
-    return map;
+    return out;
 }
 
-void NonlinearProperty::fromMap(const QMap<QString, QVariant> & map)
+QDataStream & operator>> (QDataStream & in, NonlinearProperty* np)
 {
-    m_type = (Type)map.value("type").toInt();
-    m_name = map.value("name").toString();
-    m_source = (Source)map.value("source").toInt();
-    m_strain = Serializer::fromVariantList( map.value("strain").toList());
-    m_avg = Serializer::fromVariantList( map.value("avg").toList());
-}
+    quint8 ver;
+    in >> ver;
 
-QString NonlinearProperty::toHtml() const
-{
-   QString html;
+    np->beginResetModel();
 
-   QString source;
+    int type;
 
-   switch (m_source)
-   {
-       case Temporary:
-           source = QObject::tr("Temporary");
-       case HardCoded:
-           source = QObject::tr("Hard Coded");
-       case UserDefined:
-           source = QObject::tr("User Defined");
-       case Computed:
-           source = QObject::tr("Computed");
-   }
+    in >> np->m_name
+            >> type
+            >> np->m_strain
+            >> np->m_average;
 
-   html += QString(QObject::tr(
-               "<h4>%1</h4>"
-               "<table border = \"0\">"
-               "<tr><td><strong>Type:</strong></td><td>%1</td></tr>"
-               "<tr><td><strong>Name:</strong></td><td>%2</td></tr>"
-               "<tr><td><strong>Source:</strong></td><td>%3</td></tr>"
-               "</table>"))
-       .arg(typeLabel())
-       .arg(m_name)
-       .arg(source);
+    np->m_type = (NonlinearProperty::Type)type;
+    np->m_varied = np->m_average;
+    np->initialize();
 
-   // Create a table of the strain and properties
+    np->endResetModel();
 
-   html += QString(QObject::tr(
-            "<table border = \"1\">"
-            "<tr><th>Strain (%)</th><th>%1</th></tr>"
-            )).arg(typeLabel());
-
-   for (int i = 0; i < m_strain.size(); ++i)
-       html += QString("<tr><td>%1</td><td>%2</td></tr>")
-           .arg(m_strain.at(i))
-           .arg(m_avg.at(i));
-
-   html += "</table>";
-
-   return html;
+    return in;
 }

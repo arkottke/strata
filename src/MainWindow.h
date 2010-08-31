@@ -22,20 +22,6 @@
 #ifndef MAIN_WINDOW_H_
 #define MAIN_WINDOW_H_
 
-#include "SiteResponseModel.h"
-
-#include "GeneralPage.h"
-#include "SoilTypePage.h"
-#include "SoilProfilePage.h"
-#include "MotionPage.h"
-#include "OutputPage.h"
-#include "ComputePage.h"
-#include "ResultsPage.h"
-
-#include "HelpDialog.h"
-#include "ConfiningStressDialog.h"
-#include "OutputExportDialog.h"
-#include "ConfigurePlotDialog.h"
 
 #include <QMainWindow>
 #include <QCloseEvent>
@@ -49,26 +35,35 @@
 #include <QPrinter>
 #include <QSettings>
 
+class AbstractPage;
+class ConfiningStressDialog;
+class ConfigurePlotDialog;
+class HelpDialog;
+class OutputExportDialog;
+class ResultsPage;
+class SiteResponseModel;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-        public:
+public:
     MainWindow(QMainWindow *parent = 0);
+    ~MainWindow();
 
 protected:
     void closeEvent(QCloseEvent * event);
 
     enum Pages {
         COMPUTE_PAGE = 5,
-        RESULTS_PAGE = 6 };
+        RESULTS_PAGE = 6};
 
 public slots:
 
 protected slots:
     //! Reset the window the default values
-    void reset();
-    void open( const QString & fileName = "" );
+    void newModel();
+    void open(QString fileName = "");
 
     bool save();
     bool saveAs();
@@ -82,21 +77,25 @@ protected slots:
     void showNonlinearDialog();
     void showConfiningStressDialog();
 
+    //! Update the title of the window to reflect the fileName of the document
+    void updateWindowTitle(const QString & fileName);
+
     void help();
     void update();
     void about();
 
-    void setIsWorking(bool isWorking);
-    void setReadOnly(bool readOnly = false);
+    //! Update the tabs to reflect the state of the widget (working and having results)
+    void updateTabs();
+    void setReadOnly(bool readOnly);
 
     void tabChanged(int tab);
 
-        private:
+private:
     //! Create the actions
     void createActions();
 
     //! Create the tab widget and pages
-    void createPage();
+    void createPages();
 
     //! Create the menus
     void createMenus();
@@ -104,17 +103,15 @@ protected slots:
     //! Create the toolbar
     void createToolbar();
 
-    //! Set the current file of the application
-    void setCurrentFile(const QString & fileName);
+    //! Set the model
+    void setModel(SiteResponseModel* model);
+
 
     //! Allow the user to save changes before things happen
     /*!
-         * \return true to continue
-         */
+     * \return true to continue
+     */
     bool okToClose();
-
-    //! Filename of the model
-    QString m_fileName;
 
     //! Help dialog
     HelpDialog * m_helpDialog;
@@ -123,7 +120,7 @@ protected slots:
 
     QAction * m_readOnlyAction;
 
-    QAction * m_resetAction;
+    QAction * m_newAction;
     QAction * m_openAction;
 
     QAction * m_exportAction;
@@ -150,17 +147,9 @@ protected slots:
 
     QSettings * m_settings;
     
-    GeneralPage * m_generalPage;
-    SoilTypePage * m_soilTypePage;
-    SoilProfilePage * m_soilProfilePage;
-    MotionPage * m_motionPage;
-    OutputPage * m_outputPage;
-    ComputePage * m_computePage;
-    ResultsPage * m_resultsPage;
+    ResultsPage* m_resultsPage;
+    QList<AbstractPage*> m_pages;
 
     SiteResponseModel * m_model;
-
-    //! Input values are in a read-only state
-    bool m_readOnly;
 };
 #endif
