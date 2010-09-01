@@ -1,3 +1,0 @@
-#!/bin/sh
-
-/apps/rappture/invoke_app "$@" -t strata
