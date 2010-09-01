@@ -4,6 +4,15 @@ CONFIG += debug_and_release \
 QT += script \
     xml \
     network
+
+# Enable advanced options that should not be included in the version for standard users
+DEFINES += ADVANCED_OPTIONS
+
+# Flag based on if the program is compiled in debug mode
+CONFIG(debug, debug|release) {
+   DEFINES += DEBUG
+}
+
 unix { 
     DEFINES += REVISION=$$system("svnversion . | perl -pne's/(?:\d+:)?(\d+)(?:[MS]+)?$/\1/'")
     LIBS += -lm \
@@ -22,164 +31,279 @@ win32 {
         -L"C:\devel\fftw-3.2.2" \
         -lgsl \
         -lgslcblas \
-        -L"C:\devel\GnuWin32\lib"
+        -L"C:\devel\GnuWin32\bin"
     INCLUDEPATH += . \
         "C:\devel\fftw-3.2.2" \
         "C:\devel\qwt-5.2\src" \
         "C:\devel\GnuWin32\include"
     RC_FILE = strata.rc
-    CONFIG( debug, debug|release ) {
-        LIBS += -lqwtd5 \
-            -L"C:\devel\qwt-5.2\lib"
+    CONFIG(debug, debug|release ) {
+		LIBS += -lqwtd5 \
+			-L"C:\devel\qwt-5.2\lib"
     } else {
-        LIBS += -lqwt5 \
-            -L"C:\devel\qwt-5.2\lib"
-    }
+		LIBS += -lqwt5 \
+			-L"C:\devel\qwt-5.2\lib"
+	}
 }
 
-HEADERS += src/Algorithms.h \
-    src/ColumnTableModel.h \
+# Input
+HEADERS += src/AbstractCalculator.h \
+    src/AbstractDistribution.h \
+    src/AbstractIterativeCalculator.h \
+    src/AbstractLocationOutput.h \
+    src/AbstractMotion.h \
+    src/AbstractMutableOutputCatalog.h \
+    src/AbstractNonlinearPropertyFactory.h \
+    src/AbstractNonlinearPropertyStandardDeviation.h \
+    src/AbstractOutput.h \
+    src/AbstractOutputCatalog.h \
+    src/AbstractOutputInterpolater.h \
+    src/AbstractPage.h \
+    src/AbstractProfileOutput.h \
+    src/AbstractRatioOutput.h \
+    src/AbstractRvtMotion.h \
+    src/AbstractSteppedProfileOutput.h \
+    src/AbstractTimeSeriesOutput.h \
+    src/AccelTimeSeriesOutput.h \
+    src/AccelTransferFunctionOutput.h \
+    src/Algorithms.h \
+    src/BedrockDepthVariation.h \
+    src/CompatibleRvtMotion.h \
+    src/CompatibleRvtMotionDialog.h \
     src/ComputePage.h \
     src/ConfigurePlotDialog.h \
     src/ConfiningStressDialog.h \
     src/ConfiningStressTableModel.h \
-    src/CrustalAmpModel.h \
-    src/CrustalVelModel.h \
+    src/CrustalAmplification.h \
+    src/CrustalModel.h \
+    src/CustomNonlinearProperty.h \
+    src/DampingFactory.h \
+    src/DampingProfileOutput.h \
+    src/DampingStandardDeviation.h \
+    src/DarendeliNonlinearProperty.h \
     src/DepthComboBox.h \
     src/DepthComboBoxDelegate.h \
     src/Dimension.h \
+    src/DimensionLayout.h \
+    src/DispTimeSeriesOutput.h \
     src/Distribution.h \
     src/EditActions.h \
-    src/EquivLinearCalc.h \
-    src/FourierSpectrumModel.h \
+    src/EquivalentLinearCalculator.h \
+    src/EquivalentLinearCalculatorWidget.h \
+    src/FinalVelProfileOutput.h \
+    src/FourierSpectrumOutput.h \
+    src/FrequencyDependentCalculator.h \
+    src/FrequencyDependentCalculatorWidget.h \
     src/GeneralPage.h \
     src/HelpDialog.h \
-    src/IndexedDepth.h \
-    src/ListGroupBox.h \
+    src/InitialVelProfileOutput.h \
+    src/LayerThicknessVariation.h \
+    src/LinearElasticCalculator.h \
+    src/LinearOutputInterpolater.h \
     src/Location.h \
     src/MainWindow.h \
-    src/MinimumFinder.h \
-    src/Motion.h \
+    src/MaxAccelProfileOutput.h \
+    src/MaxErrorProfileOutput.h \
+    src/MaxStrainProfileOutput.h \
+    src/MaxStressProfileOutput.h \
+    src/MaxVelProfileOutput.h \
+    src/MethodGroupBox.h \
+    src/ModulusFactory.h \
+    src/ModulusProfileOutput.h \
+    src/ModulusStandardDeviation.h \
+    src/MotionLibrary.h \
     src/MotionPage.h \
+    src/MotionTypeDelegate.h \
     src/MyAbstractTableModel.h \
-    src/MyGroupBox.h \
-    src/MyProgressDialog.h \
+    src/MyPlot.h \
     src/MyTableView.h \
     src/NonlinearProperty.h \
-    src/NonlinearPropertyLibrary.h \
-    src/NonlinearPropertyLibraryDialog.h \
-    src/NonlinearPropertyLibraryTableModel.h \
-    src/NonlinearPropertyListModel.h \
-    src/NonlinearPropertyTableModel.h \
-    src/Output.h \
+    src/NonlinearPropertyCatalog.h \
+    src/NonlinearPropertyCatalogDialog.h \
+    src/NonlinearPropertyDelegate.h \
+    src/NonlinearPropertyFactoryGroupBox.h \
+    src/NonlinearPropertyOutput.h \
+    src/NonlinearPropertyRandomizer.h \
+    src/NonlinearPropertyStandardDeviationWidget.h \
+    src/OutputCatalog.h \
     src/OutputExportDialog.h \
     src/OutputPage.h \
-    src/OutputTableModel.h \
-    src/OutputCsvSelectionTableModel.h \
-    src/PointSourceModel.h \
-    src/ProfileVariation.h \
-    src/RatioLocation.h \
-    src/RatioLocationTableModel.h \
-    src/RecordedMotion.h \
-    src/RecordedMotionDialog.h \
-    src/RecordedMotionModel.h \
-    src/ResponseLocation.h \
-    src/ResponseLocationTableModel.h \
+    src/OutputStatistics.h \
+    src/OutputTableFrame.h \
+    src/ProfileRandomizer.h \
+    src/ProfilesOutputCatalog.h \
+    src/RatiosOutputCatalog.h \
     src/ResponseSpectrum.h \
+    src/ResponseSpectrumOutput.h \
     src/ResultsPage.h \
     src/RockLayer.h \
     src/RvtMotion.h \
+    src/RvtMotionDialog.h \
     src/Serializer.h \
     src/SeriesSmoother.h \
-    src/SiteProfile.h \
     src/SiteResponseModel.h \
-    src/SiteResponseOutput.h \
     src/SoilLayer.h \
+    src/SoilProfile.h \
     src/SoilProfilePage.h \
-    src/SoilProfileModel.h \
-    src/SoilTypeTableModel.h \
     src/SoilType.h \
-    src/SoilTypePage.h \
+    src/SoilTypeCatalog.h \
+    src/SoilTypeDelegate.h \
+    src/SoilTypeOutput.h \
     src/SoilTypeOutputTableModel.h \
-    src/NonlinearPropertyVariation.h \
-    src/StringListDelegate.h \
+    src/SoilTypePage.h \
+    src/SoilTypesOutputCatalog.h \
+    src/SourceTheoryRvtMotion.h \
+    src/SourceTheoryRvtMotionDialog.h \
+    src/SpectralRatioOutput.h \
+    src/SpectraOutputCatalog.h \
+    src/SteppedOutputInterpolater.h \
+    src/StrainTimeSeriesOutput.h \
+    src/StrainTransferFunctionOutput.h \
+    src/StressRatioProfileOutput.h \
+    src/StressReducCoeffProfileOutput.h \
+    src/StressTimeSeriesOutput.h \
     src/SubLayer.h \
     src/TableGroupBox.h \
     src/TextLog.h \
+    src/TimeSeriesMotion.h \
+    src/TimeSeriesMotionDialog.h \
+    src/TimeSeriesOutputCatalog.h \
     src/Units.h \
     src/UpdateDialog.h \
-    src/VelocityLayer.h
-SOURCES += src/Algorithms.cpp \
-    src/ColumnTableModel.cpp \
+    src/VelocityLayer.h \
+    src/VelocityVariation.h \
+    src/VelTimeSeriesOutput.h \
+    src/VerticalStressProfileOutput.h
+
+SOURCES +=     src/AbstractCalculator.cpp \
+    src/AbstractDistribution.cpp \
+    src/AbstractIterativeCalculator.cpp \
+    src/AbstractLocationOutput.cpp \
+    src/AbstractMotion.cpp \
+    src/AbstractMutableOutputCatalog.cpp \
+    src/AbstractNonlinearPropertyFactory.cpp \
+    src/AbstractNonlinearPropertyStandardDeviation.cpp \
+    src/AbstractOutput.cpp \
+    src/AbstractOutputCatalog.cpp \
+    src/AbstractOutputInterpolater.cpp \
+    src/AbstractPage.cpp \
+    src/AbstractProfileOutput.cpp \
+    src/AbstractRatioOutput.cpp \
+    src/AbstractRvtMotion.cpp \
+    src/AbstractSteppedProfileOutput.cpp \
+    src/AbstractTimeSeriesOutput.cpp \
+    src/AccelTimeSeriesOutput.cpp \
+    src/AccelTransferFunctionOutput.cpp \
+    src/Algorithms.cpp \
+    src/BedrockDepthVariation.cpp \
+    src/CompatibleRvtMotion.cpp \
+    src/CompatibleRvtMotionDialog.cpp \
     src/ComputePage.cpp \
     src/ConfigurePlotDialog.cpp \
     src/ConfiningStressDialog.cpp \
     src/ConfiningStressTableModel.cpp \
-    src/CrustalAmpModel.cpp \
-    src/CrustalVelModel.cpp \
+    src/CrustalAmplification.cpp \
+    src/CrustalModel.cpp \
+    src/CustomNonlinearProperty.cpp \
+    src/DampingFactory.cpp \
+    src/DampingProfileOutput.cpp \
+    src/DampingStandardDeviation.cpp \
+    src/DarendeliNonlinearProperty.cpp \
     src/DepthComboBox.cpp \
     src/DepthComboBoxDelegate.cpp \
     src/Dimension.cpp \
+    src/DimensionLayout.cpp \
+    src/DispTimeSeriesOutput.cpp \
     src/Distribution.cpp \
     src/EditActions.cpp \
-    src/EquivLinearCalc.cpp \
-    src/FourierSpectrumModel.cpp \
+    src/EquivalentLinearCalculator.cpp \
+    src/EquivalentLinearCalculatorWidget.cpp \
+    src/FinalVelProfileOutput.cpp \
+    src/FourierSpectrumOutput.cpp \
+    src/FrequencyDependentCalculator.cpp \
+    src/FrequencyDependentCalculatorWidget.cpp \
     src/GeneralPage.cpp \
     src/HelpDialog.cpp \
-    src/IndexedDepth.cpp \
-    src/ListGroupBox.cpp \
+    src/InitialVelProfileOutput.cpp \
+    src/LayerThicknessVariation.cpp \
+    src/LinearElasticCalculator.cpp \
+    src/LinearOutputInterpolater.cpp \
     src/Location.cpp \
+    src/main.cpp \
     src/MainWindow.cpp \
-    src/MinimumFinder.cpp \
-    src/Motion.cpp \
+    src/MaxAccelProfileOutput.cpp \
+    src/MaxErrorProfileOutput.cpp \
+    src/MaxStrainProfileOutput.cpp \
+    src/MaxStressProfileOutput.cpp \
+    src/MaxVelProfileOutput.cpp \
+    src/MethodGroupBox.cpp \
+    src/ModulusFactory.cpp \
+    src/ModulusProfileOutput.cpp \
+    src/ModulusStandardDeviation.cpp \
+    src/MotionLibrary.cpp \
     src/MotionPage.cpp \
+    src/MotionTypeDelegate.cpp \
     src/MyAbstractTableModel.cpp \
-    src/MyGroupBox.cpp \
-    src/MyProgressDialog.cpp \
+    src/MyPlot.cpp \
     src/MyTableView.cpp \
     src/NonlinearProperty.cpp \
-    src/NonlinearPropertyLibrary.cpp \
-    src/NonlinearPropertyLibraryDialog.cpp \
-    src/NonlinearPropertyLibraryTableModel.cpp \
-    src/NonlinearPropertyListModel.cpp \
-    src/NonlinearPropertyTableModel.cpp \
-    src/Output.cpp \
+    src/NonlinearPropertyCatalog.cpp \
+    src/NonlinearPropertyCatalogDialog.cpp \
+    src/NonlinearPropertyDelegate.cpp \
+    src/NonlinearPropertyFactoryGroupBox.cpp \
+    src/NonlinearPropertyOutput.cpp \
+    src/NonlinearPropertyRandomizer.cpp \
+    src/NonlinearPropertyStandardDeviationWidget.cpp \
+    src/OutputCatalog.cpp \
     src/OutputExportDialog.cpp \
     src/OutputPage.cpp \
-    src/OutputCsvSelectionTableModel.cpp \
-    src/OutputTableModel.cpp \
-    src/PointSourceModel.cpp \
-    src/ProfileVariation.cpp \
-    src/RatioLocation.cpp \
-    src/RatioLocationTableModel.cpp \
-    src/RecordedMotion.cpp \
-    src/RecordedMotionDialog.cpp \
-    src/RecordedMotionModel.cpp \
-    src/ResponseLocation.cpp \
-    src/ResponseLocationTableModel.cpp \
+    src/OutputStatistics.cpp \
+    src/OutputTableFrame.cpp \
+    src/ProfileRandomizer.cpp \
+    src/ProfilesOutputCatalog.cpp \
+    src/RatiosOutputCatalog.cpp \
     src/ResponseSpectrum.cpp \
+    src/ResponseSpectrumOutput.cpp \
     src/ResultsPage.cpp \
     src/RockLayer.cpp \
     src/RvtMotion.cpp \
+    src/RvtMotionDialog.cpp \
     src/Serializer.cpp \
     src/SeriesSmoother.cpp \
-    src/SiteProfile.cpp \
     src/SiteResponseModel.cpp \
-    src/SiteResponseOutput.cpp \
     src/SoilLayer.cpp \
+    src/SoilProfile.cpp \
     src/SoilProfilePage.cpp \
-    src/SoilProfileModel.cpp \
     src/SoilType.cpp \
-    src/SoilTypePage.cpp \
-    src/SoilTypeTableModel.cpp \
+    src/SoilTypeCatalog.cpp \
+    src/SoilTypeDelegate.cpp \
+    src/SoilTypeOutput.cpp \
     src/SoilTypeOutputTableModel.cpp \
-    src/NonlinearPropertyVariation.cpp \
-    src/StringListDelegate.cpp \
+    src/SoilTypePage.cpp \
+    src/SoilTypesOutputCatalog.cpp \
+    src/SourceTheoryRvtMotion.cpp \
+    src/SourceTheoryRvtMotionDialog.cpp \
+    src/SpectralRatioOutput.cpp \
+    src/SpectraOutputCatalog.cpp \
+    src/SteppedOutputInterpolater.cpp \
+    src/StrainTimeSeriesOutput.cpp \
+    src/StrainTransferFunctionOutput.cpp \
+    src/StressRatioProfileOutput.cpp \
+    src/StressReducCoeffProfileOutput.cpp \
+    src/StressTimeSeriesOutput.cpp \
     src/SubLayer.cpp \
     src/TableGroupBox.cpp \
     src/TextLog.cpp \
+    src/TimeSeriesMotion.cpp \
+    src/TimeSeriesMotionDialog.cpp \
+    src/TimeSeriesOutputCatalog.cpp \
     src/Units.cpp \
     src/UpdateDialog.cpp \
     src/VelocityLayer.cpp \
-    src/main.cpp
+    src/VelocityVariation.cpp \
+    src/VelTimeSeriesOutput.cpp \
+    src/VerticalStressProfileOutput.cpp
+
 RESOURCES += resources/resources.qrc
+OTHER_FILES += TODO.txt
+FORMS += 
