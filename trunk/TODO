@@ -1,0 +1,40 @@
+Next release
+-- Remember the informaton regarding the axis for each of the outputs
+-- include USGS and CSMIP formats in the auto-recognized file types
+-- Added toHtml() for added features, fix report generation
+-- Ability to ask for output at the top of each velocity layer
+-- Add the ability to directly compute the transfer function
+-- Need to adjust the time series output to reflect the maximum frequency.
+--  Migrate from QGridLayout to QFormLayout
+
+-- Implement singletons for:
+    -- random number generator
+	-- Change variation controls to singletons
+-- Double corner frequency point source model
+
+Future releases
+-- define frequency range of the FAS -- does the default range need to have more resolution
+-- Multiple core support
+-- Add settings object to remember plot format for types of plots.
+-- Time vector for recorded motions should be updated with maximum frequency?
+
+Possibilities
+-- Use tree layout for output data
+	-> each site is its own branch
+	-> each motion is its own branch
+-- ability to vary RVT source
+-- develop validation files to check the program after each release
+-- Ability to create a "report" of the output
+-- See if inheritence would improve simplicity of Output class
+-- Ability to output time series as AT2 files
+-- Ability to read FAS from a file
+-- Change help page depending on the state of the program.
+-- enable distribution of the shear-wave velocity to be varied Uniform,
+Normal, Log-Normal
+-- add the option of providing calculation of time series for the RVT site
+response. The time series would be computed with the phase angles from a
+selected motion.
+-- better algorithm for searching for nearest curves
+
+Manual:
+	-- discussion of the epistemic versus aleatory variation of the layering
