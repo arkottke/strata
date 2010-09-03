@@ -19,9 +19,11 @@ unix {
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -lqwt
+        -L"/apps/gsl/1.14/lib" \
+        -lqwt-qt4
     INCLUDEPATH += . \
-        "/usr/include/qwt"
+	"/usr/include/qwt-qt4" \
+        "/apps/gsl/1.14/include"
 }
 win32 { 
     # DEFINES += REVISION=$$system(cmd.exe /C "svnversion.exe . | perl.exe -pne"s/(?:\d+:)?(\d+)(?:[MS]+)?$/\1/"")
