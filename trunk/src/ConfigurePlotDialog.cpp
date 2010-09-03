@@ -81,8 +81,14 @@ void AxisOptions::setDefaults( const QwtScaleEngine * scaleEngine, bool autoScal
     else
         m_autoCheckBox->setChecked(false);
 
-    m_minLineEdit->setText( QString::number( scaleDiv->lowerBound() ) );
-    m_maxLineEdit->setText( QString::number( scaleDiv->upperBound() ) );
+    // Get lower and upper bounds
+#if QWT_VERSION < 0x050200
+    m_minLineEdit->setText(QString::number(scaleDiv->lBound()));
+    m_maxLineEdit->setText(QString::number(scaleDiv->hBound()));
+#else
+    m_minLineEdit->setText(QString::number(scaleDiv->lowerBound()));
+    m_maxLineEdit->setText(QString::number(scaleDiv->upperBound()));
+#endif
 }
 
 bool AxisOptions::linearSpacing() const
