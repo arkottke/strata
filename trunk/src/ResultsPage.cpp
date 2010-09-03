@@ -219,7 +219,11 @@ void ResultsPage::setSelectedOutput(int index)
     // Increase the width of the identifier
     foreach (QWidget *widget, m_plot->legend()->legendItems()) {
         if (QwtLegendItem *item = dynamic_cast<QwtLegendItem*>(widget))
+#if QWT_VERSION < 0x050200
+            item->setIdentfierWidth(30);
+#else
             item->setIdentifierWidth(30);
+#endif
     }
 
     m_catalogTableView->resizeColumnsToContents();
