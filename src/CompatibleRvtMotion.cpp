@@ -241,8 +241,9 @@ void CompatibleRvtMotion::calculate()
         // Extrapolate the low frequency values
         double logFreq0 = log(freq().at(offset));
         double logFas0 = log(m_fourierAcc.at(offset));
-
-        double slope = m_limitFas ? 1.92 :
+		
+		// The theoretical slope at low frequenc
+        double slope = m_limitFas ? 2 :
                        (log(m_fourierAcc.at(offset)/m_fourierAcc.at(offset+1))
                         / log( freq().at(offset)/freq().at(offset+1)));
 
