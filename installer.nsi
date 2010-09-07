@@ -149,7 +149,7 @@ SectionEnd
 Section "Documentation" SecDocumentation
 	SetOutPath $INSTDIR
 
-	file "..\manual\manual.pdf"
+	file "./manual\manual.pdf"
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Manual.lnk" "$INSTDIR\manual.pdf"
 
 SectionEnd
@@ -159,13 +159,12 @@ Section "Examples" SecExamples
 	SetOutPath "$INSTDIR\examples"
 
 	;Files to install
-	file "..\example\example-1-td.strata"
-	file "..\example\example-2-td.strata"
-	file "..\example\example-3-rvt.strata"
-	file "..\example\example-3-rvt.strata"
-	file "..\example\suite-10-1.csv"
-	file "..\example\response-spectrum.csv"
-	file /r "..\example\*.AT2"
+	file "./example\example-1-td.strata"
+	file "./example\example-2-td.strata"
+	file "./example\example-3-rvt.strata"
+	file "./example\suite-10-1.csv"
+	file "./example\response-spectrum.csv"
+	file /r "./example\*.AT2"
 
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Examples.lnk" "$INSTDIR\examples\"
 

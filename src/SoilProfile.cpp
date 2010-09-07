@@ -415,18 +415,17 @@ const Location SoilProfile::depthToLocation(const double depth) const
     int index = 0;
     double interDepth = 0;
 
-    if ( depth < 0 ) {
+    if (depth < 0 || m_subLayers.last().depthToBase() <= depth) {
         // Use the surface of the bedrock
         index = m_subLayers.size();
-
         interDepth = 0;   
     } else {
         // Use the layer whose bottom depth is deeper
         index = 0;
 
-        while (index < m_subLayers.size() && m_subLayers.at(index).depthToBase() < depth ) {
+        while (index <= m_subLayers.size()
+                && m_subLayers.at(index).depthToBase() < depth)
             ++index;
-        }
 
         interDepth = depth - m_subLayers.at(index).depth();
     }
@@ -1126,14 +1125,13 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
     quint8 ver;
     in >> ver;
 
-    int count;
-
     // Load soil types
     in >> sp->m_soilTypeCatalog;
 
     // Load soil layers
     sp->beginResetModel();
 
+    int count;
     in >> count;
     while (sp->m_soilLayers.size() < count) {
         int row;
