@@ -13,17 +13,23 @@ CONFIG(debug, debug|release) {
    DEFINES += DEBUG
 }
 
-unix { 
+unix {
+        # -L"/apps/gsl/1.14/lib"
+        # "/apps/gsl/1.14/include"
+    DEFINES += GSL_LIB=$$system("env | grep GSL_LIB")
+    DEFINES += GSL_INCLUDE=$$system("env | grep GSL_INCLUDE")
     DEFINES += REVISION=$$system("svnversion . | perl -pne's/(?:\d+:)?(\d+)(?:[MS]+)?$/\1/'")
     LIBS += -lm \
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -L"/apps/gsl/1.14/lib" \
+        -L\${GSL_LIB} \
         -lqwt-qt4
     INCLUDEPATH += . \
-	"/usr/include/qwt-qt4" \
-        "/apps/gsl/1.14/include"
+        "/usr/include/qwt-qt4" \
+        \${GSL_INCLUDE}
+    target.path = bin
+    INSTALLS = target
 }
 win32 { 
     # DEFINES += REVISION=$$system(cmd.exe /C "svnversion.exe . | perl.exe -pne"s/(?:\d+:)?(\d+)(?:[MS]+)?$/\1/"")
@@ -40,12 +46,12 @@ win32 {
         "C:\devel\GnuWin32\include"
     RC_FILE = strata.rc
     CONFIG(debug, debug|release ) {
-		LIBS += -lqwtd5 \
-			-L"C:\devel\qwt-5.2\lib"
+        LIBS += -lqwtd5 \
+            -L"C:\devel\qwt-5.2\lib"
     } else {
-		LIBS += -lqwt5 \
-			-L"C:\devel\qwt-5.2\lib"
-	}
+        LIBS += -lqwt5 \
+            -L"C:\devel\qwt-5.2\lib"
+    }
 }
 
 # Input

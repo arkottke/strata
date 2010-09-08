@@ -1,0 +1,123 @@
+#!/bin/sh
+
+. /apps/environ/.setup
+use -e -r gsl-1.14
+use -e -r qt-4.6.3
+
+APPNAME="strata"
+toolcmd="strata"
+xfercmd="/apps/filexfer/bin/filexfer"
+keepalive="/apps/xvnc/bin/pixelflip"
+windowmanager="/apps/icewm/captive/invoke"
+
+#     -r tool version
+#     -T tool root directory
+
+let nNamedArgs=0
+let nUnnamedArgs=0
+while (( "$#" ))
+do
+   case $1 in
+      -* )
+           namedArgs[$nNamedArgs]=$1
+           let nNamedArgs++
+           shift
+           namedArgs[$nNamedArgs]=$1
+           let nNamedArgs++
+           shift
+           ;;
+       * )
+           unnamedArgs[$nUnnamedArgs]=$1
+           let nUnnamedArgs++
+           shift
+           ;;
+   esac
+done
+
+while getopts ":r:T:" Option "${namedArgs[@]}"
+do
+   case $Option in
+      r ) TOOL_VERSION=$OPTARG;;
+      T ) TOOLDIR=$OPTARG
+   esac
+done
+
+if [ "${TOOL_VERSION}" = "" ] ; then
+   if [ "${SESSIONDIR}" = "" ] ; then
+      TOOL_VERSION=current
+   else
+      if [ -e ${SESSIONDIR}/resources ] ; then
+         version=$(grep '^version' ${SESSIONDIR}/resources | cut -d' ' -f 2)
+         if [ "$version" = "" ] ; then
+            TOOL_VERSION=current
+         else
+            caseMatch=$(shopt -p nocasematch)
+            shopt -s nocasematch
+            case $version in
+                 test )
+                        TOOL_VERSION=dev
+                        ;;
+              current )
+                        TOOL_VERSION=current
+                        ;;
+                  dev )
+                        TOOL_VERSION=dev
+                        ;;
+                    * )
+                        TOOL_VERSION=current
+                        ;;
+            esac
+            $caseMatch
+         fi
+      else
+         TOOL_VERSION=current
+      fi
+   fi
+fi
+
+if [ "${TOOLDIR}" = "" ]
+then
+  export TOOLDIR=/apps/${APPNAME}/${TOOL_VERSION}
+elif [ -d ${TOOLDIR} ]
+then
+  export TOOLDIR
+elif [ -d /apps/${APPNAME}/${TOOLDIR} ]
+then
+  export TOOLDIR=/apps/${APPNAME}/${TOOLDIR}
+fi
+
+if [ ! -d ${TOOLDIR} ]
+then
+   echo "Unable to find ${TOOLDIR} for ${APPNAME}"
+   exit 1
+fi
+
+if [ -d ${TOOLDIR}/bin ]
+then
+  export PATH=${TOOLDIR}/bin:${PATH}
+fi
+
+#
+# If there is no tty, this is not an interactive session.
+# Start a window manager.
+#
+tty -s || {
+  #
+  # Start the 5-minute keepalive daemon.
+  #
+  $keepalive
+
+  #
+  # Start the window manager.
+  #
+  $windowmanager &
+}
+
+# start filexfer
+$xfercmd &
+
+# start the application
+$toolcmd
+
+exit $?
+
