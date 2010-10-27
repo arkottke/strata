@@ -13,12 +13,12 @@ CONFIG(debug, debug|release) {
    DEFINES += DEBUG
 }
 
+# Grab the revision number using svnversion. This is later cleaned up using a regular expression
+DEFINES += REVISION=$$system(svnversion.exe .)
+
 unix {
-        # -L"/apps/gsl/1.14/lib"
-        # "/apps/gsl/1.14/include"
     DEFINES += GSL_LIB=$$system("env | grep GSL_LIB")
     DEFINES += GSL_INCLUDE=$$system("env | grep GSL_INCLUDE")
-    DEFINES += REVISION=$$system("svnversion . | perl -pne's/(?:\d+:)?(\d+)(?:[MS]+)?$/\1/'")
     LIBS += -lm \
         -lfftw3 \
         -lgsl \
@@ -32,25 +32,23 @@ unix {
     INSTALLS = target
 }
 win32 { 
-    # DEFINES += REVISION=$$system(cmd.exe /C "svnversion.exe . | perl.exe -pne"s/(?:\d+:)?(\d+)(?:[MS]+)?$/\1/"")
-    DEFINES += REVISION=$$system(cmd.exe /C "SubWCRev.exe . | perl.exe -ne\"if (/^Last/){s/\D+//; print;}\"")
     LIBS += -lm \
         -lfftw3-3 \
-        -L"C:\devel\fftw-3.2.2" \
+        -L"C:/devel/fftw-3.2.2" \
         -lgsl \
         -lgslcblas \
-        -L"C:\devel\GnuWin32\bin"
+        -L"C:/devel/GnuWin32/bin"
     INCLUDEPATH += . \
-        "C:\devel\fftw-3.2.2" \
-        "C:\devel\qwt-5.2\src" \
-        "C:\devel\GnuWin32\include"
+        "C:/devel/fftw-3.2.2" \
+        "C:/devel/qwt-5.2/src" \
+        "C:/devel/GnuWin32/include"
     RC_FILE = strata.rc
     CONFIG(debug, debug|release ) {
         LIBS += -lqwtd5 \
-            -L"C:\devel\qwt-5.2\lib"
+            -L"C:/devel/qwt-5.2/lib"
     } else {
         LIBS += -lqwt5 \
-            -L"C:\devel\qwt-5.2\lib"
+            -L"C:/devel/qwt-5.2/lib"
     }
 }
 
