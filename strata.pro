@@ -14,7 +14,7 @@ CONFIG(debug, debug|release) {
 }
 
 # Grab the revision number using svnversion. This is later cleaned up using a regular expression
-DEFINES += REVISION=$$system(svnversion.exe .)
+DEFINES += REVISION=$$system(python getSvnVersion.py)
 
 unix {
     DEFINES += GSL_LIB=$$system("env | grep GSL_LIB")

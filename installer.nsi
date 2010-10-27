@@ -8,8 +8,7 @@
 
 ;--------------------------------
 ;Revision of the respository
-  ;!system 'svnversion.exe . | perl.exe -pne"s/(?:\d+:)?(\d+)(?:[MS]+)?$/!define REVISION \1/" > %TEMP%\revision.nsh'
-  !system '"C:\Program Files\TortoiseSVN\bin\SubWCRev.exe" . | perl.exe -ne"if (/^Last/){s/\D+/!define REVISION \1/; print;}" > %TEMP%\revision.nsh'
+  !system 'python getSvnVersion.py > %TEMP%\revision.nsh'
   !include "$%TEMP%\revision.nsh"
 
 ;--------------------------------
