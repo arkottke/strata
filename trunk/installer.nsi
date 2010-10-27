@@ -8,7 +8,7 @@
 
 ;--------------------------------
 ;Revision of the respository
-  !system 'python getSvnVersion.py > %TEMP%\revision.nsh'
+  !system 'python getSvnVersion.py "!define REVISION" > %TEMP%\revision.nsh'
   !include "$%TEMP%\revision.nsh"
 
 ;--------------------------------
@@ -158,11 +158,11 @@ Section "Examples" SecExamples
 	SetOutPath "$INSTDIR\examples"
 
 	;Files to install
-	file "./example\example-1-td.strata"
-	file "./example\example-2-td.strata"
-	file "./example\example-3-rvt.strata"
-	file "./example\suite-10-1.csv"
-	file "./example\response-spectrum.csv"
+	file "example\example-1-td.strata"
+	file "example\example-2-td.strata"
+	file "example\example-3-rvt.strata"
+	file "example\suite-10-1.csv"
+	file "example\response-spectrum.csv"
 	file /r "./example\*.AT2"
 
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Examples.lnk" "$INSTDIR\examples\"
