@@ -4,7 +4,7 @@ import sys
 
 # Prefix for the printing
 if len(sys.argv) > 1:
-    prefix = sys.argv[1]
+    print sys.argv[1],
 
 # Determine the versions 
 p = subprocess.Popen(['svnversion', '.'], stdout=subprocess.PIPE)
@@ -13,6 +13,6 @@ p = subprocess.Popen(['svnversion', '.'], stdout=subprocess.PIPE)
 m = re.search(r'(?:\d+:)?(\d+)(?:[MS]+)?', p.stdout.readline())
 
 if m:
-    print prefix, m.group(1)
+    print m.group(1)
 else:
     print 0
