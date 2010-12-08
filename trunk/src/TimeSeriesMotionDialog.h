@@ -88,6 +88,7 @@ private:
     QComboBox *m_formatComboBox;
     QSpinBox *m_dataColSpinBox;
 
+    QComboBox *m_unitsComboBox;
     QDoubleSpinBox *m_pgaSpinBox;
 
     QSpinBox *m_startLineSpinBox;

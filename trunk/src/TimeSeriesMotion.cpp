@@ -43,6 +43,7 @@ TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
 {
     m_saveData = true;
     // Initialize the values -- appropriate values for an AT2 file
+    m_inputUnits = Gravity;
     m_timeStep = 0;
     m_freqMax = 0;
     m_pointCount = 0;
@@ -59,6 +60,7 @@ TimeSeriesMotion::TimeSeriesMotion(const QString & fileName, double scale,  Abst
     m_type = type;
     m_saveData = true;
     // Initialize the values -- appropriate values for an AT2 file
+    m_inputUnits = Gravity;
     m_timeStep = 0;
     m_freqMax = 0;
     m_pointCount = 0;
@@ -105,6 +107,55 @@ void TimeSeriesMotion::setFileName(const QString & fileName)
 double TimeSeriesMotion::freqNyquist() const
 {
     return 1. / (2. * m_timeStep);
+}
+
+QStringList TimeSeriesMotion::inputUnitsList()
+{
+    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2");
+}
+
+TimeSeriesMotion::InputUnits TimeSeriesMotion::inputUnits() const
+{
+    return m_inputUnits;
+}
+
+void TimeSeriesMotion::setInputUnits(int inputUnits)
+{
+    setInputUnits((InputUnits)inputUnits);
+}
+
+void TimeSeriesMotion::setInputUnits(TimeSeriesMotion::InputUnits inputUnits)
+{
+    if (m_inputUnits != inputUnits) {
+        // Save the previously used conversation and scale factors
+        const double prevFactor = unitConversionFactor();
+        const double prevScale = m_scale;
+
+        m_inputUnits = inputUnits;
+        setModified(true);
+
+        // Need to modify the scale to correct for the change in units.
+        // This is done by modifying the m_scale parameter which is then
+        // used in rescale the appropriate values.
+        m_scale *= prevFactor / unitConversionFactor();
+        setScale(prevScale);
+
+        emit inputUnitsChanged(inputUnits);
+    }
+
+    setIsLoaded(false);
+}
+
+double TimeSeriesMotion::unitConversionFactor() const
+{
+    switch (m_inputUnits) {
+    case CentimetersPerSecondSquared:
+        return 1. / (100. * 9.80665);
+    case InchesPerSecondSquared:
+        return 1. / (12. * 32.174);
+    default:
+        return 1.;
+    }
 }
 
 int TimeSeriesMotion::pointCount() const
@@ -294,7 +345,8 @@ QVector<double> TimeSeriesMotion::timeSeries(
         for (int i = 0; i < 2; ++i)
             disp = integrate(disp);
 
-        int term = 7;
+        // Use a fourth order polynomial
+        int term = 4;
         // Fix a polynominal to the data
         QVector<double> dispCoeffs = baselineFit(term, disp);
 
@@ -465,6 +517,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
 
         // Process the row based on the format
         bool ok;
+        const double scale = unitConversionFactor() * m_scale;
         switch (m_format) {
         case Rows:
             // Use all parts of the data
@@ -475,7 +528,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
                     break;
                 }
                 // Apply the scale factor and read the acceleration
-                m_accel[index] = m_scale * row.at(i).trimmed().toDouble(&ok);
+                m_accel[index] = scale * row.at(i).trimmed().toDouble(&ok);
                 // Increment the index
                 ++index;
                 // Stop if there was an error in the conversion
@@ -490,7 +543,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             // row format is applied, but it still causes the program to
             // crash.
             if ( m_dataColumn - 1 < row.size() ) {
-                m_accel[index] = m_scale * row.at(m_dataColumn-1).trimmed().toDouble(&ok);
+                m_accel[index] = scale * row.at(m_dataColumn-1).trimmed().toDouble(&ok);
             }
 
             // Increment the index
@@ -739,7 +792,7 @@ QVector<double> TimeSeriesMotion::integrate(const QVector<double> & in) const
 
 const QVector<double> TimeSeriesMotion::baselineFit( const int term, const QVector<double> & series ) const
 {
-    Q_ASSERT( term > 3);
+    Q_ASSERT(term >= 3);
     // Create the matrix of terms.  The first column is x_i^0 (1), second
     // column is x_i^1 (x), third is x_i^2, etc.
     gsl_matrix* X = gsl_matrix_alloc(series.size(), term);
@@ -892,7 +945,7 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
 
 QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     out << qobject_cast<const AbstractMotion*>(tsm);
 
@@ -908,6 +961,9 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
             << tsm->m_dataColumn
             << tsm->m_startLine
             << tsm->m_stopLine;
+
+    // Added in version 2
+    out << (int)tsm->m_inputUnits;
 
     // Save the data internally if requested
     if (tsm->m_saveData) {
@@ -940,6 +996,12 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
             >> tsm->m_stopLine;
 
     tsm->setFormat(format);
+
+    if (ver > 1) {
+        int units;
+        in >> units;
+        tsm->setInputUnits(units);
+    }
 
     // Save the data internally if requested
     if (tsm->m_saveData) {

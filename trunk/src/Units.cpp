@@ -71,38 +71,43 @@ void Units::setSystem(int system)
 
 double Units::gravity() const
 {
-    if ( m_system == Metric )
+    switch (m_system) {
+    case Metric:
         return 9.80665;
-    else if ( m_system == English )
+    case English:
         return 32.174;
-        
-    return -1;
+    default:
+        return -1;
+    }
 }
 
 double Units::waterUntWt() const
 {
-    if ( m_system == Metric )
-        return 9.81;
-    else if ( m_system == English )
+    switch (m_system) {
+    case Metric:
+        return gravity();
+    case English:
         return 62.4;
-        
-    return -1;
+    default:
+        return -1;
+    }
 }
 
 double Units::toAtm() const
 {
-    if ( m_system == Metric )
+    switch (m_system) {
+    case Metric:
         return 9.868233e-3;
-    else if ( m_system == English )
+    case English:
         return 4.725451e-4;
-        
-    return -1;
+    default:
+        return -1;
+    }
 }
 
 double Units::toMeters() const
 {
-    switch ( m_system )
-    {
+    switch (m_system){
         case Metric:
             return 1.0;
         case English:

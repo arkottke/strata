@@ -125,6 +125,7 @@ void AbstractMotion::setType(AbstractMotion::Type type)
     setModified(true);
 }
 
+
 QString AbstractMotion::description() const
 {
     return m_description;
@@ -243,6 +244,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)
     out << (int)m->m_type
             << m->m_description
             << m->m_enabled;
+
 
     return out;
 }
