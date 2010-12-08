@@ -55,7 +55,7 @@ public:
     bool modified() const;
 
     Type type() const;
-    void setType(Type type);    
+    void setType(Type type);
 
     bool enabled() const;
     void setEnabled(bool enabled);
@@ -120,6 +120,7 @@ public:
 public slots:
     void setModified(bool modified = true);
     void setType(int type);
+
 
     void setDescription(QString s);
 

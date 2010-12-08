@@ -148,7 +148,7 @@ SectionEnd
 Section "Documentation" SecDocumentation
 	SetOutPath $INSTDIR
 
-	file "./manual\manual.pdf"
+	file "manual\manual.pdf"
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Manual.lnk" "$INSTDIR\manual.pdf"
 
 SectionEnd

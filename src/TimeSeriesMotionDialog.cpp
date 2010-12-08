@@ -366,9 +366,23 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
     layout->addWidget(new QLabel(tr("Data column:")), 3, 2);
     layout->addWidget(m_dataColSpinBox, 3, 3);
 
+    // Units specification
+    m_unitsComboBox = new QComboBox;
+    m_unitsComboBox->setWhatsThis(tr("Units of the time series."));
+    m_unitsComboBox->addItems(TimeSeriesMotion::inputUnitsList());
+    m_unitsComboBox->setCurrentIndex(m_motion->inputUnits());
+    connect(m_motion, SIGNAL(inputUnitsChanged(int)),
+            m_unitsComboBox, SLOT(setCurrentIndex(int)));
+    connect(m_unitsComboBox, SIGNAL(currentIndexChanged(int)),
+            m_motion, SLOT(setInputUnits(int)));
+
+    layout->addWidget(new QLabel(tr("Units:")), 3, 4);
+    layout->addWidget(m_unitsComboBox, 3, 5);
+
+    // PGA of the motion
     m_pgaSpinBox = new QDoubleSpinBox;
     m_pgaSpinBox->setWhatsThis(tr("The peak ground acceleration of the motion."));
-    m_pgaSpinBox->setRange(0.001, 5.0);
+    m_pgaSpinBox->setRange(0.001, 10.0);
     m_pgaSpinBox->setDecimals(3);
     m_pgaSpinBox->setSingleStep(0.01);
     m_pgaSpinBox->setSuffix(" g");
@@ -429,7 +443,7 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
 
     connect(m_textEdit, SIGNAL(cursorPositionChanged()), this, SLOT(updatePosition()));
 
-    layout->addWidget(m_textEdit, 5, 0, 1, 9 );
+    layout->addWidget(m_textEdit, 5, 0, 1, 9);
 
 
     QFrame *frame = new QFrame;

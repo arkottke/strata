@@ -53,6 +53,13 @@ public:
         Displacement //!< Displacement time series -- double integrated acceleration time series
     };
 
+    //! Units of the motion
+    enum InputUnits {
+        Gravity, //!< Gravity -- no unit conversion required
+        CentimetersPerSecondSquared, //!< Centimenters per second squared
+        InchesPerSecondSquared //!< Inches per second squared
+    };
+
     static QStringList formatList();
 
     virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
@@ -66,6 +73,10 @@ public:
     virtual double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
 
     QString fileName() const;
+
+    static QStringList inputUnitsList();
+    InputUnits inputUnits() const;
+    void setInputUnits(InputUnits inputUnits);
 
     //! Time step of the motion
     double timeStep() const;
@@ -132,6 +143,8 @@ signals:
     void stopLineChanged(int lines);
     void freqMaxChanged(double freqMax);
 
+    void inputUnitsChanged(int units);
+
 public slots:
     void setFileName(const QString & fileName);
     void setTimeStep(double timeStep);
@@ -144,6 +157,8 @@ public slots:
 
     void setFreqMax(double freqMax);
 
+    void setInputUnits(int inputsUnits);
+
     //! Compute the Fourier amplitudes, response spectrum, and time values
     void calculate();
 protected:
@@ -151,7 +166,7 @@ protected:
     void setIsLoaded(bool isLoaded);
 
     //! Call the readFile and computeSpecAccel functions
-    void processFile( std::ifstream* );
+    void processFile(std::ifstream*);
 
     //! Find the maximum absolute value of a vector
     double findMaxAbs( const QVector<double> & vector ) const;
@@ -179,6 +194,9 @@ protected:
     //! Compute the time series by applying a transfer function to a specified Fourier amplitude spectrum
     QVector<double> calcTimeSeries(QVector<std::complex<double> > fa, const QVector<std::complex<double> > & tf) const;
 
+    //! The conversion factor for the input motion
+    double unitConversionFactor() const;
+
     //! Columns for the data view
     enum Column {
         TimeColumn,
@@ -202,6 +220,9 @@ protected:
 
     //! The scale factor that is applied to the motion
     double m_scale;
+
+    //! Units of the motion in the input file
+    InputUnits m_inputUnits;
 
     //! The format of the text file
     Format m_format;
