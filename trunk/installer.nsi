@@ -163,7 +163,7 @@ Section "Examples" SecExamples
 	file "example\example-3-rvt.strata"
 	file "example\suite-10-1.csv"
 	file "example\response-spectrum.csv"
-	file /r "./example\*.AT2"
+	file /r "example\*.AT2"
 
 	CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Examples.lnk" "$INSTDIR\examples\"
 
