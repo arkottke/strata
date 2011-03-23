@@ -41,6 +41,7 @@
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
         : AbstractMotion(parent)
 {
+    m_isLoaded = false;
     m_saveData = true;
     // Initialize the values -- appropriate values for an AT2 file
     m_inputUnits = Gravity;
@@ -57,8 +58,9 @@ TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
 TimeSeriesMotion::TimeSeriesMotion(const QString & fileName, double scale,  AbstractMotion::Type type, bool * successful, QObject * parent)
     : AbstractMotion(parent), m_fileName(QDir::cleanPath(fileName))
 { 
-    m_type = type;
+    m_isLoaded = false;
     m_saveData = true;
+    m_type = type;
     // Initialize the values -- appropriate values for an AT2 file
     m_inputUnits = Gravity;
     m_timeStep = 0;
@@ -204,19 +206,21 @@ void TimeSeriesMotion::setScale(double scale)
         m_scale = scale;
         emit scaleChanged(scale);
 
-        // Scale the various spectra
-        for (int i = 0; i < m_accel.size(); ++i)
-            m_accel[i] = ratio * m_accel.at(i);
+        if (m_isLoaded) {
+            // Scale the various spectra
+            for (int i = 0; i < m_accel.size(); ++i)
+                m_accel[i] = ratio * m_accel.at(i);
 
-        for (int i = 0; i < m_fourierAcc.size(); ++i) {
-            m_fourierAcc[i] *= ratio;
-            m_fourierVel[i] *= ratio;
+            for (int i = 0; i < m_fourierAcc.size(); ++i) {
+                m_fourierAcc[i] *= ratio;
+                m_fourierVel[i] *= ratio;
+            }
+
+            m_respSpec->scaleBy(ratio);
+
+            setPga(ratio * m_pga);
+            setPgv(ratio * m_pgv);
         }
-
-        m_respSpec->scaleBy(ratio);
-
-        setPga(ratio * m_pga);
-        setPgv(ratio * m_pgv);        
     }
 }
 
@@ -312,7 +316,7 @@ const QVector<double> & TimeSeriesMotion::freq() const
 
 QVector<double> TimeSeriesMotion::time() const
 {    
-    // Number of points based on the FA becuase it has been zero padded
+    // Number of points based prior to zero padding
     const int n = 2 * (m_pointCount - 1);
 
     // Time step based on the max frequency
@@ -336,6 +340,9 @@ QVector<double> TimeSeriesMotion::timeSeries(
 {
     // Compute the time series
     QVector<double> ts = calcTimeSeries(m_fourierAcc, tf);
+
+    // Remove the zero padded values from the time series
+    ts.resize(m_pointCount);
 
     if (baselineCorrect) {
         const double dt = timeStep();
@@ -568,9 +575,10 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         return false;
     }
 
-    setIsLoaded(true);
     // Compute motion properties
     calculate();
+
+    setIsLoaded(true);
     return true;
 }
 

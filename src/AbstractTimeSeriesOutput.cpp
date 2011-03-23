@@ -112,9 +112,9 @@ const int AbstractTimeSeriesOutput::fieldWidth() const
 
 QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
-    out << atso->m_baselineCorrect << qobject_cast<const AbstractOutput*>(atso);
+    out << atso->m_baselineCorrect << qobject_cast<const AbstractLocationOutput*>(atso);
 
     return out;
 }
@@ -124,7 +124,14 @@ QDataStream & operator>> (QDataStream & in, AbstractTimeSeriesOutput* atso)
     quint8 ver;
     in >> ver;
 
-    in >> atso->m_baselineCorrect >> qobject_cast<AbstractOutput*>(atso);
+    in >> atso->m_baselineCorrect;
+
+    if (ver == 1) {
+        // Version 1 did not save as AbstractTimeSeriesOutput
+        in >> qobject_cast<AbstractOutput*>(atso);
+    } else {
+        in >> qobject_cast<AbstractLocationOutput*>(atso);
+    }
 
     return in;
 }

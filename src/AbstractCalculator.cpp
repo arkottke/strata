@@ -237,46 +237,6 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
     return tf;
 }
 
-//bool AbstractCalculator::calcStrainTf(const Location & inLocation, const AbstractMotion::Type inputType,
-//                                       const Location & outLocation, QVector<std::complex<double> > & tf) const
-//{
-//    std::complex<double> cTerm;
-//    std::complex<double> numer;
-//    std::complex<double> denom;
-//    // Resize the transfer function to the number of frequencies
-//    tf.resize(m_nf);
-//
-//    for ( int i = 0; i < m_nf; i++ ) {
-//        cTerm = std::complex<double>( 0.0,  1.0 ) *
-//                m_waveNum.at(outLocation.layer()).at(i) * outLocation.depth();
-//
-//        // Compute the numerator cannot be computed using waves since it is A-B
-//        numer = std::complex<double>( 0.0, 1.0 ) * m_waveNum.at(outLocation.layer()).at(i) *
-//                (m_waveA.at(outLocation.layer()).at(i) * exp(cTerm) -
-//                  m_waveB.at(outLocation.layer()).at(i) * exp(-cTerm));
-//
-//        // Compute the denominator is modified by the square of the angular
-//        // frequency and a negative
-//        denom = -m_motion->angFreqAt(i) * m_motion->angFreqAt(i) *
-//                waves(i, inLocation, inputType);
-//
-//
-//        // If the transfer
-//
-//        if ( m_motion->freqAt(i) < 0.0001 ) {
-//            tf[i] = 0.0;
-//        } else {
-//            tf[i] = numer / denom;
-//        }
-//
-//        if ( tf[i] != tf[i] ) {
-//            // Check for NaNs
-//            return false;
-//        }
-//    }
-//    return true;
-//}
-
 const QVector<std::complex<double> > AbstractCalculator::calcAccelTf(
         const Location & inLocation, const AbstractMotion::Type inputType,
         const Location & outLocation, const AbstractMotion::Type outputType ) const

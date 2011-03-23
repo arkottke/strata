@@ -333,14 +333,18 @@ bool SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
     if (!count)
         return false;
 
+    emit beginRemoveRows(parent, row, qMin(row + count - 1, m_soilLayers.size() - 1));
+
     for (int i=0; i < count; ++i) {
         if (m_soilLayers.isEmpty())
             break;
 
-        emit beginRemoveRows(parent, row, row);
-        m_soilLayers.takeAt(row)->deleteLater();
-        emit endRemoveRows();
+        m_soilLayers.takeAt(row)->deleteLater();       
     }
+    emit endRemoveRows();
+
+    // Update the depths of the layers.
+    updateDepths();
 
     return true;
 }

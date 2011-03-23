@@ -22,6 +22,8 @@
 #include "LinearElasticCalculator.h"
 
 #include "SoilProfile.h"
+#include "SubLayer.h"
+#include "Units.h"
 
 LinearElasticCalculator::LinearElasticCalculator(QObject *parent)
     : AbstractCalculator(parent)
@@ -32,11 +34,28 @@ bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
 {
     init(motion, site);
 
+
     // Complex shear modulus for all layers.
     // The shear modulus is constant over the frequency range.
-    for (int i = 0; i < m_shearMod.size(); ++i)
+    for (int i = 0; i < m_nsl; ++i)
         m_shearMod[i].fill(calcCompShearMod(m_site->shearMod(i), m_site->damping(i) / 100.));
 
     // Compute upgoing and downgoing waves
-    return calcWaves();
+    bool success = calcWaves();
+
+    if (success) {
+        QVector<std::complex<double> > strainTf;
+
+        // Compute the maximum strain predicted in the layers
+        for (int i = 0; i < m_nsl; ++i) {
+            strainTf = calcStrainTf(m_site->inputLocation(), m_motion->type(),
+                                    Location(i, m_site->subLayers().at(i).thickness() / 2));
+            // Compute maximum shear strain
+            const double strainMax = 100 * Units::instance()->gravity() * m_motion->calcMaxStrain(strainTf);
+
+            m_site->subLayers()[i].setStrain(strainMax, strainMax);
+        }
+    }
+
+    return success;
 }

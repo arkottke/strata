@@ -107,7 +107,8 @@ SourceTheoryRvtMotion::Model SourceTheoryRvtMotion::model() const
 void SourceTheoryRvtMotion::setModel(Model s)
 {
     m_model = s;
-    m_crustalAmp->setModel(s);
+    if (m_model != Custom)
+        m_crustalAmp->setModel(s);
 
     switch (m_model) {
     case WUS:
