@@ -34,6 +34,8 @@
 
 #include <qwt_text.h>
 
+#include <qwt_scale_engine.h>
+
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
     : QAbstractTableModel(catalog), m_catalog(catalog), m_statistics(0), m_interp(0), m_offset(0)
 {

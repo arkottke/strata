@@ -114,8 +114,13 @@ double AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const
 double AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf, bool applyScale) const
 {   
     const double scale = applyScale ? Units::instance()->tsConv() : 1.;
-
     return scale * calcMax(absFourierVel(tf), m_duration);
+}
+
+double AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf, bool applyScale) const
+{
+    const double scale = applyScale ? Units::instance()->tsConv() : 1.;
+    return scale * calcMax(absFourierDisp(tf), m_duration);
 }
 
 QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, double damping, const QVector<std::complex<double> >& tf )
@@ -161,6 +166,16 @@ const QVector<double> AbstractRvtMotion::absFourierVel(const QVector<std::comple
 
     for (int i = 0; i < fa.size(); ++i)
         fa[i] /= angFreqAt(i);
+
+    return fa;
+}
+
+const QVector<double> AbstractRvtMotion::absFourierDisp(const QVector<std::complex<double> >& tf) const
+{
+    QVector<double> fa = absFourierAcc(tf);
+
+    for (int i = 0; i < fa.size(); ++i)
+        fa[i] /= pow(angFreqAt(i), 2);
 
     return fa;
 }

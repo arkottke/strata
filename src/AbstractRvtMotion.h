@@ -59,6 +59,7 @@ public:
     //! Compute the maximum reponse of the motion and the applied transfer function
     virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
     virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
+    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
     virtual double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
 
 
@@ -68,6 +69,7 @@ public:
 
     virtual const QVector<double> absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
     virtual const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    virtual const QVector<double> absFourierDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
 
     //! A reference to the Fourier amplitude spectrum
     const QVector<double> & fourierAcc() const;
@@ -161,6 +163,9 @@ protected:
 
     //! Compute the Fourier amplitudes corresponding to the velocity timeseries
     QVector<double> calcFourierVel() const;
+
+    //! Compute the Fourier amplitudes corresponding to the velocity timeseries
+    QVector<double> calcFourierDisp() const;
 
     //! Oscillator corretion method
     OscillatorCorrection m_oscCorrection;

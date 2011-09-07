@@ -26,6 +26,7 @@
 #include "FinalVelProfileOutput.h"
 #include "InitialVelProfileOutput.h"
 #include "MaxAccelProfileOutput.h"
+#include "MaxDispProfileOutput.h"
 #include "MaxErrorProfileOutput.h"
 #include "MaxStrainProfileOutput.h"
 #include "MaxStressProfileOutput.h"
@@ -46,6 +47,7 @@ ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
             << new FinalVelProfileOutput(m_outputCatalog)
             << new InitialVelProfileOutput(m_outputCatalog)
             << new MaxAccelProfileOutput(m_outputCatalog)
+            << new MaxDispProfileOutput(m_outputCatalog)
             << new MaxErrorProfileOutput(m_outputCatalog)
             << new MaxStrainProfileOutput(m_outputCatalog)
             << new MaxStressProfileOutput(m_outputCatalog)
@@ -150,7 +152,7 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
 
 QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
 {    
-    out << (quint8)1;
+    out << (quint8)2;
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs)
         out << apo;
@@ -165,8 +167,12 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
 
     poc->beginResetModel();
 
-    foreach (AbstractProfileOutput* apo, poc->m_outputs)
+    foreach (AbstractProfileOutput* apo, poc->m_outputs) {
+        if (ver < 2 && qobject_cast<MaxDispProfileOutput*>(apo))
+            continue;
+
         in >> apo;
+    }
 
     poc->endResetModel();
 

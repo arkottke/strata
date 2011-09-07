@@ -64,6 +64,9 @@ public:
     //! Compute the maximum acceleration profile
     const QVector<double> maxAccelProfile() const;
 
+    //! Compute the maximum displacement profile -- not baseline corrected
+    const QVector<double> maxDispProfile() const;
+
     //! Compute the maximum velocity profile -- not baseline corrected
     const QVector<double> maxVelProfile() const;
 

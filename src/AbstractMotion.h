@@ -96,6 +96,9 @@ public:
     //! Maximum response of the velocity time series.
     virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const = 0;
 
+    //! Maximum response of the displacement time series.
+    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const = 0;
+
     //! Calculate the strain for the transfer function and the velocity FAS
     virtual double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
 

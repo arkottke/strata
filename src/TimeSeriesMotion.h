@@ -63,6 +63,7 @@ public:
     static QStringList formatList();
 
     virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
     virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
 
     QVector<double> computeSa(const QVector<double> & period, double damping,
