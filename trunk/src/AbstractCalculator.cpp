@@ -88,6 +88,20 @@ const QVector<double> AbstractCalculator::maxAccelProfile() const
     return profile;
 }
 
+const QVector<double> AbstractCalculator::maxDispProfile() const
+{
+    QVector<double> profile(m_nsl + 1);
+
+    for (int i = 0; i <= m_nsl; ++i) {
+        AbstractMotion::Type type = (i == 0) ? AbstractMotion::Outcrop : AbstractMotion::Within;
+        // Compute the acceleration at the top of each layer
+        profile[i] = m_motion->maxDisp(
+                calcAccelTf(m_site->inputLocation(), m_motion->type(), Location(i, 0), type ));
+    }
+
+    return profile;
+}
+
 const QVector<double> AbstractCalculator::maxVelProfile() const
 {
     QVector<double> profile(m_nsl + 1);

@@ -302,11 +302,11 @@ void ResultsPage::colorCurve(int row)
 
 void ResultsPage::uncolorCurve(int row)
 {
-    Q_ASSERT(0 <= row && row < m_curves.size());
-
-    // Turn the selected curve gray and set it to the regular zOrder
-    m_curves[row]->setPen(QPen(Qt::darkGray));
-    m_curves[row]->setZ(AbstractOutput::zOrder());
+    if (0 <= row && row < m_curves.size()) {
+        // Turn the selected curve gray and set it to the regular zOrder
+        m_curves[row]->setPen(QPen(Qt::darkGray));
+        m_curves[row]->setZ(AbstractOutput::zOrder());
+    }
 }
 
 void ResultsPage::setMotionEnabled(bool enabled)
