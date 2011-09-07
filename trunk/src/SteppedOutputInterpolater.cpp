@@ -21,6 +21,8 @@
 
 #include "SteppedOutputInterpolater.h"
 
+#include <QDebug>
+
 SteppedOutputInterpolater::SteppedOutputInterpolater()
 {
 }
@@ -29,7 +31,6 @@ QVector<double> SteppedOutputInterpolater::calculate(
         const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi)
 {
     // x is at the base of the layer
-
     Q_ASSERT(x.size() <= y.size());
 
     // Interpolated data
@@ -51,6 +52,10 @@ QVector<double> SteppedOutputInterpolater::calculate(
     // Add the bedrock values to the end
     if (x.size() < y.size())
         yi << y.last();
+
+    if (xi.size() < yi.size()) {
+        qDebug() << xi.size() << yi.size();
+    }
 
     return yi;
 }
