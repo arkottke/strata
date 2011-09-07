@@ -29,9 +29,7 @@
 #include <QVariant>
 #include <QVector>
 
-#include <qwt_data.h>
-
-class ResponseSpectrum : public MyAbstractTableModel, public QwtData
+class ResponseSpectrum : public MyAbstractTableModel
 {
     Q_OBJECT
 
@@ -65,15 +63,8 @@ public:
     QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
     Qt::ItemFlags flags ( const QModelIndex &index ) const;
 
-    bool insertRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-    bool removeRows ( int row, int count, const QModelIndex &parent = QModelIndex() );
-
-    //!@{ Methods for plotting working with the QwtData interface
-    virtual QwtData* copy() const;
-    virtual size_t size() const;
-    virtual double x(size_t i) const;
-    virtual double y(size_t i) const;
-    //!@}
+    bool insertRows( int row, int count, const QModelIndex &parent = QModelIndex() );
+    bool removeRows( int row, int count, const QModelIndex &parent = QModelIndex() );
 
 signals:
     void wasModified();

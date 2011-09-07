@@ -139,24 +139,30 @@ void SubLayer::setInitialStrain(double strain)
     m_damping = m_soilLayer->soilType()->dampingModel()->interp(strain);
 }
 
-void SubLayer::setStrain(double effStrain, double maxStrain)
+void SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperties)
 {
     m_effStrain = effStrain;
     m_maxStrain = maxStrain;
-    // Save the strain and old properties
-    m_oldShearMod = m_shearMod;
-    m_oldDamping = m_damping;
 
     // Compute the new values
-    interp(effStrain, &m_shearMod, &m_damping);
-    m_normShearMod = m_shearMod / initialShearMod();
+    if (updateProperties) {
+        // Save the strain and old properties
+        m_oldShearMod = m_shearMod;
+        m_oldDamping = m_damping;
 
-    // Update the shear-wave velocity
-    m_shearVel = sqrt(m_shearMod / m_soilLayer->density());
+        interp(effStrain, &m_shearMod, &m_damping);
+        m_normShearMod = m_shearMod / initialShearMod();
 
-    // Compute the error between old and new values of the damping and shear modulus
-    m_shearModError = 100 * fabs(m_shearMod - m_oldShearMod) / m_shearMod;
-    m_dampingError  = 100 * fabs(m_damping - m_oldDamping) / m_damping;
+        // Update the shear-wave velocity
+        m_shearVel = sqrt(m_shearMod / m_soilLayer->density());
+
+        // Compute the error between old and new values of the damping and shear modulus
+        m_shearModError = 100 * fabs(m_shearMod - m_oldShearMod) / m_shearMod;
+        m_dampingError  = 100 * fabs(m_damping - m_oldDamping) / m_damping;
+    } else {
+        m_shearModError = 0;
+        m_dampingError = 0;
+    }
 }
 
 double SubLayer::shearVel() const

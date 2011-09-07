@@ -118,8 +118,7 @@ void ResultsPage::print(QPrinter* printer)
 //    else if ( m_selectedOutput->orientation() == Qt::Vertical )
 //        printer->setOrientation(QPrinter::Portrait);
 
-    m_plot->print(*printer);
-
+    m_plot->render(printer);
     colorCurve(m_selectedRow);
 }
 
@@ -222,7 +221,7 @@ void ResultsPage::setSelectedOutput(int index)
 #if QWT_VERSION < 0x050200
             item->setIdentfierWidth(30);
 #else
-            item->setIdentifierWidth(30);
+            item->setIdentifierSize(QSize(30, 8));
 #endif
     }
 
@@ -420,9 +419,10 @@ QTabWidget* ResultsPage::createDataTabWidget()
     
     // Picker to allow for selection of the closest curve and displays curve
     // coordinates with a cross rubber band.
-    QwtPlotPicker* picker = new QwtPlotPicker(
-            QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection,
-            QwtPicker::CrossRubberBand, QwtPicker::ActiveOnly, m_plot->canvas());
+    QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
+                                              QwtPicker::CrossRubberBand, QwtPicker::ActiveOnly,
+                                              m_plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     connect(picker, SIGNAL(appended(QPoint)), this, SLOT(pointSelected(QPoint)));
 

@@ -35,6 +35,11 @@ class AbstractProfileOutput : public AbstractOutput
     friend QDataStream & operator>> (QDataStream & in, AbstractProfileOutput* ao);
 
 public:
+    enum CurveType{
+        Yfx, //!< Y data is a function of x data
+        Xfx  //!< X data is a function of y data
+    };
+
     explicit AbstractProfileOutput(OutputCatalog* catalog);
 
     virtual QString fullName() const;
@@ -43,7 +48,7 @@ public:
     bool enabled() const;
     void setEnabled(bool enabled);
 
-    virtual QwtPlotCurve::CurveType curveType() const;
+    virtual AbstractOutput::CurveType curveType() const;
 
 protected:
     QString fileName(int motion = 0) const;

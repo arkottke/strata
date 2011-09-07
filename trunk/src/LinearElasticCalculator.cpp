@@ -19,8 +19,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "LinearElasticCalculator.h"
 
+#include "RockLayer.h"
 #include "SoilProfile.h"
 #include "SubLayer.h"
 #include "Units.h"
@@ -34,11 +37,15 @@ bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
 {
     init(motion, site);
 
-
     // Complex shear modulus for all layers.
     // The shear modulus is constant over the frequency range.
     for (int i = 0; i < m_nsl; ++i)
         m_shearMod[i].fill(calcCompShearMod(m_site->shearMod(i), m_site->damping(i) / 100.));
+
+    // Compute the bedrock properties -- these do not change during the process.
+    // The shear modulus is constant over the frequency range.
+    m_shearMod[m_nsl].fill(calcCompShearMod(
+            m_site->bedrock()->shearMod(), m_site->bedrock()->damping() / 100.));
 
     // Compute upgoing and downgoing waves
     bool success = calcWaves();
@@ -53,7 +60,7 @@ bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
             // Compute maximum shear strain
             const double strainMax = 100 * Units::instance()->gravity() * m_motion->calcMaxStrain(strainTf);
 
-            m_site->subLayers()[i].setStrain(strainMax, strainMax);
+            m_site->subLayers()[i].setStrain(strainMax, strainMax, false);
         }
     }
 

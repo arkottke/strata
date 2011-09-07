@@ -38,6 +38,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
 #include <qwt_scale_engine.h>
 #include <qwt_text.h>
 
@@ -54,6 +55,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     // Name
     QLineEdit *lineEdit = new QLineEdit;
     lineEdit->setText(m_motion->name());
+    lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             m_motion, SLOT(setName(QString)));
@@ -64,6 +66,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     // Description
     lineEdit = new QLineEdit;
     lineEdit->setText(m_motion->description());
+    lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             m_motion, SLOT(setDescription(QString)));
@@ -74,6 +77,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     QComboBox *comboBox = new QComboBox;
     comboBox->addItems(AbstractMotion::typeList());
     comboBox->setCurrentIndex(m_motion->type());
+    comboBox->setDisabled(readOnly);
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             m_motion, SLOT(setType(int)));
     
@@ -87,6 +91,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     spinBox->setSingleStep(0.10);
     spinBox->setSuffix(" s");
     spinBox->setValue(m_motion->duration());
+    spinBox->setReadOnly(readOnly);
 
     connect(spinBox, SIGNAL(valueChanged(double)),
             m_motion, SLOT(setDuration(double)));
@@ -106,9 +111,9 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     QwtPlot *plot = new QwtPlot;
     plot->setAutoReplot(true);
     QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     QFont font = QApplication::font();
@@ -127,7 +132,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
 
     m_saCurve = new QwtPlotCurve;
     m_saCurve->setPen(QPen(Qt::blue));
-    m_saCurve->setData(*(m_motion->respSpec()));
+    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
     m_saCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("RS Plot"));
@@ -136,9 +141,9 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     plot = new QwtPlot;
     plot->setAutoReplot(true);
     picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     font = QApplication::font();
@@ -157,7 +162,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
 
     m_fasCurve = new QwtPlotCurve;    
     m_fasCurve->setPen(QPen(Qt::blue));
-    m_fasCurve->setData(*m_motion);
+    m_fasCurve->setSamples(m_motion->freq(), m_motion->fourierAcc());
     m_fasCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("FAS Plot"));
@@ -196,8 +201,8 @@ void RvtMotionDialog::calculate()
 
     m_rsTableView->resizeRowsToContents();
 
-    m_fasCurve->setData(*m_motion);
-    m_saCurve->setData(*(m_motion->respSpec()));
+    m_fasCurve->setSamples(m_motion->freq(), m_motion->fourierAcc());
+    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
 }
 
 void RvtMotionDialog::tryAccept()

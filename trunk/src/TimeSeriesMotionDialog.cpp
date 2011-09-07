@@ -43,6 +43,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
 #include <qwt_scale_engine.h>
 #include <qwt_symbol.h>
 #include <qwt_text.h>
@@ -223,7 +224,7 @@ void TimeSeriesMotionDialog::apply()
 {
     // Clear the plots
     foreach (QwtPlotCurve *curve, QList<QwtPlotCurve *>() << m_atsCurve << m_saCurve << m_fasCurve) {
-        curve->setData(QVector<double>(), QVector<double>());
+        curve->setSamples(QVector<double>(), QVector<double>());
     }
 
     if (tryApply()) {
@@ -460,9 +461,9 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
     QwtPlot *plot = new QwtPlot;
     plot->setAutoReplot(true);
     QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     QFont font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
@@ -486,9 +487,9 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
     plot = new QwtPlot;
     plot->setAutoReplot(true);
     picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     font = QApplication::font();
@@ -515,9 +516,9 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
     plot = new QwtPlot;
     plot->setAutoReplot(true);
     picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     font = QApplication::font();
@@ -564,11 +565,11 @@ void TimeSeriesMotionDialog::loadPreview(const QString &fileName)
 
 void TimeSeriesMotionDialog::plot()
 {
-    m_atsCurve->setData(m_motion->time(), m_motion->timeSeries(TimeSeriesMotion::Acceleration));
-    m_saCurve->setData(*(m_motion->respSpec()));
+    m_atsCurve->setSamples(m_motion->time(), m_motion->timeSeries(TimeSeriesMotion::Acceleration));
+    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
 
     // Don't plot the first point (0 Hz)
-    m_fasCurve->setData(
+    m_fasCurve->setSamples(
             m_motion->freq().data() + 1,
             m_motion->absFourierAcc().data() + 1,
             m_motion->freq().size() - 1);

@@ -485,8 +485,7 @@ void SourceTheoryRvtMotion::calcGeoAtten()
 void SourceTheoryRvtMotion::calculate()
 {
     // Conversion factor to convert from dyne-cm into gravity-sec
-    // const double conv = 1e-20 / 981;
-    const double conv = 1e-18 / 981.;
+    const double conv = 1e-20 / 981;
 
     // Constant term for the model component
     const double C = (0.55 * 2) / (M_SQRT2 * 4 * M_PI * m_density * pow(m_shearVelocity, 3));
@@ -507,7 +506,7 @@ void SourceTheoryRvtMotion::calculate()
 
         // Combine the three components and convert from displacement to
         // acceleleration
-        m_fourierAcc[i] = conv * pow(M_2_PI * freqAt(i), 2) * sourceComp * pathComp * siteComp;
+        m_fourierAcc[i] = conv * pow(2 * M_PI * freqAt(i), 2) * sourceComp * pathComp * siteComp;
     }
 
     dataChanged(index(0, AmplitudeColumn), index(m_fourierAcc.size(), AmplitudeColumn));

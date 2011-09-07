@@ -202,28 +202,6 @@ bool ResponseSpectrum::removeRows ( int row, int count, const QModelIndex &paren
     return true;
 }
 
-QwtData* ResponseSpectrum::copy() const
-{
-    return new QwtArrayData(m_period, m_sa);
-}
-
-size_t ResponseSpectrum::size() const
-{
-
-    return rowCount();
-}
-
-double ResponseSpectrum::x(size_t i) const
-{
-    return m_period.at(i);
-}
-
-double ResponseSpectrum::y(size_t i) const
-{
-    return m_sa.at(i);
-}
-
-
 QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs)
 {
     out << (quint8)1;

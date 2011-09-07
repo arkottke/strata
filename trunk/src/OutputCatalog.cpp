@@ -295,7 +295,7 @@ Dimension* OutputCatalog::period()
     return m_period;
 }
 
-const double OutputCatalog::damping() const
+double OutputCatalog::damping() const
 {
     return m_damping;
 }
@@ -307,12 +307,12 @@ void OutputCatalog::setDamping(double damping)
     emit wasModified();
 }
 
-const int OutputCatalog::motionCount() const
+int OutputCatalog::motionCount() const
 {
     return m_motionCount;
 }
 
-const int OutputCatalog::siteCount() const
+int OutputCatalog::siteCount() const
 {
     return m_siteCount;
 }

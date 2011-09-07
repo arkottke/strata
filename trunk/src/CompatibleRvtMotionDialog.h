@@ -45,6 +45,7 @@ protected slots:
     void openFrequencyDialog();
 
 private:
+
     CompatibleRvtMotion *m_motion;
 
     QwtPlotCurve *m_fasCurve;

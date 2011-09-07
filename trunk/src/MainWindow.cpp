@@ -325,6 +325,11 @@ bool MainWindow::saveAs()
             "Strata File (*.strata)");
 
     if (!fileName.isEmpty()) {
+        // Make sure that the file name ends with .strata
+        if (!fileName.endsWith('.strata', Qt::CaseInsensitive)) {
+            fileName.append('.strata');
+        }
+
         // Save the state
         m_settings->setValue("projectDirectory", QFileInfo(fileName).path());
         // Update the document title

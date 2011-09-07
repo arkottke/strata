@@ -86,7 +86,7 @@ public:
          * \param effStrain effective strain -- maximum strain reduced by effective strain ratio
          * \param maxStrain maximum strain
          */
-    void setStrain(double effStrain, double maxStrain);
+    void setStrain(double effStrain, double maxStrain, bool updateProperties=true);
 
     //! The shear-wave velocity -- corrected for strain
     double shearVel() const;
