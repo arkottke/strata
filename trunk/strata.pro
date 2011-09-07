@@ -40,15 +40,15 @@ win32 {
         -L"C:/devel/GnuWin32/bin"
     INCLUDEPATH += . \
         "C:/devel/fftw-3.2.2" \
-        "C:/devel/qwt-5.2/src" \
+        "C:/devel/qwt-6.0/src" \
         "C:/devel/GnuWin32/include"
     RC_FILE = strata.rc
     CONFIG(debug, debug|release ) {
-        LIBS += -lqwtd5 \
-            -L"C:/devel/qwt-5.2/lib"
+        LIBS += -lqwtd \
+            -L"C:/devel/qwt-6.0/lib"
     } else {
-        LIBS += -lqwt5 \
-            -L"C:/devel/qwt-5.2/lib"
+        LIBS += -lqwt \
+            -L"C:/devel/qwt-6.0/lib"
     }
 }
 
@@ -179,7 +179,8 @@ HEADERS += src/AbstractCalculator.h \
     src/VelocityLayer.h \
     src/VelocityVariation.h \
     src/VelTimeSeriesOutput.h \
-    src/VerticalStressProfileOutput.h
+    src/VerticalStressProfileOutput.h \
+    src/MaxDispProfileOutput.h
 
 SOURCES +=     src/AbstractCalculator.cpp \
     src/AbstractDistribution.cpp \
@@ -308,7 +309,8 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/VelocityLayer.cpp \
     src/VelocityVariation.cpp \
     src/VelTimeSeriesOutput.cpp \
-    src/VerticalStressProfileOutput.cpp
+    src/VerticalStressProfileOutput.cpp \
+    src/MaxDispProfileOutput.cpp
 
 RESOURCES += resources/resources.qrc
 OTHER_FILES += TODO.txt
