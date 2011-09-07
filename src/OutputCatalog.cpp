@@ -27,16 +27,14 @@
 #include "MotionLibrary.h"
 #include "ProfilesOutputCatalog.h"
 #include "RatiosOutputCatalog.h"
-#include "RockLayer.h"
 #include "SoilProfile.h"
 #include "SoilTypesOutputCatalog.h"
+#include "SubLayer.h"
 #include "SpectraOutputCatalog.h"
 #include "TextLog.h"
 #include "TimeSeriesMotion.h"
 #include "TimeSeriesOutputCatalog.h"
 #include "Units.h"
-
-#include <QDebug>
 
 OutputCatalog::OutputCatalog(QObject *parent) :
     QAbstractTableModel(parent), m_selectedOutput(0)
@@ -485,7 +483,10 @@ void OutputCatalog::setReadOnly(bool readOnly)
 
 void OutputCatalog::saveResults(int motion, AbstractCalculator* const calculator)
 {
-    populateDepthVector(calculator->site()->bedrock()->depth());
+    // Need to populate the depth vector based on the depth to the last
+    // sublayer. These depths are updated as the velocity profile is varied.
+    populateDepthVector(
+                calculator->site()->subLayers().last().depthToBase());
 
     foreach (AbstractOutput* output, m_outputs)
         output->addData(motion, calculator);
