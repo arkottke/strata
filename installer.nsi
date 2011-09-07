@@ -13,7 +13,7 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\Qt\2010.05\qt"
+!Define QT_PATH "C:\devel\QtSDK\Desktop\Qt\4.7.4\mingw\"
 
 ;--------------------------------
 ;Variables
@@ -122,7 +122,7 @@ Section "!Core Files" SecProgram
   file "${QT_PATH}\bin\QtScript4.dll"
   file "${QT_PATH}\bin\QtSvg4.dll"
   file "${QT_PATH}\bin\QtXml4.dll"
-  file "C:\devel\qwt-5.2\lib\qwt5.dll"
+  file "C:\devel\qwt-6.0\lib\qwt.dll"
   
   ;Plugins for SVG icons
   SetOutPath "$INSTDIR\iconengines" 
@@ -224,7 +224,7 @@ Section "Uninstall"
   Delete "$INSTDIR\QtScript4.dll"
   Delete "$INSTDIR\QtSvg4.dll"
   Delete "$INSTDIR\QtXml4.dll"
-  Delete "$INSTDIR\qwt5.dll"
+  Delete "$INSTDIR\qwt.dll"
   Delete "$INSTDIR\iconengines\qsvgicon4.dll"
   RMDir  "$INSTDIR\iconengines"
   Delete "$INSTDIR\imageformats\qsvg4.dll"
