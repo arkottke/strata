@@ -41,6 +41,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
 #include <qwt_scale_engine.h>
 #include <qwt_symbol.h>
 #include <qwt_text.h>
@@ -58,6 +59,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     // Name
     QLineEdit *lineEdit = new QLineEdit;
     lineEdit->setText(m_motion->name());
+    lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             m_motion, SLOT(setName(QString)));
@@ -68,6 +70,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     // Description
     lineEdit = new QLineEdit;
     lineEdit->setText(m_motion->description());
+    lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             m_motion, SLOT(setDescription(QString)));
@@ -79,6 +82,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     QComboBox *comboBox = new QComboBox;
     comboBox->addItems(AbstractMotion::typeList());
     comboBox->setCurrentIndex(m_motion->type());
+    comboBox->setDisabled(readOnly);
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             m_motion, SLOT(setType(int)));
 
@@ -92,6 +96,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     spinBox->setSingleStep(0.10);
     spinBox->setSuffix(" s");
     spinBox->setValue(m_motion->duration());
+    spinBox->setReadOnly(readOnly);
 
     connect(spinBox, SIGNAL(valueChanged(double)),
             m_motion, SLOT(setDuration(double)));
@@ -106,6 +111,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     spinBox->setSingleStep(1);
     spinBox->setSuffix(" %");
     spinBox->setValue(m_motion->targetRespSpec()->damping());
+    spinBox->setReadOnly(readOnly);
 
     connect(spinBox, SIGNAL(valueChanged(double)),
             m_motion->targetRespSpec(), SLOT(setDamping(double)));
@@ -116,6 +122,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     // Target response specturm
     TableGroupBox *tableGroupBox = new TableGroupBox(tr("Target Response Spectrum"), this);
     tableGroupBox->setModel(m_motion->targetRespSpec());
+    tableGroupBox->setReadOnly(readOnly);
 
     layout->addWidget(tableGroupBox, row++, 0, 1, 2);
 
@@ -134,9 +141,9 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     QwtPlot *plot = new QwtPlot;
     plot->setAutoReplot(true);
     QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     QFont font = QApplication::font();
@@ -155,14 +162,16 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
 
     m_saCurve = new QwtPlotCurve;
     m_saCurve->setPen(QPen(Qt::blue));
-    m_saCurve->setData(*(m_motion->respSpec()));
+    m_saCurve->setSamples(m_motion->respSpec()->period(),
+                       m_motion->respSpec()->sa());
     m_saCurve->attach(plot);
 
     m_targetSaCurve = new QwtPlotCurve;
     m_targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
-    m_targetSaCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(),
+    m_targetSaCurve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse, QBrush(),
                                          QPen(Qt::red), QSize(5,5)));
-    m_targetSaCurve->setData(*(m_motion->targetRespSpec()));
+    m_targetSaCurve->setSamples(m_motion->targetRespSpec()->period(),
+                             m_motion->targetRespSpec()->sa());
     m_targetSaCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("RS Plot"));
@@ -171,9 +180,8 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     plot = new QwtPlot;
     plot->setAutoReplot(true);
     picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                               QwtPlotPicker::CrossRubberBand,
+                               QwtPlotPicker::ActiveOnly, plot->canvas());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     font = QApplication::font();
@@ -192,7 +200,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
 
     m_fasCurve = new QwtPlotCurve;
     m_fasCurve->setPen(QPen(Qt::blue));
-    m_fasCurve->setData(*m_motion);
+    m_fasCurve->setSamples(m_motion->freq(),m_motion->fourierAcc());
     m_fasCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("FAS Plot"));
@@ -263,9 +271,11 @@ void CompatibleRvtMotionDialog::calculate()
     m_fasTableView->resizeRowsToContents();
     m_rsTableView->resizeRowsToContents();
 
-    m_fasCurve->setData(*m_motion);
-    m_saCurve->setData(*(m_motion->respSpec()));
-    m_targetSaCurve->setData(*(m_motion->targetRespSpec()));
+    m_fasCurve->setSamples(m_motion->freq(),m_motion->fourierAcc());
+    m_saCurve->setSamples(m_motion->respSpec()->period(),
+                          m_motion->respSpec()->sa());
+    m_targetSaCurve->setSamples(m_motion->targetRespSpec()->period(),
+                                m_motion->targetRespSpec()->sa());
 }
 
 void CompatibleRvtMotionDialog::tryAccept()
@@ -273,3 +283,4 @@ void CompatibleRvtMotionDialog::tryAccept()
     m_motion->calculate();
     accept();
 }
+

@@ -80,10 +80,10 @@ public:
     Dimension* frequency();
     Dimension* period();
 
-    const double damping() const;
+    double damping() const;
 
-    const int motionCount() const;
-    const int siteCount() const;
+    int motionCount() const;
+    int siteCount() const;
 
     const QString & title() const;
     const QString & filePrefix() const;

@@ -48,7 +48,7 @@ private slots:
 
 private:
     //! Create the GUI for the source theory inputs
-    QTabWidget* createSourceTheoryForm();
+    QTabWidget* createSourceTheoryForm(bool readOnly);
 
     SourceTheoryRvtMotion *m_motion;
 

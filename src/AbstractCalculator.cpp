@@ -151,8 +151,8 @@ bool AbstractCalculator::calcWaves()
         }
     }
 
-    for ( int i = 0; i < m_nsl; ++i ) {
-        for ( int j = 0; j < m_nf; ++j ) {
+    for (int i = 0; i < m_nsl; ++i ) {
+        for (int j = 0; j < m_nf; ++j ) {
             // In the top surface layer, the up-going and down-going waves have
             // an amplitude of 1 as they are completely reflected at the
             // surface.
@@ -160,7 +160,6 @@ bool AbstractCalculator::calcWaves()
                 m_waveA[i][j] = 1.0;
                 m_waveB[i][j] = 1.0;
             }
-
 
             // At frequencies less than 0.000001 (zero) the amplitude of the
             // upgoing and downgoing waves is 1.

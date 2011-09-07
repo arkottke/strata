@@ -60,9 +60,9 @@ void AbstractProfileOutput::setEnabled(bool enabled)
     emit wasModified();
 }
 
-QwtPlotCurve::CurveType AbstractProfileOutput::curveType() const
+AbstractOutput::CurveType AbstractProfileOutput::curveType() const
 {
-    return QwtPlotCurve::Xfy;
+    return AbstractOutput::Xfy;
 }
 
 bool AbstractProfileOutput::needsDepth() const

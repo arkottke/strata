@@ -104,7 +104,7 @@ QVariant AbstractOutput::headerData(int section, Qt::Orientation orientation, in
     switch (orientation) {
     case Qt::Horizontal:
         if (section == 0) {
-            return (curveType() == QwtPlotCurve::Yfx) ?
+            return (curveType() == Yfx) ?
                     xLabel() : yLabel();
         } else if (m_statistics && m_statistics->hasEnoughData()
             && section == columnCount() - 2) {
@@ -177,7 +177,7 @@ void AbstractOutput::finalize()
 void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves) const
 {
     curves.clear();
-    qwtPlot->clear();
+    qwtPlot->detachItems();
 
     // Set the scale engine of the axis
     qwtPlot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine());
@@ -190,23 +190,22 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
     for (int i = 0; i < siteCount(); ++i) {
         for (int j = 0; j < motionCount(); ++j) {
 
-            const QVector<double> & x = (curveType() == QwtPlotCurve::Yfx) ?
+            const QVector<double> & x = (curveType() == Yfx) ?
                                         ref(j) : m_data.at(i).at(j);
 
-            const QVector<double> & y = (curveType() == QwtPlotCurve::Yfx) ?
+            const QVector<double> & y = (curveType() == Yfx) ?
                                         m_data.at(i).at(j) : ref(j);
 
             const int n = m_data.at(i).at(j).size();
 
             QwtPlotCurve* curve = new QwtPlotCurve;
 
-            curve->setData(
+            curve->setSamples(
                     x.data() + m_offset,
                     y.data() + m_offset,
                     n - m_offset);
             curve->setPen(QPen(Qt::darkGray));
             curve->setZ(zOrder());
-            curve->setCurveType(curveType());
 
             curve->setItemAttribute(QwtPlotItem::Legend, false);
 
@@ -369,9 +368,9 @@ void AbstractOutput::labelAxes(QwtPlot* const qwtPlot) const
     qwtPlot->setAxisTitle(QwtPlot::yLeft, text);
 }
 
-QwtPlotCurve::CurveType AbstractOutput::curveType() const
+AbstractOutput::CurveType AbstractOutput::curveType() const
 {
-    return QwtPlotCurve::Yfx;
+    return Yfx;
 }
 
 int AbstractOutput::zOrder()
@@ -402,12 +401,12 @@ bool AbstractOutput::motionIndependent() const
     return false;
 }
 
-const int AbstractOutput::siteCount() const
+int AbstractOutput::siteCount() const
 {
     return siteIndependent() ? 1 : m_catalog->siteCount();
 }
 
-const int AbstractOutput::motionCount() const
+int AbstractOutput::motionCount() const
 {
     return motionIndependent() ? 1 : m_catalog->motionCount();
 }

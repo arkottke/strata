@@ -40,6 +40,11 @@ class AbstractOutput : public QAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, AbstractOutput* ao);
 
 public:
+    enum CurveType{
+        Yfx,
+        Xfy,
+    };
+
     explicit AbstractOutput(OutputCatalog* catalog);
 
     virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -119,13 +124,13 @@ public:
     virtual bool motionIndependent() const;
 
     //! Number of known sites
-    const int siteCount() const;
+    int siteCount() const;
 
     //! Number of known motions
-    const int motionCount() const;
+    int motionCount() const;
 
     //! Type of Curve
-    virtual QwtPlotCurve::CurveType curveType() const;
+    virtual AbstractOutput::CurveType curveType() const;
 
     //! Z order for a data curve
     static int zOrder();

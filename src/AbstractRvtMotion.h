@@ -29,11 +29,9 @@
 #include <QTextStream>
 #include <QVector>
 
-#include <qwt_data.h>
-
 #include <gsl/gsl_integration.h>
 
-class AbstractRvtMotion : public AbstractMotion, public QwtData
+class AbstractRvtMotion : public AbstractMotion
 {
     Q_OBJECT
 
@@ -58,13 +56,6 @@ public:
     virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
     //!@}
 
-    //!@{ Methods for plotting working with the QwtData interface
-    virtual QwtData* copy() const;
-    virtual size_t size() const;
-    virtual double x(size_t i) const;
-    virtual double y(size_t i) const;
-    //!@}
-
     //! Compute the maximum reponse of the motion and the applied transfer function
     virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
     virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
@@ -79,7 +70,7 @@ public:
     virtual const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
 
     //! A reference to the Fourier amplitude spectrum
-    const QVector<double> & fas() const;
+    const QVector<double> & fourierAcc() const;
 
     virtual double freqMax() const;
 

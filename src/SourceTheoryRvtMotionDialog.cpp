@@ -42,6 +42,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
 #include <qwt_scale_engine.h>
 #include <qwt_symbol.h>
 #include <qwt_text.h>
@@ -51,7 +52,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
 {
     QGridLayout *layout = new QGridLayout;
 
-    layout->addWidget(createSourceTheoryForm(), 0, 0);
+    layout->addWidget(createSourceTheoryForm(readOnly), 0, 0);
 
     // Create a tabs for the plots and table of data
     QTabWidget *tabWidget = new QTabWidget;
@@ -59,10 +60,12 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
     // Response spectrum plot
     QwtPlot *plot = new QwtPlot;
     plot->setAutoReplot(true);
+
     QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
+
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     QFont font = QApplication::font();
@@ -81,7 +84,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
 
     m_saCurve = new QwtPlotCurve;
     m_saCurve->setPen(QPen(Qt::blue));
-    m_saCurve->setData(*(m_motion->respSpec()));
+    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
     m_saCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("RS Plot"));
@@ -90,9 +93,9 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
     plot = new QwtPlot;
     plot->setAutoReplot(true);
     picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPlotPicker::PointSelection,
-                                              QwtPlotPicker::CrossRubberBand,
-                                              QwtPlotPicker::ActiveOnly, plot->canvas());
+                                              QwtPicker::CrossRubberBand,
+                                              QwtPicker::ActiveOnly, plot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
     font = QApplication::font();
@@ -111,7 +114,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
 
     m_fasCurve = new QwtPlotCurve;
     m_fasCurve->setPen(QPen(Qt::blue));
-    m_fasCurve->setData(*m_motion);
+    m_fasCurve->setSamples(m_motion->freq(), m_motion->fourierAcc());
     m_fasCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("FAS Plot"));
@@ -155,7 +158,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
     addAction(EditActions::instance()->pasteAction());
 }
 
-QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
+QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm(bool readOnly)
 {
     QTabWidget *tabWidget = new QTabWidget;
     QFormLayout *layout = new QFormLayout;
@@ -163,6 +166,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     // Name
     QLineEdit *lineEdit = new QLineEdit;
     lineEdit->setText(m_motion->nameTemplate());
+    lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             m_motion, SLOT(setName(QString)));    
@@ -171,6 +175,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     // Description
     lineEdit = new QLineEdit;
     lineEdit->setText(m_motion->description());
+    lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             m_motion, SLOT(setDescription(QString)));
@@ -186,6 +191,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setRange(4, 9);
     doubleSpinBox->setDecimals(2);
     doubleSpinBox->setSingleStep(0.1);
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->momentMag());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -199,6 +205,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setDecimals(1);
     doubleSpinBox->setSingleStep(1);
     doubleSpinBox->setSuffix(" km");
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->distance());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -212,6 +219,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setDecimals(1);
     doubleSpinBox->setSingleStep(1);
     doubleSpinBox->setSuffix(" km");
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->depth());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -235,6 +243,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setDecimals(0);
     doubleSpinBox->setSingleStep(5);
     doubleSpinBox->setSuffix(" bars");
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->stressDrop());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -252,6 +261,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setRange(0, 1);
     doubleSpinBox->setDecimals(4);
     doubleSpinBox->setSingleStep(0.01);
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->geoAtten());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -268,6 +278,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setRange(0, 0.20);
     doubleSpinBox->setDecimals(2);
     doubleSpinBox->setSingleStep(0.01);
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->pathDurCoeff());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -289,6 +300,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setRange(50, 10000);
     doubleSpinBox->setDecimals(0);
     doubleSpinBox->setSingleStep(10);
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->pathAttenCoeff());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -307,6 +319,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setRange(0.0, 1.0);
     doubleSpinBox->setDecimals(2);
     doubleSpinBox->setSingleStep(0.01);
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->pathAttenPower());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -326,6 +339,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setDecimals(2);
     doubleSpinBox->setSingleStep(0.1);
     doubleSpinBox->setSuffix(" km/sec");
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->shearVelocity());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -343,6 +357,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setDecimals(2);
     doubleSpinBox->setSingleStep(0.1);
     doubleSpinBox->setSuffix(" g/cc");
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->density());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -360,6 +375,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setDecimals(4);
     doubleSpinBox->setSingleStep(0.001);
     doubleSpinBox->setSuffix(" sec");
+    doubleSpinBox->setReadOnly(readOnly);
 
     doubleSpinBox->setValue(m_motion->siteAtten());
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
@@ -379,6 +395,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     doubleSpinBox->setReadOnly(true);
     doubleSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
     doubleSpinBox->setValue(m_motion->duration());
+    doubleSpinBox->setReadOnly(readOnly);
 
 
     connect(m_motion, SIGNAL(durationChanged(double)),
@@ -397,6 +414,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
     QComboBox *comboBox = new QComboBox;
     comboBox->addItems(CrustalAmplification::sourceList());
     comboBox->setCurrentIndex(m_motion->crustalAmp()->model());
+    comboBox->setDisabled(readOnly);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             m_motion->crustalAmp(), SLOT(setModel(int)));
@@ -410,6 +428,8 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
 
     TableGroupBox *tableGroupBox = new TableGroupBox(tr("Amplification"));
     tableGroupBox->setModel(m_motion->crustalAmp());
+    tableGroupBox->setReadOnly(readOnly);
+
     connect(m_motion->crustalAmp(), SIGNAL(readOnlyChanged(bool)),
             tableGroupBox, SLOT(setReadOnly(bool)));
 
@@ -417,6 +437,8 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm()
 
     tableGroupBox = new TableGroupBox(tr("Crustal Model"));
     tableGroupBox->setModel(m_motion->crustalAmp()->crustalModel());
+    tableGroupBox->setReadOnly(readOnly);
+
     connect(m_motion->crustalAmp(), SIGNAL(needsCrustalModelChanged(bool)),
             tableGroupBox, SLOT(setVisible(bool)));
 
@@ -456,8 +478,8 @@ void SourceTheoryRvtMotionDialog::calculate()
 {
     m_motion->calculate();
 
-    m_fasCurve->setData(*m_motion);
-    m_saCurve->setData(*(m_motion->respSpec()));
+    m_fasCurve->setSamples(m_motion->freq(), m_motion->fourierAcc());
+    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
 }
 
 void SourceTheoryRvtMotionDialog::tryAccept()

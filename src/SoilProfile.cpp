@@ -1025,14 +1025,14 @@ void SoilProfile::updateDepths()
     }
 }
 
-SoilLayer* SoilProfile::createRepresentativeSoilLayer( double top, double base)
+SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
 {
     SoilLayer* selectedLayer = 0;
     double longestTime = 0;
 
     // If the layer is deeper than the site profile, use the deepest layer
-    if ( top > m_soilLayers.last()->depthToBase() )
-        return m_soilLayers.last();
+    if (top > m_soilLayers.last()->depthToBase())
+        return new SoilLayer(m_soilLayers.last());
 
     foreach (SoilLayer* sl, m_soilLayers) {
         // Skip the layer if it isn't in the depth range of interest

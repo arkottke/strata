@@ -37,7 +37,7 @@
 
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
 {    
-    m_oscCorrection = BooreJoyner;
+    m_oscCorrection = LiuPezeshk;
     m_duration = 0;
     m_okToContinue = false;
     m_workspace = gsl_integration_workspace_alloc(1024);
@@ -101,24 +101,9 @@ QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-QwtData* AbstractRvtMotion::copy() const
+const QVector<double> & AbstractRvtMotion::fourierAcc() const
 {
-    return new QwtArrayData(freq(), m_fourierAcc);
-}
-
-size_t AbstractRvtMotion::size() const
-{
-    return rowCount();
-}
-
-double AbstractRvtMotion::x(size_t i) const
-{
-    return freq().at(i);
-}
-
-double AbstractRvtMotion::y(size_t i) const
-{
-    return m_fourierAcc.at(i);
+    return m_fourierAcc;
 }
 
 double AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const
