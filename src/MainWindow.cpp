@@ -326,8 +326,8 @@ bool MainWindow::saveAs()
 
     if (!fileName.isEmpty()) {
         // Make sure that the file name ends with .strata
-        if (!fileName.endsWith('.strata', Qt::CaseInsensitive)) {
-            fileName.append('.strata');
+        if (!fileName.endsWith(".strata", Qt::CaseInsensitive)) {
+            fileName.append(".strata");
         }
 
         // Save the state
