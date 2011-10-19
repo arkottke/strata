@@ -44,8 +44,7 @@ public:
         TypeColumn,
         PgaColumn,
         PgvColumn,
-        ScaleColumn,
-        FreqMaxColumn
+        ScaleColumn
     };
 
     //! Approach for preforming the analysi

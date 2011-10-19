@@ -46,7 +46,6 @@ TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
     // Initialize the values -- appropriate values for an AT2 file
     m_inputUnits = Gravity;
     m_timeStep = 0;
-    m_freqMax = 0;
     m_pointCount = 0;
     m_format = Rows;
     m_dataColumn = 2;
@@ -64,7 +63,6 @@ TimeSeriesMotion::TimeSeriesMotion(const QString & fileName, double scale,  Abst
     // Initialize the values -- appropriate values for an AT2 file
     m_inputUnits = Gravity;
     m_timeStep = 0;
-    m_freqMax = 0;
     m_pointCount = 0;
     m_format = Rows;
     m_dataColumn = 2;
@@ -104,6 +102,11 @@ void TimeSeriesMotion::setFileName(const QString & fileName)
 
     m_fileName = _fileName;   
     setIsLoaded(false);
+}
+
+double TimeSeriesMotion::freqMax() const
+{
+    return freqNyquist();
 }
 
 double TimeSeriesMotion::freqNyquist() const
@@ -186,7 +189,6 @@ void TimeSeriesMotion::setTimeStep(double timeStep)
         m_timeStep = timeStep;
 
         emit timeStepChanged(m_timeStep);
-        setFreqMax(freqNyquist());
 
         setIsLoaded(false);
     }
@@ -289,26 +291,6 @@ void TimeSeriesMotion::setStopLine(int line)
     }
 }
 
-void TimeSeriesMotion::setFreqMax(double freqMax)
-{
-    // Limit the freqMax to the Nyquist frequency
-    freqMax = qMin(freqNyquist(), freqMax);
-
-    if (fabs(m_freqMax - freqMax) - DBL_EPSILON) {
-        m_freqMax = freqMax;
-        emit freqMaxChanged(freqMax);
-
-        // Need to recompute the motion
-        if (!m_accel.isEmpty())
-            calculate();
-    }
-}
-
-double TimeSeriesMotion::freqMax() const
-{
-    return m_freqMax;
-}
-
 const QVector<double> & TimeSeriesMotion::freq() const
 {
     return m_freq;
@@ -316,15 +298,12 @@ const QVector<double> & TimeSeriesMotion::freq() const
 
 QVector<double> TimeSeriesMotion::time() const
 {    
-    // Number of points based prior to zero padding
-    const int n = 2 * (m_pointCount - 1);
-
     // Time step based on the max frequency
     const double dt = timeStep();
 
-    QVector<double> v(n);
+    QVector<double> v(m_pointCount);
 
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < m_pointCount; ++i)
         v[i] = i * dt;
 
     return v;
@@ -503,12 +482,14 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
     QString line =stream.readLine();
 
     bool finished = false;
+    bool stopLineReached = false;
 
     while (!finished && !line.isNull()) {
         // Stop if line exceeds number of lines.  The line number has
         // to be increased by one because the user display starts at
         // line number 1 instead of 0
         if (m_stopLine > 0 &&  m_stopLine <= lineNum+1) {
+            stopLineReached = true;
             break;
         }
 
@@ -571,8 +552,12 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
     }
 
     if (m_pointCount != index) {
-        qCritical() << "Number of points read does not equal specified point count!";
-        return false;
+        if (stopLineReached) {
+            qWarning() << "Number of points limited by stop line.";
+        } else {
+            qCritical() << "Number of points read does not equal specified point count!";
+            return false;
+        }
     }
 
     // Compute motion properties
@@ -605,20 +590,10 @@ void TimeSeriesMotion::calculate()
 
     // Create the frequency array truncated at the maximum frequency
     const double delta = 1 / (2. * m_timeStep * (m_fourierAcc.size() - 1));
-    const int size = int(ceil(m_freqMax / delta));
-
-    Q_ASSERT(size < m_fourierAcc.size());
-
-    m_freq.resize(size);
-    for (int i = 0; i < size; ++i)
+    m_freq.resize(m_fourierAcc.size());
+    for (int i = 0; i < m_freq.size(); ++i)
         m_freq[i] = i * delta;
 
-    // Truncate the Fourier amplitudes at the maximum frequency
-    m_fourierAcc.resize(size);
-    m_fourierVel.resize(size);
-
-    // Compute a new acceleration time series using the maximum frequency
-    accel = timeSeries(Acceleration);
     // Compute PGA and PGV
     setPga(findMaxAbs(accel));
     setPgv(findMaxAbs(integrate(accel)) * Units::instance()->tsConv());
@@ -961,14 +936,13 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
 
 QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
 {
-    out << (quint8)2;
+    out << (quint8)3;
 
     out << qobject_cast<const AbstractMotion*>(tsm);
 
     // Properties for TimeSeriesMotion
     out
             << tsm->m_saveData
-            << tsm->m_freqMax
             << tsm->m_fileName
             << tsm->m_timeStep
             << tsm->m_pointCount
@@ -999,10 +973,15 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
     // Propertise for TimeSeriesMotion
     int format;
 
-    in
-            >> tsm->m_saveData
-            >> tsm->m_freqMax
-            >> tsm->m_fileName
+    in >> tsm->m_saveData;
+
+    if (ver < 3) {
+        // Removed in version 3
+        double freqMax;
+        in >> freqMax;
+    }
+
+    in >> tsm->m_fileName
             >> tsm->m_timeStep
             >> tsm->m_pointCount
             >> tsm->m_scale
@@ -1014,6 +993,7 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
     tsm->setFormat(format);
 
     if (ver > 1) {
+        // Units added in version 2
         int units;
         in >> units;
         tsm->setInputUnits(units);

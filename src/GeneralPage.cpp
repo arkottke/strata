@@ -184,6 +184,11 @@ QGroupBox* GeneralPage::createDiscretizationGroupBox()
 
     layout->addRow(tr("Wavelength fraction:"), m_waveFractionSpinBox);
 
+    // Disable auto-discretization
+    m_disableDiscretzationCheckBox = new QCheckBox(tr("Disable auto-discretization"));
+
+    layout->addRow(m_disableDiscretzationCheckBox);
+
     // Group box 
     QGroupBox* groupBox = new QGroupBox(tr("Layer Discretization"));
     groupBox->setLayout(layout);
@@ -252,7 +257,11 @@ void GeneralPage::setModel(SiteResponseModel *model)
 
     m_waveFractionSpinBox->setValue(model->siteProfile()->waveFraction());
     connect(m_waveFractionSpinBox, SIGNAL(valueChanged(double)),
-             model->siteProfile(), SLOT(setWaveFraction(double)));   
+             model->siteProfile(), SLOT(setWaveFraction(double)));
+
+    m_disableDiscretzationCheckBox->setChecked(model->siteProfile()->disableAutoDiscretization());
+    connect(m_disableDiscretzationCheckBox, SIGNAL(toggled(bool)),
+            model->siteProfile(), SLOT(setDisableAutoDiscretization(bool)));
 }
 
 void GeneralPage::setReadOnly(bool readOnly)
@@ -275,4 +284,5 @@ void GeneralPage::setReadOnly(bool readOnly)
 
     m_maxFreqSpinBox->setReadOnly(readOnly);
     m_waveFractionSpinBox->setReadOnly(readOnly);
+    m_disableDiscretzationCheckBox->setDisabled(readOnly);
 }

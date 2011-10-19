@@ -28,6 +28,7 @@ Units * Units::m_instance = 0;
 Units::Units( QObject * parent )
     : QObject(parent)
 {
+    m_system = Metric;
     reset();
 }
 

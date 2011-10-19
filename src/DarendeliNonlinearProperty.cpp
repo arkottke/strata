@@ -29,7 +29,7 @@
 DarendeliNonlinearProperty::DarendeliNonlinearProperty(Type type, QObject *parent)
     : NonlinearProperty(parent)
 {
-    m_name = "Darendeli & Stokoe";
+    m_name = "Darendeli & Stokoe (2001)";
     m_type = type;
     m_strain = Dimension::logSpace(pow(10.,-4), pow(10.,0.5), 19);
     m_average.resize(m_strain.size());
