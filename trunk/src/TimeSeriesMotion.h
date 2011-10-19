@@ -83,6 +83,7 @@ public:
     double timeStep() const;
 
     virtual const QVector<double> & freq() const;
+
     virtual double freqMax() const;
 
     //! Nyquist frequency -- maximum frequency defined by rawTimeStep
@@ -142,7 +143,6 @@ signals:
     void dataColumnChanged(int column);
     void startLineChanged(int lines);
     void stopLineChanged(int lines);
-    void freqMaxChanged(double freqMax);
 
     void inputUnitsChanged(int units);
 
@@ -155,8 +155,6 @@ public slots:
     void setDataColumn(int column);
     void setStartLine(int lines);
     void setStopLine(int lines);
-
-    void setFreqMax(double freqMax);
 
     void setInputUnits(int inputsUnits);
 
@@ -203,12 +201,6 @@ protected:
         TimeColumn,
         AccelColumn
     };
-
-    /*! Maximum frequency of engineering interest.
-     *
-     * The Fourier amplitude above the maximum frequency of engineering interest are defined to be zero.
-     */
-    double m_freqMax;
 
     //! The filename of the time series
     QString m_fileName;

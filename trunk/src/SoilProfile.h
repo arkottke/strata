@@ -101,8 +101,8 @@ public:
     SoilTypeCatalog* soilTypeCatalog();
 
     double maxFreq() const;
-
     double waveFraction() const;
+    bool disableAutoDiscretization() const;
 
     /*! Insert a new soil type and listen to its wasModified() signal.
          * @param row location of new SoilType
@@ -164,6 +164,7 @@ public slots:
     void setIsVaried(bool isVaried);
     void setInputDepth(double depth);
     void setWaveFraction(double waveFraction);
+    void setDisableAutoDiscretization(bool disableAutoDiscretization);
 
     //! Refresh depths of the layers
     void updateDepths();
@@ -174,6 +175,7 @@ signals:
     void isVariedChanged(bool isVaried);
     void inputDepthChanged(double depth);
     void waveFractionChanged(double waveFraction);
+    void disableAutoDiscretizationChanged(bool disableAutoDiscretization);
 
     void soilTypesChanged();
     void soilLayersChanged();
@@ -250,6 +252,9 @@ private:
 
     //! Wavelength fraction
     double m_waveFraction;
+
+    //! Disable the layer discretization and use the layering provided
+    bool m_disableAutoDiscretization;
     //@}
 };
 #endif

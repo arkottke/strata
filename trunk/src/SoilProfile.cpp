@@ -81,6 +81,7 @@ SoilProfile::SoilProfile(QObject * parent)
     m_inputDepth = -1;
     m_maxFreq = 20;
     m_waveFraction = 0.20;
+    m_disableAutoDiscretization = false;
 }
 
 SoilProfile::~SoilProfile()
@@ -482,6 +483,21 @@ void SoilProfile::setWaveFraction(double waveFraction)
     }
 }
 
+bool SoilProfile::disableAutoDiscretization() const
+{
+    return m_disableAutoDiscretization;
+}
+
+void SoilProfile::setDisableAutoDiscretization(bool disableAutoDiscretization)
+{
+    if (m_disableAutoDiscretization != disableAutoDiscretization) {
+        m_disableAutoDiscretization = disableAutoDiscretization;
+
+        emit wasModified();
+        emit disableAutoDiscretizationChanged(m_disableAutoDiscretization);
+    }
+}
+
 QStringList SoilProfile::soilLayerNameList() const
 {
     QStringList list;
@@ -614,20 +630,30 @@ void SoilProfile::createSubLayers(TextLog * textLog)
      */
     double depth = 0;
     double vTotalStress = 0;
-    foreach (SoilLayer* sl, soilLayers) {
-        // Compute the optimal thickness of the sublayers
-        double optSubThickness = sl->shearVel() / m_maxFreq * m_waveFraction;
-        // Compute the required number of sub-layers for this thickness
-        int numSubLayers = int(ceil(sl->thickness() / optSubThickness));
-        // The subThickness for an even number of layers
-        double subThickness = sl->thickness() / numSubLayers;
-        
-        for (int j = 0; j < numSubLayers; ++j) {
-            m_subLayers << SubLayer(subThickness, depth, vTotalStress, sl);
-            // Increment the depth by the subThicknees
-            depth += subThickness;
-            // Compute the stress at the base of the layer and this to the total stress
-            vTotalStress += subThickness * sl->untWt();
+
+    if (m_disableAutoDiscretization) {
+        foreach (SoilLayer* sl, soilLayers) {
+            m_subLayers << SubLayer(sl->thickness(), depth, vTotalStress, sl);
+
+            depth += sl->thickness();
+            vTotalStress += sl->thickness() * sl->untWt();
+        }
+    } else {
+        foreach (SoilLayer* sl, soilLayers) {
+            // Compute the optimal thickness of the sublayers
+            double optSubThickness = sl->shearVel() / m_maxFreq * m_waveFraction;
+            // Compute the required number of sub-layers for this thickness
+            int numSubLayers = int(ceil(sl->thickness() / optSubThickness));
+            // The subThickness for an even number of layers
+            double subThickness = sl->thickness() / numSubLayers;
+
+            for (int j = 0; j < numSubLayers; ++j) {
+                m_subLayers << SubLayer(subThickness, depth, vTotalStress, sl);
+                // Increment the depth by the subThicknees
+                depth += subThickness;
+                // Compute the stress at the base of the layer and this to the total stress
+                vTotalStress += subThickness * sl->untWt();
+            }
         }
     }
     
@@ -892,7 +918,7 @@ QString SoilProfile::subLayerTable() const
 
     // Bedrock layer
     html += QString("<tr><td>%1<td>%2<td>%3<td>%4<td>%5<td>%6<td>%7<td>%8<td>%9<td>%10<td>%11<td>%12<td>%13<td>%14</tr>")
-            .arg(m_subLayers.size())
+            .arg(m_subLayers.size()+1)
             .arg(QObject::tr("Bedrock"))
             .arg(m_bedrock->depth(), 0, 'f', 2)
             .arg("--")
@@ -1092,7 +1118,7 @@ VelocityLayer * SoilProfile::velocityLayer(int index) const
 
 QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     // Save soil types
     out << sp->m_soilTypeCatalog;
@@ -1119,7 +1145,8 @@ QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
             << sp->m_isVaried
             << sp->m_profileCount
             << sp->m_maxFreq
-            << sp->m_waveFraction;
+            << sp->m_waveFraction
+            << sp->m_disableAutoDiscretization;
 
     return out;
 }
@@ -1162,6 +1189,11 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
             >> sp->m_profileCount
             >> sp->m_maxFreq
             >> sp->m_waveFraction;
+
+    if (ver > 1) {
+        // Added disable auto-discretization in version 2
+        in >> sp->m_disableAutoDiscretization;
+    }
 
     return in;
 }

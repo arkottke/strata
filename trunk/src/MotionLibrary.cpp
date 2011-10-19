@@ -106,7 +106,7 @@ int MotionLibrary::rowCount(const QModelIndex & parent) const
 int MotionLibrary::columnCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
-    return 7;
+    return 6;
 }
 
 QVariant MotionLibrary::data(const QModelIndex & index, int role) const
@@ -127,8 +127,6 @@ QVariant MotionLibrary::data(const QModelIndex & index, int role) const
             } else {
                 return (int)m_motions.at(index.row())->type();
             }
-        case FreqMaxColumn:
-            return QString::number(m_motions.at(index.row())->freqMax());
         case PgaColumn:
             return QString::number(m_motions.at(index.row())->pga(), 'f', 2);
         case PgvColumn:
@@ -174,8 +172,6 @@ QVariant MotionLibrary::headerData(int section, Qt::Orientation orientation, int
             return QString(tr("PGV (%1)")).arg(Units::instance()->velTs());
         case ScaleColumn:
             return tr("Scale Factor");
-        case FreqMaxColumn:
-            return tr("Max. Freq (Hz)");
         }
     case Qt::Vertical:
         return section+1;
@@ -196,7 +192,6 @@ Qt::ItemFlags MotionLibrary::flags(const QModelIndex & index) const
     case TypeColumn:
         flags |= Qt::ItemIsEditable;
         break;
-    case FreqMaxColumn:
     case ScaleColumn:
         if (m_approach == TimeSeries)
             flags |= Qt::ItemIsEditable;
@@ -232,7 +227,6 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
                 break;
             }
         case ScaleColumn:
-        case FreqMaxColumn:
             {
                 TimeSeriesMotion * tsMotion =
                         qobject_cast<TimeSeriesMotion*>(m_motions[index.row()]);
@@ -240,12 +234,9 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
                 bool ok;
                 const double d = value.toDouble(&ok);
 
-                if (tsMotion && ok) {
-                    if (index.column() == ScaleColumn)
-                        tsMotion->setScale(d);
-                    else // index.column() == FreqMaxColumn
-                        tsMotion->setFreqMax(d);
-                } else
+                if (tsMotion && ok)
+                    tsMotion->setScale(d);
+                else
                     return false;
 
                 break;

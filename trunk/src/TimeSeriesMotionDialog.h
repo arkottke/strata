@@ -83,7 +83,6 @@ private:
     QSpinBox *m_pointCountSpinBox;
     QDoubleSpinBox *m_timeStepSpinBox;
     QDoubleSpinBox *m_scaleSpinBox;
-    QDoubleSpinBox *m_freqMaxSpinBox;
 
     QComboBox *m_formatComboBox;
     QSpinBox *m_dataColSpinBox;

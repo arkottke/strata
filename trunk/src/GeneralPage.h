@@ -75,5 +75,6 @@ protected:
 
     QDoubleSpinBox* m_maxFreqSpinBox;
     QDoubleSpinBox* m_waveFractionSpinBox;
+    QCheckBox* m_disableDiscretzationCheckBox;
 };
 #endif

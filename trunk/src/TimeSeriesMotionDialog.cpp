@@ -116,9 +116,6 @@ void TimeSeriesMotionDialog::openFile()
         // Try to load the file
         bool success = m_motion->load(fileName, true);
         if (success) {
-            // Update the limit of the maximum frequency
-            m_freqMaxSpinBox->setMaximum(m_motion->freqNyquist());
-
             updateTextEdit();
             plot();
         } else {
@@ -268,7 +265,7 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
     layout->addWidget(new QLabel(tr("Description:")), 1, 0); 
     layout->addWidget(m_descripLineEdit, 1, 1, 1, 8);
 
-    // Create the time step, point count, scale, and maximum frequency row
+    // Create the time step, point count, and  scale row
     m_pointCountSpinBox = new QSpinBox;
     m_pointCountSpinBox->setWhatsThis(tr("The number of data points in the time series."));
     m_pointCountSpinBox->setRange(0, INT_MAX);
@@ -299,23 +296,6 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
 
     layout->addWidget(new QLabel(tr("Time step:")), 2, 2);
     layout->addWidget(m_timeStepSpinBox, 2, 3 );
-
-    m_freqMaxSpinBox = new QDoubleSpinBox;
-    m_freqMaxSpinBox->setWhatsThis(tr("Maximum frequency (i.e., frequency cut-off) to be used in the analysis"));
-    m_freqMaxSpinBox->setRange(10, m_motion->freqNyquist());
-    m_freqMaxSpinBox->setDecimals(2);
-    m_freqMaxSpinBox->setSingleStep(1);
-    m_freqMaxSpinBox->setSuffix(" Hz");
-    m_freqMaxSpinBox->setValue(m_motion->freqMax());
-    m_freqMaxSpinBox->setReadOnly(readOnly);
-
-    connect(m_motion, SIGNAL(freqMaxChanged(double)),
-            m_freqMaxSpinBox, SLOT(setValue(double)));
-    connect(m_freqMaxSpinBox, SIGNAL(valueChanged(double)),
-            m_motion, SLOT(setFreqMax(double)));
-
-    layout->addWidget(new QLabel(tr("Max. Frequency:")), 2, 4);
-    layout->addWidget(m_freqMaxSpinBox, 2, 5);
 
     m_scaleSpinBox = new QDoubleSpinBox;
     m_scaleSpinBox->setWhatsThis(tr("The scale factor that is applied to the motion."));

@@ -53,7 +53,8 @@ void AccelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* motion = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const TimeSeriesMotion* motion = qobject_cast<const TimeSeriesMotion*>(calculator->motion());
+    Q_ASSERT(motion);
 
     data = motion->timeSeries(TimeSeriesMotion::Acceleration,
                               calculator->calcAccelTf(
