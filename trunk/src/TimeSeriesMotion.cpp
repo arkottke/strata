@@ -931,6 +931,9 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
     QVector<double> ts;
     ifft(fa, ts);
 
+    // Truncate the time series to the original length
+    ts.resize(m_pointCount);
+
     return ts;
 }
 
