@@ -51,8 +51,6 @@ const QString StrainTimeSeriesOutput::yLabel() const
 void StrainTimeSeriesOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    qDebug() << ref.size();
-
     Q_UNUSED(ref);
 
     const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
