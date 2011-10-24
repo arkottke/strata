@@ -749,8 +749,6 @@ QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<do
 {
     QVector<double> strain = calcTimeSeries(m_fourierVel, tf);
 
-    // Scale the time series based on the difference in sampling rates
-
     // Use a simple subtraction of the average to correct the record.
     if (baseLineCorrect) {
         // Compute the average

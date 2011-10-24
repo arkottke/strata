@@ -428,12 +428,20 @@ void MainWindow::update()
 
 void MainWindow::about()
 {
+
+
+
+
     QMessageBox::about(this, tr("About Strata"),
                        tr("<p><b>Strata</b> was written by Albert Kottke working with Professor"
                           " Ellen Rathje at The University of Texas at Austin.</p>"
                           "<p>For comments and suggestions contact Albert at "
                           "<a href=\"mailto:albert.kottke@gmail.com\">albert.kottke@gmail.com</a></p>"
-                          "<p>Version: alpha, revision: %1</p>").arg(REVISION));
+                          "<p>Version: alpha, revision: %1</p>"
+#ifdef ADVANCED_OPTIONS
+                          "<p>Compiled with advanced options</p>"
+#endif
+                          ).arg(REVISION));
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)

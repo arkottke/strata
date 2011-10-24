@@ -82,7 +82,7 @@ public:
             const Location & inLocation, const AbstractMotion::Type inputType,
             const Location & outLocation, const AbstractMotion::Type outputType ) const;
 
-    /*! Compute the acceleration to strain transfer function.
+    /*! Compute the velocity to strain transfer function.
      *
      * \param inLocation input location
      * \param inputType type of input
@@ -90,6 +90,16 @@ public:
      * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
      */
     QVector<std::complex<double> > calcStrainTf(
+            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const;
+
+    /*! Compute the velocity to visco-elastic stress transfer function.
+     *
+     * \param inLocation input location
+     * \param inputType type of input
+     * \param outLocation location of the desired transfer fucntion
+     * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
+     */
+    QVector<std::complex<double> > calcStressTf(
             const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const;
 signals:
     void wasModified();
