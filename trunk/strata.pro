@@ -17,19 +17,15 @@ CONFIG(debug, debug|release) {
 DEFINES += REVISION=$$system(python getSvnVersion.py)
 
 unix {
-    DEFINES += GSL_LIB=$$system("env | grep GSL_LIB")
-    DEFINES += GSL_INCLUDE=$$system("env | grep GSL_INCLUDE")
     LIBS += -lm \
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -L\${GSL_LIB} \
-        -lqwt-qt4
+        -L"../qwt/lib/" \
+        -lqwt
+
     INCLUDEPATH += . \
-        "/usr/include/qwt-qt4" \
-        \${GSL_INCLUDE}
-    target.path = bin
-    INSTALLS = target
+        ../qwt/src/
 }
 win32 { 
     LIBS += -lm \
@@ -92,6 +88,7 @@ HEADERS += src/AbstractCalculator.h \
     src/Dimension.h \
     src/DimensionLayout.h \
     src/DispTimeSeriesOutput.h \
+    src/DissipatedEnergyProfileOutput.h \ 
     src/Distribution.h \
     src/EditActions.h \
     src/EquivalentLinearCalculator.h \
@@ -180,6 +177,7 @@ HEADERS += src/AbstractCalculator.h \
     src/VelocityVariation.h \
     src/VelTimeSeriesOutput.h \
     src/VerticalStressProfileOutput.h \
+    src/ViscoElasticStressTimeSeriesOutput.h \
     src/MaxDispProfileOutput.h
 
 SOURCES +=     src/AbstractCalculator.cpp \
@@ -221,6 +219,7 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/Dimension.cpp \
     src/DimensionLayout.cpp \
     src/DispTimeSeriesOutput.cpp \
+    src/DissipatedEnergyProfileOutput.cpp \
     src/Distribution.cpp \
     src/EditActions.cpp \
     src/EquivalentLinearCalculator.cpp \
@@ -310,6 +309,7 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/VelocityVariation.cpp \
     src/VelTimeSeriesOutput.cpp \
     src/VerticalStressProfileOutput.cpp \
+    src/ViscoElasticStressTimeSeriesOutput.cpp \
     src/MaxDispProfileOutput.cpp
 
 RESOURCES += resources/resources.qrc

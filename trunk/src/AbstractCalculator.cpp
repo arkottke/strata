@@ -250,6 +250,23 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
     return tf;
 }
 
+QVector<std::complex<double> > AbstractCalculator::calcStressTf(
+        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const
+{
+    // To convert to stress need to multiply by the complex shear-modulus, as
+    // well as gravity since the FAS is in units of gravity.
+    const double gravity = Units::instance()->gravity();
+
+    QVector<std::complex<double> > tf = calcStrainTf(inLocation, inputType, outLocation);
+
+    const int l = outLocation.layer();
+
+    for (int i = 0; i < tf.size(); ++i)
+        tf[i] *= (gravity * m_shearMod.at(l).at(i));
+
+    return tf;
+}
+
 const QVector<std::complex<double> > AbstractCalculator::calcAccelTf(
         const Location & inLocation, const AbstractMotion::Type inputType,
         const Location & outLocation, const AbstractMotion::Type outputType ) const

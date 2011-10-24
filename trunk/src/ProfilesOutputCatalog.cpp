@@ -23,6 +23,7 @@
 
 #include "AbstractProfileOutput.h"
 #include "DampingProfileOutput.h"
+#include "DissipatedEnergyProfileOutput.h"
 #include "FinalVelProfileOutput.h"
 #include "InitialVelProfileOutput.h"
 #include "MaxAccelProfileOutput.h"
@@ -42,9 +43,13 @@
 ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog)
 {
-    m_outputs
-            << new DampingProfileOutput(m_outputCatalog)
-            << new FinalVelProfileOutput(m_outputCatalog)
+    m_outputs << new DampingProfileOutput(m_outputCatalog);
+
+#ifdef ADVANCED_OPTIONS
+    m_outputs << new DissipatedEnergyProfileOutput(m_outputCatalog);
+#endif
+
+    m_outputs << new FinalVelProfileOutput(m_outputCatalog)
             << new InitialVelProfileOutput(m_outputCatalog)
             << new MaxAccelProfileOutput(m_outputCatalog)
             << new MaxDispProfileOutput(m_outputCatalog)

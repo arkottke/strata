@@ -30,6 +30,7 @@
 #include "StrainTimeSeriesOutput.h"
 #include "StressTimeSeriesOutput.h"
 #include "VelTimeSeriesOutput.h"
+#include "ViscoElasticStressTimeSeriesOutput.h"
 
 #include <QDebug>
 
@@ -41,6 +42,10 @@ TimeSeriesOutputCatalog::TimeSeriesOutputCatalog(OutputCatalog *outputCatalog) :
     m_lookup["Displacement Time Series"] = "DispTimeSeriesOutput";
     m_lookup["Shear-Strain Time Series"] = "StrainTimeSeriesOutput";
     m_lookup["Shear-Stress Time Series"] = "StressTimeSeriesOutput";
+
+#ifdef ADVANCED_OPTIONS
+    m_lookup["Visco-Elastic Shear-Stress Time Series"] = "ViscoElasticStressTimeSeriesOutput";
+#endif
 }
 
 bool TimeSeriesOutputCatalog::needsOutputConditions() const
@@ -183,8 +188,10 @@ Qt::ItemFlags TimeSeriesOutputCatalog::flags(const QModelIndex & index) const
         break;
     case TypeColumn:
         if (qobject_cast<const StrainTimeSeriesOutput* const>(m_outputs.at(index.row()))
-            || qobject_cast<const StressTimeSeriesOutput* const>(m_outputs.at(index.row()))) {
-            // Do nothing
+            || qobject_cast<const StressTimeSeriesOutput* const>(m_outputs.at(index.row()))
+            || qobject_cast<const ViscoElasticStressTimeSeriesOutput* const>(m_outputs.at(index.row()))
+            ) {
+            // Do nothing because it can only be within motions.
         } else {
             flags |= Qt::ItemIsEditable;
         }
@@ -257,6 +264,8 @@ AbstractTimeSeriesOutput* TimeSeriesOutputCatalog::factory(const QString & class
         atso = new StrainTimeSeriesOutput(parent);
     } else if (className == "StressTimeSeriesOutput") {
         atso = new StressTimeSeriesOutput(parent);
+    } else if (className == "ViscoElasticStressTimeSeriesOutput") {
+        atso = new ViscoElasticStressTimeSeriesOutput(parent); 
     }
 
     Q_ASSERT(atso);
