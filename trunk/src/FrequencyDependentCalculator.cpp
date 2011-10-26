@@ -52,7 +52,7 @@ QString FrequencyDependentCalculator::toHtml() const
 
 bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::complex<double> > strainTf)
 {
-    const double strainMax = 100 * Units::instance()->gravity() * m_motion->calcMaxStrain(strainTf);
+    const double strainMax = 100 * m_motion->calcMaxStrain(strainTf);
 
     if (strainMax <= 0)
         return false;

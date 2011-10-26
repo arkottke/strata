@@ -232,13 +232,16 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
     std::complex<double> cTerm, numer, denom;
 
     const int l = outLocation.layer();
+    const double gravity = Units::instance()->gravity();
+
     // Strain is inversely proportional to the complex shear-wave velocity
     for (int i = 0; i < tf.size(); ++i) {
         cTerm = std::complex<double>( 0.0,  1.0 ) *
                 m_waveNum.at(outLocation.layer()).at(i) * outLocation.depth();
 
-        // Compute the numerator cannot be computed using waves since it is A-B
-        numer = std::complex<double>( 0.0, -1.0 ) *
+        // Compute the numerator cannot be computed using waves since it is
+        // A-B. The numerator includes gravity to correct for the Vs scaling.
+        numer = std::complex<double>(gravity, -1.0 ) *
                 (m_waveA.at(outLocation.layer()).at(i) * exp(cTerm) -
                  m_waveB.at(outLocation.layer()).at(i) * exp(-cTerm));
 
@@ -253,16 +256,12 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
 QVector<std::complex<double> > AbstractCalculator::calcStressTf(
         const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const
 {
-    // To convert to stress need to multiply by the complex shear-modulus, as
-    // well as gravity since the FAS is in units of gravity.
-    const double gravity = Units::instance()->gravity();
-
     QVector<std::complex<double> > tf = calcStrainTf(inLocation, inputType, outLocation);
 
     const int l = outLocation.layer();
 
     for (int i = 0; i < tf.size(); ++i)
-        tf[i] *= (gravity * m_shearMod.at(l).at(i));
+        tf[i] *= m_shearMod.at(l).at(i);
 
     return tf;
 }

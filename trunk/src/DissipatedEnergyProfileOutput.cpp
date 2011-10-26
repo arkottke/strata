@@ -84,7 +84,7 @@ void DissipatedEnergyProfileOutput::extract(AbstractCalculator* const calculator
 
         for (int i = 1; i < strainTs.size(); ++i)
             sum += 0.5 * (stressTs.at(i) + stressTs.at(i-1)) 
-                    * gravity * (strainTs.at(i) - strainTs.at(i-1));
+                    * (strainTs.at(i) - strainTs.at(i-1));
         
         // Save the values
         ref << depth;

@@ -57,8 +57,8 @@ bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
         for (int i = 0; i < m_nsl; ++i) {
             strainTf = calcStrainTf(m_site->inputLocation(), m_motion->type(),
                                     Location(i, m_site->subLayers().at(i).thickness() / 2));
-            // Compute maximum shear strain
-            const double strainMax = 100 * Units::instance()->gravity() * m_motion->calcMaxStrain(strainTf);
+            // Compute maximum shear strain in percent
+            const double strainMax = 100 * m_motion->calcMaxStrain(strainTf);
 
             m_site->subLayers()[i].setStrain(strainMax, strainMax, false);
         }
