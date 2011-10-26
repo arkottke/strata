@@ -67,8 +67,8 @@ void StressTimeSeriesOutput::extract(AbstractCalculator* const calculator,
                     calculator->motion()->type(), loc), m_baselineCorrect);
 
     // Convert to appropriate units
-    const double factor = calculator->site()->shearMod(loc.layer()) * Units::instance()->gravity();
+    const double shearMod = calculator->site()->shearMod(loc.layer());
 
     for (int i = 0; i < data.size(); ++i)
-        data[i] *= factor;
+        data[i] *= shearMod;
 }

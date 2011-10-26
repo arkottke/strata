@@ -60,11 +60,8 @@ void StrainTimeSeriesOutput::extract(AbstractCalculator* const calculator,
     data = tsm->strainTimeSeries(calculator->calcStrainTf(
             calculator->site()->inputLocation(), calculator->motion()->type(),
             calculator->site()->depthToLocation(m_depth)), m_baselineCorrect);
-
-    // The motion is in gravity and needs to be converted to the
-    // appropriate units.  The strain is then converted to percent
-    double factor = 100 * Units::instance()->gravity();
-
+    
+    // Convert to percent
     for (int i = 0; i < data.size(); ++i)
-        data[i] *= factor;
+        data[i] *= 100;
 }
