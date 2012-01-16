@@ -1,54 +1,17 @@
-TEMPLATE = app
-CONFIG += debug_and_release \
-    warn_on
-QT += script \
-    xml \
-    network
+# All settings should be modified from the strataconfig.pri file
+include(strataconfig.pri)
 
-# Enable advanced options that should not be included in the version for standard users
-DEFINES += ADVANCED_OPTIONS
+# Grab the revision number using svnversion and clean it up.
+DEFINES += REVISION=$$system(python getSvnVersion.py)
 
-# Flag based on if the program is compiled in debug mode
+# Flag based on if the program is compiled in debug mode. 
 CONFIG(debug, debug|release) {
    DEFINES += DEBUG
 }
 
-# Grab the revision number using svnversion. This is later cleaned up using a regular expression
-DEFINES += REVISION=$$system(python getSvnVersion.py)
+TEMPLATE = app
+QT += script xml network
 
-unix {
-    LIBS += -lm \
-        -lfftw3 \
-        -lgsl \
-        -lgslcblas \
-        -L"../qwt/lib/" \
-        -lqwt
-
-    INCLUDEPATH += . \
-        ../qwt/src/
-}
-win32 { 
-    LIBS += -lm \
-        -lfftw3-3 \
-        -L"C:/devel/fftw-3.2.2" \
-        -lgsl \
-        -lgslcblas \
-        -L"C:/devel/GnuWin32/bin"
-    INCLUDEPATH += . \
-        "C:/devel/fftw-3.2.2" \
-        "C:/devel/qwt-6.0/src" \
-        "C:/devel/GnuWin32/include"
-    RC_FILE = strata.rc
-    CONFIG(debug, debug|release ) {
-        LIBS += -lqwtd \
-            -L"C:/devel/qwt-6.0/lib"
-    } else {
-        LIBS += -lqwt \
-            -L"C:/devel/qwt-6.0/lib"
-    }
-}
-
-# Input
 HEADERS += src/AbstractCalculator.h \
     src/AbstractDistribution.h \
     src/AbstractIterativeCalculator.h \
@@ -313,5 +276,3 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/MaxDispProfileOutput.cpp
 
 RESOURCES += resources/resources.qrc
-OTHER_FILES += TODO.txt
-FORMS += 
