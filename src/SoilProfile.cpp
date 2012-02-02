@@ -793,7 +793,10 @@ QVector<double> SoilProfile::dampingProfile() const
 QVector<double> SoilProfile::vTotalStressProfile() const
 {
     QVector<double> profile;
-    
+
+    // Add value at surface
+    profile << 0.;
+
     for (int i = 0; i < m_subLayers.size(); ++i)
         profile << m_subLayers.at(i).vTotalStress();
 

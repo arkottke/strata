@@ -23,12 +23,14 @@
 
 #include "AbstractCalculator.h"
 #include "SoilProfile.h"
+#include "SubLayer.h"
 #include "Units.h"
 
 VerticalStressProfileOutput::VerticalStressProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-
+    // Skip the zero at the surface
+    m_offset = 1;
 }
 
 QString VerticalStressProfileOutput::name() const
@@ -50,7 +52,19 @@ const QString VerticalStressProfileOutput::xLabel() const
 void VerticalStressProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    AbstractProfileOutput::extract(calculator, ref, data);
+    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
+    // Populate the reference with the depth to middle of the layers
+    ref.clear();
+    data.clear();
+    ref << 0.;
+    data << 0.;
 
-    data = calculator->site()->vTotalStressProfile();
+    foreach (const SubLayer & sl, subLayers) {
+        ref << sl.depthToMid();
+        data << sl.vTotalStress();
+    }
+
+    // Add the depth at the surface of the bedrock
+    ref << subLayers.last().depthToBase();
+    data << subLayers.last().vTotalStress(1.0);
 }

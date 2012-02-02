@@ -50,7 +50,7 @@ public:
     //! Density of the layer
     double density() const;
 
-    double vTotalStress() const;
+    double vTotalStress(double layerFraction=0.5) const;
 
     double thickness() const;
     void setThickness(double thickness);
