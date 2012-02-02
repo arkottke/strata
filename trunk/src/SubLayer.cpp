@@ -64,9 +64,11 @@ double SubLayer::density() const
     return m_soilLayer->density();
 }
 
-double SubLayer::vTotalStress() const
+double SubLayer::vTotalStress(double layerFraction) const
 {
-    return m_vTotalStress;
+    Q_ASSERT(0 <= layerFraction && layerFraction <=1);
+
+    return m_vTotalStress + (untWt() * m_thickness * (layerFraction - 0.5));
 }
 
 double SubLayer::thickness() const
