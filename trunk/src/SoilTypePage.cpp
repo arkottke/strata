@@ -35,8 +35,8 @@
 #include "RockLayer.h"
 #include "SiteResponseModel.h"
 #include "SoilProfile.h"
-#include "SoilTypeCatalog.h"
 #include "SoilType.h"
+#include "SoilTypeCatalog.h"
 #include "TableGroupBox.h"
 #include "Units.h"
 
@@ -46,6 +46,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
+#include <limits>
+
 
 SoilTypePage::SoilTypePage(QWidget * parent, Qt::WindowFlags f )
     : AbstractPage(parent, f)
@@ -53,11 +55,12 @@ SoilTypePage::SoilTypePage(QWidget * parent, Qt::WindowFlags f )
     // Set the layout
     QGridLayout * layout = new QGridLayout;
     
-    layout->addWidget(createLayersGroupBox(), 0, 0, 2, 1);
+    layout->addWidget(createLayersGroupBox(), 0, 0, 2, 2);
     layout->addWidget(createBedrockGroupBox(), 2, 0);
-    layout->addWidget(createVariationGroupBox(), 3, 0);
-    layout->addWidget(createSoilPropsGroupBox(), 0, 1);
-    layout->addWidget(createNlPropTableBox(), 1, 1, 3, 1);
+    layout->addWidget(createWaterTableDepthGroupBox(), 2, 1);
+    layout->addWidget(createVariationGroupBox(), 3, 0, 1, 2);
+    layout->addWidget(createSoilPropsGroupBox(), 0, 2);
+    layout->addWidget(createNlPropTableBox(), 1, 2, 3, 1);
 
     layout->setColumnStretch(0, 1);
     layout->setRowStretch(1, 1);
@@ -107,6 +110,11 @@ void SoilTypePage::setModel(SiteResponseModel *model)
     connect(m_bedrockDampingSpinBox, SIGNAL(valueChanged(double)),
             rl, SLOT(setAvgDamping(double)));
 
+    m_waterTableDepthSpinBox->setValue(
+            model->siteProfile()->waterTableDepth());
+    connect(m_waterTableDepthSpinBox, SIGNAL(valueChanged(double)),
+                model->siteProfile(), SLOT(setWaterTableDepth(double)));
+
     NonlinearPropertyRandomizer* npr
             = model->siteProfile()->nonlinearPropertyRandomizer();
 
@@ -154,6 +162,8 @@ void SoilTypePage::setReadOnly(bool readOnly)
     m_bedrockDampingSpinBox->setReadOnly(readOnly);
     m_varyBedrockDampingCheckBox->setDisabled(readOnly);
 
+    m_waterTableDepthSpinBox->setReadOnly(readOnly);
+
     m_nprModelComboBox->setDisabled(readOnly);
     m_modulusStdevWidget->setReadOnly(readOnly);
     m_dampingStdevWidget->setReadOnly(readOnly);
@@ -164,6 +174,25 @@ void SoilTypePage::setReadOnly(bool readOnly)
     m_ocrSpinBox->setReadOnly(readOnly);
     m_freqSpinBox->setReadOnly(readOnly);
     m_nCyclesSpinBox->setReadOnly(readOnly);
+}
+
+QGroupBox* SoilTypePage::createWaterTableDepthGroupBox()
+{
+    QHBoxLayout * layout = new QHBoxLayout;
+
+    // Unit weight
+    m_waterTableDepthSpinBox = new QDoubleSpinBox;
+    m_waterTableDepthSpinBox->setRange(0, std::numeric_limits<double>::max());
+    m_waterTableDepthSpinBox->setDecimals(2);
+
+    layout->addWidget(new QLabel(tr("Depth:")));
+    layout->addWidget(m_waterTableDepthSpinBox);
+
+    // Create the group box
+    QGroupBox* groupBox = new QGroupBox(tr("Water Table Depth"));
+    groupBox->setLayout(layout);
+
+    return groupBox;
 }
 
 QGroupBox* SoilTypePage::createLayersGroupBox()
@@ -329,6 +358,7 @@ QGroupBox* SoilTypePage::createNlPropTableBox()
 void SoilTypePage::updateUnits()
 {
     m_bedrockUntWtSpinBox->setSuffix(" " + Units::instance()->untWt());
+    m_waterTableDepthSpinBox->setSuffix(" " + Units::instance()->length());
 
     // Need to invalidate the size cache since setSuffix doesn't
     m_bedrockUntWtSpinBox->setRange(

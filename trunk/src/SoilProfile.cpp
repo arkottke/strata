@@ -82,6 +82,7 @@ SoilProfile::SoilProfile(QObject * parent)
     m_maxFreq = 20;
     m_waveFraction = 0.20;
     m_disableAutoDiscretization = false;
+    m_waterTableDepth = 0.;
 }
 
 SoilProfile::~SoilProfile()
@@ -453,6 +454,21 @@ SoilTypeCatalog* SoilProfile::soilTypeCatalog()
     return m_soilTypeCatalog;
 }
 
+double SoilProfile::waterTableDepth() const
+{
+    return m_waterTableDepth;
+}
+
+void SoilProfile::setWaterTableDepth(double waterTableDepth)
+{
+    if (m_waterTableDepth != waterTableDepth) {
+        m_waterTableDepth = waterTableDepth;
+
+        emit wasModified();
+        emit waterTableDepthChanged(waterTableDepth);
+    }
+}
+
 double SoilProfile::maxFreq() const
 {
     return m_maxFreq;
@@ -633,7 +649,7 @@ void SoilProfile::createSubLayers(TextLog * textLog)
 
     if (m_disableAutoDiscretization) {
         foreach (SoilLayer* sl, soilLayers) {
-            m_subLayers << SubLayer(sl->thickness(), depth, vTotalStress, sl);
+            m_subLayers << SubLayer(sl->thickness(), depth, vTotalStress, m_waterTableDepth, sl);
 
             depth += sl->thickness();
             vTotalStress += sl->thickness() * sl->untWt();
@@ -648,7 +664,7 @@ void SoilProfile::createSubLayers(TextLog * textLog)
             double subThickness = sl->thickness() / numSubLayers;
 
             for (int j = 0; j < numSubLayers; ++j) {
-                m_subLayers << SubLayer(subThickness, depth, vTotalStress, sl);
+                m_subLayers << SubLayer(subThickness, depth, vTotalStress, m_waterTableDepth, sl);
                 // Increment the depth by the subThicknees
                 depth += subThickness;
                 // Compute the stress at the base of the layer and this to the total stress
@@ -799,6 +815,19 @@ QVector<double> SoilProfile::vTotalStressProfile() const
 
     for (int i = 0; i < m_subLayers.size(); ++i)
         profile << m_subLayers.at(i).vTotalStress();
+
+    return profile;
+}
+
+QVector<double> SoilProfile::vEffectiveStressProfile() const
+{
+    QVector<double> profile;
+
+    // Add value at surface
+    profile << 0.;
+
+    for (int i = 0; i < m_subLayers.size(); ++i)
+        profile << m_subLayers.at(i).vEffectiveStress();
 
     return profile;
 }
@@ -1121,7 +1150,7 @@ VelocityLayer * SoilProfile::velocityLayer(int index) const
 
 QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
 {
-    out << (quint8)2;
+    out << (quint8)3;
 
     // Save soil types
     out << sp->m_soilTypeCatalog;
@@ -1149,7 +1178,8 @@ QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
             << sp->m_profileCount
             << sp->m_maxFreq
             << sp->m_waveFraction
-            << sp->m_disableAutoDiscretization;
+            << sp->m_disableAutoDiscretization
+            << sp->m_waterTableDepth;
 
     return out;
 }
@@ -1196,6 +1226,11 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
     if (ver > 1) {
         // Added disable auto-discretization in version 2
         in >> sp->m_disableAutoDiscretization;
+    }
+
+    if (ver > 2) {
+        // Added water table depth in version 3
+        in >> sp->m_waterTableDepth;
     }
 
     return in;

@@ -70,6 +70,7 @@ private:
     // Functions to set up the various group boxes
     QGroupBox* createLayersGroupBox();
     QGroupBox* createBedrockGroupBox();
+    QGroupBox* createWaterTableDepthGroupBox();
     QGroupBox* createVariationGroupBox();
     QGroupBox* createSoilPropsGroupBox();
     QGroupBox* createNlPropTableBox();
@@ -82,6 +83,8 @@ private:
     QDoubleSpinBox* m_bedrockUntWtSpinBox;
     QDoubleSpinBox* m_bedrockDampingSpinBox;
     QCheckBox* m_varyBedrockDampingCheckBox;
+
+    QDoubleSpinBox* m_waterTableDepthSpinBox;
 
     QGroupBox* m_randomizerGroupBox;
     QComboBox* m_nprModelComboBox;

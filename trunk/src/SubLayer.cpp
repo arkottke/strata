@@ -22,15 +22,16 @@
 #include "SubLayer.h"
 
 #include "SoilType.h"
+#include "Units.h"
 
 #include <QDebug>
 
 #include <cmath>
 
-SubLayer::SubLayer(double thickness, double depth, double vTotalStress, SoilLayer * soilLayer)
-    : m_thickness(thickness), m_depth(depth), m_soilLayer(soilLayer)
+SubLayer::SubLayer(double thickness, double depth, double vTotalStress, double waterTableDepth, SoilLayer * soilLayer)
+    : m_thickness(thickness), m_depth(depth), m_waterTableDepth(waterTableDepth), m_soilLayer(soilLayer)
 {
-    m_vTotalStress = vTotalStress + untWt() * m_thickness/2;
+    m_vTotalStress = vTotalStress + untWt() * m_thickness / 2;
     reset();
 }
 
@@ -69,6 +70,17 @@ double SubLayer::vTotalStress(double layerFraction) const
     Q_ASSERT(0 <= layerFraction && layerFraction <=1);
 
     return m_vTotalStress + (untWt() * m_thickness * (layerFraction - 0.5));
+}
+
+double SubLayer::vEffectiveStress(double layerFraction) const
+{
+    const double waterUntWt = Units::instance()->waterUntWt();
+
+    const double poreWaterPressure = waterUntWt * qMax(0., m_depth - m_waterTableDepth);
+
+    qDebug() << m_depth << m_waterTableDepth << waterUntWt << vTotalStress(layerFraction) << poreWaterPressure;
+
+    return vTotalStress(layerFraction)- poreWaterPressure;
 }
 
 double SubLayer::thickness() const
@@ -123,7 +135,7 @@ double SubLayer::maxStrain() const
 
 double SubLayer::stressRatio() const
 {
-    return shearStress() / vTotalStress();
+    return shearStress() / vEffectiveStress();
 }
 
 //! Interpolation using the curves

@@ -100,6 +100,8 @@ public:
 
     SoilTypeCatalog* soilTypeCatalog();
 
+    double waterTableDepth() const;
+
     double maxFreq() const;
     double waveFraction() const;
     bool disableAutoDiscretization() const;
@@ -137,6 +139,8 @@ public:
     QVector<double> modulusProfile() const;
     QVector<double> dampingProfile() const;
     QVector<double> vTotalStressProfile() const;
+    QVector<double> vEffectiveStressProfile() const;
+
     /*! Profile of the stress reduction coefficient (r_d).
          * The stress reduction coefficient relates the maximum shear stress of
          * a rigid block to the maximum shear stress in the deformable soil.
@@ -165,6 +169,7 @@ public slots:
     void setInputDepth(double depth);
     void setWaveFraction(double waveFraction);
     void setDisableAutoDiscretization(bool disableAutoDiscretization);
+    void setWaterTableDepth(double waterTableDepth);
 
     //! Refresh depths of the layers
     void updateDepths();
@@ -176,6 +181,8 @@ signals:
     void inputDepthChanged(double depth);
     void waveFractionChanged(double waveFraction);
     void disableAutoDiscretizationChanged(bool disableAutoDiscretization);
+
+    void waterTableDepthChanged(double waterTableDepth);
 
     void soilTypesChanged();
     void soilLayersChanged();
@@ -210,6 +217,9 @@ private:
 
     //! Bedrock layer in the model
     RockLayer* m_bedrock;
+
+    //! Water table depth
+    double m_waterTableDepth;
 
     /*! @name Input motion specification
      */

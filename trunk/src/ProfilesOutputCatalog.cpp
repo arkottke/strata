@@ -35,7 +35,8 @@
 #include "ModulusProfileOutput.h"
 #include "StressRatioProfileOutput.h"
 #include "StressReducCoeffProfileOutput.h"
-#include "VerticalStressProfileOutput.h"
+#include "VerticalEffectiveStressProfileOutput.h"
+#include "VerticalTotalStressProfileOutput.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -60,7 +61,8 @@ ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
             << new ModulusProfileOutput(m_outputCatalog)
             << new StressRatioProfileOutput(m_outputCatalog)
             << new StressReducCoeffProfileOutput(m_outputCatalog)
-            << new VerticalStressProfileOutput(m_outputCatalog);
+            << new VerticalTotalStressProfileOutput(m_outputCatalog)
+            << new VerticalEffectiveStressProfileOutput(m_outputCatalog);
 
     foreach (AbstractProfileOutput* output, m_outputs)
         connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
