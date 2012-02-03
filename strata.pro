@@ -139,7 +139,8 @@ HEADERS += src/AbstractCalculator.h \
     src/VelocityLayer.h \
     src/VelocityVariation.h \
     src/VelTimeSeriesOutput.h \
-    src/VerticalStressProfileOutput.h \
+    src/VerticalEffectiveStressProfileOutput.h \
+    src/VerticalTotalStressProfileOutput.h \
     src/ViscoElasticStressTimeSeriesOutput.h \
     src/MaxDispProfileOutput.h
 
@@ -271,7 +272,8 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/VelocityLayer.cpp \
     src/VelocityVariation.cpp \
     src/VelTimeSeriesOutput.cpp \
-    src/VerticalStressProfileOutput.cpp \
+    src/VerticalEffectiveStressProfileOutput.cpp \
+    src/VerticalTotalStressProfileOutput.cpp \
     src/ViscoElasticStressTimeSeriesOutput.cpp \
     src/MaxDispProfileOutput.cpp
 

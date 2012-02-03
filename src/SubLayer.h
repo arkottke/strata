@@ -34,9 +34,10 @@ public:
          * \param thickness thickness of the layer
          * \param depth depth to the top of the layer
          * \param vTotalStress total vertical stress at the top of the layer
+         * \param waterTableDepth depth to the water table
          * \param soilLayer soilLayer which describes the dynamic properties of the subLayer
          */
-    SubLayer( double thickness, double depth, double vTotalStress, SoilLayer * soilLayer );
+    SubLayer( double thickness, double depth, double vTotalStress, double waterTableDepth, SoilLayer * soilLayer );
 
     //! Reset the properties of the SubLayer to the initial conditions
     void reset();
@@ -51,6 +52,7 @@ public:
     double density() const;
 
     double vTotalStress(double layerFraction=0.5) const;
+    double vEffectiveStress(double layerFraction=0.5) const;
 
     double thickness() const;
     void setThickness(double thickness);
@@ -133,6 +135,9 @@ private:
 
     //! Depth to the top of the layer
     double m_depth;
+
+    //! Depth to the water table
+    double m_waterTableDepth;
 
     //! Total vertical stress at the center of the layer
     double m_vTotalStress;
