@@ -75,10 +75,9 @@ double SubLayer::vTotalStress(double layerFraction) const
 double SubLayer::vEffectiveStress(double layerFraction) const
 {
     const double waterUntWt = Units::instance()->waterUntWt();
-
-    const double poreWaterPressure = waterUntWt * qMax(0., m_depth - m_waterTableDepth);
-
-    qDebug() << m_depth << m_waterTableDepth << waterUntWt << vTotalStress(layerFraction) << poreWaterPressure;
+    
+    const double poreWaterPressure = waterUntWt * qMax(0., 
+            (m_depth + m_thickness * (layerFraction)) - m_waterTableDepth);
 
     return vTotalStress(layerFraction)- poreWaterPressure;
 }

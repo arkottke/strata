@@ -266,7 +266,7 @@ void MotionPage::importSuite()
         // Load the file
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qCritical() <<  "Unable to open file:" << fileName;
+            qWarning() <<  "Unable to open file:" << fileName;
             return;
         }
 
