@@ -9,7 +9,15 @@ CONFIG(debug, debug|release) {
    DEFINES += DEBUG
 }
 
+# Directories for building
+CONFIG(debug, debug|release) {
+   DESTDIR = build/debug
+} else {
+   DESTDIR = build/release
+}
+
 TEMPLATE = app
+TARGET = strata
 QT += script xml network
 
 HEADERS += src/AbstractCalculator.h \

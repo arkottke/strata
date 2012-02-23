@@ -27,9 +27,9 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-
-#include <QColor>
 #include <QBrush>
+#include <QColor>
+#include <QDebug>
 
 MotionLibrary::MotionLibrary(QObject *parent)
     : MyAbstractTableModel(parent)

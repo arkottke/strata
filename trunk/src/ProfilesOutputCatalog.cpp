@@ -159,7 +159,7 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
 
 QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
 {    
-    out << (quint8)2;
+    out << (quint8)3;
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs)
         out << apo;
@@ -176,6 +176,8 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs) {
         if (ver < 2 && qobject_cast<MaxDispProfileOutput*>(apo))
+            continue;
+        if (ver < 3 && qobject_cast<VerticalEffectiveStressProfileOutput*>(apo))
             continue;
 
         in >> apo;

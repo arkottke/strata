@@ -407,7 +407,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
     // Load the file
     QFile file(m_fileName);
     if (!file.open( QIODevice::ReadOnly | QIODevice::Text )) {
-        qCritical() << "Unable to open the time series file:" << qPrintable(m_fileName);
+        qWarning() << "Unable to open the time series file:" << qPrintable(m_fileName);
         return false;
     }
     QTextStream stream(&file);

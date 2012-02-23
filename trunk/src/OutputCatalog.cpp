@@ -624,22 +624,21 @@ QDataStream & operator>> (QDataStream & in, OutputCatalog* oc)
 
     oc->beginResetModel();
 
-    in
-            >> oc->m_title
-            >> oc->m_filePrefix
-            >> oc->m_enabled
-            >> oc->m_frequency
-            >> oc->m_frequencyIsNeeded
-            >> oc->m_period
-            >> oc->m_periodIsNeeded
-            >> oc->m_damping
-            >> oc->m_profilesCatalog
-            >> oc->m_ratiosCatalog
-            >> oc->m_soilTypesCatalog
-            >> oc->m_spectraCatalog
-            >> oc->m_timeSeriesCatalog
-            >> oc->m_log
-            >> maxDepth;
+    in >> oc->m_title;
+    in >> oc->m_filePrefix;
+    in >> oc->m_enabled;
+    in >> oc->m_frequency;
+    in >> oc->m_frequencyIsNeeded;
+    in >> oc->m_period;
+    in >> oc->m_periodIsNeeded;
+    in >> oc->m_damping;
+    in >> oc->m_profilesCatalog;
+    in >> oc->m_ratiosCatalog;
+    in >> oc->m_soilTypesCatalog;
+    in >> oc->m_spectraCatalog;
+    in >> oc->m_timeSeriesCatalog;
+    in >> oc->m_log;
+    in >> maxDepth;
 
     if (maxDepth > 0)
         oc->populateDepthVector(maxDepth);

@@ -1,5 +1,5 @@
 ########################################################################
-# Qwt Widget Library
+# Strata 
 # Copyright (C) 2011   Albert R. Kottke
 #
 # This library is free software; you can redistribute it and/or
@@ -18,9 +18,9 @@ DEFINES += ADVANCED_OPTIONS
 # development of the software using the debug configuration can be
 # beneficial.
 ########################################################################
-CONFIG += debug
+#CONFIG += debug
 #CONFIG += release
-#CONFIG += debug_and_release
+CONFIG += debug_and_release
 
 ########################################################################
 # Compiler warning messages.
