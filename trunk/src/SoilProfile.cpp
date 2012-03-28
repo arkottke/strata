@@ -566,7 +566,7 @@ void SoilProfile::createSubLayers(TextLog * textLog)
         }
 
         // Vary the damping of the bedrock
-        if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
+        if (m_nonlinearPropertyRandomizer->bedrockIsEnabled()) {
             if ( textLog->level() > TextLog::Low )
                 textLog->append(QObject::tr("Varying damping of bedrock"));
 
@@ -594,31 +594,37 @@ void SoilProfile::createSubLayers(TextLog * textLog)
             textLog->append(QObject::tr("Varying the layering"));
         }
         // Randomize the layer thicknesses
-        QList<double> thickness =
+        QList<double> thicknesses =
                 m_profileRandomizer->layerThicknessVariation()->vary(depthToBedrock);
 
         // For each thickness, determine the representative soil layer
         double depth = 0;
-        for (int i = 0; i < thickness.size(); ++i ) {
-            soilLayers << createRepresentativeSoilLayer(depth, depth+thickness.at(i));
+        for (int i = 0; i < thicknesses.size(); ++i ) {
+            soilLayers << createRepresentativeSoilLayer(depth, depth+thicknesses.at(i));
             // Set the new depth and thickness
             soilLayers.last()->setDepth(depth);
-            soilLayers.last()->setThickness(thickness.at(i));
+            soilLayers.last()->setThickness(thicknesses.at(i));
 
             // Increment the depth
-            depth += thickness.at(i);
+            depth += thicknesses.at(i);
         }
     } else {
         if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
             foreach (SoilLayer * layer, m_soilLayers) {
                 soilLayers << layer;
 
-                if (soilLayers.last()->depthToBase() > depthToBedrock) {
+                if (layer->depthToBase() > depthToBedrock) {
                     // Truncate the last SoilLayer once the depth to the bedrock is exceeded
-                    double thickness = depthToBedrock - soilLayers.last()->depth();
-                    soilLayers.last()->setThickness(thickness);
+                    double thickness = depthToBedrock - layer->depth();
+                    layer->setThickness(thickness);
                     break;
                 }
+            }
+
+            // Add thickness to the last layer if needed
+            SoilLayer * layer = soilLayers.last();
+            if (layer->depthToBase() < depthToBedrock) {
+                layer->setThickness(depthToBedrock - layer->depth());
             }
         } else {
             // Copy over previous soil layers
@@ -952,7 +958,7 @@ QString SoilProfile::subLayerTable() const
     html += QString("<tr><td>%1<td>%2<td>%3<td>%4<td>%5<td>%6<td>%7<td>%8<td>%9<td>%10<td>%11<td>%12<td>%13<td>%14</tr>")
             .arg(m_subLayers.size()+1)
             .arg(QObject::tr("Bedrock"))
-            .arg(m_bedrock->depth(), 0, 'f', 2)
+            .arg(m_subLayers.last().depthToBase(), 0, 'f', 2)
             .arg("--")
             .arg("--")
             .arg("--")

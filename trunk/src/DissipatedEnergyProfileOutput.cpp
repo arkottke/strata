@@ -64,9 +64,6 @@ void DissipatedEnergyProfileOutput::extract(AbstractCalculator* const calculator
     ref << 0;
     data << 0;
     
-    // Gravity is needed to convert the strain time series into meaningful values
-    double gravity = Units::instance()->gravity();
-
     foreach (const SubLayer & sl, subLayers) {
         const double depth = sl.depthToMid();
 

@@ -62,6 +62,8 @@ void AbstractDistribution::setType(AbstractDistribution::Type type)
     if (m_type != type) {
         m_type = type;
 
+        emit requiresLimits(m_type == Uniform);
+
         emit typeChanged(m_type);
         emit stdevRequiredChanged(stdevRequired());
         emit wasModified();

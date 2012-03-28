@@ -21,6 +21,7 @@
 
 #include "Distribution.h"
 #include <QObject>
+#include <QDebug>
 
 #include <gsl/gsl_randist.h>
 
@@ -38,7 +39,8 @@ double Distribution::rand()
     switch(m_type) {
     case Uniform:
         // Return the variable -- no trunction needed
-        return gsl_ran_flat(m_rng, m_min, m_max);
+        value = gsl_ran_flat(m_rng, m_min, m_max);
+        break;
     case Normal:
         // Generate the depth
         value = m_avg + gsl_ran_gaussian(m_rng, m_stdev);
@@ -49,7 +51,8 @@ double Distribution::rand()
     default:
         return -1;
     }
-
+    
+    // setVaried applies the limits to the value
     setVaried(value);
 
     return m_varied;
