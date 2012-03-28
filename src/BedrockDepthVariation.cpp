@@ -52,7 +52,6 @@ void BedrockDepthVariation::updateEnabled()
     emit enabledChanged(enabled());
 }
 
-
 QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
 
 {
@@ -60,7 +59,6 @@ QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
 
     out << qobject_cast<const Distribution*>(bdv)
             << bdv->m_enabled;
-
     return out;
 }
 

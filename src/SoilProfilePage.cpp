@@ -242,6 +242,10 @@ void SoilProfilePage::setModel(SiteResponseModel *model)
     m_bedrockDepthMinCheckBox->setChecked(bdv->hasMin());
     connect(m_bedrockDepthMinCheckBox, SIGNAL(toggled(bool)),
             bdv, SLOT(setHasMin(bool)));
+    connect(bdv, SIGNAL(requiresLimits(bool)), 
+            m_bedrockDepthMinCheckBox, SLOT(setChecked(bool)));
+    connect(bdv, SIGNAL(requiresLimits(bool)), 
+            m_bedrockDepthMinCheckBox, SLOT(setDisabled(bool)));
 
     m_bedrockDepthMinSpinBox->setRange( 0, bdv->max());
     m_bedrockDepthMinSpinBox->setEnabled(bdv->hasMin());
@@ -261,6 +265,10 @@ void SoilProfilePage::setModel(SiteResponseModel *model)
             bdv, SLOT(setHasMax(bool)));
     connect(bdv, SIGNAL(hasMaxChanged(bool)),
             m_bedrockDepthMaxCheckBox, SLOT(setChecked(bool)));
+    connect(bdv, SIGNAL(requiresLimits(bool)), 
+            m_bedrockDepthMaxCheckBox, SLOT(setChecked(bool)));
+    connect(bdv, SIGNAL(requiresLimits(bool)), 
+            m_bedrockDepthMaxCheckBox, SLOT(setDisabled(bool)));
 
     m_bedrockDepthMaxSpinBox->setRange( bdv->min(), 10000);
     m_bedrockDepthMaxSpinBox->setEnabled(bdv->hasMax());

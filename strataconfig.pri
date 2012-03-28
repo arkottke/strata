@@ -11,7 +11,7 @@
 # standard users. If only the basic features are needed, comment out the
 # following line.
 ########################################################################
-DEFINES += ADVANCED_OPTIONS
+# DEFINES += ADVANCED_OPTIONS
 
 ########################################################################
 # Build type. For most cases this should be release, however during
@@ -26,6 +26,18 @@ CONFIG += debug_and_release
 # Compiler warning messages.
 ########################################################################
 CONFIG += warn_on
+
+
+########################################################################
+# Enable console for debug versions
+########################################################################
+CONFIG(debug, debug|release) {
+    CONFIG += console
+}
+
+########################################################################
+# Use 4 processors in the build
+########################################################################
 
 ########################################################################
 # Setup of for the various libraries. This is most important on Windows.

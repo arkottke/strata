@@ -85,6 +85,7 @@ signals:
 
     void wasModified();
 
+    void requiresLimits(bool b);
 protected:
 
     //! Type of distribution

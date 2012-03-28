@@ -13,7 +13,8 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\QtSDK\Desktop\Qt\4.7.4\mingw\"
+!Define QT_PATH "C:\devel\QtSDK\Desktop\Qt\4.8.0\mingw\"
+!Define QT_MINGW_PATH "C:\devel\QtSDK\mingw\bin"
 
 ;--------------------------------
 ;Variables
@@ -122,6 +123,7 @@ Section "!Core Files" SecProgram
   file "${QT_PATH}\bin\QtScript4.dll"
   file "${QT_PATH}\bin\QtSvg4.dll"
   file "${QT_PATH}\bin\QtXml4.dll"
+  file "${QT_MINGW_PATH}\libstdc++-6.dll"
   file "C:\devel\qwt-6.0\lib\qwt.dll"
   
   ;Plugins for SVG icons

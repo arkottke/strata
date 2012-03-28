@@ -230,7 +230,8 @@ void MainWindow::createMenus()
     QMenu * helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(m_helpAction);
     helpMenu->addSeparator();
-    helpMenu->addAction(m_updateAction);
+    // FIXME: Update is currently disabled until hosting service can be figured out.
+    //helpMenu->addAction(m_updateAction);
     helpMenu->addAction(m_aboutAction);
 }
 
@@ -428,10 +429,6 @@ void MainWindow::update()
 
 void MainWindow::about()
 {
-
-
-
-
     QMessageBox::about(this, tr("About Strata"),
                        tr("<p><b>Strata</b> was written by Albert Kottke working with Professor"
                           " Ellen Rathje at The University of Texas at Austin.</p>"

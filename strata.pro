@@ -11,9 +11,9 @@ CONFIG(debug, debug|release) {
 
 # Directories for building
 CONFIG(debug, debug|release) {
-   DESTDIR = build/debug
+   DESTDIR = debug
 } else {
-   DESTDIR = build/release
+   DESTDIR = release
 }
 
 TEMPLATE = app
