@@ -288,6 +288,7 @@ AbstractRatioOutput* RatiosOutputCatalog::factory(const QString & className, Out
         emit frequencyIsNeededChanged(true);
     }
     Q_ASSERT(aro);
+
     return aro;
 }
 
