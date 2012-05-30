@@ -44,25 +44,21 @@
 ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog)
 {
-    m_outputs << new DampingProfileOutput(m_outputCatalog);
-
-#ifdef ADVANCED_OPTIONS
-    m_outputs << new DissipatedEnergyProfileOutput(m_outputCatalog);
-#endif
-
-    m_outputs << new FinalVelProfileOutput(m_outputCatalog)
-            << new InitialVelProfileOutput(m_outputCatalog)
-            << new MaxAccelProfileOutput(m_outputCatalog)
-            << new MaxDispProfileOutput(m_outputCatalog)
-            << new MaxErrorProfileOutput(m_outputCatalog)
-            << new MaxStrainProfileOutput(m_outputCatalog)
-            << new MaxStressProfileOutput(m_outputCatalog)
-            << new MaxVelProfileOutput(m_outputCatalog)
-            << new ModulusProfileOutput(m_outputCatalog)
-            << new StressRatioProfileOutput(m_outputCatalog)
-            << new StressReducCoeffProfileOutput(m_outputCatalog)
-            << new VerticalTotalStressProfileOutput(m_outputCatalog)
-            << new VerticalEffectiveStressProfileOutput(m_outputCatalog);
+    m_outputs << new DampingProfileOutput(m_outputCatalog)
+              << new DissipatedEnergyProfileOutput(m_outputCatalog)
+              << new FinalVelProfileOutput(m_outputCatalog)
+              << new InitialVelProfileOutput(m_outputCatalog)
+              << new MaxAccelProfileOutput(m_outputCatalog)
+              << new MaxDispProfileOutput(m_outputCatalog)
+              << new MaxErrorProfileOutput(m_outputCatalog)
+              << new MaxStrainProfileOutput(m_outputCatalog)
+              << new MaxStressProfileOutput(m_outputCatalog)
+              << new MaxVelProfileOutput(m_outputCatalog)
+              << new ModulusProfileOutput(m_outputCatalog)
+              << new StressRatioProfileOutput(m_outputCatalog)
+              << new StressReducCoeffProfileOutput(m_outputCatalog)
+              << new VerticalTotalStressProfileOutput(m_outputCatalog)
+              << new VerticalEffectiveStressProfileOutput(m_outputCatalog);
 
     foreach (AbstractProfileOutput* output, m_outputs)
         connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
