@@ -171,10 +171,14 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
     poc->beginResetModel();
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs) {
+        // Skip profiles not included in earlier versions
         if (ver < 2 && qobject_cast<MaxDispProfileOutput*>(apo))
+            continue;
+        if (ver < 2 && qobject_cast<DissipatedEnergyProfileOutput*>(apo))
             continue;
         if (ver < 3 && qobject_cast<VerticalEffectiveStressProfileOutput*>(apo))
             continue;
+
 
         in >> apo;
     }
