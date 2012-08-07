@@ -39,6 +39,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QSplitter>
+#include <QScrollArea>
 
 #include <qwt_symbol.h>
 #include <qwt_legend.h>
@@ -444,8 +445,10 @@ QTabWidget* ResultsPage::createDataTabWidget()
     curveC.setPen(QPen(QBrush(Qt::darkRed), 2));
     curveC.updateLegend(legend);
 
-    tabWidget->addTab(m_plot, tr("Plot"));
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidget(m_plot);
 
+    tabWidget->addTab(scrollArea, tr("Plot"));
 
     m_outputTableView = new MyTableView;
     m_outputTableView->setReadOnly(true);

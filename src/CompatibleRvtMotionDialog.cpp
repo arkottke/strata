@@ -37,6 +37,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QScrollArea>
 #include <QTabWidget>
 
 #include <qwt_plot.h>
@@ -174,7 +175,10 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
                              m_motion->targetRespSpec()->sa());
     m_targetSaCurve->attach(plot);
 
-    tabWidget->addTab(plot, tr("RS Plot"));
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidget(plot);
+
+    tabWidget->addTab(scrollArea, tr("RS Plot"));
 
     // Fourier amplitude spectrum plot
     plot = new QwtPlot;
@@ -203,7 +207,10 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     m_fasCurve->setSamples(m_motion->freq(),m_motion->fourierAcc());
     m_fasCurve->attach(plot);
 
-    tabWidget->addTab(plot, tr("FAS Plot"));
+    scrollArea = new QScrollArea;
+    scrollArea->setWidget(plot);
+
+    tabWidget->addTab(scrollArea, tr("FAS Plot"));
 
     // Response spectrum table
     m_rsTableView = new MyTableView;
