@@ -446,6 +446,7 @@ QTabWidget* ResultsPage::createDataTabWidget()
     curveC.updateLegend(legend);
 
     QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(m_plot);
 
     tabWidget->addTab(scrollArea, tr("Plot"));

@@ -176,6 +176,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     m_targetSaCurve->attach(plot);
 
     QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(plot);
 
     tabWidget->addTab(scrollArea, tr("RS Plot"));
