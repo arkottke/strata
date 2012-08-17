@@ -610,21 +610,26 @@ void SoilProfile::createSubLayers(TextLog * textLog)
         }
     } else {
         if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
-            foreach (SoilLayer * layer, m_soilLayers) {
-                soilLayers << layer;
-
+            foreach (SoilLayer * layer, m_soilLayers) {               
                 if (layer->depthToBase() > depthToBedrock) {
+                    // Create a new SoilLayer since the thickness will be modified
+                    soilLayers << new SoilLayer(layer);
+
                     // Truncate the last SoilLayer once the depth to the bedrock is exceeded
                     double thickness = depthToBedrock - layer->depth();
-                    layer->setThickness(thickness);
+                    soilLayers.last()->setThickness(thickness);
                     break;
+                } else {
+                    // Add the layer
+                    soilLayers << layer;
                 }
             }
 
-            // Add thickness to the last layer if needed
-            SoilLayer * layer = soilLayers.last();
-            if (layer->depthToBase() < depthToBedrock) {
-                layer->setThickness(depthToBedrock - layer->depth());
+            // Add thickness to the last layer if needed            
+            if (soilLayers.last()->depthToBase() < depthToBedrock) {
+                // Replace the last SoilLayer with a copy
+                soilLayers << new SoilLayer(soilLayers.takeLast());
+                soilLayers.last()->setThickness(depthToBedrock - soilLayers.last()->depth());
             }
         } else {
             // Copy over previous soil layers
