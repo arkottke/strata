@@ -61,6 +61,12 @@ public:
         VariedColumn
     };
 
+    //! Methods to locating representative soil layer
+    enum LayerSelectionMethod {
+        MaximumTravelTime,
+        MidDepth,
+    };
+
     //!@{
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -249,6 +255,9 @@ private:
 
     //! Number of artificial profiles to generate
     int m_profileCount;
+
+    //! Method used to find representative soillayer
+    LayerSelectionMethod m_layerSelectionMethod;
 
     //! Random number generator
     gsl_rng* m_rng;
