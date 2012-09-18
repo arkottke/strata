@@ -83,6 +83,7 @@ SoilProfile::SoilProfile(QObject * parent)
     m_waveFraction = 0.20;
     m_disableAutoDiscretization = false;
     m_waterTableDepth = 0.;
+    m_layerSelectionMethod = MidDepth;
 }
 
 SoilProfile::~SoilProfile()
@@ -279,7 +280,7 @@ QVariant SoilProfile::headerData(int section, Qt::Orientation orientation, int r
         }
     case Qt::Vertical:
         return section+1;
-                default:
+    default:
         return QVariant();
     }
 }
@@ -1096,53 +1097,62 @@ void SoilProfile::updateDepths()
 
 SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
 {
-    SoilLayer* selectedLayer = 0;
-    double longestTime = 0;
-
-    // If the layer is deeper than the site profile, use the deepest layer
-    if (top > m_soilLayers.last()->depthToBase())
-        return new SoilLayer(m_soilLayers.last());
-
-    foreach (SoilLayer* sl, m_soilLayers) {
-        // Skip the layer if it isn't in the depth range of interest
-        if ( sl->depthToBase() < top || sl->depth() > base )
-            continue;
-        
-        // If the layer is completely within a given layer, return that layer
-        if ( sl->depth() <= top &&  base <= sl->depthToBase()) {
-            selectedLayer = sl;
-            break;
-        }
-
+    if (m_layerSelectionMethod == MaximumTravelTime) {
         // The representative layer is the layer with the most travel time
         // through it
+        SoilLayer* selectedLayer = 0;
 
-        // Path length within the depth interest range
-        double length = 0;
+        double longestTime = 0;
 
-        if (sl->depth() > top && base < sl->depthToBase()) {
-            // New layer extends above the SoilLayer
-            length =  base - sl->depth();
-        } else if (sl->depth() < top && base > sl->depthToBase()) {
-            // New layer extends below the SoilLayer
-            length = sl->depthToBase() - top;
-        } else {
-            // New layer exists totally with the SoilLayer
-            length = base - top;
+        // If the layer is deeper than the site profile, use the deepest layer
+        if (top > m_soilLayers.last()->depthToBase())
+            return new SoilLayer(m_soilLayers.last());
+
+        foreach (SoilLayer* sl, m_soilLayers) {
+            // Skip the layer if it isn't in the depth range of interest
+            if ( sl->depthToBase() < top || sl->depth() > base )
+                continue;
+
+            // If the layer is completely within a given layer, return that layer
+            if ( sl->depth() <= top &&  base <= sl->depthToBase()) {
+                selectedLayer = sl;
+                break;
+            }
+            // Path length within the depth interest range
+            double length = 0;
+
+            if (sl->depth() > top && base < sl->depthToBase()) {
+                // New layer extends above the SoilLayer
+                length =  base - sl->depth();
+            } else if (sl->depth() < top && base > sl->depthToBase()) {
+                // New layer extends below the SoilLayer
+                length = sl->depthToBase() - top;
+            } else {
+                // New layer exists totally with the SoilLayer
+                length = base - top;
+            }
+
+            // Compute the travel time
+            double time = length / sl->shearVel();
+
+            if (!selectedLayer || time > longestTime) {
+                selectedLayer = sl;
+                longestTime = time;
+            }
         }
 
-        // Compute the travel time
-        double time = length / sl->shearVel();
+        Q_ASSERT(selectedLayer);
 
-        if (!selectedLayer || time > longestTime) {
-            selectedLayer = sl;
-            longestTime = time;
+        return new SoilLayer(selectedLayer);
+    } else if (m_layerSelectionMethod == MidDepth) {
+        const float midDepth = (top + base) / 2.0;
+
+        foreach (SoilLayer* sl, m_soilLayers) {
+            if (sl->depth() < midDepth && midDepth <= sl->depthToBase()) {
+                return new SoilLayer(sl);
+            }
         }
     }
-
-    Q_ASSERT(selectedLayer);
-    
-    return new SoilLayer(selectedLayer);
 }
 
 void SoilProfile::updateUnits()
