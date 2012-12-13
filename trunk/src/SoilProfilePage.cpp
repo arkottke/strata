@@ -471,7 +471,7 @@ QFrame* SoilProfilePage::createLayeringFrame()
 
     // Coefficient line
     m_layeringCoeffSpinBox = new QDoubleSpinBox;
-    m_layeringCoeffSpinBox->setRange( 0, 10 );
+    m_layeringCoeffSpinBox->setRange( 0, 100);
     m_layeringCoeffSpinBox->setDecimals(2);
     m_layeringCoeffSpinBox->setSingleStep(0.01);
 
@@ -488,7 +488,7 @@ QFrame* SoilProfilePage::createLayeringFrame()
 
     // Exponent line
     m_layeringExponentSpinBox = new QDoubleSpinBox;
-    m_layeringExponentSpinBox->setRange( -2, 0 );
+    m_layeringExponentSpinBox->setRange(-5, 0);
     m_layeringExponentSpinBox->setDecimals(2);
     m_layeringExponentSpinBox->setSingleStep(0.01);
 
