@@ -712,14 +712,35 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
 
     QVector<double> sa(period.size());
 
+    const double deltaFreq = 1 / (m_timeStep * m_accel.size());
+
     // Compute the response at each period
     for ( int i = 0; i < sa.size(); ++i ) {
+        /*
+        The FAS needs to extend to have a sampling rate that is 10 times larger
+        than the maximum frequency which corresponds to 5 times larger Nyquist
+        frequency. This is required for sufficient resolution of the peak value
+        in the time domain. For example, at a frequency 100 Hz (period of 0.01
+        sec) the FAS has to extend to 500 Hz. The FAS is initialized to be zero
+        which allows for resolution of the time series.
+        */
+        const double f = 1 / period.at(i);
+        const int size = qMax(m_freq.size(), int((f * 5.0) / deltaFreq));
+
+        // Only apply the SDOF transfer function over frequencies defined by the original motion
         QVector<std::complex<double> > tf = calcSdofTf(period.at(i), damping);
+
+        // The amplitude of the FAS needs to be scaled to reflect the increased
+        // number of points.
+        const double scale = double(size) / double(m_freq.size());
+
+        for (int j = 0; j < m_freq.size(); ++j )
+            tf[j] *= scale;
 
         // If there is an acceleration transfer function combine the SDOF and
         // acceleration transfer functions
         if (!accelTf.isEmpty()) {
-            for (int j = 0; j < tf.size(); ++j)
+            for (int j = 0; j < accelTf.size(); ++j)
                 tf[j] *= accelTf.at(j);
         }
 

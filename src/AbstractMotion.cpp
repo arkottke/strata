@@ -207,7 +207,7 @@ void AbstractMotion::scaleProperties()
 
 QVector<std::complex<double> > AbstractMotion::calcSdofTf(const double period, const double damping) const
 {
-    QVector<std::complex<double> > tf(freq().size());
+    QVector<std::complex<double> > tf(freq().size(), std::complex<double>(0., 0.));
 
     // Natural frequency of the oscillator
     const double fn = 1 / period;
