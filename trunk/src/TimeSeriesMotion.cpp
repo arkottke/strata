@@ -484,6 +484,9 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
     bool finished = false;
     bool stopLineReached = false;
 
+    // Modify the scale for unit conversion
+    scale = unitConversionFactor() * m_scale;
+
     while (!finished && !line.isNull()) {
         // Stop if line exceeds number of lines.  The line number has
         // to be increased by one because the user display starts at
@@ -494,7 +497,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         }
 
         // Read the line and split the line
-        QRegExp rx("(-?\\d*\\.\\d+(?:[eE]-?\\d+)?)");
+        QRegExp rx("(-?\\d*\\.\\d+(?:[eE][+-]?\\d+)?)");
         int pos = 0;
         QStringList row;
 
@@ -505,7 +508,6 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
 
         // Process the row based on the format
         bool ok;
-        const double scale = unitConversionFactor() * m_scale;
         switch (m_format) {
         case Rows:
             // Use all parts of the data
@@ -579,6 +581,9 @@ void TimeSeriesMotion::calculate()
 
     for (int i = 0; i < m_accel.size(); ++i)
         accel[i] = m_accel.at(i);
+
+    for (int i = 0; i < 20; ++i)
+        qDebug() << accel.at(1440 + i);
 
     // Compute the Fourier amplitude spectrum.  The FAS computed through this
     // method is only the postive frequencies and is of length n/2+1 where n is
