@@ -48,10 +48,15 @@ unix {
         -lfftw3 \
         -lgsl \
         -lgslcblas \
+        -L$$(QT_LIB_PATH) \
+        -L$$(QWT_LIB_PATH) \
         -L"../qwt-6.0/lib/" \
         -lqwt
     INCLUDEPATH += . \
-        ../qwt-6.0/src/
+        ../qwt-6.0/src/ \
+        $$(QT_INCLUDE_PATH) \
+        $$(QWT_INCLUDE_PATH)
+
 }
 # Windows
 win32 { 
