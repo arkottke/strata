@@ -34,10 +34,11 @@
 
 #include <qwt_scale_engine.h>
 
-AbstractProfileOutput::AbstractProfileOutput(OutputCatalog* catalog)
+AbstractProfileOutput::AbstractProfileOutput(OutputCatalog* catalog, bool interpolated)
     : AbstractOutput(catalog), m_enabled(false)
-{
-    m_interp = new LinearOutputInterpolater;
+{    
+    if (interpolated)
+        m_interp = new LinearOutputInterpolater;
 
     m_statistics = new OutputStatistics(this);
     connect(m_statistics, SIGNAL(wasModified()),

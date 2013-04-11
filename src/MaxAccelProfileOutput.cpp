@@ -24,9 +24,13 @@
 #include "AbstractCalculator.h"
 #include "SoilProfile.h"
 #include "Units.h"
+#include "AbstractMotion.h"
+#include "SoilProfile.h"
+
+#include <QDebug>
 
 MaxAccelProfileOutput::MaxAccelProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
+    : AbstractProfileOutput(catalog, false)
 {
 }
 
@@ -48,7 +52,18 @@ const QString MaxAccelProfileOutput::xLabel() const
 void MaxAccelProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    AbstractProfileOutput::extract(calculator, ref, data);
+    Q_UNUSED(ref);
 
-    data = calculator->maxAccelProfile();
+    const AbstractMotion* motion = calculator->motion();
+    const SoilProfile* site = calculator->site();
+
+    // Outcrop for the first layer. Within for subsequent.
+    AbstractMotion::Type type = AbstractMotion::Outcrop;
+
+    foreach (double depth, this->ref()) {
+        data << motion->max(calculator->calcAccelTf(
+                                site->inputLocation(), motion->type(),
+                                site->depthToLocation(depth), type));
+        type = AbstractMotion::Within;
+    }
 }

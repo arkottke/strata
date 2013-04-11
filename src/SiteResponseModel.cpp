@@ -29,6 +29,7 @@
 #include "MotionLibrary.h"
 #include "NonlinearPropertyRandomizer.h"
 #include "OutputCatalog.h"
+#include "ProfilesOutputCatalog.h"
 #include "ProfileRandomizer.h"
 #include "SoilProfile.h"
 #include "SoilTypesOutputCatalog.h"
@@ -77,8 +78,11 @@ SiteResponseModel::SiteResponseModel(QObject * parent)
             this, SLOT(setModified()));
     connect(this, SIGNAL(hasResultsChanged(bool)),
             m_outputCatalog, SLOT(setReadOnly(bool)));
-    connect(m_outputCatalog, SIGNAL(wasModified()),            
+    connect(m_outputCatalog, SIGNAL(wasModified()),
             this, SLOT(setModified()));
+    connect(this->motionLibrary(), SIGNAL(approachChanged(int)),
+            m_outputCatalog->profilesCatalog(), SLOT(setApproach(int)));
+
     // Associate the output soil types catalog with the input soil types catalog
     // Should these have a stronger link? As in be the same object?
     m_outputCatalog->soilTypesCatalog()->setSoilTypeCatalog(m_siteProfile->soilTypeCatalog());
@@ -87,7 +91,7 @@ SiteResponseModel::SiteResponseModel(QObject * parent)
 
     m_notes = new QTextDocument(this);
     connect(m_notes, SIGNAL(contentsChanged()),
-             this, SLOT(setModified()));
+            this, SLOT(setModified()));
 
     Units::instance()->reset();
 }
@@ -97,7 +101,7 @@ QStringList SiteResponseModel::methodList()
     QStringList list;
 
     list << tr("Linear Elastic")
-            << tr("Equivalent Linear (EQL)");
+         << tr("Equivalent Linear (EQL)");
 
 #ifdef ADVANCED_OPTIONS
     list << tr("Frequency Dependent EQL");
@@ -173,15 +177,15 @@ bool SiteResponseModel::modified() const
 
 void SiteResponseModel::setModified(bool modified)
 {    
-    m_modified = modified;    
+    m_modified = modified;
     emit modifiedChanged(modified);
 
-//     FIXME
-//    if (m_modified != modified && m_isLoaded) {
-//        // FIXME When opening a previously saved document, the QTextDocument
-//        // containing the notes signals that it has been modified.  This happens
-//        // before the modified flag is reset.
-//    }
+    //     FIXME
+    //    if (m_modified != modified && m_isLoaded) {
+    //        // FIXME When opening a previously saved document, the QTextDocument
+    //        // containing the notes signals that it has been modified.  This happens
+    //        // before the modified flag is reset.
+    //    }
 }
 
 QTextDocument * SiteResponseModel::notes() const
@@ -251,7 +255,7 @@ bool SiteResponseModel::load(const QString & fileName)
     m_fileName = fileName;
 
     QFile file(fileName);
-    // If the file can't be opened halt 
+    // If the file can't be opened halt
     if (!file.open(QIODevice::ReadOnly)) {
         qCritical("Error opening file: %s", qPrintable(fileName));
         return false;
@@ -282,7 +286,7 @@ bool SiteResponseModel::load(const QString & fileName)
 bool SiteResponseModel::save()
 {
     QFile file(m_fileName);
-    // If the file can't be opened halt 
+    // If the file can't be opened halt
     if (!file.open(QIODevice::WriteOnly)) {
         qCritical() << "Error opening file: %s" << qPrintable(m_fileName);
         return false;
@@ -340,7 +344,7 @@ void SiteResponseModel::run()
     // Determine the number of sites to be used in the computation
     const int siteCount = m_siteProfile->isVaried() ? m_siteProfile->profileCount() : 1;
 
-    // Initialize the output    
+    // Initialize the output
     m_outputCatalog->initialize(siteCount, m_motionLibrary);
 
     // Setup the progress bar with the number of steps
@@ -354,7 +358,7 @@ void SiteResponseModel::run()
                                    .arg(siteCount)
                                    .arg(motionCount));
 
-    int count = 0;    
+    int count = 0;
     for (int i = 0; i < siteCount; ++i) {
         // Break if not okay to continue
         if ( !m_okToContinue )
@@ -376,13 +380,13 @@ void SiteResponseModel::run()
 
             if (!m_okToContinue)
                 // Break if not okay to continue
-                break;            
+                break;
 
             // Output status
             m_outputCatalog->log()->append(QString(tr("\t[%1 of %2] Computing site response for motion: %3"))
-                                        .arg(j - motionCountOffset + 1)
-                                        .arg(motionCount)
-                                        .arg(m_motionLibrary->motionAt(j)->name()));
+                                           .arg(j - motionCountOffset + 1)
+                                           .arg(motionCount)
+                                           .arg(m_motionLibrary->motionAt(j)->name()));
 
             // Compute the site response
             if (!m_calculator->run(m_motionLibrary->motionAt(j), m_siteProfile) && m_okToContinue) {
@@ -474,18 +478,18 @@ QString SiteResponseModel::toHtml()
 
     // Project
     html += tr("<h1>%1</h1>"
-                       "<ol>"
-                       "<li>General Settings"
-                       "<ol>"
-                       "<li>Project"
-                       "<table border=\"0\">"
-                       "<tr><th>Title:</th><td>%1</td></tr>"
-                       "<tr><th>Notes:</th><td>%2</td></tr>"
-                       "<tr><th>File preffix:</th><td>%3</td></tr>"
-                       "<tr><th>Units System:</th><td>%4</td></tr>"
-                       "</table>"
-                       "</li>"
-                       )
+               "<ol>"
+               "<li>General Settings"
+               "<ol>"
+               "<li>Project"
+               "<table border=\"0\">"
+               "<tr><th>Title:</th><td>%1</td></tr>"
+               "<tr><th>Notes:</th><td>%2</td></tr>"
+               "<tr><th>File preffix:</th><td>%3</td></tr>"
+               "<tr><th>Units System:</th><td>%4</td></tr>"
+               "</table>"
+               "</li>"
+               )
             .arg(m_outputCatalog->title())
             .arg(m_notes->toHtml())
             .arg(m_outputCatalog->filePrefix())
@@ -494,14 +498,14 @@ QString SiteResponseModel::toHtml()
 
     // Type of Analysis
     html += tr(
-            "<li>Type of Analysis"
-            "<table border=\"0\">"
-            "<tr><th>Analysis Method:</th><td>%1</td></tr>"
-            "<tr><th>Approach:</th><td>%2</td></tr>"
-            "<tr><th>Properties Varied:</th><td>%3</td></tr>"
-            "</table>"
-            "</li>"
-            )
+                "<li>Type of Analysis"
+                "<table border=\"0\">"
+                "<tr><th>Analysis Method:</th><td>%1</td></tr>"
+                "<tr><th>Approach:</th><td>%2</td></tr>"
+                "<tr><th>Properties Varied:</th><td>%3</td></tr>"
+                "</table>"
+                "</li>"
+                )
             .arg(methodList().at(m_method))
             .arg(MotionLibrary::approachList().at(m_motionLibrary->approach()))
             .arg(boolToString(m_siteProfile->isVaried()));
@@ -509,27 +513,27 @@ QString SiteResponseModel::toHtml()
     // Site Variation
     if ( m_siteProfile->isVaried() )
         html += tr(
-                "<li>Site Property Variation"
-                "<table border=\"0\">"
-                "<tr><th>Number of realizations:</th><td>%1</td></tr>"
-                "<tr><th>Vary the nonlinear soil properties:</th><td>%2</td></tr>"
-                "<tr><th>Vary the site profile:</th><td>%3</td></tr>"
-                "</table>"
-                "</li>"
-                )
-        .arg(m_siteProfile->profileCount())
-        .arg(boolToString(m_siteProfile->nonlinearPropertyRandomizer()->enabled()))
-        .arg(boolToString(m_siteProfile->profileRandomizer()->enabled()));
+                    "<li>Site Property Variation"
+                    "<table border=\"0\">"
+                    "<tr><th>Number of realizations:</th><td>%1</td></tr>"
+                    "<tr><th>Vary the nonlinear soil properties:</th><td>%2</td></tr>"
+                    "<tr><th>Vary the site profile:</th><td>%3</td></tr>"
+                    "</table>"
+                    "</li>"
+                    )
+                .arg(m_siteProfile->profileCount())
+                .arg(boolToString(m_siteProfile->nonlinearPropertyRandomizer()->enabled()))
+                .arg(boolToString(m_siteProfile->profileRandomizer()->enabled()));
 
     // Layer Discretization
     html += tr(
-            "<li>Layer Discretization"
-            "<table border=\"0\">"
-            "<tr><th>Maximum frequency:</th><td>%1 Hz</td></tr>"
-            "<tr><th>Wavelength fraction:</th><td>%2</td></tr>"
-            "</table>"
-            "</li>"
-            )
+                "<li>Layer Discretization"
+                "<table border=\"0\">"
+                "<tr><th>Maximum frequency:</th><td>%1 Hz</td></tr>"
+                "<tr><th>Wavelength fraction:</th><td>%2</td></tr>"
+                "</table>"
+                "</li>"
+                )
             .arg(m_siteProfile->maxFreq())
             .arg(m_siteProfile->waveFraction());
 
@@ -566,12 +570,12 @@ QDataStream & operator<< (QDataStream & out, const SiteResponseModel* srm)
     out << (quint8)1;
 
     out << Units::instance()
-            << srm->m_notes->toPlainText()
-            << srm->m_method
-            << srm->m_siteProfile
-            << srm->m_motionLibrary
-            << srm->m_outputCatalog
-            << srm->m_hasResults;
+        << srm->m_notes->toPlainText()
+        << srm->m_method
+        << srm->m_siteProfile
+        << srm->m_motionLibrary
+        << srm->m_outputCatalog
+        << srm->m_hasResults;
 
     switch (srm->m_method) {
     case SiteResponseModel::EquivalentLinear:
@@ -585,7 +589,7 @@ QDataStream & operator<< (QDataStream & out, const SiteResponseModel* srm)
         break;
     }
 
-   return out;
+    return out;
 }
 
 QDataStream & operator>> (QDataStream & in, SiteResponseModel* srm)
@@ -598,18 +602,18 @@ QDataStream & operator>> (QDataStream & in, SiteResponseModel* srm)
     bool hasResults;
 
     in >> Units::instance()
-            >> notes
-            >> method
-            >> srm->m_siteProfile
-            >> srm->m_motionLibrary // Need to update motion count
-            >> srm->m_outputCatalog
-            >> hasResults;
+       >> notes
+       >> method
+       >> srm->m_siteProfile
+       >> srm->m_motionLibrary // Need to update motion count
+       >> srm->m_outputCatalog
+       >> hasResults;
 
     srm->m_notes->setPlainText(notes);
     srm->setMethod(method);
     srm->m_outputCatalog->initialize(
-            srm->m_siteProfile->isVaried() ?  srm->m_siteProfile->profileCount() : 1,
-            srm->m_motionLibrary);
+                srm->m_siteProfile->isVaried() ?  srm->m_siteProfile->profileCount() : 1,
+                srm->m_motionLibrary);
 
     if (hasResults)
         srm->m_outputCatalog->finalize();

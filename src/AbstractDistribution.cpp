@@ -187,12 +187,12 @@ QDataStream & operator<< (QDataStream & out, const AbstractDistribution* ad)
     out << (quint8)1;
 
     out << (int)ad->m_type
-            << ad->m_avg
-            << ad->m_stdev
-            << ad->m_hasMax
-            << ad->m_max
-            << ad->m_hasMin
-            << ad->m_min;
+        << ad->m_avg
+        << ad->m_stdev
+        << ad->m_hasMax
+        << ad->m_max
+        << ad->m_hasMin
+        << ad->m_min;
 
     return out;
 }
@@ -204,12 +204,12 @@ QDataStream & operator>> (QDataStream & in, AbstractDistribution* ad)
 
     int type;
     in >> type
-            >> ad->m_avg
-            >> ad->m_stdev
-            >> ad->m_hasMax
-            >> ad->m_max
-            >> ad->m_hasMin
-            >> ad->m_min;
+       >> ad->m_avg
+       >> ad->m_stdev
+       >> ad->m_hasMax
+       >> ad->m_max
+       >> ad->m_hasMin
+       >> ad->m_min;
 
     ad->m_type = (AbstractDistribution::Type)type;
 

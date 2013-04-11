@@ -38,7 +38,6 @@
 
 #include <QBrush>
 #include <QColor>
-#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -583,7 +582,9 @@ void SoilProfile::createSubLayers(TextLog * textLog)
             textLog->append(QObject::tr("Varying depth to bedrock"));       
 
         m_profileRandomizer->bedrockDepthVariation()->setAvg(m_bedrock->depth());
-        depthToBedrock = m_profileRandomizer->bedrockDepthVariation()->rand();
+
+        // FIXME Temporary fix.
+        depthToBedrock = qMax(1.0, m_profileRandomizer->bedrockDepthVariation()->rand());
     } else {
         depthToBedrock = m_bedrock->depth();
     }
@@ -600,14 +601,14 @@ void SoilProfile::createSubLayers(TextLog * textLog)
 
         // For each thickness, determine the representative soil layer
         double depth = 0;
-        for (int i = 0; i < thicknesses.size(); ++i ) {
-            soilLayers << createRepresentativeSoilLayer(depth, depth+thicknesses.at(i));
+        foreach (double thickness, thicknesses) {
+            soilLayers << createRepresentativeSoilLayer(depth, depth+thickness);
             // Set the new depth and thickness
             soilLayers.last()->setDepth(depth);
-            soilLayers.last()->setThickness(thicknesses.at(i));
+            soilLayers.last()->setThickness(thickness);
 
             // Increment the depth
-            depth += thicknesses.at(i);
+            depth += thickness;
         }
     } else {
         if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
@@ -1142,16 +1143,22 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
         }
 
         Q_ASSERT(selectedLayer);
-
-        return new SoilLayer(selectedLayer);
+        return new SoilLayer(selectedLayer);                
     } else if (m_layerSelectionMethod == MidDepth) {
         const float midDepth = (top + base) / 2.0;
+        SoilLayer * newLayer = 0;
 
+        // Try each of the layers
         foreach (SoilLayer* sl, m_soilLayers) {
             if (sl->depth() < midDepth && midDepth <= sl->depthToBase()) {
-                return new SoilLayer(sl);
+                newLayer = new SoilLayer(sl);
             }
         }
+        // Use the last layer is none are found
+        if (!newLayer)
+            newLayer = new SoilLayer(m_soilLayers.last());
+
+        return newLayer;
     }
 }
 

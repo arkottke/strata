@@ -58,7 +58,7 @@ QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
     out << (quint8)1;
 
     out << qobject_cast<const Distribution*>(bdv)
-            << bdv->m_enabled;
+        << bdv->m_enabled;
     return out;
 }
 
@@ -70,7 +70,7 @@ QDataStream & operator>> (QDataStream & in, BedrockDepthVariation* bdv)
 
     bool enabled;
     in >> qobject_cast<Distribution*>(bdv)
-            >> enabled;
+       >> enabled;
 
     bdv->setEnabled(enabled);
 

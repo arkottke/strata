@@ -40,7 +40,7 @@ public:
         Xfx  //!< X data is a function of y data
     };
 
-    explicit AbstractProfileOutput(OutputCatalog* catalog);
+    explicit AbstractProfileOutput(OutputCatalog* catalog, bool interpolated = true);
 
     virtual QString fullName() const;
     virtual bool needsDepth() const;

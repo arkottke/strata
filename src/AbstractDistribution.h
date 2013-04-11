@@ -105,11 +105,11 @@ protected:
 
     //! Standard deviation of the distribution
     /*!
-             * For uniform distributions this is not used.  For normal
-             * distributions this is the standard deviation in linear space, but
-             * for log-normal distributions this is the standard deviation in log
-             * space.
-             */
+     * For uniform distributions this is not used.  For normal
+     * distributions this is the standard deviation in linear space, but
+     * for log-normal distributions this is the standard deviation in log
+     * space.
+     */
     double m_stdev;
 
     //! If the distribution has a minimum

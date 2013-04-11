@@ -26,13 +26,12 @@
 
 class AbstractProfileOutput;
 
-
 class ProfilesOutputCatalog : public AbstractOutputCatalog
 {
-Q_OBJECT
+    Q_OBJECT
 
-friend QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc);
-friend QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc);
+    friend QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc);
+    friend QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc);
 
 public:
     explicit ProfilesOutputCatalog(OutputCatalog *outputCatalog);
@@ -50,7 +49,6 @@ public:
     virtual QList<AbstractOutput*> outputs() const;
 
 protected:
-
     QList<AbstractProfileOutput*> m_outputs;
 };
 

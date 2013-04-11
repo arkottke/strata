@@ -69,7 +69,6 @@ double SoilLayer::thickness() const
 void SoilLayer::setThickness(double thickness)
 {
     m_thickness = thickness;
-
     emit wasModified();
 }
         

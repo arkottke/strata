@@ -53,7 +53,7 @@ public:
     QString toString() const;
 
     double untWt() const;
-    double density() const;    
+    double density() const;
 
 protected:
     void setThickness(double thickness);

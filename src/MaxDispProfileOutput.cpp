@@ -26,7 +26,7 @@
 #include "Units.h"
 
 MaxDispProfileOutput::MaxDispProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
+    : AbstractProfileOutput(catalog, false)
 {
 
 }
@@ -50,7 +50,18 @@ const QString MaxDispProfileOutput::xLabel() const
 void MaxDispProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    AbstractProfileOutput::extract(calculator, ref, data);
+    Q_UNUSED(ref);
 
-    data = calculator->maxDispProfile();
+    const AbstractMotion* motion = calculator->motion();
+    const SoilProfile* site = calculator->site();
+
+    // Outcrop for the first layer. Within for subsequent.
+    AbstractMotion::Type type = AbstractMotion::Outcrop;
+
+    foreach (double depth, this->ref()) {
+        data << motion->maxDisp(calculator->calcAccelTf(
+                                site->inputLocation(), motion->type(),
+                                site->depthToLocation(depth), type), true);
+        type = AbstractMotion::Within;
+    }
 }

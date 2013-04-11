@@ -423,21 +423,21 @@ QDataStream & operator<< (QDataStream & out, const VelocityVariation* vv)
     out << (quint8)1;
 
     out << vv->m_enabled
-            << (int)vv->m_stdevModel;
+        << (int)vv->m_stdevModel;
 
     if (vv->m_stdevModel == VelocityVariation::Custom) {
         out << vv->m_stdevIsLayerSpecific
-                << vv->m_stdev;
+            << vv->m_stdev;
     }
 
     out << (int)vv->m_correlModel;
 
     if (vv->m_correlModel == VelocityVariation::Custom) {
         out << vv->m_correlInitial
-                << vv->m_correlFinal
-                << vv->m_correlDelta
-                << vv->m_correlIntercept
-                << vv->m_correlExponent;
+            << vv->m_correlFinal
+            << vv->m_correlDelta
+            << vv->m_correlIntercept
+            << vv->m_correlExponent;
     }
 
     return out;
@@ -452,24 +452,25 @@ QDataStream & operator>> (QDataStream & in, VelocityVariation* vv)
     int correlModel;
 
     in >> vv->m_enabled
-            >> stdevModel;
+       >> stdevModel;
 
-    vv->m_stdevModel = (VelocityVariation::Model)stdevModel;
+    // Need to call set model to update values
+    vv->setStdevModel(stdevModel);
 
     if (vv->m_stdevModel == VelocityVariation::Custom) {
         in >> vv->m_stdevIsLayerSpecific
-                >> vv->m_stdev;
+           >> vv->m_stdev;
     }
 
     in >> correlModel;
-    vv->m_correlModel = (VelocityVariation::Model)correlModel;
+    vv->setCorrelModel(correlModel);
 
     if (vv->m_correlModel == VelocityVariation::Custom) {
         in >> vv->m_correlInitial
-                >> vv->m_correlFinal
-                >> vv->m_correlDelta
-                >> vv->m_correlIntercept
-                >> vv->m_correlExponent;
+           >> vv->m_correlFinal
+           >> vv->m_correlDelta
+           >> vv->m_correlIntercept
+           >> vv->m_correlExponent;
     }
 
     return in;
