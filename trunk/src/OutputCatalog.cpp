@@ -208,7 +208,6 @@ Qt::ItemFlags OutputCatalog::flags(const QModelIndex & index) const
     return flags;
 }
 
-
 ProfilesOutputCatalog* OutputCatalog::profilesCatalog()
 {
     return m_profilesCatalog;

@@ -22,6 +22,8 @@
 #include "AbstractOutputCatalog.h"
 
 #include "AbstractOutput.h"
+#include "AbstractProfileOutput.h"
+#include "MotionLibrary.h"
 #include "OutputCatalog.h"
 
 #include <QStringList>
@@ -29,6 +31,23 @@
 AbstractOutputCatalog::AbstractOutputCatalog(OutputCatalog *outputCatalog) :
     MyAbstractTableModel(outputCatalog), m_outputCatalog(outputCatalog)
 {
+}
+
+void AbstractOutputCatalog::setApproach(int approach)
+{
+    m_approach = (MotionLibrary::Approach)approach;
+
+    // Disable time series only outputs
+    if (m_approach == MotionLibrary::RandomVibrationTheory) {
+        foreach (AbstractOutput* ao, outputs()) {
+            AbstractProfileOutput* apo = qobject_cast<AbstractProfileOutput*>(ao);
+            if (apo && apo->timeSeriesOnly())
+                apo->setEnabled(false);
+        }
+    }
+
+
+    reset();
 }
 
 QVariant AbstractOutputCatalog::data(const QModelIndex & index, int role ) const

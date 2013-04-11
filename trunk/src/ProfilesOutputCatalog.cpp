@@ -22,6 +22,7 @@
 #include "ProfilesOutputCatalog.h"
 
 #include "AbstractProfileOutput.h"
+#include "AriasIntensityProfileOutput.h"
 #include "DampingProfileOutput.h"
 #include "DissipatedEnergyProfileOutput.h"
 #include "FinalVelProfileOutput.h"
@@ -32,6 +33,7 @@
 #include "MaxStrainProfileOutput.h"
 #include "MaxStressProfileOutput.h"
 #include "MaxVelProfileOutput.h"
+#include "MotionLibrary.h"
 #include "ModulusProfileOutput.h"
 #include "StressRatioProfileOutput.h"
 #include "StressReducCoeffProfileOutput.h"
@@ -44,7 +46,8 @@
 ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog)
 {
-    m_outputs << new DampingProfileOutput(m_outputCatalog)
+    m_outputs << new AriasIntensityProfileOutput(m_outputCatalog)
+              << new DampingProfileOutput(m_outputCatalog)
               << new DissipatedEnergyProfileOutput(m_outputCatalog)
               << new FinalVelProfileOutput(m_outputCatalog)
               << new InitialVelProfileOutput(m_outputCatalog)
@@ -68,7 +71,7 @@ int ProfilesOutputCatalog::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_outputs.size();
+    return m_outputs.size();;
 }
 
 int ProfilesOutputCatalog::columnCount(const QModelIndex & parent) const
@@ -125,7 +128,14 @@ Qt::ItemFlags ProfilesOutputCatalog::flags(const QModelIndex & index) const
 {
     Q_UNUSED(index);
 
-    return  Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    Qt::ItemFlags flags = Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+    // Remove the Enabled flag for RVT motions if the output is for time series only.
+    if (m_approach == MotionLibrary::RandomVibrationTheory
+            && m_outputs.at(index.row())->timeSeriesOnly())
+        flags &= ~Qt::ItemIsEnabled;
+
+    return flags;
 }
 
 bool ProfilesOutputCatalog::removeRows(int row, int count, const QModelIndex &parent)
@@ -155,7 +165,7 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
 
 QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
 {    
-    out << (quint8)3;
+    out << (quint8)4;
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs)
         out << apo;
@@ -178,7 +188,8 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
             continue;
         if (ver < 3 && qobject_cast<VerticalEffectiveStressProfileOutput*>(apo))
             continue;
-
+        if (ver < 4 && qobject_cast<AriasIntensityProfileOutput*>(apo))
+            continue;
 
         in >> apo;
     }

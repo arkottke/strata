@@ -19,42 +19,28 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef ABSTRACT_OUTPUT_CATALOG_H
-#define ABSTRACT_OUTPUT_CATALOG_H
+#ifndef ARIAS_INTENSITY_PROFILE_OUTPUT_H
+#define ARIAS_INTENSITY_PROFILE_OUTPUT_H
 
-#include "MyAbstractTableModel.h"
-#include "MotionLibrary.h"
+#include "AbstractProfileOutput.h"
 
-#include <QList>
+class AbstractCalculator;
 
-class AbstractOutput;
-class OutputCatalog;
-
-class AbstractOutputCatalog : public MyAbstractTableModel
+class AriasIntensityProfileOutput : public AbstractProfileOutput
 {
-    Q_OBJECT
-
+Q_OBJECT
 public:
-    explicit AbstractOutputCatalog(OutputCatalog *outputCatalog);
+    explicit AriasIntensityProfileOutput(OutputCatalog* catalog);
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-
-    virtual QList<AbstractOutput*> outputs() const = 0;
-
-public slots:
-    void setApproach(int approach);
-
-signals:
-    void timesAreNeededChanged(bool timesAreNeeded) const;
-    void periodIsNeededChanged(bool periodIsNeeded) const;
-    void frequencyIsNeededChanged(bool frequencyIsNeeded) const;
-
-    void wasModified();
-
+    virtual QString name() const;
 protected:
-    OutputCatalog* m_outputCatalog;
+    virtual QString shortName() const;
+    virtual QwtScaleEngine* xScaleEngine() const;
+    virtual const QString xLabel() const;
 
-    MotionLibrary::Approach m_approach;
+    virtual bool timeSeriesOnly() const;
+
+    void extract(AbstractCalculator* const calculator,
+                             QVector<double> & ref, QVector<double> & data) const;
 };
-
-#endif // ABSTRACT_OUTPUT_CATALOG_H
+#endif // ARIAS_INTENSITY_PROFILE_OUTPUT_H

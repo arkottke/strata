@@ -28,8 +28,10 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
+#include <qwt_scale_engine.h>
+
 DissipatedEnergyProfileOutput::DissipatedEnergyProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
+    : AbstractProfileOutput(catalog, false)
 {
     m_offset = 1;
 }
@@ -49,46 +51,45 @@ const QString DissipatedEnergyProfileOutput::xLabel() const
     return tr("Dissipated Energy (??)");
 }
 
+QwtScaleEngine* DissipatedEnergyProfileOutput::xScaleEngine() const
+{
+    return new QwtLinearScaleEngine;
+}
+
+bool DissipatedEnergyProfileOutput::timeSeriesOnly() const
+{
+    return true;
+}
+
 void DissipatedEnergyProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
+    Q_UNUSED(ref);
 
     const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
-    // Uses depth from the center of the layer
-    ref.clear();
-    data.clear();
-    
-    // No values at the surface
-    ref << 0;
-    data << 0;
-    
-    foreach (const SubLayer & sl, subLayers) {
-        const double depth = sl.depthToMid();
+    foreach (double depth, this->ref()) {
+        if (abs(depth - 0) < 0.01) {
+            // No values at the surface
+            data << 0.;
+        } else {
+            // Compute the strain and visco-elastic stress time series without baseline correction
+            const QVector<double> strainTs = tsm->strainTimeSeries(calculator->calcStrainTf(
+                    calculator->site()->inputLocation(), calculator->motion()->type(),
+                    calculator->site()->depthToLocation(depth)), false);
 
-        // Compute the strain and visco-elastic stress time series without baseline correction
-        const QVector<double> strainTs = tsm->strainTimeSeries(calculator->calcStrainTf(
-                calculator->site()->inputLocation(), calculator->motion()->type(),
-                calculator->site()->depthToLocation(depth)), false);
+            const QVector<double> stressTs = tsm->strainTimeSeries(calculator->calcStressTf(
+                    calculator->site()->inputLocation(), calculator->motion()->type(),
+                    calculator->site()->depthToLocation(depth)), false);
 
-        const QVector<double> stressTs = tsm->strainTimeSeries(calculator->calcStressTf(
-                calculator->site()->inputLocation(), calculator->motion()->type(),
-                calculator->site()->depthToLocation(depth)), false);
+            // Integrate the loop using the trapezoid rule
+            double sum = 0;
 
-        // Integrate the loop using the trapezoid rule
-        double sum = 0;
+            for (int i = 1; i < strainTs.size(); ++i)
+                sum += 0.5 * (stressTs.at(i) + stressTs.at(i-1))
+                        * (strainTs.at(i) - strainTs.at(i-1));
 
-        for (int i = 1; i < strainTs.size(); ++i)
-            sum += 0.5 * (stressTs.at(i) + stressTs.at(i-1)) 
-                    * (strainTs.at(i) - strainTs.at(i-1));
-        
-        // Save the values
-        ref << depth;
-        data << sum;
+            data << sum;
+        }
     }
-
-    ref << subLayers.last().depthToBase();
-    // Linearly extrap for the final data value
-    extrap(ref, data, subLayers.last().thickness());
 }

@@ -352,6 +352,11 @@ bool AbstractOutput::needsTime() const
     return false;
 }
 
+bool AbstractOutput::timeSeriesOnly() const
+{
+    return false;
+}
+
 void AbstractOutput::labelAxes(QwtPlot* const qwtPlot) const
 {
     // Label the axes

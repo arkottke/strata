@@ -40,6 +40,7 @@ HEADERS += src/AbstractCalculator.h \
     src/AccelTimeSeriesOutput.h \
     src/AccelTransferFunctionOutput.h \
     src/Algorithms.h \
+    src/AriasIntensityProfileOutput.h\
     src/BedrockDepthVariation.h \
     src/CompatibleRvtMotion.h \
     src/CompatibleRvtMotionDialog.h \
@@ -172,6 +173,7 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/AccelTimeSeriesOutput.cpp \
     src/AccelTransferFunctionOutput.cpp \
     src/Algorithms.cpp \
+    src/AriasIntensityProfileOutput.cpp\
     src/BedrockDepthVariation.cpp \
     src/CompatibleRvtMotion.cpp \
     src/CompatibleRvtMotionDialog.cpp \

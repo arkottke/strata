@@ -38,7 +38,7 @@
 
 #include <cmath>
 #include <algorithm>
-        
+
 ProfileRandomizer::ProfileRandomizer(gsl_rng * rng, SoilProfile* siteProfile)
     : m_siteProfile(siteProfile)
 {
@@ -47,7 +47,7 @@ ProfileRandomizer::ProfileRandomizer(gsl_rng * rng, SoilProfile* siteProfile)
 
     m_bedrockDepthVariation = new BedrockDepthVariation(rng, this);
     connect(m_bedrockDepthVariation, SIGNAL(wasModified()),
-             this, SIGNAL(wasModified()));
+            this, SIGNAL(wasModified()));
 
     m_layerThicknessVariation = new LayerThicknessVariation(rng, this);
     connect(m_layerThicknessVariation, SIGNAL(wasModified()),
@@ -84,7 +84,7 @@ void ProfileRandomizer::setEnabled(bool enabled)
 
 void ProfileRandomizer::updateEnabled()
 {
-   emit enabledChanged(enabled());
+    emit enabledChanged(enabled());
 }
 
 BedrockDepthVariation* ProfileRandomizer::bedrockDepthVariation()
@@ -107,9 +107,9 @@ QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pv)
     out << (quint8)1;
 
     out << pv->m_enabled
-            << pv->m_velocityVariation
-            << pv->m_layerThicknessVariation
-            << pv->m_bedrockDepthVariation;
+        << pv->m_velocityVariation
+        << pv->m_layerThicknessVariation
+        << pv->m_bedrockDepthVariation;
 
     return out;
 }
@@ -122,9 +122,9 @@ QDataStream & operator>> (QDataStream & in, ProfileRandomizer* pv)
     bool enabled;
 
     in >> enabled
-            >> pv->m_velocityVariation
-            >> pv->m_layerThicknessVariation
-            >> pv->m_bedrockDepthVariation;
+       >> pv->m_velocityVariation
+       >> pv->m_layerThicknessVariation
+       >> pv->m_bedrockDepthVariation;
 
     pv->setEnabled(enabled);
 

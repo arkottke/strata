@@ -62,12 +62,12 @@ unix {
 win32 { 
     LIBS += -lm \
         -lfftw3-3 \
-        -L"C:/devel/fftw-3.3.2" \
+        -L"C:/devel/fftw-3.3.3" \
         -lgsl \
         -lgslcblas \
         -L"C:/devel/GnuWin32/bin"
     INCLUDEPATH += . \
-        "C:/devel/fftw-3.3.2" \
+        "C:/devel/fftw-3.3.3" \
         "C:/devel/qwt-6.0/src" \
         "C:/devel/GnuWin32/include"
     RC_FILE = strata.rc

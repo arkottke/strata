@@ -163,7 +163,7 @@ void LayerThicknessVariation::reset()
 QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
 {
     // The thickness of the layers
-    QList<double> thickness;
+    QList<double> thicknesses;
 
     // The layering is generated using a non-homogenous Poisson process.  The
     // following routine is used to generate the layering.  The rate function,
@@ -192,15 +192,17 @@ QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
                ) - m_initial;
 
         // Add the thickness
-        thickness << depth - prevDepth;
+        thicknesses << depth - prevDepth;
 
         prevDepth = depth;
     }
 
-    // Correct the last layer of thickness so that the total depth is equal to the maximum depth
-    thickness.last() = thickness.last() - (prevDepth - depthToBedrock);
 
-    return thickness;
+    // Correct the last layer of thickness so that the total depth is equal to the maximum depth
+    if (thicknesses.size())
+        thicknesses.last() = thicknesses.last() - (prevDepth - depthToBedrock);
+
+    return thicknesses;
 }
 
 QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)
@@ -208,12 +210,12 @@ QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)
     out << (quint8)1;
 
     out << ltv->m_enabled
-            << (int)ltv->m_model;
+        << (int)ltv->m_model;
 
     if (ltv->m_model == LayerThicknessVariation::Custom) {
         out << ltv->m_coeff
-                << ltv->m_initial
-                << ltv->m_exponent;
+            << ltv->m_initial
+            << ltv->m_exponent;
     }
 
     return out;
@@ -229,12 +231,11 @@ QDataStream & operator>> (QDataStream & in, LayerThicknessVariation* ltv)
     in >> ltv->m_enabled
             >> model;
 
-    ltv->m_model = (LayerThicknessVariation::Model)model;
-
+    ltv->setModel(model);
     if (ltv->m_model == LayerThicknessVariation::Custom) {
         in >> ltv->m_coeff
-                >> ltv->m_initial
-                >> ltv->m_exponent;
+           >> ltv->m_initial
+           >> ltv->m_exponent;
     }
 
     return in;

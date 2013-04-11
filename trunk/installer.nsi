@@ -13,8 +13,8 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\QtSDK\Desktop\Qt\4.8.1\mingw\"
-!Define QT_MINGW_PATH "C:\devel\QtSDK\mingw\bin"
+!Define QT_PATH "C:\devel\Qt\4.8.4"
+!Define QT_MINGW_PATH "C:\MinGW\bin"
 
 ;--------------------------------
 ;Variables
@@ -112,7 +112,7 @@ Section "!Core Files" SecProgram
   file "/oname=$INSTDIR\strata-data.ico" "resources\images\file-data.ico"
 
   ;Main libraries
-  file "C:\devel\fftw-3.3.2\libfftw3-3.dll"
+  file "C:\devel\fftw-3.3.3\libfftw3-3.dll"
   file "C:\devel\GnuWin32\bin\libgsl.dll"
   file "C:\devel\GnuWin32\bin\libgslcblas.dll"
   file "${QT_PATH}\bin\QtCore4.dll"

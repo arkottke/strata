@@ -582,9 +582,6 @@ void TimeSeriesMotion::calculate()
     for (int i = 0; i < m_accel.size(); ++i)
         accel[i] = m_accel.at(i);
 
-    for (int i = 0; i < 20; ++i)
-        qDebug() << accel.at(1440 + i);
-
     // Compute the Fourier amplitude spectrum.  The FAS computed through this
     // method is only the postive frequencies and is of length n/2+1 where n is
     // the lenght of the acceleration time history.
@@ -729,8 +726,12 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
         sec) the FAS has to extend to 500 Hz. The FAS is initialized to be zero
         which allows for resolution of the time series.
         */
-        const double f = 1 / period.at(i);
-        const int size = qMax(m_freq.size(), int((f * 5.0) / deltaFreq));
+        const double f = 1 / period.at(i);       
+        const int minSize = qMax(m_freq.size(), int((f * 5.0) / deltaFreq));
+
+        int size = 1;
+        while (size < minSize)
+            size <<= 1;
 
         // Only apply the SDOF transfer function over frequencies defined by the original motion
         QVector<std::complex<double> > tf = calcSdofTf(period.at(i), damping);
@@ -739,15 +740,19 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
         // number of points.
         const double scale = double(size) / double(m_freq.size());
 
-        for (int j = 0; j < m_freq.size(); ++j )
+        for (int j = 0; j < tf.size(); ++j )
             tf[j] *= scale;
 
         // If there is an acceleration transfer function combine the SDOF and
         // acceleration transfer functions
         if (!accelTf.isEmpty()) {
-            for (int j = 0; j < accelTf.size(); ++j)
+            for (int j = 0; j < tf.size(); ++j)
                 tf[j] *= accelTf.at(j);
         }
+
+        // Pad with zeros to achieve the required point count
+        if (tf.size() < size)
+            tf.resize(size);
 
         // Compute the maximum response
         sa[i] = max(tf);
@@ -790,6 +795,28 @@ QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<do
     }
 
     return strain;
+}
+
+QVector<double> TimeSeriesMotion::ariasIntensity(const QVector<std::complex<double> > & tf) const
+{
+    QVector<double> accelTs = calcTimeSeries(m_fourierAcc, tf);
+
+    QVector<double> accelTsSqr = QVector<double>(accelTs.size());
+    for (int i = 0; i < accelTs.size(); ++i)
+        accelTsSqr[i] = pow(accelTs.at(i), 2);
+
+    QVector<double> ai = QVector<double>(accelTs.size(), 0.0);
+
+    /* The Arias Intensity is defined by:
+     * IA = PI / (2 * g) \int_0^Td a(t) ^ dt
+     * In this calculation, the integration is peformed using the trapezoid rule. The time step and 1/2 factor are pulled out and combined with the constant factor.
+     */
+    const double foo = m_timeStep * M_PI / (4 * Units::instance()->gravity());
+
+    for (int i = 1; i < ai.size(); ++i)
+        ai[i] = foo * (accelTsSqr.at(i - 1) + accelTsSqr.at(i)) + ai[i - 1];
+
+    return ai;
 }
 
 QVector<double> TimeSeriesMotion::integrate(const QVector<double> & in) const
@@ -939,24 +966,18 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
 {
     // Apply the transfer fucntion
     if (!tf.isEmpty()) {
-        Q_ASSERT(fa.size() == tf.size());
+
+        // If needed, zero pad the Fourier amplitudes such that is has the same length as the incoming transfer function.
+        if (fa.size() << tf.size())
+            fa.resize(tf.size());
 
         for (int i = 0; i < fa.size(); ++i)
             fa[i] *= tf.at(i);
     }
 
-    // Zero pad the Fourier amplitudes to match the time step of the incoming motion
-    const int n = m_accel.size() / 2 + 1;
-
-    while (fa.size() < n)
-        fa << std::complex<double>(0., 0.);
-
     // Compute the time series
     QVector<double> ts;
     ifft(fa, ts);
-
-    // Truncate the time series to the original length
-    ts.resize(m_pointCount);
 
     return ts;
 }
@@ -1033,8 +1054,10 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
         tsm->load(tsm->m_fileName, false, tsm->m_scale);
     }
 
-    if (tsm->m_accel.size())
+    if (tsm->m_accel.size()) {
         tsm->calculate();
+        tsm->m_isLoaded = true;
+    }
 
     return in;
 }

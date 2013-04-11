@@ -100,6 +100,9 @@ public:
     //! If the Output needs time for reference
     virtual bool needsTime() const;
 
+    //! If the Output is only provided for Time Series
+    virtual bool timeSeriesOnly() const;
+
     int motionIndex() const;
 
     //! Data for a given motion and site index

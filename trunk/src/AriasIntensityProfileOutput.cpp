@@ -19,49 +19,63 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "MaxVelProfileOutput.h"
+#include "AriasIntensityProfileOutput.h"
 
 #include "AbstractCalculator.h"
+#include "AbstractMotion.h"
 #include "SoilProfile.h"
+#include "SubLayer.h"
+#include "TimeSeriesMotion.h"
 #include "Units.h"
 
-MaxVelProfileOutput::MaxVelProfileOutput(OutputCatalog* catalog)
+#include <qwt_scale_engine.h>
+
+AriasIntensityProfileOutput::AriasIntensityProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
 {
-
+    m_offset = 1;
 }
 
-QString MaxVelProfileOutput::name() const
+QString AriasIntensityProfileOutput::name() const
 {
-    return tr("Peak Ground Velocity Profile");
+    return tr("Arias Intensity Profile");
 }
 
-QString MaxVelProfileOutput::shortName() const
+QString AriasIntensityProfileOutput::shortName() const
 {
-    return tr("pgv");
+    return tr("AriasIntensity");
 }
 
-const QString MaxVelProfileOutput::xLabel() const
+const QString AriasIntensityProfileOutput::xLabel() const
 {
-    return tr("Maximum Velocity (%1)").arg(Units::instance()->velTs());
+    return tr("Arias Intensity (g)");
 }
 
+QwtScaleEngine* AriasIntensityProfileOutput::xScaleEngine() const
+{
+    return new QwtLinearScaleEngine;
+}
 
-void MaxVelProfileOutput::extract(AbstractCalculator* const calculator,
+bool AriasIntensityProfileOutput::timeSeriesOnly() const
+{
+    return true;
+}
+
+void AriasIntensityProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    Q_UNUSED(ref);
+    Q_UNUSED(ref)
 
-    const AbstractMotion* motion = calculator->motion();
+    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
     const SoilProfile* site = calculator->site();
 
     // Outcrop for the first layer. Within for subsequent.
     AbstractMotion::Type type = AbstractMotion::Outcrop;
 
     foreach (double depth, this->ref()) {
-        data << motion->maxVel(calculator->calcAccelTf(
-                                site->inputLocation(), motion->type(),
-                                site->depthToLocation(depth), type), true);
+        data << tsm->ariasIntensity(calculator->calcAccelTf(
+                                site->inputLocation(), tsm->type(),
+                                        site->depthToLocation(depth), type)).last();
         type = AbstractMotion::Within;
     }
 }

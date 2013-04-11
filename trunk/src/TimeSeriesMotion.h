@@ -109,6 +109,9 @@ public:
     //! Compute a strain time series based on the velocity Fourier amplitude spectrum
     QVector<double> strainTimeSeries(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), const bool baseLineCorrect = false) const;
 
+    //! Compute the Arias Intensity of the time series for a given transfer function
+    QVector<double> ariasIntensity(const QVector<std::complex<double> > & tf = QVector<std::complex<double> >()) const;
+
     virtual QString name() const;
 
     //! Create a html document containing the information of the model

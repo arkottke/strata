@@ -36,6 +36,9 @@ public:
 protected:
     virtual QString shortName() const;
     virtual const QString xLabel() const;
+    virtual QwtScaleEngine* xScaleEngine() const;
+
+    virtual bool timeSeriesOnly() const;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;
