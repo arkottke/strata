@@ -58,10 +58,9 @@ public:
 
     //! Compute the maximum reponse of the motion and the applied transfer function
     virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
-    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), bool applyScale = true) const;
+    virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
     virtual double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-
 
     //! Compute the acceleration response spectrum
     QVector<double> computeSa(const QVector<double>& period, double damping,

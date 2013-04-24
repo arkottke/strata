@@ -61,7 +61,7 @@ void MaxVelProfileOutput::extract(AbstractCalculator* const calculator,
     foreach (double depth, this->ref()) {
         data << motion->maxVel(calculator->calcAccelTf(
                                 site->inputLocation(), motion->type(),
-                                site->depthToLocation(depth), type), true);
+                                site->depthToLocation(depth), type));
         type = AbstractMotion::Within;
     }
 }

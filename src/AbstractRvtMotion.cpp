@@ -111,16 +111,14 @@ double AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const
     return calcMax(absFourierAcc(tf), m_duration);
 }
 
-double AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf, bool applyScale) const
+double AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf) const
 {   
-    const double scale = applyScale ? Units::instance()->tsConv() : 1.;
-    return scale * calcMax(absFourierVel(tf), m_duration);
+    return Units::instance()->tsConv() * calcMax(absFourierVel(tf), m_duration);
 }
 
-double AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf, bool applyScale) const
+double AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf) const
 {
-    const double scale = applyScale ? Units::instance()->tsConv() : 1.;
-    return scale * calcMax(absFourierDisp(tf), m_duration);
+    return Units::instance()->tsConv() * calcMax(absFourierDisp(tf), m_duration);
 }
 
 QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, double damping, const QVector<std::complex<double> >& tf )
@@ -182,8 +180,8 @@ const QVector<double> AbstractRvtMotion::absFourierDisp(const QVector<std::compl
 
 double AbstractRvtMotion::calcMaxStrain(const QVector<std::complex<double> >& tf) const
 {
-    // Don't scale the velocity
-    return maxVel(tf, false);
+    // Remove the scale factor from the maximum velocity
+    return maxVel(tf) / Units::instance()->tsConv();
 }
 
 double AbstractRvtMotion::freqMax() const

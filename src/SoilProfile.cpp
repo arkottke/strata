@@ -576,6 +576,7 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     
     // Vary the depth to the bedrock
     double depthToBedrock;
+    const double minDepthToBedrock = 1.0;
 
     if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
         if ( textLog->level() > TextLog::Low )
@@ -583,8 +584,15 @@ void SoilProfile::createSubLayers(TextLog * textLog)
 
         m_profileRandomizer->bedrockDepthVariation()->setAvg(m_bedrock->depth());
 
-        // FIXME Temporary fix.
-        depthToBedrock = qMax(1.0, m_profileRandomizer->bedrockDepthVariation()->rand());
+
+        depthToBedrock = m_profileRandomizer->bedrockDepthVariation()->rand();
+
+        if (depthToBedrock < minDepthToBedrock) {
+            depthToBedrock = minDepthToBedrock;
+
+            textLog->append(QString("\tDepth to bedrock limited to be greater than 1 %1").arg(
+                                Units::instance()->length()));
+        }
     } else {
         depthToBedrock = m_bedrock->depth();
     }
