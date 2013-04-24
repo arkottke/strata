@@ -692,20 +692,15 @@ double TimeSeriesMotion::max(const QVector<std::complex<double> > & tf) const
     return findMaxAbs(calcTimeSeries(m_fourierAcc, tf));
 } 	
 
-double TimeSeriesMotion::maxVel(const QVector<std::complex<double> > &tf, bool applyScale) const
+double TimeSeriesMotion::maxVel(const QVector<std::complex<double> > &tf) const
 {
-    const double scale = applyScale ? Units::instance()->tsConv() : 1.;
-
-    return scale * findMaxAbs(timeSeries(Velocity, tf, false));
+    return findMaxAbs(timeSeries(Velocity, tf, false));
 }
 
-double TimeSeriesMotion::maxDisp(const QVector<std::complex<double> > &tf, bool applyScale) const
+double TimeSeriesMotion::maxDisp(const QVector<std::complex<double> > &tf) const
 {
-    const double scale = applyScale ? Units::instance()->tsConv() : 1.;
-
-    return scale * findMaxAbs(timeSeries(Displacement, tf, false));
+    return findMaxAbs(timeSeries(Displacement, tf, false));
 }
-
 
 QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf )
 {
