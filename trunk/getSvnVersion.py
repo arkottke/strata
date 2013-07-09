@@ -1,6 +1,11 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
 import re
 import subprocess
 import sys
+
+from __future__ import print_function
 
 # Prefix for the printing
 if len(sys.argv) > 1:
