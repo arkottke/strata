@@ -22,12 +22,11 @@
 #include "NonlinearPropertyOutput.h"
 
 #include "AbstractCalculator.h"
+#include "MyQwtCompatibility.h"
 #include "NonlinearProperty.h"
 #include "OutputCatalog.h"
 #include "OutputStatistics.h"
 #include "SoilType.h"
-
-#include <qwt_scale_engine.h>
 
 NonlinearPropertyOutput::NonlinearPropertyOutput(
         NonlinearProperty* nonlinearProperty, OutputCatalog* catalog)
@@ -104,7 +103,7 @@ void NonlinearPropertyOutput::setSoilName(const QString &soilName)
 
 QwtScaleEngine* NonlinearPropertyOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* NonlinearPropertyOutput::yScaleEngine() const

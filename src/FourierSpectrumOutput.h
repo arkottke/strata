@@ -45,4 +45,4 @@ protected:
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;
 };
-#endif // FOURIERSPECTRUMOUTPUT_H
+#endif // FOURIER_SPECTRUM_OUTPUT_H

@@ -21,6 +21,8 @@
 
 #include "ConfigurePlotDialog.h"
 
+#include "MyQwtCompatibility.h"
+
 #include <QGridLayout>
 #include <QLabel>
 #include <QDoubleValidator>
@@ -124,7 +126,13 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
     m_xAxisOptions->setDefaults( 
             m_plot->axisScaleEngine( QwtPlot::xBottom ), 
             m_plot->axisAutoScale( QwtPlot::xBottom ), 
-            m_plot->axisScaleDiv( QwtPlot::xBottom ) );
+#if QWT_VERSION < 0x060100
+            m_plot->axisScaleDiv( QwtPlot::xBottom )
+#else
+            &(m_plot->axisScaleDiv( QwtPlot::yLeft ))
+#endif
+            );
+
    
     layout->addWidget( m_xAxisOptions, 0, 0 );
 
@@ -132,7 +140,12 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
     m_yAxisOptions->setDefaults( 
             m_plot->axisScaleEngine( QwtPlot::yLeft ), 
             m_plot->axisAutoScale( QwtPlot::yLeft ), 
-            m_plot->axisScaleDiv( QwtPlot::yLeft ) );
+#if QWT_VERSION < 0x060100
+            m_plot->axisScaleDiv( QwtPlot::yLeft )
+#else
+            &(m_plot->axisScaleDiv( QwtPlot::yLeft ))
+#endif
+            );
     
     layout->addWidget( m_yAxisOptions, 1, 0 );
     
@@ -164,7 +177,7 @@ void ConfigurePlotDialog::setAxis( int axisid, const AxisOptions * axisOptions )
     if ( axisOptions->linearSpacing() )
         newEngine = new QwtLinearScaleEngine;
     else
-        newEngine = new QwtLog10ScaleEngine;
+        newEngine = logScaleEngine();
 
     newEngine->setAttributes( oldEngine->attributes() );
 

@@ -26,6 +26,7 @@
 #include "Dimension.h"
 #include "DimensionLayout.h"
 #include "EditActions.h"
+#include "MyQwtCompatibility.h"
 #include "ResponseSpectrum.h"
 #include "TableGroupBox.h"
 
@@ -43,7 +44,6 @@
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
-#include <qwt_scale_engine.h>
 #include <qwt_symbol.h>
 #include <qwt_text.h>
 
@@ -67,11 +67,11 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
     picker->setStateMachine(new QwtPickerDragPointMachine());
 
 
-    plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
     QFont font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
 
-    plot->setAxisScaleEngine(QwtPlot::yLeft, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
     plot->setAxisFont(QwtPlot::yLeft, font);
 
     font.setBold(true);
@@ -97,11 +97,11 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *
                                               QwtPicker::ActiveOnly, plot->canvas());
     picker->setStateMachine(new QwtPickerDragPointMachine());
 
-    plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
     font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
 
-    plot->setAxisScaleEngine(QwtPlot::yLeft, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
     plot->setAxisFont(QwtPlot::yLeft, font);
 
     font.setBold(true);
@@ -461,7 +461,7 @@ void SourceTheoryRvtMotionDialog::openFrequencyDialog()
 
     DimensionLayout* layout = new DimensionLayout;    
     layout->setModel(m_motion->freqDimension());
-    layout->setRange(0.001, 200);
+    layout->setRange(0.001, 300);
     layout->setSuffix(" Hz");
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);

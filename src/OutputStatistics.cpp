@@ -108,11 +108,15 @@ void OutputStatistics::plot(QwtPlot* const qwtPlot) const
 
     QwtPlotCurve* curve = plotCurve(qwtPlot, m_average, Qt::SolidLine);
     curve->setTitle(averageLabel());
+    curve->setLegendAttribute(QwtPlotCurve::LegendShowLine);
+    curve->setLegendIconSize(QSize(32, 8));
 
     // Check if there is enough data for a standard deviaiton to be computed
     if ((m_output->siteCount() * m_output->motionCount()) > 2) {
         curve = plotCurve(qwtPlot, m_plusStd, Qt::DashLine);
         curve->setTitle(averageLabel() + "+/-" + stdevLabel());
+        curve->setLegendAttribute(QwtPlotCurve::LegendShowLine);
+        curve->setLegendIconSize(QSize(32, 8));
 
         curve = plotCurve(qwtPlot, m_minusStd, Qt::DashLine);
         curve->setItemAttribute(QwtPlotItem::Legend, false);

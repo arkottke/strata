@@ -24,14 +24,13 @@
 #include "AbstractCalculator.h"
 #include "AbstractMotion.h"
 #include "Dimension.h"
-#include "SoilProfile.h"
+#include "MyQwtCompatibility.h"
 #include "OutputCatalog.h"
 #include "OutputStatistics.h"
+#include "SoilProfile.h"
 #include "Units.h"
 
 #include <QDebug>
-
-#include <qwt_scale_engine.h>
 
 ResponseSpectrumOutput::ResponseSpectrumOutput(OutputCatalog* catalog)
     : AbstractLocationOutput(catalog)
@@ -58,12 +57,12 @@ QString ResponseSpectrumOutput::shortName() const
 
 QwtScaleEngine* ResponseSpectrumOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* ResponseSpectrumOutput::yScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 const QString ResponseSpectrumOutput::xLabel() const

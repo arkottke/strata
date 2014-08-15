@@ -151,7 +151,8 @@ HEADERS += src/AbstractCalculator.h \
     src/VerticalEffectiveStressProfileOutput.h \
     src/VerticalTotalStressProfileOutput.h \
     src/ViscoElasticStressTimeSeriesOutput.h \
-    src/MaxDispProfileOutput.h
+    src/MaxDispProfileOutput.h \
+    src/MyQwtCompatibility.h
 
 SOURCES +=     src/AbstractCalculator.cpp \
     src/AbstractDistribution.cpp \
@@ -285,6 +286,7 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/VerticalEffectiveStressProfileOutput.cpp \
     src/VerticalTotalStressProfileOutput.cpp \
     src/ViscoElasticStressTimeSeriesOutput.cpp \
-    src/MaxDispProfileOutput.cpp
+    src/MaxDispProfileOutput.cpp \
+    src/MyQwtCompatibility.cpp
 
 RESOURCES += resources/resources.qrc

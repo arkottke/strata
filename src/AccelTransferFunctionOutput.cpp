@@ -21,13 +21,14 @@
 
 #include "AccelTransferFunctionOutput.h"
 
-#include "Algorithms.h"
 #include "AbstractCalculator.h"
+#include "AbstractMotion.h"
+#include "Algorithms.h"
 #include "Dimension.h"
 #include "LinearOutputInterpolater.h"
-#include "AbstractMotion.h"
-#include "SoilProfile.h"
+#include "MyQwtCompatibility.h"
 #include "OutputCatalog.h"
+#include "SoilProfile.h"
 
 #include <qwt_scale_engine.h>
 
@@ -54,7 +55,7 @@ QString AccelTransferFunctionOutput::shortName() const
 
 QwtScaleEngine* AccelTransferFunctionOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* AccelTransferFunctionOutput::yScaleEngine() const

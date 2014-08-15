@@ -37,6 +37,7 @@ DimensionLayout::DimensionLayout(QWidget *parent) :
 
     // Maximum
     m_maxSpinBox = new QDoubleSpinBox;
+    m_maxSpinBox->setMaximum(300.);
     connect(m_maxSpinBox, SIGNAL(valueChanged(double)),
             this, SLOT(updateMax(double)));
 
