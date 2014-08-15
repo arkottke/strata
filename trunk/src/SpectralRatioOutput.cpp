@@ -22,11 +22,12 @@
 #include "SpectralRatioOutput.h"
 
 #include "AbstractCalculator.h"
+#include "AbstractMotion.h"
 #include "Algorithms.h"
 #include "Dimension.h"
-#include "AbstractMotion.h"
-#include "SoilProfile.h"
+#include "MyQwtCompatibility.h"
 #include "OutputCatalog.h"
+#include "SoilProfile.h"
 
 #include <QDebug>
 
@@ -54,7 +55,7 @@ QString SpectralRatioOutput::shortName() const
 
 QwtScaleEngine* SpectralRatioOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* SpectralRatioOutput::yScaleEngine() const

@@ -46,9 +46,9 @@ void myMessageOutput(QtMsgType type, const char *msg)
 
 int main(int argc, char* argv[])
 {
-#ifndef DEBUG
-    qInstallMsgHandler(myMessageOutput);
-#endif
+//#ifndef DEBUG
+//    qInstallMsgHandler(myMessageOutput);
+//#endif
 
     QApplication app(argc, argv);
 

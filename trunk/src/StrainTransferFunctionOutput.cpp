@@ -22,10 +22,11 @@
 #include "StrainTransferFunctionOutput.h"
 
 #include "AbstractCalculator.h"
+#include "AbstractMotion.h"
 #include "Algorithms.h"
 #include "Dimension.h"
 #include "LinearOutputInterpolater.h"
-#include "AbstractMotion.h"
+#include "MyQwtCompatibility.h"
 #include "OutputCatalog.h"
 #include "SoilProfile.h"
 
@@ -55,12 +56,12 @@ QString StrainTransferFunctionOutput::shortName() const
 
 QwtScaleEngine* StrainTransferFunctionOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* StrainTransferFunctionOutput::yScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 const QString StrainTransferFunctionOutput::xLabel() const

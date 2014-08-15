@@ -386,7 +386,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     m_stdevSpinBox = new QDoubleSpinBox;
     m_stdevSpinBox->setDecimals(2);
     m_stdevSpinBox->setRange( 0.0, 1.0);
-    m_stdevSpinBox->setSingleStep(0.1);
+    m_stdevSpinBox->setSingleStep(0.01);
     layout->addRow("", m_stdevSpinBox);
 
     // Correlation

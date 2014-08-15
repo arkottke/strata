@@ -22,8 +22,9 @@
 #include "AbstractProfileOutput.h"
 
 #include "AbstractCalculator.h"
-#include "LinearOutputInterpolater.h"
 #include "AbstractMotion.h"
+#include "MyQwtCompatibility.h"
+#include "LinearOutputInterpolater.h"
 #include "OutputCatalog.h"
 #include "OutputStatistics.h"
 #include "SoilProfile.h"
@@ -79,7 +80,7 @@ QString AbstractProfileOutput::fileName(int motion) const
 
 QwtScaleEngine* AbstractProfileOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* AbstractProfileOutput::yScaleEngine() const

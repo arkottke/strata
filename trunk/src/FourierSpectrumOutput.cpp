@@ -22,9 +22,10 @@
 #include "FourierSpectrumOutput.h"
 
 #include "AbstractCalculator.h"
+#include "AbstractMotion.h"
 #include "Dimension.h"
 #include "LinearOutputInterpolater.h"
-#include "AbstractMotion.h"
+#include "MyQwtCompatibility.h"
 #include "OutputCatalog.h"
 #include "OutputStatistics.h"
 #include "SoilProfile.h"
@@ -32,8 +33,6 @@
 #include "Units.h"
 
 #include <gsl/gsl_interp.h>
-
-#include <qwt_scale_engine.h>
 
 FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog* catalog)
     : AbstractLocationOutput(catalog)
@@ -62,12 +61,12 @@ QString FourierSpectrumOutput::shortName() const
 
 QwtScaleEngine* FourierSpectrumOutput::xScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 QwtScaleEngine* FourierSpectrumOutput::yScaleEngine() const
 {
-    return new QwtLog10ScaleEngine;
+    return logScaleEngine();
 }
 
 const QString FourierSpectrumOutput::xLabel() const

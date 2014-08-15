@@ -289,7 +289,13 @@ double CrustalAmplification::interpAmpAt(double freq)
         initInterp();
     }
 
-    return gsl_interp_eval(m_interpolator, m_freq.data(), m_amp.data(), freq, m_accelerator);
+    if (freq < m_freq.first()) {
+        return m_amp.first();
+    } else if (m_freq.last() < freq) {
+        return m_amp.last();
+    } else {
+        return gsl_interp_eval(m_interpolator, m_freq.data(), m_amp.data(), freq, m_accelerator);
+    }
 }
 
 void CrustalAmplification::calculate()

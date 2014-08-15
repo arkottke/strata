@@ -27,7 +27,6 @@ CONFIG += debug_and_release
 ########################################################################
 CONFIG += warn_on
 
-
 ########################################################################
 # Enable console for debug versions
 ########################################################################
@@ -36,29 +35,18 @@ CONFIG(debug, debug|release) {
 }
 
 ########################################################################
-# Use 4 processors in the build
-########################################################################
-
-########################################################################
 # Setup of for the various libraries. This is most important on Windows.
 ########################################################################
-# Linux
 unix {
     LIBS += -lm \
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -L$$(QT_LIB_PATH) \
-        -L$$(QWT_LIB_PATH) \
-        -L"../qwt-6.0/lib/" \
+        -L$$PWD/../../qwt-6.1/lib \
         -lqwt
-    INCLUDEPATH += . \
-        ../qwt-6.0/src/ \
-        $$(QT_INCLUDE_PATH) \
-        $$(QWT_INCLUDE_PATH)
+    INCLUDEPATH += $$PWD/../../qwt-6.1/src
 
 }
-# Windows
 win32 { 
     LIBS += -lm \
         -lfftw3-3 \

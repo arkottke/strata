@@ -43,10 +43,15 @@
 
 #include <qwt_symbol.h>
 #include <qwt_legend.h>
-#include <qwt_legend_item.h>
 #include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
 #include <qwt_scale_engine.h>
+
+#if QWT_VERSION < 0x060100
+#include <qwt_legend_item.h>
+#else
+#include <qwt_plot_legenditem.h>
+#endif
 
 ResultsPage::ResultsPage(QWidget * parent)
     : AbstractPage(parent), m_outputCatalog(0), m_selectedOutput(0)
@@ -216,15 +221,9 @@ void ResultsPage::setSelectedOutput(int index)
 
     m_selectedOutput->plot(m_plot, m_curves);
 
-    // Increase the width of the identifier
-    foreach (QWidget *widget, m_plot->legend()->legendItems()) {
-        if (QwtLegendItem *item = dynamic_cast<QwtLegendItem*>(widget))
-#if QWT_VERSION < 0x050200
-            item->setIdentfierWidth(30);
-#else
-            item->setIdentifierSize(QSize(30, 8));
+#if QWT_VERSION >= 0x060100
+    m_plot->updateLegend();
 #endif
-    }
 
     m_catalogTableView->resizeColumnsToContents();
     m_catalogTableView->resizeRowsToContents();
@@ -350,6 +349,7 @@ void ResultsPage::recomputeStats()
    
     m_statsNeedUpdate = false;
     m_recomputePushButton->setEnabled(false);
+
 }
 
 QGroupBox* ResultsPage::createOutputGroup()
@@ -431,19 +431,32 @@ QTabWidget* ResultsPage::createDataTabWidget()
     QwtLegend* legend = new QwtLegend;
     legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
     m_plot->insertLegend(legend, QwtPlot::BottomLegend);
+#if QWT_VERSION >= 0x060100
+    connect(m_plot,
+            SIGNAL(legendDataChanged(QVariant,QList<QwtLegendData>)),
+            legend,
+            SLOT(updateLegend(QVariant,QList<QwtLegendData>)));
+#endif
 
     // Add the generic curves to the legend
-    QwtPlotCurve curveA(tr("Unselected Realization"));
-    curveA.setPen(QPen(Qt::darkGray));
-    curveA.updateLegend(legend);
+    QList<QPair<QString, Qt::GlobalColor> > pairs;
+    pairs << qMakePair(tr("Unselected Realization"), Qt::darkGray)
+          << qMakePair(tr("Selected and Enabled Realization"), Qt::darkGreen)
+          << qMakePair(tr("Selected and Disabled Realization"), Qt::darkRed);
 
-    QwtPlotCurve curveB(tr("Selected and Enabled Realization"));
-    curveB.setPen(QPen(QBrush(Qt::darkGreen), 2));
-    curveB.updateLegend(legend);
+    QPair<QString, Qt::GlobalColor> pair;
+    foreach (pair, pairs) {
+        QwtPlotCurve *curve = new QwtPlotCurve(pair.first);
 
-    QwtPlotCurve curveC(tr("Selected and Disabled Realization"));
-    curveC.setPen(QPen(QBrush(Qt::darkRed), 2));
-    curveC.updateLegend(legend);
+        curve->setLegendIconSize(QSize(32, 8));
+        curve->setPen(QPen(QBrush(pair.second), 2));
+        curve->setLegendAttribute(QwtPlotCurve::LegendShowLine);
+#if QWT_VERSION < 0x060100
+        curve->updateLegend(legend);
+#else
+        m_plot->updateLegend(curve);
+#endif
+    }
 
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);

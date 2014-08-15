@@ -21,6 +21,7 @@
 
 #include "TimeSeriesMotionDialog.h"
 
+#include "MyQwtCompatibility.h"
 #include "ResponseSpectrum.h"
 #include "TimeSeriesMotion.h"
 
@@ -471,11 +472,11 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
                                               QwtPicker::ActiveOnly, plot->canvas());
     picker->setStateMachine(new QwtPickerDragPointMachine());
 
-    plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
     font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
 
-    plot->setAxisScaleEngine(QwtPlot::yLeft, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
     plot->setAxisFont(QwtPlot::yLeft, font);
 
     font.setBold(true);
@@ -500,11 +501,11 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
                                               QwtPicker::ActiveOnly, plot->canvas());
     picker->setStateMachine(new QwtPickerDragPointMachine());
 
-    plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
     font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
 
-    plot->setAxisScaleEngine(QwtPlot::yLeft, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
     plot->setAxisFont(QwtPlot::yLeft, font);
 
     font.setBold(true);

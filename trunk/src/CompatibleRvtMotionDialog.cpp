@@ -24,6 +24,7 @@
 #include "CompatibleRvtMotion.h"
 #include "DimensionLayout.h"
 #include "EditActions.h"
+#include "MyQwtCompatibility.h"
 #include "MyTableView.h"
 #include "ResponseSpectrum.h"
 #include "TableGroupBox.h"
@@ -146,11 +147,13 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
                                               QwtPicker::ActiveOnly, plot->canvas());
     picker->setStateMachine(new QwtPickerDragPointMachine());
 
-    plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
+
+    plot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
+
     QFont font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
 
-    plot->setAxisScaleEngine(QwtPlot::yLeft, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
     plot->setAxisFont(QwtPlot::yLeft, font);
 
     font.setBold(true);
@@ -188,11 +191,11 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
                                QwtPlotPicker::CrossRubberBand,
                                QwtPlotPicker::ActiveOnly, plot->canvas());
 
-    plot->setAxisScaleEngine(QwtPlot::xBottom, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
     font = QApplication::font();
     plot->setAxisFont(QwtPlot::xBottom, font);
 
-    plot->setAxisScaleEngine(QwtPlot::yLeft, new QwtLog10ScaleEngine);
+    plot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
     plot->setAxisFont(QwtPlot::yLeft, font);
 
     font.setBold(true);
