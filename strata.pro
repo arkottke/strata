@@ -1,6 +1,9 @@
 # All settings should be modified from the strataconfig.pri file
 include(strataconfig.pri)
 
+# Embed the manifest
+CONFIG += embed_manifest_exe
+
 # Grab the revision number using svnversion and clean it up.
 DEFINES += REVISION=$$system(python getSvnVersion.py)
 

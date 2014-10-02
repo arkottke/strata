@@ -11,7 +11,7 @@
 # standard users. If only the basic features are needed, comment out the
 # following line.
 ########################################################################
-# DEFINES += ADVANCED_OPTIONS
+DEFINES += ADVANCED_OPTIONS
 
 ########################################################################
 # Build type. For most cases this should be release, however during
@@ -42,7 +42,7 @@ unix {
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -L$$PWD/../../qwt-6.1/lib \
+        -L$$PWD/../../qwt-6.1/src
         -lqwt
     INCLUDEPATH += $$PWD/../../qwt-6.1/src
 
@@ -50,20 +50,20 @@ unix {
 win32 { 
     LIBS += -lm \
         -lfftw3-3 \
-        -L"C:/devel/fftw-3.3.3" \
+        -L"C:/devel/fftw-3.3.4" \
         -lgsl \
         -lgslcblas \
         -L"C:/devel/GnuWin32/bin"
     INCLUDEPATH += . \
-        "C:/devel/fftw-3.3.3" \
-        "C:/devel/qwt-6.0/src" \
+        "C:/devel/fftw-3.3.4" \
+        "C:/devel/qwt-6.1/src" \
         "C:/devel/GnuWin32/include"
     RC_FILE = strata.rc
     CONFIG(debug, debug|release ) {
         LIBS += -lqwtd \
-            -L"C:/devel/qwt-6.0/lib"
+            -L"C:/devel/qwt-6.1/lib"
     } else {
         LIBS += -lqwt \
-            -L"C:/devel/qwt-6.0/lib"
+            -L"C:/devel/qwt-6.1/lib"
     }
 }
