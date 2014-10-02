@@ -457,11 +457,11 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm(bool readOnly)
 
 void SourceTheoryRvtMotionDialog::openFrequencyDialog()
 {
-    QDialog dialog;
+    QDialog dialog(this);
 
-    DimensionLayout* layout = new DimensionLayout;    
+    DimensionLayout* layout = new DimensionLayout;
     layout->setModel(m_motion->freqDimension());
-    layout->setRange(0.001, 300);
+    layout->setRange(0.001, 1000);
     layout->setSuffix(" Hz");
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);

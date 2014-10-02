@@ -143,7 +143,7 @@ QGroupBox* OutputPage::createRespSpecGroupBox()
     m_dampingSpinBox->setDecimals(1);
 
     m_periodLayout = new DimensionLayout(this);
-    m_periodLayout->setRange(0.01, 10);
+    m_periodLayout->setRange(0.001, 100);
     m_periodLayout->setSuffix(" s");
 
     m_periodLayout->insertRow(0, "Damping:", m_dampingSpinBox);
@@ -157,7 +157,7 @@ QGroupBox* OutputPage::createRespSpecGroupBox()
 QGroupBox* OutputPage::createFreqGroupBox()
 {
     m_frequencyLayout = new DimensionLayout(this);
-    m_frequencyLayout->setRange(0.001, 200);
+    m_frequencyLayout->setRange(0.001, 1000);
     m_frequencyLayout->setSuffix(" Hz");
 
     m_freqGroupBox = new QGroupBox(tr("Frequency Properties"), this);

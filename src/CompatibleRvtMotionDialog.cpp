@@ -258,10 +258,10 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
 
 void CompatibleRvtMotionDialog::openFrequencyDialog()
 {
-    QDialog dialog;
+    QDialog dialog(this);
 
     DimensionLayout* layout = new DimensionLayout;
-    layout->setRange(0.001, 200);
+    layout->setRange(0.001, 1000);
     layout->setModel(m_motion->freqDimension());
     layout->setSuffix(" Hz");
 
