@@ -457,7 +457,7 @@ QTabWidget* ResultsPage::createDataTabWidget()
         m_plot->updateLegend(curve);
 #endif
     }
-
+	
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(m_plot);

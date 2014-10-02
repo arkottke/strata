@@ -13,8 +13,8 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\Qt\4.8.4"
-!Define QT_MINGW_PATH "C:\MinGW\bin"
+!Define QT_PATH "C:\devel\Qt\4.8.6"
+!Define MINGW_PATH "C:\Program Files\mingw-w64\i686-4.8.2-posix-dwarf-rt_v3-rev4\bin"
 
 ;--------------------------------
 ;Variables
@@ -112,19 +112,21 @@ Section "!Core Files" SecProgram
   file "/oname=$INSTDIR\strata-data.ico" "resources\images\file-data.ico"
 
   ;Main libraries
-  file "C:\devel\fftw-3.3.3\libfftw3-3.dll"
+  file "C:\devel\fftw-3.3.4\libfftw3-3.dll"
   file "C:\devel\GnuWin32\bin\libgsl.dll"
   file "C:\devel\GnuWin32\bin\libgslcblas.dll"
   file "${QT_PATH}\bin\QtCore4.dll"
+  file "${QT_PATH}\bin\QtOpenGL4.dll"
   file "${QT_PATH}\bin\QtGui4.dll"
   file "${QT_PATH}\bin\QtNetwork4.dll"
   file "${QT_PATH}\bin\QtScript4.dll"
   file "${QT_PATH}\bin\QtSvg4.dll"
   file "${QT_PATH}\bin\QtXml4.dll"
-  file "${QT_MINGW_PATH}\libstdc++-6.dll"
-  file "${QT_MINGW_PATH}\libgcc_s_dw2-1.dll"
-  file "${QT_MINGW_PATH}\mingwm10.dll"
-  file "C:\devel\qwt-6.0\lib\qwt.dll"
+  file "${MINGW_PATH}\libstdc++-6.dll"
+  file "${MINGW_PATH}\libgcc_s_dw2-1.dll"
+  file "${MINGW_PATH}\libwinpthread-1.dll"
+  ;file "${MINGW_PATH}\mingwm10.dll"
+  file "C:\devel\qwt-6.1\lib\qwt.dll"
   
   ;Plugins for SVG icons
   SetOutPath "$INSTDIR\iconengines" 
