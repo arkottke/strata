@@ -109,7 +109,6 @@ void UpdateDialog::yes()
 void UpdateDialog::replyFinished(QNetworkReply * reply)
 {
     if (m_canceled || reply->error() != QNetworkReply::NoError) {
-        qDebug() << "Request failed, " << reply->errorString() << reply->url();
         if (m_file->isOpen() && m_task == Download) {
             m_file->close();
             if (QFile::exists(m_pathName)) {
@@ -119,9 +118,6 @@ void UpdateDialog::replyFinished(QNetworkReply * reply)
         reject();
         return;
     }
-
-    qDebug() << "Request succeeded";
-    qDebug() << reply->url();
 
     switch (m_task) {
     case Query:
@@ -171,7 +167,6 @@ void UpdateDialog::replyFinished(QNetworkReply * reply)
             m_file->setFileName(m_pathName);
 
             if (!m_file->open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-                qDebug() << "Error opening:" << m_pathName;
                 m_reply->close();
                 reject();
                 return;
@@ -182,7 +177,6 @@ void UpdateDialog::replyFinished(QNetworkReply * reply)
             break;
         }
     case Download:
-        qDebug() << "download complete!";
         break;
     }
 }

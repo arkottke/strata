@@ -349,7 +349,6 @@ double AbstractRvtMotion::calcMax( const QVector<double> & fas, double durationR
     // FIXME Compute the peak factor using the asympototic solution
     // double numZero = sqrt(m2/m0) * durationGm / M_PI;
     // double peakFactor_asym = sqrt(2 * log(numZero)) + 0.5772 / sqrt(2 * log(numZero));
-    // qDebug() << peakFactor <<  peakFactor_asym;
 
     // Return the peak value which is found by multiplying the variation by the peakfactor
     return sqrt(m0/durationRms) * peakFactor;

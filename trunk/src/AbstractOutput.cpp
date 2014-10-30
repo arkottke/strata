@@ -101,8 +101,6 @@ QVariant AbstractOutput::headerData(int section, Qt::Orientation orientation, in
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    //qDebug () << "headerData" << section << orientation << role;
-
     switch (orientation) {
     case Qt::Horizontal:
         if (section == 0) {

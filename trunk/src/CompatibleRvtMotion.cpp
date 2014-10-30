@@ -305,7 +305,6 @@ void CompatibleRvtMotion::calculate()
         // Increment the count
         ++count;
 
-        // qDebug() << count << maxError << rmse << minRmse << fabs(oldRmse-rmse) << minRmseChange;
         // Stop if the RMSE is below the specified RMSE
         if (rmse < minRmse || fabs(oldRmse-rmse) < minRmseChange)
             break;

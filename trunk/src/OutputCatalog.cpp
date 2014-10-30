@@ -45,7 +45,7 @@ OutputCatalog::OutputCatalog(QObject *parent) :
 
     m_frequency = new Dimension(this);
     m_frequency->setMin(0.05);
-    m_frequency->setMax(50);
+    m_frequency->setMax(100);
     m_frequency->setSize(512);
     m_frequency->setSpacing(Dimension::Log);
     m_frequencyIsNeeded = false;
@@ -53,8 +53,8 @@ OutputCatalog::OutputCatalog(QObject *parent) :
     m_damping = 5.;
     m_period = new Dimension(this);
     m_period->setMin(0.01);
-    m_period->setMax(5);
-    m_period->setSize(64);
+    m_period->setMax(10.0);
+    m_period->setSize(91);
     m_period->setSpacing(Dimension::Log);
     m_periodIsNeeded = false;
 

@@ -38,16 +38,10 @@ NonlinearPropertyCatalog::NonlinearPropertyCatalog()
                  + "/nonlinearCurves";
 
     QFile file(m_fileName);
-    if (file.exists()) {
-        if (file.open(QIODevice::ReadOnly)) {
-            QDataStream in(&file);
-            in >> *(m_modulusFactory) >> *(m_dampingFactory);
-        } else {
-            qDebug() << "Failed to open:" << qPrintable(m_fileName);
-        }
-    } else {
-        qDebug() << "NonlinearPropertyCatalog file doesn't exist.";
-    }
+    if (file.exists() && file.open(QIODevice::ReadOnly)) {
+        QDataStream in(&file);
+        in >> *(m_modulusFactory) >> *(m_dampingFactory);
+    } 
 }
 
 NonlinearPropertyCatalog::~NonlinearPropertyCatalog()
@@ -68,13 +62,10 @@ DampingFactory* const NonlinearPropertyCatalog::dampingFactory()
 
 bool NonlinearPropertyCatalog::save() const
 {
-    qDebug() << "Saving data!";
-
     const QString dest = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     QDir dir;
 
     if (!dir.exists(dest) && !dir.mkpath(dest)) {
-        qDebug() << "Failed to created:" << qPrintable(dest);
         return false;
     }
 

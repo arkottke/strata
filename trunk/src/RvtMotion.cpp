@@ -194,8 +194,6 @@ void smooth(QVector<double> & data, int window)
         else if ( window < left && window >= right ) {
             // Not enough room on the right side
             adjustedWindow = right;
-
-            // qDebug() << "not enough room on the right side, adjusted window:" << adjustedWindow;
         } else {
             // Not enough room on either side -- use the short side
             if ( left < right )
