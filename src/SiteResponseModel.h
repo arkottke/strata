@@ -29,6 +29,7 @@ class SiteResponseOutput;
 class AbstractCalculator;
 class MotionLibrary;
 class OutputCatalog;
+class MyRandomNumGenerator;
 
 class QProgressBar;
 class QDataStream;
@@ -65,6 +66,7 @@ public:
     MotionLibrary* motionLibrary();
     AbstractCalculator* calculator();
     OutputCatalog* outputCatalog();
+    MyRandomNumGenerator* randNumGen();
 
     bool modified() const;
 
@@ -138,6 +140,9 @@ private:
 
     //! The object responsible for computing the site response
     AbstractCalculator* m_calculator;
+
+    //! Random number generator
+    MyRandomNumGenerator* m_randNumGen;
 
     //! Okay to continue calculation.
     bool m_okToContinue;

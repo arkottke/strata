@@ -27,6 +27,7 @@
 #include "FrequencyDependentCalculator.h"
 #include "LinearElasticCalculator.h"
 #include "MotionLibrary.h"
+#include "MyRandomNumGenerator.h"
 #include "NonlinearPropertyRandomizer.h"
 #include "OutputCatalog.h"
 #include "ProfilesOutputCatalog.h"
@@ -56,6 +57,10 @@ SiteResponseModel::SiteResponseModel(QObject * parent)
     m_isLoaded = false;
 
     connect(Units::instance(), SIGNAL(systemChanged(int)),
+            this, SLOT(setModified()));
+
+    m_randNumGen = new MyRandomNumGenerator(this);
+    connect(m_randNumGen, SIGNAL(wasModified()),
             this, SLOT(setModified()));
 
     m_motionLibrary = new MotionLibrary(this);
@@ -230,6 +235,11 @@ OutputCatalog* SiteResponseModel::outputCatalog()
     return m_outputCatalog;
 }
 
+MyRandomNumGenerator* SiteResponseModel::randNumGen()
+{
+    return m_randNumGen;
+}
+
 void SiteResponseModel::setCalculator(AbstractCalculator *calculator)
 {
     if (m_calculator != calculator) {
@@ -344,6 +354,9 @@ void SiteResponseModel::run()
     // Determine the number of sites to be used in the computation
     const int siteCount = m_siteProfile->isVaried() ? m_siteProfile->profileCount() : 1;
 
+    // Initialize the random number generator
+    m_randNumGen->init();
+
     // Initialize the output
     m_outputCatalog->initialize(siteCount, m_motionLibrary);
 
@@ -364,12 +377,14 @@ void SiteResponseModel::run()
         if ( !m_okToContinue )
             break;
 
-        m_outputCatalog->log()->append((QString(tr("[%1 of %2] Generating site and soil properties")).arg(i+1).arg(siteCount)));
+        m_outputCatalog->log()->append((
+                    QString(tr("[%1 of %2] Generating site and soil properties")).arg(i+1).arg(siteCount)));
 
         // Create the sublayers -- this randomizes the properties
         m_siteProfile->createSubLayers(m_outputCatalog->log());
 
-        // FIXME -- check the site profile to ensure that the waves can be computed for the intial coniditions
+        // FIXME -- check the site profile to ensure that the waves can be
+        // computed for the intial coniditions
         int motionCountOffset = 0;
         for (int j = 0; j < m_motionLibrary->rowCount(); ++j ) {
             if (!m_motionLibrary->motionAt(j)->enabled()) {
@@ -567,7 +582,7 @@ QString SiteResponseModel::toHtml()
 
 QDataStream & operator<< (QDataStream & out, const SiteResponseModel* srm)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     out << Units::instance()
         << srm->m_notes->toPlainText()
@@ -575,6 +590,7 @@ QDataStream & operator<< (QDataStream & out, const SiteResponseModel* srm)
         << srm->m_siteProfile
         << srm->m_motionLibrary
         << srm->m_outputCatalog
+        << srm->m_randNumGen
         << srm->m_hasResults;
 
     switch (srm->m_method) {
@@ -605,9 +621,14 @@ QDataStream & operator>> (QDataStream & in, SiteResponseModel* srm)
        >> notes
        >> method
        >> srm->m_siteProfile
-       >> srm->m_motionLibrary // Need to update motion count
-       >> srm->m_outputCatalog
-       >> hasResults;
+       >> srm->m_motionLibrary // TODO Need to update motion count
+       >> srm->m_outputCatalog;
+    
+    if (ver > 1) {
+        in >> srm->m_randNumGen;
+    }
+
+    in >> hasResults;
 
     srm->m_notes->setPlainText(notes);
     srm->setMethod(method);

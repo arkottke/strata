@@ -136,8 +136,9 @@ QVariant OutputCatalog::data(const QModelIndex & index, int role) const
             return QVariant();
         }
     } else if (role == Qt::CheckStateRole && index.column() == EnabledColumn) {
-        return m_enabled.at(site).at(motion) ?
-                Qt::Checked : Qt::Unchecked;
+        if (site < m_enabled.size() && motion < m_enabled.at(motion).size())
+            return m_enabled.at(site).at(motion) ?
+                    Qt::Checked : Qt::Unchecked;
     }
 
     return QVariant();
@@ -335,6 +336,9 @@ bool OutputCatalog::siteEnabled(int row) const
     Q_ASSERT(m_selectedOutput);
 
     const int site = m_selectedOutput->intToSite(row);
+
+    if (site >= m_enabled.size())
+        return false;
 
     for (int i = 0; i < m_motionCount; ++i) {
         if (!m_enabled.at(site).at(i))

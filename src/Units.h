@@ -25,8 +25,6 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QMap>
-#include <QVariant>
 
 class Units : public QObject
 {
@@ -96,9 +94,6 @@ public:
 
     //! Stress label
     QString stress() const;
-
-    QMap<QString, QVariant> toMap() const;
-    void fromMap(const QMap<QString, QVariant> & map);
 
 public slots:
     void setSystem(int system);

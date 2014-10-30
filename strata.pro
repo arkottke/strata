@@ -94,6 +94,7 @@ HEADERS += src/AbstractCalculator.h \
     src/MotionTypeDelegate.h \
     src/MyAbstractTableModel.h \
     src/MyPlot.h \
+    src/MyRandomNumGenerator.h \ 
     src/MyTableView.h \
     src/NonlinearProperty.h \
     src/NonlinearPropertyCatalog.h \
@@ -229,6 +230,7 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/MotionTypeDelegate.cpp \
     src/MyAbstractTableModel.cpp \
     src/MyPlot.cpp \
+    src/MyRandomNumGenerator.cpp \ 
     src/MyTableView.cpp \
     src/NonlinearProperty.cpp \
     src/NonlinearPropertyCatalog.cpp \
