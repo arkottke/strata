@@ -443,6 +443,8 @@ QFrame* SoilProfilePage::createVelocityFrame()
 
     correlLayout->addRow(tr("Exponent (b):"), m_correlExponentSpinBox);
 
+    correlLayout->addRow(new QLabel(tr("Correlation applied in <b>meters<b>")));
+
     m_correlGroupBox = new QGroupBox(tr("Correlation Parameters"));
     m_correlGroupBox->setLayout(correlLayout);
 
@@ -483,7 +485,6 @@ QFrame* SoilProfilePage::createLayeringFrame()
     m_layeringInitialSpinBox->setDecimals(2);
     m_layeringInitialSpinBox->setSingleStep(0.01);
 
-
     layout->addRow(tr("Initial (<b><i>b</b></i>):"), m_layeringInitialSpinBox);
 
     // Exponent line
@@ -493,6 +494,8 @@ QFrame* SoilProfilePage::createLayeringFrame()
     m_layeringExponentSpinBox->setSingleStep(0.01);
 
     layout->addRow(tr("Exponent (<b><i>c</b></i>):"), m_layeringExponentSpinBox);
+
+    layout->addRow(new QLabel(tr("Correlation applied in <b>meters<b>")));
 
     // Create the frame and set the layout
     m_layerVariationFrame = new QFrame;
