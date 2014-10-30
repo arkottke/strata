@@ -42,9 +42,9 @@ unix {
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -L$$PWD/../../qwt-6.1/lib \
+        -L$$PWD/../qwt-6.1/lib \
         -lqwt
-    INCLUDEPATH += $$PWD/../../qwt-6.1/src
+    INCLUDEPATH += $$PWD/../qwt-6.1/src
 
 }
 win32 { 

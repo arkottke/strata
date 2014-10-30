@@ -375,7 +375,6 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
             // Combine the correlations
             double correl = (1 - dCorrel) * tCorrel + dCorrel;
 
-
             // Compute the random variable taking into account the correlation from
             // the previous layer.
             randVar = correl * prevRandVar

@@ -22,6 +22,7 @@
 #include "LayerThicknessVariation.h"
 
 #include "ProfileRandomizer.h"
+#include "Units.h"
 
 #include <cfloat>
 #include <cmath>
@@ -102,7 +103,6 @@ void LayerThicknessVariation::setModel(int model)
     setModel((Model)model);
 }
 
-
 bool LayerThicknessVariation::customEnabled() const
 {
     return m_model == Custom;
@@ -153,7 +153,6 @@ void LayerThicknessVariation::setExponent(double exponent)
     }
 }
 
-
 void LayerThicknessVariation::reset()
 {
     setEnabled(false);
@@ -162,6 +161,10 @@ void LayerThicknessVariation::reset()
 
 QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
 {
+    // Need to convert the depth to bedrock into meters for the Toro (1997)
+    // model.
+    depthToBedrock *= Units::instance()->toMeters();
+
     // The thickness of the layers
     QList<double> thicknesses;
 
@@ -197,11 +200,14 @@ QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
         prevDepth = depth;
     }
 
-
     // Correct the last layer of thickness so that the total depth is equal to the maximum depth
     if (thicknesses.size())
         thicknesses.last() = thicknesses.last() - (prevDepth - depthToBedrock);
 
+    // Convert the thicknesses back into the target unit system
+    for (int i = 0; i < thicknesses.size(); ++i)
+        thicknesses[i] /= Units::instance()->toMeters();
+    
     return thicknesses;
 }
 
