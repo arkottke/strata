@@ -54,7 +54,6 @@ SoilProfilePage::SoilProfilePage(QWidget * parent, Qt::WindowFlags f)
     // Connections
     connect( Units::instance(), SIGNAL(systemChanged(int)),
              this, SLOT(updateUnits()));
-
 }
 
 void SoilProfilePage::setModel(SiteResponseModel *model)
@@ -90,7 +89,6 @@ void SoilProfilePage::setModel(SiteResponseModel *model)
             pr->bedrockDepthVariation(), SLOT(setEnabled(bool)));
     connect(pr->bedrockDepthVariation(), SIGNAL(enabledChanged(bool)),
             m_isBedrockDepthVariedCheckBox, SLOT(setChecked(bool)));
-
 
     // Velocity Variation
     VelocityVariation* vv =
@@ -384,7 +382,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     layout->addRow(tr("Standard deviation:"), m_stdevModelComboBox);
 
     m_stdevSpinBox = new QDoubleSpinBox;
-    m_stdevSpinBox->setDecimals(2);
+    m_stdevSpinBox->setDecimals(3);
     m_stdevSpinBox->setRange( 0.0, 1.0);
     m_stdevSpinBox->setSingleStep(0.01);
     layout->addRow("", m_stdevSpinBox);
@@ -402,7 +400,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     // Initial correlation
     m_correlInitialSpinBox = new QDoubleSpinBox;
     m_correlInitialSpinBox->setRange(-1, 1);
-    m_correlInitialSpinBox->setDecimals(2);
+    m_correlInitialSpinBox->setDecimals(3);
     m_correlInitialSpinBox->setSingleStep(0.1);
 
     correlLayout->addRow(tr("Correl. coeff. at surface (%1_0):").arg(QChar(0x03C1)),
@@ -411,7 +409,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     // Final correlation
     m_correlFinalSpinBox = new QDoubleSpinBox;
     m_correlFinalSpinBox->setRange(-1, 1);
-    m_correlFinalSpinBox->setDecimals(2);
+    m_correlFinalSpinBox->setDecimals(3);
     m_correlFinalSpinBox->setSingleStep(0.1);
 
     correlLayout->addRow(tr("Correl. coeff. at 200 m (%1_200):").arg(QChar(0x03C1)),
@@ -420,7 +418,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     // Change in correlation with depth
     m_correlDeltaSpinBox = new QDoubleSpinBox;
     m_correlDeltaSpinBox->setRange(0, 10);
-    m_correlDeltaSpinBox->setDecimals(2);
+    m_correlDeltaSpinBox->setDecimals(3);
     m_correlDeltaSpinBox->setSingleStep(1);
 
     correlLayout->addRow(tr("Change in correl. with depth (%1):").arg(QChar(0x0394)),
@@ -429,7 +427,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     // Initial depth 
     m_correlInterceptSpinBox = new QDoubleSpinBox;
     m_correlInterceptSpinBox->setRange(0, 100);
-    m_correlInterceptSpinBox->setDecimals(1);
+    m_correlInterceptSpinBox->setDecimals(2);
     m_correlInterceptSpinBox->setSingleStep(1);
     m_correlInterceptSpinBox->setSuffix(" m");
 
@@ -438,7 +436,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     // Exponent
     m_correlExponentSpinBox = new QDoubleSpinBox;
     m_correlExponentSpinBox->setRange(0, 1);
-    m_correlExponentSpinBox->setDecimals(3);
+    m_correlExponentSpinBox->setDecimals(4);
     m_correlExponentSpinBox->setSingleStep(0.01);
 
     correlLayout->addRow(tr("Exponent (b):"), m_correlExponentSpinBox);
@@ -474,7 +472,7 @@ QFrame* SoilProfilePage::createLayeringFrame()
     // Coefficient line
     m_layeringCoeffSpinBox = new QDoubleSpinBox;
     m_layeringCoeffSpinBox->setRange( 0, 100);
-    m_layeringCoeffSpinBox->setDecimals(2);
+    m_layeringCoeffSpinBox->setDecimals(3);
     m_layeringCoeffSpinBox->setSingleStep(0.01);
 
     layout->addRow(tr("Coefficient (<b><i>a</i></b>):"), m_layeringCoeffSpinBox);
@@ -482,7 +480,7 @@ QFrame* SoilProfilePage::createLayeringFrame()
     // Initial line
     m_layeringInitialSpinBox = new QDoubleSpinBox;
     m_layeringInitialSpinBox->setRange( 0, 100 );
-    m_layeringInitialSpinBox->setDecimals(2);
+    m_layeringInitialSpinBox->setDecimals(3);
     m_layeringInitialSpinBox->setSingleStep(0.01);
 
     layout->addRow(tr("Initial (<b><i>b</b></i>):"), m_layeringInitialSpinBox);
@@ -490,7 +488,7 @@ QFrame* SoilProfilePage::createLayeringFrame()
     // Exponent line
     m_layeringExponentSpinBox = new QDoubleSpinBox;
     m_layeringExponentSpinBox->setRange(-5, 0);
-    m_layeringExponentSpinBox->setDecimals(2);
+    m_layeringExponentSpinBox->setDecimals(3);
     m_layeringExponentSpinBox->setSingleStep(0.01);
 
     layout->addRow(tr("Exponent (<b><i>c</b></i>):"), m_layeringExponentSpinBox);
@@ -518,7 +516,7 @@ QFrame* SoilProfilePage::createBedrockDepthFrame()
     m_bedrockStdevSpinBox = new QDoubleSpinBox;
     m_bedrockStdevSpinBox->setRange( 0, 500 );
     m_bedrockStdevSpinBox->setSingleStep(0.1);
-    m_bedrockStdevSpinBox->setDecimals(2);
+    m_bedrockStdevSpinBox->setDecimals(3);
 
     layout->addRow(tr("Standard deviation:"), m_bedrockStdevSpinBox);
     

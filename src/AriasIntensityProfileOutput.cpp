@@ -48,7 +48,7 @@ QString AriasIntensityProfileOutput::shortName() const
 
 const QString AriasIntensityProfileOutput::xLabel() const
 {
-    return tr("Arias Intensity (g)");
+    return tr("Arias Intensity (m/sec)");
 }
 
 QwtScaleEngine* AriasIntensityProfileOutput::xScaleEngine() const
