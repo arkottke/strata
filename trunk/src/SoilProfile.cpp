@@ -25,9 +25,11 @@
 #include "BedrockDepthVariation.h"
 #include "Location.h"
 #include "LayerThicknessVariation.h"
+#include "MyRandomNumGenerator.h"
 #include "NonlinearPropertyRandomizer.h"
 #include "ProfileRandomizer.h"
 #include "RockLayer.h"
+#include "SiteResponseModel.h"
 #include "SoilLayer.h"
 #include "SoilType.h"
 #include "SoilTypeCatalog.h"
@@ -38,32 +40,31 @@
 
 #include <QBrush>
 #include <QColor>
+#include <QDateTime>
+#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QStringList>
-#include <QDateTime>
 #include <QVariant>
 
 #include <cmath>
 
-SoilProfile::SoilProfile(QObject * parent)
-    : MyAbstractTableModel(parent)
+SoilProfile::SoilProfile(SiteResponseModel * parent)
+    : MyAbstractTableModel(parent), m_siteResponseModel(parent)
 {
-    // Allocate the random number generator with the "Mersenne Twister" algorithm
-    m_rng = gsl_rng_alloc(gsl_rng_mt19937);
-
-    // Initialize the seed of the generator using the time
-    gsl_rng_set(m_rng, QDateTime().currentDateTime().toTime_t());
+    MyRandomNumGenerator* randNumGen = m_siteResponseModel->randNumGen();
 
     m_bedrock = new RockLayer;
     connect( m_bedrock, SIGNAL(wasModified()),
              this, SIGNAL(wasModified()));
 
-    m_profileRandomizer = new ProfileRandomizer(m_rng, this);
+    m_profileRandomizer = new ProfileRandomizer(
+            randNumGen->gsl_pointer(), this);
     connect( m_profileRandomizer, SIGNAL(wasModified()),
              this, SIGNAL(wasModified()));
 
-    m_nonlinearPropertyRandomizer = new NonlinearPropertyRandomizer(m_rng, this);
+    m_nonlinearPropertyRandomizer = new NonlinearPropertyRandomizer(
+            randNumGen->gsl_pointer(), this);
     connect( m_nonlinearPropertyRandomizer, SIGNAL(wasModified()),
              this, SIGNAL(wasModified()));
 
@@ -73,7 +74,6 @@ SoilProfile::SoilProfile(QObject * parent)
 
     connect(Units::instance(), SIGNAL(systemChanged(int)),
             this, SLOT(updateUnits()));
-
 
     m_isVaried = false;
     m_profileCount = 100;
@@ -91,7 +91,6 @@ SoilProfile::~SoilProfile()
     delete m_nonlinearPropertyRandomizer;
     delete m_bedrock;
     delete m_soilTypeCatalog;
-    gsl_rng_free(m_rng);
 }
 
 int SoilProfile::rowCount(const QModelIndex &parent) const
@@ -552,7 +551,7 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     if (m_nonlinearPropertyRandomizer->enabled()) {
         if (textLog->level() > TextLog::Low)
             textLog->append(QObject::tr("Varying dynamic properties of soil types"));
-
+        
         // Vary the nonlinear properties of the soil types
         for (int i = 0; i < m_soilTypeCatalog->rowCount(); ++i) {
             SoilType * st = m_soilTypeCatalog->soilType(i);

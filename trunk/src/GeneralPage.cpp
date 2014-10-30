@@ -21,13 +21,14 @@
 
 #include "GeneralPage.h"
 
-#include "MotionLibrary.h"
 #include "MethodGroupBox.h"
+#include "MotionLibrary.h"
+#include "MyRandomNumGenerator.h"
 #include "NonlinearPropertyRandomizer.h"
 #include "OutputCatalog.h"
 #include "ProfileRandomizer.h"
-#include "SoilProfile.h"
 #include "SiteResponseModel.h"
+#include "SoilProfile.h"
 #include "Units.h"
 
 #include <QDebug>
@@ -157,6 +158,15 @@ QGroupBox* GeneralPage::createVariationGroupBox()
     label->setIndent(indent);
     layout->addRow(label);
 
+    // Control of seed
+    m_specifiedSeedCheckBox = new QCheckBox(tr("Specify seed number"));
+    m_seedSpinBox = new QSpinBox;
+    m_seedSpinBox->setRange(0, 65535);
+    m_seedSpinBox->setEnabled(false);
+    connect(m_specifiedSeedCheckBox, SIGNAL(toggled(bool)),
+            m_seedSpinBox, SLOT(setEnabled(bool)));
+
+    layout->addRow(m_specifiedSeedCheckBox, m_seedSpinBox);
 
     // Create the group box and add the layout
     m_variationGroupBox = new QGroupBox(tr("Site Property Variation"));
@@ -247,6 +257,16 @@ void GeneralPage::setModel(SiteResponseModel *model)
     connect(m_siteIsVariedCheckBox, SIGNAL(toggled(bool)),
              model->siteProfile()->profileRandomizer(), SLOT(setEnabled(bool)));
 
+    m_specifiedSeedCheckBox->setChecked(model->randNumGen()->seedSpecified());
+    connect(m_specifiedSeedCheckBox, SIGNAL(toggled(bool)),
+            model->randNumGen(), SLOT(setSeedSpecified(bool)));
+
+    m_seedSpinBox->setValue(model->randNumGen()->seed());
+    connect(m_seedSpinBox, SIGNAL(valueChanged(int)),
+            model->randNumGen(), SLOT(setSeed(int)));
+    connect(model->randNumGen(), SIGNAL(seedChanged(int)),
+            m_seedSpinBox, SLOT(setValue(int)));
+
     m_methodGroupBox->setCalculator(model->calculator());
     connect(model, SIGNAL(calculatorChanged(AbstractCalculator*)),
             m_methodGroupBox, SLOT(setCalculator(AbstractCalculator*)));
@@ -279,6 +299,8 @@ void GeneralPage::setReadOnly(bool readOnly)
     m_countSpinBox->setReadOnly(readOnly);
     m_nlPropertiesAreVariedCheckBox->setDisabled(readOnly);
     m_siteIsVariedCheckBox->setDisabled(readOnly);
+    m_specifiedSeedCheckBox->setDisabled(readOnly);
+    m_seedSpinBox->setDisabled(readOnly || !m_specifiedSeedCheckBox->isChecked());
 
     m_methodGroupBox->setReadOnly(readOnly);
 

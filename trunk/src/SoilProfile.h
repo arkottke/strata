@@ -31,8 +31,9 @@
 class NonlinearPropertyRandomizer;
 class ProfileRandomizer;
 class RockLayer;
-class SoilType;
+class SiteResponseModel;
 class SoilLayer;
+class SoilType;
 class SoilTypeCatalog;
 class SubLayer;
 class TextLog;
@@ -46,7 +47,7 @@ class SoilProfile : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, SoilProfile* siteProfile);
 
 public:
-    SoilProfile(QObject * parent = 0);
+    SoilProfile(SiteResponseModel* parent = 0);
     ~SoilProfile();
 
     //! Columns of the table
@@ -159,9 +160,6 @@ public:
     QVector<double> stressRatioProfile() const;
     QVector<double> maxErrorProfile() const;
 
-    QMap<QString, QVariant> toMap() const;
-    void fromMap( const QMap<QString, QVariant> & map );
-
     //! Create a table of the sublayers
     QString subLayerTable() const;
 
@@ -217,6 +215,9 @@ private:
          */
     QList<SoilLayer*> m_soilLayers;
     QList<SubLayer> m_subLayers;
+
+    //! Parent site response model
+    SiteResponseModel* m_siteResponseModel;
 
     //! Catalog of defined soil types
     SoilTypeCatalog* m_soilTypeCatalog;

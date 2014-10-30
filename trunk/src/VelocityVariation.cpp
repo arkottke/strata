@@ -351,6 +351,8 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
     double randVar = 0;
     double stdev = 0;
 
+    const double toMeters = Units::instance()->toMeters();
+
     for (int i = 0; i < soilLayers.size(); ++i) {
         stdev = m_stdevIsLayerSpecific ? soilLayers.at(i)->stdev() : m_stdev;
 
@@ -362,15 +364,16 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
             double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
 
             // If the English units are used convert the depthToMid to meters
-            depthToMid *= Units::instance()->toMeters();
+            depthToMid *= toMeters;
 
             // Depth dependent correlation
             const double dCorrel =  (depthToMid <= 200) ?
                                     m_correlFinal * pow((depthToMid + m_correlInitial)
                                                         / (200 + m_correlInitial), m_correlExponent)
                                                             : m_correlFinal;
-            // Thickness dependent correlation
-            const double tCorrel = m_correlInitial * exp(-soilLayers.at(i)->thickness() / m_correlDelta );
+            // Thickness dependent correlation. Again convert to meters
+            const double tCorrel = m_correlInitial * exp( -toMeters *
+                    soilLayers.at(i)->thickness() / m_correlDelta );
 
             // Combine the correlations
             double correl = (1 - dCorrel) * tCorrel + dCorrel;

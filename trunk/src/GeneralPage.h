@@ -70,6 +70,8 @@ protected:
     QSpinBox* m_countSpinBox;
     QCheckBox* m_nlPropertiesAreVariedCheckBox;
     QCheckBox* m_siteIsVariedCheckBox;
+    QCheckBox* m_specifiedSeedCheckBox;
+    QSpinBox* m_seedSpinBox;
 
     MethodGroupBox* m_methodGroupBox;
 
