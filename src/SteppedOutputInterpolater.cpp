@@ -53,9 +53,5 @@ QVector<double> SteppedOutputInterpolater::calculate(
     if (x.size() < y.size())
         yi << y.last();
 
-    if (xi.size() < yi.size()) {
-        qDebug() << xi.size() << yi.size();
-    }
-
     return yi;
 }

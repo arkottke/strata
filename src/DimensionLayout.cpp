@@ -30,16 +30,20 @@ DimensionLayout::DimensionLayout(QWidget *parent) :
 {
     // Minimum
     m_minSpinBox = new QDoubleSpinBox;
+    m_minSpinBox->setDecimals(3);
+    m_minSpinBox->setSingleStep(0.01);
     connect(m_minSpinBox, SIGNAL(valueChanged(double)),
-            this, SLOT(updateMin(double)));
+            this, SLOT(updateMaxMin(double)));
 
     addRow(tr("Minimum:"), m_minSpinBox);
 
     // Maximum
     m_maxSpinBox = new QDoubleSpinBox;
     m_maxSpinBox->setMaximum(300.);
+    m_maxSpinBox->setDecimals(3);
+    m_maxSpinBox->setSingleStep(1);
     connect(m_maxSpinBox, SIGNAL(valueChanged(double)),
-            this, SLOT(updateMax(double)));
+            this, SLOT(updateMinMax(double)));
 
     addRow(tr("Maximum:"), m_maxSpinBox);
 
@@ -86,8 +90,15 @@ void DimensionLayout::setSuffix(const QString &suffix)
 
 void DimensionLayout::setRange(double min, double max)
 {
+    // Need to block the signals to prevent the values from getting changed,
+    // which causes the min-max and max-min to be updated.
+    m_minSpinBox->blockSignals(true);
     m_minSpinBox->setMinimum(min);
+    m_minSpinBox->blockSignals(false);
+
+    m_maxSpinBox->blockSignals(true);
     m_maxSpinBox->setMaximum(max);
+    m_maxSpinBox->blockSignals(false);
 }
 
 void DimensionLayout::setSingleStep(double step)
@@ -104,12 +115,12 @@ void DimensionLayout::setReadOnly(bool readOnly)
     m_spacingComboBox->setDisabled(readOnly);
 }
 
-void DimensionLayout::updateMin(double min)
+void DimensionLayout::updateMaxMin(double min)
 {
     m_maxSpinBox->setMinimum(min);
 }
 
-void DimensionLayout::updateMax(double max)
+void DimensionLayout::updateMinMax(double max)
 {
     m_minSpinBox->setMaximum(max);
 }

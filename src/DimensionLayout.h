@@ -45,8 +45,8 @@ public slots:
     void setReadOnly(bool readOnly);
 
 protected slots:
-    void updateMin(double min);
-    void updateMax(double max);
+    void updateMaxMin(double min);
+    void updateMinMax(double max);
     void updateSpacing(int spacing);
 
 protected:

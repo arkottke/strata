@@ -265,7 +265,8 @@ void CompatibleRvtMotionDialog::openFrequencyDialog()
     layout->setModel(m_motion->freqDimension());
     layout->setSuffix(" Hz");
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            QDialogButtonBox::Ok, Qt::Horizontal);
     connect(buttonBox, SIGNAL(accepted()),
             &dialog, SLOT(accept()));
 

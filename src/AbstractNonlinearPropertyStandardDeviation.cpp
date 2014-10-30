@@ -97,7 +97,6 @@ double AbstractNonlinearPropertyStandardDeviation::calculate(NonlinearPropertyRa
         QScriptValue result = m_engine.evaluate(m_function);
         if (m_engine.hasUncaughtException()) {
             int line = m_engine.uncaughtExceptionLineNumber();
-            qDebug() << "uncaught exception at line" << line << ":" << result.toString();
             return 0;
         } else {
             return result.toNumber();
