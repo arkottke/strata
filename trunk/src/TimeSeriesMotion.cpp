@@ -804,7 +804,9 @@ QVector<double> TimeSeriesMotion::ariasIntensity(const QVector<std::complex<doub
 
     /* The Arias Intensity is defined by:
      * IA = PI / (2 * g) \int_0^Td a(t) ^ dt
-     * In this calculation, the integration is peformed using the trapezoid rule. The time step and 1/2 factor are pulled out and combined with the constant factor.
+     * In this calculation, the integration is peformed using the trapezoid
+     * rule. The time step and 1/2 factor are pulled out and combined with the
+     * constant factor.
      */
     const double foo = m_timeStep * M_PI / (4 * Units::instance()->gravity());
 
