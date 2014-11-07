@@ -32,6 +32,7 @@
 #include "NonlinearPropertyDelegate.h"
 #include "NonlinearPropertyRandomizer.h"
 #include "NonlinearPropertyStandardDeviationWidget.h"
+#include "OnlyIncreasingDelegate.h"
 #include "RockLayer.h"
 #include "SiteResponseModel.h"
 #include "SoilProfile.h"
@@ -350,6 +351,7 @@ QGroupBox* SoilTypePage::createSoilPropsGroupBox()
 QGroupBox* SoilTypePage::createNlPropTableBox()
 {
     m_nlPropTableBox = new TableGroupBox(tr("Nonlinear Property"));
+    m_nlPropTableBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);
 
 
     return m_nlPropTableBox;

@@ -25,6 +25,7 @@
 #include "EditActions.h"
 #include "MyQwtCompatibility.h"
 #include "ResponseSpectrum.h"
+#include "OnlyIncreasingDelegate.h"
 #include "TableGroupBox.h"
 
 #include <QApplication>
@@ -101,6 +102,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
 
     TableGroupBox *tableGroupBox = new TableGroupBox(tr("Fourier Amplitude Spectrum"));
     tableGroupBox->setModel(m_motion);
+    tableGroupBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);
 
     layout->addWidget(tableGroupBox, row++, 0, 1, 2);
 

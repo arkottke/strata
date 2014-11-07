@@ -26,6 +26,7 @@
 #include "EditActions.h"
 #include "MyQwtCompatibility.h"
 #include "MyTableView.h"
+#include "OnlyIncreasingDelegate.h"
 #include "ResponseSpectrum.h"
 #include "TableGroupBox.h"
 
@@ -125,6 +126,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     TableGroupBox *tableGroupBox = new TableGroupBox(tr("Target Response Spectrum"), this);
     tableGroupBox->setModel(m_motion->targetRespSpec());
     tableGroupBox->setReadOnly(readOnly);
+    tableGroupBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);
 
     layout->addWidget(tableGroupBox, row++, 0, 1, 2);
 

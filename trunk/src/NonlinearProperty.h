@@ -61,7 +61,7 @@ public:
     const QString & name() const;
 
     //! Linear interpolation of the prop for a given strain
-    double interp(const double strain) const;
+    double interp(const double strain);
 
     //! Create a html document containing the information of the model
     QString toHtml() const;
@@ -81,7 +81,7 @@ public:
     NonlinearProperty *duplicate() const;
 
 protected:    
-    //! Initialize the interpolation routine
+    //! Initialize the interpolation routine. Called on the first interpolation
     void initialize();
 
     //! Name of the model
