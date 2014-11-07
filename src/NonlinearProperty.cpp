@@ -28,6 +28,7 @@
 #include <QColor>
 #include <QDebug>
 
+#include <cfloat>
 #include <cmath>
 
 NonlinearProperty::NonlinearProperty(QObject *parent)
@@ -203,6 +204,20 @@ void NonlinearProperty::initialize()
     if (m_strain.size() > 2) {
         if (m_interp)
             gsl_interp_free(m_interp);
+
+        // Remove values that have the same x
+        for (int i = 0; i < m_strain.size(); ++i) {
+            int j = i + 1;
+
+            while (j < m_strain.size()) {
+                if (fabs(m_strain.at(i) - m_strain.at(j)) <= DBL_EPSILON) {
+                    m_strain.remove(j);
+                    m_varied.remove(j);
+                } else {
+                    ++j;
+                }
+            }
+        }
 
         m_interp = gsl_interp_alloc(gsl_interp_linear, m_strain.size());
         gsl_interp_init(m_interp, m_strain.data(), m_varied.data(), m_strain.size());
