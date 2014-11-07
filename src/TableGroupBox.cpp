@@ -104,6 +104,11 @@ void TableGroupBox::addButton(QPushButton * pushButton )
     m_buttonRow->addWidget(pushButton);
 }
 
+MyTableView* const TableGroupBox::table()
+{
+    return m_table;
+}
+
 void TableGroupBox::addRow()
 {
     QModelIndexList selectedRows = m_table->selectionModel()->selectedRows();

@@ -82,9 +82,6 @@ bool CustomNonlinearProperty::insertRows(int row, int count, const QModelIndex &
     m_varied.insert(row, count, 0);
 
     emit endInsertRows();
-
-    // Change in size requires the interpolation to be adjusted
-    initialize();
     return true;
 }
 
@@ -100,8 +97,5 @@ bool CustomNonlinearProperty::removeRows(int row, int count, const QModelIndex &
     m_varied.remove(row, count);
 
     emit endRemoveRows();
-
-    // Change in size requires the spline to be reset
-    initialize();
     return true;
 }

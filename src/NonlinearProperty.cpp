@@ -28,9 +28,6 @@
 #include <QColor>
 #include <QDebug>
 
-#include <cfloat>
-#include <cmath>
-
 NonlinearProperty::NonlinearProperty(QObject *parent)
     : QAbstractTableModel(parent)
 {
@@ -46,15 +43,16 @@ NonlinearProperty::NonlinearProperty(
 {
     m_interp = 0;
     m_acc = gsl_interp_accel_alloc();
-    initialize();
 }
 
 NonlinearProperty::~NonlinearProperty()
 {
     gsl_interp_accel_free(m_acc);
 
-    if (m_interp)
+    if (m_interp) {
         gsl_interp_free(m_interp);
+        m_interp = 0;
+    }
 }
 
 NonlinearProperty::Type NonlinearProperty::type() const
@@ -67,7 +65,7 @@ const QString & NonlinearProperty::name() const
     return m_name;
 }
 
-double NonlinearProperty::interp(const double strain) const
+double NonlinearProperty::interp(const double strain)
 {
     double d;
 
@@ -79,7 +77,9 @@ double NonlinearProperty::interp(const double strain) const
         // Interpolater won't be intialized
         d = m_varied.first();
     } else {
-        Q_ASSERT(m_interp);
+        if (!m_interp)
+            initialize();
+
         d = gsl_interp_eval(m_interp, m_strain.data(), m_varied.data(), strain, m_acc);
     }
 
@@ -146,6 +146,13 @@ QVariant NonlinearProperty::data(const QModelIndex &index, int role) const
         case PropertyColumn:
             return QString::number(m_average.at(index.row()), 'f', 3);
         }
+    } else if (role == Qt::UserRole) {
+        switch (index.column()) {
+        case StrainColumn:
+            return m_strain.at(index.row());
+        case PropertyColumn:
+            return m_average.at(index.row());
+        }
     }
 
     return QVariant();
@@ -195,9 +202,27 @@ const QVector<double> & NonlinearProperty::varied() const
 void NonlinearProperty::setVaried(const QVector<double> &varied)
 {
     m_varied = varied;
-    gsl_interp_accel_reset(m_acc);
-}
 
+    // Need to ensure that the strains are constantly increasing. This is required for the GSL interpolation
+    for (int i = 0; i < m_strain.size(); ++i) {
+        int j = i + 1;
+
+        while (j < m_strain.size()) {
+            if (m_strain.at(i) >= m_strain.at(j)) {
+                m_strain.remove(j);
+                m_varied.remove(j);
+            } else {
+                ++j;
+            }
+        }
+    }
+
+    // Free the interpolator and reset the pointer to zero
+    if (m_interp) {
+        gsl_interp_free(m_interp);
+        m_interp = 0;
+    }
+}
 
 void NonlinearProperty::initialize()
 {
@@ -205,21 +230,7 @@ void NonlinearProperty::initialize()
         if (m_interp)
             gsl_interp_free(m_interp);
 
-        // Remove values that have the same x
-        for (int i = 0; i < m_strain.size(); ++i) {
-            int j = i + 1;
-
-            while (j < m_strain.size()) {
-                if (fabs(m_strain.at(i) - m_strain.at(j)) <= DBL_EPSILON) {
-                    m_strain.remove(j);
-                    m_varied.remove(j);
-                } else {
-                    ++j;
-                }
-            }
-        }
-
-        m_interp = gsl_interp_alloc(gsl_interp_linear, m_strain.size());
+        m_interp = gsl_interp_alloc(gsl_interp_cspline, m_strain.size());
         gsl_interp_init(m_interp, m_strain.data(), m_varied.data(), m_strain.size());
         gsl_interp_accel_reset(m_acc);
     }
@@ -234,8 +245,7 @@ QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np)
 {
     out << (quint8)1;
 
-    out
-            << np->m_name
+    out << np->m_name
             << (int)np->m_type
             << np->m_strain
             << np->m_average;
@@ -258,8 +268,7 @@ QDataStream & operator>> (QDataStream & in, NonlinearProperty* np)
             >> np->m_average;
 
     np->m_type = (NonlinearProperty::Type)type;
-    np->m_varied = np->m_average;
-    np->initialize();
+    np->setVaried(np->average());
 
     np->endResetModel();
 
