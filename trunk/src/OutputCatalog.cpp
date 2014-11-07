@@ -136,7 +136,7 @@ QVariant OutputCatalog::data(const QModelIndex & index, int role) const
             return QVariant();
         }
     } else if (role == Qt::CheckStateRole && index.column() == EnabledColumn) {
-        if (site < m_enabled.size() && motion < m_enabled.at(motion).size())
+        if (site < m_enabled.size() && motion < m_enabled.at(site).size())
             return m_enabled.at(site).at(motion) ?
                     Qt::Checked : Qt::Unchecked;
     }
