@@ -127,10 +127,10 @@ Section "!Core Files" SecProgram
   file "${MINGW_PATH}\libgcc_s_dw2-1.dll"
   file "${MINGW_PATH}\libwinpthread-1.dll"
   ;file "${MINGW_PATH}\mingwm10.dll"
-  file "..\build-qwt\lib\qwt.dll"
-  file "C:\boost\lib32-mingw\libboost_system-mgw47-mt-1_55.dll"
-  file "C:\boost\lib32-mingw\libboost_serialization-mgw47-mt-1_55.dll"
- 
+  file "C:\devel\boost_1_57_0\stage\lib\libboost_serialization-mgw48-mt-1_57.dll"
+  file "C:\devel\boost_1_57_0\stage\lib\libboost_system-mgw48-mt-1_57.dll"
+  file "C:\devel\qwt-6.1\lib\qwt.dll"
+  
   ;Plugins for SVG icons
   SetOutPath "$INSTDIR\iconengines" 
   file "${QT_PATH}\plugins\iconengines\qsvgicon4.dll"
