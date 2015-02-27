@@ -211,6 +211,31 @@ QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
     return thicknesses;
 }
 
+void LayerThicknessVariation::ptRead(const ptree &pt)
+{
+    m_enabled = pt.get<bool>("enabled");
+    int model = pt.get<int>("model");
+    setModel(model);
+    if (m_model == LayerThicknessVariation::Custom)
+    {
+        m_coeff = pt.get<double>("coeff");
+        m_initial = pt.get<double>("initial");
+        m_exponent = pt.get<double>("exponent");
+    }
+}
+
+void LayerThicknessVariation::ptWrite(ptree &pt) const
+{
+    pt.put("enabled", m_enabled);
+    pt.put("model", m_model);
+    if (m_model == LayerThicknessVariation::Custom)
+    {
+        pt.put("coeff", m_coeff);
+        pt.put("initial", m_initial);
+        pt.put("exponent", m_exponent);
+    }
+}
+
 QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)
 {
     out << (quint8)1;

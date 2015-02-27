@@ -23,6 +23,9 @@
 #define ABSTRACT_TIME_SERIES_OUTPUT_H
 
 #include "AbstractLocationOutput.h"
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class OutputCatalog;
 
@@ -41,6 +44,9 @@ public:
     virtual bool needsTime() const;
 
     bool baselineCorrect() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setBaselineCorrect(bool baseLineCorrect);

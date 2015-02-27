@@ -28,14 +28,16 @@
 
 #include <gsl/gsl_rng.h>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class MyRandomNumGenerator : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const
-            MyRandomNumGenerator* myGenerator);
-    friend QDataStream & operator>> (QDataStream & in,
-            MyRandomNumGenerator* myGenerator);
+    friend QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator);
+    friend QDataStream & operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator);
 
 public:
     MyRandomNumGenerator(QObject* parent = 0);
@@ -47,6 +49,9 @@ public:
     void setSeed(quint32 seed);
 
     gsl_rng* gsl_pointer();
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setSeedSpecified(bool seedSpecified);

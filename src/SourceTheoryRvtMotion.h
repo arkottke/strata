@@ -25,6 +25,9 @@
 #include "AbstractRvtMotion.h"
 
 #include <QDataStream>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 #include <gsl/gsl_interp.h>
 
@@ -80,6 +83,9 @@ public:
 
     //! Site amplification
     CrustalAmplification* crustalAmp();
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void isCustomizeable(bool b);

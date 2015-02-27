@@ -25,6 +25,10 @@
 #include "AbstractRvtMotion.h"
 
 #include <QDataStream>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 
 /*! A class that uses random vibration theory to compute the reponse.
  * The motion is characterized by the Fourier Amplitude and random vibration
@@ -54,6 +58,9 @@ public:
     virtual const QVector<double> & freq() const;
     virtual QString toHtml() const;
     virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setDuration(double d);

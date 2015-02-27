@@ -182,6 +182,28 @@ void AbstractDistribution::setVaried(double varied)
     m_varied = varied;
 }
 
+void AbstractDistribution::ptRead(const ptree &pt)
+{
+    m_type = (AbstractDistribution::Type) pt.get<int>("type");
+    m_avg = pt.get<double>("avg");
+    m_stdev = pt.get<double>("stdev");
+    m_hasMax = pt.get<bool>("hasMax");
+    m_max = pt.get<double>("max");
+    m_hasMin = pt.get<bool>("hasMin");
+    m_min = pt.get<double>("min");
+}
+
+void AbstractDistribution::ptWrite(ptree &pt) const
+{
+    pt.put("type", (int)m_type);
+    pt.put("avg", m_avg);
+    pt.put("stdev", m_stdev);
+    pt.put("hasMax", m_hasMax);
+    pt.put("max", m_max);
+    pt.put("hasMin", m_hasMin);
+    pt.put("min", m_min);
+}
+
 QDataStream & operator<< (QDataStream & out, const AbstractDistribution* ad)
 {
     out << (quint8)1;

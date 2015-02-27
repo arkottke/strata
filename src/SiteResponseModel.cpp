@@ -41,9 +41,15 @@
 #include <QDataStream>
 #include <QApplication>
 #include <QTimer>
-#include <QDataStream>
 #include <QProgressBar>
 #include <QTextDocument>
+
+#include <QMetaObject>
+#include <QMetaProperty>
+
+#include <iomanip>
+#include <iostream>
+#include <fstream>
 
 #include <QDebug>
 
@@ -95,8 +101,7 @@ SiteResponseModel::SiteResponseModel(QObject * parent)
     setCalculator(new EquivalentLinearCalculator(this));
 
     m_notes = new QTextDocument(this);
-    connect(m_notes, SIGNAL(contentsChanged()),
-            this, SLOT(setModified()));
+    connect(m_notes, SIGNAL(contentsChanged()), this, SLOT(setModified()));
 
     Units::instance()->reset();
 }
@@ -293,6 +298,80 @@ bool SiteResponseModel::load(const QString & fileName)
     return true;
 }
 
+bool SiteResponseModel::loadReadable(const QString & fileName)
+{
+    setModified(false);
+    m_isLoaded = false;
+
+    // Save the file name
+    m_fileName = fileName;
+
+    // structured save data
+    ptree hrLoad;
+    // open JSON structured file
+    boost::property_tree::read_json(m_fileName.toStdString(), hrLoad);
+
+    // load all ptree data
+    m_notes->setHtml(QString::fromStdString(hrLoad.get<std::string>("notes")));
+    int method = hrLoad.get<int>("method");
+    bool hasResults = hrLoad.get<bool>("hasResults");
+    Units::instance()->setSystem(hrLoad.get<int>("system"));
+
+    if( hrLoad.count("randNumGen") != 0 )
+    {
+        ptree randnum = hrLoad.get_child("randNumGen");
+        m_randNumGen->ptRead(randnum);
+    }
+
+    if( hrLoad.count("siteProfile") != 0 )
+    {
+        ptree siteProfile = hrLoad.get_child("siteProfile");
+        m_siteProfile->ptRead(siteProfile);
+    }
+
+    if( hrLoad.count("motionLibrary") != 0 )
+    {
+        ptree motionLibrary = hrLoad.get_child("motionLibrary");
+        m_motionLibrary->ptRead(motionLibrary);
+    }
+
+    if( hrLoad.count("outputCatalog") != 0 )
+    {
+        ptree outputCatalog = hrLoad.get_child("outputCatalog");
+        m_outputCatalog->ptRead(outputCatalog);
+    }
+
+    // initialize as in binary load
+    setMethod(method);
+    m_outputCatalog->initialize(m_siteProfile->isVaried() ?  m_siteProfile->profileCount() : 1, m_motionLibrary);
+    if (hasResults)
+    {
+        m_outputCatalog->finalize();
+    }
+
+    ptree calculator = hrLoad.get_child("calculator");
+    switch (m_method)
+    {
+        case SiteResponseModel::EquivalentLinear:
+            qobject_cast<EquivalentLinearCalculator*>(m_calculator)->ptRead(calculator);
+        break;
+        case SiteResponseModel::FrequencyDependent:
+            qobject_cast<FrequencyDependentCalculator*>(m_calculator)->ptRead(calculator);
+        break;
+        case SiteResponseModel::LinearElastic:
+        default:
+        break;
+    }
+    // Need to update the other objects that the model has data and should not be editted.
+    setHasResults(hasResults);
+
+    setModified(false);
+    // Wait until all events have been processed and then reset the modified flag
+    //QTimer::singleShot(10, this, SLOT(setIsLoaded()));
+
+    return true;
+}
+
 bool SiteResponseModel::save()
 {
     QFile file(m_fileName);
@@ -310,6 +389,51 @@ bool SiteResponseModel::save()
     // outStream << version;
 
     outStream << this;
+
+    setModified(false);
+    return true;
+}
+
+bool SiteResponseModel::saveReadable()
+{
+    // structured save data
+    ptree hrSave;
+    // load all ptree data
+    hrSave.put("notes", m_notes->toPlainText().toStdString());
+    hrSave.put("method", (int) m_method);
+    hrSave.put("hasResults", m_hasResults);
+    hrSave.put("system", (int) Units::instance()->system());
+
+    ptree randnum;
+    m_randNumGen->ptWrite(randnum);
+    hrSave.add_child("randNumGen", randnum);
+
+    ptree siteProfile;
+    m_siteProfile->ptWrite(siteProfile);
+    hrSave.add_child("siteProfile", siteProfile);
+    ptree motionLibrary;
+    m_motionLibrary->ptWrite(motionLibrary);
+    hrSave.add_child("motionLibrary", motionLibrary);
+    ptree outputCatalog;
+    m_outputCatalog->ptWrite(outputCatalog);
+    hrSave.add_child("outputCatalog", outputCatalog);
+
+    ptree calculator;
+    switch (m_method) {
+    case SiteResponseModel::EquivalentLinear:
+        qobject_cast<EquivalentLinearCalculator*>(m_calculator)->ptWrite(calculator);
+        break;
+    case SiteResponseModel::FrequencyDependent:
+        qobject_cast<FrequencyDependentCalculator*>(m_calculator)->ptWrite(calculator);
+        break;
+    case SiteResponseModel::LinearElastic:
+    default:
+        break;
+    }
+    hrSave.add_child("calculator", calculator);
+
+    // save as json
+    boost::property_tree::write_json(m_fileName.toStdString(), hrSave);
 
     setModified(false);
     return true;

@@ -26,6 +26,10 @@
 
 #include <QPointer>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class SoilTypeCatalog;
 class SoilType;
 
@@ -54,6 +58,9 @@ public:
 
     double untWt() const;
     double density() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     void setThickness(double thickness);

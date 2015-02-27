@@ -23,6 +23,8 @@
 
 #include <cmath>
 
+#include <boost/lexical_cast.hpp>
+
 CrustalModel::CrustalModel(QObject *parent) :
         MyAbstractTableModel(parent)
 {
@@ -211,6 +213,61 @@ QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
     }
 
     return amp;
+}
+
+void CrustalModel::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    ptree thickness = pt.get_child("thickness");
+    foreach(const ptree::value_type &vv, thickness)
+    {
+        m_thickness << boost::lexical_cast<double>(vv.second.data());
+    }
+
+    ptree velocity = pt.get_child("velocity");
+    foreach(const ptree::value_type &vv, velocity)
+    {
+        m_velocity << boost::lexical_cast<double>(vv.second.data());
+    }
+
+    ptree density = pt.get_child("density");
+    foreach(const ptree::value_type &vv, density)
+    {
+        m_density << boost::lexical_cast<double>(vv.second.data());
+    }
+
+    endResetModel();
+}
+
+void CrustalModel::ptWrite(ptree &pt) const
+{
+    ptree thickness;
+    foreach(const double & d, m_thickness)
+    {
+        ptree val;
+        val.put("", d);
+        thickness.push_back(std::make_pair("", val));
+    }
+    pt.add_child("thickness", thickness);
+
+    ptree velocity;
+    foreach(const double & d, m_velocity)
+    {
+        ptree val;
+        val.put("", d);
+        velocity.push_back(std::make_pair("", val));
+    }
+    pt.add_child("velocity", velocity);
+
+    ptree density;
+    foreach(const double & d, m_density)
+    {
+        ptree val;
+        val.put("", d);
+        density.push_back(std::make_pair("", val));
+    }
+    pt.add_child("density", density);
 }
 
 QDataStream& operator<< (QDataStream & out, const CrustalModel* cm)

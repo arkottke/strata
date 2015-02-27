@@ -110,6 +110,18 @@ const int AbstractTimeSeriesOutput::fieldWidth() const
     return (int)ceil(log10(motionCount()+1));
 }
 
+void AbstractTimeSeriesOutput::ptRead(const ptree &pt)
+{
+    AbstractLocationOutput::ptRead(pt);
+    m_baselineCorrect = pt.get<bool>("baselineCorrect");
+}
+
+void AbstractTimeSeriesOutput::ptWrite(ptree &pt) const
+{
+    AbstractLocationOutput::ptWrite(pt);
+    pt.put("baselineCorrect", m_baselineCorrect);
+}
+
 QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso)
 {
     out << (quint8)2;

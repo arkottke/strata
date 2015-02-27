@@ -26,6 +26,10 @@
 
 #include <complex>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class TimeSeriesMotion : public AbstractMotion
 {
     Q_OBJECT
@@ -136,6 +140,9 @@ public:
     void setSaveData(bool b);
     bool saveData() const;
     bool isLoaded() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void fileNameChanged(QString fileName);

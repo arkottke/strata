@@ -25,6 +25,10 @@
 #include "AbstractOutput.h"
 
 #include "AbstractMotion.h"
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 
 class AbstractLocationOutput : public AbstractOutput
 {
@@ -42,6 +46,9 @@ public:
     double depth() const;
     AbstractMotion::Type type() const;
     void setType(AbstractMotion::Type type);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setDepth(double depth);

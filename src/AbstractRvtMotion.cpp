@@ -35,6 +35,8 @@
 #include <qwt_scale_engine.h>
 #include <qwt_text.h>
 
+#include <boost/lexical_cast.hpp>
+
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
 {    
     m_oscCorrection = LiuPezeshk;
@@ -449,6 +451,44 @@ QString AbstractRvtMotion::extractColumn(const QString &line, int column)
         return "";
     } else
         return parts.at(column);
+}
+
+void AbstractRvtMotion::ptRead(const ptree &pt)
+{
+    AbstractMotion::ptRead(pt);
+    int oscCorrection = pt.get<int>("oscCorrection");
+
+    beginResetModel();
+
+    ptree fourierAcc = pt.get_child("fourierAcc");
+    foreach(const ptree::value_type &v, fourierAcc)
+    {
+        m_fourierAcc << boost::lexical_cast<double>(v.second.data());
+    }
+
+    m_duration = pt.get<double>("duration");
+    m_name = QString::fromStdString(pt.get<std::string>("name"));
+
+    setOscCorrection(oscCorrection);
+    endResetModel();
+}
+
+void AbstractRvtMotion::ptWrite(ptree &pt) const
+{
+    AbstractMotion::ptWrite(pt);
+    pt.put("oscCorrection", (int) m_oscCorrection);
+
+    ptree fourierAcc;
+    foreach(const double & d, m_fourierAcc)
+    {
+        ptree val;
+        val.put("", d);
+        fourierAcc.push_back(std::make_pair("", val));
+    }
+    pt.add_child("fourierAcc", fourierAcc);
+
+    pt.put("duration", m_duration);
+    pt.put("name", m_name.toStdString());
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)

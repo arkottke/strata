@@ -27,6 +27,9 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 #include <gsl/gsl_interp.h>
 
@@ -78,6 +81,9 @@ public:
     CrustalModel* crustalModel();
 
     double interpAmpAt(double freq);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void modelChanged(int i);

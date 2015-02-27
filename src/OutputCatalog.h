@@ -26,6 +26,11 @@
 
 #include <QStringList>
 #include <QVector>
+#include "SoilTypeCatalog.h"
+
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class AbstractCalculator;
 class AbstractOutput;
@@ -137,6 +142,9 @@ public:
     //! Compute the statistics of all of the outputs
     void computeStats();
 
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
+
 signals:
     void timesAreNeededChanged(bool timesAreNeeded);
     void periodIsNeededChanged(bool periodIsNeeded);
@@ -224,11 +232,11 @@ protected:
     double m_damping;
 
     //! Catalogs of output
-    ProfilesOutputCatalog* m_profilesCatalog;
-    RatiosOutputCatalog* m_ratiosCatalog;
-    SoilTypesOutputCatalog* m_soilTypesCatalog;
-    SpectraOutputCatalog* m_spectraCatalog;
-    TimeSeriesOutputCatalog* m_timeSeriesCatalog;
+    ProfilesOutputCatalog* m_profilesOutputCatalog;
+    RatiosOutputCatalog* m_ratiosOutputCatalog;
+    SoilTypesOutputCatalog* m_soilTypesOutputCatalog;
+    SpectraOutputCatalog* m_spectraOutputCatalog;
+    TimeSeriesOutputCatalog* m_timeSeriesOutputCatalog;
 
     //! List of the catalogs
     QList<AbstractOutputCatalog*> m_catalogs;

@@ -30,6 +30,9 @@
 #include <QObject>
 #include <QString>
 #include <QVariant>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class SoilType : public QObject
 {
@@ -81,6 +84,9 @@ public:
 
     //! Compute the shear modulus-reduction and damping curves
     void computeDarendeliCurves();
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setPi(double pi);
@@ -139,5 +145,7 @@ private:
 
     //! Damping
     NonlinearProperty* m_dampingModel;
+
+    NonlinearProperty* deriveModel(NonlinearProperty::Type type, QString className);
 };
 #endif

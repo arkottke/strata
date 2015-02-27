@@ -93,6 +93,20 @@ const QString AbstractLocationOutput::prefix() const
             .arg(AbstractMotion::typeList().at(m_type));
 }
 
+void AbstractLocationOutput::ptRead(const ptree &pt)
+{
+    AbstractOutput::ptRead(pt);
+    m_type = (AbstractMotion::Type) pt.get<int>("type");
+    m_depth = pt.get<double>("depth");
+}
+
+void AbstractLocationOutput::ptWrite(ptree &pt) const
+{
+    AbstractOutput::ptWrite(pt);
+    pt.put("type", (int) m_type);
+    pt.put("depth", m_depth);
+}
+
 QDataStream & operator<< (QDataStream & out, const AbstractLocationOutput* alo)
 {
     out << (quint8)1;

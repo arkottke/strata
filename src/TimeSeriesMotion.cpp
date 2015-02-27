@@ -38,6 +38,8 @@
 
 #include <cmath>
 
+#include <boost/lexical_cast.hpp>
+
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
         : AbstractMotion(parent)
 {
@@ -977,6 +979,72 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
     ifft(fa, ts);
 
     return ts;
+}
+
+void TimeSeriesMotion::ptRead(const ptree &pt)
+{
+    AbstractMotion::ptRead(pt);
+    m_saveData = pt.get<bool>("saveData");
+    m_fileName = QString::fromStdString(pt.get<std::string>("fileName"));
+    m_timeStep = pt.get<double>("timeStep");
+    m_pointCount = pt.get<int>("pointCount");
+    m_scale = pt.get<double>("scale");
+
+    int format = pt.get<int>("format");
+    setFormat(format);
+
+    m_dataColumn = pt.get<int>("dataColumn");
+    m_startLine = pt.get<int>("startLine");
+    m_stopLine = pt.get<int>("stopLine");
+
+    int inputUnits = pt.get<int>("inputUnits");
+    setInputUnits(inputUnits);
+
+    if (m_saveData)
+    {
+        ptree accel = pt.get_child("accel");
+        foreach(const ptree::value_type &v, accel)
+        {
+            m_accel << boost::lexical_cast<double>(v.second.data());
+        }
+    }
+    else
+    {
+        load(m_fileName, false, m_scale);
+    }
+
+    if (m_accel.size())
+    {
+        calculate();
+        m_isLoaded = true;
+    }
+}
+
+void TimeSeriesMotion::ptWrite(ptree &pt) const
+{
+    AbstractMotion::ptWrite(pt);
+    pt.put("saveData", m_saveData);
+    pt.put("fileName", m_fileName.toStdString());
+    pt.put("timeStep", m_timeStep);
+    pt.put("pointCount", m_pointCount);
+    pt.put("scale", m_scale);
+    pt.put("format", (int) m_format);
+    pt.put("dataColumn", m_dataColumn);
+    pt.put("startLine", m_startLine);
+    pt.put("stopLine", m_stopLine);
+    pt.put("inputUnits", (int) m_inputUnits);
+
+    if (m_saveData)
+    {
+        ptree accel;
+        foreach(const double & d, m_accel)
+        {
+            ptree val;
+            val.put("", d);
+            accel.push_back(std::make_pair("", val));
+        }
+        pt.add_child("accel", accel);
+    }
 }
 
 QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)

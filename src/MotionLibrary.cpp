@@ -221,21 +221,24 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
                 AbstractMotion::Type type = AbstractMotion::variantToType(value, &ok);
 
                 if (ok)
+                {
                     m_motions[index.row()]->setType(type);
+                }
                 else
                     return false;
                 break;
             }
         case ScaleColumn:
             {
-                TimeSeriesMotion * tsMotion =
-                        qobject_cast<TimeSeriesMotion*>(m_motions[index.row()]);
+                TimeSeriesMotion * tsMotion = qobject_cast<TimeSeriesMotion*>(m_motions[index.row()]);
 
                 bool ok;
                 const double d = value.toDouble(&ok);
 
                 if (tsMotion && ok)
+                {
                     tsMotion->setScale(d);
+                }
                 else
                     return false;
 
@@ -260,7 +263,9 @@ bool MotionLibrary::removeRows(int row, int count, const QModelIndex &parent)
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i)
+    {
         m_motions.takeAt(row)->deleteLater();
+    }
 
     emit endRemoveRows();
     return true;
@@ -333,6 +338,81 @@ void MotionLibrary::setReadOnly(bool readOnly)
 void MotionLibrary::updateUnits()
 {
     emit headerDataChanged(Qt::Horizontal, PgvColumn, PgvColumn);
+}
+
+void MotionLibrary::ptRead(const ptree &pt)
+{
+    int approach = pt.get<int>("approach");
+    setApproach(approach);
+    bool saveData = pt.get<bool>("saveData");
+    setSaveData(saveData);
+
+    beginResetModel();
+
+    ptree motions = pt.get_child("motions");
+    foreach(const ptree::value_type &v, motions)
+    {
+        AbstractMotion * m;
+        if (v.first.find("TimeSeriesMotion")!=std::string::npos) {
+            m = new TimeSeriesMotion(this);
+            ((TimeSeriesMotion *) m)->ptRead(v.second);
+            ((TimeSeriesMotion *) m)->setSaveData(m_saveData);
+            if (((TimeSeriesMotion *) m)->accel().size()) {
+                m_motions.append(m);
+            } else {
+                deleteLater();
+            }
+        } else if (v.first.find("RvtMotion")!=std::string::npos) {
+            m = new RvtMotion(this);
+            ((RvtMotion *) m)->ptRead(v.second);
+            m_motions.append(m);
+        } else if (v.first.find("CompatibleRvtMotion")!=std::string::npos) {
+            m = new CompatibleRvtMotion(this);
+            ((CompatibleRvtMotion *) m)->ptRead(v.second);
+            m_motions.append(m);
+        } else if (v.first.find("SourceTheoryRvtMotion")!=std::string::npos) {
+            m = new SourceTheoryRvtMotion(this);
+            ((SourceTheoryRvtMotion *) m)->ptRead(v.second);
+            m_motions.append(m);
+        }
+    }
+
+    endResetModel();
+}
+
+void MotionLibrary::ptWrite(ptree &pt) const
+{
+    pt.put("approach", (int) m_approach);
+    pt.put("saveData", m_saveData);
+
+    // generate unqiue key names
+    int counter = 0;
+
+    ptree motions;
+    foreach(AbstractMotion *m, m_motions)
+    {
+        ptree motion;
+        std::stringstream fmt;
+        const QString & className = m->metaObject()->className();
+        if (className == "TimeSeriesMotion") {
+            qobject_cast<const TimeSeriesMotion*>(m)->ptWrite(motion);
+            fmt << "TimeSeriesMotion-" << counter++;
+            motions.add_child(fmt.str(), motion);
+        } else if (className == "RvtMotion") {
+            qobject_cast<const RvtMotion*>(m)->ptWrite(motion);
+            fmt << "RvtMotion-" << counter++;
+            motions.add_child(fmt.str(), motion);
+        } else if (className == "CompatibleRvtMotion") {
+            qobject_cast<const CompatibleRvtMotion*>(m)->ptWrite(motion);
+            fmt << "CompatibleRvtMotion-" << counter++;
+            motions.add_child(fmt.str(), motion);
+        } else if (className == "SourceTheoryRvtMotion") {
+            qobject_cast<const SourceTheoryRvtMotion*>(m)->ptWrite(motion);
+            fmt << "SourceTheoryRvtMotion-" << counter++;
+            motions.add_child(fmt.str(), motion);
+        }
+    }
+    pt.add_child("motions", motions);
 }
 
 QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml)

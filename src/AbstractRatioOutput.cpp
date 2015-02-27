@@ -133,6 +133,24 @@ const QString AbstractRatioOutput::prefix() const
             .arg(AbstractMotion::typeList().at(m_inType));
 }
 
+void AbstractRatioOutput::ptRead(const ptree &pt)
+{
+    AbstractOutput::ptRead(pt);
+    m_outType = (AbstractMotion::Type) pt.get<int>("outType");
+    m_inType = (AbstractMotion::Type) pt.get<int>("inType");
+    m_outDepth = pt.get<double>("outDepth");
+    m_inDepth = pt.get<double>("inDepth");
+}
+
+void AbstractRatioOutput::ptWrite(ptree &pt) const
+{
+    AbstractOutput::ptWrite(pt);
+    pt.put("outType", (int) m_outType);
+    pt.put("inType", (int) m_inType);
+    pt.put("outDepth", m_outDepth);
+    pt.put("inDepth", m_inDepth);
+}
+
 QDataStream & operator<< (QDataStream & out, const AbstractRatioOutput* aro)
 {
     out << (quint8)1;

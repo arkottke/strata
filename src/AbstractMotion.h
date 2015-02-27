@@ -31,6 +31,10 @@ class ResponseSpectrum;
 #include <QVector>
 #include <complex>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class AbstractMotion : public MyAbstractTableModel
 {
     Q_OBJECT
@@ -119,6 +123,9 @@ public:
 
     //! The absolute value of the velocity Fourier amplitude spectrum with the applied transfer function
     virtual const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setModified(bool modified = true);

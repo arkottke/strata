@@ -24,6 +24,9 @@ CONFIG(debug, debug|release) {
    DESTDIR = release
 }
 
+# add console output
+CONFIG += console
+
 TEMPLATE = app
 TARGET = strata
 QT += script xml network
@@ -64,29 +67,37 @@ unix {
         -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -L$$PWD/../../qwt-6.1/lib \
+        -lboost_system \
+        -lboost_serialization \
+        -L$$PWD/../qwt-6.1/lib \
         -lqwt
-    INCLUDEPATH += $$PWD/../../qwt-6.1/src
+    INCLUDEPATH += $$PWD/../qwt-6.1/src
 
 }
 win32 { 
-    LIBS += -lm \
+  LIBS += -lm \
         -lfftw3-3 \
-        -L"C:/devel/fftw-3.3.4" \
         -lgsl \
         -lgslcblas \
-        -L"C:/devel/GnuWin32/bin"
+        -L$$PWD/../fftw-3.3.4/.libs \
+        -L$$PWD/../GetGnuWin32/gnuwin32/lib \
+        -L$$PWD/../build-qwt/lib \
+        -LC:/boost/lib32-mingw \
+        -LC:/mingw32/bin
     INCLUDEPATH += . \
-        "C:/devel/fftw-3.3.4" \
-        "C:/devel/qwt-6.1/src" \
-        "C:/devel/GnuWin32/include"
+        $$PWD/../fftw-3.3.4/api \
+        $$PWD/../qwt-6.1/src \
+        $$PWD/../GetGnuWin32/gnuwin32/include \
+        C:/boost
     RC_FILE = strata.rc
     CONFIG(debug, debug|release ) {
         LIBS += -lqwtd \
-            -L"C:/devel/qwt-6.1/lib"
+                -lboost_serialization-mgw47-mt-d-1_55  \
+                -lboost_system-mgw47-mt-d-1_55
     } else {
         LIBS += -lqwt \
-            -L"C:/devel/qwt-6.1/lib"
+                -lboost_serialization-mgw47-mt-1_55  \
+                -lboost_system-mgw47-mt-1_55
     }
 }
 
@@ -227,7 +238,8 @@ HEADERS += src/AbstractCalculator.h \
     src/ViscoElasticStressTimeSeriesOutput.h \
     src/MaxDispProfileOutput.h \
     src/MyQwtCompatibility.h \
-    src/OnlyIncreasingDelegate.h
+    src/OnlyIncreasingDelegate.h \
+    src/BatchRunner.h
 
 SOURCES +=     src/AbstractCalculator.cpp \
     src/AbstractDistribution.cpp \
@@ -364,6 +376,7 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/ViscoElasticStressTimeSeriesOutput.cpp \
     src/MaxDispProfileOutput.cpp \
     src/MyQwtCompatibility.cpp \
-    src/OnlyIncreasingDelegate.cpp
+    src/OnlyIncreasingDelegate.cpp \
+    src/BatchRunner.cpp
 
 RESOURCES += resources/resources.qrc

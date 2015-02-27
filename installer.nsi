@@ -13,8 +13,8 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\devel\Qt\4.8.6"
-!Define MINGW_PATH "C:\Program Files\mingw-w64\i686-4.8.2-posix-dwarf-rt_v3-rev4\bin"
+!Define QT_PATH "C:\Qt\4.8.6"
+!Define MINGW_PATH "C:\mingw32\bin"
 
 ;--------------------------------
 ;Variables
@@ -104,7 +104,7 @@ Section "!Core Files" SecProgram
   SetOutPath "$INSTDIR"
 
   ;Main Strata files
-  file "release\strata.exe"
+  file "..\build-strata\release\strata.exe"
   file "/oname=$INSTDIR\readme.txt" "README"
 
   ;Icons
@@ -112,9 +112,10 @@ Section "!Core Files" SecProgram
   file "/oname=$INSTDIR\strata-data.ico" "resources\images\file-data.ico"
 
   ;Main libraries
-  file "C:\devel\fftw-3.3.4\libfftw3-3.dll"
-  file "C:\devel\GnuWin32\bin\libgsl.dll"
-  file "C:\devel\GnuWin32\bin\libgslcblas.dll"
+  file "..\fftw-3.3.4\.libs\libfftw3-3.dll"
+  file "..\GetGnuWin32\gnuwin32\bin\libgsl.dll"
+  file "..\GetGnuWin32\gnuwin32\bin\libgslcblas.dll"
+  file "..\GetGnuWin32\gnuwin32\bin\libm5.dll"
   file "${QT_PATH}\bin\QtCore4.dll"
   file "${QT_PATH}\bin\QtOpenGL4.dll"
   file "${QT_PATH}\bin\QtGui4.dll"
@@ -126,8 +127,10 @@ Section "!Core Files" SecProgram
   file "${MINGW_PATH}\libgcc_s_dw2-1.dll"
   file "${MINGW_PATH}\libwinpthread-1.dll"
   ;file "${MINGW_PATH}\mingwm10.dll"
-  file "C:\devel\qwt-6.1\lib\qwt.dll"
-  
+  file "..\build-qwt\lib\qwt.dll"
+  file "C:\boost\lib32-mingw\libboost_system-mgw47-mt-1_55.dll"
+  file "C:\boost\lib32-mingw\libboost_serialization-mgw47-mt-1_55.dll"
+ 
   ;Plugins for SVG icons
   SetOutPath "$INSTDIR\iconengines" 
   file "${QT_PATH}\plugins\iconengines\qsvgicon4.dll"
@@ -176,6 +179,7 @@ SectionEnd
 Section "File Associations" SecAssociation
   ;File associations
   !insertmacro APP_ASSOCIATE "strata" "strata.data" "Strata Data" "$INSTDIR\strata-data.ico" "Edit/Run with Strata" "$INSTDIR\strata.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "stratahr" "stratahr.data" "Human Readable Strata Data" "$INSTDIR\strata-data.ico" "Edit/Run with Strata" "$INSTDIR\strata.exe $\"%1$\""
 SectionEnd
 
 Section /o "Source" SecSource
@@ -222,6 +226,10 @@ Section "Uninstall"
   Delete "$INSTDIR\libgsl.dll"
   Delete "$INSTDIR\libgslcblas.dll"
   Delete "$INSTDIR\mingwm10.dll"
+  Delete "$INSTDIR\libm5.dll"
+  Delete "$INSTDIR\libstdc++-6.dll"
+  Delete "$INSTDIR\libgcc_s_dw2-1.dll"
+  Delete "$INSTDIR\libwinpthread-1.dll"
   Delete "$INSTDIR\QtCore4.dll"
   Delete "$INSTDIR\QtGui4.dll"
   Delete "$INSTDIR\QtNetwork4.dll"
@@ -229,6 +237,8 @@ Section "Uninstall"
   Delete "$INSTDIR\QtSvg4.dll"
   Delete "$INSTDIR\QtXml4.dll"
   Delete "$INSTDIR\qwt.dll"
+  Delete "$INSTDIR\libboost_system-mgw47-mt-1_55.dll"
+  Delete "$INSTDIR\libboost_serialization-mgw47-mt-1_55.dll"
   Delete "$INSTDIR\iconengines\qsvgicon4.dll"
   RMDir  "$INSTDIR\iconengines"
   Delete "$INSTDIR\imageformats\qsvg4.dll"

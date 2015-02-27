@@ -24,6 +24,10 @@
 
 #include "AbstractIterativeCalculator.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class EquivalentLinearCalculator : public AbstractIterativeCalculator
 {
     Q_OBJECT
@@ -38,6 +42,9 @@ public:
 
     virtual QString toHtml() const;
     double strainRatio() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void strainRatioChanged(double strainRatio);

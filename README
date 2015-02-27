@@ -1,1 +1,71 @@
-Hello!
+!! These are the Windows Development Environment install instructions for working with the Strata code  !!
+!! for the actual library versions check the strataconfig.pri file                                      !!    
+
+(see https://github.com/Peershares/Peershares/wiki/Windows for help)
+
+1.
+install i686-4.8.2-release-posix-dwarf-rt_v3-rev3.7z (MinGW 4.8.2)
+! 
+download mingw-get-setup, in order to add msys to this distribution
+installation manager -> All packages -> MSYS -> mark the following for installation:
+msys-base-bin
+Installation -> Apply changes
+!
+
+2.
+install qt-opensource-windows-x86-mingw482-4.8.6-1(this is Qt 4.8.6; qt creator will need to be installed manually, it is not included in the package)
+
+3.
+Start Qt creator and (via manage kit) add the compiler (g++) and the debugger (gdb) from the previous install directories.
+
+4.
+Extract qwt-6.X.zip. You should now be able to build this Qt-project without any difficulties.
+Build debug and release (after setting the configurations).
+
+5.
+Install GetGnuWin32-0.6.3.exe
+!
+first download.bat
+then install.bat
+(files do not need to be copied to another folder)
+! 
+
+6.
+Extract fftw-3.X.zip and build it with MSYS/MinGW
+!
+in msys, goto /c/path/to/fftw
+./configure --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --enable-portable-binary --enable-sse2 --with-incoming-stack-boundary=2
+make
+!
+
+7.
+Install boost 1.5X (http://www.boost.org)
+The boost libraries need to be build with the same compiler and runtime as all other components (MSYS/MinGW).
+!
+Add MinGW 4.8.2 to PATH variabele
+bootstrap mingw
+b2 toolset=gcc link=shared -j 7
+!
+
+8.
+Extract or check out strata-r399_werkt.zip and open in Qt creator. 
+Make configuration for debug/release.
+Configure the pri-file for your build environment (point to the libraries you've just created, MinGW, gnuwin32, boost, etc.).
+
+A.
+In order to have the application work, you will need to copy some files to the output directories.
+The path settings on windows are not allways correct given MinGW/MSYS/QT/etc.
+
+Copy the following files to the output dir of the build process (build/release):
+
+libgsl.dll, libgslcblias.dll, libm5.dll -> from gnuwin32/bin map to build output
+libfftw3-3.dll -> from fftw directory to build output
+qwtd.dll, qwtmathmld.dll (in case of release, files not ending with d) -> from qwt/lib directory to build output
+QtCored4.dll, QtGuid4.dll, QtNetworkd4.dll, QtScriptd4.dll, QtXmld4.dll (in case of release, files not ending with d) -> from qt/4.8.6/bin directory to build output
+libboost_system-mgw47-mt-d-1_55, libboost_serialization-mgw47-mt-d-1_55 (in case of release, files not containing -d- at end before -1_55) -> from boost/stage/lib (or where you put the dll's) to build output
+
+B.
+Finally you can install Nullsoft Installer System (nsis-3.0b-setup.exe) to build the strata installers.
+Check the paths in the .nsi files, in order to point to the correct files on your system.
+Compile the script to generate the installers.
+

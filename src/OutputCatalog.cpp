@@ -36,6 +36,8 @@
 #include "TimeSeriesOutputCatalog.h"
 #include "Units.h"
 
+#include <boost/lexical_cast.hpp>
+
 OutputCatalog::OutputCatalog(QObject *parent) :
     QAbstractTableModel(parent), m_selectedOutput(0)
 {    
@@ -58,43 +60,43 @@ OutputCatalog::OutputCatalog(QObject *parent) :
     m_period->setSpacing(Dimension::Log);
     m_periodIsNeeded = false;
 
-    m_profilesCatalog = new ProfilesOutputCatalog(this);
-    connect(m_profilesCatalog, SIGNAL(wasModified()),
+    m_profilesOutputCatalog = new ProfilesOutputCatalog(this);
+    connect(m_profilesOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    m_catalogs << m_profilesCatalog;
+    m_catalogs << m_profilesOutputCatalog;
 
-    m_ratiosCatalog = new RatiosOutputCatalog(this);
-    connect(m_ratiosCatalog, SIGNAL(wasModified()),
+    m_ratiosOutputCatalog = new RatiosOutputCatalog(this);
+    connect(m_ratiosOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    connect(m_ratiosCatalog, SIGNAL(periodIsNeededChanged(bool)),
+    connect(m_ratiosOutputCatalog, SIGNAL(periodIsNeededChanged(bool)),
             this, SLOT(setPeriodIsNeeded(bool)));
-    connect(m_ratiosCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
+    connect(m_ratiosOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
             this, SLOT(setFrequencyIsNeeded(bool)));
 
-    m_catalogs << m_ratiosCatalog;
+    m_catalogs << m_ratiosOutputCatalog;
 
-    m_soilTypesCatalog = new SoilTypesOutputCatalog(this);
-    connect(m_soilTypesCatalog, SIGNAL(wasModified()),
+    m_soilTypesOutputCatalog = new SoilTypesOutputCatalog(this);
+    connect(m_soilTypesOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    m_catalogs << m_soilTypesCatalog;
+    m_catalogs << m_soilTypesOutputCatalog;
 
-    m_spectraCatalog = new SpectraOutputCatalog(this);
-    connect(m_spectraCatalog, SIGNAL(wasModified()),
+    m_spectraOutputCatalog = new SpectraOutputCatalog(this);
+    connect(m_spectraOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    connect(m_spectraCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
+    connect(m_spectraOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
             this, SLOT(setFrequencyIsNeeded(bool)));
-    connect(m_spectraCatalog, SIGNAL(periodIsNeededChanged(bool)),
+    connect(m_spectraOutputCatalog, SIGNAL(periodIsNeededChanged(bool)),
             this, SLOT(setPeriodIsNeeded(bool)));
 
-    m_catalogs << m_spectraCatalog;
+    m_catalogs << m_spectraOutputCatalog;
 
-    m_timeSeriesCatalog = new TimeSeriesOutputCatalog(this);
-    connect(m_timeSeriesCatalog, SIGNAL(wasModified()),
+    m_timeSeriesOutputCatalog = new TimeSeriesOutputCatalog(this);
+    connect(m_timeSeriesOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    connect(m_timeSeriesCatalog, SIGNAL(timesAreNeededChanged(bool)),
+    connect(m_timeSeriesOutputCatalog, SIGNAL(timesAreNeededChanged(bool)),
             this, SLOT(setTimesAreNeeded(bool)));
 
-    m_catalogs << m_timeSeriesCatalog;
+    m_catalogs << m_timeSeriesOutputCatalog;
 
 }
 
@@ -211,27 +213,27 @@ Qt::ItemFlags OutputCatalog::flags(const QModelIndex & index) const
 
 ProfilesOutputCatalog* OutputCatalog::profilesCatalog()
 {
-    return m_profilesCatalog;
+    return m_profilesOutputCatalog;
 }
 
 RatiosOutputCatalog* OutputCatalog::ratiosCatalog()
 {
-    return m_ratiosCatalog;
+    return m_ratiosOutputCatalog;
 }
 
 SoilTypesOutputCatalog* OutputCatalog::soilTypesCatalog()
 {
-    return m_soilTypesCatalog;
+    return m_soilTypesOutputCatalog;
 }
 
 SpectraOutputCatalog* OutputCatalog::spectraCatalog()
 {
-    return m_spectraCatalog;
+    return m_spectraOutputCatalog;
 }
 
 TimeSeriesOutputCatalog* OutputCatalog::timeSeriesCatalog()
 {
-    return m_timeSeriesCatalog;
+    return m_timeSeriesOutputCatalog;
 }
 
 const QString& OutputCatalog::title() const
@@ -594,6 +596,126 @@ void OutputCatalog::populateDepthVector(double maxDepth)
     }
 }
 
+void OutputCatalog::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    m_title = QString::fromStdString(pt.get<std::string>("title"));
+    m_filePrefix = QString::fromStdString(pt.get<std::string>("filePrefix"));
+
+    ptree list = pt.get_child("enabled");
+    foreach(const ptree::value_type &e, list)
+    {
+        QList<bool> qb = QList<bool>();
+        foreach(const ptree::value_type &b, e.second)
+        {
+            if (boost::lexical_cast<std::string>(b.second.data()) == "true")
+            {
+                qb.push_back(true);
+            }
+            else
+            {
+                qb.push_back(false);
+            }
+        }
+        m_enabled << qb;
+    }
+
+    ptree frequency = pt.get_child("frequency");
+    m_frequency->ptRead(frequency);
+    m_frequencyIsNeeded = pt.get<bool>("frequencyIsNeeded");
+
+    ptree period = pt.get_child("period");
+    m_period->ptRead(period);
+    m_periodIsNeeded = pt.get<bool>("periodIsNeeded");
+
+    m_damping = pt.get<double>("damping");
+
+    ptree profilesOutputCatalog = pt.get_child("profilesOutputCatalog");
+    m_profilesOutputCatalog->ptRead(profilesOutputCatalog);
+
+    ptree ratiosOutputCatalog = pt.get_child("ratiosOutputCatalog");
+    m_ratiosOutputCatalog->ptRead(ratiosOutputCatalog);
+
+    ptree soilTypesOutputCatalog = pt.get_child("soilTypesOutputCatalog");
+    m_soilTypesOutputCatalog->ptRead(soilTypesOutputCatalog);
+
+    ptree spectraOutputCatalog = pt.get_child("spectraOutputCatalog");
+    m_spectraOutputCatalog->ptRead(spectraOutputCatalog);
+
+    ptree timeSeriesOutputCatalog = pt.get_child("timeSeriesOutputCatalog");
+    m_timeSeriesOutputCatalog->ptRead(timeSeriesOutputCatalog);
+
+    ptree log = pt.get_child("log");
+    m_log->ptRead(log);
+
+    double depth = pt.get<double>("depth");
+    if (depth > 0)
+    {
+        populateDepthVector(depth);
+    }
+
+    endResetModel();
+}
+
+void OutputCatalog::ptWrite(ptree &pt) const
+{
+    pt.put<std::string>("title", m_title.toStdString());
+    pt.put<std::string>("filePrefix", m_filePrefix.toStdString());
+
+    ptree enabled;
+    foreach(const QList<bool> & l, m_enabled)
+    {
+        ptree el;
+        foreach(const bool & b, l)
+        {
+            ptree val;
+            val.put("", b);
+            el.push_back(std::make_pair("", val));
+        }
+        enabled.add_child("l", el);
+    }
+    pt.add_child("enabled", enabled);
+
+    ptree frequency;
+    m_frequency->ptWrite(frequency);
+    pt.add_child("frequency", frequency);
+    pt.put("frequencyIsNeeded", m_frequencyIsNeeded);
+
+    ptree period;
+    m_period->ptWrite(period);
+    pt.add_child("period", period);
+    pt.put("periodIsNeeded", m_periodIsNeeded);
+
+    pt.put("damping", m_damping);
+
+    ptree profilesOutputCatalog;
+    m_profilesOutputCatalog->ptWrite(profilesOutputCatalog);
+    pt.add_child("profilesOutputCatalog", profilesOutputCatalog);
+
+    ptree ratiosOutputCatalog;
+    m_ratiosOutputCatalog->ptWrite(ratiosOutputCatalog);
+    pt.add_child("ratiosOutputCatalog", ratiosOutputCatalog);
+
+    ptree soilTypesOutputCatalog;
+    m_soilTypesOutputCatalog->ptWrite(soilTypesOutputCatalog);
+    pt.add_child("soilTypesOutputCatalog", soilTypesOutputCatalog);
+
+    ptree spectraOutputCatalog;
+    m_spectraOutputCatalog->ptWrite(spectraOutputCatalog);
+    pt.add_child("spectraOutputCatalog", spectraOutputCatalog);
+
+    ptree timeSeriesOutputCatalog;
+    m_timeSeriesOutputCatalog->ptWrite(timeSeriesOutputCatalog);
+    pt.add_child("timeSeriesOutputCatalog", timeSeriesOutputCatalog);
+
+    ptree log;
+    m_log->ptWrite(log);
+    pt.add_child("log", log);
+
+    m_depth.size() ? pt.put("depth", m_depth.last()) : pt.put("depth", -1);
+}
+
 QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)
 {
     out << (quint8)1;
@@ -607,11 +729,11 @@ QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)
             << oc->m_period
             << oc->m_periodIsNeeded
             << oc->m_damping
-            << oc->m_profilesCatalog
-            << oc->m_ratiosCatalog
-            << oc->m_soilTypesCatalog
-            << oc->m_spectraCatalog
-            << oc->m_timeSeriesCatalog
+            << oc->m_profilesOutputCatalog
+            << oc->m_ratiosOutputCatalog
+            << oc->m_soilTypesOutputCatalog
+            << oc->m_spectraOutputCatalog
+            << oc->m_timeSeriesOutputCatalog
             << oc->m_log
             << (oc->m_depth.size() ? oc->m_depth.last() : -1);
 
@@ -635,11 +757,11 @@ QDataStream & operator>> (QDataStream & in, OutputCatalog* oc)
     in >> oc->m_period;
     in >> oc->m_periodIsNeeded;
     in >> oc->m_damping;
-    in >> oc->m_profilesCatalog;
-    in >> oc->m_ratiosCatalog;
-    in >> oc->m_soilTypesCatalog;
-    in >> oc->m_spectraCatalog;
-    in >> oc->m_timeSeriesCatalog;
+    in >> oc->m_profilesOutputCatalog;
+    in >> oc->m_ratiosOutputCatalog;
+    in >> oc->m_soilTypesOutputCatalog;
+    in >> oc->m_spectraOutputCatalog;
+    in >> oc->m_timeSeriesOutputCatalog;
     in >> oc->m_log;
     in >> maxDepth;
 

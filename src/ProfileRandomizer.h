@@ -28,6 +28,11 @@
 #include <QString>
 #include <QMap>
 #include <QVariant>
+#include <QTextStream>
+
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 #include <gsl/gsl_rng.h>
 
@@ -59,6 +64,9 @@ public:
     BedrockDepthVariation* bedrockDepthVariation();
     LayerThicknessVariation* layerThicknessVariation();
     VelocityVariation* velocityVariation();
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void enabledChanged(bool enabled);

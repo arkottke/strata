@@ -93,6 +93,20 @@ void VelocityLayer::vary(double randVar)
     }
 }
 
+void VelocityLayer::ptRead(const ptree &pt)
+{
+    AbstractDistribution::ptRead(pt);
+    m_isVaried = pt.get<bool>("isVaried");
+    m_depth = pt.get<double>("depth");
+}
+
+void VelocityLayer::ptWrite(ptree &pt) const
+{
+    AbstractDistribution::ptWrite(pt);
+    pt.put("isVaried", m_isVaried);
+    pt.put("depth", m_depth);
+}
+
 QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl)
 {
     out << (quint8)1;

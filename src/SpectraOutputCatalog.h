@@ -23,15 +23,18 @@
 #define SPECTRA_OUTPUT_CATALOG_H
 
 #include "AbstractMutableOutputCatalog.h"
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class AbstractLocationOutput;
 
 class SpectraOutputCatalog : public AbstractMutableOutputCatalog
 {
-Q_OBJECT
+    Q_OBJECT
 
-friend QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc);
-friend QDataStream & operator>> (QDataStream & in, SpectraOutputCatalog* soc);
+    friend QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc);
+    friend QDataStream & operator>> (QDataStream & in, SpectraOutputCatalog* soc);
 
 public:
     explicit SpectraOutputCatalog(OutputCatalog *outputCatalog);
@@ -51,6 +54,9 @@ public:
 
     virtual void addRow(const QString &name);
     virtual QList<AbstractOutput*> outputs() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     AbstractLocationOutput* factory(const QString & className, OutputCatalog * parent) const;

@@ -168,6 +168,23 @@ void Dimension::clear()
     m_data.clear();
 }
 
+void Dimension::ptRead(const ptree &pt)
+{
+    m_min = pt.get<double>("min");
+    m_max = pt.get<double>("max");
+    m_size = pt.get<int>("size");
+    m_spacing = (Dimension::Spacing) pt.get<int>("spacing");
+    init();
+}
+
+void Dimension::ptWrite(ptree &pt) const
+{
+    pt.put("min", m_min);
+    pt.put("max", m_max);
+    pt.put("size", m_size);
+    pt.put("spacing", (int) m_spacing);
+}
+
 QDataStream & operator<<(QDataStream & out, const Dimension* d)
 {
     out << (quint8)1;

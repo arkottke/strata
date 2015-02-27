@@ -52,6 +52,20 @@ void BedrockDepthVariation::updateEnabled()
     emit enabledChanged(enabled());
 }
 
+void BedrockDepthVariation::ptRead(const ptree &pt)
+{
+    Distribution::ptRead(pt);
+    bool enabled = pt.get<bool>("enabled");
+
+    setEnabled(enabled);
+}
+
+void BedrockDepthVariation::ptWrite(ptree &pt) const
+{
+    Distribution::ptWrite(pt);
+    pt.put("enabled", m_enabled);
+}
+
 QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
 
 {

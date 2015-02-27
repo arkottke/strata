@@ -106,6 +106,19 @@ double AbstractNonlinearPropertyStandardDeviation::calculate(NonlinearPropertyRa
     }
 }
 
+void AbstractNonlinearPropertyStandardDeviation::ptRead(const ptree &pt)
+{
+    m_min = pt.get<double>("min");
+    m_max = pt.get<double>("max");
+    m_function = QString::fromStdString(pt.get<std::string>("function"));
+}
+
+void AbstractNonlinearPropertyStandardDeviation::ptWrite(ptree &pt) const
+{
+    pt.put("min", m_min);
+    pt.put("max", m_max);
+    pt.put("function", m_function.toStdString());
+}
 
 QDataStream& operator<< (QDataStream & out, const AbstractNonlinearPropertyStandardDeviation* anpsd)
 {

@@ -26,6 +26,10 @@
 
 #include <QStringList>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 #include <gsl/gsl_rng.h>
 
 class ProfileRandomizer;
@@ -68,6 +72,9 @@ public:
     void reset();
 
     QList<double> vary(double depthToBedrock) const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void enabledChanged(bool enabled);

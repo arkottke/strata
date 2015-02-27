@@ -28,6 +28,10 @@
 
 #include <QStringList>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 //! A virtual class that describes the shear-wave velocity of a specific layer
 
 class VelocityLayer : public AbstractDistribution
@@ -59,6 +63,9 @@ public:
 
     //! Vary the shear-wave velocity
     void vary(double randVar);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void depthChanged(double depth);

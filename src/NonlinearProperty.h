@@ -25,6 +25,10 @@
 #include <QAbstractTableModel>
 #include <QList>
 #include <QVector>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 
 #include "gsl/gsl_interp.h"
 
@@ -40,6 +44,7 @@ class NonlinearProperty : public QAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, NonlinearProperty* np);
 
 public:
+
     //! Type of model
     enum Type {
         ModulusReduction, //!< Shear-modulus reduction (G/G_max)
@@ -79,6 +84,9 @@ public:
 
     //! Return a duplicate of the NonlinearProperty
     NonlinearProperty *duplicate() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:    
     //! Initialize the interpolation routine. Called on the first interpolation

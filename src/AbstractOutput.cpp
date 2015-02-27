@@ -36,6 +36,8 @@
 
 #include <qwt_scale_engine.h>
 
+#include <boost/lexical_cast.hpp>
+
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
     : QAbstractTableModel(catalog), m_catalog(catalog), m_statistics(0), m_interp(0), m_offset(0)
 {
@@ -442,6 +444,60 @@ const QString AbstractOutput::prefix() const
 const QString AbstractOutput::suffix() const
 {
     return "";
+}
+
+void AbstractOutput::ptRead(const ptree &pt)
+{
+    m_exportEnabled = pt.get<bool>("exportEnabled");
+
+    ptree data = pt.get_child("data");
+    foreach(const ptree::value_type &t, data)
+    {
+        QList<QVector<double> > qelem;
+        foreach(const ptree::value_type &v, t.second)
+        {
+            QVector<double> qvect;
+            foreach(const ptree::value_type &vv, v.second)
+            {
+                qvect.append(boost::lexical_cast<double>(vv.second.data()));
+            }
+            qelem << qvect;
+        }
+        if (qelem.size() > 0)
+        {
+            m_data << qelem;
+        }
+    }
+
+    foreach (const QList<QVector<double> > &l, m_data) {
+        foreach (const QVector<double> &v, l) {
+            if (m_maxSize < v.size())
+                m_maxSize = v.size();
+        }
+    }
+}
+
+void AbstractOutput::ptWrite(ptree &pt) const
+{
+    pt.put("exportEnabled", m_exportEnabled);
+    ptree data;
+    foreach(const QList<QVector<double> > &l, m_data)
+    {
+        ptree elem;
+        foreach(const QVector<double> &v, l)
+        {
+            ptree vect;
+            foreach(const double &vv, v)
+            {
+                ptree val;
+                val.put("", vv);
+                vect.push_back(std::make_pair("", val));
+            }
+            elem.add_child("v", vect);
+        }
+        data.add_child("l", elem);
+    }
+    pt.add_child("data", data);
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)

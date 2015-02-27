@@ -25,6 +25,9 @@
 #include "AbstractRvtMotion.h"
 
 #include <QDataStream>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class Dimension;
 
@@ -56,6 +59,9 @@ public:
 
     //! Load the motion from a TextStream
     virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setDuration(double duration);

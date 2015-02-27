@@ -25,6 +25,9 @@
 #include "AbstractIterativeCalculator.h"
 
 #include <QDataStream>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class FrequencyDependentCalculator : public AbstractIterativeCalculator
 {
@@ -39,6 +42,9 @@ public:
     explicit FrequencyDependentCalculator(QObject *parent = 0);
 
     virtual QString toHtml() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf);

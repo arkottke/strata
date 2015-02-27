@@ -292,6 +292,35 @@ AbstractRatioOutput* RatiosOutputCatalog::factory(const QString & className, Out
     return aro;
 }
 
+void RatiosOutputCatalog::ptRead(const ptree &pt)
+{
+    beginResetModel();
+    QString name;
+    foreach(const ptree::value_type &v, pt)
+    {
+        std::size_t pos = v.first.find("-");
+        std::string name = v.first.substr(0, pos);
+
+        AbstractRatioOutput * aro = factory(QString::fromStdString(name), m_outputCatalog);
+        aro->ptRead(v.second);
+        m_outputs.append(aro);
+    }
+    endResetModel();
+}
+
+void RatiosOutputCatalog::ptWrite(ptree &pt) const
+{
+    int counter = 0;
+    foreach(AbstractRatioOutput *aro, m_outputs)
+    {
+        ptree apt;
+        aro->ptWrite(apt);
+        std::stringstream fmt;
+        fmt << aro->metaObject()->className() << "-" << counter++;
+        pt.put_child(fmt.str(), apt);
+    }
+}
+
 QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc)
 {
     out << (quint8)1;
@@ -315,7 +344,7 @@ QDataStream & operator>> (QDataStream & in, RatiosOutputCatalog* roc)
     roc->beginResetModel();
     QString name;
     while (roc->m_outputs.size() < size) {
-        in >> name;        
+        in >> name;
         roc->m_outputs << roc->factory(name, roc->m_outputCatalog);
         in >> roc->m_outputs.last();
     }

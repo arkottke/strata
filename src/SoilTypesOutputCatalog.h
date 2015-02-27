@@ -24,6 +24,10 @@
 
 #include "AbstractOutputCatalog.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class SoilType;
 class SoilTypeOutput;
 class SoilTypeCatalog;
@@ -50,6 +54,9 @@ public:
 
     void setSoilTypeCatalog(SoilTypeCatalog* soilTypeCatalog);
     virtual QList<AbstractOutput*> outputs() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected slots:
     void addOutput(SoilType* soilType);

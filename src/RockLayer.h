@@ -26,6 +26,10 @@
 
 #include <QString>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 //! Describes the velocity variation and linear response of bedrock
 
 class RockLayer : public VelocityLayer
@@ -52,6 +56,9 @@ public:
 
     //! A description of the layer for tables
     QString toString() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setUntWt(double untWt);

@@ -27,6 +27,11 @@
 #include <QDataStream>
 #include <QList>
 #include <QStringList>
+#include <QTextStream>
+
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 #include <gsl/gsl_rng.h>
 
@@ -77,6 +82,9 @@ public:
     double correlDelta() const;
     double correlIntercept() const;
     double correlExponent() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void enabledChanged(bool enabled);

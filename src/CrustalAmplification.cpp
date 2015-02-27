@@ -26,6 +26,8 @@
 
 #include <cmath>
 
+#include <boost/lexical_cast.hpp>
+
 CrustalAmplification::CrustalAmplification(QObject *parent) :
         MyAbstractTableModel(parent)
 {
@@ -320,6 +322,81 @@ void CrustalAmplification::clearInterp()
     if (m_interpolator) {
         gsl_interp_free(m_interpolator);
         m_interpolator = 0;
+    }
+}
+
+void CrustalAmplification::ptRead(const ptree &pt)
+{
+    int model = pt.get<int>("model");
+
+    setModel(model);
+
+    switch (m_model) {
+        case CrustalAmplification::Custom:
+        {
+            beginResetModel();
+            ptree freq = pt.get_child("freq");
+            foreach(const ptree::value_type &v, freq)
+            {
+                m_freq << boost::lexical_cast<double>(v.second.data());
+            }
+
+            ptree amp = pt.get_child("amp");
+            foreach(const ptree::value_type &v, amp)
+            {
+                m_amp << boost::lexical_cast<double>(v.second.data());
+            }
+            endResetModel();
+            break;
+        }
+        case CrustalAmplification::WUS:
+        case CrustalAmplification::CEUS:
+            break;
+        case CrustalAmplification::Calculated:
+        {
+            ptree crustalModel = pt.get_child("crustalModel");
+            m_crustalModel->ptRead(crustalModel);
+            calculate();
+            break;
+        }
+    }
+}
+
+void CrustalAmplification::ptWrite(ptree &pt) const
+{
+    pt.put("model", (int) m_model);
+    switch (m_model) {
+        case CrustalAmplification::Custom:
+        {
+            ptree freq;
+            foreach(const double & d, m_freq)
+            {
+                ptree val;
+                val.put("", d);
+                freq.push_back(std::make_pair("", val));
+            }
+            pt.add_child("freq", freq);
+
+            ptree amp;
+            foreach(const double & d, m_amp)
+            {
+                ptree val;
+                val.put("", d);
+                amp.push_back(std::make_pair("", val));
+            }
+            pt.add_child("amp", amp);
+            break;
+        }
+        case CrustalAmplification::WUS:
+        case CrustalAmplification::CEUS:
+            break;
+        case CrustalAmplification::Calculated:
+        {
+            ptree crustalModel;
+            m_crustalModel->ptWrite(crustalModel);
+            pt.add_child("crustalModel", crustalModel);
+            break;
+        }
     }
 }
 

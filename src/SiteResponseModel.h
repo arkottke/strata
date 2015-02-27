@@ -24,6 +24,12 @@
 
 #include <QThread>
 
+#include <boost/foreach.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class SoilProfile;
 class SiteResponseOutput;
 class AbstractCalculator;
@@ -75,9 +81,13 @@ public:
 
     //! Load the model from a file
     bool load(const QString & fileName);
+    //! Load the human readable model from a file
+    bool loadReadable(const QString & fileName);
 
     //! Save the model to a file
     bool save();
+    //! Save the model in a human readable format
+    bool saveReadable();
 
     //! If the model has results from an analysis
     bool hasResults() const;

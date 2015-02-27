@@ -321,6 +321,60 @@ QString SoilType::toHtml() const
     return html;
 }
 
+void SoilType::ptRead(const ptree &pt)
+{
+    m_untWt = pt.get<double>("untWt");
+    m_damping = pt.get<double>("damping");
+    m_name = QString::fromStdString(pt.get<std::string>("name"));
+    m_notes = QString::fromStdString(pt.get<std::string>("notes"));
+    m_isVaried = pt.get<bool>("isVaried");
+    m_saveData = pt.get<bool>("saveData");
+    m_meanStress = pt.get<double>("meanStress");
+    m_pi = pt.get<double>("pi");
+    m_ocr = pt.get<double>("ocr");
+    m_freq = pt.get<double>("freq");
+    m_nCycles = pt.get<int>("nCycles");
+
+    QString modulusModelType = QString::fromStdString(pt.get<std::string>("modulusType"));
+    NonlinearProperty* mnp = deriveModel(NonlinearProperty::ModulusReduction, modulusModelType);
+    Q_ASSERT(mnp);
+    ptree modulusModel = pt.get_child("modulusModel");
+    mnp->ptRead(modulusModel);
+    setModulusModel(mnp);
+
+    QString dampingModelType = QString::fromStdString(pt.get<std::string>("dampingType"));
+    NonlinearProperty* dnp = deriveModel(NonlinearProperty::ModulusReduction, dampingModelType);
+    Q_ASSERT(dnp);
+    ptree dampingModel = pt.get_child("dampingModel");
+    dnp->ptRead(dampingModel);
+    setDampingModel(dnp);
+}
+
+void SoilType::ptWrite(ptree &pt) const
+{
+    pt.put("untWt", m_untWt);
+    pt.put("damping", m_damping);
+    pt.put("name", m_name.toStdString());
+    pt.put("notes", m_notes.toStdString());
+    pt.put("isVaried", m_isVaried);
+    pt.put("saveData", m_saveData);
+    pt.put("meanStress", m_meanStress);
+    pt.put("pi", m_pi);
+    pt.put("ocr", m_ocr);
+    pt.put("freq", m_freq);
+    pt.put("nCycles", m_nCycles);
+
+    pt.put("modulusType", QString(m_modulusModel->metaObject()->className()).toStdString());
+    ptree modulusModel;
+    m_modulusModel->ptWrite(modulusModel);
+    pt.add_child("modulusModel", modulusModel);
+
+    pt.put("dampingType", QString(m_dampingModel->metaObject()->className()).toStdString());
+    ptree dampingModel;
+    m_dampingModel->ptWrite(dampingModel);
+    pt.add_child("dampingModel", dampingModel);
+}
+
 QDataStream & operator<< (QDataStream & out, const SoilType* st)
 {
     out << (quint8)1;
@@ -364,17 +418,10 @@ QDataStream & operator>> (QDataStream & in, SoilType* st)
         QString className;
         in >> className;
 
-        NonlinearProperty::Type type = (i == 0) ?
-                                       NonlinearProperty::ModulusReduction : NonlinearProperty::Damping;
+        NonlinearProperty::Type type = (i == 0) ? NonlinearProperty::ModulusReduction : NonlinearProperty::Damping;
 
-        NonlinearProperty* np = 0;
-        if (className == "CustomNonlinearProperty") {
-            np = qobject_cast<NonlinearProperty*>(new CustomNonlinearProperty(type));
-        } else if (className == "DarendeliNonlinearProperty") {
-            np = qobject_cast<NonlinearProperty*>(new DarendeliNonlinearProperty(type));
-        } else if (className == "NonlinearProperty") {
-            np = new NonlinearProperty;
-        }
+        NonlinearProperty* np = st->deriveModel(type, className);
+
         Q_ASSERT(np);
         in >> np;
 
@@ -386,4 +433,17 @@ QDataStream & operator>> (QDataStream & in, SoilType* st)
     }
 
     return in;
+}
+
+NonlinearProperty * SoilType::deriveModel(NonlinearProperty::Type type, QString className)
+{
+    NonlinearProperty* np = 0;
+    if (className == "CustomNonlinearProperty") {
+        np = qobject_cast<NonlinearProperty*>(new CustomNonlinearProperty(type));
+    } else if (className == "DarendeliNonlinearProperty") {
+        np = qobject_cast<NonlinearProperty*>(new DarendeliNonlinearProperty(type));
+    } else if (className == "NonlinearProperty") {
+        np = new NonlinearProperty;
+    }
+    return np;
 }

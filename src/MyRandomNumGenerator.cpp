@@ -84,6 +84,18 @@ void MyRandomNumGenerator::init()
     gsl_rng_set(m_gsl_rng, m_seed);
 }
 
+void MyRandomNumGenerator::ptRead(const ptree &pt)
+{
+    m_seedSpecified = pt.get<bool>("seedSpecified");
+    m_seed = pt.get<quint32>("seed");
+}
+
+void MyRandomNumGenerator::ptWrite(ptree &pt) const
+{
+    pt.put("seedSpecified", m_seedSpecified);
+    pt.put("seed", m_seed);
+}
+
 QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator)
 {
     out << (quint8)1;

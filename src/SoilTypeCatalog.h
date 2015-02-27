@@ -23,6 +23,11 @@
 #define SOIL_TYPE_CATALOG_H
 
 #include "MyAbstractTableModel.h"
+#include <QTextStream>
+
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class NonlinearPropertyCatalog;
 class SoilType;
@@ -69,6 +74,9 @@ public:
 
     //! Catalog of nonlinear models
     NonlinearPropertyCatalog* nlCatalog();
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void soilTypeAdded(SoilType* soilType);

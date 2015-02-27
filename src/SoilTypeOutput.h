@@ -23,6 +23,9 @@
 #define SOIL_TYPE_OUTPUT_H
 
 #include <QObject>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class SoilType;
 class NonlinearPropertyOutput;
@@ -30,10 +33,10 @@ class OutputCatalog;
 
 class SoilTypeOutput : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 
-friend QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto);
-friend QDataStream & operator>> (QDataStream & in, SoilTypeOutput* sto);
+    friend QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto);
+    friend QDataStream & operator>> (QDataStream & in, SoilTypeOutput* sto);
 
 public:
     explicit SoilTypeOutput(SoilType* soilType, OutputCatalog* catalog);
@@ -44,6 +47,9 @@ public:
     NonlinearPropertyOutput* damping();
 
     bool enabled() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void wasModified();

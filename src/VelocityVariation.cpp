@@ -420,6 +420,52 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
     }
 }
 
+void VelocityVariation::ptRead(const ptree &pt)
+{
+    m_enabled = pt.get<bool>("enabled");
+
+    int stdevModel = pt.get<int>("stdevModel");
+    setStdevModel(stdevModel);
+
+    if (m_stdevModel == VelocityVariation::Custom)
+    {
+        m_stdevIsLayerSpecific = pt.get<bool>("stddevIsLayerSpecific");
+        m_stdev = pt.get<double>("stdev");
+    }
+
+    int correlModel = pt.get<int>("correlModel");
+    setCorrelModel(correlModel);
+
+    if (m_correlModel == VelocityVariation::Custom)
+    {
+        m_correlInitial = pt.get<double>("correlInitial");
+        m_correlFinal = pt.get<double>("correlFinal");
+        m_correlDelta = pt.get<double>("correlDelta");
+        m_correlIntercept = pt.get<double>("correlIntercept");
+        m_correlExponent = pt.get<double>("correlExponent");
+    }
+}
+
+void VelocityVariation::ptWrite(ptree &pt) const
+{
+    pt.put("enabled", m_enabled);
+    pt.put("stdevModel", (int) m_stdevModel);
+    if (m_stdevModel == VelocityVariation::Custom)
+    {
+        pt.put("stddevIsLayerSpecific", m_stdevIsLayerSpecific);
+        pt.put("stdev", m_stdev);
+    }
+    pt.put("correlModel", (int) m_correlModel);
+    if (m_correlModel == VelocityVariation::Custom)
+    {
+        pt.put("correlInitial", m_correlInitial);
+        pt.put("correlFinal", m_correlFinal);
+        pt.put("correlDelta", m_correlDelta);
+        pt.put("correlIntercept", m_correlIntercept);
+        pt.put("correlExponent", m_correlExponent);
+    }
+}
+
 QDataStream & operator<< (QDataStream & out, const VelocityVariation* vv)
 {
     out << (quint8)1;

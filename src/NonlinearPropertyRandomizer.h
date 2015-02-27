@@ -25,6 +25,11 @@
 #include <QObject>
 
 #include <QStringList>
+#include <QTextStream>
+
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 #include <gsl/gsl_rng.h>
 
@@ -73,6 +78,9 @@ public:
 
     //! Vary the damping of the bedrock
     void vary(RockLayer* bedrock);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setEnabled(bool enabled);

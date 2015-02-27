@@ -514,6 +514,77 @@ void SourceTheoryRvtMotion::calculate()
     AbstractRvtMotion::calculate();
 }
 
+void SourceTheoryRvtMotion::ptRead(const ptree &pt)
+{
+    AbstractRvtMotion::ptRead(pt);
+    int model = pt.get<int>("model");
+    double momentMag = pt.get<double>("momentMag");
+    double distance = pt.get<double>("distance");
+    double depth = pt.get<double>("depth");
+
+    setModel(model);
+    setMomentMag(momentMag);
+    setDistance(distance);
+    setDepth(depth);
+
+    ptree freq = pt.get_child("freq");
+    m_freq->ptRead(freq);
+
+    if (m_model == SourceTheoryRvtMotion::Custom)
+    {
+        double stressDrop = pt.get<double>("stressDrop");
+        double geoAtten = pt.get<double>("geoAtten");
+        double pathDurCoeff = pt.get<double>("pathDurCoeff");
+        double pathAttenCoeff = pt.get<double>("pathAttenCoeff");
+        double pathAttenPower = pt.get<double>("pathAttenPower");
+        double shearVelocity = pt.get<double>("shearVelocity");
+        double density = pt.get<double>("density");
+        double siteAtten = pt.get<double>("siteAtten");
+
+        setStressDrop(stressDrop);
+        setGeoAtten(geoAtten);
+        setPathDurCoeff(pathDurCoeff);
+        setPathAttenCoeff(pathAttenCoeff);
+        setPathAttenPower(pathAttenPower);
+        setShearVelocity(shearVelocity);
+        setDensity(density);
+        setSiteAtten(siteAtten);
+
+        ptree crustalAmp = pt.get_child("crustalAmp");
+        m_crustalAmp->ptRead(crustalAmp);
+    }
+
+    calculate();
+}
+
+void SourceTheoryRvtMotion::ptWrite(ptree &pt) const
+{
+    AbstractRvtMotion::ptWrite(pt);
+    pt.put("model", (int) m_model);
+    pt.put("momentMag", m_momentMag);
+    pt.put("distance", m_distance);
+    pt.put("depth", m_depth);
+
+    ptree freq;
+    m_freq->ptWrite(freq);
+    pt.add_child("freq", freq);
+
+    if (m_model == SourceTheoryRvtMotion::Custom)
+    {
+        pt.put("stressDrop", m_stressDrop);
+        pt.put("geoAtten", m_geoAtten);
+        pt.put("pathDurCoeff", m_pathDurCoeff);
+        pt.put("pathAttenCoeff", m_pathAttenCoeff);
+        pt.put("pathAttenPower", m_pathAttenPower);
+        pt.put("shearVelocity", m_shearVelocity);
+        pt.put("density", m_density);
+        pt.put("siteAtten", m_siteAtten);
+
+        ptree crustalAmp;
+        m_crustalAmp->ptWrite(crustalAmp);
+        pt.add_child("crustalAmp", crustalAmp);
+    }
+}
 
 QDataStream & operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm)
 {

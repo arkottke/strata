@@ -25,6 +25,10 @@
 #include "NonlinearProperty.h"
 
 #include <QAbstractListModel>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 
 class AbstractNonlinearPropertyFactory : public QAbstractListModel
 {
@@ -34,6 +38,7 @@ class AbstractNonlinearPropertyFactory : public QAbstractListModel
     friend QDataStream & operator>> (QDataStream & in, AbstractNonlinearPropertyFactory & anpf);
 
 public:
+
     AbstractNonlinearPropertyFactory(QObject *parent = 0);
     ~AbstractNonlinearPropertyFactory();
 
@@ -56,6 +61,9 @@ public:
 
     //! Tries the QVariant as an integer and a QString to match a possible model
     NonlinearProperty* duplicateAt(QVariant value) const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     //! Type of models the factor produces

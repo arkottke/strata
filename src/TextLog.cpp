@@ -24,6 +24,8 @@
 
 #include <QDebug>
 
+#include <boost/lexical_cast.hpp>
+
 TextLog::TextLog(QObject * parent) :
         QObject(parent)
 
@@ -82,6 +84,30 @@ TextLog & operator<<( TextLog & log, const QString & string )
 {
     log.append(string);
     return log;
+}
+
+void TextLog::ptRead(const ptree &pt)
+{
+    m_level = (TextLog::Level) pt.get<int>("level");
+    m_text.clear();
+    foreach (const ptree::value_type & v, pt.get_child("text"))
+    {
+        QString t = QString::fromStdString(boost::lexical_cast<std::string>(v.second.data()));
+        m_text.append(t);
+    }
+}
+
+void TextLog::ptWrite(ptree &pt) const
+{
+    pt.put("level", (int) m_level);
+    ptree text;
+    foreach (const QString & line, m_text)
+    {
+        ptree val;
+        val.put("", line.toStdString());
+        text.push_back(std::make_pair("", val));
+    }
+    pt.put_child("text", text);
 }
 
 QDataStream & operator<< (QDataStream & out, const TextLog* tl)

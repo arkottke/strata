@@ -26,6 +26,10 @@
 
 #include <QDataStream>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class AbstractIterativeCalculator : public AbstractCalculator
 {
     Q_OBJECT
@@ -42,6 +46,9 @@ public:
     int maxIterations() const;
     double errorTolerance() const;
     bool converged() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void maxIterationsChanged(int maxIterations);

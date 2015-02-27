@@ -20,11 +20,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "MainWindow.h"
+#include "BatchRunner.h"
 
+#include <QtCore>
 #include <QString>
 #include <QMessageBox>
 #include <QApplication>
+#include <QThread>
+#include <QTimer>
+#include <QTextStream>
 #include <QDebug>
+
+#include <fstream>
+#include <iostream>
 
 void myMessageOutput(QtMsgType type, const char *msg)
 {
@@ -46,20 +54,58 @@ void myMessageOutput(QtMsgType type, const char *msg)
 
 int main(int argc, char* argv[])
 {
-//#ifndef DEBUG
-//    qInstallMsgHandler(myMessageOutput);
-//#endif
+#ifndef DEBUG
+    qInstallMsgHandler(myMessageOutput);
+#endif
 
-    QApplication app(argc, argv);
+    bool batch = false;
+    for (int i = 0; i < argc; i++)
+    {
+        QString a = QString::fromUtf8(argv[i]);
+        if (a == "?" || a == "-?" || a == "--?" || a == "help" || a == "-help" || a == "--help")
+        {
+            fprintf(stdout, "strata.exe (-b, for batch use) [path_to_file]\n");
+            exit(0);
+        }
+        if (a == "-b")
+        {
+            batch = true;
+        }
+    }
 
-    // Set the window icon
-    app.setWindowIcon(QIcon(":/images/application-icon.svg"));
+    if (batch)
+    {
+        // console hook
+        QCoreApplication a(argc, argv);
+        // console output hooks
+        QTextStream qerr(stderr);
 
-    QCoreApplication::setOrganizationName("accipter");
-    QCoreApplication::setApplicationName("Strata");
+        const char * fn = argv[argc-1];
+        QString fileName = QString::fromUtf8(fn);
+        // check if input file exists
+        std::ifstream input(fn, std::ios::binary);
+        if (!input)
+        {
+            qerr << "file not found: " << fn << endl;
+            a.exit(-1);
+        }
+        BatchRunner * b = new BatchRunner(fileName);
+        b->run();
+        return a.exec();
+    }
+    else
+    {
+        // Normal application mode
+        QApplication app(argc, argv);
 
-    MainWindow * mainWindow = new MainWindow;
-    mainWindow->showMaximized();
-    
-    return app.exec();
+        // Set the window icon
+        app.setWindowIcon(QIcon(":/images/application-icon.svg"));
+
+        QCoreApplication::setOrganizationName("accipter");
+        QCoreApplication::setApplicationName("Strata");
+
+        MainWindow * mainWindow = new MainWindow;
+        mainWindow->showMaximized();
+        return app.exec();
+    }
 } 
