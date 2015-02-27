@@ -1,3 +1,15 @@
+Installing Boost
+================
+
+Follow directions here: 
+http://www.boost.org/more/getting_started/index.html
+
+If using mingw:
+C:\devel\boost_1_57_0> bootstrap.bat mingw
+C:\devel\boost_1_57_0> b2 toolset=gcc link=shared variant=release,debug stage --with-system --with-serialization
+
+
+
 !! These are the Windows Development Environment install instructions for working with the Strata code  !!
 !! for the actual library versions check the strataconfig.pri file                                      !!    
 
@@ -68,4 +80,3 @@ B.
 Finally you can install Nullsoft Installer System (nsis-3.0b-setup.exe) to build the strata installers.
 Check the paths in the .nsi files, in order to point to the correct files on your system.
 Compile the script to generate the installers.
-
