@@ -28,7 +28,6 @@
 
 #include <QDebug>
 
-
 SpectraOutputCatalog::SpectraOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractMutableOutputCatalog(outputCatalog)
 {
@@ -248,6 +247,37 @@ AbstractLocationOutput* SpectraOutputCatalog::factory(const QString & className,
     return alo;
 }
 
+void SpectraOutputCatalog::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    foreach(const ptree::value_type &v, pt.get_child("outputs"))
+    {
+        std::size_t pos = v.first.find("-");
+        std::string name = v.first.substr(0, pos);
+        AbstractLocationOutput* alo = factory(QString::fromStdString(name), m_outputCatalog);
+        alo->ptRead(v.second);
+        m_outputs << alo;
+    }
+
+    endResetModel();
+}
+
+void SpectraOutputCatalog::ptWrite(ptree &pt) const
+{
+    int counter = 0;
+
+    ptree m_arr;
+    foreach(AbstractLocationOutput *alo, m_outputs)
+    {
+        ptree alp;
+        alo->ptWrite(alp);
+        std::stringstream fmt;
+        fmt << alo->metaObject()->className() << "-" << counter++;
+        m_arr.add_child(fmt.str(), alp);
+    }
+    pt.add_child("outputs", m_arr);
+}
 
 QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc)
 {

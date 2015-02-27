@@ -28,6 +28,8 @@
 #include <QColor>
 #include <QDebug>
 
+#include <boost/lexical_cast.hpp>
+
 NonlinearProperty::NonlinearProperty(QObject *parent)
     : QAbstractTableModel(parent)
 {
@@ -241,6 +243,54 @@ NonlinearProperty *NonlinearProperty::duplicate() const
     return new NonlinearProperty(m_name, m_type, m_strain, m_average);
 }
 
+void NonlinearProperty::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    m_name = QString::fromStdString(pt.get<std::string>("name"));
+    m_type = (NonlinearProperty::Type) pt.get<int>("type");
+
+    m_strain.clear();
+    ptree strain = pt.get_child("strain");
+    foreach(const ptree::value_type &v, strain)
+    {
+        m_strain << boost::lexical_cast<double>(v.second.data());
+    }
+
+    m_average.clear();
+    ptree average = pt.get_child("average");
+    foreach(const ptree::value_type &v, average)
+    {
+        m_average << boost::lexical_cast<double>(v.second.data());
+    }
+    setVaried(m_average);
+    endResetModel();
+}
+
+void NonlinearProperty::ptWrite(ptree &pt) const
+{
+    pt.put("name", m_name.toStdString());
+    pt.put("type", (int) m_type);
+
+    ptree strain;
+    foreach(const double & d, m_strain)
+    {
+        ptree val;
+        val.put("", d);
+        strain.push_back(std::make_pair("", val));
+    }
+    pt.add_child("strain", strain);
+
+    ptree average;
+    foreach(const double & d, m_average)
+    {
+        ptree val;
+        val.put("", d);
+        average.push_back(std::make_pair("", val));
+    }
+    pt.add_child("average", average);
+}
+
 QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np)
 {
     out << (quint8)1;
@@ -269,8 +319,6 @@ QDataStream & operator>> (QDataStream & in, NonlinearProperty* np)
 
     np->m_type = (NonlinearProperty::Type)type;
     np->setVaried(np->average());
-
     np->endResetModel();
-
     return in;
 }

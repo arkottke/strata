@@ -24,6 +24,10 @@
 
 #include "AbstractOutputCatalog.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class AbstractProfileOutput;
 
 class ProfilesOutputCatalog : public AbstractOutputCatalog
@@ -47,6 +51,9 @@ public:
 
     virtual Qt::ItemFlags flags(const QModelIndex & index) const;
     virtual QList<AbstractOutput*> outputs() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     QList<AbstractProfileOutput*> m_outputs;

@@ -145,6 +145,15 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
     return true;
 }
 
+void FrequencyDependentCalculator::ptRead(const ptree &pt)
+{
+    AbstractIterativeCalculator::ptRead(pt);
+}
+
+void FrequencyDependentCalculator::ptWrite(ptree &pt) const
+{
+    AbstractIterativeCalculator::ptWrite(pt);
+}
 
 QDataStream & operator<<(QDataStream & out,
                                  const FrequencyDependentCalculator* fdc)

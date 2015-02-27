@@ -26,6 +26,9 @@
 #include "MyAbstractTableModel.h"
 
 #include <QDataStream>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class MotionLibrary : public MyAbstractTableModel
 {
@@ -88,6 +91,9 @@ public:
     Approach approach() const;
     void setApproach(Approach approach);
 
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
+
 signals:    
     void wasModified();
     void approachChanged(int approach);
@@ -110,6 +116,7 @@ protected:
 
     //! List of motions
     QList<AbstractMotion*> m_motions;
+
 };
 
 #endif // MOTION_LIBRARY_H

@@ -177,6 +177,30 @@ NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(QVariant value)
     }
 }
 
+void AbstractNonlinearPropertyFactory::ptRead(const ptree &pt)
+{
+    foreach (const ptree::value_type & v, pt.get_child("models"))
+    {
+        CustomNonlinearProperty * np = new CustomNonlinearProperty(m_type, true);
+        np->ptRead(v.second);
+        m_models << np;
+    }
+}
+
+void AbstractNonlinearPropertyFactory::ptWrite(ptree &pt) const
+{
+    ptree m_arr;
+    foreach (NonlinearProperty* np, m_models) {
+        const CustomNonlinearProperty *cnp = qobject_cast<CustomNonlinearProperty*>(np);
+        if (cnp && cnp->retain()) {
+            ptree n;
+            np->ptWrite(n);
+            m_arr.push_back(std::make_pair("", n));
+        }
+    }
+    pt.add_child("models", m_arr);
+}
+
 QDataStream & operator<<(QDataStream & out, const AbstractNonlinearPropertyFactory & anpf)
 {
     out << (quint8)1;

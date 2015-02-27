@@ -26,6 +26,9 @@
 
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class AbstractCalculator;
 class AbstractOutputInterpolater;
@@ -140,6 +143,9 @@ public:
 
     //! Offset for plotting the curves
     int offset() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void exportEnabledChanged(bool exportEnabled);

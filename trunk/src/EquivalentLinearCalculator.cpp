@@ -81,6 +81,18 @@ bool EquivalentLinearCalculator::updateSubLayer(int index, const QVector<std::co
     return true;
 }
 
+void EquivalentLinearCalculator::ptRead(const ptree &pt)
+{
+    AbstractIterativeCalculator::ptRead(pt);
+    m_strainRatio = pt.get<double>("strainRatio");
+}
+
+void EquivalentLinearCalculator::ptWrite(ptree &pt) const
+{
+    AbstractIterativeCalculator::ptWrite(pt);
+    pt.put("strainRatio", m_strainRatio);
+}
+
 QDataStream & operator<< (QDataStream & out,
                                  const EquivalentLinearCalculator* elc)
 {

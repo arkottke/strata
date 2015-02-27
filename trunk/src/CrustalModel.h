@@ -26,6 +26,10 @@
 
 #include <QVector>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class CrustalModel : public MyAbstractTableModel
 {
     Q_OBJECT
@@ -60,6 +64,9 @@ public:
     /*! Compute the crustal amplification
      */
     QVector<double> calculate(const QVector<double> &freq) const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 private:
     /*! Compute the average value of a property to a max depth.

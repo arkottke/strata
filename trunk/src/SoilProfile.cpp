@@ -49,6 +49,8 @@
 
 #include <cmath>
 
+#include <boost/lexical_cast.hpp>
+
 SoilProfile::SoilProfile(SiteResponseModel * parent)
     : MyAbstractTableModel(parent), m_siteResponseModel(parent)
 {
@@ -891,6 +893,9 @@ QVector<double> SoilProfile::stressReducCoeffProfile(const double pga) const
 
     }
 
+    // Add the value at the base of the profile
+    profile << m_subLayers.last().shearStress() / (totalWeight * pga);
+
     return profile;
 }
 
@@ -1181,6 +1186,85 @@ VelocityLayer * SoilProfile::velocityLayer(int index) const
     } else {
         return m_bedrock;
     }
+}
+
+void SoilProfile::ptRead(const ptree &pt)
+{
+    ptree soilTypeCatalog = pt.get_child("soilTypeCatalog");
+    m_soilTypeCatalog->ptRead(soilTypeCatalog);
+
+    beginResetModel();
+    m_soilLayers.clear();
+    ptree soilLayers = pt.get_child("soilLayers");
+    foreach(const ptree::value_type &v, soilLayers)
+    {
+       SoilLayer * sl = new SoilLayer(this);
+       sl->ptRead(v.second);
+       sl->setSoilType(m_soilTypeCatalog->soilType(
+                           v.second.get<int>("soilType")));
+       m_soilLayers.append(sl);
+    }
+
+    updateDepths();
+    endResetModel();
+
+    ptree bedrock = pt.get_child("bedrock");
+    m_bedrock->ptRead(bedrock);
+
+    ptree profileRandomizer = pt.get_child("profileRandomizer");
+    m_profileRandomizer->ptRead(profileRandomizer);
+
+    ptree nonlinearPropertyRandomizer = pt.get_child("nonlinearPropertyRandomizer");
+    m_nonlinearPropertyRandomizer->ptRead(nonlinearPropertyRandomizer);
+
+    m_inputDepth = pt.get<double>("inputDepth");
+    m_isVaried = pt.get<bool>("isVaried");
+    m_profileCount = pt.get<int>("profileCount");
+    m_maxFreq = pt.get<double>("maxFreq");
+    m_waveFraction = pt.get<double>("waveFraction");
+    m_disableAutoDiscretization = pt.get<bool>("disableAutoDiscretization");
+    m_waterTableDepth = pt.get<double>("waterTableDepth");
+}
+
+void SoilProfile::ptWrite(ptree &pt) const
+{
+    ptree soilTypeCatalog;
+    m_soilTypeCatalog->ptWrite(soilTypeCatalog);
+    pt.add_child("soilTypeCatalog", soilTypeCatalog);
+
+    ptree soilLayers;
+
+    for (int  i =0; i < m_soilLayers.size(); ++i) {
+        ptree soilLayer;
+        m_soilLayers.at(i)->ptWrite(soilLayer);
+        soilLayer.add("soilType", m_soilTypeCatalog->rowOf(
+                          m_soilLayers.at(i)->soilType()));
+
+        std::stringstream ss;
+        ss << i;
+        soilLayers.put_child(ss.str(), soilLayer);
+    }
+    pt.add_child("soilLayers", soilLayers);
+
+    ptree bedrock;
+    m_bedrock->ptWrite(bedrock);
+    pt.add_child("bedrock", bedrock);
+
+    ptree profileRandomizer;
+    m_profileRandomizer->ptWrite(profileRandomizer);
+    pt.add_child("profileRandomizer", profileRandomizer);
+
+    ptree nonlinearPropertyRandomizer;
+    m_nonlinearPropertyRandomizer->ptWrite(nonlinearPropertyRandomizer);
+    pt.add_child("nonlinearPropertyRandomizer", nonlinearPropertyRandomizer);
+
+    pt.put("inputDepth", m_inputDepth);
+    pt.put("isVaried", m_isVaried);
+    pt.put("profileCount", m_profileCount);
+    pt.put("maxFreq", m_maxFreq);
+    pt.put("waveFraction", m_waveFraction);
+    pt.put("disableAutoDiscretization", m_disableAutoDiscretization);
+    pt.put("waterTableDepth", m_waterTableDepth);
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)

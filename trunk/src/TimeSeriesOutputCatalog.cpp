@@ -274,6 +274,38 @@ AbstractTimeSeriesOutput* TimeSeriesOutputCatalog::factory(const QString & class
     return atso;
 }
 
+void TimeSeriesOutputCatalog::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    foreach(const ptree::value_type &v, pt.get_child("outputs"))
+    {
+        std::size_t pos = v.first.find("-");
+        std::string name = v.first.substr(0, pos);
+        AbstractTimeSeriesOutput * atso = factory(QString::fromStdString(name), m_outputCatalog);
+        m_outputs << atso;
+        m_outputs.last()->ptRead(v.second);
+    }
+
+    endResetModel();
+}
+
+void TimeSeriesOutputCatalog::ptWrite(ptree &pt) const
+{
+    int counter = 0;
+
+    ptree m_arr;
+    foreach(AbstractTimeSeriesOutput *atso, m_outputs)
+    {
+        ptree patso;
+        atso->ptWrite(patso);
+        std::stringstream fmt;
+        fmt << atso->metaObject()->className() << "-" << counter++;
+        m_arr.add_child(fmt.str(), patso);
+    }
+    pt.add_child("outputs", m_arr);
+}
+
 
 QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc)
 {
@@ -288,7 +320,7 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc
 }
 
 QDataStream & operator>> (QDataStream & in, TimeSeriesOutputCatalog* tsoc)
-{    
+{
     quint8 ver;
     in >> ver;
 

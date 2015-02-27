@@ -129,6 +129,17 @@ void AbstractProfileOutput::extrap(const QVector<double> & ref, QVector<double> 
     data << data.last() + slope * layerThickness / 2.;
 }
 
+void AbstractProfileOutput::ptRead(const ptree &pt)
+{
+    AbstractOutput::ptRead(pt);
+    m_enabled = pt.get<bool>("enabled");
+}
+
+void AbstractProfileOutput::ptWrite(ptree &pt) const
+{
+    AbstractOutput::ptWrite(pt);
+    pt.put("enabled", m_enabled);
+}
 
 QDataStream & operator<< (QDataStream & out, const AbstractProfileOutput* apo)
 {

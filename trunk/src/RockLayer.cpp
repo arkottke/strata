@@ -79,6 +79,21 @@ void RockLayer::setAvgDamping(double damping )
     emit avgDampingChanged(m_avgDamping);
 }
 
+void RockLayer::ptRead(const ptree &pt)
+{
+    VelocityLayer::ptRead(pt);
+    m_untWt = pt.get<double>("untWt");
+    double avgDamping = pt.get<double>("avgDamping");
+    setAvgDamping(avgDamping);
+}
+
+void RockLayer::ptWrite(ptree &pt) const
+{
+    VelocityLayer::ptWrite(pt);
+    pt.put("untWt", m_untWt);
+    pt.put("avgDamping", m_avgDamping);
+}
+
 QDataStream & operator<< (QDataStream & out, const RockLayer* rl)
 {
     out << (quint8)1;

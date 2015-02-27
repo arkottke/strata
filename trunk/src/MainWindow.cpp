@@ -276,15 +276,21 @@ void MainWindow::open(QString fileName)
     }
 
     if (fileName.isEmpty()) {
-        QString dir = m_settings->value("projectDirectory",
-                                        QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
-                                        ).toString();
+
+        // setup multiple filters
+        QString selfilter = tr("strata (*.strata);;strata human readable (*.stratahr)");
+
         // Prompt for a fileName
         fileName = QFileDialog::getOpenFileName(
-                this,
-                tr("Select a Strata file..."),
-                dir,
-                "Strata File (*.strata)");
+                    this,
+                    tr("Open strata file..."),
+                    (m_model->fileName().isEmpty() ?
+                     m_settings->value("projectDirectory",
+                                       QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+                                       ).toString()
+                                           : m_model->fileName()),
+                    "Strata File (*.strata);;strata human readable (*.stratahr)",
+                    &selfilter);
 
         if (!fileName.isEmpty()) {
             // Save the state
@@ -295,8 +301,14 @@ void MainWindow::open(QString fileName)
     }   
 
     SiteResponseModel* srm = new SiteResponseModel;
-    srm->load(fileName);
-
+    if (fileName.endsWith(".strata"))
+    {
+        srm->load(fileName);
+    }
+    else
+    {
+        srm->loadReadable(fileName);
+    }
     setModel(srm);
 }
 
@@ -305,15 +317,24 @@ bool MainWindow::save()
     // If no file name is selected run saveAs
     if (m_model->fileName().isEmpty())
         return saveAs();
-    
+
     // Save the model
-    m_model->save();
+    if (m_model->fileName().endsWith(".strata"))
+    {
+       m_model->save();
+    }
+    else
+    {
+       m_model->saveReadable();
+    }
 
     return true;
 }
 
 bool MainWindow::saveAs()
 {
+    // setup multiple filters
+    QString selfilter = tr("strata (*.strata);;strata human readable (*.stratahr)");
     // Prompt for a fileName
     QString fileName = QFileDialog::getSaveFileName(
             this,
@@ -323,11 +344,12 @@ bool MainWindow::saveAs()
                                QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
                                ).toString()
                                    : m_model->fileName()),
-            "Strata File (*.strata)");
+            "Strata File (*.strata);;strata human readable (*.stratahr)",
+            &selfilter);
 
     if (!fileName.isEmpty()) {
-        // Make sure that the file name ends with .strata
-        if (!fileName.endsWith(".strata", Qt::CaseInsensitive)) {
+        // Make sure that the file name ends with .strata or .stratahr
+        if (!fileName.endsWith(".strata", Qt::CaseInsensitive) && !fileName.endsWith(".stratahr", Qt::CaseInsensitive)) {
             fileName.append(".strata");
         }
 

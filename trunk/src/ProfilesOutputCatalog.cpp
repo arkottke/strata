@@ -162,9 +162,38 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
     return list;
 }
 
+ 
+void ProfilesOutputCatalog::ptRead(const ptree &pt)
+{
+    QMap<QString, AbstractProfileOutput*> output_map = QMap<QString, AbstractProfileOutput*>();
+    foreach (AbstractProfileOutput* o, m_outputs)
+        output_map.insert(o->metaObject()->className(), o);
+
+    beginResetModel();
+
+    foreach(const ptree::value_type &v, pt)
+    {
+        QString key = QString::fromStdString(v.first);
+        if (output_map.contains(key)) {
+            output_map[key]->ptRead(v.second);
+        }
+    }
+
+    endResetModel();
+}
+
+void ProfilesOutputCatalog::ptWrite(ptree &pt) const
+{
+    foreach(AbstractProfileOutput *apo, m_outputs)
+    {
+        ptree apt;
+        apo->ptWrite(apt);
+        pt.put_child(apo->metaObject()->className(), apt);
+    }
+}
 
 QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
-{    
+{
     out << (quint8)4;
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs)

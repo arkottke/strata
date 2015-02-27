@@ -26,6 +26,10 @@
 
 #include "Location.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 #include <gsl/gsl_rng.h>
 
 class NonlinearPropertyRandomizer;
@@ -165,6 +169,9 @@ public:
 
     //! Create a html document containing the information of the model
     QString toHtml() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setMaxFreq(double maxFreq);

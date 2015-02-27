@@ -205,6 +205,38 @@ void NonlinearPropertyRandomizer::varyProperty(
     property->setVaried(varied);
 }
 
+void NonlinearPropertyRandomizer::ptRead(const ptree &pt)
+{
+    m_enabled = pt.get<bool>("enabled");
+    m_model = (NonlinearPropertyRandomizer::Model) pt.get<int>("model");
+    m_bedrockIsEnabled = pt.get<bool>("bedrockIsEnabled");
+    m_correl = pt.get<double>("correl");
+
+    ptree modulusStdev = pt.get_child("modulusStdev");
+    m_modulusStdev->ptRead(modulusStdev);
+
+    ptree dampingStdev = pt.get_child("dampingStdev");
+    m_dampingStdev->ptRead(dampingStdev);
+
+    setModel(m_model);
+}
+
+void NonlinearPropertyRandomizer::ptWrite(ptree &pt) const
+{
+    pt.put("enabled", m_enabled);
+    pt.put("model", (int) m_model);
+    pt.put("bedrockIsEnabled", m_bedrockIsEnabled);
+    pt.put("correl", m_correl);
+
+    ptree modulusStdev;
+    m_modulusStdev->ptWrite(modulusStdev);
+    pt.put_child("modulusStdev", modulusStdev);
+
+    ptree dampingStdev;
+    m_dampingStdev->ptWrite(dampingStdev);
+    pt.put_child("dampingStdev", dampingStdev);
+}
+
 QDataStream& operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npv)
 {
     out << (quint8)1;

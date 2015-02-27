@@ -23,6 +23,9 @@
 #define RATIOS_OUTPUT_CATALOG_H
 
 #include "AbstractMutableOutputCatalog.h"
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class AbstractRatioOutput;
 
@@ -52,6 +55,9 @@ public:
 
     virtual void addRow(const QString &name);
     virtual QList<AbstractOutput*> outputs() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     AbstractRatioOutput* factory(const QString & className, OutputCatalog * parent) const;

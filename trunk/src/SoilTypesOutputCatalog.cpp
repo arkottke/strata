@@ -28,6 +28,7 @@
 #include "SoilTypeOutput.h"
 
 #include <QStringList>
+#include <boost/lexical_cast.hpp>
 
 SoilTypesOutputCatalog::SoilTypesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog), m_soilTypeCatalog(0)
@@ -151,6 +152,35 @@ QList<AbstractOutput*> SoilTypesOutputCatalog::outputs() const
     }
 
     return list;
+}
+
+void SoilTypesOutputCatalog::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    foreach(const ptree::value_type &v, pt)
+    {
+        int row = boost::lexical_cast<int>(v.first);
+        SoilTypeOutput * sto = new SoilTypeOutput(m_soilTypeCatalog->soilType(row), m_outputCatalog);
+        m_outputs << sto;
+        m_outputs.last()->ptRead(v.second);
+    }
+
+    endResetModel();
+}
+
+void SoilTypesOutputCatalog::ptWrite(ptree &pt) const
+{
+    foreach(SoilTypeOutput *sto, m_outputs)
+    {
+        int row = m_soilTypeCatalog->rowOf(sto->soilType());
+        std::stringstream ss;
+        ss << row;
+
+        ptree stp;
+        sto->ptWrite(stp);
+        pt.add_child(ss.str(), stp);
+    }
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc)

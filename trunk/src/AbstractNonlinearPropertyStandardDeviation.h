@@ -28,6 +28,11 @@
 
 #include <QScriptEngine>
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
+
 class AbstractNonlinearPropertyStandardDeviation : public QObject
 {
     Q_OBJECT
@@ -48,6 +53,9 @@ public:
 
     //! Limit the value to the minimum and maximum
     double limit(double value) const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void minChanged(double min);

@@ -27,6 +27,10 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 
 class TextLog : public QObject
 {
@@ -57,6 +61,10 @@ class TextLog : public QObject
         void setLevel(Level level);
 
         const QStringList& text() const;
+
+        void ptRead(const ptree &pt);
+        void ptWrite(ptree &pt) const;
+
     public slots:
         void setLevel(int level);
 

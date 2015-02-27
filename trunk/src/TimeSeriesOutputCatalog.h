@@ -23,15 +23,18 @@
 #define TIME_SERIES_OUTPUT_CATALOG_H
 
 #include "AbstractMutableOutputCatalog.h"
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 class AbstractTimeSeriesOutput;
 
 class TimeSeriesOutputCatalog : public AbstractMutableOutputCatalog
 {
-Q_OBJECT
+    Q_OBJECT
 
-friend QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc);
-friend QDataStream & operator>> (QDataStream & in, TimeSeriesOutputCatalog* tsoc);
+    friend QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc);
+    friend QDataStream & operator>> (QDataStream & in, TimeSeriesOutputCatalog* tsoc);
 
 public:
     explicit TimeSeriesOutputCatalog(OutputCatalog *outputCatalog);
@@ -51,6 +54,9 @@ public:
 
     virtual void addRow(const QString &name);
     virtual QList<AbstractOutput*> outputs() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:   
     AbstractTimeSeriesOutput* factory(const QString & className, OutputCatalog * parent) const;

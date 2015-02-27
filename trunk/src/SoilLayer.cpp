@@ -98,6 +98,18 @@ double SoilLayer::density() const
         return -1;
 }
 
+void SoilLayer::ptRead(const ptree &pt)
+{
+    VelocityLayer::ptRead(pt);
+    m_thickness = pt.get<double>("thickness");
+}
+
+void SoilLayer::ptWrite(ptree &pt) const
+{
+    VelocityLayer::ptWrite(pt);
+    pt.put("thickness", m_thickness);
+}
+
 QDataStream & operator<< (QDataStream & out, const SoilLayer* sl)
 {
     out << (quint8)1;

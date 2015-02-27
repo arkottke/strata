@@ -178,6 +178,18 @@ double AbstractIterativeCalculator::maxError(const QVector<double> &maxStrain)
     return max;
 }
 
+void AbstractIterativeCalculator::ptRead(const ptree &pt)
+{
+    m_maxIterations = pt.get<int>("maxIterations");
+    m_errorTolerance = pt.get<double>("errorTolerance");
+}
+
+void AbstractIterativeCalculator::ptWrite(ptree &pt) const
+{
+    pt.put("maxIterations", m_maxIterations);
+    pt.put("errorTolerance", m_errorTolerance);
+}
+
 QDataStream & operator<< (QDataStream & out, const AbstractIterativeCalculator* aic)
 {
     out << (quint8)1;

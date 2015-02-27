@@ -30,8 +30,6 @@
 #include <cmath>
 #include <iostream>
 
-
-
 AbstractMotion::AbstractMotion(QObject * parent)
     : MyAbstractTableModel(parent)
 {
@@ -235,6 +233,22 @@ void AbstractMotion::setPgv(double pgv)
 {
     m_pgv = pgv;
     emit pgvChanged(m_pgv);
+}
+
+void AbstractMotion::ptRead(const ptree &pt)
+{
+    int type = pt.get<int>("type");
+    m_description = QString::fromStdString(pt.get<std::string>("description"));
+    m_enabled = pt.get<bool>("enabled");
+
+    setType(type);
+}
+
+void AbstractMotion::ptWrite(ptree &pt) const
+{
+    pt.put("type", (int) m_type);
+    pt.put("description", m_description.toStdString());
+    pt.put("enabled", m_enabled);
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)

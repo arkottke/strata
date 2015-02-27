@@ -23,6 +23,8 @@
 
 #include <QDebug>
 
+#include <boost/lexical_cast.hpp>
+
 RvtMotion::RvtMotion(QObject * parent) : AbstractRvtMotion(parent)
 {
     m_duration = 5.0;
@@ -316,6 +318,32 @@ bool RvtMotion::loadFromTextStream(QTextStream &stream, double scale)
     return true;
 }
 
+void RvtMotion::ptRead(const ptree &pt)
+{
+    AbstractRvtMotion::ptRead(pt);
+
+    ptree freq = pt.get_child("freq");
+    foreach(const ptree::value_type &v, freq)
+    {
+        m_freq << boost::lexical_cast<double>(v.second.data());
+    }
+
+    calculate();
+}
+
+void RvtMotion::ptWrite(ptree &pt) const
+{
+    AbstractRvtMotion::ptWrite(pt);
+
+    ptree freq;
+    foreach(const double & d, m_freq)
+    {
+        ptree val;
+        val.put("", d);
+        freq.push_back(std::make_pair("", val));
+    }
+    pt.add_child("freq", freq);
+}
 
 QDataStream & operator<< (QDataStream & out, const RvtMotion* rm)
 {

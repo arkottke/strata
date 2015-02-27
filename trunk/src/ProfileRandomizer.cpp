@@ -102,6 +102,39 @@ VelocityVariation* ProfileRandomizer::velocityVariation()
     return m_velocityVariation;
 }
 
+void ProfileRandomizer::ptRead(const ptree &pt)
+{
+    bool enabled = pt.get<bool>("enabled");
+
+    ptree velocityVariation = pt.get_child("velocityVariation");
+    m_velocityVariation->ptRead(velocityVariation);
+
+    ptree layerThicknessVariation = pt.get_child("layerThicknessVariation");
+    m_layerThicknessVariation->ptRead(layerThicknessVariation);
+
+    ptree bedrockDepthVariation = pt.get_child("bedrockDepthVariation");
+    m_bedrockDepthVariation->ptRead(bedrockDepthVariation);
+
+    setEnabled(enabled);
+}
+
+void ProfileRandomizer::ptWrite(ptree &pt) const
+{
+    pt.put("enabled", m_enabled);
+
+    ptree velocityVariation;
+    m_velocityVariation->ptWrite(velocityVariation);
+    pt.add_child("velocityVariation", velocityVariation);
+
+    ptree layerThicknessVariation;
+    m_layerThicknessVariation->ptWrite(layerThicknessVariation);
+    pt.add_child("layerThicknessVariation", layerThicknessVariation);
+
+    ptree bedrockDepthVariation;
+    m_bedrockDepthVariation->ptWrite(bedrockDepthVariation);
+    pt.add_child("bedrockDepthVariation", bedrockDepthVariation);
+}
+
 QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pv)
 {
     out << (quint8)1;

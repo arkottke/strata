@@ -28,6 +28,9 @@
 #include <QProgressBar>
 #include <QTextStream>
 #include <QVector>
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
 
 #include <gsl/gsl_integration.h>
 
@@ -88,6 +91,9 @@ public:
     virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
 
     void setOscCorrection(OscillatorCorrection oscCorrection);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     //! Stop the current calculation

@@ -24,6 +24,8 @@
 
 #include <QDebug>
 
+#include <boost/lexical_cast.hpp>
+
 ResponseSpectrum::ResponseSpectrum(QObject * parent)
         : MyAbstractTableModel(parent)
 {
@@ -200,6 +202,48 @@ bool ResponseSpectrum::removeRows ( int row, int count, const QModelIndex &paren
 
     emit endRemoveRows();
     return true;
+}
+
+void ResponseSpectrum::ptRead(const ptree &pt)
+{
+    m_modified = pt.get<bool>("modified");
+    m_damping = pt.get<double>("damping");
+
+    ptree period = pt.get_child("period");
+    foreach(const ptree::value_type &v, period)
+    {
+        m_period << boost::lexical_cast<double>(v.second.data());
+    }
+
+    ptree sa = pt.get_child("sa");
+    foreach(const ptree::value_type &v, sa)
+    {
+        m_sa << boost::lexical_cast<double>(v.second.data());
+    }
+}
+
+void ResponseSpectrum::ptWrite(ptree &pt) const
+{
+    pt.put("modified", m_modified);
+    pt.put("damping", m_damping);
+
+    ptree period;
+    foreach(const double & d, m_period)
+    {
+        ptree val;
+        val.put("", d);
+        period.push_back(std::make_pair("", val));
+    }
+    pt.add_child("period", period);
+
+    ptree sa;
+    foreach(const double & d, m_sa)
+    {
+        ptree val;
+        val.put("", d);
+        sa.push_back(std::make_pair("", val));
+    }
+    pt.add_child("sa", sa);
 }
 
 QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs)

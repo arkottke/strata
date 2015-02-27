@@ -30,6 +30,7 @@ SoilTypeOutput::SoilTypeOutput(SoilType* soilType, OutputCatalog* catalog) :
     QObject(soilType), m_soilType(soilType), m_enabled(false)
 {
     m_modulus = new NonlinearPropertyOutput(soilType->modulusModel(), catalog);
+
     m_modulus->setSoilName(soilType->name());
     connect(m_soilType, SIGNAL(nameChanged(QString)),
             m_modulus, SLOT(setSoilName(QString)));
@@ -73,6 +74,30 @@ void SoilTypeOutput::setEnabled(bool enabled)
 {
     m_enabled = enabled;
     emit wasModified();
+}
+
+void SoilTypeOutput::ptRead(const ptree &pt)
+{
+    m_enabled = pt.get<bool>("enabled");
+
+    ptree modulus = pt.get_child("modulus");
+    m_modulus->ptRead(modulus);
+
+    ptree damping = pt.get_child("damping");
+    m_damping->ptRead(damping);
+}
+
+void SoilTypeOutput::ptWrite(ptree &pt) const
+{
+    pt.put("enabled", m_enabled);
+
+    ptree modulus;
+    m_modulus->ptWrite(modulus);
+    pt.add_child("modulus", modulus);
+
+    ptree damping;
+    m_damping->ptWrite(damping);
+    pt.add_child("damping", damping);
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto)

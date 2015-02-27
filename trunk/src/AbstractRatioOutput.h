@@ -25,6 +25,10 @@
 #include "AbstractOutput.h"
 #include "AbstractMotion.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class OutputStatistics;
 
 class AbstractRatioOutput : public AbstractOutput
@@ -46,6 +50,9 @@ public:
     double outDepth() const;
     AbstractMotion::Type outType() const;
     void setOutType(AbstractMotion::Type outType);
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 public slots:
     void setInDepth(double inDepth);

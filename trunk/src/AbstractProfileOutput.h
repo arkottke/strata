@@ -24,6 +24,10 @@
 
 #include "AbstractOutput.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 class OutputStatistics;
 class OutputCatalog;
 
@@ -49,6 +53,9 @@ public:
     void setEnabled(bool enabled);
 
     virtual AbstractOutput::CurveType curveType() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 protected:
     QString fileName(int motion = 0) const;

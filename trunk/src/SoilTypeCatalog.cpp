@@ -297,6 +297,31 @@ void SoilTypeCatalog::updateUnits()
     emit headerDataChanged(Qt::Horizontal, UnitWeightColumn, UnitWeightColumn);
 }
 
+void SoilTypeCatalog::ptRead(const ptree &pt)
+{
+    beginResetModel();
+
+    foreach(const ptree::value_type &v, pt.get_child("soilTypes"))
+    {
+       SoilType * st = new SoilType(this);
+       st->ptRead(v.second);
+       m_soilTypes << st;
+    }
+
+    endResetModel();
+}
+
+void SoilTypeCatalog::ptWrite(ptree &pt) const
+{
+    ptree m_arr;
+    foreach(const SoilType *st, m_soilTypes)
+    {
+        ptree soil;
+        st->ptWrite(soil);
+        m_arr.push_back(std::make_pair("", soil));
+    }
+    pt.add_child("soilTypes", m_arr);
+}
 
 QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc)
 {

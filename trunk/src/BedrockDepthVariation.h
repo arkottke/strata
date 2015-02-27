@@ -24,6 +24,10 @@
 
 #include "Distribution.h"
 
+#include <boost/property_tree/ptree.hpp>
+
+using boost::property_tree::ptree;
+
 #include <gsl/gsl_rng.h>
 
 class ProfileRandomizer;
@@ -39,6 +43,9 @@ public:
     explicit BedrockDepthVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer);
 
     bool enabled() const;
+
+    void ptRead(const ptree &pt);
+    void ptWrite(ptree &pt) const;
 
 signals:
     void enabledChanged(bool enabled);
