@@ -218,7 +218,7 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
         if (ver < 3 && qobject_cast<VerticalEffectiveStressProfileOutput*>(apo))
             continue;
         if (ver < 4 && qobject_cast<AriasIntensityProfileOutput*>(apo))
-            continue;
+            continue;        
 
         in >> apo;
     }
