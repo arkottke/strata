@@ -451,14 +451,11 @@ void AbstractOutput::ptRead(const ptree &pt)
     m_exportEnabled = pt.get<bool>("exportEnabled");
 
     ptree data = pt.get_child("data");
-    foreach(const ptree::value_type &t, data)
-    {
+    foreach(const ptree::value_type &t, data) {
         QList<QVector<double> > qelem;
-        foreach(const ptree::value_type &v, t.second)
-        {
+        foreach(const ptree::value_type &v, t.second) {
             QVector<double> qvect;
-            foreach(const ptree::value_type &vv, v.second)
-            {
+            foreach(const ptree::value_type &vv, v.second) {
                 qvect.append(boost::lexical_cast<double>(vv.second.data()));
             }
             qelem << qvect;
@@ -479,23 +476,21 @@ void AbstractOutput::ptRead(const ptree &pt)
 
 void AbstractOutput::ptWrite(ptree &pt) const
 {
+    pt.put("className", metaObject()->className());
     pt.put("exportEnabled", m_exportEnabled);
     ptree data;
-    foreach(const QList<QVector<double> > &l, m_data)
-    {
-        ptree elem;
-        foreach(const QVector<double> &v, l)
-        {
-            ptree vect;
-            foreach(const double &vv, v)
-            {
+    foreach(const QList<QVector<double> > &l, m_data) {
+        ptree pt_site;
+        foreach(const QVector<double> &v, l) {
+            ptree pt_motion;
+            foreach(const double &vv, v) {
                 ptree val;
                 val.put("", vv);
-                vect.push_back(std::make_pair("", val));
+                pt_motion.push_back(std::make_pair("", val));
             }
-            elem.add_child("v", vect);
+            pt_site.push_back(std::make_pair("", pt_motion));
         }
-        data.add_child("l", elem);
+        data.push_back(std::make_pair("", pt_site));
     }
     pt.add_child("data", data);
 }

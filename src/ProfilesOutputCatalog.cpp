@@ -173,7 +173,8 @@ void ProfilesOutputCatalog::ptRead(const ptree &pt)
 
     foreach(const ptree::value_type &v, pt)
     {
-        QString key = QString::fromStdString(v.first);
+        QString key = QString::fromStdString(
+                    v.second.get<std::string>("className"));
         if (output_map.contains(key)) {
             output_map[key]->ptRead(v.second);
         }
@@ -184,11 +185,10 @@ void ProfilesOutputCatalog::ptRead(const ptree &pt)
 
 void ProfilesOutputCatalog::ptWrite(ptree &pt) const
 {
-    foreach(AbstractProfileOutput *apo, m_outputs)
-    {
+    foreach(AbstractProfileOutput *apo, m_outputs) {
         ptree apt;
         apo->ptWrite(apt);
-        pt.put_child(apo->metaObject()->className(), apt);
+        pt.push_back(std::make_pair("", apt));
     }
 }
 
@@ -196,8 +196,9 @@ QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
 {
     out << (quint8)4;
 
-    foreach (AbstractProfileOutput* apo, poc->m_outputs)
+    foreach (AbstractProfileOutput* apo, poc->m_outputs) {
         out << apo;
+    }
 
     return out;
 }
@@ -206,7 +207,6 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
 {
     quint8 ver;
     in >> ver;
-
     poc->beginResetModel();
 
     foreach (AbstractProfileOutput* apo, poc->m_outputs) {
@@ -224,6 +224,5 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
     }
 
     poc->endResetModel();
-
     return in;
 }

@@ -673,7 +673,7 @@ void OutputCatalog::ptWrite(ptree &pt) const
             val.put("", b);
             el.push_back(std::make_pair("", val));
         }
-        enabled.add_child("l", el);
+        enabled.push_back(std::make_pair("", el));
     }
     pt.add_child("enabled", enabled);
 

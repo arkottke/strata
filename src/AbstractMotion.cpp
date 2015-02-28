@@ -246,6 +246,7 @@ void AbstractMotion::ptRead(const ptree &pt)
 
 void AbstractMotion::ptWrite(ptree &pt) const
 {
+    pt.put("className", metaObject()->className());
     pt.put("type", (int) m_type);
     pt.put("description", m_description.toStdString());
     pt.put("enabled", m_enabled);
