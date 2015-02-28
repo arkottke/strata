@@ -13,8 +13,8 @@
 
 ;--------------------------------
 ; Path to Qt
-!Define QT_PATH "C:\Qt\4.8.6"
-!Define MINGW_PATH "C:\mingw32\bin"
+!Define QT_PATH "C:\devel\Qt\4.8.6"
+!Define MINGW_PATH "C:\Program Files\mingw-w64\i686-4.8.2-posix-dwarf-rt_v3-rev4\bin"
 
 ;--------------------------------
 ;Variables
@@ -104,7 +104,7 @@ Section "!Core Files" SecProgram
   SetOutPath "$INSTDIR"
 
   ;Main Strata files
-  file "..\build-strata\release\strata.exe"
+  file "release\strata.exe"
   file "/oname=$INSTDIR\readme.txt" "README"
 
   ;Icons
@@ -112,10 +112,9 @@ Section "!Core Files" SecProgram
   file "/oname=$INSTDIR\strata-data.ico" "resources\images\file-data.ico"
 
   ;Main libraries
-  file "..\fftw-3.3.4\.libs\libfftw3-3.dll"
-  file "..\GetGnuWin32\gnuwin32\bin\libgsl.dll"
-  file "..\GetGnuWin32\gnuwin32\bin\libgslcblas.dll"
-  file "..\GetGnuWin32\gnuwin32\bin\libm5.dll"
+  file "C:\devel\fftw-3.3.4\libfftw3-3.dll"
+  file "C:\devel\GnuWin32\bin\libgsl.dll"
+  file "C:\devel\GnuWin32\bin\libgslcblas.dll"
   file "${QT_PATH}\bin\QtCore4.dll"
   file "${QT_PATH}\bin\QtOpenGL4.dll"
   file "${QT_PATH}\bin\QtGui4.dll"

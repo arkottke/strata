@@ -79,25 +79,25 @@ win32 {
         -lfftw3-3 \
         -lgsl \
         -lgslcblas \
-        -L$$PWD/../fftw-3.3.4/.libs \
-        -L$$PWD/../GetGnuWin32/gnuwin32/lib \
-        -L$$PWD/../build-qwt/lib \
-        -LC:/boost/lib32-mingw \
-        -LC:/mingw32/bin
+        -LC:/devel/fftw-3.3.4 \
+        -LC:/devel/GnuWin32/bin \
+        -LC:/devel/qwt-6.1/lib \
+		-LC:/devel/boost_1_57_0/stage/lib \
+        -L"C:/Program Files/mingw-w64/i686-4.8.2-posix-dwarf-rt_v3-rev4/bin"
     INCLUDEPATH += . \
-        $$PWD/../fftw-3.3.4/api \
-        $$PWD/../qwt-6.1/src \
-        $$PWD/../GetGnuWin32/gnuwin32/include \
-        C:/boost
+        C:/devel/fftw-3.3.4 \
+        C:/devel/qwt-6.1/src \
+        C:/devel/GnuWin32/include \
+        C:/devel/boost_1_57_0
     RC_FILE = strata.rc
     CONFIG(debug, debug|release ) {
         LIBS += -lqwtd \
-                -lboost_serialization-mgw47-mt-d-1_55  \
-                -lboost_system-mgw47-mt-d-1_55
+                -lboost_serialization-mgw48-mt-d-1_57  \
+                -lboost_system-mgw48-mt-d-1_57
     } else {
         LIBS += -lqwt \
-                -lboost_serialization-mgw47-mt-1_55  \
-                -lboost_system-mgw47-mt-1_55
+                -lboost_serialization-mgw48-mt-1_57  \
+                -lboost_system-mgw48-mt-1_57
     }
 }
 
