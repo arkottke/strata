@@ -352,29 +352,27 @@ void MotionLibrary::ptRead(const ptree &pt)
     ptree motions = pt.get_child("motions");
     foreach(const ptree::value_type &v, motions)
     {
+        QString className = QString::fromStdString(
+                    v.second.get<std::string>("className"));
+
         AbstractMotion * m;
-        if (v.first.find("TimeSeriesMotion")!=std::string::npos) {
+        if (className == "TimeSeriesMotion") {
             m = new TimeSeriesMotion(this);
-            ((TimeSeriesMotion *) m)->ptRead(v.second);
-            ((TimeSeriesMotion *) m)->setSaveData(m_saveData);
-            if (((TimeSeriesMotion *) m)->accel().size()) {
-                m_motions.append(m);
-            } else {
-                deleteLater();
-            }
-        } else if (v.first.find("RvtMotion")!=std::string::npos) {
+            qobject_cast<TimeSeriesMotion*>(m)->ptRead(v.second);
+            qobject_cast<TimeSeriesMotion*>(m)->setSaveData(m_saveData);
+        } else if (className == "RvtMotion") {
             m = new RvtMotion(this);
-            ((RvtMotion *) m)->ptRead(v.second);
-            m_motions.append(m);
-        } else if (v.first.find("CompatibleRvtMotion")!=std::string::npos) {
+            qobject_cast<RvtMotion*>(m)->ptRead(v.second);
+        } else if (className == "CompatibleRvtMotion") {
             m = new CompatibleRvtMotion(this);
-            ((CompatibleRvtMotion *) m)->ptRead(v.second);
-            m_motions.append(m);
-        } else if (v.first.find("SourceTheoryRvtMotion")!=std::string::npos) {
+            qobject_cast<CompatibleRvtMotion*>(m)->ptRead(v.second);
+        } else if (className == "SourceTheoryRvtMotion") {
             m = new SourceTheoryRvtMotion(this);
-            ((SourceTheoryRvtMotion *) m)->ptRead(v.second);
-            m_motions.append(m);
+            qobject_cast<SourceTheoryRvtMotion*>(m)->ptRead(v.second);
+        } else {
+            qCritical("className '%s' not recognized!", qPrintable(className));
         }
+        m_motions.append(m);
     }
 
     endResetModel();
@@ -385,32 +383,23 @@ void MotionLibrary::ptWrite(ptree &pt) const
     pt.put("approach", (int) m_approach);
     pt.put("saveData", m_saveData);
 
-    // generate unqiue key names
-    int counter = 0;
-
     ptree motions;
     foreach(AbstractMotion *m, m_motions)
     {
-        ptree motion;
-        std::stringstream fmt;
+        ptree motion;        
+        m->ptWrite(motion);
+
         const QString & className = m->metaObject()->className();
         if (className == "TimeSeriesMotion") {
             qobject_cast<const TimeSeriesMotion*>(m)->ptWrite(motion);
-            fmt << "TimeSeriesMotion-" << counter++;
-            motions.add_child(fmt.str(), motion);
         } else if (className == "RvtMotion") {
             qobject_cast<const RvtMotion*>(m)->ptWrite(motion);
-            fmt << "RvtMotion-" << counter++;
-            motions.add_child(fmt.str(), motion);
         } else if (className == "CompatibleRvtMotion") {
             qobject_cast<const CompatibleRvtMotion*>(m)->ptWrite(motion);
-            fmt << "CompatibleRvtMotion-" << counter++;
-            motions.add_child(fmt.str(), motion);
         } else if (className == "SourceTheoryRvtMotion") {
             qobject_cast<const SourceTheoryRvtMotion*>(m)->ptWrite(motion);
-            fmt << "SourceTheoryRvtMotion-" << counter++;
-            motions.add_child(fmt.str(), motion);
         }
+        motions.push_back(std::make_pair("", motion));
     }
     pt.add_child("motions", motions);
 }

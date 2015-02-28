@@ -1233,16 +1233,14 @@ void SoilProfile::ptWrite(ptree &pt) const
     pt.add_child("soilTypeCatalog", soilTypeCatalog);
 
     ptree soilLayers;
-
     for (int  i =0; i < m_soilLayers.size(); ++i) {
-        ptree soilLayer;
-        m_soilLayers.at(i)->ptWrite(soilLayer);
-        soilLayer.add("soilType", m_soilTypeCatalog->rowOf(
+        ptree sl;
+        m_soilLayers.at(i)->ptWrite(sl);
+        sl.add("soilType",
+                      m_soilTypeCatalog->rowOf(
                           m_soilLayers.at(i)->soilType()));
 
-        std::stringstream ss;
-        ss << i;
-        soilLayers.put_child(ss.str(), soilLayer);
+        soilLayers.push_back(std::make_pair("", sl));
     }
     pt.add_child("soilLayers", soilLayers);
 
