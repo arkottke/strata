@@ -493,8 +493,9 @@ void OutputCatalog::saveResults(int motion, AbstractCalculator* const calculator
     populateDepthVector(
                 calculator->site()->subLayers().last().depthToBase());
 
-    foreach (AbstractOutput* output, m_outputs)
+    foreach (AbstractOutput* output, m_outputs) {
         output->addData(motion, calculator);
+    }
 }
 
 void OutputCatalog::removeLastSite()
@@ -655,6 +656,8 @@ void OutputCatalog::ptRead(const ptree &pt)
         populateDepthVector(depth);
     }
 
+
+
     endResetModel();
 }
 
@@ -713,7 +716,7 @@ void OutputCatalog::ptWrite(ptree &pt) const
     m_log->ptWrite(log);
     pt.add_child("log", log);
 
-    m_depth.size() ? pt.put("depth", m_depth.last()) : pt.put("depth", -1);
+    m_depth.size() ? pt.put("depth", m_depth.last()) : pt.put("depth", -1);  
 }
 
 QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)

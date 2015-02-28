@@ -276,10 +276,6 @@ void MainWindow::open(QString fileName)
     }
 
     if (fileName.isEmpty()) {
-
-        // setup multiple filters
-        QString selfilter = tr("strata (*.strata);;strata human readable (*.stratahr)");
-
         // Prompt for a fileName
         fileName = QFileDialog::getOpenFileName(
                     this,
@@ -289,8 +285,9 @@ void MainWindow::open(QString fileName)
                                        QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
                                        ).toString()
                                            : m_model->fileName()),
-                    "Strata File (*.strata);;strata human readable (*.stratahr)",
-                    &selfilter);
+                    "Strata Files (*.strata *.stratahr);;"
+                    "Strata Binary File (*.strata);;"
+                    "Strata Human-Readable File (*.stratahr)");
 
         if (!fileName.isEmpty()) {
             // Save the state
@@ -333,8 +330,6 @@ bool MainWindow::save()
 
 bool MainWindow::saveAs()
 {
-    // setup multiple filters
-    QString selfilter = tr("strata (*.strata);;strata human readable (*.stratahr)");
     // Prompt for a fileName
     QString fileName = QFileDialog::getSaveFileName(
             this,
@@ -344,8 +339,9 @@ bool MainWindow::saveAs()
                                QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
                                ).toString()
                                    : m_model->fileName()),
-            "Strata File (*.strata);;strata human readable (*.stratahr)",
-            &selfilter);
+                "Strata Files (*.strata *.stratahr);;"
+                "Strata Binary File (*.strata);;"
+                "Strata Human-Readable File (*.stratahr)");
 
     if (!fileName.isEmpty()) {
         // Make sure that the file name ends with .strata or .stratahr
