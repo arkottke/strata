@@ -201,7 +201,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm(bool readOnly)
 
     // Distance
     doubleSpinBox = new QDoubleSpinBox;
-    doubleSpinBox->setRange(0, 500);
+    doubleSpinBox->setRange(0, 2000);
     doubleSpinBox->setDecimals(1);
     doubleSpinBox->setSingleStep(1);
     doubleSpinBox->setSuffix(" km");
