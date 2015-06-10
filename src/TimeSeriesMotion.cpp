@@ -32,7 +32,13 @@
 #include <QTextStream>
 #include <QDebug>
 
+#ifdef USE_FFTW
 #include <fftw3.h>
+#else
+#include <gsl/gsl_fft_real.h>
+#include <gsl/gsl_fft_halfcomplex.h>
+#include <gsl/gsl_errno.h>
+#endif
 
 #include <gsl/gsl_multifit.h>
 
@@ -589,6 +595,12 @@ void TimeSeriesMotion::calculate()
     // the lenght of the acceleration time history.
     fft(accel, m_fourierAcc);
 
+    // Test the FFT/IFFT methods
+    // QVector<double> test;
+    // ifft(m_fourierAcc, test);
+    // for (int i = 0; i < test.size(); ++i)
+    //     Q_ASSERT(fabs(test.at(i) - accel.at(i)) < 1E-5);
+
     // Compute FAS of the velocity time series
     fft(integrate(accel), m_fourierVel);
 
@@ -729,6 +741,10 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
         int size = 1;
         while (size < minSize)
             size <<= 1;
+
+        // Need to have an odd number of points in the frequency domain for a
+        // equal number in the time domain.
+        size += 1;
 
         // Only apply the SDOF transfer function over frequencies defined by the original motion
         QVector<std::complex<double> > tf = calcSdofTf(period.at(i), damping);
@@ -902,6 +918,7 @@ QVector<double> TimeSeriesMotion::absFourier(const QVector< std::complex<double>
 
 void TimeSeriesMotion::fft( const QVector<double>& in, QVector<std::complex<double> >& out ) const
 {
+/*
     // The number of elements in the double array is 2 * n, but only the first
     // n are filled with data.  For the complex array, n/2 + 1 elements are
     // required.
@@ -923,17 +940,45 @@ void TimeSeriesMotion::fft( const QVector<double>& in, QVector<std::complex<doub
 
     // Copy the data to the output QVector
     out.resize(n);
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
         out[i] = std::complex<double>(outArray[i][0], outArray[i][1]);
+    }
 
     // Free the memory
     fftw_destroy_plan(p);
     fftw_free(inArray);
     fftw_free(outArray);
+*/
+    // Load the buffer with the initial values
+    const int n = in.size();
+    double *d = new double[n];
+    // Load the data
+    memcpy(d, in.data(), n * sizeof(double));
+
+#ifdef USE_FFTW
+    fftw_plan p = fftw_plan_r2r_1d(n, d, d, FFTW_R2HC, FFTW_ESTIMATE);
+    fftw_execute(p);
+#else
+    // Execute FFT
+    gsl_fft_real_radix2_transform(d, 1, n);
+#endif
+
+    // Load the data into out
+    out.resize(1 + n / 2);
+    out[0] = std::complex<double>(d[0], 0);
+    for (int i = 1; i < (out.size() - 1); ++i) {
+        out[i] = std::complex<double>(d[i], d[n - i]);
+    }
+    out[out.size() - 1] = std::complex<double>(d[n - 1], 0);
+
+    // Delete the buffer
+    delete [] d;
 }
 
 void TimeSeriesMotion::ifft(const QVector<std::complex<double> >& in, QVector<double>& out ) const
 {
+/*
+#ifdef USE_IFFTW
     // Copy the input QVector into a double array
     fftw_complex* inArray = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * in.size());
 
@@ -952,13 +997,42 @@ void TimeSeriesMotion::ifft(const QVector<std::complex<double> >& in, QVector<do
 
     // Copy the data to the output QVector and normalize by QVector length
     out.resize(n);
-    for (int i = 0; i < out.size(); i++)
+    for (int i = 0; i < out.size(); i++) {
         out[i] = outArray[i] / out.size();
+    }
 
     // Free the memory
     fftw_destroy_plan(p);
     fftw_free(inArray);
     fftw_free(outArray);
+*/
+    const int n = 2 * (in.size() - 1);
+    double *d = new double[n];
+
+    d[0] = in.first().real();
+    for (int i = 1; i < in.size(); ++i) {
+        d[i] = in.at(i).real();
+        d[n - i] = in.at(i).imag();
+    }
+    d[n / 2] = in.last().real();
+
+#if USE_FFTW
+    fftw_plan p = fftw_plan_r2r_1d(n, d, d, FFTW_HC2R, FFTW_ESTIMATE);
+    fftw_execute(p);
+
+    for (int i = 0; i < n; ++i) {
+        // Scale by n
+        d[i] /= n;
+    }
+#else
+    gsl_fft_halfcomplex_radix2_inverse(d, 1, n);
+#endif
+
+    // Copy results to output
+    out.resize(n);
+    memcpy(out.data(), d, n * sizeof(double));
+
+    delete [] d;
 }
 
 QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > fa, const QVector<std::complex<double> > & tf) const
