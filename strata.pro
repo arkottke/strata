@@ -63,19 +63,19 @@ CONFIG(debug, debug|release) {
 # Setup of for the various libraries. This is most important on Windows.
 ########################################################################
 unix {
-    LIBS += -lm \
+    LIBS += \
         -lfftw3 \
         -lgsl \
         -lgslcblas \
         -lboost_system \
         -lboost_serialization \
-        -L$$PWD/../qwt-6.1/lib \
+        # -L$$PWD/../qwt-6.1/lib \
         -lqwt
-    INCLUDEPATH += $$PWD/../qwt-6.1/src
-
+    # INCLUDEPATH += $$PWD/../qwt-6.1/src
+    INCLUDEPATH += /usr/include/qwt/
 }
 win32 { 
-  LIBS += -lm \
+  LIBS += \
         -lfftw3-3 \
         -lgsl \
         -lgslcblas \
