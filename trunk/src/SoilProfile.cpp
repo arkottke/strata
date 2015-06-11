@@ -431,7 +431,7 @@ const Location SoilProfile::depthToLocation(const double depth) const
         index = 0;
 
         while (index <= m_subLayers.size()
-                && m_subLayers.at(index).depthToBase() < depth)
+                && m_subLayers.at(index).depthToBase() <= depth)
             ++index;
 
         interDepth = depth - m_subLayers.at(index).depth();
