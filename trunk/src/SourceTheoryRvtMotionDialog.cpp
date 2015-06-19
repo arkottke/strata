@@ -389,7 +389,7 @@ QTabWidget* SourceTheoryRvtMotionDialog::createSourceTheoryForm(bool readOnly)
 
     // Duration
     doubleSpinBox = new QDoubleSpinBox;
-    doubleSpinBox->setRange(0, 60);
+    doubleSpinBox->setRange(0, 1000);
     doubleSpinBox->setDecimals(2);
     doubleSpinBox->setSuffix(" sec");
     doubleSpinBox->setReadOnly(true);
