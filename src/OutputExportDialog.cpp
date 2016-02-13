@@ -26,7 +26,6 @@
 
 #include <QDebug>
 
-#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QFileDialog>
@@ -35,7 +34,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTableWidgetItem>
+
 
 OutputExportDialog::OutputExportDialog(OutputCatalog * model, QWidget * parent, Qt::WindowFlags f)
     : QDialog(parent, f), m_model(model)
@@ -51,8 +52,8 @@ void OutputExportDialog::selectDirectory()
             this,
             tr("Select directory..."),
             settings.value("exportDirectory",
-                           QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString());
-
+                           QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                           ).toString());
     if (!dirName.isEmpty()) {
         settings.setValue("exportDirectory", dirName);
         m_destDirLineEdit->setText(dirName);
@@ -110,7 +111,7 @@ void OutputExportDialog::createDialog()
     m_destDirLineEdit->setText(
             settings.value(
                     "outputExportDialog/path",
-                    QDesktopServices::storageLocation( QDesktopServices::DocumentsLocation )
+                    QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                     ).toString());
 
     layout->addWidget( selectDirPushButton, 0, 0);

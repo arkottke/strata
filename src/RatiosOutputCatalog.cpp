@@ -292,33 +292,29 @@ AbstractRatioOutput* RatiosOutputCatalog::factory(const QString & className, Out
     return aro;
 }
 
-void RatiosOutputCatalog::ptRead(const ptree &pt)
+void RatiosOutputCatalog::fromJson(const QJsonArray &json)
 {
     beginResetModel();
-    QString name;
-    foreach(const ptree::value_type &v, pt)
-    {
-        std::size_t pos = v.first.find("-");
-        std::string name = v.first.substr(0, pos);
+    m_outputs.clear();
 
-        AbstractRatioOutput * aro = factory(QString::fromStdString(name), m_outputCatalog);
-        aro->ptRead(v.second);
-        m_outputs.append(aro);
+    foreach (const QJsonValue &qjv, json) {
+        QJsonObject qjo = qjv.toObject();
+        AbstractRatioOutput *aro = factory(qjo["className"].toString(), m_outputCatalog);
+        aro->fromJson(qjo);
+        m_outputs << aro;
     }
+
     endResetModel();
 }
 
-void RatiosOutputCatalog::ptWrite(ptree &pt) const
+QJsonArray RatiosOutputCatalog::toJson() const
 {
-    int counter = 0;
-    foreach(AbstractRatioOutput *aro, m_outputs)
-    {
-        ptree apt;
-        aro->ptWrite(apt);
-        std::stringstream fmt;
-        fmt << aro->metaObject()->className() << "-" << counter++;
-        pt.put_child(fmt.str(), apt);
+    QJsonArray json;
+    foreach (AbstractRatioOutput *aro, m_outputs) {
+        json << aro->toJson();
     }
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc)

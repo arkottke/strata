@@ -21,9 +21,10 @@
 
 #include "CrustalModel.h"
 
-#include <cmath>
+#include <QJsonArray>
+#include <QJsonValue>
 
-#include <boost/lexical_cast.hpp>
+#include <cmath>
 
 CrustalModel::CrustalModel(QObject *parent) :
         MyAbstractTableModel(parent)
@@ -215,59 +216,51 @@ QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
     return amp;
 }
 
-void CrustalModel::ptRead(const ptree &pt)
+void CrustalModel::fromJson(const QJsonObject &json)
 {
     beginResetModel();
 
-    ptree thickness = pt.get_child("thickness");
-    foreach(const ptree::value_type &vv, thickness)
-    {
-        m_thickness << boost::lexical_cast<double>(vv.second.data());
+    m_thickness.clear();
+    foreach (const QJsonValue &v, json["thickness"].toArray()) {
+        m_thickness << v.toDouble();
     }
 
-    ptree velocity = pt.get_child("velocity");
-    foreach(const ptree::value_type &vv, velocity)
-    {
-        m_velocity << boost::lexical_cast<double>(vv.second.data());
+    m_velocity.clear();
+    foreach (const QJsonValue &v, json["velocity"].toArray()) {
+        m_velocity << v.toDouble();
     }
 
-    ptree density = pt.get_child("density");
-    foreach(const ptree::value_type &vv, density)
-    {
-        m_density << boost::lexical_cast<double>(vv.second.data());
+    m_density.clear();
+    foreach (const QJsonValue &v, json["density"].toArray()) {
+        m_density << v.toDouble();
     }
 
     endResetModel();
 }
 
-void CrustalModel::ptWrite(ptree &pt) const
+QJsonObject CrustalModel::toJson() const
 {
-    ptree thickness;
-    foreach(const double & d, m_thickness)
-    {
-        ptree val;
-        val.put("", d);
-        thickness.push_back(std::make_pair("", val));
-    }
-    pt.add_child("thickness", thickness);
+    QJsonObject json;
 
-    ptree velocity;
-    foreach(const double & d, m_velocity)
-    {
-        ptree val;
-        val.put("", d);
-        velocity.push_back(std::make_pair("", val));
+    QJsonArray thickness;
+    foreach (const double &d, m_thickness) {
+        thickness << QJsonValue(d);
     }
-    pt.add_child("velocity", velocity);
+    json["thickness"] = thickness;
 
-    ptree density;
-    foreach(const double & d, m_density)
-    {
-        ptree val;
-        val.put("", d);
-        density.push_back(std::make_pair("", val));
+    QJsonArray velocity;
+    foreach (const double &d, m_velocity) {
+        velocity << QJsonValue(d);
     }
-    pt.add_child("density", density);
+    json["velocity"] = velocity;
+
+    QJsonArray density;
+    foreach (const double &d, m_density) {
+        density << QJsonValue(d);
+    }
+    json["density"] = density;
+
+    return json;
 }
 
 QDataStream& operator<< (QDataStream & out, const CrustalModel* cm)

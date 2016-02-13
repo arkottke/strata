@@ -48,7 +48,7 @@ QString DissipatedEnergyProfileOutput::shortName() const
 
 const QString DissipatedEnergyProfileOutput::xLabel() const
 {
-    return tr("Dissipated Energy (??)");
+    return tr("Dissipated Energy (?)");
 }
 
 QwtScaleEngine* DissipatedEnergyProfileOutput::xScaleEngine() const

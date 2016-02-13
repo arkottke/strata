@@ -22,13 +22,11 @@
 #ifndef ABSTRACT_LOCATION_OUTPUT_H
 #define ABSTRACT_LOCATION_OUTPUT_H
 
+#include "AbstractMotion.h"
 #include "AbstractOutput.h"
 
-#include "AbstractMotion.h"
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
-
+#include <QDataStream>
+#include <QJsonObject>
 
 class AbstractLocationOutput : public AbstractOutput
 {
@@ -47,8 +45,8 @@ public:
     AbstractMotion::Type type() const;
     void setType(AbstractMotion::Type type);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setDepth(double depth);

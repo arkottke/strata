@@ -20,7 +20,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Units.h"
+
 #include <QChar>
+#include <QDataStream>
 #include <QDebug>
 
 Units * Units::m_instance = 0;

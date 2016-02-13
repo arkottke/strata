@@ -25,12 +25,11 @@
 #include "AbstractMotion.h"
 
 #include <QAbstractTableModel>
+#include <QDataStream>
+#include <QJsonObject>
 #include <QProgressBar>
 #include <QTextStream>
 #include <QVector>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 #include <gsl/gsl_integration.h>
 
@@ -92,8 +91,8 @@ public:
 
     void setOscCorrection(OscillatorCorrection oscCorrection);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     //! Stop the current calculation

@@ -20,11 +20,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "ResponseSpectrum.h"
-#include "Serializer.h"
 
 #include <QDebug>
-
-#include <boost/lexical_cast.hpp>
+#include <QJsonArray>
+#include <QJsonValue>
 
 ResponseSpectrum::ResponseSpectrum(QObject * parent)
         : MyAbstractTableModel(parent)
@@ -64,10 +63,10 @@ const QVector<double> & ResponseSpectrum::period() const
 
 void ResponseSpectrum::setPeriod(const QVector<double> & period)
 {
+    beginResetModel();
     m_period = period;
     m_sa.clear();
-
-    reset();
+    endResetModel();
 }
 
 const QVector<double> & ResponseSpectrum::sa() const
@@ -204,47 +203,39 @@ bool ResponseSpectrum::removeRows ( int row, int count, const QModelIndex &paren
     return true;
 }
 
-void ResponseSpectrum::ptRead(const ptree &pt)
+void ResponseSpectrum::fromJson(const QJsonObject &json)
 {
-    m_modified = pt.get<bool>("modified");
-    m_damping = pt.get<double>("damping");
+    m_modified = json["modified"].toBool();
+    m_damping = json["damping"].toDouble();
 
-    ptree period = pt.get_child("period");
-    foreach(const ptree::value_type &v, period)
-    {
-        m_period << boost::lexical_cast<double>(v.second.data());
-    }
+    m_period.clear();
+    foreach (const QJsonValue &v, json["period"].toArray())
+        m_period << v.toDouble();
 
-    ptree sa = pt.get_child("sa");
-    foreach(const ptree::value_type &v, sa)
-    {
-        m_sa << boost::lexical_cast<double>(v.second.data());
-    }
+    m_sa.clear();
+    foreach (const QJsonValue &v, json["sa"].toArray())
+        m_sa << v.toDouble();
 }
 
-void ResponseSpectrum::ptWrite(ptree &pt) const
+QJsonObject ResponseSpectrum::toJson() const
 {
-    pt.put("modified", m_modified);
-    pt.put("damping", m_damping);
+    QJsonObject json;
+    json["modified"] = m_modified;
+    json["damping"] = m_damping;
 
-    ptree period;
-    foreach(const double & d, m_period)
-    {
-        ptree val;
-        val.put("", d);
-        period.push_back(std::make_pair("", val));
-    }
-    pt.add_child("period", period);
+    QJsonArray period;
+    foreach (const double &d, m_period)
+        period << QJsonValue(d);
+    json["period"] = period;
 
-    ptree sa;
-    foreach(const double & d, m_sa)
-    {
-        ptree val;
-        val.put("", d);
-        sa.push_back(std::make_pair("", val));
-    }
-    pt.add_child("sa", sa);
+    QJsonArray sa;
+    foreach (const double &d, m_sa)
+        sa << QJsonValue(d);
+    json["sa"] = sa;
+
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs)
 {

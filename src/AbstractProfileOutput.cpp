@@ -129,16 +129,17 @@ void AbstractProfileOutput::extrap(const QVector<double> & ref, QVector<double> 
     data << data.last() + slope * layerThickness / 2.;
 }
 
-void AbstractProfileOutput::ptRead(const ptree &pt)
+void AbstractProfileOutput::fromJson(const QJsonObject &json)
 {
-    AbstractOutput::ptRead(pt);
-    m_enabled = pt.get<bool>("enabled");
+    AbstractOutput::fromJson(json);
+    m_enabled = json["enabled"].toBool();
 }
 
-void AbstractProfileOutput::ptWrite(ptree &pt) const
+QJsonObject AbstractProfileOutput::toJson() const
 {
-    AbstractOutput::ptWrite(pt);
-    pt.put("enabled", m_enabled);
+    QJsonObject json = AbstractOutput::toJson();
+    json["enabled"] = m_enabled;
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractProfileOutput* apo)

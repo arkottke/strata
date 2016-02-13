@@ -26,14 +26,12 @@
 
 class ResponseSpectrum;
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QString>
 #include <QStringList>
 #include <QVector>
 #include <complex>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class AbstractMotion : public MyAbstractTableModel
 {
@@ -124,8 +122,8 @@ public:
     //! The absolute value of the velocity Fourier amplitude spectrum with the applied transfer function
     virtual const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setModified(bool modified = true);

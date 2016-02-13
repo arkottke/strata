@@ -22,6 +22,7 @@
 #include "AbstractDistribution.h"
 
 #include <QDebug>
+#include <QJsonObject>
 
 #include <cfloat>
 #include <cmath>
@@ -182,26 +183,30 @@ void AbstractDistribution::setVaried(double varied)
     m_varied = varied;
 }
 
-void AbstractDistribution::ptRead(const ptree &pt)
+void AbstractDistribution::fromJson(const QJsonObject &json)
 {
-    m_type = (AbstractDistribution::Type) pt.get<int>("type");
-    m_avg = pt.get<double>("avg");
-    m_stdev = pt.get<double>("stdev");
-    m_hasMax = pt.get<bool>("hasMax");
-    m_max = pt.get<double>("max");
-    m_hasMin = pt.get<bool>("hasMin");
-    m_min = pt.get<double>("min");
+    m_type = (AbstractDistribution::Type)json["type"].toInt();
+    m_avg = json["avg"].toDouble();
+    m_stdev = json["stdev"].toDouble();
+    m_max = json["max"].toDouble();
+    m_min = json["min"].toDouble();
+    m_hasMax = json["hasMax"].toBool();
+    m_hasMin = json["hasMin"].toBool();
 }
 
-void AbstractDistribution::ptWrite(ptree &pt) const
+QJsonObject AbstractDistribution::toJson() const
 {
-    pt.put("type", (int)m_type);
-    pt.put("avg", m_avg);
-    pt.put("stdev", m_stdev);
-    pt.put("hasMax", m_hasMax);
-    pt.put("max", m_max);
-    pt.put("hasMin", m_hasMin);
-    pt.put("min", m_min);
+    QJsonObject json;
+
+    json["type"] = (int)m_type;
+    json["avg"] = m_avg;
+    json["stdev"] = m_stdev;
+    json["max"] = m_max;
+    json["min"] = m_min;
+    json["hasMax"] = m_hasMax;
+    json["hasMin"] = m_hasMin;
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractDistribution* ad)

@@ -178,17 +178,20 @@ double AbstractIterativeCalculator::maxError(const QVector<double> &maxStrain)
     return max;
 }
 
-void AbstractIterativeCalculator::ptRead(const ptree &pt)
+void AbstractIterativeCalculator::fromJson(const QJsonObject &json)
 {
-    m_maxIterations = pt.get<int>("maxIterations");
-    m_errorTolerance = pt.get<double>("errorTolerance");
+    m_maxIterations = json["maxIterations"].toInt();
+    m_errorTolerance = json["errorTolerance"].toDouble();
 }
 
-void AbstractIterativeCalculator::ptWrite(ptree &pt) const
+QJsonObject AbstractIterativeCalculator::toJson() const
 {
-    pt.put("maxIterations", m_maxIterations);
-    pt.put("errorTolerance", m_errorTolerance);
+    QJsonObject json;
+    json["maxIterations"] = m_maxIterations;
+    json["errorTolerance"] = m_errorTolerance;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const AbstractIterativeCalculator* aic)
 {

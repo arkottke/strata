@@ -81,16 +81,17 @@ bool EquivalentLinearCalculator::updateSubLayer(int index, const QVector<std::co
     return true;
 }
 
-void EquivalentLinearCalculator::ptRead(const ptree &pt)
+void EquivalentLinearCalculator::fromJson(const QJsonObject &json)
 {
-    AbstractIterativeCalculator::ptRead(pt);
-    m_strainRatio = pt.get<double>("strainRatio");
+    AbstractIterativeCalculator::fromJson(json);
+    m_strainRatio = json["strainRatio"].toDouble();
 }
 
-void EquivalentLinearCalculator::ptWrite(ptree &pt) const
+QJsonObject EquivalentLinearCalculator::toJson() const
 {
-    AbstractIterativeCalculator::ptWrite(pt);
-    pt.put("strainRatio", m_strainRatio);
+    QJsonObject json = AbstractIterativeCalculator ::toJson();
+    json["strainRatio"] = m_strainRatio;
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out,

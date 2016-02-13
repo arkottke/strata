@@ -22,13 +22,10 @@
 #ifndef LAYER_THICKNESS_VARIATION_H
 #define LAYER_THICKNESS_VARIATION_H
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QObject>
-
 #include <QStringList>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 #include <gsl/gsl_rng.h>
 
@@ -73,8 +70,8 @@ public:
 
     QList<double> vary(double depthToBedrock) const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void enabledChanged(bool enabled);

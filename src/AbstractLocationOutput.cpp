@@ -93,19 +93,22 @@ const QString AbstractLocationOutput::prefix() const
             .arg(AbstractMotion::typeList().at(m_type));
 }
 
-void AbstractLocationOutput::ptRead(const ptree &pt)
+void AbstractLocationOutput::fromJson(const QJsonObject &json)
 {
-    AbstractOutput::ptRead(pt);
-    m_type = (AbstractMotion::Type) pt.get<int>("type");
-    m_depth = pt.get<double>("depth");
+    AbstractOutput::fromJson(json);
+    m_type = (AbstractMotion::Type) json["type"].toInt();
+    m_depth = json["depth"].toDouble();
 }
 
-void AbstractLocationOutput::ptWrite(ptree &pt) const
+QJsonObject AbstractLocationOutput::toJson() const
 {
-    AbstractOutput::ptWrite(pt);
-    pt.put("type", (int) m_type);
-    pt.put("depth", m_depth);
+    QJsonObject json = AbstractOutput::toJson();
+    json["type"] = (int) m_type;
+    json["depth"] = m_depth;
+
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const AbstractLocationOutput* alo)
 {

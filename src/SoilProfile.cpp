@@ -49,8 +49,6 @@
 
 #include <cmath>
 
-#include <boost/lexical_cast.hpp>
-
 SoilProfile::SoilProfile(SiteResponseModel * parent)
     : MyAbstractTableModel(parent), m_siteResponseModel(parent)
 {
@@ -1172,6 +1170,8 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
 
         return newLayer;
     }
+
+    return NULL;
 }
 
 void SoilProfile::updateUnits()
@@ -1188,81 +1188,68 @@ VelocityLayer * SoilProfile::velocityLayer(int index) const
     }
 }
 
-void SoilProfile::ptRead(const ptree &pt)
+void SoilProfile::fromJson(const QJsonObject &json)
 {
-    ptree soilTypeCatalog = pt.get_child("soilTypeCatalog");
-    m_soilTypeCatalog->ptRead(soilTypeCatalog);
+    m_inputDepth = json["inputDepth"].toDouble();
+    m_isVaried = json["isVaried"].toBool();
+    m_profileCount = json["profileCount"].toInt();
+    m_maxFreq = json["maxFreq"].toDouble();
+    m_waveFraction = json["waveFraction"].toDouble();
+    m_disableAutoDiscretization = json["disableAutoDiscretization"].toBool();
+    m_waterTableDepth = json["waterTableDepth"].toDouble();
+
+    m_bedrock->fromJson(json["bedrock"].toObject());
+    m_nonlinearPropertyRandomizer->fromJson(json["nonlinearPropertyRandomizer"].toObject());
+    m_soilTypeCatalog->fromJson(json["soilTypeCatalog"].toArray());
+    m_profileRandomizer->fromJson(json["profileRandomizer"].toObject());
 
     beginResetModel();
-    m_soilLayers.clear();
-    ptree soilLayers = pt.get_child("soilLayers");
-    foreach(const ptree::value_type &v, soilLayers)
-    {
-       SoilLayer * sl = new SoilLayer(this);
-       sl->ptRead(v.second);
-       sl->setSoilType(m_soilTypeCatalog->soilType(
-                           v.second.get<int>("soilType")));
-       m_soilLayers.append(sl);
+    // Delete the old layers
+    while (m_soilLayers.size())
+        m_soilLayers.takeLast()->deleteLater();
+
+    foreach (const QJsonValue &jv, json["soilLayers"].toArray()) {
+        QJsonObject sljo = jv.toObject();
+
+        SoilLayer * sl = new SoilLayer(this);
+        sl->fromJson(sljo);
+
+        const int row = sljo["soilType"].toInt();
+        sl->setSoilType(row < 0 ? 0 : m_soilTypeCatalog->soilType(row));
+
+        m_soilLayers << sl;
     }
 
     updateDepths();
     endResetModel();
-
-    ptree bedrock = pt.get_child("bedrock");
-    m_bedrock->ptRead(bedrock);
-
-    ptree profileRandomizer = pt.get_child("profileRandomizer");
-    m_profileRandomizer->ptRead(profileRandomizer);
-
-    ptree nonlinearPropertyRandomizer = pt.get_child("nonlinearPropertyRandomizer");
-    m_nonlinearPropertyRandomizer->ptRead(nonlinearPropertyRandomizer);
-
-    m_inputDepth = pt.get<double>("inputDepth");
-    m_isVaried = pt.get<bool>("isVaried");
-    m_profileCount = pt.get<int>("profileCount");
-    m_maxFreq = pt.get<double>("maxFreq");
-    m_waveFraction = pt.get<double>("waveFraction");
-    m_disableAutoDiscretization = pt.get<bool>("disableAutoDiscretization");
-    m_waterTableDepth = pt.get<double>("waterTableDepth");
 }
 
-void SoilProfile::ptWrite(ptree &pt) const
+QJsonObject SoilProfile::toJson() const
 {
-    ptree soilTypeCatalog;
-    m_soilTypeCatalog->ptWrite(soilTypeCatalog);
-    pt.add_child("soilTypeCatalog", soilTypeCatalog);
+    QJsonObject json;
+    json["inputDepth"] = m_inputDepth;
+    json["isVaried"] = m_isVaried;
+    json["profileCount"] = m_profileCount;
+    json["maxFreq"] = m_maxFreq;
+    json["waveFraction"] = m_waveFraction;
+    json["disableAutoDiscretization"] = m_disableAutoDiscretization;
+    json["waterTableDepth"] = m_waterTableDepth;
 
-    ptree soilLayers;
-    for (int  i =0; i < m_soilLayers.size(); ++i) {
-        ptree sl;
-        m_soilLayers.at(i)->ptWrite(sl);
-        sl.add("soilType",
-                      m_soilTypeCatalog->rowOf(
-                          m_soilLayers.at(i)->soilType()));
+    json["bedrock"] = m_bedrock->toJson();
+    json["nonlinearPropertyRandomizer"] = m_nonlinearPropertyRandomizer->toJson();
+    json["soilTypeCatalog"] = m_soilTypeCatalog->toJson();
+    json["profileRandomizer"] = m_profileRandomizer->toJson();
 
-        soilLayers.push_back(std::make_pair("", sl));
+    QJsonArray soilLayers;
+    foreach (const SoilLayer &sl, m_soilLayers) {
+        QJsonObject sljo = sl.toJson();
+        // Save the soil type index
+        sljo["soilType"] = sl.soilType() ? m_soilTypeCatalog->rowOf(sl.soilType()) : -1;
+        soilLayers << sljo;
     }
-    pt.add_child("soilLayers", soilLayers);
+    json["soilLayers"] = soilLayers;
 
-    ptree bedrock;
-    m_bedrock->ptWrite(bedrock);
-    pt.add_child("bedrock", bedrock);
-
-    ptree profileRandomizer;
-    m_profileRandomizer->ptWrite(profileRandomizer);
-    pt.add_child("profileRandomizer", profileRandomizer);
-
-    ptree nonlinearPropertyRandomizer;
-    m_nonlinearPropertyRandomizer->ptWrite(nonlinearPropertyRandomizer);
-    pt.add_child("nonlinearPropertyRandomizer", nonlinearPropertyRandomizer);
-
-    pt.put("inputDepth", m_inputDepth);
-    pt.put("isVaried", m_isVaried);
-    pt.put("profileCount", m_profileCount);
-    pt.put("maxFreq", m_maxFreq);
-    pt.put("waveFraction", m_waveFraction);
-    pt.put("disableAutoDiscretization", m_disableAutoDiscretization);
-    pt.put("waterTableDepth", m_waterTableDepth);
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
@@ -1319,8 +1306,6 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
         SoilLayer* sl = new SoilLayer(sp);
 
         in >> sl >> row;
-
-
         // If no soil type is defined for the soil layer set it the pointer to be zero
         sl->setSoilType(
                 row < 0 ? 0 : sp->m_soilTypeCatalog->soilType(row));

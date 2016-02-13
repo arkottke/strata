@@ -25,13 +25,10 @@
 #include <QObject>
 
 #include <QDataStream>
+#include <QJsonObject>
 #include <QList>
 #include <QStringList>
 #include <QTextStream>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 #include <gsl/gsl_rng.h>
 
@@ -83,8 +80,8 @@ public:
     double correlIntercept() const;
     double correlExponent() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void enabledChanged(bool enabled);

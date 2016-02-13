@@ -24,17 +24,18 @@
 #include "ModulusFactory.h"
 #include "DampingFactory.h"
 
+#include <QDataStream>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
+#include <QStandardPaths>
 
 NonlinearPropertyCatalog::NonlinearPropertyCatalog()
 {
     m_modulusFactory = new ModulusFactory;
     m_dampingFactory = new DampingFactory;
 
-    m_fileName = QDesktopServices::storageLocation(QDesktopServices::DataLocation)
+    m_fileName = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
                  + "/nonlinearCurves";
 
     QFile file(m_fileName);
@@ -50,19 +51,19 @@ NonlinearPropertyCatalog::~NonlinearPropertyCatalog()
     delete m_dampingFactory;
 }
 
-ModulusFactory* const NonlinearPropertyCatalog::modulusFactory()
+ModulusFactory* NonlinearPropertyCatalog::modulusFactory()
 {
     return m_modulusFactory;
 }
 
-DampingFactory* const NonlinearPropertyCatalog::dampingFactory()
+DampingFactory* NonlinearPropertyCatalog::dampingFactory()
 {
     return m_dampingFactory;
 }
 
 bool NonlinearPropertyCatalog::save() const
 {
-    const QString dest = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    const QString dest = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     QDir dir;
 
     if (!dir.exists(dest) && !dir.mkpath(dest)) {

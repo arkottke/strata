@@ -24,11 +24,9 @@
 
 #include "MyAbstractTableModel.h"
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QVector>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class CrustalModel : public MyAbstractTableModel
 {
@@ -65,8 +63,8 @@ public:
      */
     QVector<double> calculate(const QVector<double> &freq) const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 private:
     /*! Compute the average value of a property to a max depth.

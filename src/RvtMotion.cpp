@@ -22,8 +22,8 @@
 #include "RvtMotion.h"
 
 #include <QDebug>
-
-#include <boost/lexical_cast.hpp>
+#include <QJsonArray>
+#include <QJsonValue>
 
 RvtMotion::RvtMotion(QObject * parent) : AbstractRvtMotion(parent)
 {
@@ -318,31 +318,27 @@ bool RvtMotion::loadFromTextStream(QTextStream &stream, double scale)
     return true;
 }
 
-void RvtMotion::ptRead(const ptree &pt)
+void RvtMotion::fromJson(const QJsonObject &json)
 {
-    AbstractRvtMotion::ptRead(pt);
+    AbstractRvtMotion::fromJson(json);
 
-    ptree freq = pt.get_child("freq");
-    foreach(const ptree::value_type &v, freq)
-    {
-        m_freq << boost::lexical_cast<double>(v.second.data());
-    }
+    m_freq.clear();
+    foreach (const QJsonValue &v, json["freq"].toArray())
+        m_freq << v.toDouble();
 
     calculate();
 }
 
-void RvtMotion::ptWrite(ptree &pt) const
+QJsonObject RvtMotion::toJson() const
 {
-    AbstractRvtMotion::ptWrite(pt);
+    QJsonObject json = AbstractRvtMotion::toJson();
 
-    ptree freq;
-    foreach(const double & d, m_freq)
-    {
-        ptree val;
-        val.put("", d);
-        freq.push_back(std::make_pair("", val));
-    }
-    pt.add_child("freq", freq);
+    QJsonArray freq;
+    foreach (const double &d, m_freq)
+        freq << QJsonValue(d);
+    json["freq"] = freq;
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const RvtMotion* rm)

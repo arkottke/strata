@@ -79,20 +79,22 @@ void RockLayer::setAvgDamping(double damping )
     emit avgDampingChanged(m_avgDamping);
 }
 
-void RockLayer::ptRead(const ptree &pt)
+void RockLayer::fromJson(const QJsonObject &json)
 {
-    VelocityLayer::ptRead(pt);
-    m_untWt = pt.get<double>("untWt");
-    double avgDamping = pt.get<double>("avgDamping");
+    VelocityLayer::fromJson(json);
+    m_untWt = json["untWt"].toDouble();
+    double avgDamping = json["avgDamping"].toDouble();
     setAvgDamping(avgDamping);
 }
 
-void RockLayer::ptWrite(ptree &pt) const
+QJsonObject RockLayer::toJson() const
 {
-    VelocityLayer::ptWrite(pt);
-    pt.put("untWt", m_untWt);
-    pt.put("avgDamping", m_avgDamping);
+    QJsonObject json = VelocityLayer::toJson();
+    json["untWt"] = m_untWt;
+    json["avgDampig"] = m_avgDamping;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const RockLayer* rl)
 {

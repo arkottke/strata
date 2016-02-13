@@ -133,22 +133,24 @@ const QString AbstractRatioOutput::prefix() const
             .arg(AbstractMotion::typeList().at(m_inType));
 }
 
-void AbstractRatioOutput::ptRead(const ptree &pt)
+void AbstractRatioOutput::fromJson(const QJsonObject &json)
 {
-    AbstractOutput::ptRead(pt);
-    m_outType = (AbstractMotion::Type) pt.get<int>("outType");
-    m_inType = (AbstractMotion::Type) pt.get<int>("inType");
-    m_outDepth = pt.get<double>("outDepth");
-    m_inDepth = pt.get<double>("inDepth");
+    AbstractOutput::fromJson(json);
+    m_outType = (AbstractMotion::Type) json["outType"].toInt();
+    m_inType = (AbstractMotion::Type) json["inType"].toInt();
+    m_outDepth = json["outDepth"].toDouble();
+    m_inDepth = json["inDepth"].toDouble();
 }
 
-void AbstractRatioOutput::ptWrite(ptree &pt) const
+QJsonObject AbstractRatioOutput::toJson() const
 {
-    AbstractOutput::ptWrite(pt);
-    pt.put("outType", (int) m_outType);
-    pt.put("inType", (int) m_inType);
-    pt.put("outDepth", m_outDepth);
-    pt.put("inDepth", m_inDepth);
+    QJsonObject json = AbstractOutput::toJson();
+    json["outType"] = (int) m_outType;
+    json["inType"] = (int) m_inType;
+    json["outDepth"] = m_outDepth;
+    json["inDepth"] = m_inDepth;
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractRatioOutput* aro)

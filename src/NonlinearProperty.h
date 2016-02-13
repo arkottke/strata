@@ -23,12 +23,10 @@
 #define NONLINEAR_PROPERTY_H_
 
 #include <QAbstractTableModel>
+#include <QDataStream>
+#include <QJsonObject>
 #include <QList>
 #include <QVector>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
-
 
 #include "gsl/gsl_interp.h"
 
@@ -85,8 +83,8 @@ public:
     //! Return a duplicate of the NonlinearProperty
     NonlinearProperty *duplicate() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 protected:    
     //! Initialize the interpolation routine. Called on the first interpolation

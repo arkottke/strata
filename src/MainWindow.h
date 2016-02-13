@@ -81,7 +81,7 @@ protected slots:
     void updateWindowTitle(const QString & fileName);
 
     void help();
-    void update();
+    // FIXME void update();
     void about();
 
     //! Update the tabs to reflect the state of the widget (working and having results)

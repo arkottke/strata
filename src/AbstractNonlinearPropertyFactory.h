@@ -25,9 +25,8 @@
 #include "NonlinearProperty.h"
 
 #include <QAbstractListModel>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 
 class AbstractNonlinearPropertyFactory : public QAbstractListModel
@@ -62,8 +61,8 @@ public:
     //! Tries the QVariant as an integer and a QString to match a possible model
     NonlinearProperty* duplicateAt(QVariant value) const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 protected:
     //! Type of models the factor produces

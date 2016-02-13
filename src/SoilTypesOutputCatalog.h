@@ -24,9 +24,8 @@
 
 #include "AbstractOutputCatalog.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonArray>
 
 class SoilType;
 class SoilTypeOutput;
@@ -55,8 +54,8 @@ public:
     void setSoilTypeCatalog(SoilTypeCatalog* soilTypeCatalog);
     virtual QList<AbstractOutput*> outputs() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonArray &json);
+    QJsonArray toJson() const;
 
 protected slots:
     void addOutput(SoilType* soilType);

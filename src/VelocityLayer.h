@@ -26,11 +26,9 @@
 
 #include "AbstractDistribution.h"
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QStringList>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 //! A virtual class that describes the shear-wave velocity of a specific layer
 
@@ -64,8 +62,8 @@ public:
     //! Vary the shear-wave velocity
     void vary(double randVar);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void depthChanged(double depth);

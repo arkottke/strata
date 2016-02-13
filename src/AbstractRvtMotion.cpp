@@ -30,12 +30,11 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
-#include <QTextStream>
+#include <QJsonArray>
+#include <QJsonValue>
 
 #include <qwt_scale_engine.h>
 #include <qwt_text.h>
-
-#include <boost/lexical_cast.hpp>
 
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
 {    
@@ -453,43 +452,40 @@ QString AbstractRvtMotion::extractColumn(const QString &line, int column)
         return parts.at(column);
 }
 
-void AbstractRvtMotion::ptRead(const ptree &pt)
+void AbstractRvtMotion::fromJson(const QJsonObject &json)
 {
-    AbstractMotion::ptRead(pt);
-    int oscCorrection = pt.get<int>("oscCorrection");
-
     beginResetModel();
 
-    ptree fourierAcc = pt.get_child("fourierAcc");
-    foreach(const ptree::value_type &v, fourierAcc)
-    {
-        m_fourierAcc << boost::lexical_cast<double>(v.second.data());
+    AbstractMotion::fromJson(json);
+    bool oscCorrection = json["oscCorrection"].toBool();
+    setOscCorrection(oscCorrection);
+    m_duration = json["duration"].toDouble();
+    m_name = json["name"].toString();
+
+    m_fourierAcc.clear();
+    foreach (const QJsonValue &v, json["fourierAcc"].toArray())  {
+        m_fourierAcc << v.toDouble();
     }
 
-    m_duration = pt.get<double>("duration");
-    m_name = QString::fromStdString(pt.get<std::string>("name"));
-
-    setOscCorrection(oscCorrection);
     endResetModel();
 }
 
-void AbstractRvtMotion::ptWrite(ptree &pt) const
+QJsonObject AbstractRvtMotion::toJson() const
 {
-    AbstractMotion::ptWrite(pt);
-    pt.put("oscCorrection", (int) m_oscCorrection);
+    QJsonObject json = AbstractMotion::toJson();
+    json["oscCorrection"] = m_oscCorrection;
+    json["duration"] = m_duration;
+    json["name"] = m_name;
 
-    ptree fourierAcc;
-    foreach(const double & d, m_fourierAcc)
-    {
-        ptree val;
-        val.put("", d);
-        fourierAcc.push_back(std::make_pair("", val));
+    QJsonArray fourierAcc;
+    foreach (const double &d, m_fourierAcc) {
+        fourierAcc << QJsonValue(d);
     }
-    pt.add_child("fourierAcc", fourierAcc);
+    json["fourierAcc"] = fourierAcc;
 
-    pt.put("duration", m_duration);
-    pt.put("name", m_name.toStdString());
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
 {

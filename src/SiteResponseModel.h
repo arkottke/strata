@@ -22,13 +22,9 @@
 #ifndef SITE_RESPONSE_MODEL_H_
 #define SITE_RESPONSE_MODEL_H_
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QThread>
-
-#include <boost/foreach.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class SoilProfile;
 class SiteResponseOutput;
@@ -79,15 +75,15 @@ public:
     bool dampingRequired() const;
     bool nonlinearPropertiesRequired() const;
 
-    //! Load the model from a file
-    bool load(const QString & fileName);
-    //! Load the human readable model from a file
-    bool loadReadable(const QString & fileName);
+    //! Load the model from a binary file
+    bool loadBinary(const QString & fileName);
+    //! Load the model from a JSON file
+    bool loadJson(const QString & fileName);
 
     //! Save the model to a file
-    bool save();
-    //! Save the model in a human readable format
-    bool saveReadable();
+    bool saveBinary();
+    //! Save the model in a JSON readable format
+    bool saveJson();
 
     //! If the model has results from an analysis
     bool hasResults() const;

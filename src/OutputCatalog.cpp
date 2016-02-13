@@ -36,7 +36,8 @@
 #include "TimeSeriesOutputCatalog.h"
 #include "Units.h"
 
-#include <boost/lexical_cast.hpp>
+#include <QJsonArray>
+#include <QJsonValue>
 
 OutputCatalog::OutputCatalog(QObject *parent) :
     QAbstractTableModel(parent), m_selectedOutput(0)
@@ -263,10 +264,9 @@ void OutputCatalog::setFilePrefix(const QString &prefix)
 AbstractOutput* OutputCatalog::setSelectedOutput(int index)
 {
     Q_ASSERT(index >= 0 && index < m_outputs.size());
-
+    beginResetModel();
     m_selectedOutput = m_outputs[index];
-    reset();
-
+    endResetModel();
     return m_selectedOutput;
 }
 
@@ -597,127 +597,75 @@ void OutputCatalog::populateDepthVector(double maxDepth)
     }
 }
 
-void OutputCatalog::ptRead(const ptree &pt)
+void OutputCatalog::fromJson(const QJsonObject &json)
 {
     beginResetModel();
 
-    m_title = QString::fromStdString(pt.get<std::string>("title"));
-    m_filePrefix = QString::fromStdString(pt.get<std::string>("filePrefix"));
+    m_title = json["title"].toString();
+    m_filePrefix = json["filePrefix"].toString();
+    m_frequencyIsNeeded = json["frequencyIsNeeded"].toBool();
+    m_frequency->fromJson(json["frequency"].toObject());
+    m_periodIsNeeded = json["periodIsNeeded"].toBool();
+    m_period->fromJson(json["period"].toObject());
+    m_damping = json["damping"].toDouble();
 
-    ptree list = pt.get_child("enabled");
-    foreach(const ptree::value_type &e, list)
-    {
-        QList<bool> qb = QList<bool>();
-        foreach(const ptree::value_type &b, e.second)
-        {
-            if (boost::lexical_cast<std::string>(b.second.data()) == "true")
-            {
-                qb.push_back(true);
-            }
-            else
-            {
-                qb.push_back(false);
-            }
-        }
-        m_enabled << qb;
-    }
+    m_log->fromJson(json["log"].toObject());
+    m_profilesOutputCatalog->fromJson(json["profilesOutputCatalog"].toArray());
+    m_ratiosOutputCatalog->fromJson(json["ratiosOutputCatalog"].toArray());
+    m_soilTypesOutputCatalog->fromJson(json["soilTypesOutputCatalog"].toArray());
+    m_spectraOutputCatalog->fromJson(json["spectraOutputCatalog"].toArray());
+    m_timeSeriesOutputCatalog->fromJson(json["timeSeriesOutputCatalog"].toArray());
 
-    ptree frequency = pt.get_child("frequency");
-    m_frequency->ptRead(frequency);
-    m_frequencyIsNeeded = pt.get<bool>("frequencyIsNeeded");
-
-    ptree period = pt.get_child("period");
-    m_period->ptRead(period);
-    m_periodIsNeeded = pt.get<bool>("periodIsNeeded");
-
-    m_damping = pt.get<double>("damping");
-
-    ptree profilesOutputCatalog = pt.get_child("profilesOutputCatalog");
-    m_profilesOutputCatalog->ptRead(profilesOutputCatalog);
-
-    ptree ratiosOutputCatalog = pt.get_child("ratiosOutputCatalog");
-    m_ratiosOutputCatalog->ptRead(ratiosOutputCatalog);
-
-    ptree soilTypesOutputCatalog = pt.get_child("soilTypesOutputCatalog");
-    m_soilTypesOutputCatalog->ptRead(soilTypesOutputCatalog);
-
-    ptree spectraOutputCatalog = pt.get_child("spectraOutputCatalog");
-    m_spectraOutputCatalog->ptRead(spectraOutputCatalog);
-
-    ptree timeSeriesOutputCatalog = pt.get_child("timeSeriesOutputCatalog");
-    m_timeSeriesOutputCatalog->ptRead(timeSeriesOutputCatalog);
-
-    ptree log = pt.get_child("log");
-    m_log->ptRead(log);
-
-    double depth = pt.get<double>("depth");
-    if (depth > 0)
-    {
+    double depth = json["depth"].toDouble();
+    if (depth > 0) {
         populateDepthVector(depth);
     }
 
+    m_enabled.clear();
+    foreach (const QJsonValue &value, json["enabled"].toArray()) {
+        QList<bool> l;
+        foreach (const QJsonValue &v, value.toArray())
+            l << v.toBool();
 
+        m_enabled << l;
+    }
 
     endResetModel();
 }
 
-void OutputCatalog::ptWrite(ptree &pt) const
+QJsonObject OutputCatalog::toJson() const
 {
-    pt.put<std::string>("title", m_title.toStdString());
-    pt.put<std::string>("filePrefix", m_filePrefix.toStdString());
+    QJsonObject json;
+    json["title"] = m_title;
+    json["filePrefix"] = m_filePrefix;
+    json["frequencyIsNeeded"] = m_frequencyIsNeeded;
+    json["frequency"] = m_frequency->toJson();
+    json["periodIsNeeded"] = m_periodIsNeeded;
+    json["period"] = m_period->toJson();
+    json["damping"] = m_damping;
+    json["log"] = m_log->toJson();
 
-    ptree enabled;
-    foreach(const QList<bool> & l, m_enabled)
-    {
-        ptree el;
-        foreach(const bool & b, l)
-        {
-            ptree val;
-            val.put("", b);
-            el.push_back(std::make_pair("", val));
-        }
-        enabled.push_back(std::make_pair("", el));
+    json["profilesOutputCatalog"] = m_profilesOutputCatalog->toJson();
+    json["ratiosOutputCatalog"] = m_ratiosOutputCatalog->toJson();
+    json["soilTypesOutputCatalog"] = m_soilTypesOutputCatalog->toJson();
+    json["spectraOutputCatalog"] = m_spectraOutputCatalog->toJson();
+    json["timeSeriesOutputCatalog"] = m_timeSeriesOutputCatalog->toJson();
+
+    json["depth"] = m_depth.size() ? m_depth.last() : -1;
+
+    QJsonArray enabled;
+    foreach (const QList<bool> &l, m_enabled) {
+        QJsonArray qja;
+        foreach (const bool &b, l)
+            qja << QJsonValue(b);
+
+        enabled << qja;
     }
-    pt.add_child("enabled", enabled);
+    json["enabled"] = enabled;
 
-    ptree frequency;
-    m_frequency->ptWrite(frequency);
-    pt.add_child("frequency", frequency);
-    pt.put("frequencyIsNeeded", m_frequencyIsNeeded);
-
-    ptree period;
-    m_period->ptWrite(period);
-    pt.add_child("period", period);
-    pt.put("periodIsNeeded", m_periodIsNeeded);
-
-    pt.put("damping", m_damping);
-
-    ptree profilesOutputCatalog;
-    m_profilesOutputCatalog->ptWrite(profilesOutputCatalog);
-    pt.add_child("profilesOutputCatalog", profilesOutputCatalog);
-
-    ptree ratiosOutputCatalog;
-    m_ratiosOutputCatalog->ptWrite(ratiosOutputCatalog);
-    pt.add_child("ratiosOutputCatalog", ratiosOutputCatalog);
-
-    ptree soilTypesOutputCatalog;
-    m_soilTypesOutputCatalog->ptWrite(soilTypesOutputCatalog);
-    pt.add_child("soilTypesOutputCatalog", soilTypesOutputCatalog);
-
-    ptree spectraOutputCatalog;
-    m_spectraOutputCatalog->ptWrite(spectraOutputCatalog);
-    pt.add_child("spectraOutputCatalog", spectraOutputCatalog);
-
-    ptree timeSeriesOutputCatalog;
-    m_timeSeriesOutputCatalog->ptWrite(timeSeriesOutputCatalog);
-    pt.add_child("timeSeriesOutputCatalog", timeSeriesOutputCatalog);
-
-    ptree log;
-    m_log->ptWrite(log);
-    pt.add_child("log", log);
-
-    m_depth.size() ? pt.put("depth", m_depth.last()) : pt.put("depth", -1);  
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)
 {

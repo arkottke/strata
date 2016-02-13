@@ -27,6 +27,7 @@
 #include <QBrush>
 #include <QColor>
 #include <QDebug>
+#include <QJsonArray>
 
 AbstractNonlinearPropertyFactory::AbstractNonlinearPropertyFactory(QObject *parent)
     : QAbstractListModel(parent)
@@ -177,29 +178,30 @@ NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(QVariant value)
     }
 }
 
-void AbstractNonlinearPropertyFactory::ptRead(const ptree &pt)
+void AbstractNonlinearPropertyFactory::fromJson(const QJsonObject &json)
 {
-    foreach (const ptree::value_type & v, pt.get_child("models"))
-    {
+    foreach (const QJsonValue &v, json["models"].toArray()) {
         CustomNonlinearProperty * np = new CustomNonlinearProperty(m_type, true);
-        np->ptRead(v.second);
+        np->fromJson(v.toObject());
         m_models << np;
     }
 }
 
-void AbstractNonlinearPropertyFactory::ptWrite(ptree &pt) const
+QJsonObject AbstractNonlinearPropertyFactory::toJson() const
 {
-    ptree m_arr;
+    QJsonArray models;
     foreach (NonlinearProperty* np, m_models) {
         const CustomNonlinearProperty *cnp = qobject_cast<CustomNonlinearProperty*>(np);
         if (cnp && cnp->retain()) {
-            ptree n;
-            np->ptWrite(n);
-            m_arr.push_back(std::make_pair("", n));
+            models.append(np->toJson());
         }
     }
-    pt.add_child("models", m_arr);
+
+    QJsonObject json;
+    json["models"] = models;
+    return json;
 }
+
 
 QDataStream & operator<<(QDataStream & out, const AbstractNonlinearPropertyFactory & anpf)
 {

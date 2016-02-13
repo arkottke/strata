@@ -98,17 +98,21 @@ double SoilLayer::density() const
         return -1;
 }
 
-void SoilLayer::ptRead(const ptree &pt)
+void SoilLayer::fromJson(const QJsonObject &json)
 {
-    VelocityLayer::ptRead(pt);
-    m_thickness = pt.get<double>("thickness");
+    VelocityLayer::fromJson(json);
+    m_thickness = json["thickness"].toDouble();
 }
 
-void SoilLayer::ptWrite(ptree &pt) const
+
+QJsonObject SoilLayer::toJson() const
 {
-    VelocityLayer::ptWrite(pt);
-    pt.put("thickness", m_thickness);
+    QJsonObject json = VelocityLayer::toJson();
+    json["thickness"] = m_thickness;
+
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const SoilLayer* sl)
 {

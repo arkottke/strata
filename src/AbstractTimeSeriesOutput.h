@@ -23,9 +23,9 @@
 #define ABSTRACT_TIME_SERIES_OUTPUT_H
 
 #include "AbstractLocationOutput.h"
-#include <boost/property_tree/ptree.hpp>
 
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 class OutputCatalog;
 
@@ -45,8 +45,8 @@ public:
 
     bool baselineCorrect() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setBaselineCorrect(bool baseLineCorrect);
@@ -63,7 +63,7 @@ protected:
     virtual const QString suffix() const;
 
     //! Field width of the motion index
-    const int fieldWidth() const;
+    int fieldWidth() const;
 
     //! If the time series is baseline corrected
     bool m_baselineCorrect;

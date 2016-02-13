@@ -145,14 +145,14 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
     return true;
 }
 
-void FrequencyDependentCalculator::ptRead(const ptree &pt)
+void FrequencyDependentCalculator::fromJson(const QJsonObject &json)
 {
-    AbstractIterativeCalculator::ptRead(pt);
+    AbstractIterativeCalculator::fromJson(json);
 }
 
-void FrequencyDependentCalculator::ptWrite(ptree &pt) const
+QJsonObject FrequencyDependentCalculator::toJson() const
 {
-    AbstractIterativeCalculator::ptWrite(pt);
+    return AbstractIterativeCalculator::toJson();
 }
 
 QDataStream & operator<<(QDataStream & out,

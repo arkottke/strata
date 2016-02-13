@@ -22,15 +22,13 @@
 #ifndef MY_RANDOM_NUM_GENERATOR_H_
 #define MY_RANDOM_NUM_GENERATOR_H_
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 
 #include <gsl/gsl_rng.h>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class MyRandomNumGenerator : public QObject
 {
@@ -50,8 +48,8 @@ public:
 
     gsl_rng* gsl_pointer();
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setSeedSpecified(bool seedSpecified);

@@ -21,6 +21,8 @@
 
 #include "LayerThicknessVariation.h"
 
+#include <QDataStream>
+
 #include "ProfileRandomizer.h"
 #include "Units.h"
 
@@ -39,7 +41,6 @@ LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer
     m_model = Custom;
     setModel(Default);
 }
-
 
 QStringList LayerThicknessVariation::modelList()
 {
@@ -70,7 +71,6 @@ void LayerThicknessVariation::updateEnabled()
 {
     emit enabledChanged(enabled());
 }
-
 
 LayerThicknessVariation::Model LayerThicknessVariation::model()
 {
@@ -211,29 +211,30 @@ QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
     return thicknesses;
 }
 
-void LayerThicknessVariation::ptRead(const ptree &pt)
+void LayerThicknessVariation::fromJson(const QJsonObject &json)
 {
-    m_enabled = pt.get<bool>("enabled");
-    int model = pt.get<int>("model");
+    m_enabled = json["enabled"].toBool();
+    int model = json["model"].toInt();
     setModel(model);
     if (m_model == LayerThicknessVariation::Custom)
     {
-        m_coeff = pt.get<double>("coeff");
-        m_initial = pt.get<double>("initial");
-        m_exponent = pt.get<double>("exponent");
+        m_coeff = json["coeff"].toDouble();
+        m_initial = json["initial"].toDouble();
+        m_exponent = json["exponent"].toDouble();
     }
 }
 
-void LayerThicknessVariation::ptWrite(ptree &pt) const
+QJsonObject LayerThicknessVariation::toJson() const
 {
-    pt.put("enabled", m_enabled);
-    pt.put("model", m_model);
-    if (m_model == LayerThicknessVariation::Custom)
-    {
-        pt.put("coeff", m_coeff);
-        pt.put("initial", m_initial);
-        pt.put("exponent", m_exponent);
+    QJsonObject json;
+    json["enabled"] = m_enabled;
+    json["model"] = (int) m_model;
+    if (m_model == LayerThicknessVariation::Custom) {
+        json["coeff"] = m_coeff;
+        json["initial"] = m_initial;
+        json["exponent"] = m_exponent;
     }
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)

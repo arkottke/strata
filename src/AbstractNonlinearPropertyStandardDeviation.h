@@ -26,12 +26,9 @@
 
 #include "NonlinearPropertyRandomizer.h"
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QScriptEngine>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
-
 
 class AbstractNonlinearPropertyStandardDeviation : public QObject
 {
@@ -54,8 +51,8 @@ public:
     //! Limit the value to the minimum and maximum
     double limit(double value) const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void minChanged(double min);

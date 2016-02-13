@@ -27,6 +27,7 @@
 #include "SoilType.h"
 #include "Units.h"
 
+#include <QDataStream>
 #include <QDebug>
 
 SoilTypeCatalog::SoilTypeCatalog(QObject *parent)
@@ -297,31 +298,29 @@ void SoilTypeCatalog::updateUnits()
     emit headerDataChanged(Qt::Horizontal, UnitWeightColumn, UnitWeightColumn);
 }
 
-void SoilTypeCatalog::ptRead(const ptree &pt)
+void SoilTypeCatalog::fromJson(const QJsonArray &json)
 {
     beginResetModel();
+    while (m_soilTypes.size())
+        m_soilTypes.takeLast()->deleteLater();
 
-    foreach(const ptree::value_type &v, pt.get_child("soilTypes"))
-    {
-       SoilType * st = new SoilType(this);
-       st->ptRead(v.second);
-       m_soilTypes << st;
+    foreach (const QJsonValue &v, json) {
+        SoilType *st = new SoilType(this);
+        st->fromJson(v.toObject());
+        m_soilTypes << st;
     }
 
     endResetModel();
 }
 
-void SoilTypeCatalog::ptWrite(ptree &pt) const
+QJsonArray SoilTypeCatalog::toJson() const
 {
-    ptree m_arr;
-    foreach(const SoilType *st, m_soilTypes)
-    {
-        ptree soil;
-        st->ptWrite(soil);
-        m_arr.push_back(std::make_pair("", soil));
-    }
-    pt.add_child("soilTypes", m_arr);
+    QJsonArray json;
+    foreach (const SoilType *st, m_soilTypes)
+        json << st->toJson();
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc)
 {

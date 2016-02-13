@@ -39,7 +39,6 @@
 #include <QBuffer>
 #include <QDataStream>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -50,6 +49,7 @@
 #include <QPushButton>
 #include <QProgressDialog>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTableView>
 #include <QVBoxLayout>
 
@@ -252,7 +252,8 @@ void MotionPage::importSuite()
             this,
             tr("Select suite file... - Strata"),
             settings.value("suiteDirectory",
-                           QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString(),
+                           QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                           ).toString(),
             "Strata Suite File (*.csv)");
 
 

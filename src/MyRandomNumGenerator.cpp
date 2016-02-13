@@ -21,6 +21,7 @@
 
 #include "MyRandomNumGenerator.h"
 
+#include <QDataStream>
 #include <QDateTime>
 #include <QDebug>
 
@@ -84,17 +85,20 @@ void MyRandomNumGenerator::init()
     gsl_rng_set(m_gsl_rng, m_seed);
 }
 
-void MyRandomNumGenerator::ptRead(const ptree &pt)
+void MyRandomNumGenerator::fromJson(const QJsonObject &json)
 {
-    m_seedSpecified = pt.get<bool>("seedSpecified");
-    m_seed = pt.get<quint32>("seed");
+    m_seedSpecified = json["seedSpecified"].toBool();
+    m_seed = (quint32)json["seed"].toInt();
 }
 
-void MyRandomNumGenerator::ptWrite(ptree &pt) const
+QJsonObject MyRandomNumGenerator::toJson() const
 {
-    pt.put("seedSpecified", m_seedSpecified);
-    pt.put("seed", m_seed);
+    QJsonObject json;
+    json["seedSpecified"] = m_seedSpecified;
+    json["seed"] = (int) m_seed;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator)
 {

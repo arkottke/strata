@@ -27,8 +27,8 @@
 #include "SoilTypeCatalog.h"
 #include "SoilTypeOutput.h"
 
+#include <QJsonObject>
 #include <QStringList>
-#include <boost/lexical_cast.hpp>
 
 SoilTypesOutputCatalog::SoilTypesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog), m_soilTypeCatalog(0)
@@ -154,33 +154,33 @@ QList<AbstractOutput*> SoilTypesOutputCatalog::outputs() const
     return list;
 }
 
-void SoilTypesOutputCatalog::ptRead(const ptree &pt)
+void SoilTypesOutputCatalog::fromJson(const QJsonArray &array)
 {
     beginResetModel();
 
-    foreach(const ptree::value_type &v, pt)
-    {
-        int row = boost::lexical_cast<int>(v.first);
+    while (m_outputs.size())
+        m_outputs.takeLast()->deleteLater();
+
+    foreach(const QJsonValue &v, array) {
+        const QJsonObject &json = v.toObject();
+        int row = json["row"].toInt();
         SoilTypeOutput * sto = new SoilTypeOutput(m_soilTypeCatalog->soilType(row), m_outputCatalog);
+        sto->fromJson(json);
         m_outputs << sto;
-        m_outputs.last()->ptRead(v.second);
     }
 
     endResetModel();
 }
 
-void SoilTypesOutputCatalog::ptWrite(ptree &pt) const
+QJsonArray SoilTypesOutputCatalog::toJson() const
 {
-    foreach(SoilTypeOutput *sto, m_outputs)
-    {
-        int row = m_soilTypeCatalog->rowOf(sto->soilType());
-        std::stringstream ss;
-        ss << row;
-
-        ptree stp;
-        sto->ptWrite(stp);
-        pt.add_child(ss.str(), stp);
+    QJsonArray array;
+    foreach (const SoilTypeOutput *sto, m_outputs) {
+        QJsonObject json = sto->toJson();
+        json["row"] = m_soilTypeCatalog->rowOf(sto->soilType());
+        array << QJsonValue(json);
     }
+    return array;
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc)

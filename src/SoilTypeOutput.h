@@ -22,10 +22,9 @@
 #ifndef SOIL_TYPE_OUTPUT_H
 #define SOIL_TYPE_OUTPUT_H
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QObject>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class SoilType;
 class NonlinearPropertyOutput;
@@ -48,8 +47,8 @@ public:
 
     bool enabled() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void wasModified();

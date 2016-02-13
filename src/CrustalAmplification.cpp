@@ -24,9 +24,10 @@
 #include "CrustalModel.h"
 #include "Dimension.h"
 
-#include <cmath>
+#include <QJsonArray>
+#include <QJsonValue>
 
-#include <boost/lexical_cast.hpp>
+#include <cmath>
 
 CrustalAmplification::CrustalAmplification(QObject *parent) :
         MyAbstractTableModel(parent)
@@ -325,27 +326,24 @@ void CrustalAmplification::clearInterp()
     }
 }
 
-void CrustalAmplification::ptRead(const ptree &pt)
+void CrustalAmplification::fromJson(const QJsonObject &json)
 {
-    int model = pt.get<int>("model");
-
+    int model = json["model"].toInt();
     setModel(model);
 
     switch (m_model) {
         case CrustalAmplification::Custom:
         {
             beginResetModel();
-            ptree freq = pt.get_child("freq");
-            foreach(const ptree::value_type &v, freq)
-            {
-                m_freq << boost::lexical_cast<double>(v.second.data());
-            }
 
-            ptree amp = pt.get_child("amp");
-            foreach(const ptree::value_type &v, amp)
-            {
-                m_amp << boost::lexical_cast<double>(v.second.data());
-            }
+            m_freq.clear();
+            foreach (const QJsonValue &d, json["freq"].toArray())
+                m_freq << d.toDouble();
+
+            m_amp.clear();
+            foreach (const QJsonValue &d, json["amp"].toArray())
+                m_amp << d.toDouble();
+
             endResetModel();
             break;
         }
@@ -354,50 +352,39 @@ void CrustalAmplification::ptRead(const ptree &pt)
             break;
         case CrustalAmplification::Calculated:
         {
-            ptree crustalModel = pt.get_child("crustalModel");
-            m_crustalModel->ptRead(crustalModel);
+            m_crustalModel->fromJson(json["crustalModel"].toObject());
             calculate();
             break;
         }
     }
 }
 
-void CrustalAmplification::ptWrite(ptree &pt) const
+QJsonObject CrustalAmplification::toJson() const
 {
-    pt.put("model", (int) m_model);
+    QJsonObject json;
+    json["model"] = (int) m_model;
     switch (m_model) {
         case CrustalAmplification::Custom:
         {
-            ptree freq;
-            foreach(const double & d, m_freq)
-            {
-                ptree val;
-                val.put("", d);
-                freq.push_back(std::make_pair("", val));
-            }
-            pt.add_child("freq", freq);
+            QJsonArray freq;
+            foreach(const double &d, m_freq)
+                freq << QJsonValue(d);
+            json["freq"] = freq;
 
-            ptree amp;
-            foreach(const double & d, m_amp)
-            {
-                ptree val;
-                val.put("", d);
-                amp.push_back(std::make_pair("", val));
-            }
-            pt.add_child("amp", amp);
+            QJsonArray amp;
+            foreach(const double &d, m_amp)
+                amp << QJsonValue(d);
+            json["amp"] = amp;
             break;
         }
         case CrustalAmplification::WUS:
         case CrustalAmplification::CEUS:
             break;
         case CrustalAmplification::Calculated:
-        {
-            ptree crustalModel;
-            m_crustalModel->ptWrite(crustalModel);
-            pt.add_child("crustalModel", crustalModel);
+            json["crustalModel"] = m_crustalModel->toJson();
             break;
-        }
     }
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const CrustalAmplification* ca)

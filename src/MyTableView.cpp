@@ -27,6 +27,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDebug>
+#include <QMimeData>
 
 MyTableView::MyTableView(QWidget * parent)
     : QTableView(parent)

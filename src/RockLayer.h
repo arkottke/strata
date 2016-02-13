@@ -24,11 +24,9 @@
 
 #include "VelocityLayer.h"
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QString>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 //! Describes the velocity variation and linear response of bedrock
 
@@ -57,8 +55,8 @@ public:
     //! A description of the layer for tables
     QString toString() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setUntWt(double untWt);

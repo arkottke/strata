@@ -38,13 +38,11 @@
 #include "SoilTypePage.h"
 #include "SoilTypeCatalog.h"
 #include "SoilProfilePage.h"
-#include "UpdateDialog.h"
 
 #include <QApplication>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLabel>
@@ -52,6 +50,7 @@
 #include <QScrollArea>
 #include <QPrintDialog>
 #include <QStatusBar>
+#include <QStandardPaths>
 #include <QScrollArea>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -145,8 +144,8 @@ void MainWindow::createActions()
     connect(m_helpAction, SIGNAL(triggered()), this, SLOT(help()));
 
     // Check for updates
-    m_updateAction = new QAction(tr("&Check for updates..."), this);
-    connect(m_updateAction, SIGNAL(triggered()), this, SLOT(update()));
+    // m_updateAction = new QAction(tr("&Check for updates..."), this);
+    // connect(m_updateAction, SIGNAL(triggered()), this, SLOT(update()));
 
     // About action
     m_aboutAction = new QAction(tr("&About"), this);
@@ -269,6 +268,16 @@ void MainWindow::newModel()
     setModel(new SiteResponseModel);
 }
 
+void showExtensionError(QWidget *parent) {
+    QMessageBox::critical(
+                parent,
+                "Invalid file extension",
+                "Invalid file extension."
+                "Possible extensions are \".strata\" for binary files,"
+                "and \".strata.json\" for JSON text files."
+                );
+}
+
 void MainWindow::open(QString fileName)
 {
     if (!okToClose()) {
@@ -282,12 +291,12 @@ void MainWindow::open(QString fileName)
                     tr("Open strata file..."),
                     (m_model->fileName().isEmpty() ?
                      m_settings->value("projectDirectory",
-                                       QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+                                       QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                                        ).toString()
                                            : m_model->fileName()),
-                    "Strata Files (*.strata *.stratahr);;"
+                    "Strata Files (*.strata *.json);;"
                     "Strata Binary File (*.strata);;"
-                    "Strata Human-Readable File (*.stratahr)");
+                    "Strata JSON File (*.json);;");
 
         if (!fileName.isEmpty()) {
             // Save the state
@@ -298,14 +307,14 @@ void MainWindow::open(QString fileName)
     }   
 
     SiteResponseModel* srm = new SiteResponseModel;
-    if (fileName.endsWith(".strata"))
-    {
-        srm->load(fileName);
+    if (fileName.endsWith(".strata")) {
+        srm->loadBinary(fileName);
+    } else if (fileName.endsWith(".json")) {
+        srm->loadJson(fileName);
+    } else {
+        return showExtensionError(this);
     }
-    else
-    {
-        srm->loadReadable(fileName);
-    }
+
     setModel(srm);
 }
 
@@ -315,14 +324,16 @@ bool MainWindow::save()
     if (m_model->fileName().isEmpty())
         return saveAs();
 
+    const QString &fileName = m_model->fileName();
+
     // Save the model
-    if (m_model->fileName().endsWith(".strata"))
-    {
-       m_model->save();
-    }
-    else
-    {
-       m_model->saveReadable();
+    if (fileName.endsWith(".strata")){
+        m_model->saveBinary();
+    } else if (fileName.endsWith(".json")) {
+        m_model->saveJson();
+    } else {
+        showExtensionError(this);
+        return false;
     }
 
     return true;
@@ -336,17 +347,17 @@ bool MainWindow::saveAs()
             tr("Save file as..."),
             (m_model->fileName().isEmpty() ?
              m_settings->value("projectDirectory",
-                               QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+                               QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                                ).toString()
                                    : m_model->fileName()),
-                "Strata Files (*.strata *.stratahr);;"
+                "Strata Files (*.strata *.json);;"
                 "Strata Binary File (*.strata);;"
-                "Strata Human-Readable File (*.stratahr)");
+                "Strata JSON File (*.json);;");
 
     if (!fileName.isEmpty()) {
         // Make sure that the file name ends with .strata or .stratahr
-        if (!fileName.endsWith(".strata", Qt::CaseInsensitive) && !fileName.endsWith(".stratahr", Qt::CaseInsensitive)) {
-            fileName.append(".strata");
+        if (!fileName.endsWith(".strata", Qt::CaseInsensitive) && !fileName.endsWith(".json", Qt::CaseInsensitive)) {
+            fileName.append(".json");
         }
 
         // Save the state
@@ -389,7 +400,7 @@ void MainWindow::printToPdf()
             this,
             tr("Select output file..."),
             m_settings->value("exportDirectory",
-                              QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+                              QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                               ).toString(),
             "PDF File (*.pdf)");
 
@@ -438,12 +449,14 @@ void MainWindow::help()
     m_helpDialog->show();
 }
 
+/*
 void MainWindow::update()
 {
     UpdateDialog ud(this);
 
     ud.exec();
 }
+*/
 
 void MainWindow::about()
 {

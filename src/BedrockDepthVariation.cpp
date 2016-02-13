@@ -52,19 +52,20 @@ void BedrockDepthVariation::updateEnabled()
     emit enabledChanged(enabled());
 }
 
-void BedrockDepthVariation::ptRead(const ptree &pt)
+void BedrockDepthVariation::fromJson(const QJsonObject &json)
 {
-    Distribution::ptRead(pt);
-    bool enabled = pt.get<bool>("enabled");
-
+    Distribution::fromJson(json);
+    bool enabled = json["enabled"].toBool();
     setEnabled(enabled);
 }
 
-void BedrockDepthVariation::ptWrite(ptree &pt) const
+QJsonObject BedrockDepthVariation::toJson() const
 {
-    Distribution::ptWrite(pt);
-    pt.put("enabled", m_enabled);
+    QJsonObject json = Distribution::toJson();
+    json["enabled"] = m_enabled;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
 

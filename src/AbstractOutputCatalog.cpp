@@ -35,6 +35,7 @@ AbstractOutputCatalog::AbstractOutputCatalog(OutputCatalog *outputCatalog) :
 
 void AbstractOutputCatalog::setApproach(int approach)
 {
+    beginResetModel();
     m_approach = (MotionLibrary::Approach)approach;
 
     // Disable time series only outputs
@@ -46,8 +47,7 @@ void AbstractOutputCatalog::setApproach(int approach)
         }
     }
 
-
-    reset();
+    endResetModel();
 }
 
 QVariant AbstractOutputCatalog::data(const QModelIndex & index, int role ) const

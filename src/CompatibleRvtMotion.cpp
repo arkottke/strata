@@ -371,34 +371,22 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
     return fas;
 }
 
-void CompatibleRvtMotion::ptRead(const ptree &pt)
+void CompatibleRvtMotion::fromJson(const QJsonObject &json)
 {
-    AbstractRvtMotion::ptRead(pt);
-
-    ptree f = pt.get_child("freq");
-    m_freq->ptRead(f);
-
-    m_limitFas = pt.get<bool>("limitFas");
-
-    ptree t = pt.get_child("targetRespSpec");
-    m_targetRespSpec->ptRead(t);
-
+    AbstractRvtMotion::fromJson(json);
+    m_limitFas = json["limitFas"].toBool();
+    m_freq->fromJson(json["freq"].toObject());
+    m_targetRespSpec->fromJson(json["targetRespSpec"].toObject());
     calculate();
 }
 
-void CompatibleRvtMotion::ptWrite(ptree &pt) const
+QJsonObject CompatibleRvtMotion::toJson() const
 {
-    AbstractRvtMotion::ptWrite(pt);
-
-    ptree freq;
-    m_freq->ptWrite(freq);
-    pt.add_child("freq", freq);
-
-    pt.put("limitFas", m_limitFas);
-
-    ptree targetRespSpec;
-    m_targetRespSpec->ptWrite(targetRespSpec);
-    pt.add_child("targetRespSpec", targetRespSpec);
+    QJsonObject json = AbstractRvtMotion::toJson();
+    json["freq"] = m_freq->toJson();
+    json["limitFas"] = m_limitFas;
+    json["targetRespSpec"] = m_targetRespSpec->toJson();
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const CompatibleRvtMotion* crm)

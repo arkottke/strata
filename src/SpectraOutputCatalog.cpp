@@ -247,37 +247,30 @@ AbstractLocationOutput* SpectraOutputCatalog::factory(const QString & className,
     return alo;
 }
 
-void SpectraOutputCatalog::ptRead(const ptree &pt)
+void SpectraOutputCatalog::fromJson(const QJsonArray &array)
 {
     beginResetModel();
+    while (m_outputs.size())
+        m_outputs.takeLast()->deleteLater();
 
-    foreach(const ptree::value_type &v, pt.get_child("outputs"))
-    {
-        std::size_t pos = v.first.find("-");
-        std::string name = v.first.substr(0, pos);
-        AbstractLocationOutput* alo = factory(QString::fromStdString(name), m_outputCatalog);
-        alo->ptRead(v.second);
+    foreach (const QJsonValue &v, array) {
+        QJsonObject json = v.toObject();
+        AbstractLocationOutput *alo = factory(json["className"].toString(), m_outputCatalog);
+        alo->fromJson(json);
         m_outputs << alo;
     }
-
     endResetModel();
 }
 
-void SpectraOutputCatalog::ptWrite(ptree &pt) const
+QJsonArray SpectraOutputCatalog::toJson() const
 {
-    int counter = 0;
+    QJsonArray array;
+    foreach (AbstractLocationOutput *alo, m_outputs)
+        array << alo->toJson();
 
-    ptree m_arr;
-    foreach(AbstractLocationOutput *alo, m_outputs)
-    {
-        ptree alp;
-        alo->ptWrite(alp);
-        std::stringstream fmt;
-        fmt << alo->metaObject()->className() << "-" << counter++;
-        m_arr.add_child(fmt.str(), alp);
-    }
-    pt.add_child("outputs", m_arr);
+    return array;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc)
 {
