@@ -7,5 +7,5 @@ before_install:
     - sudo apt-get install -qq libqwt-dev fftw-dev libgsl0-dev qt5-qmake qt5-default
 
 script:  
-    - qmake
+    - qmake-qt5
     - make release
