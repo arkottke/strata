@@ -24,13 +24,12 @@
 
 #include "MyAbstractTableModel.h"
 
+#include <QDataStream>
+#include <QJsonObject>
 #include <QMap>
 #include <QString>
 #include <QVariant>
 #include <QVector>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class ResponseSpectrum : public MyAbstractTableModel
 {
@@ -69,8 +68,8 @@ public:
     bool insertRows( int row, int count, const QModelIndex &parent = QModelIndex() );
     bool removeRows( int row, int count, const QModelIndex &parent = QModelIndex() );
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void wasModified();

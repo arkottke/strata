@@ -26,9 +26,8 @@
 
 #include "Location.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 #include <gsl/gsl_rng.h>
 
@@ -170,8 +169,8 @@ public:
     //! Create a html document containing the information of the model
     QString toHtml() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setMaxFreq(double maxFreq);

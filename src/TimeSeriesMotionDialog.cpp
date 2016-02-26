@@ -27,7 +27,6 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QFileDialog>
@@ -37,17 +36,18 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTextCursor>
 #include <QTextBlock>
 #include <QTextStream>
 #include <QWhatsThis>
 
-#include <qwt_plot.h>
-#include <qwt_plot_picker.h>
-#include <qwt_picker_machine.h>
-#include <qwt_scale_engine.h>
-#include <qwt_symbol.h>
-#include <qwt_text.h>
+#include <qwt/qwt_plot.h>
+#include <qwt/qwt_plot_picker.h>
+#include <qwt/qwt_picker_machine.h>
+#include <qwt/qwt_scale_engine.h>
+#include <qwt/qwt_symbol.h>
+#include <qwt/qwt_text.h>
 
 #include <climits>
 
@@ -105,7 +105,8 @@ void TimeSeriesMotionDialog::openFile()
             this,
             tr("Select a time series..."),
             settings.value("motionDirectory",
-                           QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString());
+                           QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                           ).toString());
 
     if (!fileName.isEmpty()) {
         QFileInfo fileInfo = QFileInfo(fileName);

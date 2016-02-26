@@ -34,8 +34,8 @@ public:
     NonlinearPropertyCatalog();
     ~NonlinearPropertyCatalog();
 
-    ModulusFactory* const modulusFactory();
-    DampingFactory* const dampingFactory();
+    ModulusFactory* modulusFactory();
+    DampingFactory* dampingFactory();
 
     //! Save the defined curves
     bool save() const;

@@ -25,6 +25,7 @@
 #include "ResponseSpectrum.h"
 #include "Units.h"
 
+#include <QDataStream>
 #include <QDebug>
 
 #include <cmath>
@@ -202,7 +203,6 @@ void AbstractMotion::scaleProperties()
     }
 }
 
-
 QVector<std::complex<double> > AbstractMotion::calcSdofTf(const double period, const double damping) const
 {
     QVector<std::complex<double> > tf(freq().size(), std::complex<double>(0., 0.));
@@ -235,21 +235,24 @@ void AbstractMotion::setPgv(double pgv)
     emit pgvChanged(m_pgv);
 }
 
-void AbstractMotion::ptRead(const ptree &pt)
+void AbstractMotion::fromJson(const QJsonObject &json)
 {
-    int type = pt.get<int>("type");
-    m_description = QString::fromStdString(pt.get<std::string>("description"));
-    m_enabled = pt.get<bool>("enabled");
+    m_description = json["description"].toString();
+    m_enabled = json["enabled"].toBool();
 
-    setType(type);
+    setType(json["type"].toInt());
 }
 
-void AbstractMotion::ptWrite(ptree &pt) const
+QJsonObject AbstractMotion::toJson() const
 {
-    pt.put("className", metaObject()->className());
-    pt.put("type", (int) m_type);
-    pt.put("description", m_description.toStdString());
-    pt.put("enabled", m_enabled);
+    QJsonObject json;
+
+    json["className"] = metaObject()->className();
+    json["type"] = (int) m_type;
+    json["description"] = m_description;
+    json["enabled"] = m_enabled;
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)
@@ -257,9 +260,8 @@ QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)
     out << (quint8)1;
 
     out << (int)m->m_type
-            << m->m_description
-            << m->m_enabled;
-
+        << m->m_description
+        << m->m_enabled;
 
     return out;
 }
@@ -270,10 +272,9 @@ QDataStream & operator>> (QDataStream & in, AbstractMotion* m)
     in >> ver;
 
     int type;
-
     in >> type
-            >> m->m_description
-            >> m->m_enabled;
+       >> m->m_description
+       >> m->m_enabled;
 
     m->setType(type);
 

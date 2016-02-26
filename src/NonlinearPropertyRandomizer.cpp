@@ -205,36 +205,29 @@ void NonlinearPropertyRandomizer::varyProperty(
     property->setVaried(varied);
 }
 
-void NonlinearPropertyRandomizer::ptRead(const ptree &pt)
+void NonlinearPropertyRandomizer::fromJson(const QJsonObject &json)
 {
-    m_enabled = pt.get<bool>("enabled");
-    m_model = (NonlinearPropertyRandomizer::Model) pt.get<int>("model");
-    m_bedrockIsEnabled = pt.get<bool>("bedrockIsEnabled");
-    m_correl = pt.get<double>("correl");
+    m_enabled = json["enabled"].toBool();
+    m_model = (NonlinearPropertyRandomizer::Model) json["model"].toInt();
+    m_bedrockIsEnabled = json["bedrockIsEnabled"].toBool();
+    m_correl = json["correl"].toDouble();
 
-    ptree modulusStdev = pt.get_child("modulusStdev");
-    m_modulusStdev->ptRead(modulusStdev);
-
-    ptree dampingStdev = pt.get_child("dampingStdev");
-    m_dampingStdev->ptRead(dampingStdev);
+    m_modulusStdev->fromJson(json["modulusStdev"].toObject());
+    m_dampingStdev->fromJson(json["dampingStdev"].toObject());
 
     setModel(m_model);
 }
 
-void NonlinearPropertyRandomizer::ptWrite(ptree &pt) const
+QJsonObject NonlinearPropertyRandomizer::toJson() const
 {
-    pt.put("enabled", m_enabled);
-    pt.put("model", (int) m_model);
-    pt.put("bedrockIsEnabled", m_bedrockIsEnabled);
-    pt.put("correl", m_correl);
-
-    ptree modulusStdev;
-    m_modulusStdev->ptWrite(modulusStdev);
-    pt.put_child("modulusStdev", modulusStdev);
-
-    ptree dampingStdev;
-    m_dampingStdev->ptWrite(dampingStdev);
-    pt.put_child("dampingStdev", dampingStdev);
+    QJsonObject json;
+    json["enabled"] = m_enabled;
+    json["model"] = (int) m_model;
+    json["bedrockIsEnabled"] = m_bedrockIsEnabled;
+    json["correl"] = m_correl;
+    json["modulusStdev"] = m_modulusStdev->toJson();
+    json["dampingStdev"] = m_dampingStdev->toJson();
+    return json;
 }
 
 QDataStream& operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npv)

@@ -49,12 +49,12 @@ void AbstractCalculator::reset()
     // Do nothing!
 }
 
-SoilProfile* const AbstractCalculator::site() const
+SoilProfile* AbstractCalculator::site() const
 {
     return m_site;
 }
 
-AbstractMotion* const AbstractCalculator::motion() const
+AbstractMotion* AbstractCalculator::motion() const
 {
     return m_motion;
 }

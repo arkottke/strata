@@ -23,9 +23,9 @@
 #define SPECTRA_OUTPUT_CATALOG_H
 
 #include "AbstractMutableOutputCatalog.h"
-#include <boost/property_tree/ptree.hpp>
 
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonArray>
 
 class AbstractLocationOutput;
 
@@ -55,8 +55,8 @@ public:
     virtual void addRow(const QString &name);
     virtual QList<AbstractOutput*> outputs() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonArray &array);
+    QJsonArray toJson() const;
 
 protected:
     AbstractLocationOutput* factory(const QString & className, OutputCatalog * parent) const;

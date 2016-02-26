@@ -22,15 +22,14 @@
 #ifndef DIMENSION_H_
 #define DIMENSION_H_
 
-#include <QVector>
-#include <QStringList>
+#include <QDataStream>
+#include <QJsonObject>
 #include <QMap>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QVector>
 
 //! Class to create vectors of evening spaced values in either log or linear space.
 
@@ -70,8 +69,8 @@ public:
     static QVector<double> linSpace( double min, double max, int size );
     static QVector<double> logSpace( double min, double max, int size );
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setMin(double min);

@@ -24,7 +24,7 @@
 #include "OutputCatalog.h"
 #include "AbstractCalculator.h"
 
-#include <qwt_scale_engine.h>
+#include <qwt/qwt_scale_engine.h>
 
 
 AbstractTimeSeriesOutput::AbstractTimeSeriesOutput(OutputCatalog* catalog)
@@ -105,22 +105,24 @@ const QString AbstractTimeSeriesOutput::suffix() const
     return (m_baselineCorrect ? "corrected" : "");
 }
 
-const int AbstractTimeSeriesOutput::fieldWidth() const
+int AbstractTimeSeriesOutput::fieldWidth() const
 {
     return (int)ceil(log10(motionCount()+1));
 }
 
-void AbstractTimeSeriesOutput::ptRead(const ptree &pt)
+void AbstractTimeSeriesOutput::fromJson(const QJsonObject &json)
 {
-    AbstractLocationOutput::ptRead(pt);
-    m_baselineCorrect = pt.get<bool>("baselineCorrect");
+    AbstractLocationOutput::fromJson(json);
+    m_baselineCorrect = json["baselineCorrect"].toBool();
 }
 
-void AbstractTimeSeriesOutput::ptWrite(ptree &pt) const
+QJsonObject AbstractTimeSeriesOutput::toJson() const
 {
-    AbstractLocationOutput::ptWrite(pt);
-    pt.put("baselineCorrect", m_baselineCorrect);
+    QJsonObject json = AbstractLocationOutput::toJson();
+    json["baselineCorrect"] = m_baselineCorrect;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso)
 {

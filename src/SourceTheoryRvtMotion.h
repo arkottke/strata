@@ -25,9 +25,7 @@
 #include "AbstractRvtMotion.h"
 
 #include <QDataStream>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QJsonObject>
 
 #include <gsl/gsl_interp.h>
 
@@ -62,7 +60,6 @@ public:
     virtual QString name() const;
 
     virtual QString toHtml() const;
-    virtual bool loadFromTextStream(QTextStream &stream);
 
     Model model() const;
     void setModel(Model s);
@@ -84,8 +81,8 @@ public:
     //! Site amplification
     CrustalAmplification* crustalAmp();
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void isCustomizeable(bool b);

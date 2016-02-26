@@ -28,6 +28,7 @@ class AbstractOutputInterpolater
 {
 public:
     AbstractOutputInterpolater();
+    virtual ~AbstractOutputInterpolater();
 
     virtual QVector<double> calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) = 0;
 };

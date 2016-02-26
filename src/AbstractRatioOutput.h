@@ -25,9 +25,8 @@
 #include "AbstractOutput.h"
 #include "AbstractMotion.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 class OutputStatistics;
 
@@ -51,8 +50,8 @@ public:
     AbstractMotion::Type outType() const;
     void setOutType(AbstractMotion::Type outType);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setInDepth(double inDepth);

@@ -93,18 +93,19 @@ void VelocityLayer::vary(double randVar)
     }
 }
 
-void VelocityLayer::ptRead(const ptree &pt)
+void VelocityLayer::fromJson(const QJsonObject &json)
 {
-    AbstractDistribution::ptRead(pt);
-    m_isVaried = pt.get<bool>("isVaried");
-    m_depth = pt.get<double>("depth");
+    AbstractDistribution::fromJson(json);
+    m_isVaried = json["isVaried"].toBool();
+    m_depth = json["depth"].toDouble();
 }
 
-void VelocityLayer::ptWrite(ptree &pt) const
+QJsonObject VelocityLayer::toJson() const
 {
-    AbstractDistribution::ptWrite(pt);
-    pt.put("isVaried", m_isVaried);
-    pt.put("depth", m_depth);
+    QJsonObject json = AbstractDistribution::toJson();
+    json["isVaried"] = m_isVaried;
+    json["depth"] = m_depth;
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl)

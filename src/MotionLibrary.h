@@ -26,9 +26,7 @@
 #include "MyAbstractTableModel.h"
 
 #include <QDataStream>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QJsonObject>
 
 class MotionLibrary : public MyAbstractTableModel
 {
@@ -91,8 +89,8 @@ public:
     Approach approach() const;
     void setApproach(Approach approach);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:    
     void wasModified();

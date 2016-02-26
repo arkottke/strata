@@ -34,49 +34,68 @@
 #include <fstream>
 #include <iostream>
 
-void myMessageOutput(QtMsgType type, const char *msg)
+//void myMessageOutput(QtMsgType type, const char *msg)
+//{
+//    switch (type) {
+//        case QtDebugMsg:
+//            fprintf( stdout, "Debug: %s\n", msg );
+//            break;
+//        case QtWarningMsg:
+//            QMessageBox::warning(0, "Strata", msg);
+//            break;
+//        case QtCriticalMsg:
+//            QMessageBox::critical(0, "Strata", msg);
+//            break;
+//        case QtFatalMsg:
+//            QMessageBox::critical(0, "Strata", msg);
+//            abort();
+//        }
+//}
+
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
-        case QtDebugMsg:
-            fprintf( stdout, "Debug: %s\n", msg );
-            break;
-        case QtWarningMsg:
-            QMessageBox::warning(0, "Strata", msg);
-            break;
-        case QtCriticalMsg:
-            QMessageBox::critical(0, "Strata", msg);
-            break;
-        case QtFatalMsg:
-            QMessageBox::critical(0, "Strata", msg);
-            abort();
-        }
+    case QtDebugMsg:
+        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtInfoMsg:
+        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        abort();
+    }
 }
 
 int main(int argc, char* argv[])
 {
 #ifndef DEBUG
-    qInstallMsgHandler(myMessageOutput);
+    qInstallMessageHandler(myMessageOutput);
 #endif
 
     bool batch = false;
-    for (int i = 0; i < argc; i++)
-    {
+    for (int i = 0; i < argc; i++) {
         QString a = QString::fromUtf8(argv[i]);
         if (a == "?" || a == "-?" || a == "--?" || a == "help" || a == "-help" || a == "--help")
         {
             fprintf(stdout, "strata.exe (-b, for batch use) [path_to_file]\n");
             exit(0);
         }
-        if (a == "-b")
-        {
+        if (a == "-b") {
             batch = true;
         }
     }
 
-    if (batch)
-    {
+    if (batch) {
         // console hook
-        QCoreApplication a(argc, argv);
+        QCoreApplication app(argc, argv);
         // console output hooks
         QTextStream qerr(stderr);
 
@@ -87,21 +106,19 @@ int main(int argc, char* argv[])
         if (!input)
         {
             qerr << "file not found: " << fn << endl;
-            a.exit(-1);
+            app.exit(-1);
         }
         BatchRunner * b = new BatchRunner(fileName);
         b->run();
-        return a.exec();
-    }
-    else
-    {
+        return app.exec();
+    } else {
         // Normal application mode
         QApplication app(argc, argv);
 
         // Set the window icon
         app.setWindowIcon(QIcon(":/images/application-icon.svg"));
 
-        QCoreApplication::setOrganizationName("accipter");
+        QCoreApplication::setOrganizationName("arkottke");
         QCoreApplication::setApplicationName("Strata");
 
         MainWindow * mainWindow = new MainWindow;

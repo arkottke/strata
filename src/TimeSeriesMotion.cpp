@@ -21,16 +21,18 @@
 
 #include "TimeSeriesMotion.h"
 
-#include "Serializer.h"
 #include "ResponseSpectrum.h"
 #include "Units.h"
 
-#include <QFile>
+#include <QDataStream>
+#include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonValue>
 #include <QRegExp>
 #include <QTextStream>
-#include <QDebug>
 
 #ifdef USE_FFTW
 #include <fftw3.h>
@@ -43,8 +45,6 @@
 #include <gsl/gsl_multifit.h>
 
 #include <cmath>
-
-#include <boost/lexical_cast.hpp>
 
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
         : AbstractMotion(parent)
@@ -1055,71 +1055,60 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
     return ts;
 }
 
-void TimeSeriesMotion::ptRead(const ptree &pt)
+void TimeSeriesMotion::fromJson(const QJsonObject &json)
 {
-    AbstractMotion::ptRead(pt);
-    m_saveData = pt.get<bool>("saveData");
-    m_fileName = QString::fromStdString(pt.get<std::string>("fileName"));
-    m_timeStep = pt.get<double>("timeStep");
-    m_pointCount = pt.get<int>("pointCount");
-    m_scale = pt.get<double>("scale");
+    AbstractMotion::fromJson(json);
 
-    int format = pt.get<int>("format");
-    setFormat(format);
+    m_saveData = json["saveData"].toBool();
+    m_fileName = json["fileName"].toString();
+    m_timeStep = json["timeStep"].toDouble();
+    m_pointCount = json["pointCount"].toInt();
+    m_scale = json["scale"].toDouble();
+    m_dataColumn = json["dataColumn"].toInt();
+    m_startLine = json["startLine"].toInt();
+    m_stopLine = json["stopLine"].toInt();
 
-    m_dataColumn = pt.get<int>("dataColumn");
-    m_startLine = pt.get<int>("startLine");
-    m_stopLine = pt.get<int>("stopLine");
+    setFormat(json["format"].toInt());
+    setInputUnits(json["inputUnits"].toInt());
 
-    int inputUnits = pt.get<int>("inputUnits");
-    setInputUnits(inputUnits);
-
-    if (m_saveData)
-    {
-        ptree accel = pt.get_child("accel");
-        foreach(const ptree::value_type &v, accel)
-        {
-            m_accel << boost::lexical_cast<double>(v.second.data());
-        }
-    }
-    else
-    {
+    if (m_saveData) {
+        m_accel.clear();
+        foreach (const QJsonValue &v, json["accel"].toArray())
+            m_accel << v.toDouble();
+    } else {
         load(m_fileName, false, m_scale);
     }
 
-    if (m_accel.size())
-    {
+    if (m_accel.size()) {
         calculate();
         m_isLoaded = true;
     }
 }
 
-void TimeSeriesMotion::ptWrite(ptree &pt) const
+QJsonObject TimeSeriesMotion::toJson() const
 {
-    AbstractMotion::ptWrite(pt);
-    pt.put("saveData", m_saveData);
-    pt.put("fileName", m_fileName.toStdString());
-    pt.put("timeStep", m_timeStep);
-    pt.put("pointCount", m_pointCount);
-    pt.put("scale", m_scale);
-    pt.put("format", (int) m_format);
-    pt.put("dataColumn", m_dataColumn);
-    pt.put("startLine", m_startLine);
-    pt.put("stopLine", m_stopLine);
-    pt.put("inputUnits", (int) m_inputUnits);
+    QJsonObject json = AbstractMotion::toJson();
+    json["saveData"] = m_saveData;
+    json["fileName"] = m_fileName;
+    json["timeStep"] = m_timeStep;
+    json["pointCount"] = m_pointCount;
+    json["scale"] = m_scale;
+    json["format"] = m_format;
+    json["dataColumn"] = m_dataColumn;
+    json["startLine"] = m_startLine;
+    json["stopLine"] = m_stopLine;
+    json["inputUnits"] = (int) m_inputUnits;
 
-    if (m_saveData)
-    {
-        ptree accel;
-        foreach(const double & d, m_accel)
-        {
-            ptree val;
-            val.put("", d);
-            accel.push_back(std::make_pair("", val));
-        }
-        pt.add_child("accel", accel);
+    if (m_saveData) {
+        QJsonArray accel;
+        foreach (const double &d, m_accel)
+            accel << QJsonValue(d);
+        json["accel"] = accel;
     }
+
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
 {

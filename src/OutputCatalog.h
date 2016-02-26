@@ -23,14 +23,12 @@
 #define OUTPUT_CATALOG_H
 
 #include <QAbstractTableModel>
-
+#include <QDataStream>
+#include <QJsonObject>
 #include <QStringList>
 #include <QVector>
+
 #include "SoilTypeCatalog.h"
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class AbstractCalculator;
 class AbstractOutput;
@@ -142,8 +140,8 @@ public:
     //! Compute the statistics of all of the outputs
     void computeStats();
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void timesAreNeededChanged(bool timesAreNeeded);

@@ -28,7 +28,7 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-#include <qwt_scale_engine.h>
+#include <qwt/qwt_scale_engine.h>
 
 DissipatedEnergyProfileOutput::DissipatedEnergyProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
@@ -48,7 +48,7 @@ QString DissipatedEnergyProfileOutput::shortName() const
 
 const QString DissipatedEnergyProfileOutput::xLabel() const
 {
-    return tr("Dissipated Energy (??)");
+    return tr("Dissipated Energy (?)");
 }
 
 QwtScaleEngine* DissipatedEnergyProfileOutput::xScaleEngine() const

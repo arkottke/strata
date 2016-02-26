@@ -25,10 +25,7 @@
 #include "AbstractRvtMotion.h"
 
 #include <QDataStream>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
-
+#include <QJsonObject>
 
 /*! A class that uses random vibration theory to compute the reponse.
  * The motion is characterized by the Fourier Amplitude and random vibration
@@ -59,8 +56,8 @@ public:
     virtual QString toHtml() const;
     virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setDuration(double d);

@@ -28,7 +28,7 @@
 #include <QDialog>
 #include <QTabWidget>
 
-#include <qwt_plot_curve.h>
+#include <qwt/qwt_plot_curve.h>
 
 class SourceTheoryRvtMotionDialog : public QDialog
 {

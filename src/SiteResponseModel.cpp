@@ -37,19 +37,15 @@
 #include "TextLog.h"
 #include "Units.h"
 
-#include <QFile>
-#include <QDataStream>
 #include <QApplication>
+#include <QDataStream>
+#include <QFile>
+#include <QJsonDocument>
+#include <QMetaObject>
+#include <QMetaProperty>
 #include <QTimer>
 #include <QProgressBar>
 #include <QTextDocument>
-
-#include <QMetaObject>
-#include <QMetaProperty>
-
-#include <iomanip>
-#include <iostream>
-#include <fstream>
 
 #include <QDebug>
 
@@ -261,7 +257,7 @@ void SiteResponseModel::setCalculator(AbstractCalculator *calculator)
     }
 }
 
-bool SiteResponseModel::load(const QString & fileName)
+bool SiteResponseModel::loadBinary(const QString &fileName)
 {
     setModified(false);
     m_isLoaded = false;
@@ -278,6 +274,7 @@ bool SiteResponseModel::load(const QString & fileName)
     }
     // Open the data stream
     QDataStream inStream(&file);
+    inStream.setVersion(QDataStream::Qt_4_0);
 
     // Read and check the header
     quint32 magic;
@@ -298,7 +295,7 @@ bool SiteResponseModel::load(const QString & fileName)
     return true;
 }
 
-bool SiteResponseModel::loadReadable(const QString & fileName)
+bool SiteResponseModel::loadJson(const QString & fileName)
 {
     setModified(false);
     m_isLoaded = false;
@@ -306,73 +303,55 @@ bool SiteResponseModel::loadReadable(const QString & fileName)
     // Save the file name
     m_fileName = fileName;
 
-    // structured save data
-    ptree hrLoad;
-    // open JSON structured file
-    boost::property_tree::read_json(m_fileName.toStdString(), hrLoad);
-
-    // load all ptree data
-    m_notes->setHtml(QString::fromStdString(hrLoad.get<std::string>("notes")));
-    int method = hrLoad.get<int>("method");
-    bool hasResults = hrLoad.get<bool>("hasResults");
-    Units::instance()->setSystem(hrLoad.get<int>("system"));
-
-    if( hrLoad.count("randNumGen") != 0 )
-    {
-        ptree randnum = hrLoad.get_child("randNumGen");
-        m_randNumGen->ptRead(randnum);
+    QFile file(m_fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open save file.");
+        return false;
     }
 
-    if( hrLoad.count("siteProfile") != 0 )
+    QByteArray savedData = file.readAll();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(savedData);
+
+    QJsonObject json = jsonDoc.object();
+
+    //
+    m_notes->setHtml(json["notes"].toString());
+    Units::instance()->setSystem(json["system"].toInt());
+
+    m_randNumGen->fromJson(json["randNumGen"].toObject());
+    m_siteProfile->fromJson(json["siteProfile"].toObject());
+    m_motionLibrary->fromJson(json["motionLibrary"].toObject());
+    m_outputCatalog->fromJson(json["outputCatalog"].toObject());
+
+    setMethod(json["method"].toInt());
+    const QJsonObject cjo = json["calculator"].toObject();
+    switch (m_method)
     {
-        ptree siteProfile = hrLoad.get_child("siteProfile");
-        m_siteProfile->ptRead(siteProfile);
+    case SiteResponseModel::EquivalentLinear:
+        qobject_cast<EquivalentLinearCalculator*>(m_calculator)->fromJson(cjo);
+        break;
+    case SiteResponseModel::FrequencyDependent:
+        qobject_cast<FrequencyDependentCalculator*>(m_calculator)->fromJson(cjo);
+        break;
+    case SiteResponseModel::LinearElastic:
+    default:
+        break;
     }
 
-    if( hrLoad.count("motionLibrary") != 0 )
-    {
-        ptree motionLibrary = hrLoad.get_child("motionLibrary");
-        m_motionLibrary->ptRead(motionLibrary);
-    }
+    setHasResults(json["hasResults"].toBool());
 
-    if( hrLoad.count("outputCatalog") != 0 )
-    {
-        ptree outputCatalog = hrLoad.get_child("outputCatalog");
-        m_outputCatalog->ptRead(outputCatalog);
-    }
+    m_outputCatalog->initialize(
+                m_siteProfile->isVaried() ?  m_siteProfile->profileCount() : 1, m_motionLibrary);
 
-    // initialize as in binary load
-    setMethod(method);
-    m_outputCatalog->initialize(m_siteProfile->isVaried() ?  m_siteProfile->profileCount() : 1, m_motionLibrary);
-    if (hasResults)
-    {
+    if (m_hasResults) {
         m_outputCatalog->finalize();
     }
 
-    ptree calculator = hrLoad.get_child("calculator");
-    switch (m_method)
-    {
-        case SiteResponseModel::EquivalentLinear:
-            qobject_cast<EquivalentLinearCalculator*>(m_calculator)->ptRead(calculator);
-        break;
-        case SiteResponseModel::FrequencyDependent:
-            qobject_cast<FrequencyDependentCalculator*>(m_calculator)->ptRead(calculator);
-        break;
-        case SiteResponseModel::LinearElastic:
-        default:
-        break;
-    }
-    // Need to update the other objects that the model has data and should not be editted.
-    setHasResults(hasResults);
-
     setModified(false);
-    // Wait until all events have been processed and then reset the modified flag
-    //QTimer::singleShot(10, this, SLOT(setIsLoaded()));
-
     return true;
 }
 
-bool SiteResponseModel::save()
+bool SiteResponseModel::saveBinary()
 {
     QFile file(m_fileName);
     // If the file can't be opened halt
@@ -382,11 +361,10 @@ bool SiteResponseModel::save()
     }
     // Open the data stream
     QDataStream outStream(&file);
+    outStream.setVersion(QDataStream::Qt_4_0);
 
     // Write a header with a "magic number" and a version
     outStream << (quint32)0xA1B2;
-    // FIXME add versioning out file
-    // outStream << version;
 
     outStream << this;
 
@@ -394,46 +372,40 @@ bool SiteResponseModel::save()
     return true;
 }
 
-bool SiteResponseModel::saveReadable()
+bool SiteResponseModel::saveJson()
 {
-    // structured save data
-    ptree hrSave;
-    // load all ptree data
-    hrSave.put("notes", m_notes->toPlainText().toStdString());
-    hrSave.put("method", (int) m_method);
-    hrSave.put("hasResults", m_hasResults);
-    hrSave.put("system", (int) Units::instance()->system());
+    QJsonObject json;
 
-    ptree randnum;
-    m_randNumGen->ptWrite(randnum);
-    hrSave.add_child("randNumGen", randnum);
+    json["notes"] = m_notes->toPlainText();
+    json["method"] = (int) m_method;
+    json["hasResults"] = m_hasResults;
+    json["system"] = (int) Units::instance()->system();
 
-    ptree siteProfile;
-    m_siteProfile->ptWrite(siteProfile);
-    hrSave.add_child("siteProfile", siteProfile);
-    ptree motionLibrary;
-    m_motionLibrary->ptWrite(motionLibrary);
-    hrSave.add_child("motionLibrary", motionLibrary);
-    ptree outputCatalog;
-    m_outputCatalog->ptWrite(outputCatalog);
-    hrSave.add_child("outputCatalog", outputCatalog);
+    json["randNumGen"] = m_randNumGen->toJson();
+    json["siteProfile"] = m_siteProfile->toJson();
+    json["motionLibrary"] = m_motionLibrary->toJson();
+    json["outputCatalog"] = m_outputCatalog->toJson();
 
-    ptree calculator;
     switch (m_method) {
     case SiteResponseModel::EquivalentLinear:
-        qobject_cast<EquivalentLinearCalculator*>(m_calculator)->ptWrite(calculator);
+        json["calculator"] = qobject_cast<EquivalentLinearCalculator*>(m_calculator)->toJson();
         break;
     case SiteResponseModel::FrequencyDependent:
-        qobject_cast<FrequencyDependentCalculator*>(m_calculator)->ptWrite(calculator);
+        json["calculator"] = qobject_cast<FrequencyDependentCalculator*>(m_calculator)->toJson();
         break;
     case SiteResponseModel::LinearElastic:
     default:
         break;
     }
-    hrSave.add_child("calculator", calculator);
 
-    // save as json
-    boost::property_tree::write_json(m_fileName.toStdString(), hrSave);
+    QFile file(m_fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning("Couldn't open save file.");
+        return false;
+    }
+
+    QJsonDocument saveDoc(json);
+    file.write(saveDoc.toJson(QJsonDocument::Indented));
 
     setModified(false);
     return true;

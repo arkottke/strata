@@ -49,7 +49,8 @@ bool MyAbstractTableModel::readOnly() const
 void MyAbstractTableModel::setReadOnly(bool readOnly)
 {
     if (m_readOnly != readOnly) {
+        beginResetModel();
         m_readOnly = readOnly;
-        reset();
+        endResetModel();
     }
 }

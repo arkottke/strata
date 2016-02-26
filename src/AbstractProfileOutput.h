@@ -24,9 +24,8 @@
 
 #include "AbstractOutput.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 class OutputStatistics;
 class OutputCatalog;
@@ -54,8 +53,8 @@ public:
 
     virtual AbstractOutput::CurveType curveType() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 protected:
     QString fileName(int motion = 0) const;

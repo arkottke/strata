@@ -24,9 +24,8 @@
 
 #include "AbstractOutputCatalog.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonArray>
 
 class AbstractProfileOutput;
 
@@ -52,8 +51,8 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex & index) const;
     virtual QList<AbstractOutput*> outputs() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonArray &json);
+    QJsonArray toJson() const;
 
 protected:
     QList<AbstractProfileOutput*> m_outputs;

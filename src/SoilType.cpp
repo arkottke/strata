@@ -25,7 +25,6 @@
 #include "CustomNonlinearProperty.h"
 #include "DarendeliNonlinearProperty.h"
 #include "Dimension.h"
-#include "Serializer.h"
 #include "Units.h"
 
 #include <QBrush>
@@ -143,7 +142,7 @@ bool SoilType::saveData() const
     return m_saveData;
 }
 
-NonlinearProperty* const SoilType::modulusModel()
+NonlinearProperty* SoilType::modulusModel()
 {
     return m_modulusModel;
 }
@@ -163,7 +162,7 @@ void SoilType::setModulusModel(NonlinearProperty * model)
     emit wasModified();
 }
 
-NonlinearProperty* const SoilType::dampingModel()
+NonlinearProperty* SoilType::dampingModel()
 {
     return m_dampingModel;
 }
@@ -321,58 +320,55 @@ QString SoilType::toHtml() const
     return html;
 }
 
-void SoilType::ptRead(const ptree &pt)
+void SoilType::fromJson(const QJsonObject &json)
 {
-    m_untWt = pt.get<double>("untWt");
-    m_damping = pt.get<double>("damping");
-    m_name = QString::fromStdString(pt.get<std::string>("name"));
-    m_notes = QString::fromStdString(pt.get<std::string>("notes"));
-    m_isVaried = pt.get<bool>("isVaried");
-    m_saveData = pt.get<bool>("saveData");
-    m_meanStress = pt.get<double>("meanStress");
-    m_pi = pt.get<double>("pi");
-    m_ocr = pt.get<double>("ocr");
-    m_freq = pt.get<double>("freq");
-    m_nCycles = pt.get<int>("nCycles");
+    m_untWt = json["untWt"].toDouble();
+    m_damping = json["damping"].toDouble();
+    m_name = json["name"].toString();
+    m_notes = json["notes"].toString();
+    m_isVaried = json["isVaried"].toBool();
+    m_saveData = json["saveData"].toBool();
+    m_meanStress = json["meanStress"].toDouble();
+    m_pi = json["pi"].toDouble();
+    m_ocr = json["ocr"].toDouble();
+    m_freq = json["freq"].toDouble();
+    m_nCycles = json["nCycles"].toDouble();
 
-    QString modulusModelType = QString::fromStdString(pt.get<std::string>("modulusType"));
-    NonlinearProperty* mnp = deriveModel(NonlinearProperty::ModulusReduction, modulusModelType);
+    QString modulusType = json["modulusType"].toString();
+    NonlinearProperty *mnp = deriveModel(NonlinearProperty::ModulusReduction, modulusType);
     Q_ASSERT(mnp);
-    ptree modulusModel = pt.get_child("modulusModel");
-    mnp->ptRead(modulusModel);
+    mnp->fromJson(json["modulusModel"].toObject());
     setModulusModel(mnp);
 
-    QString dampingModelType = QString::fromStdString(pt.get<std::string>("dampingType"));
-    NonlinearProperty* dnp = deriveModel(NonlinearProperty::ModulusReduction, dampingModelType);
+    QString dampingType = json["dampingType"].toString();
+    NonlinearProperty *dnp = deriveModel(NonlinearProperty::Damping, dampingType);
     Q_ASSERT(dnp);
-    ptree dampingModel = pt.get_child("dampingModel");
-    dnp->ptRead(dampingModel);
+    dnp->fromJson(json["dampingModel"].toObject());
     setDampingModel(dnp);
 }
 
-void SoilType::ptWrite(ptree &pt) const
+QJsonObject SoilType::toJson() const
 {
-    pt.put("untWt", m_untWt);
-    pt.put("damping", m_damping);
-    pt.put("name", m_name.toStdString());
-    pt.put("notes", m_notes.toStdString());
-    pt.put("isVaried", m_isVaried);
-    pt.put("saveData", m_saveData);
-    pt.put("meanStress", m_meanStress);
-    pt.put("pi", m_pi);
-    pt.put("ocr", m_ocr);
-    pt.put("freq", m_freq);
-    pt.put("nCycles", m_nCycles);
+    QJsonObject json;
+    json["untWt"] = m_untWt;
+    json["damping"] = m_damping;
+    json["name"] = m_name;
+    json["notes"] = m_notes;
+    json["isVaried"] = m_isVaried;
+    json["saveData"] = m_saveData;
+    json["meanStress"] = m_meanStress;
+    json["pi"] = m_pi;
+    json["ocr"] = m_ocr;
+    json["freq"] = m_freq;
+    json["nCycles"] = m_nCycles;
 
-    pt.put("modulusType", QString(m_modulusModel->metaObject()->className()).toStdString());
-    ptree modulusModel;
-    m_modulusModel->ptWrite(modulusModel);
-    pt.add_child("modulusModel", modulusModel);
+    json["modulusType"] = m_modulusModel->metaObject()->className();
+    json["modulusModel"] = m_modulusModel->toJson();
 
-    pt.put("dampingType", QString(m_dampingModel->metaObject()->className()).toStdString());
-    ptree dampingModel;
-    m_dampingModel->ptWrite(dampingModel);
-    pt.add_child("dampingModel", dampingModel);
+    json["dampingType"] = m_dampingModel->metaObject()->className();
+    json["dampingModel"] = m_dampingModel->toJson();
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilType* st)

@@ -52,7 +52,7 @@ class TableGroupBox : public QGroupBox
 
         void addButton( QPushButton * pushButton);
 
-        MyTableView* const table();
+        MyTableView* table();
 
     public slots:
         void setReadOnly(bool readOnly);

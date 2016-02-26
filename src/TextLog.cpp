@@ -20,11 +20,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "TextLog.h"
+
 #include <QApplication>
-
 #include <QDebug>
-
-#include <boost/lexical_cast.hpp>
+#include <QJsonArray>
+#include <QJsonValue>
 
 TextLog::TextLog(QObject * parent) :
         QObject(parent)
@@ -86,29 +86,27 @@ TextLog & operator<<( TextLog & log, const QString & string )
     return log;
 }
 
-void TextLog::ptRead(const ptree &pt)
+void TextLog::fromJson(const QJsonObject &json)
 {
-    m_level = (TextLog::Level) pt.get<int>("level");
+    m_level = (TextLog::Level) json["level"].toInt();
+
     m_text.clear();
-    foreach (const ptree::value_type & v, pt.get_child("text"))
-    {
-        QString t = QString::fromStdString(boost::lexical_cast<std::string>(v.second.data()));
-        m_text.append(t);
-    }
+    foreach (const QJsonValue &v, json["text"].toArray())
+        m_text << v.toString();
 }
 
-void TextLog::ptWrite(ptree &pt) const
+QJsonObject TextLog::toJson() const
 {
-    pt.put("level", (int) m_level);
-    ptree text;
-    foreach (const QString & line, m_text)
-    {
-        ptree val;
-        val.put("", line.toStdString());
-        text.push_back(std::make_pair("", val));
-    }
-    pt.put_child("text", text);
+    QJsonObject json;
+    json["level"] = (int) m_level;
+
+    QJsonArray text;
+    foreach (const QString &l, m_text)
+        text << QJsonValue(l);
+    json["text"] = text;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const TextLog* tl)
 {

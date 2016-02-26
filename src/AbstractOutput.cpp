@@ -31,12 +31,11 @@
 #include <QDebug>
 #include <QDir>
 #include <QFont>
+#include <QJsonArray>
 
-#include <qwt_text.h>
+#include <qwt/qwt_text.h>
 
-#include <qwt_scale_engine.h>
-
-#include <boost/lexical_cast.hpp>
+#include <qwt/qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
     : QAbstractTableModel(catalog), m_catalog(catalog), m_statistics(0), m_interp(0), m_offset(0)
@@ -326,10 +325,11 @@ int AbstractOutput::motionIndex() const
 void AbstractOutput::setMotionIndex(int motionIndex)
 {
     Q_ASSERT(motionIndex < motionCount());
+    beginResetModel();
     m_motionIndex = motionIndex;
 
     // Reset the table model
-    reset();
+    endResetModel();
 }
 
 bool AbstractOutput::needsDepth() const
@@ -446,26 +446,26 @@ const QString AbstractOutput::suffix() const
     return "";
 }
 
-void AbstractOutput::ptRead(const ptree &pt)
+void AbstractOutput::fromJson(const QJsonObject &json)
 {
-    m_exportEnabled = pt.get<bool>("exportEnabled");
+    m_exportEnabled = json["exportEnabled"].toBool();
 
-    ptree data = pt.get_child("data");
-    foreach(const ptree::value_type &t, data) {
-        QList<QVector<double> > qelem;
-        foreach(const ptree::value_type &v, t.second) {
-            QVector<double> qvect;
-            foreach(const ptree::value_type &vv, v.second) {
-                qvect.append(boost::lexical_cast<double>(vv.second.data()));
+    QJsonArray data = json["data"].toArray();
+    foreach (const QJsonValue &site, data) {
+        QList<QVector<double> > l;
+        foreach (const QJsonValue &motion, site.toArray()) {
+            QVector<double> v;
+            foreach (const QJsonValue &qjv, motion.toArray()) {
+                v << qjv.toDouble();
             }
-            qelem << qvect;
+            l << v;
         }
-        if (qelem.size() > 0)
-        {
-            m_data << qelem;
-        }
+
+        if (l.size() > 0)
+            m_data << l;
     }
 
+    m_maxSize = 0;
     foreach (const QList<QVector<double> > &l, m_data) {
         foreach (const QVector<double> &v, l) {
             if (m_maxSize < v.size())
@@ -474,26 +474,30 @@ void AbstractOutput::ptRead(const ptree &pt)
     }
 }
 
-void AbstractOutput::ptWrite(ptree &pt) const
+QJsonObject AbstractOutput::toJson() const
 {
-    pt.put("className", metaObject()->className());
-    pt.put("exportEnabled", m_exportEnabled);
-    ptree data;
+    QJsonObject json;
+    json["className"] = metaObject()->className();
+    json["exportEnabled"] = m_exportEnabled;
+
+    QJsonArray data;
     foreach(const QList<QVector<double> > &l, m_data) {
-        ptree pt_site;
+        QJsonArray site;
         foreach(const QVector<double> &v, l) {
-            ptree pt_motion;
-            foreach(const double &vv, v) {
-                ptree val;
-                val.put("", vv);
-                pt_motion.push_back(std::make_pair("", val));
+            QJsonArray motion;
+            foreach(const double &d, v) {
+                motion << QJsonValue(d);
             }
-            pt_site.push_back(std::make_pair("", pt_motion));
+            // FIXME: Need the QJV?
+            site << QJsonValue(motion);
         }
-        data.push_back(std::make_pair("", pt_site));
+        data << site;
     }
-    pt.add_child("data", data);
+
+    json["data"] = data;
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)
 {

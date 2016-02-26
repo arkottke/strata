@@ -96,7 +96,8 @@ double AbstractNonlinearPropertyStandardDeviation::calculate(NonlinearPropertyRa
 
         QScriptValue result = m_engine.evaluate(m_function);
         if (m_engine.hasUncaughtException()) {
-            int line = m_engine.uncaughtExceptionLineNumber();
+            // FIXME: Remove support for the script engine.
+            // int line = m_engine.uncaughtExceptionLineNumber();
             return 0;
         } else {
             return result.toNumber();
@@ -106,19 +107,22 @@ double AbstractNonlinearPropertyStandardDeviation::calculate(NonlinearPropertyRa
     }
 }
 
-void AbstractNonlinearPropertyStandardDeviation::ptRead(const ptree &pt)
+void AbstractNonlinearPropertyStandardDeviation::fromJson(const QJsonObject &json)
 {
-    m_min = pt.get<double>("min");
-    m_max = pt.get<double>("max");
-    m_function = QString::fromStdString(pt.get<std::string>("function"));
+    m_min = json["min"].toDouble();
+    m_max = json["max"].toDouble();
+    m_function = json["function"].toString();
 }
 
-void AbstractNonlinearPropertyStandardDeviation::ptWrite(ptree &pt) const
+QJsonObject AbstractNonlinearPropertyStandardDeviation::toJson() const
 {
-    pt.put("min", m_min);
-    pt.put("max", m_max);
-    pt.put("function", m_function.toStdString());
+    QJsonObject json;
+    json["min"] = m_min;
+    json["max"] = m_max;
+    json["function"] = m_function;
+    return json;
 }
+
 
 QDataStream& operator<< (QDataStream & out, const AbstractNonlinearPropertyStandardDeviation* anpsd)
 {

@@ -102,37 +102,25 @@ VelocityVariation* ProfileRandomizer::velocityVariation()
     return m_velocityVariation;
 }
 
-void ProfileRandomizer::ptRead(const ptree &pt)
+void ProfileRandomizer::fromJson(const QJsonObject &json)
 {
-    bool enabled = pt.get<bool>("enabled");
+    m_bedrockDepthVariation->fromJson(json["bedrockDepthVariation"].toObject());
+    m_layerThicknessVariation->fromJson(json["layerThicknessVariation"].toObject());
+    m_velocityVariation->fromJson(json["velocityVariation"].toObject());
 
-    ptree velocityVariation = pt.get_child("velocityVariation");
-    m_velocityVariation->ptRead(velocityVariation);
-
-    ptree layerThicknessVariation = pt.get_child("layerThicknessVariation");
-    m_layerThicknessVariation->ptRead(layerThicknessVariation);
-
-    ptree bedrockDepthVariation = pt.get_child("bedrockDepthVariation");
-    m_bedrockDepthVariation->ptRead(bedrockDepthVariation);
-
+    bool enabled = json["enabled"].toBool();
     setEnabled(enabled);
 }
 
-void ProfileRandomizer::ptWrite(ptree &pt) const
+QJsonObject ProfileRandomizer::toJson() const
 {
-    pt.put("enabled", m_enabled);
+    QJsonObject json;
+    json["enabled"] = m_enabled;
 
-    ptree velocityVariation;
-    m_velocityVariation->ptWrite(velocityVariation);
-    pt.add_child("velocityVariation", velocityVariation);
-
-    ptree layerThicknessVariation;
-    m_layerThicknessVariation->ptWrite(layerThicknessVariation);
-    pt.add_child("layerThicknessVariation", layerThicknessVariation);
-
-    ptree bedrockDepthVariation;
-    m_bedrockDepthVariation->ptWrite(bedrockDepthVariation);
-    pt.add_child("bedrockDepthVariation", bedrockDepthVariation);
+    json["bedrockDepthVariation"] = m_bedrockDepthVariation->toJson();
+    json["layerThicknessVariation"] = m_layerThicknessVariation->toJson();
+    json["velocityVariation"] = m_velocityVariation->toJson();
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pv)

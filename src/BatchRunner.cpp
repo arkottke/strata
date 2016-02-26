@@ -11,13 +11,10 @@ BatchRunner::BatchRunner(QString filename)
     // console output hooks
     QTextStream(stdout) << "preparing batch for file " << fileName << endl;
     m_model = new SiteResponseModel;
-    if (fileName.endsWith(".strata"))
-    {
-        m_model->load(fileName);
-    }
-    else
-    {
-        m_model->loadReadable(fileName);
+    if (fileName.endsWith(".strata")) {
+        m_model->loadBinary(fileName);
+    } else {
+        m_model->loadJson(fileName);
     }
     // Clean the run
     m_model->clearResults();
@@ -63,13 +60,10 @@ void BatchRunner::rangeChanged(int begin, int end)
 void BatchRunner::finalize()
 {
     QTextStream(stdout) << "finished batch run, saving results" << endl;
-    if (fileName.endsWith(".strata"))
-    {
-        m_model->save();
-    }
-    else
-    {
-        m_model->saveReadable();
+    if (fileName.endsWith(".strata")) {
+        m_model->saveBinary();
+    } else {
+        m_model->saveJson();
     }
     QTextStream(stdout) << "done." << endl;
     exit(0);

@@ -22,14 +22,13 @@
 #ifndef TEXT_LOG_H_
 #define TEXT_LOG_H_
 
-#include <QObject>    
+#include <QDataStream>
+#include <QJsonObject>
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 
 class TextLog : public QObject
@@ -62,8 +61,9 @@ class TextLog : public QObject
 
         const QStringList& text() const;
 
-        void ptRead(const ptree &pt);
-        void ptWrite(ptree &pt) const;
+        void fromJson(const QJsonObject &json);
+        QJsonObject toJson() const;
+
 
     public slots:
         void setLevel(int level);

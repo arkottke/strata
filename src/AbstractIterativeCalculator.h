@@ -25,10 +25,7 @@
 #include "AbstractCalculator.h"
 
 #include <QDataStream>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QJsonObject>
 
 class AbstractIterativeCalculator : public AbstractCalculator
 {
@@ -47,8 +44,8 @@ public:
     double errorTolerance() const;
     bool converged() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void maxIterationsChanged(int maxIterations);

@@ -24,13 +24,9 @@
 
 #include <QObject>
 
+#include <QJsonObject>
 #include <QDataStream>
 #include <QStringList>
-
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class AbstractDistribution : public QObject
 {
@@ -68,8 +64,8 @@ public:
     //! Set the varied value after applying limits
     void setVaried(double varied);
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setType(int type);

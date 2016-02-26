@@ -24,9 +24,8 @@
 
 #include "AbstractIterativeCalculator.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 class EquivalentLinearCalculator : public AbstractIterativeCalculator
 {
@@ -43,8 +42,8 @@ public:
     virtual QString toHtml() const;
     double strainRatio() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void strainRatioChanged(double strainRatio);

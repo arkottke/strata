@@ -25,14 +25,13 @@
 #include "NonlinearProperty.h"
 
 #include <QAbstractTableModel>
+#include <QDataStream>
+#include <QJsonObject>
 #include <QList>
 #include <QMap>
 #include <QObject>
 #include <QString>
 #include <QVariant>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class SoilType : public QObject
 {
@@ -64,10 +63,10 @@ public:
     void setSaveData(bool saveData);
     bool saveData() const;
 
-    NonlinearProperty* const modulusModel();
+    NonlinearProperty* modulusModel();
     void setModulusModel(NonlinearProperty * model);
 
-    NonlinearProperty* const dampingModel();
+    NonlinearProperty* dampingModel();
     void setDampingModel(NonlinearProperty * model);
 
     //! If the soil properties are required
@@ -85,8 +84,8 @@ public:
     //! Compute the shear modulus-reduction and damping curves
     void computeDarendeliCurves();
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 public slots:
     void setPi(double pi);

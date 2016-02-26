@@ -24,9 +24,8 @@
 
 #include "Distribution.h"
 
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QDataStream>
+#include <QJsonObject>
 
 #include <gsl/gsl_rng.h>
 
@@ -44,8 +43,8 @@ public:
 
     bool enabled() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void enabledChanged(bool enabled);

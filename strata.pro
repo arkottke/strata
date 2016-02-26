@@ -6,30 +6,19 @@
 # modify it under the terms of the GPL License, Version 3.0
 ########################################################################
 
-# Embed the manifest
-CONFIG += embed_manifest_exe
-
 # Grab the revision number using svnversion and clean it up.
-DEFINES += REVISION=$$system(python getSvnVersion.py)
+# FIXME: Fixed revision
+DEFINES += REVISION=\\\"0.2.0\\\"
+#DEFINES += REVISION=$$system(python getSvnVersion.py)
 
 # Flag based on if the program is compiled in debug mode. 
 CONFIG(debug, debug|release) {
    DEFINES += DEBUG
 }
 
-# Directories for building
-CONFIG(debug, debug|release) {
-   DESTDIR = debug
-} else {
-   DESTDIR = release
-}
-
-# add console output
-CONFIG += console
-
 TEMPLATE = app
 TARGET = strata
-QT += script xml network
+QT += gui printsupport script widgets xml core
 
 ########################################################################
 # Enable advanced options that should not be included in the version for
@@ -39,19 +28,24 @@ QT += script xml network
 DEFINES += ADVANCED_OPTIONS
 
 ########################################################################
+# Use FFTW for the FFT alogorithm, otherwise GSL is used.
+########################################################################
+DEFINES += USE_FFTW
+LIBS += -lfftw3
+#LIBS += -lfftw3 -LC:/devel/fftw-3.3.4
+#INCLUDEPATH += C:/devel/fftw-3.3.4
+
+########################################################################
 # Build type. For most cases this should be release, however during
 # development of the software using the debug configuration can be
 # beneficial.
 ########################################################################
-#CONFIG += debug
-#CONFIG += release
 CONFIG += debug_and_release
 
 ########################################################################
 # Compiler warning messages.
 ########################################################################
 CONFIG += warn_on
-
 ########################################################################
 # Enable console for debug versions
 ########################################################################
@@ -64,41 +58,19 @@ CONFIG(debug, debug|release) {
 ########################################################################
 unix {
     LIBS += \
-        -lfftw3 \
         -lgsl \
         -lgslcblas \
-        -lboost_system \
-        -lboost_serialization \
-        # -L$$PWD/../qwt-6.1/lib \
         -lqwt
+    # -L$$PWD/../qwt-6.1/lib \
     # INCLUDEPATH += $$PWD/../qwt-6.1/src
-    INCLUDEPATH += /usr/include/qwt/
 }
 win32 { 
-  LIBS += \
-        -lfftw3-3 \
+    LIBS += \
         -lgsl \
         -lgslcblas \
-        -LC:/devel/fftw-3.3.4 \
-        -LC:/devel/GnuWin32/bin \
-        -LC:/devel/qwt-6.1/lib \
-		-LC:/devel/boost_1_57_0/stage/lib \
-        -L"C:/Program Files/mingw-w64/i686-4.8.2-posix-dwarf-rt_v3-rev4/bin"
-    INCLUDEPATH += . \
-        C:/devel/fftw-3.3.4 \
-        C:/devel/qwt-6.1/src \
-        C:/devel/GnuWin32/include \
-        C:/devel/boost_1_57_0
-    RC_FILE = strata.rc
-    CONFIG(debug, debug|release ) {
-        LIBS += -lqwtd \
-                -lboost_serialization-mgw48-mt-d-1_57  \
-                -lboost_system-mgw48-mt-d-1_57
-    } else {
-        LIBS += -lqwt \
-                -lboost_serialization-mgw48-mt-1_57  \
-                -lboost_system-mgw48-mt-1_57
-    }
+        -lqwt
+    # See: http://doc.qt.io/qt-5/qmake-platform-notes.html
+    # RC_FILE = strata.rc
 }
 
 ########################################################################
@@ -199,7 +171,6 @@ HEADERS += src/AbstractCalculator.h \
     src/RockLayer.h \
     src/RvtMotion.h \
     src/RvtMotionDialog.h \
-    src/Serializer.h \
     src/SeriesSmoother.h \
     src/SiteResponseModel.h \
     src/SoilLayer.h \
@@ -229,7 +200,6 @@ HEADERS += src/AbstractCalculator.h \
     src/TimeSeriesMotionDialog.h \
     src/TimeSeriesOutputCatalog.h \
     src/Units.h \
-    src/UpdateDialog.h \
     src/VelocityLayer.h \
     src/VelocityVariation.h \
     src/VelTimeSeriesOutput.h \
@@ -337,7 +307,6 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/RockLayer.cpp \
     src/RvtMotion.cpp \
     src/RvtMotionDialog.cpp \
-    src/Serializer.cpp \
     src/SeriesSmoother.cpp \
     src/SiteResponseModel.cpp \
     src/SoilLayer.cpp \
@@ -367,7 +336,6 @@ SOURCES +=     src/AbstractCalculator.cpp \
     src/TimeSeriesMotionDialog.cpp \
     src/TimeSeriesOutputCatalog.cpp \
     src/Units.cpp \
-    src/UpdateDialog.cpp \
     src/VelocityLayer.cpp \
     src/VelocityVariation.cpp \
     src/VelTimeSeriesOutput.cpp \

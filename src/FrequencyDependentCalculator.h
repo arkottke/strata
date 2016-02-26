@@ -25,9 +25,7 @@
 #include "AbstractIterativeCalculator.h"
 
 #include <QDataStream>
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
+#include <QJsonObject>
 
 class FrequencyDependentCalculator : public AbstractIterativeCalculator
 {
@@ -43,8 +41,8 @@ public:
 
     virtual QString toHtml() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 protected:
     virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf);

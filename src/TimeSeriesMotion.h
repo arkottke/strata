@@ -24,11 +24,10 @@
 
 #include "AbstractMotion.h"
 
+#include <QDataStream>
+#include <QJsonObject>
+
 #include <complex>
-
-#include <boost/property_tree/ptree.hpp>
-
-using boost::property_tree::ptree;
 
 class TimeSeriesMotion : public AbstractMotion
 {
@@ -141,8 +140,8 @@ public:
     bool saveData() const;
     bool isLoaded() const;
 
-    void ptRead(const ptree &pt);
-    void ptWrite(ptree &pt) const;
+    void fromJson(const QJsonObject &json);
+    QJsonObject toJson() const;
 
 signals:
     void fileNameChanged(QString fileName);

@@ -76,29 +76,22 @@ void SoilTypeOutput::setEnabled(bool enabled)
     emit wasModified();
 }
 
-void SoilTypeOutput::ptRead(const ptree &pt)
+void SoilTypeOutput::fromJson(const QJsonObject &json)
 {
-    m_enabled = pt.get<bool>("enabled");
-
-    ptree modulus = pt.get_child("modulus");
-    m_modulus->ptRead(modulus);
-
-    ptree damping = pt.get_child("damping");
-    m_damping->ptRead(damping);
+    m_enabled = json["enabled"].toBool();
+    m_modulus->fromJson(json["modulus"].toObject());
+    m_damping->fromJson(json["damping"].toObject());
 }
 
-void SoilTypeOutput::ptWrite(ptree &pt) const
+QJsonObject SoilTypeOutput::toJson() const
 {
-    pt.put("enabled", m_enabled);
-
-    ptree modulus;
-    m_modulus->ptWrite(modulus);
-    pt.add_child("modulus", modulus);
-
-    ptree damping;
-    m_damping->ptWrite(damping);
-    pt.add_child("damping", damping);
+    QJsonObject json;
+    json["enabled"] = m_enabled;
+    json["modulus"] = m_modulus->toJson();
+    json["damping"] = m_damping->toJson();
+    return json;
 }
+
 
 QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto)
 {

@@ -21,7 +21,6 @@
 
 #include "Dimension.h"
 
-#include <QObject>
 #include <QDebug>
 
 #include <cfloat>
@@ -168,21 +167,23 @@ void Dimension::clear()
     m_data.clear();
 }
 
-void Dimension::ptRead(const ptree &pt)
+void Dimension::fromJson(const QJsonObject &json)
 {
-    m_min = pt.get<double>("min");
-    m_max = pt.get<double>("max");
-    m_size = pt.get<int>("size");
-    m_spacing = (Dimension::Spacing) pt.get<int>("spacing");
+    m_min = json["min"].toDouble();
+    m_max = json["max"].toDouble();
+    m_size = json["size"].toInt();
+    m_spacing = (Dimension::Spacing) json["spacing"].toInt();
     init();
 }
 
-void Dimension::ptWrite(ptree &pt) const
+QJsonObject Dimension::toJson() const
 {
-    pt.put("min", m_min);
-    pt.put("max", m_max);
-    pt.put("size", m_size);
-    pt.put("spacing", (int) m_spacing);
+    QJsonObject json;
+    json["min"] = m_min;
+    json["max"] = m_max;
+    json["size"] = m_size;
+    json["spacing"] = (int) m_spacing;
+    return json;
 }
 
 QDataStream & operator<<(QDataStream & out, const Dimension* d)

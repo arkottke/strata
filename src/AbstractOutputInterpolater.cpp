@@ -24,3 +24,7 @@
 AbstractOutputInterpolater::AbstractOutputInterpolater()
 {
 }
+
+AbstractOutputInterpolater::~AbstractOutputInterpolater()
+{
+}

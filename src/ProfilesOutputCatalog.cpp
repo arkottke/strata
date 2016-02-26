@@ -40,8 +40,8 @@
 #include "VerticalEffectiveStressProfileOutput.h"
 #include "VerticalTotalStressProfileOutput.h"
 
-#include <QStringList>
 #include <QDebug>
+#include <QStringList>
 
 ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog)
@@ -161,35 +161,33 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
 
     return list;
 }
-
  
-void ProfilesOutputCatalog::ptRead(const ptree &pt)
+void ProfilesOutputCatalog::fromJson(const QJsonArray &json)
 {
-    QMap<QString, AbstractProfileOutput*> output_map = QMap<QString, AbstractProfileOutput*>();
+    beginResetModel();
+
+    QMap<QString, AbstractProfileOutput*> output_map;
     foreach (AbstractProfileOutput* o, m_outputs)
         output_map.insert(o->metaObject()->className(), o);
 
-    beginResetModel();
-
-    foreach(const ptree::value_type &v, pt)
-    {
-        QString key = QString::fromStdString(
-                    v.second.get<std::string>("className"));
-        if (output_map.contains(key)) {
-            output_map[key]->ptRead(v.second);
-        }
+    foreach (const QJsonValue &qjv, json) {
+        QJsonObject qjo = qjv.toObject();
+        QString key = qjo["className"].toString();
+        if (output_map.contains(key))
+            output_map[key]->fromJson(qjo);
     }
 
     endResetModel();
 }
 
-void ProfilesOutputCatalog::ptWrite(ptree &pt) const
+QJsonArray ProfilesOutputCatalog::toJson() const
 {
-    foreach(AbstractProfileOutput *apo, m_outputs) {
-        ptree apt;
-        apo->ptWrite(apt);
-        pt.push_back(std::make_pair("", apt));
+    QJsonArray json;
+    foreach (AbstractProfileOutput *apo, m_outputs) {
+        json << apo->toJson();
     }
+
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)

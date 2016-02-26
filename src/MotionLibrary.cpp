@@ -30,6 +30,8 @@
 #include <QBrush>
 #include <QColor>
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonValue>
 
 MotionLibrary::MotionLibrary(QObject *parent)
     : MyAbstractTableModel(parent)
@@ -262,8 +264,7 @@ bool MotionLibrary::removeRows(int row, int count, const QModelIndex &parent)
         return false;
     emit beginRemoveRows(parent, row, row+count-1);
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         m_motions.takeAt(row)->deleteLater();
     }
 
@@ -340,68 +341,104 @@ void MotionLibrary::updateUnits()
     emit headerDataChanged(Qt::Horizontal, PgvColumn, PgvColumn);
 }
 
-void MotionLibrary::ptRead(const ptree &pt)
+void MotionLibrary::fromJson(const QJsonObject &json)
 {
-    int approach = pt.get<int>("approach");
+    int approach = json["approach"].toInt();
     setApproach(approach);
-    bool saveData = pt.get<bool>("saveData");
+    bool saveData = json["saveData"].toBool();
     setSaveData(saveData);
 
     beginResetModel();
 
-    ptree motions = pt.get_child("motions");
-    foreach(const ptree::value_type &v, motions)
-    {
-        QString className = QString::fromStdString(
-                    v.second.get<std::string>("className"));
+    while (m_motions.size())
+        m_motions.takeLast()->deleteLater();
 
-        AbstractMotion * m;
+    QJsonArray motions = json["motions"].toArray();
+    foreach(const QJsonValue &value, motions)
+    {
+        QJsonObject mjo = value.toObject();
+        QString className = mjo["className"].toString();
+
         if (className == "TimeSeriesMotion") {
-            m = new TimeSeriesMotion(this);
-            qobject_cast<TimeSeriesMotion*>(m)->ptRead(v.second);
+            TimeSeriesMotion *m = new TimeSeriesMotion(this);
+            qobject_cast<TimeSeriesMotion*>(m)->fromJson(mjo);
             qobject_cast<TimeSeriesMotion*>(m)->setSaveData(m_saveData);
+            m_motions << m;
         } else if (className == "RvtMotion") {
-            m = new RvtMotion(this);
-            qobject_cast<RvtMotion*>(m)->ptRead(v.second);
+            RvtMotion *m = new RvtMotion(this);
+            qobject_cast<RvtMotion*>(m)->fromJson(mjo);
+            m_motions << m;
         } else if (className == "CompatibleRvtMotion") {
-            m = new CompatibleRvtMotion(this);
-            qobject_cast<CompatibleRvtMotion*>(m)->ptRead(v.second);
+            CompatibleRvtMotion *m = new CompatibleRvtMotion(this);
+            qobject_cast<CompatibleRvtMotion*>(m)->fromJson(mjo);
+            m_motions << m;
         } else if (className == "SourceTheoryRvtMotion") {
-            m = new SourceTheoryRvtMotion(this);
-            qobject_cast<SourceTheoryRvtMotion*>(m)->ptRead(v.second);
+            SourceTheoryRvtMotion *m = new SourceTheoryRvtMotion(this);
+            qobject_cast<SourceTheoryRvtMotion*>(m)->fromJson(mjo);
+            m_motions << m;
         } else {
             qCritical("className '%s' not recognized!", qPrintable(className));
         }
-        m_motions.append(m);
     }
 
     endResetModel();
 }
 
-void MotionLibrary::ptWrite(ptree &pt) const
+// FIXME: Remove
+//void MotionLibrary::ptWrite(ptree &pt) const
+//{
+//    pt.put("approach", (int) m_approach);
+//    pt.put("saveData", m_saveData);
+
+//    ptree motions;
+//    foreach(AbstractMotion *m, m_motions)
+//    {
+//        ptree motion;
+//        m->ptWrite(motion);
+
+//        const QString & className = m->metaObject()->className();
+//        if (className == "TimeSeriesMotion") {
+//            qobject_cast<const TimeSeriesMotion*>(m)->ptWrite(motion);
+//        } else if (className == "RvtMotion") {
+//            qobject_cast<const RvtMotion*>(m)->ptWrite(motion);
+//        } else if (className == "CompatibleRvtMotion") {
+//            qobject_cast<const CompatibleRvtMotion*>(m)->ptWrite(motion);
+//        } else if (className == "SourceTheoryRvtMotion") {
+//            qobject_cast<const SourceTheoryRvtMotion*>(m)->ptWrite(motion);
+//        }
+//        motions.push_back(std::make_pair("", motion));
+//    }
+//    pt.add_child("motions", motions);
+//}
+
+
+QJsonObject MotionLibrary::toJson() const
 {
-    pt.put("approach", (int) m_approach);
-    pt.put("saveData", m_saveData);
+    QJsonObject json;
+    json["approach"] = (int) m_approach;
+    json["saveData"] = m_saveData;
 
-    ptree motions;
-    foreach(AbstractMotion *m, m_motions)
-    {
-        ptree motion;        
-        m->ptWrite(motion);
+    QJsonArray motions;
 
-        const QString & className = m->metaObject()->className();
+    foreach (AbstractMotion *m, m_motions) {
+        const QString &className = m->metaObject()->className();
+        QJsonObject mjo;
+
         if (className == "TimeSeriesMotion") {
-            qobject_cast<const TimeSeriesMotion*>(m)->ptWrite(motion);
+            mjo = qobject_cast<const TimeSeriesMotion*>(m)->toJson();
         } else if (className == "RvtMotion") {
-            qobject_cast<const RvtMotion*>(m)->ptWrite(motion);
+            mjo = qobject_cast<const RvtMotion*>(m)->toJson();;
         } else if (className == "CompatibleRvtMotion") {
-            qobject_cast<const CompatibleRvtMotion*>(m)->ptWrite(motion);
+            mjo = qobject_cast<const CompatibleRvtMotion*>(m)->toJson();;
         } else if (className == "SourceTheoryRvtMotion") {
-            qobject_cast<const SourceTheoryRvtMotion*>(m)->ptWrite(motion);
+            mjo = qobject_cast<const SourceTheoryRvtMotion*>(m)->toJson();;
         }
-        motions.push_back(std::make_pair("", motion));
+
+        motions << mjo;
     }
-    pt.add_child("motions", motions);
+
+    json["motions"] = motions;
+    return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml)

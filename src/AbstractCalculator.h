@@ -46,8 +46,8 @@ public:
     //! Produce an HTML table summarizing the calculator
     virtual QString toHtml() const;
 
-    SoilProfile* const site() const;
-    AbstractMotion* const motion() const;
+    SoilProfile* site() const;
+    AbstractMotion* motion() const;
 
     //! Set text log to record calculation steps
     void setTextLog(TextLog* const textLog);
