@@ -15,9 +15,10 @@ install:
     - qmake --version
     - qmake
     - make
+    - sudo make install
     - cd ..
 script:  
     - mkdir build
     - cd build
-    - INCLUDE=../qwt cmake ..
+    - cmake ..
     - make -j 4
