@@ -2,6 +2,22 @@ sudo: required
 language: cpp
 dist: trusty
 
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "kcXPG6QFxIh4xM6U1PcdN1jTv6rm4PjjNA3byeAqOzRLwcbi/vTyXyL2ubfyJpIk8WKYCaEQGap3nLbj1ol6QLtTn5DeAQRDWHHGmQuqkig/QNyK3sWqiqUkoHNlk774uYZmhKtQaYF1FkRl5Pnu18AMuf3zdgKCvHZmWe75Ar9SFwT7DsX9g3MBKW1N+m3JebyXdfuDKsy6QGbqvoAipKHMynh6QzvFemMuieMVnqpXsmTARB6qJBHYuEubOJcnn35WBhArlAIgDA3GrgHCxqog49nHBMs4cqxhL0zoGYiJV5GFGe7OwyqrPRGH+hzw7FUiIEE+cyAX4h6PL70OTI6d7xE1+f9oeFK10mN+IajwJNGfnI1M7PGq9ksinY/j8A/BeDpZCLEdA+AICavfVMnUTIU9+03fcLIteeeho+L6r/Zse5QjAc/zND6QWgO7R9bFJmd+sZTGmy941T+iUc70UX8axLq2ThZhQGaVD2q7cRAbiW1TYaG3XBsa+7dl9RFLnpR72jAj/Ev/WQjlhSAUuKX5dO9N7VS+/c+L0sccxtWp+msNzu7fDumH7ZnxRwiOX32KmlLpzMVHZMbppSCpEwTmMMSEK1a0ZlDkL35vqEYEO3cPx+zf745uofgc+LF2f8D+CKuIuO3c+S/EFYWjn0+qcu1ElK9O7Gu9XQ0="
+
+addons:
+  coverity_scan:
+    project:
+      name: "arkottke/strata"
+      description: "Build submitted via Travis CI"
+    notification_email: albert.kottke@gmail.com
+    build_command_prepend: "mkdir build && cd build && CMAKE_PREFIX_PATH=/usr/local/qwt-6.1.3-svn cmake .."
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
+
 before_install:
     # From: http://forum.qt.io/topic/50340/installing-qt-5-4-dev-packages-in-travis-ci/16
     - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
@@ -20,4 +36,4 @@ script:
     - mkdir build
     - cd build
     - CMAKE_PREFIX_PATH=/usr/local/qwt-6.1.3-svn cmake ..
-    - make VERBOSE=1 -j 2
+    - make -j 4
