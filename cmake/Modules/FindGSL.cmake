@@ -7,6 +7,9 @@
 
 include(LibFindMacros)
 
+# Dependendencies
+libfind_package(gsl)
+
 # Use pkg-config to get hints about paths
 libfind_pkg_check_modules(GSL_PKGCONF gsl)
 
@@ -19,7 +22,7 @@ find_path(GSL_INCLUDE_DIR
 
 # Finally the library itself
 find_library(GSL_LIBRARY
-  NAMES gsl
+  NAMES gsl gslcblas
   PATHS ${GSL_PKGCONF_LIBRARY_DIRS}
 )
 
