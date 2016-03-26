@@ -7,9 +7,6 @@
 
 include(LibFindMacros)
 
-# Dependendencies
-libfind_package(gsl)
-
 # Use pkg-config to get hints about paths
 libfind_pkg_check_modules(GSL_PKGCONF gsl)
 

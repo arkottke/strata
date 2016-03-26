@@ -46,13 +46,6 @@ add_executable(${CMAKE_PROJECT_NAME} WIN32
   ${WINDOWS_RES_FILE}
 )
 target_link_libraries(${CMAKE_PROJECT_NAME} ${LIBS})
-#     Qt5::Core
-#     Qt5::Gui
-#     Qt5::PrintSupport
-#     Qt5::Script
-#     Qt5::Widgets
-#     Qt5::Xml
-
 
 if (UNIX)
   install(TARGETS ${CMAKE_PROJECT_NAME}
