@@ -15,10 +15,10 @@ install:
     - qmake --version
     - qmake
     - make
-    - sudo make install
+    - sudo PREFIX=/usr/local/qwt-6.1 make install
     - cd ..
 script:  
     - mkdir build
     - cd build
-    - cmake ..
+    - LIB_DIR=/usr/local/qwt-6.1 cmake ..
     - make -j 4
