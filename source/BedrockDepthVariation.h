@@ -27,7 +27,7 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-#include <gsl_rng.h>
+#include <gsl/gsl_rng.h>
 
 class ProfileRandomizer;
 

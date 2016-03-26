@@ -24,7 +24,7 @@
 
 #include "AbstractDistribution.h"
 
-#include <gsl_rng.h>
+#include <gsl/gsl_rng.h>
 
 class Distribution : public AbstractDistribution
 {

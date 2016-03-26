@@ -28,7 +28,7 @@
 #include <QStringList>
 #include <QTextStream>
 
-#include <gsl_rng.h>
+#include <gsl/gsl_rng.h>
 
 class AbstractNonlinearPropertyStandardDeviation;
 class DampingStandardDeviation;

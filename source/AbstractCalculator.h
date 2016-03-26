@@ -28,7 +28,7 @@
 
 #include <QVector>
 
-#include <gsl_multifit.h>
+#include <gsl/gsl_multifit.h>
 
 #include <complex>
 

@@ -31,7 +31,7 @@
 #include <QTextStream>
 #include <QVector>
 
-#include <gsl_integration.h>
+#include <gsl/gsl_integration.h>
 
 class AbstractRvtMotion : public AbstractMotion
 {

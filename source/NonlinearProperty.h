@@ -28,7 +28,7 @@
 #include <QList>
 #include <QVector>
 
-#include <gsl_interp.h>
+#include <gsl/gsl_interp.h>
 
 class SoilType;
 
