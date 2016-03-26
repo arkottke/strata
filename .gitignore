@@ -5,5 +5,7 @@ build*/
 *Makefile*
 object_script*
 
-# Vim tags
+# Ignore vim files
 tags
+*.swp
+*.un~

@@ -34,7 +34,6 @@
 #include <QJsonArray>
 
 #include <qwt/qwt_text.h>
-
 #include <qwt/qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)

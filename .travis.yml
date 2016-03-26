@@ -1,0 +1,11 @@
+sudo: required
+language: cpp
+dist: trusty
+
+before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install -qq libqwt-dev fftw-dev libgsl0-dev qt5-qmake qt5-default qtscript5-dev
+
+script:  
+    - qmake
+    - make release
