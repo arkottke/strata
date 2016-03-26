@@ -43,22 +43,29 @@ set(CMAKE_AUTOMOC ON)
 
 # Configure Qt
 find_package(Qt5 COMPONENTS Core Gui PrintSupport Script Widgets Xml REQUIRED)
-find_package(GSL REQUIRED)
-find_package(Qwt REQUIRED)
-# Try to use FFTW, but don't require it
-find_package(FFTW)
 message(STATUS "Building with Qt v${Qt5Core_VERSION_STRING}")
 
-include_directories(${Qwt_INCLUDE_DIR}, ${GSL_INCLUDE_DIR})
+find_package(GSL REQUIRED)
+find_package(Qwt REQUIRED)
+include_directories(${Qwt_INCLUDE_DIR} ${GSL_INCLUDE_DIR})
 
 # Add required libraries
-set(LIBS Qt5::Core Qt5::Gui Qt5::PrintSupport Qt5::Script Qt5::Widgets Qt5::Xml Qwt GSL)
+set(LIBS 
+    Qt5::Core 
+    Qt5::Gui 
+    Qt5::PrintSupport 
+    Qt5::Script 
+    Qt5::Widgets 
+    Qt5::Xml 
+    ${GSL_LIBRARY}
+    ${Qwt_LIBRARY}
+)
 
 # Add FFTW if it is available
+find_package(FFTW)
 if (FFTW_FOUND)
     message(STATUS "Building with FFTW")
-    set(LIBS ${LIBS} fftw3)
-    include_directories(${FFTW_INCLUDE_DIR})
+    set(LIBS ${LIBS} ${FFTW_LIBRARY})
 endif (FFTW_FOUND)
 
 if (MSVC)

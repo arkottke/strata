@@ -12,9 +12,8 @@ install:
     - source /opt/qt55/bin/qt55-env.sh
     - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
     - cd qwt
-    - qmake --version
     - qmake
-    - make
+    - make -j 2
     - sudo make install
     - cd ..
 script:  
