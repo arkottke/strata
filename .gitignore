@@ -7,5 +7,6 @@ object_script*
 
 # Ignore vim files
 tags
+tags.temp
 *.swp
 *.un~
