@@ -1,47 +1,30 @@
-# Find Qwt
-# ~~~~~~~~
-# Copyright (c) 2010, Tim Sutton <tim at linfiniti.com>
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# - Try to find QWT
+# Once done, this will define
 #
-# Once run this will define:
-#
-# QWT_FOUND       = system has QWT lib
-# QWT_LIBRARY     = full path to the QWT library
-# QWT_INCLUDE_DIR = where to find headers
-#
+#  QWT_FOUND - system has QWT
+#  QWT_INCLUDE_DIRS - the QWT include directories
+#  QWT_LIBRARIES - link these to use QWT
 
-FIND_PATH(QWT_INCLUDE_DIR NAMES qwt.h PATHS
-  /usr/include
-  /usr/local/include
-  "$ENV{LIB_DIR}/include"
-  "$ENV{INCLUDE}"
-  PATH_SUFFIXES qwt qwt5 qwt6
-  )
+include(LibFindMacros)
 
-set(QWT_LIBRARY_NAMES qwt qwt6 qwt-qt5 qwt6-qt5)
+# Use pkg-config to get hints about paths
+libfind_pkg_check_modules(QWT_PKGCONF qwt-qt5)
 
-find_library(QWT_LIBRARY
-  NAMES ${QWT_LIBRARY_NAMES}
-  PATHS
-    /usr/lib
-    /usr/local/lib
-    "$ENV{LIB_DIR}/lib"
-    "$ENV{LIB}"
+# Include dir
+find_path(QWT_INCLUDE_DIR
+  NAMES qwt.h
+  PATHS ${QWT_PKGCONF_INCLUDE_DIRS}
+  PATH_SUFFIXES qwt
 )
 
-IF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
-  SET(QWT_FOUND TRUE)
-ENDIF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
+# Finally the library itself
+find_library(QWT_LIBRARY
+  NAMES qwt
+  PATHS ${QWT_PKGCONF_LIBRARY_DIRS}
+)
 
-IF (QWT_FOUND)
-  FILE(READ ${QWT_INCLUDE_DIR}/qwt_global.h qwt_header)
-  STRING(REGEX REPLACE "^.*QWT_VERSION_STR +\"([^\"]+)\".*$" "\\1" QWT_VERSION_STR "${qwt_header}")
-  IF (NOT QWT_FIND_QUIETLY)
-    MESSAGE(STATUS "Found Qwt: ${QWT_LIBRARY} (${QWT_VERSION_STR})")
-  ENDIF (NOT QWT_FIND_QUIETLY)
-ELSE (QWT_FOUND)
-  IF (QWT_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find Qwt")
-  ENDIF (QWT_FIND_REQUIRED)
-ENDIF (QWT_FOUND)
+# Set the include dir variables and the libraries and let libfind_process do the rest.
+# NOTE: Singular variables for this library, plural for libraries this this lib depends on.
+set(QWT_PROCESS_INCLUDES QWT_INCLUDE_DIR)
+set(QWT_PROCESS_LIBS QWT_LIBRARY)
+libfind_process(QWT)

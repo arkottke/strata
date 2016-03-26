@@ -49,6 +49,8 @@ find_package(Qwt REQUIRED)
 find_package(FFTW)
 message(STATUS "Building with Qt v${Qt5Core_VERSION_STRING}")
 
+include_directories(${Qwt_INCLUDES})
+
 # Add required libraries
 set(LIBS Qt5::Core Qt5::Gui Qt5::PrintSupport Qt5::Script Qt5::Widgets Qt5::Xml Qwt GSL)
 
@@ -56,6 +58,7 @@ set(LIBS Qt5::Core Qt5::Gui Qt5::PrintSupport Qt5::Script Qt5::Widgets Qt5::Xml 
 if (FFTW_FOUND)
     message(STATUS "Building with FFTW")
     set(LIBS ${LIBS} fftw3)
+    include_directories(${FFTW_INCLUDES})
 endif (FFTW_FOUND)
 
 if (MSVC)

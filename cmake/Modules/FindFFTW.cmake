@@ -1,22 +1,29 @@
-# - Find FFTW
-# Find the native FFTW includes and library
+# - Try to find FFTW
+# Once done, this will define
 #
-#  FFTW_INCLUDES    - where to find fftw3.h
-#  FFTW_LIBRARIES   - List of libraries when using FFTW.
-#  FFTW_FOUND       - True if FFTW found.
+#  FFTW_FOUND - system has FFTW
+#  FFTW_INCLUDE_DIRS - the FFTW include directories
+#  FFTW_LIBRARIES - link these to use FFTW
 
-if (FFTW_INCLUDES)
-    # Already in cache, be silent
-    set (FFTW_FIND_QUIETLY TRUE)
-endif (FFTW_INCLUDES)
+include(LibFindMacros)
 
-find_path (FFTW_INCLUDES fftw3.h)
+# Use pkg-config to get hints about paths
+libfind_pkg_check_modules(FFTW_PKGCONF fftw3)
 
-find_library (FFTW_LIBRARIES NAMES fftw3)
+# Include dir
+find_path(FFTW_INCLUDE_DIR
+  NAMES fftw3.h
+  PATHS ${FFTW_PKGCONF_INCLUDE_DIRS}
+)
 
-# handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if
-# all listed variables are TRUE
-include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (FFTW DEFAULT_MSG FFTW_LIBRARIES FFTW_INCLUDES)
+# Finally the library itself
+find_library(FFTW_LIBRARY
+  NAMES fftw3
+  PATHS ${FFTW_PKGCONF_LIBRARY_DIRS}
+)
 
-mark_as_advanced (FFTW_LIBRARIES FFTW_INCLUDES)
+# Set the include dir variables and the libraries and let libfind_process do the rest.
+# NOTE: Singular variables for this library, plural for libraries this this lib depends on.
+set(FFTW_PROCESS_INCLUDES FFTW_INCLUDE_DIR)
+set(FFTW_PROCESS_LIBS FFTW_LIBRARY)
+libfind_process(FFTW)
