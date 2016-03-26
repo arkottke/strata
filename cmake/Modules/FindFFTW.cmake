@@ -2,8 +2,8 @@
 # Once done, this will define
 #
 #  FFTW_FOUND - system has FFTW
-#  FFTW_INCLUDE_DIRS - the FFTW include directories
-#  FFTW_LIBRARIES - link these to use FFTW
+#  FFTW_INCLUDE_DIR - the FFTW include directories
+#  FFTW_LIBRARY - link these to use FFTW
 
 include(LibFindMacros)
 

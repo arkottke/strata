@@ -2,8 +2,8 @@
 # Once done, this will define
 #
 #  Qwt_FOUND - system has Qwt
-#  Qwt_INCLUDE_DIRS - the Qwt include directories
-#  Qwt_LIBRARIES - link these to use Qwt
+#  Qwt_INCLUDE_DIR - the Qwt include directories
+#  Qwt_LIBRARY - link these to use Qwt
 
 include(LibFindMacros)
 
