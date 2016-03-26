@@ -26,8 +26,8 @@
 #include <QDebug>
 #include <QObject>
 
-#include <gsl/gsl_interp.h>
-#include <gsl/gsl_math.h>
+#include <gsl_interp.h>
+#include <gsl_math.h>
 
 
 QVector<double> interp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi )

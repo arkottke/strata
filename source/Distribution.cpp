@@ -23,7 +23,7 @@
 #include <QObject>
 #include <QDebug>
 
-#include <gsl/gsl_randist.h>
+#include <gsl_randist.h>
 
 #include <cmath>
 

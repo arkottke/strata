@@ -29,7 +29,7 @@
 #include <cfloat>
 #include <cmath>
 
-#include <gsl/gsl_randist.h>
+#include <gsl_randist.h>
 
 LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
     m_rng(rng), m_profileRandomizer(profileRandomizer)

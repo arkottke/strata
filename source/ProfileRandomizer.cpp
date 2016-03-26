@@ -33,8 +33,8 @@
 #include <QObject>
 #include <QDebug>
 
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
+#include <gsl_randist.h>
+#include <gsl_cdf.h>
 
 #include <cmath>
 #include <algorithm>

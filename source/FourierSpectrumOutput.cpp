@@ -32,7 +32,7 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-#include <gsl/gsl_interp.h>
+#include <gsl_interp.h>
 
 FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog* catalog)
     : AbstractLocationOutput(catalog)

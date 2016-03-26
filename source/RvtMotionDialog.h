@@ -27,7 +27,7 @@
 
 #include <QDialog>
 
-#include <qwt/qwt_plot_curve.h>
+#include <qwt_plot_curve.h>
 
 class RvtMotionDialog : public QDialog
 {

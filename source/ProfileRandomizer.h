@@ -32,7 +32,7 @@
 #include <QTextStream>
 #include <QVariant>
 
-#include <gsl/gsl_rng.h>
+#include <gsl_rng.h>
 
 class BedrockDepthVariation;
 class LayerThicknessVariation;

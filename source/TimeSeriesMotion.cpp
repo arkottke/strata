@@ -37,12 +37,12 @@
 #ifdef USE_FFTW
 #include <fftw3.h>
 #else
-#include <gsl/gsl_fft_real.h>
-#include <gsl/gsl_fft_halfcomplex.h>
-#include <gsl/gsl_errno.h>
+#include <gsl_fft_real.h>
+#include <gsl_fft_halfcomplex.h>
+#include <gsl_errno.h>
 #endif
 
-#include <gsl/gsl_multifit.h>
+#include <gsl_multifit.h>
 
 #include <cmath>
 

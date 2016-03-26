@@ -38,10 +38,10 @@
 #include <QLineEdit>
 #include <QTabWidget>
 
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_picker.h>
-#include <qwt/qwt_picker_machine.h>
-#include <qwt/qwt_text.h>
+#include <qwt_plot.h>
+#include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
+#include <qwt_text.h>
 
 RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent) :
     QDialog(parent), m_motion(motion)

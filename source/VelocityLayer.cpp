@@ -26,7 +26,7 @@
 #include <cmath> 
 #include <cfloat>
 
-#include <gsl/gsl_cdf.h>
+#include <gsl_cdf.h>
 
 VelocityLayer::VelocityLayer(QObject* parent)
     : AbstractDistribution(parent)

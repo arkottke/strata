@@ -22,7 +22,7 @@
 #ifndef MY_QWT_COMPATIBILITY_H
 #define MY_QWT_COMPATIBILITY_H
 
-#include <qwt/qwt_scale_engine.h>
+#include <qwt_scale_engine.h>
 
 QwtScaleEngine* logScaleEngine();
 

@@ -27,7 +27,7 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-#include <gsl/gsl_interp.h>
+#include <gsl_interp.h>
 
 class CrustalAmplification;
 class Dimension;

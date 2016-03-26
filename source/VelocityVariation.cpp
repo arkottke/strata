@@ -26,7 +26,7 @@
 #include "SoilLayer.h"
 #include "Units.h"
 
-#include <gsl/gsl_randist.h>
+#include <gsl_randist.h>
 
 #include <cmath>
 #include <cfloat>

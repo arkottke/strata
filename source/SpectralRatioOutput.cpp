@@ -31,7 +31,7 @@
 
 #include <QDebug>
 
-#include <qwt/qwt_scale_engine.h>
+#include <qwt_scale_engine.h>
 
 SpectralRatioOutput::SpectralRatioOutput(OutputCatalog* catalog)
     : AbstractRatioOutput(catalog)

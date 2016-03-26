@@ -24,8 +24,8 @@
 #include "Dimension.h"
 #include "ResponseSpectrum.h"
 
-#include "gsl/gsl_interp.h"
-#include "gsl/gsl_spline.h"
+#include <gsl_interp.h>
+#include <gsl_spline.h>
 
 #include <QDebug>
 

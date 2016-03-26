@@ -33,9 +33,9 @@
 #include <QTableView>
 #include <QTabWidget>
 
-#include <qwt/qwt_legend.h>
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_curve.h>
+#include <qwt_legend.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 class AbstractOutput;
 class MyTableView;

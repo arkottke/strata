@@ -43,7 +43,7 @@ set(CMAKE_AUTOMOC ON)
 
 # Configure Qt
 find_package(Qt5 COMPONENTS Core Gui PrintSupport Script Widgets Xml REQUIRED)
-# find_package(GSL REQUIRED)
+find_package(GSL REQUIRED)
 find_package(Qwt REQUIRED)
 # Try to use FFTW, but don't require it
 find_package(FFTW)

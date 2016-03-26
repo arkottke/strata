@@ -30,7 +30,7 @@
 #include <QStringList>
 #include <QTextStream>
 
-#include <gsl/gsl_rng.h>
+#include <gsl_rng.h>
 
 class ProfileRandomizer;
 class SoilLayer;

@@ -27,7 +27,7 @@
 #include "SubLayer.h"
 #include "OutputCatalog.h"
 
-#include <qwt/qwt_plot_curve.h>
+#include <qwt_plot_curve.h>
 
 AbstractSteppedProfileOutput::AbstractSteppedProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)

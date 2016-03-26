@@ -21,7 +21,7 @@
 
 #include "LinearOutputInterpolater.h"
 
-#include <gsl/gsl_interp.h>
+#include <gsl_interp.h>
 
 LinearOutputInterpolater::LinearOutputInterpolater()
 {

@@ -30,7 +30,7 @@
 #include "OutputCatalog.h"
 #include "SoilProfile.h"
 
-#include <qwt/qwt_scale_engine.h>
+#include <qwt_scale_engine.h>
 
 AccelTransferFunctionOutput::AccelTransferFunctionOutput(OutputCatalog* catalog)
     : AbstractRatioOutput(catalog)

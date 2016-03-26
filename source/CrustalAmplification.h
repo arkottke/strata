@@ -30,7 +30,7 @@
 #include <QStringList>
 #include <QVector>
 
-#include <gsl/gsl_interp.h>
+#include <gsl_interp.h>
 
 class CrustalModel;
 
