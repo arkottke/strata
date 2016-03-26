@@ -20,5 +20,5 @@ install:
 script:  
     - mkdir build
     - cd build
-    - LIB_DIR=/usr/local/qwt-6.1.3-svn cmake ..
+    - CMAKE_PREFIX_PATH=/usr/local/qwt-6.1.3-svn cmake ..
     - make -j 4
