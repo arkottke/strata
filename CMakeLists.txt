@@ -45,7 +45,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt5 COMPONENTS Core Gui PrintSupport Script Widgets Xml REQUIRED)
 message(STATUS "Building with Qt v${Qt5Core_VERSION_STRING}")
 
-find_package(GSL REQUIRED)
+find_package(GSL COMPONENTS gsl gslcblas REQUIRED)
 find_package(Qwt REQUIRED)
 include_directories(${Qwt_INCLUDE_DIR} ${GSL_INCLUDE_DIR})
 
@@ -57,6 +57,8 @@ set(LIBS
     Qt5::Script 
     Qt5::Widgets 
     Qt5::Xml 
+    GSL::gsl
+    GSL::gslcblas
     ${GSL_LIBRARY}
     ${Qwt_LIBRARY}
 )

@@ -23,6 +23,10 @@ find_library(Qwt_LIBRARY
   PATHS ${Qwt_PKGCONF_LIBRARY_DIRS}
 )
 
+# Find the version
+file( STRINGS "${Qwt_INCLUDE_DIR}/qwt_global.h" qwt_global_h_contents REGEX "define QWT_VERSION_STR" )
+string( REGEX REPLACE ".*([0-9].[0-9].[0-9]).*" "\\1" Qwt_VERSION ${qwt_global_h_contents} )
+
 # Set the include dir variables and the libraries and let libfind_process do the rest.
 # NOTE: Singular variables for this library, plural for libraries this this lib depends on.
 set(Qwt_PROCESS_INCLUDES Qwt_INCLUDE_DIR)
