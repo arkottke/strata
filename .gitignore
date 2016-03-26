@@ -1,0 +1,9 @@
+# Build directories
+build*/
+
+# Make and CMake files
+*Makefile*
+object_script*
+
+# Vim tags
+tags

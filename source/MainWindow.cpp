@@ -21,6 +21,8 @@
 
 #include "MainWindow.h"
 
+#include "defines.h"
+
 #include "ComputePage.h"
 #include "ConfigurePlotDialog.h"
 #include "ConfiningStressDialog.h"
@@ -469,7 +471,7 @@ void MainWindow::about()
 #ifdef ADVANCED_OPTIONS
                           "<p>Compiled with advanced options</p>"
 #endif
-                          ).arg(REVISION));
+                          ).arg(PROJECT_VERSION));
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)

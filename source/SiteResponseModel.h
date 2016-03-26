@@ -136,7 +136,7 @@ private:
     QString m_fileName;
 
     //! Notes on the project for sanity of the user
-    QTextDocument * m_notes;
+    QTextDocument* m_notes;
 
     //! Method of analysis
     Method m_method;
