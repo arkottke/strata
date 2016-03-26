@@ -9,10 +9,14 @@ before_install:
 
 install:
     - sudo apt-get install -qq libqwt-dev fftw-dev libgsl0-dev qt55base qt55tools qt55svg qt55script
-
-script:  
     - source /opt/qt55/bin/qt55-env.sh
+    - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+    - cd qwt
+    - qmake
+    - make release
+    - cd ..
+script:  
     - mkdir build
     - cd build
-    - cmake ..
+    - INCLUDE='../qwt' LD_LIBRARY_PATH='../qwt/lib' cmake ..
     - make -j 4
