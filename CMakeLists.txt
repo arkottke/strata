@@ -30,6 +30,9 @@ if (WIN32 AND NOT CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX dist CACHE STRING "Install path prefix.")
 endif()
 
+# Support custom CMake modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 project(strata)
 set(PROJECT_LONGNAME "Strata")
 set(PROJECT_VERSION "0.3.0")
@@ -40,7 +43,20 @@ set(CMAKE_AUTOMOC ON)
 
 # Configure Qt
 find_package(Qt5 COMPONENTS Core Gui PrintSupport Script Widgets Xml REQUIRED)
-message(STATUS "Building with Qt${Qt5Core_VERSION_STRING}")
+# find_package(Qwt REQUIRED)
+# find_package(GSL REQUIRED)
+# Try to use FFTW, but don't require it
+find_package(FFTW)
+message(STATUS "Building with Qt v${Qt5Core_VERSION_STRING}")
+
+# Add required libraries
+set(LIBS Qt5::Core Qt5::Gui Qt5::PrintSupport Qt5::Script Qt5::Widgets Qt5::Xml Qwt GSL)
+
+# Add FFTW if it is available
+if (FFTW_FOUND)
+    message(STATUS "Building with FFTW")
+    set(LIBS ${LIBS} fftw3)
+endif (FFTW_FOUND)
 
 if (MSVC)
     # Enable the C++11 standard
