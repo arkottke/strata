@@ -40,6 +40,5 @@ before_script:
     - make -j 4
 
 script:
-    - cp ../example/example-3-rvt.json .
-    - ./source/strata -b example-3-rvt.json
-    - diff example-3-rvt.json ../example/example-3-rvt.json
+    - ./source/strata -b ../example/*.strata
+    - ./source/strata -b ../example/*.json
