@@ -12352,7 +12352,7 @@
     "siteProfile": {
         "bedrock": {
             "avg": 760,
-            "avgDampig": 1,
+            "avgDamping": 1,
             "depth": 91,
             "hasMax": false,
             "hasMin": false,

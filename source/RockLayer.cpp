@@ -91,7 +91,7 @@ QJsonObject RockLayer::toJson() const
 {
     QJsonObject json = VelocityLayer::toJson();
     json["untWt"] = m_untWt;
-    json["avgDampig"] = m_avgDamping;
+    json["avgDamping"] = m_avgDamping;
     return json;
 }
 
