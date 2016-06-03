@@ -59,11 +59,11 @@ protected:
         RESULTS_PAGE = 6};
 
 public slots:
+    void open(QString fileName = "");
 
 protected slots:
     //! Reset the window the default values
     void newModel();
-    void open(QString fileName = "");
 
     bool save();
     bool saveAs();

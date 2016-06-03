@@ -41,16 +41,16 @@
 #include <QSplitter>
 #include <QScrollArea>
 
-#include <qwt_symbol.h>
-#include <qwt_legend.h>
-#include <qwt_plot_picker.h>
-#include <qwt_picker_machine.h>
-#include <qwt_scale_engine.h>
+#include <qwt/qwt_symbol.h>
+#include <qwt/qwt_legend.h>
+#include <qwt/qwt_plot_picker.h>
+#include <qwt/qwt_picker_machine.h>
+#include <qwt/qwt_scale_engine.h>
 
 #if QWT_VERSION < 0x060100
-#include <qwt_legend_item.h>
+#include <qwt/qwt_legend_item.h>
 #else
-#include <qwt_plot_legenditem.h>
+#include <qwt/qwt_plot_legenditem.h>
 #endif
 
 ResultsPage::ResultsPage(QWidget * parent)
@@ -410,7 +410,7 @@ QTabWidget* ResultsPage::createDataTabWidget()
     QTabWidget *tabWidget = new QTabWidget;
 
     // Plot
-    m_plot = new QwtPlot;
+    m_plot = new QwtPlot(tabWidget);
     m_plot->setCanvasBackground(Qt::white);
     m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
     m_plot->setAutoReplot(false);

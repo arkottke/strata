@@ -30,7 +30,7 @@
 #include "OutputCatalog.h"
 #include "SoilProfile.h"
 
-#include <qwt_scale_engine.h>
+#include <qwt/qwt_scale_engine.h>
 
 StrainTransferFunctionOutput::StrainTransferFunctionOutput(OutputCatalog* catalog)
     : AbstractRatioOutput(catalog)

@@ -21,8 +21,6 @@
 
 #include "MainWindow.h"
 
-#include "defines.h"
-
 #include "ComputePage.h"
 #include "ConfigurePlotDialog.h"
 #include "ConfiningStressDialog.h"
@@ -42,6 +40,7 @@
 #include "SoilProfilePage.h"
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDebug>
@@ -75,12 +74,7 @@ MainWindow::MainWindow(QMainWindow * parent)
     createToolbar();
     createMenus();
 
-    // Set the initial title
-    if (QApplication::arguments().size() > 1) {
-        open(QApplication::arguments().last());
-    } else {
-        newModel();
-    }   
+    newModel();
 }
 
 MainWindow::~MainWindow()
@@ -467,11 +461,11 @@ void MainWindow::about()
                           " Ellen Rathje at The University of Texas at Austin.</p>"
                           "<p>For comments and suggestions contact Albert at "
                           "<a href=\"mailto:albert.kottke@gmail.com\">albert.kottke@gmail.com</a></p>"
-                          "<p>Version: alpha, revision: %1</p>"
+                          "<p>Version: %1</p>"
 #ifdef ADVANCED_OPTIONS
                           "<p>Compiled with advanced options</p>"
 #endif
-                          ).arg(PROJECT_VERSION));
+                          ).arg(QCoreApplication::applicationVersion()));
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)

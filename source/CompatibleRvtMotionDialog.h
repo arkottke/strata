@@ -24,7 +24,7 @@
 
 #include <QDialog>
 
-#include <qwt_plot_curve.h>
+#include <qwt/qwt_plot_curve.h>
 
 class MyTableView;
 class CompatibleRvtMotion;

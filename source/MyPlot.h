@@ -22,7 +22,7 @@
 #ifndef MY_PLOT_H_
 #define MY_PLOT_H_
 
-#include <qwt_plot.h>
+#include <qwt/qwt_plot.h>
 
 #include <QMenu>
 #include <QContextMenuEvent>

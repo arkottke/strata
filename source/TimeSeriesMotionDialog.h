@@ -30,7 +30,7 @@
 #include <QTabWidget>
 #include <QTextEdit>
 
-#include <qwt_plot_curve.h>
+#include <qwt/qwt_plot_curve.h>
 
 class TimeSeriesMotion;
 

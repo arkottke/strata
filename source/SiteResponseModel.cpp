@@ -268,7 +268,7 @@ bool SiteResponseModel::loadBinary(const QString &fileName)
     QFile file(fileName);
     // If the file can't be opened halt
     if (!file.open(QIODevice::ReadOnly)) {
-        qCritical("Error opening file: %s", qPrintable(fileName));
+        qCritical("Unable to open file: %s", qPrintable(fileName));
         return false;
 
     }
@@ -305,7 +305,7 @@ bool SiteResponseModel::loadJson(const QString & fileName)
 
     QFile file(m_fileName);
     if (!file.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open save file.");
+        qCritical("Unable to open file: %s", qPrintable(fileName));
         return false;
     }
 
@@ -462,7 +462,7 @@ void SiteResponseModel::run()
     emit progressRangeChanged(0, totalCount);
     emit progressChanged(0);
 
-    m_outputCatalog->log()->append(tr("%1 Trials (%2 Sites and %3 Motions )")
+    m_outputCatalog->log()->append(tr("%1 Trial(s) (%2 Site(s) and %3 Motion(s) )")
                                    .arg(totalCount)
                                    .arg(siteCount)
                                    .arg(motionCount));

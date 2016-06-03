@@ -24,7 +24,7 @@
 #include "OutputCatalog.h"
 #include "AbstractCalculator.h"
 
-#include <qwt_scale_engine.h>
+#include <qwt/qwt_scale_engine.h>
 
 AbstractTimeSeriesOutput::AbstractTimeSeriesOutput(OutputCatalog* catalog)
     : AbstractLocationOutput(catalog)

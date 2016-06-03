@@ -23,6 +23,7 @@
 #include "BatchRunner.h"
 
 #include <QtCore>
+#include <QCommandLineOption>
 #include <QString>
 #include <QMessageBox>
 #include <QApplication>
@@ -34,24 +35,6 @@
 #include <fstream>
 #include <iostream>
 
-//void myMessageOutput(QtMsgType type, const char *msg)
-//{
-//    switch (type) {
-//        case QtDebugMsg:
-//            fprintf( stdout, "Debug: %s\n", msg );
-//            break;
-//        case QtWarningMsg:
-//            QMessageBox::warning(0, "Strata", msg);
-//            break;
-//        case QtCriticalMsg:
-//            QMessageBox::critical(0, "Strata", msg);
-//            break;
-//        case QtFatalMsg:
-//            QMessageBox::critical(0, "Strata", msg);
-//            abort();
-//        }
-//}
-
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QByteArray localMsg = msg.toLocal8Bit();
@@ -60,7 +43,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtInfoMsg:
-        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        fprintf(stdout, "Info: %s\n", localMsg.constData());
+        fflush(stdout);
         break;
     case QtWarningMsg:
         fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -74,55 +58,61 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     }
 }
 
+QCoreApplication* createApplication(int &argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i)
+        if (qstrcmp(argv[i], "-b") || qstrcmp(argv[i], "-batch"))
+            return new QCoreApplication(argc, argv);
+    return new QApplication(argc, argv);
+}
+
 int main(int argc, char* argv[])
 {
+    QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
+
+    QCoreApplication::setApplicationName("Strata");
+    QCoreApplication::setApplicationVersion("0.3.0");
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(
+                "Strata - site response with RVT and simulated properties");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addOptions({
+        {{"b", "batch"},
+            QCoreApplication::translate("main", "Batch mode without a GUI")},
+     });
+    parser.addPositionalArgument(
+                "file",
+                QCoreApplication::translate(
+                    "main",
+                    "Strata JSON or binary files to process. Multiple files"
+                    "are only supported by batch mode (-b)."),
+                "file1 [file2 file3...]");
+
+    parser.process(*app.data());
+    const QStringList args = parser.positionalArguments();
+
+    if (qobject_cast<QApplication *>(app.data())) {
+        // GUI Version
 #ifndef DEBUG
-    qInstallMessageHandler(myMessageOutput);
+        qInstallMessageHandler(myMessageOutput);
 #endif
-
-    bool batch = false;
-    for (int i = 0; i < argc; i++) {
-        QString a = QString::fromUtf8(argv[i]);
-        if (a == "?" || a == "-?" || a == "--?" || a == "help" || a == "-help" || a == "--help")
-        {
-            fprintf(stdout, "strata.exe (-b, for batch use) [path_to_file]\n");
-            exit(0);
-        }
-        if (a == "-b") {
-            batch = true;
-        }
-    }
-
-    if (batch) {
-        // console hook
-        QCoreApplication app(argc, argv);
-        // console output hooks
-        QTextStream qerr(stderr);
-
-        const char * fn = argv[argc-1];
-        QString fileName = QString::fromUtf8(fn);
-        // check if input file exists
-        std::ifstream input(fn, std::ios::binary);
-        if (!input)
-        {
-            qerr << "file not found: " << fn << endl;
-            app.exit(-1);
-        }
-        BatchRunner * b = new BatchRunner(fileName);
-        b->run();
-        return app.exec();
-    } else {
-        // Normal application mode
-        QApplication app(argc, argv);
-
-        // Set the window icon
-        app.setWindowIcon(QIcon(":/images/application-icon.svg"));
-
-        QCoreApplication::setOrganizationName("arkottke");
-        QCoreApplication::setApplicationName("Strata");
-
+        qobject_cast<QApplication *>(app.data())->setWindowIcon(QIcon(":/images/application-icon.svg"));
         MainWindow * mainWindow = new MainWindow;
+        if (args.size())
+            mainWindow->open(args.at(0));
         mainWindow->showMaximized();
-        return app.exec();
+    } else {
+        // start non-GUI version...
+        qInstallMessageHandler(myMessageOutput);
+
+        if (args.size() < 1) {
+            qFatal("At least one file must be specified.");
+            return 1;
+        }
+        BatchRunner *br = new BatchRunner(args);
     }
-} 
+
+    return app.data()->exec();
+}
