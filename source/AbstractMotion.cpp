@@ -28,6 +28,7 @@
 #include <QDataStream>
 #include <QDebug>
 
+#include <gsl/gsl_math.h>
 #include <cmath>
 #include <iostream>
 

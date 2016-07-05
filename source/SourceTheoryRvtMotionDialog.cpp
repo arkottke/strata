@@ -41,11 +41,11 @@
 #include <QLineEdit>
 #include <QDebug>
 
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_picker.h>
-#include <qwt/qwt_picker_machine.h>
-#include <qwt/qwt_symbol.h>
-#include <qwt/qwt_text.h>
+#include <qwt_plot.h>
+#include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
+#include <qwt_symbol.h>
+#include <qwt_text.h>
 
 SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly, QWidget *parent) :
         QDialog(parent), m_motion(motion)

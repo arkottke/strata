@@ -33,8 +33,8 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
-#include <qwt/qwt_scale_engine.h>
-#include <qwt/qwt_text.h>
+#include <qwt_scale_engine.h>
+#include <qwt_text.h>
 
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
 {    

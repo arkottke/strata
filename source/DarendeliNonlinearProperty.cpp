@@ -24,7 +24,7 @@
 #include "Dimension.h"
 #include "SoilType.h"
 
-#include <cmath>
+#include <gsl/gsl_math.h>
 
 DarendeliNonlinearProperty::DarendeliNonlinearProperty(Type type, QObject *parent)
     : NonlinearProperty(parent)

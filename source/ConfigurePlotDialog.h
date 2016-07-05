@@ -28,9 +28,9 @@
 #include <QCheckBox>
 #include <QLineEdit>
 
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_scale_engine.h>
-#include <qwt/qwt_scale_div.h>
+#include <qwt_plot.h>
+#include <qwt_scale_engine.h>
+#include <qwt_scale_div.h>
 
 //! A QGroupBox contain the options to customize a plot axis.
 
