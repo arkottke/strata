@@ -481,13 +481,8 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         ++lineNum;
     }
 
-    // Initialize the length of m_accel
-    m_accel.resize(m_pointCount);
-
-    // Process each of the lines
-    int index = 0;
     // Read the first line
-    QString line =stream.readLine();
+    QString line = stream.readLine();
 
     bool finished = false;
     bool stopLineReached = false;
@@ -520,48 +515,50 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         case Rows:
             // Use all parts of the data
             for(int i = 0; i < row.size(); ++i) {
-                if ( index == m_pointCount ) {
+                if ( m_pointCount && m_accel.size() >= m_pointCount ) {
                     qWarning("Point count reached before end of data!");
                     finished = true;
                     break;
                 }
                 // Apply the scale factor and read the acceleration
-                m_accel[index] = scale * row.at(i).trimmed().toDouble(&ok);
-                // Increment the index
-                ++index;
+                m_accel << scale * row.at(i).trimmed().toDouble(&ok);
                 // Stop if there was an error in the conversion
                 if (!ok) {
                     continue;
                 }
             }
             break;
-                case Columns:
+        case Columns:
+            if ( m_pointCount && m_accel.size() >= m_pointCount ) {
+                qWarning("Point count reached before end of data!");
+                finished = true;
+                break;
+            }
             // Use only the important column, however at the end of the
             // file that column may not exist -- this only happens when the
             // row format is applied, but it still causes the program to
             // crash.
             if ( m_dataColumn - 1 < row.size() ) {
-                m_accel[index] = scale * row.at(m_dataColumn-1).trimmed().toDouble(&ok);
+                m_accel << scale * row.at(m_dataColumn-1).trimmed().toDouble(&ok);
             }
-
-            // Increment the index
-            ++index;
             break;
         }
-
         // Throw an error if there was a problem
         if (!ok) {
             qCritical() << "Error converting string to double in line: \n\""
-                    << qPrintable(line) << "\"\nCheck starting line.";
+                        << qPrintable(line) << "\"\nCheck starting line.";
             return false;
         }
 
-        // Read the next line
-        ++lineNum;
-        line = stream.readLine();
+        if (stream.atEnd()) {
+            break;
+        } else {
+            // Read the next line
+            line = stream.readLine();
+        }
     }
 
-    if (m_pointCount != index) {
+    if (m_pointCount && m_pointCount != m_accel.size()) {
         if (stopLineReached) {
             qWarning() << "Number of points limited by stop line.";
         } else {
@@ -569,6 +566,13 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             return false;
         }
     }
+
+    // Update counts that might not have been set
+    if (m_pointCount == 0)
+        setPointCount(m_accel.size());
+
+    if (m_stopLine == 0)
+        setStopLine(m_pointCount + m_startLine - 1);
 
     // Compute motion properties
     calculate();

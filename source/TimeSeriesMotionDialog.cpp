@@ -381,7 +381,7 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
 
     // Lines row
     m_startLineSpinBox = new QSpinBox;
-    m_startLineSpinBox->setMinimum(1);
+    m_startLineSpinBox->setRange(1, INT_MAX);
     m_startLineSpinBox->setWhatsThis(tr("The line number at which to start reading the data"));
     m_startLineSpinBox->setValue(m_motion->startLine());
     m_startLineSpinBox->setReadOnly(readOnly);
@@ -395,6 +395,7 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
     layout->addWidget(m_startLineSpinBox, 4, 1);
 
     m_stopLineSpinBox = new QSpinBox;
+    m_stopLineSpinBox->setRange(0, INT_MAX);
     m_stopLineSpinBox->setWhatsThis(tr("The line number to stop reading the data. If set to 0 the entire file is processed."));
     m_stopLineSpinBox->setValue(m_motion->stopLine());
     m_stopLineSpinBox->setReadOnly(readOnly);

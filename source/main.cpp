@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
 
     QCoreApplication::setApplicationName("Strata");
-    QCoreApplication::setApplicationVersion("0.3.0");
+    QCoreApplication::setApplicationVersion("0.4.0-dev");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(

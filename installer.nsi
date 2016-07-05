@@ -5,13 +5,10 @@
 ;Include Modern UI
 !include "MUI.nsh"
 ;--------------------------------
-;Revision of the respository
-!system 'python getSvnVersion.py "!define REVISION" > %TEMP%\revision.nsh'
-!include "$%TEMP%\revision.nsh"
 
 ;--------------------------------
 ; Path of the Strata executable
-!Define STRATA_PATH 'build_${ARCH}/release'
+!Define STRATA_PATH 'release_${ARCH}/release'
 
 ;--------------------------------
 ; Path to libraries
@@ -29,7 +26,7 @@ Var STARTMENU_FOLDER
 
 ;Name and file
 Name "Strata"
-OutFile "Strata-${ARCH}-r${REVISION}.exe"
+OutFile "Strata-${ARCH}-r${VERSION}.exe"
 
 ;Default installation folder
 InstallDir ${INSTDIR}
@@ -108,11 +105,11 @@ SetOutPath "$INSTDIR"
 
 ;Main Strata files
 File "${STRATA_PATH}\strata.exe"
-File "/oname=$INSTDIR\readme.txt" "README"
+File "/oname=$INSTDIR\README.rst" "README.rst"
 
 ;Icons
-File "/oname=$INSTDIR\strata.ico" "resources\images\application-icon.ico"
-File "/oname=$INSTDIR\strata-data.ico" "resources\images\file-data.ico"
+File "/oname=$INSTDIR\strata.ico" "win\application-icon.ico"
+File "/oname=$INSTDIR\strata-data.ico" "win\file-data.ico"
 
 ;Main libraries
 File "${MINGW_PATH}\bin\Qt5Core.dll"
@@ -199,12 +196,12 @@ SectionEnd
 
 Section /o "Source" SecSource
 
-SetOutPath "$INSTDIR\src"
+SetOutPath "$INSTDIR\source"
 
 ;Files to install
 File "/oname=..\strata.pro" "strata.pro"
-File "src\*.h"
-File "src\*.cpp"
+File "source\*.h"
+File "source\*.cpp"
 
 ; 13:07 <Dirm> I normally just do something like exec("cmd /c start http://www.google.com")
 ; CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Source Documentation.lnk" "cmd.exe" "/c weee"

@@ -21,8 +21,8 @@ DEFINES += ADVANCED_OPTIONS
 ########################################################################
 # Use FFTW for the FFT alogorithm, otherwise GSL is used.
 ########################################################################
-DEFINES += USE_FFTW
-LIBS += -lfftw3
+# DEFINES += USE_FFTW
+# LIBS += -lfftw3
 #LIBS += -lfftw3 -LC:/devel/fftw-3.3.4
 #INCLUDEPATH += C:/devel/fftw-3.3.4
 
@@ -64,11 +64,10 @@ CONFIG(debug, debug|release) {
     LIBS += -lqwt
 }
 
-# win32 { 
-#     # INCLUDEPATH += /mingw64/include/qwt
-#     # See: http://doc.qt.io/qt-5/qmake-platform-notes.html
-#     # RC_FILE = strata.rc
-# }
+# Icon file
+win32 { 
+    RC_FILE = strata.rc
+}
 
 ########################################################################
 # Add all of the headers and sources
