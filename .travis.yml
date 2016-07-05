@@ -21,7 +21,7 @@ before_script:
     - cd $TRAVIS_BUILD_DIR
     - mkdir build
     - cd build
-    - CMAKE_PREFIX_PATH=/usr/local/qwt-6.1.3-svn cmake ..
+    - CMAKE_PREFIX_PATH=/usr/local/qwt-6.1.4-svn cmake ..
     - make -j 2
 
 script:
