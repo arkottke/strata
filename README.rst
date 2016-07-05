@@ -21,7 +21,7 @@ Building
 
 Strata requires the following dependencies prior to building:
 
-* `Qt <http://doc.qt.io/>`_ (version 5.4 or later)
+* `Qt <http://doc.qt.io/>`_ (version 5.5 or later)
 * GNU Scientific Library (`GSL <http://www.gnu.org/software/gsl/>`_)
 * `Qwt <http://qwt.sourceforge.net/>`_ (version 6.1 or later)
 * `FFTW <http://www.fftw.org/>`_ (optional)
