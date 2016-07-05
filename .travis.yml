@@ -20,7 +20,7 @@ install:
 before_script:
     - cd $TRAVIS_BUILD_DIR
     - qmake -set INCLUDEPATH ..
-    - make -j 2 release
+    - make -j 2
 
 script:
     - ./source/strata -b ../example/*.strata
