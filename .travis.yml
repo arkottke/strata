@@ -10,14 +10,15 @@ before_install:
 install:
     - sudo apt-get install -qq libgsl0-dev qt56base qt56tools qt56svg qt56script
     - source /opt/qt56/bin/qt56-env.sh
+    - cd $TRAVIS_BUILD_DIR/..
     - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
     - cd qwt
     - qmake
     - make -j 2
     - sudo make install
-    - cd ..
 
-before_script:  
+before_script:
+    - cd $TRAVIS_BUILD_DIR
     - qmake -set INCLUDEPATH ..
     - make -j 2 release
 
