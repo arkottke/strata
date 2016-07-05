@@ -1,9 +1,10 @@
 # Build directories
 build*/
 
-# Make and CMake files
+# Make, qmake, and CMake files
 *Makefile*
 object_script*
+strata.pro.user
 
 # Ignore vim files
 tags
