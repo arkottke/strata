@@ -1,5 +1,6 @@
 # Build directories
 build*/
+release*/
 
 # Make, qmake, and CMake files
 *Makefile*
