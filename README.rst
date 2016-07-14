@@ -2,12 +2,12 @@
 Strata
 ======
 
-.. image:: https://img.shields.io/travis/arkottke/pygmm.svg
-    :target: https://travis-ci.org/arkottke/pygmm
+.. image:: https://img.shields.io/travis/arkottke/strata.svg
+    :target: https://travis-ci.org/arkottke/strata
     :alt: Build Status
 
 .. image::  https://img.shields.io/badge/license-GLPv3-blue.svg
-    :target: https://github.com/arkottke/pygmm/blob/master/LICENSE.txt
+    :target: https://github.com/arkottke/strata/blob/master/LICENSE.txt
     :alt: License
 
 

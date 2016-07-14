@@ -24,9 +24,8 @@ wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./func
 cd $APP.AppDir
 
 sudo chown -R $USER /app/
-sed -i -e 's|/app|././|g' /app/bin/strata
-
-cp /app/bin/strata ./usr/bin/
+cp ../../build/source/strata ./usr/bin/
+#sed -i -e 's|/|././|g' /app/bin/strata
 
 ########################################################################
 # Copy desktop and icon file to AppDir for AppRun to pick them up
