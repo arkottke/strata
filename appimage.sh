@@ -60,11 +60,11 @@ copy_deps
 
 # Move the libraries to usr/bin
 move_lib
-mv /usr/lib/x86_64-linux-gnu/* ./usr/lib/
-# Qt 5
-mv /opt/qt56/lib/* ./usr/lib/
+# mv /opt/qt56/lib/* ./usr/lib/
 # Qwt
-find $HOME -name "libqwt*" -exec cp {} ./usr/lib/ \;
+# find $HOME -name "libqwt*" -exec cp {} ./usr/lib/ \;
+
+mv ./usr/lib/x86_64-linux-gnu/* ./usr/lib/
 
 ########################################################################
 # Delete stuff that should not go into the AppImage
