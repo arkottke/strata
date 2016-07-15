@@ -51,10 +51,11 @@ find ../../ -name application-icon.svg -exec cp {} strata.svg \;
 # on all target systems
 ########################################################################
 
-# FIXME: How to find out which subset of plugins is really needed?
-# mkdir -p ./usr/lib/qt56/plugins/
+mkdir -p ./usr/lib/qt56/plugins/
 # PLUGINS=/opt/qt56/plugins
-# cp -r $PLUGINS/* ./usr/lib/qt56/plugins/
+cp -r /opt/qt56/plugins/imageformats ./usr/lib/qt56/plugins/
+cp -r /opt/qt56/plugins/iconengines ./usr/lib/qt56/plugins/
+cp -r /opt/qt56/plugins/platforms ./usr/lib/qt56/plugins/
 
 copy_deps
 
