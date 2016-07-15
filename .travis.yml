@@ -24,7 +24,7 @@ script:
     - cd build
     - CMAKE_PREFIX_PATH=/usr/local/qwt-$QWT_VERSION-svn cmake ..
     - make -j 2
-    - cd ..
     - ./source/strata -b ../example/*.strata
     - ./source/strata -b ../example/*.json
+    - cd ..
     - bash -ex appimage.sh

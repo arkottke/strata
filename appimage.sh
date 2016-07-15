@@ -53,14 +53,18 @@ find ../../ -name application-icon.svg -exec cp {} strata.svg \;
 
 # FIXME: How to find out which subset of plugins is really needed?
 mkdir -p ./usr/lib/qt5/plugins/
-PLUGINS=/usr/lib/x86_64-linux-gnu/qt5/plugins/
+PLUGINS=/opt/qt5/plugins
 cp -r $PLUGINS/* ./usr/lib/qt5/plugins/
 
 copy_deps
 
 # Move the libraries to usr/bin
 move_lib
-mv usr/lib/x86_64-linux-gnu/* usr/lib/
+mv /usr/lib/x86_64-linux-gnu/* ./usr/lib/
+# Qt 5
+mv /opt/qt5/lib/* ./usr/lib/
+# Qwt
+find $HOME -name "libqwt*" -exec cp {} ./usr/lib/ \;
 
 ########################################################################
 # Delete stuff that should not go into the AppImage
