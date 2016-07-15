@@ -24,8 +24,8 @@ wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./func
 cd $APP.AppDir
 
 cp $TRAVIS_BUILD_DIR/build/source/strata ./usr/bin/
-sudo chown -R $USER ./usr/
-sed -i -e 's|/|././|g' ./usr/bin/strata
+# sudo chown -R $USER ./usr/
+# sed -i -e 's|/|././|g' ./usr/bin/strata
 
 ########################################################################
 # Copy desktop and icon file to AppDir for AppRun to pick them up
