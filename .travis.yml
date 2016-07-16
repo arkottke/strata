@@ -16,6 +16,7 @@ install:
     - qmake
     - make -j2
     - QWT_VERSION=`sed -rn 's/^#define QWT_VERSION_STR.*"([0-9]+.[0-9]+.[0-9]+)"/\1/p' src/qwt_global.h`
+    - QWT_PATH=/usr/local/qwt-$QWT_VERSION-svn
     - sudo make install
 
 script:
@@ -24,9 +25,8 @@ script:
     - cd build
     - source /opt/qt56/bin/qt56-env.sh
     # Add paths for libraries
-    - export LIBS="-L/usr/qwt-$QWT_VERSION-svn/lib"
-    - export INCLUDEPATH="/usr/local/qwt-$QWT_VERSION-svn/include"
-    - qmake --version
+    - export LIBS="-L$QWT_PATH/lib"
+    - export INCLUDEPATH="$QWT_PATH/include"
     - qmake ..
     - make -j2
     - ./release/strata -b ../example/*.strata
