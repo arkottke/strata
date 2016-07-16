@@ -22,8 +22,12 @@ script:
     - cd $TRAVIS_BUILD_DIR
     - mkdir build
     - cd build
+    - source /opt/qt56/bin/qt56-env.sh
     # Add paths for libraries
-    - LIBS="-L/usr/qwt-$QWT_VERSION/lib" INCLUDEPATH="/usr/local/qwt-$QWT_VERSION/include" qmake ..
+    - export LIBS="-L/usr/qwt-$QWT_VERSION/lib"
+    - export INCLUDEPATH="/usr/local/qwt-$QWT_VERSION/include"
+    - qmake --version
+    - qmake ..
     - make -j2
     - ./release/strata -b ../example/*.strata
     - ./release/strata -b ../example/*.json
