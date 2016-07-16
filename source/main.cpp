@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
 
     QCoreApplication::setApplicationName("Strata");
-    QCoreApplication::setApplicationVersion("0.4.0-dev");
+    QCoreApplication::setApplicationVersion(VERSION);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
@@ -112,6 +112,7 @@ int main(int argc, char* argv[])
             return 1;
         }
         BatchRunner *br = new BatchRunner(args);
+        Q_UNUSED(br);
     }
 
     return app.data()->exec();

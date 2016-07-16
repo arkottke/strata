@@ -9,69 +9,62 @@
 TEMPLATE = app
 TARGET = strata
 QT += gui printsupport script widgets xml core
-CONFIG += c++14
 
-########################################################################
+# Version information
+VER_MAJ = 0
+VER_MIN = 4
+VER_PAT = 0
+GIT_VER = $$system(git rev-parse --short HEAD)
+DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
+
 # Enable advanced options that should not be included in the version for
 # standard users. If only the basic features are needed, comment out the
 # following line.
-########################################################################
 DEFINES += ADVANCED_OPTIONS
 
-########################################################################
-# Use FFTW for the FFT alogorithm, otherwise GSL is used.
-########################################################################
+# Required libraries for linking. Paths can be added here or by modifying the
+# INCLUDEPATH and LIBS environmental variable 
+LIBS += $$(LIBS) -lgsl -lgslcblas -lqwt
+INCLUDEPATH += $$(INCLUDEPATH)
+# LIBS += -L/usr/qwt-6.1.3/lib
+# INCLUDEPATH += /usr/local/qwt-6.1.3/include
+
+# (Optional) Use FFTW for the FFT alogorithm, otherwise GSL is used.
 # DEFINES += USE_FFTW
 # LIBS += -lfftw3
-#LIBS += -lfftw3 -LC:/devel/fftw-3.3.4
-#INCLUDEPATH += C:/devel/fftw-3.3.4
+# LIBS += -lfftw3 -LC:/devel/fftw-3.3.4
+# INCLUDEPATH += C:/devel/fftw-3.3.4
 
-########################################################################
 # Build type. For most cases this should be release, however during
 # development of the software using the debug configuration can be
 # beneficial.
-########################################################################
+# 
+# This can be specified at build time with, such as::
+#   $> make release
 CONFIG += debug_and_release
 
-########################################################################
-# Compiler warning messages.
-########################################################################
-CONFIG += warn_on
+# Add warning messages and support for c++14
+CONFIG += c++14 warn_on
 
-########################################################################
-# Enable console for debug versions
-########################################################################
+# Configuration for release and debug versions
 CONFIG(debug, debug|release) {
+    # Enable console for debug versions
     CONFIG += console
-}
-
-########################################################################
-# Flag based on if the program is compiled in debug mode. 
-########################################################################
-CONFIG(debug, debug|release) {
-   DEFINES += DEBUG
-}
-
-########################################################################
-# Libraries for linking
-########################################################################
-LIBS += -lgsl -lgslcblas
-
-# Qwt requires debugging libraries
-CONFIG(debug, debug|release) {
-    LIBS += -lqwtd
+    # Flag based on if the program is compiled in debug mode. 
+    DEFINES += DEBUG
+    # Build to debug
+    DESTDIR = debug
 } else {
-    LIBS += -lqwt
+    # Build to release
+    DESTDIR = release
 }
 
-# Icon file
+# Add the icon for windows binaries
 win32 { 
     RC_FILE = strata.rc
 }
 
-########################################################################
 # Add all of the headers and sources
-########################################################################
 HEADERS += source/AbstractCalculator.h \
     source/AbstractDistribution.h \
     source/AbstractIterativeCalculator.h \
@@ -93,6 +86,7 @@ HEADERS += source/AbstractCalculator.h \
     source/AccelTransferFunctionOutput.h \
     source/Algorithms.h \
     source/AriasIntensityProfileOutput.h\
+    source/BatchRunner.h \
     source/BedrockDepthVariation.h \
     source/CompatibleRvtMotion.h \
     source/CompatibleRvtMotionDialog.h \
@@ -112,7 +106,7 @@ HEADERS += source/AbstractCalculator.h \
     source/Dimension.h \
     source/DimensionLayout.h \
     source/DispTimeSeriesOutput.h \
-    source/DissipatedEnergyProfileOutput.h \ 
+    source/DissipatedEnergyProfileOutput.h \
     source/Distribution.h \
     source/EditActions.h \
     source/EquivalentLinearCalculator.h \
@@ -130,6 +124,7 @@ HEADERS += source/AbstractCalculator.h \
     source/Location.h \
     source/MainWindow.h \
     source/MaxAccelProfileOutput.h \
+    source/MaxDispProfileOutput.h \
     source/MaxErrorProfileOutput.h \
     source/MaxStrainProfileOutput.h \
     source/MaxStressProfileOutput.h \
@@ -143,7 +138,8 @@ HEADERS += source/AbstractCalculator.h \
     source/MotionTypeDelegate.h \
     source/MyAbstractTableModel.h \
     source/MyPlot.h \
-    source/MyRandomNumGenerator.h \ 
+    source/MyQwtCompatibility.h \
+    source/MyRandomNumGenerator.h \
     source/MyTableView.h \
     source/NonlinearProperty.h \
     source/NonlinearPropertyCatalog.h \
@@ -153,6 +149,7 @@ HEADERS += source/AbstractCalculator.h \
     source/NonlinearPropertyOutput.h \
     source/NonlinearPropertyRandomizer.h \
     source/NonlinearPropertyStandardDeviationWidget.h \
+    source/OnlyIncreasingDelegate.h \
     source/OutputCatalog.h \
     source/OutputExportDialog.h \
     source/OutputPage.h \
@@ -180,8 +177,8 @@ HEADERS += source/AbstractCalculator.h \
     source/SoilTypesOutputCatalog.h \
     source/SourceTheoryRvtMotion.h \
     source/SourceTheoryRvtMotionDialog.h \
-    source/SpectralRatioOutput.h \
     source/SpectraOutputCatalog.h \
+    source/SpectralRatioOutput.h \
     source/SteppedOutputInterpolater.h \
     source/StrainTimeSeriesOutput.h \
     source/StrainTransferFunctionOutput.h \
@@ -195,16 +192,12 @@ HEADERS += source/AbstractCalculator.h \
     source/TimeSeriesMotionDialog.h \
     source/TimeSeriesOutputCatalog.h \
     source/Units.h \
+    source/VelTimeSeriesOutput.h \
     source/VelocityLayer.h \
     source/VelocityVariation.h \
-    source/VelTimeSeriesOutput.h \
     source/VerticalEffectiveStressProfileOutput.h \
     source/VerticalTotalStressProfileOutput.h \
-    source/ViscoElasticStressTimeSeriesOutput.h \
-    source/MaxDispProfileOutput.h \
-    source/MyQwtCompatibility.h \
-    source/OnlyIncreasingDelegate.h \
-    source/BatchRunner.h
+    source/ViscoElasticStressTimeSeriesOutput.h
 
 SOURCES +=     source/AbstractCalculator.cpp \
     source/AbstractDistribution.cpp \
@@ -227,6 +220,7 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/AccelTransferFunctionOutput.cpp \
     source/Algorithms.cpp \
     source/AriasIntensityProfileOutput.cpp\
+    source/BatchRunner.cpp \
     source/BedrockDepthVariation.cpp \
     source/CompatibleRvtMotion.cpp \
     source/CompatibleRvtMotionDialog.cpp \
@@ -262,9 +256,9 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/LinearElasticCalculator.cpp \
     source/LinearOutputInterpolater.cpp \
     source/Location.cpp \
-    source/main.cpp \
     source/MainWindow.cpp \
     source/MaxAccelProfileOutput.cpp \
+    source/MaxDispProfileOutput.cpp \
     source/MaxErrorProfileOutput.cpp \
     source/MaxStrainProfileOutput.cpp \
     source/MaxStressProfileOutput.cpp \
@@ -278,7 +272,8 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/MotionTypeDelegate.cpp \
     source/MyAbstractTableModel.cpp \
     source/MyPlot.cpp \
-    source/MyRandomNumGenerator.cpp \ 
+    source/MyQwtCompatibility.cpp \
+    source/MyRandomNumGenerator.cpp \
     source/MyTableView.cpp \
     source/NonlinearProperty.cpp \
     source/NonlinearPropertyCatalog.cpp \
@@ -288,6 +283,7 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/NonlinearPropertyOutput.cpp \
     source/NonlinearPropertyRandomizer.cpp \
     source/NonlinearPropertyStandardDeviationWidget.cpp \
+    source/OnlyIncreasingDelegate.cpp \
     source/OutputCatalog.cpp \
     source/OutputExportDialog.cpp \
     source/OutputPage.cpp \
@@ -315,8 +311,8 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/SoilTypesOutputCatalog.cpp \
     source/SourceTheoryRvtMotion.cpp \
     source/SourceTheoryRvtMotionDialog.cpp \
-    source/SpectralRatioOutput.cpp \
     source/SpectraOutputCatalog.cpp \
+    source/SpectralRatioOutput.cpp \
     source/SteppedOutputInterpolater.cpp \
     source/StrainTimeSeriesOutput.cpp \
     source/StrainTransferFunctionOutput.cpp \
@@ -330,15 +326,12 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/TimeSeriesMotionDialog.cpp \
     source/TimeSeriesOutputCatalog.cpp \
     source/Units.cpp \
+    source/VelTimeSeriesOutput.cpp \
     source/VelocityLayer.cpp \
     source/VelocityVariation.cpp \
-    source/VelTimeSeriesOutput.cpp \
     source/VerticalEffectiveStressProfileOutput.cpp \
     source/VerticalTotalStressProfileOutput.cpp \
     source/ViscoElasticStressTimeSeriesOutput.cpp \
-    source/MaxDispProfileOutput.cpp \
-    source/MyQwtCompatibility.cpp \
-    source/OnlyIncreasingDelegate.cpp \
-    source/BatchRunner.cpp
+    source/main.cpp
 
 RESOURCES += resources/resources.qrc
