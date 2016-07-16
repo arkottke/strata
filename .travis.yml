@@ -23,8 +23,8 @@ script:
     - mkdir build
     - cd build
     # Add paths for libraries
-    - LIBS="-L/usr/qwt-$QWT_VERSION/lib"
-    - INCLUDEPATH="/usr/local/qwt-$QWT_VERSION/include"
+    - export LIBS="-L/usr/qwt-$QWT_VERSION/lib"
+    - export INCLUDEPATH="/usr/local/qwt-$QWT_VERSION/include"
     - qmake ..
     - make -j2
     - ./release/strata -b ../example/*.strata
