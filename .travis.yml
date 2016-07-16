@@ -25,6 +25,7 @@ script:
     - cd build
     - source /opt/qt56/bin/qt56-env.sh
     # Add paths for libraries
+    - export LD_LIBRARY_PATH="$QWT_PATH/lib:$LD_LIBRARY_PATH"
     - export LIBS="-L$QWT_PATH/lib"
     - export INCLUDEPATH="$QWT_PATH/include"
     - qmake ..
