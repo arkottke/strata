@@ -14,7 +14,7 @@ install:
     - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
     - cd qwt
     - qmake
-    - make -j 2
+    - make -j2
     - QWT_VERSION=`sed -rn 's/^#define QWT_VERSION_STR.*"([0-9]+.[0-9]+.[0-9]+)"/\1/p' src/qwt_global.h`
     - sudo make install
 
@@ -22,9 +22,11 @@ script:
     - cd $TRAVIS_BUILD_DIR
     - mkdir build
     - cd build
-    - CMAKE_PREFIX_PATH=/usr/local/qwt-$QWT_VERSION-svn cmake ..
-    - make -j 2
-    - ./source/strata -b ../example/*.strata
-    - ./source/strata -b ../example/*.json
+    # Add paths for libraries
+    LIBS=-L/usr/qwt-$QWT_VERSION/lib
+    INCLUDEPATH=/usr/local/qwt-$QWT_VERSION/include
+    - qmake ..
+    - make -j2
+    - ./release/strata -b ../example/*.strata
+    - ./release/strata -b ../example/*.json
     - cd ..
-    - bash -ex appimage.sh
