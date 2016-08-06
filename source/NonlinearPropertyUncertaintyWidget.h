@@ -19,22 +19,38 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef MODULUS_STANDARD_DEVIATION_H
-#define MODULUS_STANDARD_DEVIATION_H
+#ifndef NONLINEAR_PROPERTY_UNCERTAINTY_WIDGET_H
+#define NONLINEAR_PROPERTY_UNCERTAINTY_WIDGET_H
 
-#include "AbstractNonlinearPropertyStandardDeviation.h"
+#include <QObject>
 
-class ModulusStandardDeviation : public AbstractNonlinearPropertyStandardDeviation
+#include <QDoubleSpinBox>
+#include <QGridLayout>
+#include <QLineEdit>
+
+class NonlinearPropertyUncertainty;
+
+class NonlinearPropertyUncertaintyWidget : public QObject
 {
     Q_OBJECT
 public:
-    explicit ModulusStandardDeviation(QObject *parent = 0);
+    explicit NonlinearPropertyUncertaintyWidget(const QString& title, QGridLayout *layout, QObject *parent);
 
-    virtual double calculate(NonlinearPropertyRandomizer::Model model, double strain, double property);
+    void setDecimals(int prec);
+    void setLnStdevRange(double min, double max);
+    void setMinRange(double min, double max);
+    void setMaxRange(double min, double max);
+    void setSuffix(const QString& suffix);
+    void setModel(NonlinearPropertyUncertainty* model);
 
 public slots:
-    virtual void setPropertyValue(double value);
-    virtual void setModel(NonlinearPropertyRandomizer::Model model);
+    void setReadOnly(bool readOnly);
+    void setUncertaintyModel(int model);
+
+protected:
+    QDoubleSpinBox* m_lnStdevSpinBox;
+    QDoubleSpinBox* m_minSpinBox;
+    QDoubleSpinBox* m_maxSpinBox;
 };
 
-#endif // MODULUS_STANDARD_DEVIATION_H
+#endif // NONLINEAR_PROPERTY_UNCERTAINTY_WIDGET_H

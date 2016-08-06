@@ -31,7 +31,7 @@
 #include "NonlinearPropertyCatalog.h"
 #include "NonlinearPropertyDelegate.h"
 #include "NonlinearPropertyRandomizer.h"
-#include "NonlinearPropertyStandardDeviationWidget.h"
+#include "NonlinearPropertyUncertaintyWidget.h"
 #include "OnlyIncreasingDelegate.h"
 #include "RockLayer.h"
 #include "SiteResponseModel.h"
@@ -131,17 +131,15 @@ void SoilTypePage::setModel(SiteResponseModel *model)
     connect(m_nprModelComboBox, SIGNAL(currentIndexChanged(int)),
             npr, SLOT(setModel(int)));
 
-    m_modulusStdevWidget->setModel(npr->modulusStdev());
-    m_modulusStdevWidget->setCustomEnabled(
-            npr->customEnabled());
-    connect(npr, SIGNAL(customEnabledChanged(bool)),
-            m_modulusStdevWidget, SLOT(setCustomEnabled(bool)));
+    m_modulusUncertWidget->setUncertaintyModel(npr->model());
+    m_modulusUncertWidget->setModel(npr->modulusUncert());
+    connect(npr, SIGNAL(modelChanged(int)),
+            m_modulusUncertWidget, SLOT(setUncertaintyModel(int)));
 
-    m_dampingStdevWidget->setModel(npr->dampingStdev());
-    m_dampingStdevWidget->setCustomEnabled(
-            npr->customEnabled());
-    connect(npr, SIGNAL(customEnabledChanged(bool)),
-            m_dampingStdevWidget, SLOT(setCustomEnabled(bool)));
+    m_dampingUncertWidget->setUncertaintyModel(npr->model());
+    m_dampingUncertWidget->setModel(npr->dampingUncert());
+    connect(npr, SIGNAL(modelChanged(int)),
+            m_dampingUncertWidget, SLOT(setUncertaintyModel(int)));
 
     m_correlSpinBox->setValue(npr->correl());
     connect(m_correlSpinBox, SIGNAL(valueChanged(double)),
@@ -166,8 +164,8 @@ void SoilTypePage::setReadOnly(bool readOnly)
     m_waterTableDepthSpinBox->setReadOnly(readOnly);
 
     m_nprModelComboBox->setDisabled(readOnly);
-    m_modulusStdevWidget->setReadOnly(readOnly);
-    m_dampingStdevWidget->setReadOnly(readOnly);
+    m_modulusUncertWidget->setReadOnly(readOnly);
+    m_dampingUncertWidget->setReadOnly(readOnly);
     m_correlSpinBox->setReadOnly(readOnly);
 
     m_stressSpinBox->setReadOnly(readOnly);
@@ -247,33 +245,29 @@ QGroupBox* SoilTypePage::createBedrockGroupBox()
 QGroupBox* SoilTypePage::createVariationGroupBox()
 {
     QGridLayout * layout = new QGridLayout;
-    layout->setColumnStretch(3, 1);
+    layout->setColumnStretch(6, 1);
 
     // Model for the standard deviation
     m_nprModelComboBox = new QComboBox;
     m_nprModelComboBox->addItems(NonlinearPropertyRandomizer::modelList());
 
     // Link for help on standard deviation models
-    QLabel* label = new QLabel(tr(
-            "Standard deviation model (<a href=\"qrc:/docs/soil-type.html#stdev-models\">more information</a>):"));
-    connect(label, SIGNAL(linkActivated(QString)), 
-            this, SIGNAL(linkActivated(QString)));
-
+    QLabel* label = new QLabel(tr("Standard deviation model:"));
     layout->addWidget(label, 0, 0, 1, 2);
     layout->addWidget(m_nprModelComboBox, 0, 2);
 
     // Modulus reduction parameters
-    m_modulusStdevWidget = new NonlinearPropertyStandardDeviationWidget(
+    m_modulusUncertWidget = new NonlinearPropertyUncertaintyWidget(
             tr("Normalized shear modulus (G/G_max):"), layout, this);
-    m_modulusStdevWidget->setDecimals(3);
-    m_modulusStdevWidget->setMaxRange(1, 2);
-    m_modulusStdevWidget->setMinRange(0.001, 0.40);
+    m_modulusUncertWidget->setDecimals(3);
+    m_modulusUncertWidget->setMaxRange(1, 2);
+    m_modulusUncertWidget->setMinRange(0.001, 0.40);
 
-    m_dampingStdevWidget = new NonlinearPropertyStandardDeviationWidget(
+    m_dampingUncertWidget = new NonlinearPropertyUncertaintyWidget(
             tr("Damping:"), layout, this);
-    m_dampingStdevWidget->setSuffix(" %");
-    m_dampingStdevWidget->setMaxRange(10., 50.);
-    m_dampingStdevWidget->setMinRange(0.01, 2);
+    m_dampingUncertWidget->setSuffix(" %");
+    m_dampingUncertWidget->setMaxRange(10., 50.);
+    m_dampingUncertWidget->setMinRange(0.01, 2);
     
     // Correlation
     m_correlSpinBox = new QDoubleSpinBox;

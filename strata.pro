@@ -8,11 +8,11 @@
 
 TEMPLATE = app
 TARGET = strata
-QT += gui printsupport script widgets xml core
+QT += gui printsupport widgets xml core
 
 # Version information
 VER_MAJ = 0
-VER_MIN = 4
+VER_MIN = 5
 VER_PAT = 0
 GIT_VER = $$system(git rev-parse --short HEAD)
 DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
@@ -72,7 +72,6 @@ HEADERS += source/AbstractCalculator.h \
     source/AbstractMotion.h \
     source/AbstractMutableOutputCatalog.h \
     source/AbstractNonlinearPropertyFactory.h \
-    source/AbstractNonlinearPropertyStandardDeviation.h \
     source/AbstractOutput.h \
     source/AbstractOutputCatalog.h \
     source/AbstractOutputInterpolater.h \
@@ -88,6 +87,7 @@ HEADERS += source/AbstractCalculator.h \
     source/AriasIntensityProfileOutput.h\
     source/BatchRunner.h \
     source/BedrockDepthVariation.h \
+ #   source/CalculationTask.h \
     source/CompatibleRvtMotion.h \
     source/CompatibleRvtMotionDialog.h \
     source/ComputePage.h \
@@ -99,7 +99,6 @@ HEADERS += source/AbstractCalculator.h \
     source/CustomNonlinearProperty.h \
     source/DampingFactory.h \
     source/DampingProfileOutput.h \
-    source/DampingStandardDeviation.h \
     source/DarendeliNonlinearProperty.h \
     source/DepthComboBox.h \
     source/DepthComboBoxDelegate.h \
@@ -132,7 +131,6 @@ HEADERS += source/AbstractCalculator.h \
     source/MethodGroupBox.h \
     source/ModulusFactory.h \
     source/ModulusProfileOutput.h \
-    source/ModulusStandardDeviation.h \
     source/MotionLibrary.h \
     source/MotionPage.h \
     source/MotionTypeDelegate.h \
@@ -148,7 +146,8 @@ HEADERS += source/AbstractCalculator.h \
     source/NonlinearPropertyFactoryGroupBox.h \
     source/NonlinearPropertyOutput.h \
     source/NonlinearPropertyRandomizer.h \
-    source/NonlinearPropertyStandardDeviationWidget.h \
+    source/NonlinearPropertyUncertainty.h \
+    source/NonlinearPropertyUncertaintyWidget.h \
     source/OnlyIncreasingDelegate.h \
     source/OutputCatalog.h \
     source/OutputExportDialog.h \
@@ -206,7 +205,6 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/AbstractMotion.cpp \
     source/AbstractMutableOutputCatalog.cpp \
     source/AbstractNonlinearPropertyFactory.cpp \
-    source/AbstractNonlinearPropertyStandardDeviation.cpp \
     source/AbstractOutput.cpp \
     source/AbstractOutputCatalog.cpp \
     source/AbstractOutputInterpolater.cpp \
@@ -222,6 +220,7 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/AriasIntensityProfileOutput.cpp\
     source/BatchRunner.cpp \
     source/BedrockDepthVariation.cpp \
+ #   source/CalculationTask.cpp \
     source/CompatibleRvtMotion.cpp \
     source/CompatibleRvtMotionDialog.cpp \
     source/ComputePage.cpp \
@@ -233,7 +232,6 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/CustomNonlinearProperty.cpp \
     source/DampingFactory.cpp \
     source/DampingProfileOutput.cpp \
-    source/DampingStandardDeviation.cpp \
     source/DarendeliNonlinearProperty.cpp \
     source/DepthComboBox.cpp \
     source/DepthComboBoxDelegate.cpp \
@@ -266,7 +264,6 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/MethodGroupBox.cpp \
     source/ModulusFactory.cpp \
     source/ModulusProfileOutput.cpp \
-    source/ModulusStandardDeviation.cpp \
     source/MotionLibrary.cpp \
     source/MotionPage.cpp \
     source/MotionTypeDelegate.cpp \
@@ -282,7 +279,8 @@ SOURCES +=     source/AbstractCalculator.cpp \
     source/NonlinearPropertyFactoryGroupBox.cpp \
     source/NonlinearPropertyOutput.cpp \
     source/NonlinearPropertyRandomizer.cpp \
-    source/NonlinearPropertyStandardDeviationWidget.cpp \
+    source/NonlinearPropertyUncertainty.cpp \
+    source/NonlinearPropertyUncertaintyWidget.cpp \
     source/OnlyIncreasingDelegate.cpp \
     source/OutputCatalog.cpp \
     source/OutputExportDialog.cpp \

@@ -30,9 +30,7 @@
 
 #include <gsl/gsl_rng.h>
 
-class AbstractNonlinearPropertyStandardDeviation;
-class DampingStandardDeviation;
-class ModulusStandardDeviation;
+class NonlinearPropertyUncertainty;
 class NonlinearProperty;
 class RockLayer;
 class SoilProfile;
@@ -51,7 +49,7 @@ public:
 
     //! Model for the standard deviation
     enum Model {
-        Custom, //!< User defined standard deviation
+        SPID, //!< EPRI SPID model
         Darendeli //!< Defined by Stokoe and Darendeli
     };
 
@@ -67,8 +65,8 @@ public:
     bool bedrockIsEnabled() const;
     double correl() const;
 
-    DampingStandardDeviation* dampingStdev();
-    ModulusStandardDeviation* modulusStdev();
+    NonlinearPropertyUncertainty* dampingUncert();
+    NonlinearPropertyUncertainty* modulusUncert();
 
     //! Vary the properties of a given layer
     void vary(SoilType* soilType);
@@ -99,9 +97,6 @@ protected slots:
     void updateBedrockIsEnabled();
 
 private:
-    //! Vary a specific property
-    void varyProperty(AbstractNonlinearPropertyStandardDeviation* stdevModel, NonlinearProperty* property, const double randVar);
-
     //! If the variation is enabled.    
     int m_enabled;
 
@@ -114,11 +109,11 @@ private:
     //! Correlation between shear modulus and damping
     double m_correl;
 
-    //! Standard deviation model for the shear modulus reduction
-    ModulusStandardDeviation* m_modulusStdev;
+    //! Uncertainty model for the shear modulus reduction
+    NonlinearPropertyUncertainty* m_modulusUncert;
 
-    //! Standard deviation model for the damping ratio
-    DampingStandardDeviation* m_dampingStdev;
+    //! Uncertainty model for the damping ratio
+    NonlinearPropertyUncertainty* m_dampingUncert;
 
     //! Random number generator
     gsl_rng * m_rng;

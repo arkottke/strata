@@ -46,8 +46,8 @@ SoilType::SoilType(QObject *parent)
     m_saveData = false;
 
     // Assume custom models
-    m_modulusModel = new CustomNonlinearProperty(NonlinearProperty::ModulusReduction, this);
-    m_dampingModel = new CustomNonlinearProperty(NonlinearProperty::Damping, this);
+    m_modulusModel = new CustomNonlinearProperty(NonlinearProperty::ModulusReduction, false, this);
+    m_dampingModel = new CustomNonlinearProperty(NonlinearProperty::Damping, false, this);
 
     m_meanStress = 2;
     m_pi = 0;

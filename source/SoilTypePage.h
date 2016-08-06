@@ -35,7 +35,7 @@
 
 class NonlinearProperty;
 class NonlinearPropertyDelegate;
-class NonlinearPropertyStandardDeviationWidget;
+class NonlinearPropertyUncertaintyWidget;
 class SiteResponseModel;
 class SoilTypeCatalog;
 class TableGroupBox;
@@ -88,8 +88,8 @@ private:
 
     QGroupBox* m_randomizerGroupBox;
     QComboBox* m_nprModelComboBox;
-    NonlinearPropertyStandardDeviationWidget* m_modulusStdevWidget;
-    NonlinearPropertyStandardDeviationWidget* m_dampingStdevWidget;
+    NonlinearPropertyUncertaintyWidget* m_modulusUncertWidget;
+    NonlinearPropertyUncertaintyWidget* m_dampingUncertWidget;
     QDoubleSpinBox* m_correlSpinBox;
 
     QGroupBox* m_soilPropsGroupBox;

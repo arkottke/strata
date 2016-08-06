@@ -21,8 +21,7 @@
 
 #include "NonlinearPropertyRandomizer.h"
 
-#include "DampingStandardDeviation.h"
-#include "ModulusStandardDeviation.h"
+#include "NonlinearPropertyUncertainty.h"
 #include "SoilProfile.h"
 #include "SoilType.h"
 #include "RockLayer.h"
@@ -45,27 +44,25 @@ NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfi
     connect(m_siteProfile, SIGNAL(isVariedChanged(bool)),
             this, SLOT(updateBedrockIsEnabled()));
 
-    m_modulusStdev = new ModulusStandardDeviation;
-    m_dampingStdev = new DampingStandardDeviation;
+    m_modulusUncert = new NonlinearPropertyUncertainty(0.15);
+    m_dampingUncert = new NonlinearPropertyUncertainty(0.30);
 
     m_enabled = false;
     m_bedrockIsEnabled = false;
     m_correl = -0.50;
-
-    m_model = Custom;
     setModel(Darendeli);
 }
 
 NonlinearPropertyRandomizer::~NonlinearPropertyRandomizer()
 {
-    m_modulusStdev->deleteLater();
-    m_dampingStdev->deleteLater();
+    m_modulusUncert->deleteLater();
+    m_dampingUncert->deleteLater();
 }
 
 
 QStringList NonlinearPropertyRandomizer::modelList()
 {
-    return QStringList() << tr("Custom") << tr("Darendeli");
+    return QStringList() << tr("SPID") << tr("Darendeli");
 }
 
 bool NonlinearPropertyRandomizer::enabled() const
@@ -97,21 +94,11 @@ void NonlinearPropertyRandomizer::setModel(Model model)
 {
     if ( m_model != model ) {
         m_model = model;
-        
-        m_modulusStdev->setModel(m_model);
-        m_dampingStdev->setModel(m_model);
-
         emit modelChanged(m_model);
-        emit customEnabledChanged(customEnabled());
         emit wasModified();
     }
 }
     
-bool NonlinearPropertyRandomizer::customEnabled() const
-{
-    return (m_model == Custom);
-}
-
 bool NonlinearPropertyRandomizer::bedrockIsEnabled() const
 {
     return m_siteProfile->isVaried() && m_bedrockIsEnabled;
@@ -141,14 +128,14 @@ void NonlinearPropertyRandomizer::setCorrel(double correl)
     m_correl = correl;
 }
 
-DampingStandardDeviation* NonlinearPropertyRandomizer::dampingStdev()
+NonlinearPropertyUncertainty* NonlinearPropertyRandomizer::dampingUncert()
 {
-    return m_dampingStdev;
+    return m_dampingUncert;
 }
 
-ModulusStandardDeviation* NonlinearPropertyRandomizer::modulusStdev()
+NonlinearPropertyUncertainty* NonlinearPropertyRandomizer::modulusUncert()
 {
-    return m_modulusStdev;
+    return m_modulusUncert;
 }
 
 void NonlinearPropertyRandomizer::vary(SoilType* soilType)
@@ -159,24 +146,14 @@ void NonlinearPropertyRandomizer::vary(SoilType* soilType)
     gsl_ran_bivariate_gaussian(m_rng, 1.0, 1.0, m_correl, &randG, &randD);
 
     // Vary the shear modulus
-    varyProperty(
-            m_modulusStdev,
-            soilType->modulusModel(),
-            randG);
-
-    varyProperty(
-            m_dampingStdev,
-            soilType->dampingModel(),
-            randD);
+    m_modulusUncert->vary(m_model, soilType->modulusModel(), randG);
+    m_dampingUncert->vary(m_model, soilType->dampingModel(), randD);
 }
 
 void NonlinearPropertyRandomizer::vary(RockLayer* bedrock)
 {
-    const double stdev = m_dampingStdev->calculate(m_model,
-                                                   0.0001, // FIXME can't actually calculate a strain and shouldn't really be used
-                                                   bedrock->avgDamping());
-
-    bedrock->setDamping(m_dampingStdev->limit(gsl_ran_gaussian(m_rng, stdev)));
+    bedrock->setDamping(
+                m_dampingUncert->variedDamping(m_model, bedrock->avgDamping(), gsl_ran_gaussian(m_rng, 1)));
 }
 
 void NonlinearPropertyRandomizer::updateEnabled()
@@ -189,22 +166,6 @@ void NonlinearPropertyRandomizer::updateBedrockIsEnabled()
     emit bedrockIsEnabledChanged(bedrockIsEnabled());
 }
 
-void NonlinearPropertyRandomizer::varyProperty(
-        AbstractNonlinearPropertyStandardDeviation* stdevModel, NonlinearProperty *property, double randVar)
-{
-    QVector<double> varied(property->average().size());
-
-    for (int i = 0; i < property->average().size(); ++i) {
-        const double stdev = stdevModel->calculate(
-                m_model,
-                property->strain().at(i),
-                property->average().at(i));
-
-        varied[i] = stdevModel->limit(property->average().at(i) + stdev * randVar);
-    }
-    property->setVaried(varied);
-}
-
 void NonlinearPropertyRandomizer::fromJson(const QJsonObject &json)
 {
     m_enabled = json["enabled"].toBool();
@@ -212,8 +173,8 @@ void NonlinearPropertyRandomizer::fromJson(const QJsonObject &json)
     m_bedrockIsEnabled = json["bedrockIsEnabled"].toBool();
     m_correl = json["correl"].toDouble();
 
-    m_modulusStdev->fromJson(json["modulusStdev"].toObject());
-    m_dampingStdev->fromJson(json["dampingStdev"].toObject());
+    m_modulusUncert->fromJson(json["modulusUncert"].toObject());
+    m_dampingUncert->fromJson(json["dampingUncert"].toObject());
 
     setModel(m_model);
 }
@@ -225,21 +186,21 @@ QJsonObject NonlinearPropertyRandomizer::toJson() const
     json["model"] = (int) m_model;
     json["bedrockIsEnabled"] = m_bedrockIsEnabled;
     json["correl"] = m_correl;
-    json["modulusStdev"] = m_modulusStdev->toJson();
-    json["dampingStdev"] = m_dampingStdev->toJson();
+    json["modulusUncert"] = m_modulusUncert->toJson();
+    json["dampingUncert"] = m_dampingUncert->toJson();
     return json;
 }
 
 QDataStream& operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npv)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     out << npv->m_enabled
             << (int)npv->m_model
             << npv->m_bedrockIsEnabled
             << npv->m_correl
-            << npv->m_modulusStdev
-            << npv->m_dampingStdev;
+            << npv->m_modulusUncert
+            << npv->m_dampingUncert;
 
     return out;
 }
@@ -254,10 +215,19 @@ QDataStream& operator>> (QDataStream & in, NonlinearPropertyRandomizer* npv)
     in >> npv->m_enabled
             >> model
             >> npv->m_bedrockIsEnabled
-            >> npv->m_correl
-            >> npv->m_modulusStdev
-            >> npv->m_dampingStdev;
+            >> npv->m_correl;
 
+    if (ver < 2) {
+        // Read information previously stored in the NonlinearPropertyStandardDeviation
+        quint8 ui;
+        double d;
+        QString s;
+        for (int i = 0; i < 2; ++i) {
+            in >> ui >> d >> d >> s;
+        }
+    } else {
+        in >> npv->m_modulusUncert >> npv->m_dampingUncert;
+    }
     npv->m_model = (NonlinearPropertyRandomizer::Model)model;
     return in;
 }
