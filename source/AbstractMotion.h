@@ -19,8 +19,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef MOTION_H_
-#define MOTION_H_
+#ifndef ABSTRACT_MOTION_H_
+#define ABSTRACT_MOTION_H_
 
 #include "MyAbstractTableModel.h"
 
@@ -185,4 +185,4 @@ protected:
     //! The single-degree-of-freedom oscillator transfer function
     QVector<QVector<std::complex<double> > > m_sdofTf;
 };
-#endif
+#endif // ABSTRACT_MOTION_H_
