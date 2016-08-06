@@ -23,9 +23,7 @@
 
 #include "CustomNonlinearProperty.h"
 #include "DampingFactory.h"
-#include "DampingStandardDeviation.h"
 #include "ModulusFactory.h"
-#include "ModulusStandardDeviation.h"
 #include "MyTableView.h"
 #include "NonlinearProperty.h"
 #include "NonlinearPropertyCatalog.h"

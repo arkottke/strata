@@ -29,7 +29,7 @@
 #include <cmath>
 
 NonlinearPropertyUncertainty::NonlinearPropertyUncertainty(double lnStdev, QObject *parent) :
-    m_lnStdev(lnStdev), QObject(parent)
+    QObject(parent), m_lnStdev(lnStdev) 
 {
 }
 
