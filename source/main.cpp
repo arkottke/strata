@@ -61,7 +61,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 QCoreApplication* createApplication(int &argc, char *argv[])
 {
     for (int i = 1; i < argc; ++i)
-        if (qstrcmp(argv[i], "-b") || qstrcmp(argv[i], "-batch"))
+        if (qstrcmp(argv[i], "-b") == 0 || qstrcmp(argv[i], "-batch") == 0)
             return new QCoreApplication(argc, argv);
     return new QApplication(argc, argv);
 }
