@@ -8,7 +8,7 @@ before_install:
     - sudo apt-get update -qq
 
 install:
-    - sudo apt-get install -qq libgsl0-dev qt56base qt56tools qt56svg qt56script
+    - sudo apt-get install -qq libgsl0-dev qt56base qt56tools qt56svg
     - source /opt/qt56/bin/qt56-env.sh
     - cd $TRAVIS_BUILD_DIR/..
     - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
