@@ -22,18 +22,21 @@ DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
 # following line.
 DEFINES += ADVANCED_OPTIONS
 
+# Include configuration of paths to include and required for linking
+exists(strataconfig.pri) {
+    include(strataconfig.pri)
+}
+
 # Required libraries for linking. Paths can be added here or by modifying the
 # INCLUDEPATH and LIBS environmental variable 
-LIBS += $$(LIBS) -lgsl -lgslcblas -lqwt
-INCLUDEPATH += $$(INCLUDEPATH)
-# LIBS += -L/usr/qwt-6.1.3/lib
-# INCLUDEPATH += /usr/local/qwt-6.1.3/include
+LIBS += $$(LIBS) -lgsl -lgslcblas
+
+debug: LIBS += -lqwtd
+else: LIBS += -lqwt
 
 # (Optional) Use FFTW for the FFT alogorithm, otherwise GSL is used.
 # DEFINES += USE_FFTW
 # LIBS += -lfftw3
-# LIBS += -lfftw3 -LC:/devel/fftw-3.3.4
-# INCLUDEPATH += C:/devel/fftw-3.3.4
 
 # Build type. For most cases this should be release, however during
 # development of the software using the debug configuration can be
@@ -53,10 +56,10 @@ CONFIG(debug, debug|release) {
     # Flag based on if the program is compiled in debug mode. 
     DEFINES += DEBUG
     # Build to debug
-    DESTDIR = debug
+    # DESTDIR = debug
 } else {
     # Build to release
-    DESTDIR = release
+    # DESTDIR = release
 }
 
 # Add the icon for windows binaries
