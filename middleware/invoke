@@ -1,9 +1,0 @@
-#!/bin/sh
-
-/apps/share/invoke/invoke_app "$@" \
-    -t strata \
-    -c "filexfer" \
-    -C "strata" \
-    -u qt-4.8.0 \
-    -u qwt-6.0.0 \
-    -w captive
