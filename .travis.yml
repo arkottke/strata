@@ -26,8 +26,8 @@ script:
     - source /opt/qt56/bin/qt56-env.sh
     # Add paths for libraries
     - export LD_LIBRARY_PATH="$QWT_PATH/lib:$LD_LIBRARY_PATH"
-    - export LIBS="-L$QWT_PATH/lib"
-    - export INCLUDEPATH="$QWT_PATH/include"
+    - echo "LIBS=-L$QWT_PATH/lib" > strataconfig.pri
+    - echo "INCLUDEPATH=$QWT_PATH/include" >> strataconfig.pri
     - qmake ..
     - make -j2
     - ./release/strata -b ../example/*.strata
