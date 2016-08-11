@@ -31,8 +31,11 @@ exists(strataconfig.pri) {
 # INCLUDEPATH and LIBS environmental variable 
 LIBS += $$(LIBS) -lgsl -lgslcblas
 
-debug: LIBS += -lqwtd
-else: LIBS += -lqwt
+CONFIG(debug, debug|release) {
+    LIBS += -lqwtd
+} else {
+    LIBS += -lqwt
+}
 
 # (Optional) Use FFTW for the FFT alogorithm, otherwise GSL is used.
 # DEFINES += USE_FFTW
