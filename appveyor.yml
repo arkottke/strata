@@ -5,26 +5,29 @@ environment:
   fast_finish: true
   matrix:
   - ARCH: "i686"
-    BITS: 32
+    PATH: C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
+    CC: C:\msys64\mingw32\bin\gcc.exe
   - ARCH: "x86_64"
-    BITS: 64
+    PATH: C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
+    CC: C:\msys64\mingw64\bin\gcc.exe
 
 configuration: Release
     
 # Configure git linebreaks
 init:
   - git config --global core.autocrlf input
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 # Install dependencies
 install:
-  - SET PATH=C:\msys64\mingw%BITS%\bin;C:\msys64\usr\bin;%PATH%
   - pacman --noconfirm -S pacman-mirrors
   - pacman -Syu --noconfirm
   - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build_script:
-  - mkdir build && pushd build && qmake .. && make -j2 release && popd
-
-on_finish:
-  - ps: $blockRdp = $true;
+  - mkdir build
+  - pushd build
+  - qmake --version
+  - qmake ..
+  - make --version
+  - make -j2 release
+  - popd
