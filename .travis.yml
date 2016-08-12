@@ -29,7 +29,7 @@ script:
     - export LIBRARY_PATH="$QWT_PATH/lib"
     - export CPLUS_INCLUDE_PATH="$QWT_PATH/include"
     - qmake ..
-    - make -j2
-    - ./build/release/strata -b ../example/*.strata
-    - ./build/release/strata -b ../example/*.json
+    - make -j2 release
+    - ./release/strata -b ../example/*.strata
+    - ./release/strata -b ../example/*.json
     - cd ..
