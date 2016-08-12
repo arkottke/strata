@@ -4,7 +4,9 @@ version: '{build}'
 environment:
   matrix:
   - ARCH: "i686"
+    BITS: 32
   - ARCH: "x86_64"
+    BITS: 64
 
 configuration: Release
     
@@ -12,15 +14,12 @@ configuration: Release
 init:
     - git config --global core.autocrlf input
     - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-platform:
-  - x64
-  
+
 # Install dependencies
 install:
-  - C:\msys64\msys2_shell.bat
-  - pacman -Sy --noconfirm pacman-mirrors
-  - update-core
-  - pacman -Su --noconfirm
+  - SET PATH=C:\msys64\mingw%BITS%\bin;%PATH%;C:\msys64\usr\bin
+  - pacman --noconfirm -S pacman-mirrors
+  - pacman -Syu --noconfirm
   - pacman -S --noconfirm mingw-w64-$ARCH-qwt-qt5 mingw-w64-$ARCH-gsl mingw-w64-$ARCH-qt5
 
 
