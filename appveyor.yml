@@ -1,5 +1,5 @@
 # version format
-version: {build}
+version: '{build}'
 
 environment:
   matrix:
