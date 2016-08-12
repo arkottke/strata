@@ -16,7 +16,7 @@ configuration: Release
 # Configure git linebreaks
 init:
   - git config --global core.autocrlf input
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  
 
 # Install dependencies
 install:
@@ -25,6 +25,7 @@ install:
   - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build_script:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - mkdir build
   - pushd build
   - qmake ..
