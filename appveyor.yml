@@ -6,10 +6,10 @@ environment:
   matrix:
   - ARCH: "i686"
     PATH: C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
-    MKSPEC: C:/msys64/mingw32/share/qt5/mkspecs/win32-g++
+    MKSPEC: C:\msys64\mingw32\share\qt5\mkspecs\win32-g++
   - ARCH: "x86_64"
     PATH: C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
-    MKSPEC: C:/msys64/mingw64/share/qt5/mkspecs/win32-g++
+    MKSPEC: C:\msys64\mingw32\share\qt5\mkspecs\win32-g++
 
 configuration: Release
     
