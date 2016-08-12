@@ -5,8 +5,8 @@ platform: x64
 environment:
   fast_finish: true
   matrix:
-  - ARCH: "i686"
-    PATH: C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
+#  - ARCH: "i686"
+#    PATH: C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - ARCH: "x86_64"
     PATH: C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
 
