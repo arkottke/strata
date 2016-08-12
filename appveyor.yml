@@ -20,6 +20,6 @@ install:
   - SET PATH=C:\msys64\mingw%BITS%\bin;%PATH%;C:\msys64\usr\bin
   - pacman --noconfirm -S pacman-mirrors
   - pacman -Syu --noconfirm
-  - pacman -S --noconfirm mingw-w64-$ARCH-qwt-qt5 mingw-w64-$ARCH-gsl mingw-w64-$ARCH-qt5
+  - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 
