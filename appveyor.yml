@@ -17,7 +17,7 @@ platform:
   
 # Install dependencies
 install:
-  - msys64\msys2_shell.bat
+  - C:\msys64\msys2_shell.bat
   - pacman -Sy --noconfirm pacman-mirrors
   - update-core
   - pacman -Su --noconfirm
