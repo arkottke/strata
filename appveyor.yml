@@ -26,6 +26,6 @@ install:
 build_script:
   - mkdir build
   - pushd build
-  - qmake -spec %MKSPEC% ..
-  - make -j2 release
+  - qmake -spec C:\msys64\mingw32\share\qt5\mkspecs\win32-g++ ..
+  - make VERBOSE=1 -j2 release
   - popd
