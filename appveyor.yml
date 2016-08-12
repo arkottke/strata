@@ -6,7 +6,6 @@ environment:
   fast_finish: true
   matrix:
 #  - ARCH: "i686"
-#    PATH: C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - ARCH: "x86_64"
 
 configuration: Release
@@ -25,4 +24,5 @@ install:
   - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build_script:
-  - C:\msys64\usr\bin\sh --login "$APPVEYOR_BUILD_FOLDER/build_msys.sh"
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) 
+  - C:\msys64\usr\bin\sh --login /c/projects/strata/msys_build.sh
