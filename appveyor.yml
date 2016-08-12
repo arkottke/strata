@@ -2,6 +2,7 @@
 version: '{build}'
 
 environment:
+  fast_finish: true
   matrix:
   - ARCH: "i686"
     BITS: 32
