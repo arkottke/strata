@@ -23,5 +23,5 @@ install:
   - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build:
- - mkdir build && pushd build && qmake .. && make -j2 release && popd
+  - mkdir build && pushd build && qmake .. && make -j2 release && popd
 
