@@ -8,7 +8,6 @@ environment:
 #  - ARCH: "i686"
 #    PATH: C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - ARCH: "x86_64"
-    PATH: C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
 
 configuration: Release
     
@@ -17,7 +16,8 @@ init:
   - git config --global core.autocrlf input
   
 # Install dependencies
-#install:
+install:
+  - set PATH=C:\msys64\usr\bin;%PATH%
   - pacman --noconfirm -S pacman-mirrors
   - pacman -Syu --noconfirm
   # Need to re-run Syu after update
@@ -25,5 +25,4 @@ init:
   - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build_script:
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-  - C:\msys64\usr\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake; make -j2 release;"
+  - C:\msys64\usr\bin\sh --login "$APPVEYOR_BUILD_FOLDER/build_msys.sh"

@@ -85,7 +85,7 @@ void BatchRunner::finalize()
     } else {
         m_model->saveJson();
     }
-    qInfo().noquote() << "[BATCH] Completed processing: %s" << fileName;
+    qInfo().noquote() << "[BATCH] Completed processing:" << fileName;
 
     m_model->deleteLater();
     startNext();
