@@ -24,5 +24,4 @@ install:
   - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build_script:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) 
-  - C:\msys64\usr\bin\sh --login /c/projects/strata/msys_build.sh
+  - C:\msys64\usr\bin\sh --login /c/projects/strata/build_msys.sh

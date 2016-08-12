@@ -33,8 +33,8 @@ export LD_LIBRARY_PATH="/mingw$bits/lib"
 export LIBRARY_PATH="/mingw$bits/lib"
 export CPLUS_INCLUDE_PATH="/mingw$bits/include/qwt"
 
-qmake --version
 qmake 
-make --version
 make -j2 release
 
+./release/strata -b ../example/*.strata
+./release/strata -b ../example/*.json
