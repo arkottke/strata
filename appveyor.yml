@@ -25,6 +25,6 @@ platform:
 install:
   - set PATH=%QTDIR%\bin;%PATH%
   - cd
-  - svn export svn export svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - svn export svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
   - pushd qwt && qmake -tp vc qwt.pro && msbuild qwt.sln && popd
 
