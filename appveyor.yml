@@ -26,8 +26,6 @@ install:
 build_script:
   - mkdir build
   - pushd build
-  - qmake --version
-  - qmake ..
-  - make --version
+  - qmake -spec g++-win32 ..
   - make -j2 release
   - popd
