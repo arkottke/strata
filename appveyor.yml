@@ -1,0 +1,30 @@
+# version format
+version: {build}
+
+environment:
+  matrix:
+  - platform: x64
+    CC: VS2015
+    QTDIR: C:\Qt\5.5\msvc2015_64
+    PLATFORM_TAG: win64
+  - platform: Win32
+    CC: VS2015
+    QTDIR: C:\Qt\5.5\msvc2015
+    PLATFORM_TAG: win32
+
+configuration: Release
+    
+# Configure git linebreaks
+init:
+    - git config --global core.autocrlf input
+    
+platform:
+  - x64
+  
+# Install dependencies
+install:
+  - set PATH=%QTDIR%\bin;%PATH%
+  - cd
+  - svn export svn export svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - pushd qwt && qmake -tp vc qwt.pro && msbuild qwt.sln && popd
+
