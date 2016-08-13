@@ -45,7 +45,7 @@ make -j2 release
 # Compile the NSIS script
 /c/'Program Files (x86)'/NSIS/makensis.exe \
     -DVERSION="$version" \
-    -DSTRATA_PATH="release/strata.exe" \
+    -DSTRATA_PATH="release" \
     -DARCH="mingw$bits" \
     -DINSTDIR="$instdir" \
     installer.nsi
