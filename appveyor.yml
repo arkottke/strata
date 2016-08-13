@@ -30,11 +30,11 @@ artifacts:
     - path: Strata-mingw64-*.exe
       name: Strata Installer (64-bit)
 
-    - path: Strata-mingw64-*.7z
+    - path: Strata-mingw64-*.zip
       name: Strata Archive (64-bit)
 
     - path: Strata-mingw32-*.exe
       name: Strata Installer (32-bit)
 
-    - path: Strata-mingw32-*.7z
+    - path: Strata-mingw32-*.zip
       name: Strata Archive (32-bit)
