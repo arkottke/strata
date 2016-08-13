@@ -18,11 +18,11 @@ version=`python get_version.py`
 if [ "$ARCH" = x86_64 ]; then
   bits=64
   archsuffix=64
-  instdir='C:\Program Files\Strata'
+  instdir='/c/Program\ Files/Strata'
 else
   bits=32
   archsuffix=86
-  instdir='C:\Program Files (x86)\Strata'
+  instdir='/c/Program Files (x86)/Strata'
 fi
 
 echo Using ARCH=$ARCH
@@ -47,5 +47,5 @@ make -j2 release
     -DVERSION="$version" \
     -DSTRATA_PATH="release/strata.exe" \
     -DARCH="mingw$bits" \
-    -DINSTDIR="$instdir" \
+    -DINSTDIR=`cygpath -w $instdir` \
     installer.nsi
