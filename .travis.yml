@@ -33,4 +33,4 @@ script:
     - ./release/strata -b ../example/*.strata
     - ./release/strata -b ../example/*.json
     - cd ..
-    - bash -ex appimage.sh
+    - bash -ex scripts/appimage.sh

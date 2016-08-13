@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Run in top-level directory
-cd `dirname "$0"`
+cd `dirname "$0"`/..
 # Stop on error
 set -e
 # Make sure stdin exists (not true on appveyor msys2)
@@ -14,7 +14,7 @@ elif [ -z "$ARCH" ]; then
   ARCH=`echo $XC_HOST | sed 's/-w64-mingw32//'`
 fi
 
-version=`python get_version.py`
+version=`python scripts/get_version.py`
 if [ "$ARCH" = x86_64 ]; then
   bits=64
   archsuffix=64
@@ -49,3 +49,6 @@ make -j2 release
     -DARCH="mingw$bits" \
     -DINSTDIR="$instdir" \
     installer.nsi
+
+# Create zip file
+sh scripts/create_zip.sh
