@@ -23,7 +23,7 @@ wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./func
 
 cd $APP.AppDir
 
-cp $TRAVIS_BUILD_DIR/build/source/strata ./usr/bin/
+cp $TRAVIS_BUILD_DIR/build/release/strata ./usr/bin/
 # sudo chown -R $USER ./usr/
 # sed -i -e 's|/|././|g' ./usr/bin/strata
 
