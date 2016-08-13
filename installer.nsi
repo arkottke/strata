@@ -25,7 +25,7 @@ Name "Strata"
 OutFile "Strata-${ARCH}-r${VERSION}.exe"
 
 ;Default installation folder
-InstallDir ${INSTDIR}
+InstallDir "${INSTDIR}"
 
 ;Get installation folder from registry if available
 InstallDirRegKey HKCU "Software\Strata" ""
