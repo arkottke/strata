@@ -18,11 +18,11 @@ version=`python get_version.py`
 if [ "$ARCH" = x86_64 ]; then
   bits=64
   archsuffix=64
-  installdir='C:\Program Files\'
+  installdir='C:\Program Files\Strata'
 else
   bits=32
   archsuffix=86
-  installdir='C:\Program Files (x86)\'
+  installdir='C:\Program Files (x86)\Strata'
 fi
 
 echo Using ARCH=$ARCH
