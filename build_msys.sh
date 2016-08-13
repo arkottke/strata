@@ -14,12 +14,15 @@ elif [ -z "$ARCH" ]; then
   ARCH=`echo $XC_HOST | sed 's/-w64-mingw32//'`
 fi
 
+version=`python get_version.py`
 if [ "$ARCH" = x86_64 ]; then
   bits=64
   archsuffix=64
+  installdir='C:\Program Files\'
 else
   bits=32
   archsuffix=86
+  installdir='C:\Program Files (x86)\'
 fi
 
 echo Using ARCH=$ARCH
@@ -38,3 +41,11 @@ make -j2 release
 
 ./release/strata -b example/*.strata
 ./release/strata -b example/*.json
+
+# Compile the NSIS script
+/c/'Program Files (x86)'/NSIS/makensis.exe \
+    -DVERSION="$version" \
+    -DSTRATA_PATH="release/strata.exe" \
+    -DARCH="mingw$bits" \
+    -DINSTDIR="$instdir" \
+    installer.nsi
