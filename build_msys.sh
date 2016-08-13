@@ -47,5 +47,5 @@ make -j2 release
     -DVERSION="$version" \
     -DSTRATA_PATH="release/strata.exe" \
     -DARCH="mingw$bits" \
-    -DINSTDIR=`cygpath -w $instdir` \
+    -DINSTDIR="$instdir" \
     installer.nsi
