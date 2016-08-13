@@ -18,7 +18,7 @@ version=`python get_version.py`
 if [ "$ARCH" = x86_64 ]; then
   bits=64
   archsuffix=64
-  instdir='/c/Program\ Files/Strata'
+  instdir='/c/Program Files/Strata'
 else
   bits=32
   archsuffix=86
