@@ -18,11 +18,11 @@ version=`python get_version.py`
 if [ "$ARCH" = x86_64 ]; then
   bits=64
   archsuffix=64
-  installdir='C:\Program Files\'
+  instdir='C:\Program Files\'
 else
   bits=32
   archsuffix=86
-  installdir='C:\Program Files (x86)\'
+  instdir='C:\Program Files (x86)\'
 fi
 
 echo Using ARCH=$ARCH
