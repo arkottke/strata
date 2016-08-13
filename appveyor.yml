@@ -25,3 +25,10 @@ install:
 
 build_script:
   - C:\msys64\usr\bin\sh --login /c/projects/strata/build_msys.sh
+
+artifacts:
+    - path: Strata-mingw64-*.exe
+      name: Strata 64bit
+
+    - path: Strata-mingw32-*.exe
+      name: Strata 32bit
