@@ -64,6 +64,17 @@ move_lib
 
 mv ./usr/lib/x86_64-linux-gnu/* ./usr/lib/
 
+# ./usr/local is not used inside an AppDir/AppImage, so move it
+mv usr/local/qwt-6.1.4-svn/lib/libqwt.so.6 usr/lib/
+rm -rf usr/local/
+
+# ./opt is not use inside an AppDir/AppImage, so move it
+mv opt/qt56/lib/* usr/lib/
+rm -rf opt/
+
+# ./usr/lib/qt56/ is not use inside an AppDir/AppImage, so move it
+mv ./usr/lib/qt56/ ./usr/lib/qt5/
+
 ########################################################################
 # Delete stuff that should not go into the AppImage
 ########################################################################
