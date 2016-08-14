@@ -22,8 +22,10 @@ DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
 # following line.
 DEFINES += ADVANCED_OPTIONS
 
-# Required libraries for linking. Paths can be added here or by modifying the
-# INCLUDEPATH and LIBS environmental variable 
+# Load configuration from strataconfig.pri if it exists
+include( strataconfig.pri )
+
+# Required libraries for linking.
 LIBS += $$(LIBS) -lgsl -lgslcblas
 
 CONFIG(debug, debug|release) {
