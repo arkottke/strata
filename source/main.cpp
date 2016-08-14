@@ -25,6 +25,7 @@
 #include <QtCore>
 #include <QCommandLineOption>
 #include <QString>
+#include <QStringList>
 #include <QMessageBox>
 #include <QApplication>
 #include <QThread>
@@ -60,9 +61,14 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 QCoreApplication* createApplication(int &argc, char *argv[])
 {
+    QStringList coreArgs{"-v", "--version", "-b", "--batch"};
+
     for (int i = 1; i < argc; ++i)
-        if (qstrcmp(argv[i], "-b") == 0 || qstrcmp(argv[i], "-batch") == 0)
-            return new QCoreApplication(argc, argv);
+        for (const QString& arg : coreArgs) {
+            if (arg.compare(argv[i]) == 0) {
+                return new QCoreApplication(argc, argv);
+            }
+        }
     return new QApplication(argc, argv);
 }
 
