@@ -12,3 +12,6 @@ tags
 tags.temp
 *.swp
 *.un~
+
+# Ignore deploy
+deploy/
