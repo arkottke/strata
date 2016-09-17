@@ -21,25 +21,39 @@
 
 #include "LinearOutputInterpolater.h"
 
+#include <QDebug>
+
 #include <gsl/gsl_interp.h>
+
+#include <float.h>
 
 LinearOutputInterpolater::LinearOutputInterpolater()
 {
 }
 
 QVector<double> LinearOutputInterpolater::calculate(
-        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi)
+        QVector<double> x, const QVector<double> & y, const QVector<double> & xi)
 {
     QVector<double> yi;
 
+    // Ensure that x is increasing, if not nudge it.
+    // FIXME: Better solution?
+    QVector<double> xm(x);
+    for (int i = 0; i < (xm.size() - 1); ++i) {
+        if (xm.at(i + 1) == xm.at(i)) {
+            qDebug() << i;
+            xm[i + 1] *= 1 + 1E-6;
+        }
+    }
+
     // Allocate the interpolator
     gsl_interp* interpolator = gsl_interp_alloc(gsl_interp_linear, y.size());
-    gsl_interp_init(interpolator, x.data(), y.data(), y.size());
+    gsl_interp_init(interpolator, xm.data(), y.data(), y.size());
     gsl_interp_accel* accelerator =  gsl_interp_accel_alloc();
 
     for (int i = 0; i < xi.size(); ++i) {
-        if (xi.at(i) < x.last()) {
-            yi << gsl_interp_eval(interpolator, x.data(), y.data(), xi.at(i), accelerator);
+        if (xi.at(i) < xm.last()) {
+            yi << gsl_interp_eval(interpolator, xm.data(), y.data(), xi.at(i), accelerator);
         } else {
             break;
         }
