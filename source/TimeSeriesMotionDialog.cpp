@@ -302,7 +302,7 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
     m_scaleSpinBox = new QDoubleSpinBox;
     m_scaleSpinBox->setWhatsThis(tr("The scale factor that is applied to the motion."));
     m_scaleSpinBox->setRange(0.001, 20);
-    m_scaleSpinBox->setDecimals(2);
+    m_scaleSpinBox->setDecimals(4);
     m_scaleSpinBox->setSingleStep(0.01);
     m_scaleSpinBox->setValue(m_motion->scale());
     m_scaleSpinBox->setReadOnly(readOnly);
