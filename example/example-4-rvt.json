@@ -1,0 +1,234 @@
+{
+    "calculator": {
+        "errorTolerance": 2,
+        "maxIterations": 10,
+        "strainRatio": 0.65000000000000002
+    },
+    "hasResults": false,
+    "method": 1,
+    "motionLibrary": {
+        "approach": 0,
+        "motions": [
+        ],
+        "saveData": true
+    },
+    "notes": "",
+    "outputCatalog": {
+        "damping": 5,
+        "depth": -1,
+        "enabled": [
+        ],
+        "filePrefix": "",
+        "frequency": {
+            "max": 100,
+            "min": 0.050000000000000003,
+            "size": 512,
+            "spacing": 1
+        },
+        "frequencyIsNeeded": false,
+        "log": {
+            "level": 0,
+            "text": [
+            ]
+        },
+        "period": {
+            "max": 10,
+            "min": 0.01,
+            "size": 91,
+            "spacing": 1
+        },
+        "periodIsNeeded": false,
+        "profilesOutputCatalog": [
+            {
+                "className": "AriasIntensityProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "DampingProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "DissipatedEnergyProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "FinalVelProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "InitialVelProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "MaxAccelProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "MaxDispProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "MaxErrorProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "MaxStrainProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "MaxStressProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "MaxVelProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "ModulusProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "StressRatioProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "StressReducCoeffProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "VerticalTotalStressProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            },
+            {
+                "className": "VerticalEffectiveStressProfileOutput",
+                "data": [
+                ],
+                "enabled": false,
+                "exportEnabled": false
+            }
+        ],
+        "ratiosOutputCatalog": [
+        ],
+        "soilTypesOutputCatalog": [
+        ],
+        "spectraOutputCatalog": [
+        ],
+        "timeSeriesOutputCatalog": [
+        ],
+        "title": ""
+    },
+    "randNumGen": {
+        "seed": 42,
+        "seedSpecified": false
+    },
+    "siteProfile": {
+        "bedrock": {
+            "avg": 0,
+            "avgDamping": 1,
+            "depth": 0,
+            "hasMax": false,
+            "hasMin": false,
+            "isVaried": true,
+            "max": 0,
+            "min": 0,
+            "stdev": 0,
+            "type": 2,
+            "untWt": 22
+        },
+        "disableAutoDiscretization": false,
+        "inputDepth": -1,
+        "isVaried": false,
+        "maxFreq": 20,
+        "nonlinearPropertyRandomizer": {
+            "bedrockIsEnabled": false,
+            "correl": -0.5,
+            "dampingUncert": {
+                "lnStdev": 0.29999999999999999,
+                "max": 0,
+                "min": 0
+            },
+            "enabled": 0,
+            "model": 1,
+            "modulusUncert": {
+                "lnStdev": 0.14999999999999999,
+                "max": 8.9882514066570934e-315,
+                "min": 1.1857575500189917e-322
+            }
+        },
+        "profileCount": 100,
+        "profileRandomizer": {
+            "bedrockDepthVariation": {
+                "avg": 0,
+                "enabled": false,
+                "hasMax": false,
+                "hasMin": false,
+                "max": 0,
+                "min": 0,
+                "stdev": 0,
+                "type": 2
+            },
+            "enabled": false,
+            "layerThicknessVariation": {
+                "enabled": false,
+                "model": 1
+            },
+            "velocityVariation": {
+                "correlModel": 7,
+                "enabled": false,
+                "stdevModel": 7
+            }
+        },
+        "soilLayers": [
+        ],
+        "soilTypeCatalog": [
+        ],
+        "waterTableDepth": 0,
+        "waveFraction": 0.20000000000000001
+    },
+    "system": 0
+}
