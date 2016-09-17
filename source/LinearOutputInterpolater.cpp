@@ -32,7 +32,7 @@ LinearOutputInterpolater::LinearOutputInterpolater()
 }
 
 QVector<double> LinearOutputInterpolater::calculate(
-        QVector<double> x, const QVector<double> & y, const QVector<double> & xi)
+        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi)
 {
     QVector<double> yi;
 
