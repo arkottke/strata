@@ -218,17 +218,17 @@ bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
 {
     Q_UNUSED(scale);
 
-    m_name = extractColumn(stream.readLine());
-    m_description = extractColumn(stream.readLine());
+    m_name = extractColumn(stream.readLine(), 1);
+    m_description = extractColumn(stream.readLine(), 1);
 
     bool ok;
-    m_type = variantToType(extractColumn(stream.readLine()), &ok);
+    m_type = variantToType(extractColumn(stream.readLine(), 1), &ok);
     if (!ok) {
         qWarning() << "Unabled to parse motion type";
         return false;
     }
 
-    m_duration = extractColumn(stream.readLine()).toFloat(&ok);
+    m_duration = extractColumn(stream.readLine(), 1).toFloat(&ok);
     if (!ok) {
         qWarning() << "Unable to parse duration!";
         return false;
