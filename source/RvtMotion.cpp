@@ -273,6 +273,9 @@ bool RvtMotion::loadFromTextStream(QTextStream &stream, double scale)
     if (!AbstractRvtMotion::loadFromTextStream(stream, scale))
         return false;
 
+    // Read the duration
+    rvtMotion->setDuration(stream.readLine().split(',').at(1).toFloat());
+
     // Skip the column header line
     stream.readLine();
 
