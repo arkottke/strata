@@ -549,6 +549,10 @@ AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double sca
         return 0;
     }
 
+    in >> rvtMotion->m_name;
+    in >> rvtMotion->m_description;
+    in >> rvtMotion->m_duration:
+
     if (rvtMotion->loadFromTextStream(in, scale)) {
         return rvtMotion;
     } else {
