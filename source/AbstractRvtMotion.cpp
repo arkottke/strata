@@ -532,7 +532,9 @@ AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double sca
     }
 
     QTextStream in(&data);
+
     QString line = in.readLine();
+
     QString className = line.split(',').at(1);
 
     AbstractRvtMotion *rvtMotion = 0;
@@ -546,9 +548,6 @@ AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double sca
         qWarning() << "Unrecogized className:" << className;
         return 0;
     }
-   
-    rvtMotion->setName(in.readLine().split(',').at(1));
-    rvtMotion->setDescription(in.readLine().split(',').at(1));
 
     if (rvtMotion->loadFromTextStream(in, scale)) {
         return rvtMotion;
