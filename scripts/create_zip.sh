@@ -59,4 +59,4 @@ cp release/strata.exe deploy/
 cp -r example deploy/
 cp LICENSE.txt deploy/
 
-7z a Strata-mingw$bits-$version.zip ./deploy/*
+7z a Strata-mingw$bits-v$version.zip ./deploy/*

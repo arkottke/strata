@@ -40,12 +40,11 @@ artifacts:
       name: Strata Archive (32-bit)
 
 deploy:
-    release: Strata-v$(appveyor_build_version)
     description: 'Release description'
     provider: GitHub
     auth_token:
         secure: e/Uc+Q6xQyd6u9tBsvh6UlYfmmJgSL/cmoq6dhS5NHkgQAvETilqfDsO2euzazfp
-    draft: false
+    draft: true
     prerelease: false
     on:
         branch: master                 # release from master branch only

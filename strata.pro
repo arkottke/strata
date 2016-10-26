@@ -13,7 +13,7 @@ QT += gui printsupport widgets xml core
 # Version information
 VER_MAJ = 0
 VER_MIN = 5
-VER_PAT = 0
+VER_PAT = 1
 GIT_VER = $$system(git rev-parse --short HEAD)
 DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
 
