@@ -22,7 +22,7 @@ Var STARTMENU_FOLDER
 
 ;Name and file
 Name "Strata"
-OutFile "Strata-${ARCH}-r${VERSION}.exe"
+OutFile "Strata-${ARCH}-v${VERSION}.exe"
 
 ;Default installation folder
 InstallDir "${INSTDIR}"

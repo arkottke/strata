@@ -2,18 +2,20 @@
 Strata
 ======
 
-.. image:: https://img.shields.io/travis/arkottke/strata.svg
-    :target: https://travis-ci.org/arkottke/strata
-    :alt: Build Status
-
 .. image::  https://img.shields.io/badge/license-GLPv3-blue.svg
     :target: https://github.com/arkottke/strata/blob/master/LICENSE.txt
     :alt: License
 
+.. image:: https://img.shields.io/travis/arkottke/strata.svg
+    :target: https://travis-ci.org/arkottke/strata
+    :alt: Travis Build Status
+
+.. image:: https://ci.appveyor.com/api/projects/status/cpgr2vsh1re8c35x?svg=true
+    :target: https://ci.appveyor.com/project/arkottke/strata
+    :alt: AppVeyor Build Status
 
 Equivalent linear site response with random vibration theory, site property
 randomization, and a graphical user interface.
-
 
 
 Building

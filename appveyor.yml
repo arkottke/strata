@@ -38,3 +38,14 @@ artifacts:
 
     - path: Strata-mingw32-*.zip
       name: Strata Archive (32-bit)
+
+deploy:
+    description: 'Release description'
+    provider: GitHub
+    auth_token:
+        secure: e/Uc+Q6xQyd6u9tBsvh6UlYfmmJgSL/cmoq6dhS5NHkgQAvETilqfDsO2euzazfp
+    draft: true
+    prerelease: false
+    on:
+        branch: /v\d+\.\d+\.\d+/       # Match against the version tag
+        appveyor_repo_tag: true        # deploy on tag push only

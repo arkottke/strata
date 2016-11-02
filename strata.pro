@@ -13,7 +13,7 @@ QT += gui printsupport widgets xml core
 # Version information
 VER_MAJ = 0
 VER_MIN = 5
-VER_PAT = 0
+VER_PAT = 4
 GIT_VER = $$system(git rev-parse --short HEAD)
 DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
 
@@ -26,13 +26,13 @@ DEFINES += ADVANCED_OPTIONS
 include( strataconfig.pri )
 
 # Required libraries for linking.
-LIBS += $$(LIBS) -lgsl -lgslcblas -lqwt
+LIBS += $$(LIBS) -lgsl -lgslcblas
 
-# CONFIG(debug, debug|release) {
-#     LIBS += -lqwtd
-# } else {
-#     LIBS += -lqwt
-# }
+CONFIG(debug, debug|release) {
+    LIBS += -lqwtd
+} else {
+    LIBS += -lqwt
+}
 
 # (Optional) Use FFTW for the FFT alogorithm, otherwise GSL is used.
 # DEFINES += USE_FFTW
