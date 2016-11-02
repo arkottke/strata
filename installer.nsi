@@ -133,6 +133,7 @@ File "${MINGW_PATH}\bin\libintl-8.dll"
 File "${MINGW_PATH}\bin\libpcre-1.dll"
 File "${MINGW_PATH}\bin\libbz2-1.dll"
 File "${MINGW_PATH}\bin\libiconv-2.dll"
+File "${MINGW_PATH}\bin\libgcc_s_seh-1.dll"
 
 ;Plugins for SVG icons
 SetOutPath "$INSTDIR\iconengines" 
