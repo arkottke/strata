@@ -55,6 +55,16 @@ do
     cp /mingw$bits/bin/$dll deploy/
 done
 
+# Add Qt Plugins
+mkdir deploy/iconengines
+cp /mingw$bits/share/qt5/plugins/iconengines/qsvgicon.dll deploy/iconengines
+
+mkdir deploy/imageformats
+cp /mingw$bits/share/qt5/plugins/imageformats/qsvg.dll deploy/imageformats
+
+mkdir deploy/platforms
+cp /mingw$bits/share/qt5/plugins/platforms/qwindows.dll deploy/platforms
+
 cp release/strata.exe deploy/
 cp -r example deploy/
 cp LICENSE.txt deploy/
