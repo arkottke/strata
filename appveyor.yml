@@ -47,5 +47,6 @@ deploy:
     draft: true
     prerelease: false
     on:
-        branch: /v\d+\.\d+\.\d+/       # Match against the version tag
+        # branch: /v\d+\.\d+\.\d+/       # Match against the version tag
+        branch: master
         appveyor_repo_tag: true        # deploy on tag push only
