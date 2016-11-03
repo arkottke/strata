@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
 {
     QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
 
+    QCoreApplication::setOrganizationName("ARKottke");
     QCoreApplication::setApplicationName("Strata");
     QCoreApplication::setApplicationVersion(VERSION);
 
