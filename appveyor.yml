@@ -17,11 +17,11 @@ init:
 # Install dependencies
 install:
   - set PATH=C:\msys64\usr\bin;%PATH%
-  - pacman --noconfirm -S pacman-mirrors
-  - pacman -Syu --noconfirm
+  - pacman -S --noconfirm --quiet pacman-mirrors
+  - pacman -Syu --noconfirm --quiet 
   # Need to re-run Syu after update
-  - pacman -Syu --noconfirm
-  - pacman -S --noconfirm mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
+  - pacman -Syu --noconfirm --quiet 
+  - pacman -S --noconfirm --quiet mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
 
 build_script:
   - C:\msys64\usr\bin\sh --login /c/projects/strata/scripts/build_msys.sh
