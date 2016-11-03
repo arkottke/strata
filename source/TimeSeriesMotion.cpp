@@ -500,7 +500,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         }
 
         // Read the line and split the line
-        QRegExp rx("(-?\\d*\\.\\d+(?:[eE][+-]?\\d+)?)");
+        QRegExp rx("(-?\\d+(?:\\.\\d+(?:[eE][+-]?\\d+)?)?)");
         int pos = 0;
         QStringList row;
 
