@@ -33,8 +33,7 @@ cp LICENSE.txt deploy/
 windeployqt deploy/strata.exe --compiler-runtime
 
 # Copy other required DLLs
-for dll in 
-    libbz2-1.dll \
+for dll in libbz2-1.dll \
     libfreetype-6.dll \
     libglib-2.0-0.dll \
     libgraphite2.dll \
