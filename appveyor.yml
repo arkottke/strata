@@ -1,6 +1,10 @@
 # version format
 version: '{build}'
 
+branches:
+  only:
+    - master
+
 platform: x64
 environment:
   fast_finish: true

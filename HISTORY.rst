@@ -2,7 +2,7 @@ v0.5.6
 ------
 - Added: Interpolation to CompatibleRvtMotion target if specified with fewer
   than 10 points.
-
+- CI: limit Appveyor to build only master
 
 v0.5.5
 ------
