@@ -1,3 +1,7 @@
+v0.5.6
+------
+- Added: Interpolation to CompatibleRvtMotion target if specified with fewer
+  than 10 points.
 
 v0.5.5
 ------
