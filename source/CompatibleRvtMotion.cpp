@@ -23,6 +23,7 @@
 
 #include "Dimension.h"
 #include "ResponseSpectrum.h"
+#include "RvtMotion.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -333,6 +334,25 @@ void CompatibleRvtMotion::calculate()
 
 QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
 {
+    if (m_targetRespSpec->sa().size() < 10) {
+        // Loglog interpolate prior to performing the inversion
+        QVector<double> targetPeriod = m_targetRespSpec->period();
+        QVector<double> targetSa = m_targetRespSpec->sa();
+        const double decades = log10(targetPeriod.last() / targetPeriod.first());
+
+        QVector<double> period = Dimension::logSpace(
+                    targetPeriod.first(), targetPeriod.last(),
+                    int(10 * decades));
+
+        QVector<double>sa;
+        logLogInterp(
+            m_targetRespSpec->period(), m_targetRespSpec->sa(),
+            period, sa);
+
+        m_targetRespSpec->setPeriod(period);
+        m_targetRespSpec->setSa(sa);
+    }
+
     QVector<double> fas(m_targetRespSpec->period().size());
 
     // Assume a constant peak factor

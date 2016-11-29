@@ -66,4 +66,7 @@ protected:
     //! Vector of frequency values
     QVector<double> m_freq;
 };
+
+bool logLogInterp( const QVector<double> & x, const QVector<double> & y,
+        const QVector<double> & xi, QVector<double> & yi);
 #endif
