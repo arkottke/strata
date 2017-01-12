@@ -14,9 +14,6 @@ property randomization, and a graphical user interface.
 Pre-built binaries for Windows are available from the [Github releases
 page](https://github.com/arkottke/strata/releases). 
 
-test
-
-
 ## Building
 
 Compiling Strata from the source code requires the following
