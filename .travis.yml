@@ -3,8 +3,8 @@ language: cpp
 dist: trusty
 
 before_install:
-    # https://launchpad.net/~beineri/+archive/ubuntu/opt-qt561
-    - sudo add-apt-repository --yes ppa:beineri/opt-qt561-trusty
+    # https://launchpad.net/~beineri/+archive/ubuntu/opt-qt562
+    - sudo add-apt-repository --yes ppa:beineri/opt-qt562-trusty
     - sudo apt-get update -qq
 
 install:
