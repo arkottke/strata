@@ -3,13 +3,13 @@ language: cpp
 dist: trusty
 
 before_install:
-    # https://launchpad.net/~beineri/+archive/ubuntu/opt-qt561
-    - sudo add-apt-repository --yes ppa:beineri/opt-qt561-trusty
+    # https://launchpad.net/~beineri/+archive/ubuntu/opt-qt58
+    - sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
     - sudo apt-get update -qq
 
 install:
-    - sudo apt-get install -qq libgsl0-dev qt56base qt56tools qt56svg
-    - source /opt/qt56/bin/qt56-env.sh
+    - sudo apt-get install -qq libgsl0-dev qt58base qt58tools qt58svg
+    - source /opt/qt58/bin/qt58-env.sh
     - cd $TRAVIS_BUILD_DIR/..
     - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
     - cd qwt
@@ -23,7 +23,7 @@ script:
     - cd $TRAVIS_BUILD_DIR
     - mkdir build
     - cd build
-    - source /opt/qt56/bin/qt56-env.sh
+    - source /opt/qt58/bin/qt58-env.sh
     # Add paths for libraries
     - export LD_LIBRARY_PATH="$QWT_PATH/lib:$LD_LIBRARY_PATH"
     - export LIBRARY_PATH="$QWT_PATH/lib"
