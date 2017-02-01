@@ -65,6 +65,9 @@ protected:
     //! Compute the maximum error of the maximum shear strain
     double maxError(const QVector<double> & maxStrain);
 
+    //! Set initial strains of the layers
+    void setInitialStrains(bool estimateStrain);
+
     //! Maximum number of iterations in the equivalent linear loop
     int m_maxIterations;
 

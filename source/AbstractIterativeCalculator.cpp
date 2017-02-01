@@ -26,6 +26,8 @@
 #include "SubLayer.h"
 #include "TextLog.h"
 
+#include "math.h"
+
 AbstractIterativeCalculator::AbstractIterativeCalculator(QObject *parent)
     : AbstractCalculator(parent), m_maxIterations(0), m_errorTolerance(0),
     m_converged(false)
@@ -46,17 +48,14 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     m_shearMod[m_nsl].fill(calcCompShearMod(
             m_site->bedrock()->shearMod(), m_site->bedrock()->damping() / 100.));
 
-    // Estimate the intial strain from the ratio of peak ground velocity of the
-    //  motion and the shear-wave velocity of the layer
-    for (int i = 0; i < m_nsl; ++i)
-        m_site->subLayers()[i].setInitialStrain(
-                m_motion->pgv() / m_site->subLayers().at(i).shearVel());
 
-    // Compute the complex shear modulus and complex shear-wave velocity for
-    // each soil layer -- initially this is assumed to be frequency independent
-    for (int i = 0; i < m_nsl; ++i )
-        m_shearMod[i].fill(calcCompShearMod(
-                m_site->shearMod(i), m_site->damping(i) / 100.));
+    // For high-intensinty motions, the estimated strain can be large (which
+    // results in low velocity and high damping). This causes an overflow on
+    // the wave amplitudes. If this happens, re-compute the initial strains
+    // with a lower value.
+    setInitialStrains(true);
+    if (!calcWaves())
+        setInitialStrains(false);
 
     // Initialize the loop control variables
     int iter = 0;
@@ -116,6 +115,24 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     }
 
     return true;
+}
+
+void AbstractIterativeCalculator::setInitialStrains(bool estimateStrain)
+{
+    // Estimate the intial strain from the ratio of peak ground velocity of the
+    //  motion and the shear-wave velocity of the layer.
+    double estimatedStrain = 0;
+    for (int i = 0; i < m_nsl; ++i) {
+        estimatedStrain = m_motion->pgv() / m_site->subLayers().at(i).shearVel();
+        m_site->subLayers()[i].setInitialStrain(
+                    estimateStrain ? estimatedStrain : 0.01);
+    }
+    // Compute the complex shear modulus and complex shear-wave velocity for
+    // each soil layer -- initially this is assumed to be frequency independent
+    for (int i = 0; i < m_nsl; ++i ) {
+        m_shearMod[i].fill(calcCompShearMod(
+                m_site->shearMod(i), m_site->damping(i) / 100.));
+    }
 }
 
 int AbstractIterativeCalculator::maxIterations() const
