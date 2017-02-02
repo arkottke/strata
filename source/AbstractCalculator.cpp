@@ -153,11 +153,6 @@ bool AbstractCalculator::calcWaves()
 
                 m_waveB[i+1][j] = 0.5 * m_waveA.at(i).at(j) * (1.0 - cImped) * exp(cTerm)
                                   + 0.5 * m_waveB.at(i).at(j) * (1.0 + cImped) * exp(-cTerm);
-
-                // Check for NaNs
-                if (m_waveA[i+1][j] != m_waveA[i+1][j] ||
-                    m_waveB[i+1][j] != m_waveB[i+1][j])
-                    return false;
             }
         }
     }
@@ -189,6 +184,7 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
 
     QVector<std::complex<double> > tf(m_nf);
     std::complex<double> cTerm, numer, denom;
+    std::complex<double> value;
 
     const int l = outLocation.layer();
     const double gravity = Units::instance()->gravity();
@@ -206,7 +202,8 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
 
         denom = sqrt(m_shearMod.at(l).at(i) / m_site->density(l)) * waves(i, inLocation, inputType);
 
-        tf[i] = numer / denom;
+        value = numer / denom;
+        tf[i] = (value == value) ? value : 0;
     }
 
     return tf;
@@ -216,11 +213,11 @@ QVector<std::complex<double> > AbstractCalculator::calcStressTf(
         const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const
 {
     QVector<std::complex<double> > tf = calcStrainTf(inLocation, inputType, outLocation);
-
     const int l = outLocation.layer();
 
-    for (int i = 0; i < tf.size(); ++i)
+    for (int i = 0; i < tf.size(); ++i) {
         tf[i] *= m_shearMod.at(l).at(i);
+    }
 
     return tf;
 }
@@ -230,9 +227,12 @@ const QVector<std::complex<double> > AbstractCalculator::calcAccelTf(
         const Location & outLocation, const AbstractMotion::Type outputType ) const
 {
     QVector<std::complex<double> > tf(m_nf);
+    std::complex<double> value;
 
-    for (int i = 0; i < m_nf; i++)
-        tf[i] = waves(i, outLocation, outputType) / waves(i, inLocation, inputType);
+    for (int i = 0; i < m_nf; i++) {
+        value = waves(i, outLocation, outputType) / waves(i, inLocation, inputType);
+        tf[i] = (value == value) ? value : 0;
+    }
 
     return tf;
 }

@@ -66,7 +66,7 @@ protected:
     double maxError(const QVector<double> & maxStrain);
 
     //! Set initial strains of the layers
-    void setInitialStrains(bool estimateStrain);
+    void setInitialStrains();
 
     //! Maximum number of iterations in the equivalent linear loop
     int m_maxIterations;
