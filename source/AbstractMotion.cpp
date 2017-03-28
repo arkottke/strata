@@ -239,7 +239,8 @@ void AbstractMotion::setPgv(double pgv)
 void AbstractMotion::fromJson(const QJsonObject &json)
 {
     m_description = json["description"].toString();
-    m_enabled = json["enabled"].toBool();
+    m_enabled = json["enabled"].toVariant().toBool();
+    // m_enabled = json["enabled"].toBool();
 
     setType(json["type"].toInt());
 }
