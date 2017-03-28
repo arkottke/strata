@@ -294,13 +294,19 @@ void MainWindow::open(QString fileName)
                     "Strata Binary File (*.strata);;"
                     "Strata JSON File (*.json);;");
 
-        if (!fileName.isEmpty()) {
-            // Save the state
-            m_settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
-        } else {
+        if (fileName.isEmpty()) {
             return;
         }
-    }   
+    } else {
+        // Check that the provided filename exists
+        if (!QFileInfo(fileName).exists()) {
+            qWarning() << qPrintable(fileName) << "does not exist!";
+            return;
+        }
+    }
+
+    // Save the state
+    m_settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
 
     SiteResponseModel* srm = new SiteResponseModel;
     if (fileName.endsWith(".strata")) {
