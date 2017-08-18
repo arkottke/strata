@@ -1,3 +1,7 @@
+v0.5.7 (2017-08-18)
+-------------------
+- Added: Support for alternative PEER header formats
+
 v0.5.6
 ------
 - Added: Interpolation to CompatibleRvtMotion target if specified with fewer
