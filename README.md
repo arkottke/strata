@@ -1,13 +1,11 @@
 # Strata
 
-![image](https://img.shields.io/badge/license-GLPv3-blue.svg%0A%20:target:%20https://github.com/arkottke/strata/blob/master/LICENSE.txt%0A%20:alt:%20License)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://travis-ci.org/arkottke/strata.svg?branch=master)](https://travis-ci.org/arkottke/strata)
+[![Build status](https://ci.appveyor.com/api/projects/status/cpgr2vsh1re8c35x/branch/master?svg=true)](https://ci.appveyor.com/project/arkottke/strata/branch/master)
 
-![image](https://img.shields.io/travis/arkottke/strata.svg%0A%20:target:%20https://travis-ci.org/arkottke/strata%0A%20:alt:%20Travis%20Build%20Status)
-
-![image](https://ci.appveyor.com/api/projects/status/cpgr2vsh1re8c35x?svg=true%0A%20:target:%20https://ci.appveyor.com/project/arkottke/strata%0A%20:alt:%20AppVeyor%20Build%20Status)
-
-Equivalent linear site response with random vibration theory, site
-property randomization, and a graphical user interface.
+Equivalent linear site response with random vibration theory, site property
+randomization, and a graphical user interface.
 
 ## Binaries
 
@@ -16,8 +14,8 @@ page](https://github.com/arkottke/strata/releases).
 
 ## Building
 
-Compiling Strata from the source code requires the following
-dependencies prior to building:
+Compiling Strata from the source code requires the following dependencies prior
+to building:
 
 -   [Qt](http://doc.qt.io/) (version 5.5 or later)
 -   GNU Scientific Library ([GSL](http://www.gnu.org/software/gsl/))
@@ -35,10 +33,10 @@ build checked out and built using the following commands:
     $> qmake .. 
     $> make -j2 release
 
-Strata executable is located in: `strata/build/release/strata`. If the
-build is unable to find header files and libraries for linking, paths to
-these files can be added by modifying the strata.pro text file, or by
-passing the INCLUDEPATH and LIBS environmental varibles:
+Strata executable is located in: `strata/build/release/strata`. If the build is
+unable to find header files and libraries for linking, paths to these files can
+be added by modifying the strata.pro text file, or by passing the INCLUDEPATH
+and LIBS environmental varibles:
 
 ### Building on Linux
 
@@ -51,8 +49,8 @@ steps:
     $> sudo apt-get update -qq 
     $> sudo apt-get install -qq libgsl0-dev qt56base qt56tools qt56svg qt56script
 
-If Qwt 6.1 is not available in the package manager. Qwt can be built
-using the following commands:
+If Qwt 6.1 is not available in the package manager. Qwt can be built using the
+following commands:
 
     $> source /opt/qt56/bin/qt56-env.sh
     $> cd \$HOME/.. 
@@ -72,8 +70,8 @@ libraries:
 ### Building on Windows
 
 Building on Windows is greatly simplified by using
-[MSYS2](https://msys2.github.io/). After installing MSYS2, the
-required dependencies can be installed with the following commands:
+[MSYS2](https://msys2.github.io/). After installing MSYS2, the required
+dependencies can be installed with the following commands:
 
     $> pacman -Sy
     $> pacman -S \
