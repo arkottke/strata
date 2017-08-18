@@ -56,7 +56,7 @@ SetCompressor lzma
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page configuration
 !define MUI_FINISHPAGE_RUN "$INSTDIR\strata.exe"
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\readme.txt"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.md"
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 !insertmacro MUI_PAGE_FINISH
 
@@ -101,7 +101,7 @@ SetOutPath "$INSTDIR"
 
 ;Main Strata files
 File "${STRATA_PATH}\strata.exe"
-File "/oname=$INSTDIR\README.rst" "README.rst"
+File "/oname=$INSTDIR\README.md" "README.md"
 
 ;Icons
 File "/oname=$INSTDIR\strata.ico" "resources\images\application-icon.ico"
@@ -228,7 +228,7 @@ LangString DESC_SecSource ${LANG_ENGLISH} "Source code."
 Section "Uninstall"
 ;Remove the files
 Delete "$INSTDIR\strata.exe"
-Delete "$INSTDIR\readme.txt"
+Delete "$INSTDIR\README.md"
 Delete "$INSTDIR\manual.pdf"
 Delete "$INSTDIR\Qt5Core.dll"
 Delete "$INSTDIR\Qt5Gui.dll"
