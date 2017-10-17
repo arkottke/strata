@@ -28,15 +28,18 @@
 #include <cfloat>
 #include <cmath>
 
-NonlinearPropertyUncertainty::NonlinearPropertyUncertainty(double lnStdev, QObject *parent) :
-    QObject(parent), m_lnStdev(lnStdev) 
+NonlinearPropertyUncertainty::NonlinearPropertyUncertainty(double lnStdev,
+                                                           double min,
+                                                           double max,
+                                                           QObject *parent) :
+    QObject(parent), m_min(min), m_max(max), m_lnStdev(lnStdev)
 {
 }
 
 void NonlinearPropertyUncertainty::vary(NonlinearPropertyRandomizer::Model model, NonlinearProperty* nlProperty, const double rand) const
 {
     QVector<double> varied(nlProperty->strain().size());
-    float avg;
+    double avg;
     if (nlProperty->type() == NonlinearProperty::ModulusReduction) {
         // G/Gmax
         if (model == NonlinearPropertyRandomizer::SPID) {

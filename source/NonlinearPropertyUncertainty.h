@@ -35,7 +35,7 @@ class NonlinearPropertyUncertainty : public QObject
     friend QDataStream & operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu);
 
 public:
-    explicit NonlinearPropertyUncertainty(double lnStdev, QObject *parent = 0);
+    explicit NonlinearPropertyUncertainty(double lnStdev, double min, double max, QObject *parent = 0);
 
     double min() const;
     double max() const;

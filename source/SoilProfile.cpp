@@ -549,26 +549,28 @@ void SoilProfile::createSubLayers(TextLog * textLog)
 
     // Vary the nonlinear properties of the SoilTypes
     if (m_nonlinearPropertyRandomizer->enabled()) {
-        if (textLog->level() > TextLog::Low)
+        if (textLog->level() > TextLog::Low) {
             textLog->append(QObject::tr("Varying dynamic properties of soil types"));
-        
+        }
+
         // Vary the nonlinear properties of the soil types
         for (int i = 0; i < m_soilTypeCatalog->rowCount(); ++i) {
             SoilType * st = m_soilTypeCatalog->soilType(i);
 
             if (st->isVaried()) {
                 // Vary the properties
-                if (textLog->level() > TextLog::Low)
+                if (textLog->level() > TextLog::Low) {
                     textLog->append(QString("\t%1").arg(st->name()));
+                }
                 m_nonlinearPropertyRandomizer->vary(st);
             }
         }
 
         // Vary the damping of the bedrock
         if (m_nonlinearPropertyRandomizer->bedrockIsEnabled()) {
-            if ( textLog->level() > TextLog::Low )
+            if ( textLog->level() > TextLog::Low ) {
                 textLog->append(QObject::tr("Varying damping of bedrock"));
-
+            }
             m_nonlinearPropertyRandomizer->vary(m_bedrock);
         }
     }
@@ -578,9 +580,9 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     const double minDepthToBedrock = 1.0;
 
     if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
-        if ( textLog->level() > TextLog::Low )
+        if ( textLog->level() > TextLog::Low ) {
             textLog->append(QObject::tr("Varying depth to bedrock"));       
-
+}
         m_profileRandomizer->bedrockDepthVariation()->setAvg(m_bedrock->depth());
 
 

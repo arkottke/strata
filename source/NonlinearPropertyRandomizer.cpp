@@ -44,8 +44,8 @@ NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfi
     connect(m_siteProfile, SIGNAL(isVariedChanged(bool)),
             this, SLOT(updateBedrockIsEnabled()));
 
-    m_modulusUncert = new NonlinearPropertyUncertainty(0.15);
-    m_dampingUncert = new NonlinearPropertyUncertainty(0.30);
+    m_modulusUncert = new NonlinearPropertyUncertainty(0.15, 0.001, 1.);
+    m_dampingUncert = new NonlinearPropertyUncertainty(0.30, 0.001, 20);
 
     m_enabled = false;
     m_bedrockIsEnabled = false;

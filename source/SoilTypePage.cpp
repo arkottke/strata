@@ -264,7 +264,7 @@ QGroupBox* SoilTypePage::createVariationGroupBox()
     m_dampingUncertWidget = new NonlinearPropertyUncertaintyWidget(
             tr("Damping:"), layout, this);
     m_dampingUncertWidget->setSuffix(" %");
-    m_dampingUncertWidget->setMaxRange(10., 50.);
+    m_dampingUncertWidget->setMaxRange(10., 30.);
     m_dampingUncertWidget->setMinRange(0.01, 2);
     
     // Correlation
