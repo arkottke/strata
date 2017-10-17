@@ -1,3 +1,7 @@
+v0.5.8 (2017-10-17)
+-------------------
+- Fixed min/max of nonlinear curves.
+
 v0.5.7 (2017-08-18)
 -------------------
 - Added: Support for alternative PEER header formats
