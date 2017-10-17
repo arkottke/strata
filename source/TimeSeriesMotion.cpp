@@ -78,10 +78,11 @@ TimeSeriesMotion::TimeSeriesMotion(const QString & fileName, double scale,  Abst
     m_stopLine = 0;
     m_scale = 1.0;
 
-    if (!m_fileName.isEmpty() && load(m_fileName, true, scale))
+    if (!m_fileName.isEmpty() && load(m_fileName, true, scale)) {
         *successful = true;
-    else
+    } else {
         *successful = false;
+    }
 }
 
 TimeSeriesMotion::~TimeSeriesMotion()
@@ -218,8 +219,9 @@ void TimeSeriesMotion::setScale(double scale)
 
         if (m_isLoaded) {
             // Scale the various spectra
-            for (int i = 0; i < m_accel.size(); ++i)
+            for (int i = 0; i < m_accel.size(); ++i) {
                 m_accel[i] = ratio * m_accel.at(i);
+            }
 
             for (int i = 0; i < m_fourierAcc.size(); ++i) {
                 m_fourierAcc[i] *= ratio;
@@ -311,8 +313,9 @@ QVector<double> TimeSeriesMotion::time() const
 
     QVector<double> v(m_pointCount);
 
-    for (int i = 0; i < m_pointCount; ++i)
+    for (int i = 0; i < m_pointCount; ++i) {
         v[i] = i * dt;
+    }
 
     return v;
 }
@@ -364,13 +367,15 @@ QVector<double> TimeSeriesMotion::timeSeries(
     }
 
     // Integrate to the appropriate time series
-    for (int i = 0; i < (int)type; ++i)
+    for (int i = 0; i < (int)type; ++i) {
         ts = integrate(ts);
+    }
 
     // Scale to the appropriate units
     if (type == Velocity || type == Displacement) {
-        for ( int i = 0; i < ts.size(); ++i )
+        for ( int i = 0; i < ts.size(); ++i ) {
             ts[i] *= Units::instance()->tsConv();
+        }
     }
 
     return ts;
