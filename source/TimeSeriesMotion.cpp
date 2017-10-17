@@ -78,10 +78,11 @@ TimeSeriesMotion::TimeSeriesMotion(const QString & fileName, double scale,  Abst
     m_stopLine = 0;
     m_scale = 1.0;
 
-    if (!m_fileName.isEmpty() && load(m_fileName, true, scale))
+    if (!m_fileName.isEmpty() && load(m_fileName, true, scale)) {
         *successful = true;
-    else
+    } else {
         *successful = false;
+    }
 }
 
 TimeSeriesMotion::~TimeSeriesMotion()
@@ -218,8 +219,9 @@ void TimeSeriesMotion::setScale(double scale)
 
         if (m_isLoaded) {
             // Scale the various spectra
-            for (int i = 0; i < m_accel.size(); ++i)
+            for (int i = 0; i < m_accel.size(); ++i) {
                 m_accel[i] = ratio * m_accel.at(i);
+            }
 
             for (int i = 0; i < m_fourierAcc.size(); ++i) {
                 m_fourierAcc[i] *= ratio;
@@ -311,8 +313,9 @@ QVector<double> TimeSeriesMotion::time() const
 
     QVector<double> v(m_pointCount);
 
-    for (int i = 0; i < m_pointCount; ++i)
+    for (int i = 0; i < m_pointCount; ++i) {
         v[i] = i * dt;
+    }
 
     return v;
 }
@@ -364,13 +367,15 @@ QVector<double> TimeSeriesMotion::timeSeries(
     }
 
     // Integrate to the appropriate time series
-    for (int i = 0; i < (int)type; ++i)
+    for (int i = 0; i < (int)type; ++i) {
         ts = integrate(ts);
+    }
 
     // Scale to the appropriate units
     if (type == Velocity || type == Displacement) {
-        for ( int i = 0; i < ts.size(); ++i )
+        for ( int i = 0; i < ts.size(); ++i ) {
             ts[i] *= Units::instance()->tsConv();
+        }
     }
 
     return ts;
@@ -430,29 +435,46 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
 
             // Read in the header information
             Q_UNUSED(stream.readLine());
-
             setDescription(stream.readLine());
-
             Q_UNUSED(stream.readLine());
 
-            QStringList parts = stream.readLine().split(QRegExp("\\s+"));
+            QList<QRegExp> patterns = {
+                // Example: 8751    0.0040    NPTS, DT
+                QRegExp("(\\d+)\\s+([0-9.]+)\\s+NPTS, DT"),
+                // Example: NPTS=   7998, DT=   .0050 SEC,                                             
+                // Example: NPTS=   3666, DT=   0.025 SEC
+                QRegExp("NPTS=\\s+(\\d+), DT=\\s+([0-9.]+) SEC,?"),
+            };
 
-            bool b;
-            const int count = parts.at(0).toInt(&b);
-            if (b && count > 1) {
-                // Greater than one condition to catch if an acceleration value is read
-                setPointCount(count);
-            } else {
-                qCritical() << "Unable to parse the point count in AT2 file!";
-                return false;
+            QString line = stream.readLine();
+            bool success = false;
+            for (QRegExp &pattern: patterns) {
+                int pos = pattern.indexIn(line);
+                if (pos < 0) {
+                    continue;
+                }
+
+                bool b;
+                const int count = pattern.cap(1).toInt(&b);
+                if (b && count > 1) {
+                    // Greater than one condition to catch if an acceleration value is read
+                    setPointCount(count);
+                } else {
+                    qCritical() << "Unable to parse the point count in AT2 file!";
+                    return false;
+                }
+
+                const double timeStep = pattern.cap(2).toDouble(&b);
+                if (b) {
+                    setTimeStep(timeStep);
+                } else {
+                    qCritical() << "Unable to parse the time step in AT2 file!";
+                    return false;
+                }
+                success = true;
             }
-
-            const double timeStep = parts.at(1).toDouble(&b);
-
-            if (b) {
-                setTimeStep(timeStep);
-            } else {
-                qCritical() << "Unable to parse the time step in AT2 file!";
+            if (!success) {
+                qCritical() << "Unrecognized header format!" << line;
                 return false;
             }
         } else {
@@ -500,7 +522,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         }
 
         // Read the line and split the line
-        QRegExp rx("(-?\\d+(?:\\.\\d+(?:[eE][+-]?\\d+)?)?)");
+        QRegExp rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
         int pos = 0;
         QStringList row;
 
@@ -1043,9 +1065,8 @@ QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > 
 {
     // Apply the transfer fucntion
     if (!tf.isEmpty()) {
-
         // If needed, zero pad the Fourier amplitudes such that is has the same length as the incoming transfer function.
-        if (fa.size() << tf.size())
+        if (fa.size() < tf.size())
             fa.resize(tf.size());
 
         for (int i = 0; i < fa.size(); ++i)

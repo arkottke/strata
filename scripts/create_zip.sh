@@ -34,16 +34,17 @@ windeployqt deploy/strata.exe --compiler-runtime
 
 # Copy other required DLLs
 for dll in libbz2-1.dll \
+    libgcc_s_seh-1.dll \
     libfreetype-6.dll \
     libglib-2.0-0.dll \
     libgraphite2.dll \
-    libgsl-19.dll \
+    libgsl-23.dll \
     libgslcblas-0.dll \
     libharfbuzz-0.dll \
     libiconv-2.dll \
-    libicudt57.dll \
-    libicuin57.dll \
-    libicuuc57.dll \
+    libicudt58.dll \
+    libicuin58.dll \
+    libicuuc58.dll \
     libintl-8.dll \
     libpcre-1.dll \
     libpcre16-0.dll \
