@@ -51,11 +51,11 @@ find ../../ -name application-icon.svg -exec cp {} strata.svg \;
 # on all target systems
 ########################################################################
 
-mkdir -p ./usr/lib/qt58/plugins/
-# PLUGINS=/opt/qt58/plugins
-cp -r /opt/qt58/plugins/imageformats ./usr/lib/qt58/plugins/
-cp -r /opt/qt58/plugins/iconengines ./usr/lib/qt58/plugins/
-cp -r /opt/qt58/plugins/platforms ./usr/lib/qt58/plugins/
+mkdir -p ./usr/lib/qt59/plugins/
+# PLUGINS=/opt/qt59/plugins
+cp -r /opt/qt59/plugins/imageformats ./usr/lib/qt59/plugins/
+cp -r /opt/qt59/plugins/iconengines ./usr/lib/qt59/plugins/
+cp -r /opt/qt59/plugins/platforms ./usr/lib/qt59/plugins/
 
 copy_deps
 
@@ -69,11 +69,11 @@ mv usr/local/qwt-6.1.4-svn/lib/libqwt.so.6 usr/lib/
 rm -rf usr/local/
 
 # ./opt is not use inside an AppDir/AppImage, so move it
-mv opt/qt58/lib/* usr/lib/
+mv opt/qt59/lib/* usr/lib/
 rm -rf opt/
 
-# ./usr/lib/qt58/ is not use inside an AppDir/AppImage, so move it
-mv ./usr/lib/qt58/ ./usr/lib/qt5/
+# ./usr/lib/qt59/ is not use inside an AppDir/AppImage, so move it
+mv ./usr/lib/qt59/ ./usr/lib/qt5/
 
 ########################################################################
 # Delete stuff that should not go into the AppImage
