@@ -26,14 +26,7 @@ DEFINES += ADVANCED_OPTIONS
 include( strataconfig.pri )
 
 # Required libraries for linking.
-LIBS += $$(LIBS) -lgsl -lgslcblas
-
-win32:debug {
-    LIBS += -lqwtd
-} else {
-    LIBS += -lqwt
-}
-
+LIBS += $$(LIBS) -lgsl -lgslcblas -lqwt
 
 # (Optional) Use FFTW for the FFT alogorithm, otherwise GSL is used.
 # DEFINES += USE_FFTW
