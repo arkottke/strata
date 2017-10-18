@@ -47,7 +47,7 @@ for dll in libbz2-1.dll \
     libicuuc58.dll \
     libintl-8.dll \
     libpcre-1.dll \
-    libpcre16-0.dll \
+    libpcre2-16-0.dll \
     libpng16-16.dll \
     qwt.dll \
     zlib1.dll
