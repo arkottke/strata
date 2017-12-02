@@ -1,3 +1,7 @@
+v0.5.9 (2017-12-02)
+-------------------
+- Fixed name of the PCRE DLL.
+
 v0.5.8 (2017-10-17)
 -------------------
 - Fixed min/max of nonlinear curves.
