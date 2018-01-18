@@ -31,23 +31,20 @@
 #include "SoilProfile.h"
 #include "Units.h"
 
-#include <QDebug>
-#include <QDoubleValidator>
 #include <QFormLayout>
-#include <QGridLayout>
 #include <QLabel>
 
 GeneralPage::GeneralPage(QWidget * parent, Qt::WindowFlags f )
-    : AbstractPage(parent, f)
+        : AbstractPage(parent, f)
 {
     _methodGroupBox = new MethodGroupBox;
 
     // Layout of the widget
-    QGridLayout * layout = new QGridLayout;
-    layout->addWidget(createProjectGroupBox(), 0, 0, 4, 1 );
+    auto *layout = new QGridLayout;
+    layout->addWidget(createProjectGroupBox(), 0, 0, 5, 1);
     layout->addWidget(createAnalysisGroupBox(), 0, 1);
-    layout->addWidget(createVariationGroupBox(), 1, 1 );
-    layout->addWidget(_methodGroupBox, 2, 1 );
+    layout->addWidget(createVariationGroupBox(), 1, 1);
+    layout->addWidget(_methodGroupBox, 2, 1);
     layout->addWidget(createDiscretizationGroupBox(), 3, 1);
 
     // Add a row of stretching
@@ -59,7 +56,7 @@ GeneralPage::GeneralPage(QWidget * parent, Qt::WindowFlags f )
 
 QGroupBox* GeneralPage::createProjectGroupBox()
 {
-    QGridLayout *layout = new QGridLayout;
+    auto *layout = new QGridLayout;
     layout->setRowStretch(2, 1);
     layout->setColumnStretch(2, 1);
 
@@ -103,7 +100,7 @@ QGroupBox* GeneralPage::createProjectGroupBox()
 
 QGroupBox*  GeneralPage::createAnalysisGroupBox()
 {
-    QFormLayout * layout = new QFormLayout;
+    auto layout = new QFormLayout;
 
     // Method
     _methodComboBox = new QComboBox;
@@ -113,6 +110,8 @@ QGroupBox*  GeneralPage::createAnalysisGroupBox()
     // Approach
     _approachComboBox = new QComboBox;
     _approachComboBox->addItems(MotionLibrary::approachList());
+    connect(_approachComboBox, SIGNAL(currentIndexChanged(QString)), this,
+            SLOT(updateApproach(QString)));
     layout->addRow(tr("Approach:"), _approachComboBox);
 
     // Site varied
@@ -129,7 +128,7 @@ QGroupBox*  GeneralPage::createAnalysisGroupBox()
 QGroupBox* GeneralPage::createVariationGroupBox()
 {
     const int indent = 20;
-    QFormLayout * layout = new QFormLayout;
+    auto * layout = new QFormLayout;
 
     // Count
     _countSpinBox = new QSpinBox;
@@ -143,8 +142,8 @@ QGroupBox* GeneralPage::createVariationGroupBox()
 
     QLabel* label = new QLabel(tr(
             "-- shear-modulus reduction curve\n"
-            "-- damping ratio curve\n"
-            "-- damping of the bedrock"));
+                    "-- damping ratio curve\n"
+                    "-- damping of the bedrock"));
     label->setIndent(indent);
     layout->addRow(label);
 
@@ -153,8 +152,8 @@ QGroupBox* GeneralPage::createVariationGroupBox()
 
     label = new QLabel(tr(
             "-- shear-wave velocity\n"
-            "-- layer thickness\n"
-            "-- depth to bedrock"));
+                    "-- layer thickness\n"
+                    "-- depth to bedrock"));
     label->setIndent(indent);
     layout->addRow(label);
 
@@ -177,7 +176,7 @@ QGroupBox* GeneralPage::createVariationGroupBox()
 
 QGroupBox* GeneralPage::createDiscretizationGroupBox()
 {
-    QFormLayout* layout = new QFormLayout;
+    auto *layout = new QFormLayout;
 
     // Maximum frequency
     _maxFreqSpinBox = new QDoubleSpinBox;
@@ -207,17 +206,17 @@ QGroupBox* GeneralPage::createDiscretizationGroupBox()
 }
 
 void GeneralPage::setModel(SiteResponseModel *model)
-{   
+{
     _titleLineEdit->setText(model->outputCatalog()->title());
     connect(_titleLineEdit, SIGNAL(textChanged(QString)),
-             model->outputCatalog(), SLOT(setTitle(QString)));
+            model->outputCatalog(), SLOT(setTitle(QString)));
 
     _notesTextEdit->setDocument(model->notes());
 
     _prefixLineEdit->setText(model->outputCatalog()->filePrefix());
 
     connect(_prefixLineEdit, SIGNAL(textChanged(QString)),
-             model->outputCatalog(), SLOT(setFilePrefix(QString)));
+            model->outputCatalog(), SLOT(setFilePrefix(QString)));
 
     _unitsComboBox->setCurrentIndex(Units::instance()->system());
     connect(_unitsComboBox, SIGNAL(currentIndexChanged(int)),
@@ -250,12 +249,12 @@ void GeneralPage::setModel(SiteResponseModel *model)
     _nlPropertiesAreVariedCheckBox->setChecked(
             model->siteProfile()->nonlinearPropertyRandomizer()->enabled());
     connect(_nlPropertiesAreVariedCheckBox, SIGNAL(toggled(bool)),
-             model->siteProfile()->nonlinearPropertyRandomizer(), SLOT(setEnabled(bool)));
+            model->siteProfile()->nonlinearPropertyRandomizer(), SLOT(setEnabled(bool)));
 
     _siteIsVariedCheckBox->setChecked(
             model->siteProfile()->profileRandomizer()->enabled());
     connect(_siteIsVariedCheckBox, SIGNAL(toggled(bool)),
-             model->siteProfile()->profileRandomizer(), SLOT(setEnabled(bool)));
+            model->siteProfile()->profileRandomizer(), SLOT(setEnabled(bool)));
 
     _specifiedSeedCheckBox->setChecked(model->randNumGen()->seedSpecified());
     connect(_specifiedSeedCheckBox, SIGNAL(toggled(bool)),
@@ -273,11 +272,11 @@ void GeneralPage::setModel(SiteResponseModel *model)
 
     _maxFreqSpinBox->setValue(model->siteProfile()->maxFreq());
     connect(_maxFreqSpinBox, SIGNAL(valueChanged(double)),
-             model->siteProfile(), SLOT(setMaxFreq(double)));
+            model->siteProfile(), SLOT(setMaxFreq(double)));
 
     _waveFractionSpinBox->setValue(model->siteProfile()->waveFraction());
     connect(_waveFractionSpinBox, SIGNAL(valueChanged(double)),
-             model->siteProfile(), SLOT(setWaveFraction(double)));
+            model->siteProfile(), SLOT(setWaveFraction(double)));
 
     _disableDiscretzationCheckBox->setChecked(model->siteProfile()->disableAutoDiscretization());
     connect(_disableDiscretzationCheckBox, SIGNAL(toggled(bool)),

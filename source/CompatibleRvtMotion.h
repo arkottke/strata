@@ -58,8 +58,8 @@ public:
     //! Load the motion from a TextStream
     virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
 
-    void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    virtual void fromJson(const QJsonObject &json);
+    virtual QJsonObject toJson() const;
 
 public slots:
     void setDuration(double duration);

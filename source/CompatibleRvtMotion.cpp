@@ -31,7 +31,7 @@
 #include <QDebug>
 
 CompatibleRvtMotion::CompatibleRvtMotion(QObject* parent)
-    : AbstractRvtMotion(parent)
+        : AbstractRvtMotion(parent)
 {
     _freq = new Dimension(this);
     _freq->setMin(0.05);
@@ -150,7 +150,7 @@ void CompatibleRvtMotion::calculate()
     // Check that both period and sa have some length
     if ( _targetRespSpec->period().size() == 0 ||
          _targetRespSpec->sa().size() != _targetRespSpec->period().size()
-        ) {
+            ) {
         qCritical("Both period and sa must be defined.");
         return;
     }
@@ -236,20 +236,22 @@ void CompatibleRvtMotion::calculate()
         // Apply the ratio correction to the FAS
         gsl_spline_init(spline, _respSpec->period().data(), ratio.data(), ratio.size());
 
-        for (int i = offset; i < freq().size(); ++i)
+        for (int i = offset; i < freq().size(); ++i) {
             _fourierAcc[i] *= gsl_spline_eval(spline, 1. / freq().at(i), acc);
+        }
 
         // Extrapolate the low frequency values
         double logFreq0 = log(freq().at(offset));
         double logFas0 = log(_fourierAcc.at(offset));
-		
-		// The theoretical slope at low frequenc
-        double slope = _limitFas ? 2 :
-                       (log(_fourierAcc.at(offset)/_fourierAcc.at(offset+1))
-                        / log( freq().at(offset)/freq().at(offset+1)));
 
-        for (int i = 0; i < offset; ++i)
-            _fourierAcc[i] = exp( slope * (log(freq().at(i)) - logFreq0 ) + logFas0 );
+        // The theoretical slope at low frequenc
+        double slope = _limitFas ? 2 :
+                       (log(_fourierAcc.at(offset) / _fourierAcc.at(offset + 1))
+                        / log(freq().at(offset) / freq().at(offset + 1)));
+
+        for (int i = 0; i < offset; ++i) {
+            _fourierAcc[i] = exp(slope * (log(freq().at(i)) - logFreq0) + logFas0);
+        }
 
         // Force down the high frequency tail
 
@@ -259,16 +261,15 @@ void CompatibleRvtMotion::calculate()
             int minSlopeIdx = 0;
             int i = offset;
 
-            while (i < freq().size()-1) {
-                const double slope = log(_fourierAcc.at(i)/_fourierAcc.at(i+1)) / log(freq().at(i)/freq().at(i+1));
-
+            while (i < freq().size() - 1) {
+                slope = log(_fourierAcc.at(i) / _fourierAcc.at(i + 1)) /
+                        log(freq().at(i) / freq().at(i + 1));
                 if (slope < minSlope) {
                     minSlope = slope;
                     minSlopeIdx = i;
                 }
                 ++i;
             }
-
 
             // Extrapolate from deviation
             i = minSlopeIdx;
@@ -277,10 +278,10 @@ void CompatibleRvtMotion::calculate()
             //double kappa0 = exp( -M_PI * 0.01 * freq().at(idx) );
 
             ++i;
-            while ( i < _fourierAcc.size() ) {
+            while (i < _fourierAcc.size()) {
                 // Extrapolate the value based, but reduce the value using a kappa filter
                 //_fourierAcc[idx] = exp( cutoff * (log(freq().at(idx)) - x0 ) + y0 ) * exp(-M_PI * 0.01 * freq().at(idx) ) / kappa0 ;
-                _fourierAcc[i] = exp( -slope * (log(freq().at(i)) - x0 ) + y0 );
+                _fourierAcc[i] = exp(-slope * (log(freq().at(i)) - x0) + y0);
                 ++i;
             }
         }
@@ -291,7 +292,8 @@ void CompatibleRvtMotion::calculate()
         // Compute the root-mean-squared error
         double sumError = 0;
         for (int i = 0; i < _respSpec->sa().size(); ++i) {
-            const double e = (_respSpec->sa().at(i) - _targetRespSpec->sa().at(i) ) / _targetRespSpec->sa().at(i);
+            const double e = (_respSpec->sa().at(i) - _targetRespSpec->sa().at(i)) /
+                             _targetRespSpec->sa().at(i);
 
             // Save the maximum error
             if (fabs(maxError) < fabs(e)) {
@@ -307,11 +309,13 @@ void CompatibleRvtMotion::calculate()
         ++count;
 
         // Stop if the RMSE is below the specified RMSE
-        if (rmse < minRmse || fabs(oldRmse-rmse) < minRmseChange)
+        if (rmse < minRmse || fabs(oldRmse - rmse) < minRmseChange) {
             break;
+        }
         // Allow the user to cancel the operation
-        if (!_okToContinue)
+        if (!_okToContinue) {
             break;
+        }
         // Save old rmse
         oldRmse = rmse;
     } while (count < maxCount);
@@ -341,13 +345,13 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
         const double decades = log10(targetPeriod.last() / targetPeriod.first());
 
         QVector<double> period = Dimension::logSpace(
-                    targetPeriod.first(), targetPeriod.last(),
-                    int(10 * decades));
+                targetPeriod.first(), targetPeriod.last(),
+                int(10 * decades));
 
         QVector<double>sa;
         logLogInterp(
-            _targetRespSpec->period(), _targetRespSpec->sa(),
-            period, sa);
+                _targetRespSpec->period(), _targetRespSpec->sa(),
+                period, sa);
 
         _targetRespSpec->setPeriod(period);
         _targetRespSpec->setSa(sa);
@@ -368,11 +372,12 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
     for ( int i = fas.size()-1; i > -1; --i ) {
         double freq = 1 / _targetRespSpec->period().at(i);
         double sa = _targetRespSpec->sa().at(i);
-        const double rmsDuration = calcRmsDuration(1/freq, damping);
+        const double rmsDuration = _peakCalculator->calcDurationRms(
+                _duration, freq, damping, QVector<std::complex<double> >());
 
         // Compute the squared Fourier amplitude spectrum
         fasSqr = ( ( rmsDuration * pow(sa,2) ) / ( 2 * pow( peakFactor, 2) ) - sum ) /
-            ( freq * sdofFactor );
+                 ( freq * sdofFactor );
 
         if ( fasSqr < 0 )
             fasSqr = prevFasSqr;
@@ -380,11 +385,11 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
         // Convert from spectral density into FAS
         fas[i] = sqrt(fasSqr);
 
-        if ( i == fas.size()-1 )
+        if ( i == fas.size()-1 ) {
             sum = fasSqr * freq / 2;
-        else
-            sum += ( fasSqr - prevFasSqr ) / 2 * ( freq - (1/_targetRespSpec->period().at(i+1)) );
-
+        } else {
+            sum += (fasSqr - prevFasSqr) / 2 * (freq - (1 / _targetRespSpec->period().at(i + 1)));
+        }
         prevFasSqr = fasSqr;
     }
 

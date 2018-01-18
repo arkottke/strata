@@ -56,27 +56,27 @@ protected:
     QGroupBox* createDiscretizationGroupBox();
     //@}
 
-    QLineEdit* _titleLineEdit;
-    QTextEdit* _notesTextEdit;
-    QLineEdit* _prefixLineEdit;
-    QComboBox* _unitsComboBox;
-    QCheckBox* _saveMotionDataCheckBox;
+  QLineEdit *_titleLineEdit;
+  QTextEdit *_notesTextEdit;
+  QLineEdit *_prefixLineEdit;
+  QComboBox *_unitsComboBox;
+  QCheckBox *_saveMotionDataCheckBox;
 
-    QComboBox* _methodComboBox;
-    QComboBox* _approachComboBox;
-    QCheckBox* _propertiesAreVariedCheckBox;
+  QComboBox *_methodComboBox;
+  QComboBox *_approachComboBox;
+  QCheckBox *_propertiesAreVariedCheckBox;
 
-    QGroupBox* _variationGroupBox;
-    QSpinBox* _countSpinBox;
-    QCheckBox* _nlPropertiesAreVariedCheckBox;
-    QCheckBox* _siteIsVariedCheckBox;
-    QCheckBox* _specifiedSeedCheckBox;
-    QSpinBox* _seedSpinBox;
+  QGroupBox *_variationGroupBox;
+  QSpinBox *_countSpinBox;
+  QCheckBox *_nlPropertiesAreVariedCheckBox;
+  QCheckBox *_siteIsVariedCheckBox;
+  QCheckBox *_specifiedSeedCheckBox;
+  QSpinBox *_seedSpinBox;
 
-    MethodGroupBox* _methodGroupBox;
+  MethodGroupBox *_methodGroupBox;
 
-    QDoubleSpinBox* _maxFreqSpinBox;
-    QDoubleSpinBox* _waveFractionSpinBox;
-    QCheckBox* _disableDiscretzationCheckBox;
+  QDoubleSpinBox *_maxFreqSpinBox;
+  QDoubleSpinBox *_waveFractionSpinBox;
+  QCheckBox *_disableDiscretzationCheckBox;
 };
 #endif

@@ -26,6 +26,8 @@
 #include "RvtMotion.h"
 #include "SourceTheoryRvtMotion.h"
 #include "Units.h"
+#include "VanmarckePeakCalculator.h"
+#include "WangRathjePeakCalculator.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -37,16 +39,15 @@
 #include <qwt_text.h>
 
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
-{    
-    _oscCorrection = LiuPezeshk;
+{
+    _peakCalculator = new WangRathjePeakCalculator;
     _duration = 0;
     _okToContinue = false;
-    _workspace = gsl_integration_workspace_alloc(1024);
 }
 
 AbstractRvtMotion::~AbstractRvtMotion()
 {
-    gsl_integration_workspace_free(_workspace);
+    delete _peakCalculator;
 }
 
 int AbstractRvtMotion::rowCount(const QModelIndex & parent) const
@@ -71,10 +72,10 @@ QVariant AbstractRvtMotion::data(const QModelIndex & index, int role) const
 
     if ( role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()) {
-        case FrequencyColumn:
-            return QString::number(freq().at(index.row()), 'e', 2);
-        case AmplitudeColumn:
-            return QString::number(_fourierAcc.at(index.row()), 'e', 2);
+            case FrequencyColumn:
+                return QString::number(freq().at(index.row()), 'e', 2);
+            case AmplitudeColumn:
+                return QString::number(_fourierAcc.at(index.row()), 'e', 2);
         }
     }
 
@@ -88,15 +89,15 @@ QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation,
     }
 
     switch (orientation) {
-    case Qt::Horizontal:
-        switch (section) {
-        case FrequencyColumn:
-            return tr("Frequency (Hz)");
-        case AmplitudeColumn:
-            return tr("Amplitude (g-s)");
-        }
-    case Qt::Vertical:
-        return section + 1;
+        case Qt::Horizontal:
+            switch (section) {
+                case FrequencyColumn:
+                    return tr("Frequency (Hz)");
+                case AmplitudeColumn:
+                    return tr("Amplitude (g-s)");
+            }
+        case Qt::Vertical:
+            return section + 1;
     }
 
     return QVariant();
@@ -109,36 +110,38 @@ const QVector<double> & AbstractRvtMotion::fourierAcc() const
 
 double AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const
 {
-    return calcMax(absFourierAcc(tf), _duration);
+    return calcMax(absFourierAcc(tf));
 }
 
 double AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf) const
-{   
-    return Units::instance()->tsConv() * calcMax(absFourierVel(tf), _duration);
+{
+    return Units::instance()->tsConv() * calcMax(absFourierVel(tf));
 }
 
 double AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf) const
 {
-    return Units::instance()->tsConv() * calcMax(absFourierDisp(tf), _duration);
+    return Units::instance()->tsConv() * calcMax(absFourierDisp(tf));
 }
 
-QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, double damping, const QVector<std::complex<double> >& tf )
+QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, double damping,
+                                             const QVector<std::complex<double> >& accelTf )
 {
-    QVector<double> sa(period.size());
-    QVector<double> fas = _fourierAcc;
-
-    // Apply the transfer function to the motion
-    if (!tf.isEmpty()) {
-        Q_ASSERT(fas.size() == tf.size());
-
-        for (int i = 0; i < fas.size(); ++i) {
-            fas[i] *= abs(tf.at(i));
-        }
-    }
-
     // Compute the response at each period
-    for ( int i = 0; i < sa.size(); ++i ) {
-        sa[i] = calcOscillatorMax(fas, period.at(i), damping);
+    QVector<double> sa;
+    QVector<double> fourierAcc(_fourierAcc.size());
+    for (double oscPeriod : period ) {
+        const QVector<std::complex<double> > sdofTf = calcSdofTf(oscPeriod, damping);
+        Q_ASSERT(sdofTf.size() == fourierAcc.size());
+
+        for (int i = 0; i < fourierAcc.size(); ++i) {
+            fourierAcc[i] = abs(sdofTf.at(i)) * _fourierAcc.at(i);
+            if (accelTf.size()) {
+                fourierAcc[i] *= abs(accelTf.at(i));
+            }
+        }
+
+        sa << _peakCalculator->calcPeak(
+                _duration, freq(), fourierAcc, (1 / oscPeriod), damping, accelTf);
     }
 
     return sa;
@@ -163,8 +166,9 @@ const QVector<double> AbstractRvtMotion::absFourierVel(const QVector<std::comple
 {
     QVector<double> fa = absFourierAcc(tf);
 
-    for (int i = 0; i < fa.size(); ++i)
+    for (int i = 0; i < fa.size(); ++i) {
         fa[i] /= angFreqAt(i);
+    }
 
     return fa;
 }
@@ -173,8 +177,9 @@ const QVector<double> AbstractRvtMotion::absFourierDisp(const QVector<std::compl
 {
     QVector<double> fa = absFourierAcc(tf);
 
-    for (int i = 0; i < fa.size(); ++i)
+    for (int i = 0; i < fa.size(); ++i) {
         fa[i] /= pow(angFreqAt(i), 2);
+    }
 
     return fa;
 }
@@ -237,21 +242,6 @@ bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
     return true;
 }
 
-void AbstractRvtMotion::setOscCorrection(OscillatorCorrection oscCorrection)
-{
-    if (_oscCorrection != oscCorrection) {
-         _oscCorrection = oscCorrection;
-
-         emit oscCorrectionChanged(_oscCorrection);
-         emit wasModified();
-    }
-}
-
-void AbstractRvtMotion::setOscCorrection(int oscCorrection)
-{
-    setOscCorrection((OscillatorCorrection)oscCorrection);
-}
-
 void AbstractRvtMotion::calculate()
 {
     // Compute the PGA and PGV
@@ -263,182 +253,13 @@ void AbstractRvtMotion::calculate()
             _respSpec->period(), _respSpec->damping()));
 }
 
-struct peakFactorParams
+double AbstractRvtMotion::calcMax(const QVector<double> &fourierAmps) const
 {
-    double bandWidth;
-    double numExtrema;
-};
-
-double AbstractRvtMotion::calcMax( const QVector<double> & fas, double durationRms ) const
-{
-    if ( durationRms < 0 ) {
-        durationRms = _duration;
-    }
-
-    // Square the Fourier amplitude spectrum
-    QVector<double> fasSqr(fas.size());
-    for ( int i = 0; i < fasSqr.size(); ++i ) {
-        fasSqr[i] = fas.at(i) * fas.at(i);
-    }
-
-    // The zero moment is the area of the spectral density computed by the
-    // trapezoid rule.
-    double m0 = moment( 0, fasSqr);
-    // double m1 = moment( 1, fasSqr); // FIXME Remove this
-    double m2 = moment( 2, fasSqr);
-    double m4 = moment( 4, fasSqr);
-
-    // Compute the bandwidth
-    double bandWidth = sqrt((m2 * m2 )/( m0 * m4));
-
-    // Compute the number extrema
-    double numExtrema = sqrt(m4/m2) * _duration / M_PI;
-
-    // If the number of extrema is less than 2, increase to 2.  There must be
-    // one full cycle (two peaks)
-    if (numExtrema <2) {
-        numExtrema = 2;
-    }
-
-    // Use GSL to integrate the peak factor equation
-    struct peakFactorParams params = { bandWidth, numExtrema };
-    gsl_function F = { &peakFactorEqn, &params};
-    double result;
-    double error;
-
-    // Try the adaptive integration without bounds
-    if ( bandWidth != bandWidth || numExtrema != numExtrema ) {
-        // We have issues!
-        QString fileName;
-        int i = 0;
-
-        do {
-            fileName = QString("rvtInfo-%1.dat").arg(i);
-        } while (QFile::exists(fileName));
-
-        QFile file(fileName);
-
-        if (file.open(QFile::WriteOnly)) {
-            QTextStream fout(&file);
-
-            fout << "durationGm: " << _duration << endl;
-            fout << "durationRms: " << durationRms << endl;
-            fout << "m0: " << m0 << endl;
-            fout << "m2: " << m2 << endl;
-            fout << "m4: " << m4 << endl;
-            fout << "bandWidth: " << bandWidth << endl;
-            fout << "numExtrema: " << numExtrema << endl;
-
-            for (int i = 0; i < fas.size(); ++i) {
-                fout << i << " " << fas.at(i) << endl;
-            }
-        }
-
-        result = 1.0;
-    } else {
-        gsl_integration_qagiu( &F, 0, 0, 1e-7, 1000, _workspace, &result, &error);
-    }
-
-    const double peakFactor = sqrt(2) * result;
-
-    // fout << bandWidth << ","
-    //     << sqrt(1 - m1 * m1 / m0 / m2 ) << ","
-    //     << numExtrema << ","
-    //     << peakFactor << ","
-    //     << sqrt(m0/durationRms) << endl;
-
-    // FIXME Compute the peak factor using the asympototic solution
-    // double numZero = sqrt(m2/m0) * durationGm / M_PI;
-    // double peakFactor_asym = sqrt(2 * log(numZero)) + 0.5772 / sqrt(2 * log(numZero));
-
-    // Return the peak value which is found by multiplying the variation by the peakfactor
-    return sqrt(m0/durationRms) * peakFactor;
-}
-
-double AbstractRvtMotion::calcOscillatorMax(QVector<double> fas, const double period, const double damping) const
-{
-    const QVector<std::complex<double> > tf = calcSdofTf(period, damping);
-
-    Q_ASSERT(tf.size() == fas.size());
-
-    for (int i = 0; i < fas.size(); ++i) {
-        fas[i] *= abs(tf.at(i));
-    }
-
-    return calcMax(fas, calcRmsDuration(period, damping, fas));
-}
-
-double AbstractRvtMotion::moment( int power, const QVector<double> & fasSqr) const
-{
-    // The moment is found by:
-    //           /
-    // _n = 2 * | ( 2 * pi * freq )^n * FAS^2 * df
-    //           /
-    double sum = 0;
-    double dFreq = 0;
-    double last = pow( 2 * M_PI * freq().at(0), power) * fasSqr.at(0);
-    double current = 0.0;
-    // Integrate using the trapezoid rule
-    for (int i=1; i < fasSqr.size(); ++i) {
-        // Compute the current piece
-        current = pow( 2 * M_PI * freq().at(i), power) * fasSqr.at(i);
-
-        // Frequency may be increasing or decreasing, just want the difference
-        dFreq = fabs(freq().at(i) - freq().at(i-1));
-
-        // Compute the area of the trapezoid defined by the current and last value
-        sum += dFreq * ( current + last ) / 2;
-        // Save the current piece
-        last = current;
-    }
-
-    return 2 * sum;
-}
-
-double AbstractRvtMotion::peakFactorEqn(double z, void * p)
-{
-    struct peakFactorParams * params = (struct peakFactorParams *)p;
-
-    return 1 - pow( 1 - params->bandWidth * exp(-z*z), params->numExtrema );
-}
-
-double AbstractRvtMotion::calcRmsDuration(const double period, const double damping, const QVector<double> & fas) const
-{
-    // Use BooreJoyner if there is no FAS defined
-    OscillatorCorrection oscCorrection = fas.isEmpty() ? BooreJoyner : _oscCorrection;
-
-    // Duration of the oscillator
-    const double durOsc = period / (2 * M_PI * damping / 100);
-
-    int power = 0;
-    double bar = 0;
-
-    switch (oscCorrection)  {
-    case BooreJoyner:
-        power = 3;
-        bar = 1. / 3.;
-        break;
-
-    case LiuPezeshk:
-        QVector<double> fasSqr(fas.size());
-
-        for (int i = 0; i < fas.size(); ++i)
-            fasSqr[i] = fas.at(i) * fas.at(i);
-
-        const double m0 = moment(0, fasSqr);
-        const double m1 = moment(1, fasSqr);
-        const double m2 = moment(2, fasSqr);
-
-        power = 2;
-        bar = sqrt( 2 * M_PI * ( 1 - (m1 * m1)/(m0 * m2)));
-        break;
-    }
-
-    const double foo = pow(_duration / period, power);
-
-    const double durationRms = _duration + durOsc * (foo / (foo + bar));
-
-    return durationRms;
+    return _peakCalculator->calcPeak(
+            _duration,
+            freq(),
+            fourierAmps
+    );
 }
 
 QString AbstractRvtMotion::extractColumn(const QString &line, int column)
@@ -457,15 +278,13 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
     beginResetModel();
 
     AbstractMotion::fromJson(json);
-    bool oscCorrection = json["oscCorrection"].toBool();
-    setOscCorrection(oscCorrection);
     _duration = json["duration"].toDouble();
     _name = json["name"].toString();
 
     _fourierAcc.clear();
-    foreach (const QJsonValue &v, json["fourierAcc"].toArray())  {
-        _fourierAcc << v.toDouble();
-    }
+            foreach (const QJsonValue &v, json["fourierAcc"].toArray())  {
+            _fourierAcc << v.toDouble();
+        }
 
     endResetModel();
 }
@@ -473,12 +292,11 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
 QJsonObject AbstractRvtMotion::toJson() const
 {
     QJsonObject json = AbstractMotion::toJson();
-    json["oscCorrection"] = _oscCorrection;
     json["duration"] = _duration;
     json["name"] = _name;
 
     QJsonArray fourierAcc;
-    foreach (const double &d, _fourierAcc) {
+    for (double d : _fourierAcc) {
         fourierAcc << QJsonValue(d);
     }
     json["fourierAcc"] = fourierAcc;
@@ -489,14 +307,13 @@ QJsonObject AbstractRvtMotion::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     out << qobject_cast<const AbstractMotion*>(arm);
 
-    out << (int)arm->_oscCorrection
-            << arm->_fourierAcc
-            << arm->_duration
-            << arm->_name;
+    out << arm->_fourierAcc
+        << arm->_duration
+        << arm->_name;
 
     return out;
 }
@@ -512,16 +329,19 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
 
     arm->beginResetModel();
     in >> oscCorrection
-            >> arm->_fourierAcc
-            >> arm->_duration
-            >> arm->_name;
+       >> arm->_fourierAcc
+       >> arm->_duration
+       >> arm->_name;
 
-    arm->setOscCorrection(oscCorrection);
+    // Not used anymore
+    Q_UNUSED(oscCorrection);
+
     arm->endResetModel();
 
     return in;
 }
 
+// FIXME: Might be out of date.
 AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double scale)
 {
     QFile data(fileName);
