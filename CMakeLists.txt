@@ -66,6 +66,8 @@ endif()
 if(MSVC)
     # Add GSL DLL definition for MSVC
     add_definitions(-DGSL_DLL)
+    # Optimize for speed
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()
     # Add optimization for GCC
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
