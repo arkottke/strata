@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -74,15 +74,15 @@ const QString SpectralRatioOutput::xLabel() const
 const QString SpectralRatioOutput::yLabel() const
 {
     return tr("Sa at %1 / Sa at %2")
-            .arg(locationToString(m_outDepth))
-            .arg(locationToString(m_inDepth));
+            .arg(locationToString(_outDepth))
+            .arg(locationToString(_inDepth));
 }
 
 const QVector<double>& SpectralRatioOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
 
-    return m_catalog->period()->data();
+    return _catalog->period()->data();
 }
 
 void SpectralRatioOutput::extract(AbstractCalculator* const calculator,
@@ -90,23 +90,23 @@ void SpectralRatioOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const Location inLoc = calculator->site()->depthToLocation(m_inDepth);
-    const Location outLoc = calculator->site()->depthToLocation(m_outDepth);
+    const Location inLoc = calculator->site()->depthToLocation(_inDepth);
+    const Location outLoc = calculator->site()->depthToLocation(_outDepth);
 
     const QVector<double> inSa = calculator->motion()->computeSa(
-            m_catalog->period()->data(), m_catalog->damping(),
+            _catalog->period()->data(), _catalog->damping(),
             calculator->calcAccelTf(
                     calculator->site()->inputLocation(), calculator->motion()->type(),
-                    inLoc, m_inType));
+                    inLoc, _inType));
 
     const QVector<double> outSa = calculator->motion()->computeSa(
-            m_catalog->period()->data(), m_catalog->damping(),
+            _catalog->period()->data(), _catalog->damping(),
             calculator->calcAccelTf(
                     calculator->site()->inputLocation(), calculator->motion()->type(),
-                    outLoc, m_outType));
+                    outLoc, _outType));
 
     // Compute the ratio
-    data.resize(m_catalog->period()->size());
+    data.resize(_catalog->period()->size());
 
     for (int i = 0; i < data.size(); ++i)
         data[i] = outSa.at(i) / inSa.at(i);

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ SoilTypeDelegate::SoilTypeDelegate(QObject *parent) :
 
 void SoilTypeDelegate::setCatalog(SoilTypeCatalog *catalog)
 {
-    m_catalog = catalog;
+    _catalog = catalog;
 }
 
 QWidget* SoilTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -49,7 +49,7 @@ void SoilTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & index)
 {
     QComboBox * comboBox = static_cast<QComboBox*>(editor);
 
-    comboBox->setModel(m_catalog);
+    comboBox->setModel(_catalog);
     comboBox->setCurrentIndex(
             comboBox->findText(index.model()->data(index, Qt::EditRole).toString()));
 }

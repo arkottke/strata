@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,10 +29,10 @@
 Dimension::Dimension(QObject * parent)
         : QObject(parent)
 {
-    m_min = 0;
-    m_max = 0;
-    m_size = 10;
-    m_spacing = Linear;
+    _min = 0;
+    _max = 0;
+    _size = 10;
+    _spacing = Linear;
 
     connect(this, SIGNAL(wasModified()),
             this, SLOT(clear()));
@@ -45,69 +45,69 @@ QStringList Dimension::spacingList()
 
 double Dimension::min() const
 {
-    return m_min;
+    return _min;
 }
 
 void Dimension::setMin(double min)
 {
-    if (fabs(m_min - min) > DBL_EPSILON ) {
-        m_min = min;
+    if (fabs(_min - min) > DBL_EPSILON ) {
+        _min = min;
 
         emit wasModified();
-        emit minChanged(m_min);
+        emit minChanged(_min);
     }
 }
 
 double Dimension::max() const
 {
-    return m_max;
+    return _max;
 }
 
 void Dimension::setMax(double max)
 {
-    if (fabs(m_max - max) > DBL_EPSILON ) {
-        m_max = max;
+    if (fabs(_max - max) > DBL_EPSILON ) {
+        _max = max;
 
         emit wasModified();
-        emit maxChanged(m_max);
+        emit maxChanged(_max);
     }
 }
 
 int Dimension::size() const
 {
-    return m_size;
+    return _size;
 }
 
 double Dimension::at(int i) const
 {
-    return m_data.at(i);
+    return _data.at(i);
 }
 
 void Dimension::setSize(int size)
 {
-    if (m_size != size) {
-        m_size = size;
+    if (_size != size) {
+        _size = size;
 
-        emit sizeChanged(m_size);
+        emit sizeChanged(_size);
         emit wasModified();
     }
 }
 
 Dimension::Spacing Dimension::spacing() const
 {
-    return m_spacing;
+    return _spacing;
 }
 
 void Dimension::setSpacing(Dimension::Spacing spacing)
 {
-    if ( m_spacing != spacing ) {
-        m_spacing = spacing;
+    if ( _spacing != spacing ) {
+        _spacing = spacing;
 
 
-        if (m_spacing == Log && fabs(m_min) < DBL_EPSILON)
+        if (_spacing == Log && fabs(_min) < DBL_EPSILON)
             setMin(0.01);
 
-        emit spacingChanged(m_spacing);
+        emit spacingChanged(_spacing);
         emit wasModified();
     }
 }
@@ -119,18 +119,18 @@ void Dimension::setSpacing(int spacing)
 
 QVector<double> & Dimension::data()
 {
-    if (m_data.isEmpty())
+    if (_data.isEmpty())
         init();
     
-    return m_data;
+    return _data;
 }
 
 void Dimension::init()
 {
-    if ( m_spacing == Linear )
-        m_data = linSpace(m_min, m_max, m_size);
-    else if ( m_spacing == Log )
-        m_data = logSpace(m_min, m_max, m_size);
+    if ( _spacing == Linear )
+        _data = linSpace(_min, _max, _size);
+    else if ( _spacing == Log )
+        _data = logSpace(_min, _max, _size);
 }
 
 QVector<double> Dimension::linSpace( double min, double max, int size )
@@ -164,25 +164,25 @@ QVector<double> Dimension::logSpace( double min, double max, int size )
 
 void Dimension::clear()
 {
-    m_data.clear();
+    _data.clear();
 }
 
 void Dimension::fromJson(const QJsonObject &json)
 {
-    m_min = json["min"].toDouble();
-    m_max = json["max"].toDouble();
-    m_size = json["size"].toInt();
-    m_spacing = (Dimension::Spacing) json["spacing"].toInt();
+    _min = json["min"].toDouble();
+    _max = json["max"].toDouble();
+    _size = json["size"].toInt();
+    _spacing = (Dimension::Spacing) json["spacing"].toInt();
     init();
 }
 
 QJsonObject Dimension::toJson() const
 {
     QJsonObject json;
-    json["min"] = m_min;
-    json["max"] = m_max;
-    json["size"] = m_size;
-    json["spacing"] = (int) m_spacing;
+    json["min"] = _min;
+    json["max"] = _max;
+    json["size"] = _size;
+    json["spacing"] = (int) _spacing;
     return json;
 }
 
@@ -190,7 +190,7 @@ QDataStream & operator<<(QDataStream & out, const Dimension* d)
 {
     out << (quint8)1;
 
-    out << d->m_min << d->m_max << d->m_size << (int)d->m_spacing;
+    out << d->_min << d->_max << d->_size << (int)d->_spacing;
 
     return out;
 }
@@ -202,9 +202,9 @@ QDataStream & operator>>(QDataStream & in, Dimension* d)
 
     int spacing;
 
-    in >> d->m_min >> d->m_max >> d->m_size >> spacing;
+    in >> d->_min >> d->_max >> d->_size >> spacing;
 
-    d->m_spacing = (Dimension::Spacing)spacing;
+    d->_spacing = (Dimension::Spacing)spacing;
     d->init();
 
     return in;

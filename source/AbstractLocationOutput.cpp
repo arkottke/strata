@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,8 +28,8 @@
 AbstractLocationOutput::AbstractLocationOutput(OutputCatalog* catalog)
     : AbstractOutput(catalog)
 {
-    m_type = AbstractMotion::Outcrop;
-    m_depth = 0;
+    _type = AbstractMotion::Outcrop;
+    _depth = 0;
 }
 
 bool AbstractLocationOutput::needsOutputConditions() const
@@ -46,30 +46,30 @@ QString AbstractLocationOutput::fullName() const
 
 double AbstractLocationOutput::depth() const
 {
-    return m_depth;
+    return _depth;
 }
 
 void AbstractLocationOutput::setDepth(double depth)
 {
-    if (m_depth != depth) {
-        m_depth = depth;
+    if (_depth != depth) {
+        _depth = depth;
 
-        emit depthChanged(m_depth);
+        emit depthChanged(_depth);
         emit wasModified();
     }
 }
 
 AbstractMotion::Type AbstractLocationOutput::type() const
 {
-    return m_type;
+    return _type;
 }
 
 void AbstractLocationOutput::setType(AbstractMotion::Type type)
 {
-    if (m_type != type) {
-        m_type = type;
+    if (_type != type) {
+        _type = type;
 
-        emit typeChanged(m_type);
+        emit typeChanged(_type);
         emit wasModified();
     }
 }
@@ -89,22 +89,22 @@ QString AbstractLocationOutput::fileName(int motion) const
 const QString AbstractLocationOutput::prefix() const
 {
     return QString("%1 (%3)")
-            .arg(locationToString(m_depth))
-            .arg(AbstractMotion::typeList().at(m_type));
+            .arg(locationToString(_depth))
+            .arg(AbstractMotion::typeList().at(_type));
 }
 
 void AbstractLocationOutput::fromJson(const QJsonObject &json)
 {
     AbstractOutput::fromJson(json);
-    m_type = (AbstractMotion::Type) json["type"].toInt();
-    m_depth = json["depth"].toDouble();
+    _type = (AbstractMotion::Type) json["type"].toInt();
+    _depth = json["depth"].toDouble();
 }
 
 QJsonObject AbstractLocationOutput::toJson() const
 {
     QJsonObject json = AbstractOutput::toJson();
-    json["type"] = (int) m_type;
-    json["depth"] = m_depth;
+    json["type"] = (int) _type;
+    json["depth"] = _depth;
 
     return json;
 }
@@ -115,8 +115,8 @@ QDataStream & operator<< (QDataStream & out, const AbstractLocationOutput* alo)
     out << (quint8)1;
 
     out << static_cast<const AbstractOutput*>(alo)
-            << (int)alo->m_type
-            << alo->m_depth;
+            << (int)alo->_type
+            << alo->_depth;
 
     return out;
 }
@@ -129,9 +129,9 @@ QDataStream & operator>> (QDataStream & in, AbstractLocationOutput* alo)
     int type;
     in >> static_cast<AbstractOutput*>(alo)
             >> type
-            >> alo->m_depth;
+            >> alo->_depth;
 
-    alo->m_type = (AbstractMotion::Type)type;
+    alo->_type = (AbstractMotion::Type)type;
 
     return in;
 }

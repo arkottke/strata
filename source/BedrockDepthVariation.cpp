@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,23 +24,23 @@
 #include "ProfileRandomizer.h"
 
 BedrockDepthVariation::BedrockDepthVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
-    Distribution(rng), m_profileRandomizer(profileRandomizer)
+    Distribution(rng), _profileRandomizer(profileRandomizer)
 {
-    connect(m_profileRandomizer, SIGNAL(enabledChanged(bool)),
+    connect(_profileRandomizer, SIGNAL(enabledChanged(bool)),
             this, SLOT(updateEnabled()));
 
-    m_enabled = false;
+    _enabled = false;
 }
 
 bool BedrockDepthVariation::enabled() const
 {
-    return m_profileRandomizer->enabled() && m_enabled;
+    return _profileRandomizer->enabled() && _enabled;
 }
 
 void BedrockDepthVariation::setEnabled(bool enabled)
 {
-    if (m_enabled != enabled) {
-        m_enabled = enabled;
+    if (_enabled != enabled) {
+        _enabled = enabled;
 
         emit enabledChanged(this->enabled());
         emit wasModified();
@@ -62,7 +62,7 @@ void BedrockDepthVariation::fromJson(const QJsonObject &json)
 QJsonObject BedrockDepthVariation::toJson() const
 {
     QJsonObject json = Distribution::toJson();
-    json["enabled"] = m_enabled;
+    json["enabled"] = _enabled;
     return json;
 }
 
@@ -73,7 +73,7 @@ QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
     out << (quint8)1;
 
     out << qobject_cast<const Distribution*>(bdv)
-        << bdv->m_enabled;
+        << bdv->_enabled;
     return out;
 }
 

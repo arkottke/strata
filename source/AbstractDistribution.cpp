@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,13 +30,13 @@
 AbstractDistribution::AbstractDistribution( QObject * parent)
     : QObject(parent)
 {
-    m_type = LogNormal;
-    m_avg = 0;
-    m_stdev = 0;
-    m_hasMin = false;
-    m_min = 0;
-    m_hasMax = false;
-    m_max = 0;
+    _type = LogNormal;
+    _avg = 0;
+    _stdev = 0;
+    _hasMin = false;
+    _min = 0;
+    _hasMax = false;
+    _max = 0;
 }
 
 QStringList AbstractDistribution::typeList()
@@ -50,7 +50,7 @@ QStringList AbstractDistribution::typeList()
 
 AbstractDistribution::Type AbstractDistribution::type() const
 {
-    return m_type;
+    return _type;
 }
 
 void AbstractDistribution::setType(int type)
@@ -60,12 +60,12 @@ void AbstractDistribution::setType(int type)
 
 void AbstractDistribution::setType(AbstractDistribution::Type type)
 {
-    if (m_type != type) {
-        m_type = type;
+    if (_type != type) {
+        _type = type;
 
-        emit requiresLimits(m_type == Uniform);
+        emit requiresLimits(_type == Uniform);
 
-        emit typeChanged(m_type);
+        emit typeChanged(_type);
         emit stdevRequiredChanged(stdevRequired());
         emit wasModified();
     }
@@ -73,101 +73,101 @@ void AbstractDistribution::setType(AbstractDistribution::Type type)
 
 void AbstractDistribution::reset()
 {
-    m_varied = m_avg;
+    _varied = _avg;
 }
 
 bool AbstractDistribution::stdevRequired()
 {
-    return m_type != Uniform;
+    return _type != Uniform;
 }
 
 double AbstractDistribution::avg() const
 {
-    return m_avg;
+    return _avg;
 }
 
 void AbstractDistribution::setAvg(double avg)
 {
-    if (fabs(m_avg - avg) > DBL_EPSILON) {
-        m_avg = avg;
-        m_varied = avg;
+    if (fabs(_avg - avg) > DBL_EPSILON) {
+        _avg = avg;
+        _varied = avg;
 
-        emit avgChanged(m_avg);
+        emit avgChanged(_avg);
         emit wasModified();
     }
 }
 
 double AbstractDistribution::stdev() const
 {
-    return m_stdev;
+    return _stdev;
 }
 
 void AbstractDistribution::setStdev(double stdev)
 {
-    if (fabs(m_stdev - stdev) > DBL_EPSILON) {
-        m_stdev = stdev;
+    if (fabs(_stdev - stdev) > DBL_EPSILON) {
+        _stdev = stdev;
 
-        emit stdevChanged(m_stdev);
+        emit stdevChanged(_stdev);
         emit wasModified();
     }
 }
 
 bool AbstractDistribution::hasMin() const
 {
-    return m_hasMin;
+    return _hasMin;
 }
 
 void AbstractDistribution::setHasMin(bool hasMin)
 {
-    if (m_hasMin != hasMin) {
-        m_hasMin = hasMin;
+    if (_hasMin != hasMin) {
+        _hasMin = hasMin;
 
-        emit hasMinChanged(m_hasMin);
+        emit hasMinChanged(_hasMin);
         emit wasModified();
     }
 }
 
 double AbstractDistribution::min() const
 {
-    return m_min;
+    return _min;
 }
 
 void AbstractDistribution::setMin(double min)
 {
-    if (fabs(m_min - min) > DBL_EPSILON) {
-        m_min = min;
+    if (fabs(_min - min) > DBL_EPSILON) {
+        _min = min;
 
-        emit minChanged(m_min);
+        emit minChanged(_min);
         emit wasModified();
     }
 }
 
 bool AbstractDistribution::hasMax() const
 {
-    return m_hasMax;
+    return _hasMax;
 }
 
 void AbstractDistribution::setHasMax(bool hasMax)
 {
-    if (m_hasMax != hasMax) {
-        m_hasMax = hasMax;
+    if (_hasMax != hasMax) {
+        _hasMax = hasMax;
 
-        emit hasMaxChanged(m_hasMax);
+        emit hasMaxChanged(_hasMax);
         emit wasModified();
     }
 }
 
 double AbstractDistribution::max() const
 {
-    return m_max;
+    return _max;
 }
 
 void AbstractDistribution::setMax(double max)
 {
-    if (fabs(m_max - max) > DBL_EPSILON) {
-        m_max = max;
+    if (fabs(_max - max) > DBL_EPSILON) {
+        _max = max;
 
-        emit maxChanged(m_max);
+        emit maxChanged(_max);
         emit wasModified();
     }
 }
@@ -175,36 +175,36 @@ void AbstractDistribution::setMax(double max)
 void AbstractDistribution::setVaried(double varied)
 {
     if (hasMax())
-        varied = qMin(m_max, varied);
+        varied = qMin(_max, varied);
 
     if (hasMin())
-        varied = qMax(m_min, varied);
+        varied = qMax(_min, varied);
 
-    m_varied = varied;
+    _varied = varied;
 }
 
 void AbstractDistribution::fromJson(const QJsonObject &json)
 {
-    m_type = (AbstractDistribution::Type)json["type"].toInt();
-    m_avg = json["avg"].toDouble();
-    m_stdev = json["stdev"].toDouble();
-    m_max = json["max"].toDouble();
-    m_min = json["min"].toDouble();
-    m_hasMax = json["hasMax"].toBool();
-    m_hasMin = json["hasMin"].toBool();
+    _type = (AbstractDistribution::Type)json["type"].toInt();
+    _avg = json["avg"].toDouble();
+    _stdev = json["stdev"].toDouble();
+    _max = json["max"].toDouble();
+    _min = json["min"].toDouble();
+    _hasMax = json["hasMax"].toBool();
+    _hasMin = json["hasMin"].toBool();
 }
 
 QJsonObject AbstractDistribution::toJson() const
 {
     QJsonObject json;
 
-    json["type"] = (int)m_type;
-    json["avg"] = m_avg;
-    json["stdev"] = m_stdev;
-    json["max"] = m_max;
-    json["min"] = m_min;
-    json["hasMax"] = m_hasMax;
-    json["hasMin"] = m_hasMin;
+    json["type"] = (int)_type;
+    json["avg"] = _avg;
+    json["stdev"] = _stdev;
+    json["max"] = _max;
+    json["min"] = _min;
+    json["hasMax"] = _hasMax;
+    json["hasMin"] = _hasMin;
 
     return json;
 }
@@ -213,13 +213,13 @@ QDataStream & operator<< (QDataStream & out, const AbstractDistribution* ad)
 {
     out << (quint8)1;
 
-    out << (int)ad->m_type
-        << ad->m_avg
-        << ad->m_stdev
-        << ad->m_hasMax
-        << ad->m_max
-        << ad->m_hasMin
-        << ad->m_min;
+    out << (int)ad->_type
+        << ad->_avg
+        << ad->_stdev
+        << ad->_hasMax
+        << ad->_max
+        << ad->_hasMin
+        << ad->_min;
 
     return out;
 }
@@ -231,14 +231,14 @@ QDataStream & operator>> (QDataStream & in, AbstractDistribution* ad)
 
     int type;
     in >> type
-       >> ad->m_avg
-       >> ad->m_stdev
-       >> ad->m_hasMax
-       >> ad->m_max
-       >> ad->m_hasMin
-       >> ad->m_min;
+       >> ad->_avg
+       >> ad->_stdev
+       >> ad->_hasMax
+       >> ad->_max
+       >> ad->_hasMin
+       >> ad->_min;
 
-    ad->m_type = (AbstractDistribution::Type)type;
+    ad->_type = (AbstractDistribution::Type)type;
 
     return in;
 }

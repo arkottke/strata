@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ NonlinearPropertyDelegate::NonlinearPropertyDelegate(QObject *parent) :
 
 void NonlinearPropertyDelegate::setModel(AbstractNonlinearPropertyFactory* factory)
 {
-    m_factory = factory;
+    _factory = factory;
 }
 
 QWidget* NonlinearPropertyDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -49,8 +49,8 @@ void NonlinearPropertyDelegate::setEditorData(QWidget *editor, const QModelIndex
 {
     QComboBox * comboBox = static_cast<QComboBox*>(editor);
 
-    if (m_factory) {
-        comboBox->setModel(m_factory);
+    if (_factory) {
+        comboBox->setModel(_factory);
 
         comboBox->setCurrentIndex(
                 comboBox->findText(index.model()->data(index, Qt::EditRole).toString()));

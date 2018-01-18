@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,10 +32,10 @@
 AbstractSteppedProfileOutput::AbstractSteppedProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-    if (m_interp)
-        delete m_interp;
+    if (_interp)
+        delete _interp;
 
-    m_interp = new SteppedOutputInterpolater;
+    _interp = new SteppedOutputInterpolater;
 }
 
 void AbstractSteppedProfileOutput::extract(AbstractCalculator* const calculator,

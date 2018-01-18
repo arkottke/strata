@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,18 +41,18 @@ OutputTableFrame::OutputTableFrame(QWidget *parent) :
     QGridLayout* layout = new QGridLayout;
     layout->setColumnStretch(2, 1);
     // Create the buttons
-    m_addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-    connect(m_addButton, SIGNAL(clicked()), this, SLOT(add()));
-    layout->addWidget(m_addButton, 0, 0);
+    _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
+    connect(_addButton, SIGNAL(clicked()), this, SLOT(add()));
+    layout->addWidget(_addButton, 0, 0);
 
-    m_removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
-    connect(m_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
-    layout->addWidget(m_removeButton, 0, 1);
+    _removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
+    connect(_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
+    layout->addWidget(_removeButton, 0, 1);
 
     // Create table
-    m_tableView = new MyTableView(this);
-    m_tableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    layout->addWidget(m_tableView, 1, 0, 1, 3);
+    _tableView = new MyTableView(this);
+    _tableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+    layout->addWidget(_tableView, 1, 0, 1, 3);
 
     setLayout(layout);
 }
@@ -60,28 +60,28 @@ OutputTableFrame::OutputTableFrame(QWidget *parent) :
 
 void OutputTableFrame::setModel(AbstractMutableOutputCatalog *amoc)
 {
-    m_outputCatalog = amoc;
-    m_tableView->setModel(m_outputCatalog);
+    _outputCatalog = amoc;
+    _tableView->setModel(_outputCatalog);
     updateButtons();
-    connect(m_tableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+    connect(_tableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(updateButtons()));
 
-    if (m_outputCatalog->needsOutputConditions()) {
-        m_tableView->setItemDelegateForColumn(1, new DepthComboBoxDelegate);
-        m_tableView->setItemDelegateForColumn(2, new MotionTypeDelegate);
+    if (_outputCatalog->needsOutputConditions()) {
+        _tableView->setItemDelegateForColumn(1, new DepthComboBoxDelegate);
+        _tableView->setItemDelegateForColumn(2, new MotionTypeDelegate);
     }
 
-    if (m_outputCatalog->needsInputConditions()) {
-        m_tableView->setItemDelegateForColumn(3, new DepthComboBoxDelegate);
-        m_tableView->setItemDelegateForColumn(4, new MotionTypeDelegate);
+    if (_outputCatalog->needsInputConditions()) {
+        _tableView->setItemDelegateForColumn(3, new DepthComboBoxDelegate);
+        _tableView->setItemDelegateForColumn(4, new MotionTypeDelegate);
     }
 }
 
 void OutputTableFrame::setReadOnly(bool readOnly)
 {
-    m_addButton->setHidden(readOnly);
-    m_removeButton->setHidden(readOnly);
-    m_tableView->setReadOnly(readOnly);
+    _addButton->setHidden(readOnly);
+    _removeButton->setHidden(readOnly);
+    _tableView->setReadOnly(readOnly);
 }
 
 
@@ -91,20 +91,20 @@ void OutputTableFrame::add()
 
     QString item = QInputDialog::getItem(this, tr("Output Selection - Strata"),
                           "Select the output type to add",
-                          m_outputCatalog->names(),
+                          _outputCatalog->names(),
                           0, false, &ok);
 
     if (ok)
-        m_outputCatalog->addRow(item);
+        _outputCatalog->addRow(item);
 }
 
 void OutputTableFrame::remove()
 {
-    QModelIndexList selectedRows = m_tableView->selectionModel()->selectedRows();
-    m_outputCatalog->removeRows(selectedRows.first().row(), selectedRows.size());
+    QModelIndexList selectedRows = _tableView->selectionModel()->selectedRows();
+    _outputCatalog->removeRows(selectedRows.first().row(), selectedRows.size());
 }
 
 void OutputTableFrame::updateButtons()
 {
-    m_removeButton->setEnabled(m_tableView->selectionModel()->selectedRows().size());
+    _removeButton->setEnabled(_tableView->selectionModel()->selectedRows().size());
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,20 +46,20 @@ QString FrequencyDependentCalculator::toHtml() const
             "</table>"
             "</li>"
             )
-            .arg(m_errorTolerance)
-            .arg(m_maxIterations);
+            .arg(_errorTolerance)
+            .arg(_maxIterations);
 }
 
 bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::complex<double> > strainTf)
 {
-    const double strainMax = 100 * m_motion->calcMaxStrain(strainTf);
+    const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
     if (strainMax <= 0)
         return false;
 
-    const QVector<double> strainFas = m_motion->absFourierVel(strainTf);
+    const QVector<double> strainFas = _motion->absFourierVel(strainTf);
 
-    const QVector<double> &freq = m_motion->freq();
+    const QVector<double> &freq = _motion->freq();
 
     // Compute the mean frequency and mean strain parameters defined by Kausel and Assimaki (2002)
     double numer = 0;
@@ -89,10 +89,10 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
     const double strainAvg = sum / freqAvg;
 
     // Update the sublayer with the representative strain -- FIXME strainAvg doesn't appear to be representative
-    m_site->subLayers()[index].setStrain(strainMax, strainMax);
+    _site->subLayers()[index].setStrain(strainMax, strainMax);
 
     // Calculate model parameter using a least squares fit
-    const int n = m_nf - offset;
+    const int n = _nf - offset;
     double chisq;
     gsl_multifit_linear_workspace* work = gsl_multifit_linear_alloc(n, 2);
     gsl_matrix* model = gsl_matrix_alloc(n, 2);
@@ -125,9 +125,9 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
     double modulus;
     double damping;
     double strain;
-    const SubLayer &sl = m_site->subLayers().at(index);
+    const SubLayer &sl = _site->subLayers().at(index);
 
-    for (int i = 0; i < m_nf; ++i) {
+    for (int i = 0; i < _nf; ++i) {
         // Compute the strain from the function
         if (freq.at(i) < freqAvg) {
             strain = 1.;
@@ -139,7 +139,7 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
         strain *= strainMax;
 
         sl.interp(strain, &modulus, &damping);
-        m_shearMod[index][i] = calcCompShearMod(modulus, damping / 100.);
+        _shearMod[index][i] = calcCompShearMod(modulus, damping / 100.);
     }
 
     return true;

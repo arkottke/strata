@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@
 EquivalentLinearCalculator::EquivalentLinearCalculator(QObject *parent)
     : AbstractIterativeCalculator(parent)
 {
-    m_strainRatio = 0.65;
+    _strainRatio = 0.65;
 }
 
 QString EquivalentLinearCalculator::toHtml() const
@@ -42,41 +42,41 @@ QString EquivalentLinearCalculator::toHtml() const
             "</table>"
             "</li>"
             )
-            .arg(m_strainRatio)
-            .arg(m_errorTolerance)
-            .arg(m_maxIterations);
+            .arg(_strainRatio)
+            .arg(_errorTolerance)
+            .arg(_maxIterations);
 }
 
 double EquivalentLinearCalculator::strainRatio() const
 {
-    return m_strainRatio;
+    return _strainRatio;
 }
 
 void EquivalentLinearCalculator::setStrainRatio(double strainRatio)
 {
-    if (m_strainRatio != strainRatio) {
-        m_strainRatio = strainRatio;
+    if (_strainRatio != strainRatio) {
+        _strainRatio = strainRatio;
 
-        emit strainRatioChanged(m_strainRatio);
+        emit strainRatioChanged(_strainRatio);
         emit wasModified();
     }
 }
 
 bool EquivalentLinearCalculator::updateSubLayer(int index, const QVector<std::complex<double> > strainTf)
 {
-    const double strainMax = 100 * m_motion->calcMaxStrain(strainTf);
+    const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
     if (strainMax <= 0)
         return false;
 
-    m_site->subLayers()[index].setStrain(m_strainRatio * strainMax, strainMax);
+    _site->subLayers()[index].setStrain(_strainRatio * strainMax, strainMax);
 
     // Compute the complex shear modulus and complex shear-wave velocity
     // for each soil layer -- these change because the damping and shear
     // modulus change.
-    m_shearMod[index].fill(calcCompShearMod(
-            m_site->subLayers().at(index).shearMod(),
-            m_site->subLayers().at(index).damping() / 100.));
+    _shearMod[index].fill(calcCompShearMod(
+            _site->subLayers().at(index).shearMod(),
+            _site->subLayers().at(index).damping() / 100.));
 
     return true;
 }
@@ -84,13 +84,13 @@ bool EquivalentLinearCalculator::updateSubLayer(int index, const QVector<std::co
 void EquivalentLinearCalculator::fromJson(const QJsonObject &json)
 {
     AbstractIterativeCalculator::fromJson(json);
-    m_strainRatio = json["strainRatio"].toDouble();
+    _strainRatio = json["strainRatio"].toDouble();
 }
 
 QJsonObject EquivalentLinearCalculator::toJson() const
 {
     QJsonObject json = AbstractIterativeCalculator ::toJson();
-    json["strainRatio"] = m_strainRatio;
+    json["strainRatio"] = _strainRatio;
     return json;
 }
 
@@ -100,7 +100,7 @@ QDataStream & operator<< (QDataStream & out,
     out << (quint8)1;
 
     out << qobject_cast<const AbstractIterativeCalculator*>(elc)
-            << elc->m_strainRatio;
+            << elc->_strainRatio;
 
     return out;
 }
@@ -112,7 +112,7 @@ QDataStream & operator>> (QDataStream & in,
     in >> ver;
 
     in >> qobject_cast<AbstractIterativeCalculator*>(elc);
-    in >> elc->m_strainRatio;
+    in >> elc->_strainRatio;
 
     return in;
 }

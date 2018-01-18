@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,16 +43,16 @@ class OutputExportDialog : public QDialog
 
     private:
         //! Site response model information
-        OutputCatalog* m_model;
+        OutputCatalog* _model;
 
         //! Widget for display the output
-        QTableWidget* m_tableWidget;
+        QTableWidget* _tableWidget;
 
         //! Selected destination directory
-        QLineEdit * m_destDirLineEdit;
+        QLineEdit * _destDirLineEdit;
 
         //! Selected fileName prefix
-        QLineEdit * m_prefixLineEdit;
+        QLineEdit * _prefixLineEdit;
 
         //! Create the page
         void createDialog();

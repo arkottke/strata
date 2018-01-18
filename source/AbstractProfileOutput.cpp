@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,13 +36,13 @@
 #include <qwt_scale_engine.h>
 
 AbstractProfileOutput::AbstractProfileOutput(OutputCatalog* catalog, bool interpolated)
-    : AbstractOutput(catalog), m_enabled(false)
+    : AbstractOutput(catalog), _enabled(false)
 {    
     if (interpolated)
-        m_interp = new LinearOutputInterpolater;
+        _interp = new LinearOutputInterpolater;
 
-    m_statistics = new OutputStatistics(this);
-    connect(m_statistics, SIGNAL(wasModified()),
+    _statistics = new OutputStatistics(this);
+    connect(_statistics, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 }
 
@@ -53,12 +53,12 @@ QString AbstractProfileOutput::fullName() const
 
 bool AbstractProfileOutput::enabled() const
 {
-    return m_enabled;
+    return _enabled;
 }
 
 void AbstractProfileOutput::setEnabled(bool enabled)
 {
-    m_enabled = enabled;
+    _enabled = enabled;
     emit wasModified();
 }
 
@@ -99,7 +99,7 @@ const QString AbstractProfileOutput::yLabel() const
 const QVector<double>& AbstractProfileOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
-    return m_catalog->depth();
+    return _catalog->depth();
 }
 
 void AbstractProfileOutput::extract(AbstractCalculator* const calculator,
@@ -132,13 +132,13 @@ void AbstractProfileOutput::extrap(const QVector<double> & ref, QVector<double> 
 void AbstractProfileOutput::fromJson(const QJsonObject &json)
 {
     AbstractOutput::fromJson(json);
-    m_enabled = json["enabled"].toBool();
+    _enabled = json["enabled"].toBool();
 }
 
 QJsonObject AbstractProfileOutput::toJson() const
 {
     QJsonObject json = AbstractOutput::toJson();
-    json["enabled"] = m_enabled;
+    json["enabled"] = _enabled;
     return json;
 }
 
@@ -146,7 +146,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractProfileOutput* apo)
 {
     out << (quint8)1;
 
-    out << apo->m_enabled << qobject_cast<const AbstractOutput*>(apo);
+    out << apo->_enabled << qobject_cast<const AbstractOutput*>(apo);
 
     return out;
 }
@@ -156,7 +156,7 @@ QDataStream & operator>> (QDataStream & in, AbstractProfileOutput* apo)
     quint8 ver;
     in >> ver;
 
-    in >> apo->m_enabled >> qobject_cast<AbstractOutput*>(apo);
+    in >> apo->_enabled >> qobject_cast<AbstractOutput*>(apo);
 
     return in;
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,33 +32,33 @@
 
 NonlinearPropertyCatalog::NonlinearPropertyCatalog()
 {
-    m_modulusFactory = new ModulusFactory;
-    m_dampingFactory = new DampingFactory;
+    _modulusFactory = new ModulusFactory;
+    _dampingFactory = new DampingFactory;
 
-    m_fileName = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+    _fileName = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
                  + "/nonlinearCurves";
 
-    QFile file(m_fileName);
+    QFile file(_fileName);
     if (file.exists() && file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file);
-        in >> *(m_modulusFactory) >> *(m_dampingFactory);
+        in >> *(_modulusFactory) >> *(_dampingFactory);
     } 
 }
 
 NonlinearPropertyCatalog::~NonlinearPropertyCatalog()
 {
-    delete m_modulusFactory;
-    delete m_dampingFactory;
+    delete _modulusFactory;
+    delete _dampingFactory;
 }
 
 ModulusFactory* NonlinearPropertyCatalog::modulusFactory()
 {
-    return m_modulusFactory;
+    return _modulusFactory;
 }
 
 DampingFactory* NonlinearPropertyCatalog::dampingFactory()
 {
-    return m_dampingFactory;
+    return _dampingFactory;
 }
 
 bool NonlinearPropertyCatalog::save() const
@@ -70,10 +70,10 @@ bool NonlinearPropertyCatalog::save() const
         return false;
     }
 
-    QFile file(m_fileName);
+    QFile file(_fileName);
     if (file.open(QIODevice::WriteOnly)) {
         QDataStream out(&file);
-        out << *(m_modulusFactory) << *(m_dampingFactory);
+        out << *(_modulusFactory) << *(_dampingFactory);
     } else {
         return false;
     }

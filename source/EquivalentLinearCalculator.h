@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +55,7 @@ protected:
     virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf);
 
     //! Ratio between the maximum strain and the strain of the layer
-    double m_strainRatio;
+    double _strainRatio;
 };
 
 #endif // EQUIVALENTLINEARCALCULATOR_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@
 #include <cmath>
 
 Distribution::Distribution(gsl_rng * rng, QObject * parent)
-    : AbstractDistribution(parent), m_rng(rng)
+    : AbstractDistribution(parent), _rng(rng)
 {
 }
 
@@ -36,17 +36,17 @@ double Distribution::rand()
 {
     double value = 0;
 
-    switch(m_type) {
+    switch(_type) {
     case Uniform:
         // Return the variable -- no trunction needed
-        value = gsl_ran_flat(m_rng, m_min, m_max);
+        value = gsl_ran_flat(_rng, _min, _max);
         break;
     case Normal:
         // Generate the depth
-        value = m_avg + gsl_ran_gaussian(m_rng, m_stdev);
+        value = _avg + gsl_ran_gaussian(_rng, _stdev);
         break;
     case LogNormal:
-        value = gsl_ran_lognormal(m_rng, log(m_avg), m_stdev);
+        value = gsl_ran_lognormal(_rng, log(_avg), _stdev);
         break;
     default:
         return -1;
@@ -55,5 +55,5 @@ double Distribution::rand()
     // setVaried applies the limits to the value
     setVaried(value);
 
-    return m_varied;
+    return _varied;
 }

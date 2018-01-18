@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,32 +39,32 @@
 SoilType::SoilType(QObject *parent)
     : QObject(parent)
 { 
-    m_untWt = -1;
-    m_damping = 5.;
+    _untWt = -1;
+    _damping = 5.;
 
-    m_isVaried = true;
-    m_saveData = false;
+    _isVaried = true;
+    _saveData = false;
 
     // Assume custom models
-    m_modulusModel = new CustomNonlinearProperty(NonlinearProperty::ModulusReduction, false, this);
-    m_dampingModel = new CustomNonlinearProperty(NonlinearProperty::Damping, false, this);
+    _modulusModel = new CustomNonlinearProperty(NonlinearProperty::ModulusReduction, false, this);
+    _dampingModel = new CustomNonlinearProperty(NonlinearProperty::Damping, false, this);
 
-    m_meanStress = 2;
-    m_pi = 0;
-    m_ocr = 1;
-    m_freq = 1;
-    m_nCycles = 10;
+    _meanStress = 2;
+    _pi = 0;
+    _ocr = 1;
+    _freq = 1;
+    _nCycles = 10;
 }
 
 double SoilType::untWt() const
 {
-    return m_untWt;
+    return _untWt;
 }
 
 void SoilType::setUntWt(double untWt)
 {
-    if ( m_untWt != untWt ) {
-        m_untWt = untWt;
+    if ( _untWt != untWt ) {
+        _untWt = untWt;
 
         emit wasModified();
     }
@@ -72,18 +72,18 @@ void SoilType::setUntWt(double untWt)
 
 double SoilType::density() const
 {
-    return m_untWt / Units::instance()->gravity();
+    return _untWt / Units::instance()->gravity();
 }
 
 double SoilType::damping() const
 {
-    return m_damping;
+    return _damping;
 }
 
 void SoilType::setDamping(double damping)
 {
-    if ( m_damping != damping ) {
-        m_damping = damping;
+    if ( _damping != damping ) {
+        _damping = damping;
 
         emit wasModified();        
     }
@@ -91,24 +91,24 @@ void SoilType::setDamping(double damping)
 
 const QString & SoilType::name() const
 {
-    return m_name;
+    return _name;
 }
 
 void SoilType::setName(const QString & name) 
 {
-    m_name = name;
-    emit nameChanged(m_name);
+    _name = name;
+    emit nameChanged(_name);
 }
 
 const QString & SoilType::notes() const
 {
-    return m_notes;
+    return _notes;
 }
 
 void SoilType::setNotes(const QString & notes)
 {
-    if ( m_notes != notes ) {
-        m_notes = notes;
+    if ( _notes != notes ) {
+        _notes = notes;
 
         emit wasModified();
     }
@@ -116,22 +116,22 @@ void SoilType::setNotes(const QString & notes)
 
 bool SoilType::isVaried() const
 {
-    return m_isVaried;
+    return _isVaried;
 }
 
 void SoilType::setIsVaried(bool isVaried)
 {
-    if ( m_isVaried != isVaried ) {
+    if ( _isVaried != isVaried ) {
         emit wasModified();
     }
 
-    m_isVaried = isVaried;
+    _isVaried = isVaried;
 }
 
 void SoilType::setSaveData(bool saveData)
 {
-    if ( m_saveData != saveData ) {
-        m_saveData = saveData;
+    if ( _saveData != saveData ) {
+        _saveData = saveData;
 
         emit wasModified();
     }
@@ -139,64 +139,64 @@ void SoilType::setSaveData(bool saveData)
 
 bool SoilType::saveData() const
 {
-    return m_saveData;
+    return _saveData;
 }
 
 NonlinearProperty* SoilType::modulusModel()
 {
-    return m_modulusModel;
+    return _modulusModel;
 }
 
 void SoilType::setModulusModel(NonlinearProperty * model)
 {
-    if (m_modulusModel)
-        m_modulusModel->deleteLater();
+    if (_modulusModel)
+        _modulusModel->deleteLater();
 
-    m_modulusModel = model;
-    m_modulusModel->setParent(this);
+    _modulusModel = model;
+    _modulusModel->setParent(this);
 
-    if (DarendeliNonlinearProperty *dnp = qobject_cast<DarendeliNonlinearProperty*>(m_modulusModel))
+    if (DarendeliNonlinearProperty *dnp = qobject_cast<DarendeliNonlinearProperty*>(_modulusModel))
         dnp->calculate(this);
 
-    emit modulusModelChanged(m_modulusModel);
+    emit modulusModelChanged(_modulusModel);
     emit wasModified();
 }
 
 NonlinearProperty* SoilType::dampingModel()
 {
-    return m_dampingModel;
+    return _dampingModel;
 }
 
 void SoilType::setDampingModel(NonlinearProperty * model)
 {
-    if (m_dampingModel)
-        m_dampingModel->deleteLater();
+    if (_dampingModel)
+        _dampingModel->deleteLater();
 
-    m_dampingModel = model;
-    m_dampingModel->setParent(this);
+    _dampingModel = model;
+    _dampingModel->setParent(this);
 
-    if (DarendeliNonlinearProperty *dnp = qobject_cast<DarendeliNonlinearProperty*>(m_dampingModel))
+    if (DarendeliNonlinearProperty *dnp = qobject_cast<DarendeliNonlinearProperty*>(_dampingModel))
         dnp->calculate(this);
 
-    emit dampingModelChanged(m_dampingModel);
+    emit dampingModelChanged(_dampingModel);
     emit wasModified();
 }
 
 bool SoilType::requiresSoilProperties() const
 {
-    return (qobject_cast<DarendeliNonlinearProperty*>(m_modulusModel)
-            || qobject_cast<DarendeliNonlinearProperty*>(m_dampingModel));
+    return (qobject_cast<DarendeliNonlinearProperty*>(_modulusModel)
+            || qobject_cast<DarendeliNonlinearProperty*>(_dampingModel));
 }
 
 double SoilType::meanStress() const
 {
-    return m_meanStress;
+    return _meanStress;
 }
 
 void SoilType::setMeanStress(double meanStress)
 {
-    if ( m_meanStress != meanStress ) {
-        m_meanStress = meanStress;
+    if ( _meanStress != meanStress ) {
+        _meanStress = meanStress;
         computeDarendeliCurves();
         emit wasModified();
     }
@@ -205,12 +205,12 @@ void SoilType::setMeanStress(double meanStress)
 
 double SoilType::pi() const
 {
-    return m_pi;
+    return _pi;
 }
 void SoilType::setPi(double pi)
 {
-    if (m_pi != pi) {
-        m_pi = pi;
+    if (_pi != pi) {
+        _pi = pi;
 
         computeDarendeliCurves();
         emit wasModified();
@@ -219,13 +219,13 @@ void SoilType::setPi(double pi)
 
 double SoilType::ocr() const
 {
-    return m_ocr;
+    return _ocr;
 }
 
 void SoilType::setOcr(double ocr)
 {
-    if ( m_ocr != ocr ) {
-        m_ocr = ocr;
+    if ( _ocr != ocr ) {
+        _ocr = ocr;
         computeDarendeliCurves();
         emit wasModified();
     }
@@ -234,13 +234,13 @@ void SoilType::setOcr(double ocr)
 
 double SoilType::freq() const
 {
-    return m_freq;
+    return _freq;
 }
 
 void SoilType::setFreq(double freq)
 {
-    if ( m_freq != freq ) {
-    	m_freq = freq;
+    if ( _freq != freq ) {
+    	_freq = freq;
         computeDarendeliCurves();
         emit wasModified();
     }
@@ -248,13 +248,13 @@ void SoilType::setFreq(double freq)
 
 int SoilType::nCycles() const
 {
-    return m_nCycles;
+    return _nCycles;
 }
 
 void SoilType::setNCycles(int nCycles)
 {
-    if ( m_nCycles != nCycles ) {
-        m_nCycles = nCycles;
+    if ( _nCycles != nCycles ) {
+        _nCycles = nCycles;
         computeDarendeliCurves();
         emit wasModified();
     }
@@ -265,12 +265,12 @@ void SoilType::computeDarendeliCurves()
     DarendeliNonlinearProperty *dnp;
 
     // Calculate the shear modulus reduction
-    dnp = qobject_cast<DarendeliNonlinearProperty*>(m_modulusModel);
+    dnp = qobject_cast<DarendeliNonlinearProperty*>(_modulusModel);
     if (dnp)
         dnp->calculate(this);
 
     // Calculate the damping curve
-    dnp = qobject_cast<DarendeliNonlinearProperty*>(m_dampingModel);
+    dnp = qobject_cast<DarendeliNonlinearProperty*>(_dampingModel);
     if (dnp)
         dnp->calculate(this);
 }
@@ -286,17 +286,17 @@ QString SoilType::toHtml() const
                        "<tr><th>Initial Damping:</th><td>%5</td></tr>"
                        "<tr><th>Varied:</th><td>%6</td></tr>"
                        )
-            .arg(m_name)
-            .arg(m_notes)
-            .arg(m_untWt)
+            .arg(_name)
+            .arg(_notes)
+            .arg(_untWt)
             .arg(Units::instance()->untWt())
-            .arg(m_damping)
-            .arg(boolToString(m_isVaried));
+            .arg(_damping)
+            .arg(boolToString(_isVaried));
 
 
     // Print the darendeli model parameters
-    if (qobject_cast<DarendeliNonlinearProperty*>(m_modulusModel)
-         || qobject_cast<DarendeliNonlinearProperty*>(m_dampingModel))
+    if (qobject_cast<DarendeliNonlinearProperty*>(_modulusModel)
+         || qobject_cast<DarendeliNonlinearProperty*>(_dampingModel))
         html += tr(
                 "<tr><th>Mean Stress:</th><td>%1 atm</td></tr>"
                 "<tr><th>Plasticity index:</th><td>%2</td>"
@@ -304,35 +304,35 @@ QString SoilType::toHtml() const
                 "<tr><th>Excitation frequency:</th><td>%4 Hz</td></tr>"
                 "<tr><th>Number of cycles:</th><td>%5</td></tr>"
                 )
-        .arg(m_meanStress)
-        .arg(m_pi)
-        .arg(m_ocr)
-        .arg(m_freq)
-        .arg(m_nCycles);
+        .arg(_meanStress)
+        .arg(_pi)
+        .arg(_ocr)
+        .arg(_freq)
+        .arg(_nCycles);
 
     html += "</table>";
 
     // Print the information of the damping and modulus reduction
     // Techincally tables aren't supposed to be used for layout, but fuck em
     html += QString("<table border = \"0\"><tr><td>%1</td><td>%2</td></tr></table>")
-            .arg( m_modulusModel->toHtml()). arg(m_dampingModel->toHtml());
+            .arg( _modulusModel->toHtml()). arg(_dampingModel->toHtml());
 
     return html;
 }
 
 void SoilType::fromJson(const QJsonObject &json)
 {
-    m_untWt = json["untWt"].toDouble();
-    m_damping = json["damping"].toDouble();
-    m_name = json["name"].toString();
-    m_notes = json["notes"].toString();
-    m_isVaried = json["isVaried"].toBool();
-    m_saveData = json["saveData"].toBool();
-    m_meanStress = json["meanStress"].toDouble();
-    m_pi = json["pi"].toDouble();
-    m_ocr = json["ocr"].toDouble();
-    m_freq = json["freq"].toDouble();
-    m_nCycles = json["nCycles"].toDouble();
+    _untWt = json["untWt"].toDouble();
+    _damping = json["damping"].toDouble();
+    _name = json["name"].toString();
+    _notes = json["notes"].toString();
+    _isVaried = json["isVaried"].toBool();
+    _saveData = json["saveData"].toBool();
+    _meanStress = json["meanStress"].toDouble();
+    _pi = json["pi"].toDouble();
+    _ocr = json["ocr"].toDouble();
+    _freq = json["freq"].toDouble();
+    _nCycles = json["nCycles"].toDouble();
 
     QString modulusType = json["modulusType"].toString();
     NonlinearProperty *mnp = deriveModel(NonlinearProperty::ModulusReduction, modulusType);
@@ -350,23 +350,23 @@ void SoilType::fromJson(const QJsonObject &json)
 QJsonObject SoilType::toJson() const
 {
     QJsonObject json;
-    json["untWt"] = m_untWt;
-    json["damping"] = m_damping;
-    json["name"] = m_name;
-    json["notes"] = m_notes;
-    json["isVaried"] = m_isVaried;
-    json["saveData"] = m_saveData;
-    json["meanStress"] = m_meanStress;
-    json["pi"] = m_pi;
-    json["ocr"] = m_ocr;
-    json["freq"] = m_freq;
-    json["nCycles"] = m_nCycles;
+    json["untWt"] = _untWt;
+    json["damping"] = _damping;
+    json["name"] = _name;
+    json["notes"] = _notes;
+    json["isVaried"] = _isVaried;
+    json["saveData"] = _saveData;
+    json["meanStress"] = _meanStress;
+    json["pi"] = _pi;
+    json["ocr"] = _ocr;
+    json["freq"] = _freq;
+    json["nCycles"] = _nCycles;
 
-    json["modulusType"] = m_modulusModel->metaObject()->className();
-    json["modulusModel"] = m_modulusModel->toJson();
+    json["modulusType"] = _modulusModel->metaObject()->className();
+    json["modulusModel"] = _modulusModel->toJson();
 
-    json["dampingType"] = m_dampingModel->metaObject()->className();
-    json["dampingModel"] = m_dampingModel->toJson();
+    json["dampingType"] = _dampingModel->metaObject()->className();
+    json["dampingModel"] = _dampingModel->toJson();
 
     return json;
 }
@@ -375,19 +375,19 @@ QDataStream & operator<< (QDataStream & out, const SoilType* st)
 {
     out << (quint8)1;
 
-    out << st->m_untWt
-            << st->m_damping
-            << st->m_name
-            << st->m_notes
-            << st->m_isVaried
-            << st->m_saveData
-            << st->m_meanStress
-            << st->m_pi
-            << st->m_ocr
-            << st->m_freq
-            << st->m_nCycles
-            << QString(st->m_modulusModel->metaObject()->className()) << st->m_modulusModel
-            << QString(st->m_dampingModel->metaObject()->className()) << st->m_dampingModel;
+    out << st->_untWt
+            << st->_damping
+            << st->_name
+            << st->_notes
+            << st->_isVaried
+            << st->_saveData
+            << st->_meanStress
+            << st->_pi
+            << st->_ocr
+            << st->_freq
+            << st->_nCycles
+            << QString(st->_modulusModel->metaObject()->className()) << st->_modulusModel
+            << QString(st->_dampingModel->metaObject()->className()) << st->_dampingModel;
 
     return out;
 }
@@ -397,17 +397,17 @@ QDataStream & operator>> (QDataStream & in, SoilType* st)
     quint8 ver;
     in >> ver;
 
-    in >> st->m_untWt
-            >> st->m_damping
-            >> st->m_name
-            >> st->m_notes
-            >> st->m_isVaried
-            >> st->m_saveData
-            >> st->m_meanStress
-            >> st->m_pi
-            >> st->m_ocr
-            >> st->m_freq
-            >> st->m_nCycles;
+    in >> st->_untWt
+            >> st->_damping
+            >> st->_name
+            >> st->_notes
+            >> st->_isVaried
+            >> st->_saveData
+            >> st->_meanStress
+            >> st->_pi
+            >> st->_ocr
+            >> st->_freq
+            >> st->_nCycles;
 
     // Load both nonlinear properties
     for (int i = 0; i < 2; ++i) {

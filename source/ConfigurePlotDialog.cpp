@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,35 +38,35 @@ AxisOptions::AxisOptions( const QString & title, QWidget * parent )
     // Spacing combo box
     layout->addWidget( new QLabel(tr("Spacing:")), 0, 0);
 
-    m_spacingComboBox = new QComboBox;
-    m_spacingComboBox->addItem(tr("Linear"));
-    m_spacingComboBox->addItem(tr("Log10"));
+    _spacingComboBox = new QComboBox;
+    _spacingComboBox->addItem(tr("Linear"));
+    _spacingComboBox->addItem(tr("Log10"));
 
-    layout->addWidget( m_spacingComboBox, 0, 1);
+    layout->addWidget( _spacingComboBox, 0, 1);
 
     // Automatic scaling of axis
-    m_autoCheckBox = new QCheckBox(tr("Automatic scaling of axis"));
+    _autoCheckBox = new QCheckBox(tr("Automatic scaling of axis"));
 
-    layout->addWidget( m_autoCheckBox, 1, 0);
+    layout->addWidget( _autoCheckBox, 1, 0);
 
     // Minimum value
     layout->addWidget( new QLabel(tr("Minimum value:")), 2, 0);
 
-    m_minLineEdit = new QLineEdit;
-    m_minLineEdit->setValidator( new QDoubleValidator(m_minLineEdit));
+    _minLineEdit = new QLineEdit;
+    _minLineEdit->setValidator( new QDoubleValidator(_minLineEdit));
 
-    layout->addWidget( m_minLineEdit, 2, 1 );
+    layout->addWidget( _minLineEdit, 2, 1 );
 
     // Maximum value
     layout->addWidget( new QLabel(tr("Maximum value:")), 3, 0);
 
-    m_maxLineEdit = new QLineEdit;
-    m_maxLineEdit->setValidator( new QDoubleValidator(m_maxLineEdit));
+    _maxLineEdit = new QLineEdit;
+    _maxLineEdit->setValidator( new QDoubleValidator(_maxLineEdit));
 
-    layout->addWidget( m_maxLineEdit, 3, 1 );
+    layout->addWidget( _maxLineEdit, 3, 1 );
 
-    connect( m_autoCheckBox, SIGNAL(toggled(bool)), m_minLineEdit, SLOT(setDisabled(bool)));
-    connect( m_autoCheckBox, SIGNAL(toggled(bool)), m_maxLineEdit, SLOT(setDisabled(bool)));
+    connect( _autoCheckBox, SIGNAL(toggled(bool)), _minLineEdit, SLOT(setDisabled(bool)));
+    connect( _autoCheckBox, SIGNAL(toggled(bool)), _maxLineEdit, SLOT(setDisabled(bool)));
 
     setLayout(layout);
 }
@@ -74,28 +74,28 @@ AxisOptions::AxisOptions( const QString & title, QWidget * parent )
 void AxisOptions::setDefaults( const QwtScaleEngine * scaleEngine, bool autoScale, const QwtScaleDiv * scaleDiv )
 {
     if ( dynamic_cast<const QwtLinearScaleEngine*>(scaleEngine) )
-        m_spacingComboBox->setCurrentIndex(0);
+        _spacingComboBox->setCurrentIndex(0);
     else
-        m_spacingComboBox->setCurrentIndex(1);
+        _spacingComboBox->setCurrentIndex(1);
 
     if ( autoScale )
-        m_autoCheckBox->setChecked(true);
+        _autoCheckBox->setChecked(true);
     else
-        m_autoCheckBox->setChecked(false);
+        _autoCheckBox->setChecked(false);
 
     // Get lower and upper bounds
 #if QWT_VERSION < 0x050200
-    m_minLineEdit->setText(QString::number(scaleDiv->lBound()));
-    m_maxLineEdit->setText(QString::number(scaleDiv->hBound()));
+    _minLineEdit->setText(QString::number(scaleDiv->lBound()));
+    _maxLineEdit->setText(QString::number(scaleDiv->hBound()));
 #else
-    m_minLineEdit->setText(QString::number(scaleDiv->lowerBound()));
-    m_maxLineEdit->setText(QString::number(scaleDiv->upperBound()));
+    _minLineEdit->setText(QString::number(scaleDiv->lowerBound()));
+    _maxLineEdit->setText(QString::number(scaleDiv->upperBound()));
 #endif
 }
 
 bool AxisOptions::linearSpacing() const
 {
-    if ( m_spacingComboBox->currentIndex() == 0 )
+    if ( _spacingComboBox->currentIndex() == 0 )
         return true;
     else 
         return false;
@@ -103,51 +103,51 @@ bool AxisOptions::linearSpacing() const
 
 bool AxisOptions::autoScale() const
 {
-    return m_autoCheckBox->isChecked();
+    return _autoCheckBox->isChecked();
 }
 
 double AxisOptions::min() const
 {
-    return m_minLineEdit->text().toDouble();
+    return _minLineEdit->text().toDouble();
 }
 
 double AxisOptions::max() const
 {
-    return m_maxLineEdit->text().toDouble();
+    return _maxLineEdit->text().toDouble();
 }
 
 ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
-    : QDialog(parent), m_plot(plot)
+    : QDialog(parent), _plot(plot)
 {
     // Create the dialog
     QGridLayout * layout = new QGridLayout;
 
-    m_xAxisOptions = new AxisOptions(tr("X Axis") );
-    m_xAxisOptions->setDefaults( 
-            m_plot->axisScaleEngine( QwtPlot::xBottom ), 
-            m_plot->axisAutoScale( QwtPlot::xBottom ), 
+    _xAxisOptions = new AxisOptions(tr("X Axis") );
+    _xAxisOptions->setDefaults( 
+            _plot->axisScaleEngine( QwtPlot::xBottom ), 
+            _plot->axisAutoScale( QwtPlot::xBottom ), 
 #if QWT_VERSION < 0x060100
-            m_plot->axisScaleDiv( QwtPlot::xBottom )
+            _plot->axisScaleDiv( QwtPlot::xBottom )
 #else
-            &(m_plot->axisScaleDiv( QwtPlot::yLeft ))
+            &(_plot->axisScaleDiv( QwtPlot::yLeft ))
 #endif
             );
 
    
-    layout->addWidget( m_xAxisOptions, 0, 0 );
+    layout->addWidget( _xAxisOptions, 0, 0 );
 
-    m_yAxisOptions = new AxisOptions(tr("Y Axis") );
-    m_yAxisOptions->setDefaults( 
-            m_plot->axisScaleEngine( QwtPlot::yLeft ), 
-            m_plot->axisAutoScale( QwtPlot::yLeft ), 
+    _yAxisOptions = new AxisOptions(tr("Y Axis") );
+    _yAxisOptions->setDefaults( 
+            _plot->axisScaleEngine( QwtPlot::yLeft ), 
+            _plot->axisAutoScale( QwtPlot::yLeft ), 
 #if QWT_VERSION < 0x060100
-            m_plot->axisScaleDiv( QwtPlot::yLeft )
+            _plot->axisScaleDiv( QwtPlot::yLeft )
 #else
-            &(m_plot->axisScaleDiv( QwtPlot::yLeft ))
+            &(_plot->axisScaleDiv( QwtPlot::yLeft ))
 #endif
             );
     
-    layout->addWidget( m_yAxisOptions, 1, 0 );
+    layout->addWidget( _yAxisOptions, 1, 0 );
     
     // Add the buttons
     QDialogButtonBox * buttonBox = new QDialogButtonBox( 
@@ -163,15 +163,15 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
 
 void ConfigurePlotDialog::tryAccept()
 {
-    setAxis( QwtPlot::xBottom, m_xAxisOptions );
-    setAxis( QwtPlot::yLeft, m_yAxisOptions );
+    setAxis( QwtPlot::xBottom, _xAxisOptions );
+    setAxis( QwtPlot::yLeft, _yAxisOptions );
     
     accept();
 }
 
 void ConfigurePlotDialog::setAxis( int axisid, const AxisOptions * axisOptions )
 {
-    QwtScaleEngine * oldEngine = m_plot->axisScaleEngine(axisid);
+    QwtScaleEngine * oldEngine = _plot->axisScaleEngine(axisid);
     QwtScaleEngine * newEngine;
 
     if ( axisOptions->linearSpacing() )
@@ -182,11 +182,11 @@ void ConfigurePlotDialog::setAxis( int axisid, const AxisOptions * axisOptions )
     newEngine->setAttributes( oldEngine->attributes() );
 
     // Deletes the old engine
-    m_plot->setAxisScaleEngine( axisid, newEngine );
+    _plot->setAxisScaleEngine( axisid, newEngine );
 
     // Set the axis range
     if ( axisOptions->autoScale() )
-        m_plot->setAxisAutoScale(axisid);
+        _plot->setAxisAutoScale(axisid);
     else
-        m_plot->setAxisScale( axisid, axisOptions->min(), axisOptions->max() );
+        _plot->setAxisScale( axisid, axisOptions->min(), axisOptions->max() );
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ public:
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 
 protected:
-    QPointer<AbstractNonlinearPropertyFactory> m_factory;
+    QPointer<AbstractNonlinearPropertyFactory> _factory;
 };
 
 #endif // NONLINEAR_PROPERTY_DELEGATE_H

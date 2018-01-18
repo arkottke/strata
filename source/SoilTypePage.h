@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,33 +75,33 @@ private:
     QGroupBox* createSoilPropsGroupBox();
     QGroupBox* createNlPropTableBox();
 
-    TableGroupBox* m_soilTypeTableBox;     
-    NonlinearPropertyDelegate* m_modulusDelegate;
-    NonlinearPropertyDelegate* m_dampingDelegate;
-    TableGroupBox* m_nlPropTableBox;
+    TableGroupBox* _soilTypeTableBox;     
+    NonlinearPropertyDelegate* _modulusDelegate;
+    NonlinearPropertyDelegate* _dampingDelegate;
+    TableGroupBox* _nlPropTableBox;
 
-    QDoubleSpinBox* m_bedrockUntWtSpinBox;
-    QDoubleSpinBox* m_bedrockDampingSpinBox;
-    QCheckBox* m_varyBedrockDampingCheckBox;
+    QDoubleSpinBox* _bedrockUntWtSpinBox;
+    QDoubleSpinBox* _bedrockDampingSpinBox;
+    QCheckBox* _varyBedrockDampingCheckBox;
 
-    QDoubleSpinBox* m_waterTableDepthSpinBox;
+    QDoubleSpinBox* _waterTableDepthSpinBox;
 
-    QGroupBox* m_randomizerGroupBox;
-    QComboBox* m_nprModelComboBox;
-    NonlinearPropertyUncertaintyWidget* m_modulusUncertWidget;
-    NonlinearPropertyUncertaintyWidget* m_dampingUncertWidget;
-    QDoubleSpinBox* m_correlSpinBox;
+    QGroupBox* _randomizerGroupBox;
+    QComboBox* _nprModelComboBox;
+    NonlinearPropertyUncertaintyWidget* _modulusUncertWidget;
+    NonlinearPropertyUncertaintyWidget* _dampingUncertWidget;
+    QDoubleSpinBox* _correlSpinBox;
 
-    QGroupBox* m_soilPropsGroupBox;
-    QDoubleSpinBox* m_stressSpinBox;
-    QDoubleSpinBox* m_piSpinBox;
-    QDoubleSpinBox* m_ocrSpinBox;
-    QDoubleSpinBox* m_freqSpinBox;
-    QSpinBox* m_nCyclesSpinBox;
+    QGroupBox* _soilPropsGroupBox;
+    QDoubleSpinBox* _stressSpinBox;
+    QDoubleSpinBox* _piSpinBox;
+    QDoubleSpinBox* _ocrSpinBox;
+    QDoubleSpinBox* _freqSpinBox;
+    QSpinBox* _nCyclesSpinBox;
 
-    QPointer<SoilTypeCatalog> m_soilTypeCatalog;
+    QPointer<SoilTypeCatalog> _soilTypeCatalog;
 
     //! If the widget is in read-only mode
-    bool m_readOnly;
+    bool _readOnly;
 };
 #endif

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -66,9 +66,9 @@ public:
 
 protected:
     //! Type of models the factor produces
-    NonlinearProperty::Type m_type;
+    NonlinearProperty::Type _type;
 
-    QList<NonlinearProperty*> m_models;
+    QList<NonlinearProperty*> _models;
 };
 
 #endif // ABSTRACTNONLINEARPROPERTYFACTORY_H

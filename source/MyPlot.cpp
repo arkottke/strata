@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,14 +38,14 @@ MyPlot::MyPlot(const QwtText & title, QWidget * parent)
 
 void MyPlot::contextMenuEvent( QContextMenuEvent * event )
 {
-    m_contextMenu->popup(event->globalPos());
+    _contextMenu->popup(event->globalPos());
 }
 
 void MyPlot::createContextMenu()
 {
-    m_contextMenu = new QMenu;
+    _contextMenu = new QMenu;
     
-    m_contextMenu->addAction(tr("Copy"), this, SLOT(MyPlot::copyPlot()), QKeySequence(tr("Ctrl+c")));
+    _contextMenu->addAction(tr("Copy"), this, SLOT(MyPlot::copyPlot()), QKeySequence(tr("Ctrl+c")));
 }
 
 void MyPlot::copyPlot()

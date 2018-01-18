@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ int CrustalModel::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_thickness.size();
+    return _thickness.size();
 }
 
 int CrustalModel::columnCount(const QModelIndex & parent) const
@@ -81,11 +81,11 @@ QVariant CrustalModel::data(const QModelIndex & index, int role) const
         switch (index.column())
         {
         case ThicknessColumn:
-            return QString::number(m_thickness.at(index.row()));
+            return QString::number(_thickness.at(index.row()));
         case VelocityColumn:
-            return QString::number(m_velocity.at(index.row()));
+            return QString::number(_velocity.at(index.row()));
         case DensityColumn:
-            return QString::number(m_density.at(index.row()));
+            return QString::number(_density.at(index.row()));
         }
     }
 
@@ -104,13 +104,13 @@ bool CrustalModel::setData( const QModelIndex & index, const QVariant & value, i
     if (b) {
         switch (index.column()) {
         case ThicknessColumn:
-            m_thickness[index.row()] = d;
+            _thickness[index.row()] = d;
             break;
         case VelocityColumn:
-            m_velocity[index.row()] = d;
+            _velocity[index.row()] = d;
             break;
         case DensityColumn:
-            m_density[index.row()] = d;
+            _density[index.row()] = d;
             break;
         }
         dataChanged(index, index);
@@ -129,9 +129,9 @@ bool CrustalModel::insertRows(int row, int count, const QModelIndex &parent)
 {
     emit beginInsertRows( parent, row, row+count-1 );
 
-    m_thickness.insert(row, count, 0);
-    m_velocity.insert(row, count, 0);
-    m_density.insert(row, count, 0);
+    _thickness.insert(row, count, 0);
+    _velocity.insert(row, count, 0);
+    _density.insert(row, count, 0);
 
     emit endInsertRows();
 
@@ -142,9 +142,9 @@ bool CrustalModel::removeRows(int row, int count, const QModelIndex &parent)
 {
     emit beginRemoveRows(parent, row, row+count-1 );
 
-    m_thickness.remove(row, count);
-    m_velocity.remove(row, count);
-    m_density.remove(row, count);
+    _thickness.remove(row, count);
+    _velocity.remove(row, count);
+    _density.remove(row, count);
 
     emit endRemoveRows();
 
@@ -183,10 +183,10 @@ QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
 {
     QVector<double> amp(freq.size());
     // Slowness (inverse of the crustal velocity
-    QVector<double> slowness(m_velocity.size());
+    QVector<double> slowness(_velocity.size());
 
     for (int i = 0; i < slowness.size(); ++i) {
-        slowness[i] = 1./m_velocity.at(i);
+        slowness[i] = 1./_velocity.at(i);
     }
 
     // average slowness over a depth range (1/velocity)
@@ -202,15 +202,15 @@ QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
             ++count;
             depth_f[i] = 1. / (4 * freq.at(i) * avgSlow.at(i));
             const double oldValue = avgSlow.at(i);
-            avgSlow[i] = averageValue(m_thickness, slowness, depth_f.at(i));
+            avgSlow[i] = averageValue(_thickness, slowness, depth_f.at(i));
             error = fabs((oldValue - avgSlow.at(i)) / avgSlow.at(i));
         } while (error > 0.005 && count < 10);
     }
 
     for (int i = 0; i < freq.size(); ++i) {
         // Average density for the depth range
-        const double avgDensity = averageValue(m_thickness, m_density, depth_f.at(i));
-        amp[i] = sqrt((m_velocity.at(i) * m_density.at(i)) / (avgDensity / avgSlow.at(i)));
+        const double avgDensity = averageValue(_thickness, _density, depth_f.at(i));
+        amp[i] = sqrt((_velocity.at(i) * _density.at(i)) / (avgDensity / avgSlow.at(i)));
     }
 
     return amp;
@@ -220,19 +220,19 @@ void CrustalModel::fromJson(const QJsonObject &json)
 {
     beginResetModel();
 
-    m_thickness.clear();
+    _thickness.clear();
     foreach (const QJsonValue &v, json["thickness"].toArray()) {
-        m_thickness << v.toDouble();
+        _thickness << v.toDouble();
     }
 
-    m_velocity.clear();
+    _velocity.clear();
     foreach (const QJsonValue &v, json["velocity"].toArray()) {
-        m_velocity << v.toDouble();
+        _velocity << v.toDouble();
     }
 
-    m_density.clear();
+    _density.clear();
     foreach (const QJsonValue &v, json["density"].toArray()) {
-        m_density << v.toDouble();
+        _density << v.toDouble();
     }
 
     endResetModel();
@@ -243,19 +243,19 @@ QJsonObject CrustalModel::toJson() const
     QJsonObject json;
 
     QJsonArray thickness;
-    foreach (const double &d, m_thickness) {
+    foreach (const double &d, _thickness) {
         thickness << QJsonValue(d);
     }
     json["thickness"] = thickness;
 
     QJsonArray velocity;
-    foreach (const double &d, m_velocity) {
+    foreach (const double &d, _velocity) {
         velocity << QJsonValue(d);
     }
     json["velocity"] = velocity;
 
     QJsonArray density;
-    foreach (const double &d, m_density) {
+    foreach (const double &d, _density) {
         density << QJsonValue(d);
     }
     json["density"] = density;
@@ -267,7 +267,7 @@ QDataStream& operator<< (QDataStream & out, const CrustalModel* cm)
 {
     out << (quint8)1;
 
-    out << cm->m_thickness << cm->m_velocity << cm->m_density;
+    out << cm->_thickness << cm->_velocity << cm->_density;
 
     return out;
 }
@@ -279,7 +279,7 @@ QDataStream& operator>> (QDataStream & in, CrustalModel* cm)
 
     cm->beginResetModel();
 
-    in >> cm->m_thickness >> cm->m_velocity >> cm->m_density;
+    in >> cm->_thickness >> cm->_velocity >> cm->_density;
 
     cm->endResetModel();
 

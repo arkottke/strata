@@ -18,22 +18,22 @@ public:
 public slots:
     void updateLog(QString line);
     void updateEtc(int value);
-    void rangeChanged(int m_begin, int m_end);
+    void rangeChanged(int _begin, int _end);
     void finalize();
 
 private:
     // All files to process
-    QStringList m_fileNames;
+    QStringList _fileNames;
 
     // Current site response model
-    SiteResponseModel * m_model;
+    SiteResponseModel * _model;
 
     // model range for timing
-    int m_begin;
-    int m_end;
+    int _begin;
+    int _end;
 
     // timer for updates
-    QTime m_timer;
+    QTime _timer;
 };
 
 #endif // BATCHRUNNER_H

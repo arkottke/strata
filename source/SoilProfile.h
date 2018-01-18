@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -219,20 +219,20 @@ private:
          * phase.  The ordering of soil layers and velocity layers is used to
          * facilitate the varying of the soil properties.
          */
-    QList<SoilLayer*> m_soilLayers;
-    QList<SubLayer> m_subLayers;
+    QList<SoilLayer*> _soilLayers;
+    QList<SubLayer> _subLayers;
 
     //! Parent site response model
-    SiteResponseModel* m_siteResponseModel;
+    SiteResponseModel* _siteResponseModel;
 
     //! Catalog of defined soil types
-    SoilTypeCatalog* m_soilTypeCatalog;
+    SoilTypeCatalog* _soilTypeCatalog;
 
     //! Bedrock layer in the model
-    RockLayer* m_bedrock;
+    RockLayer* _bedrock;
 
     //! Water table depth
-    double m_waterTableDepth;
+    double _waterTableDepth;
 
     /*! @name Input motion specification
      */
@@ -242,45 +242,45 @@ private:
          * surface.  If the depth is less than zero then the depth of the
          * bedrock is used.  The user defines the depth of the input location.
          */
-    double m_inputDepth;
+    double _inputDepth;
 
     //! Index associated with the location
-    Location m_inputLocation;
+    Location _inputLocation;
     //@}
 
     /*! @name Variation parameter
         */
     //{@
     //! Variation of the velocity profile
-    ProfileRandomizer* m_profileRandomizer;
+    ProfileRandomizer* _profileRandomizer;
 
     //! Variation of the soil properites
-    NonlinearPropertyRandomizer* m_nonlinearPropertyRandomizer;
+    NonlinearPropertyRandomizer* _nonlinearPropertyRandomizer;
 
     //! If the site is varied
-    bool m_isVaried;
+    bool _isVaried;
 
     //! Number of artificial profiles to generate
-    int m_profileCount;
+    int _profileCount;
 
     //! Method used to find representative soillayer
-    LayerSelectionMethod m_layerSelectionMethod;
+    LayerSelectionMethod _layerSelectionMethod;
 
     //! Random number generator
-    gsl_rng* m_rng;
+    gsl_rng* _rng;
     //@}
 
     /*! @name Layer discretization parameters
         */
     //@{
     //! Maximum frequency of interest
-    double m_maxFreq;
+    double _maxFreq;
 
     //! Wavelength fraction
-    double m_waveFraction;
+    double _waveFraction;
 
     //! Disable the layer discretization and use the layering provided
-    bool m_disableAutoDiscretization;
+    bool _disableAutoDiscretization;
     //@}
 };
 #endif

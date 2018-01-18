@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,8 +36,8 @@
 MotionLibrary::MotionLibrary(QObject *parent)
     : MyAbstractTableModel(parent)
 {
-    m_approach = TimeSeries;
-    m_saveData = true;
+    _approach = TimeSeries;
+    _saveData = true;
 
     connect(Units::instance(), SIGNAL(systemChanged(int)),
             this, SLOT(updateUnits()));
@@ -72,7 +72,7 @@ QString MotionLibrary::toHtml() const
 
 //    // Details
 //    html += "<ol>";
-//    foreach (Motion *motion, m_motions)
+//    foreach (Motion *motion, _motions)
 //        html += "<li>" + motion->toHtml() + "</li>";
 //
 //    html += "</ol>";
@@ -82,11 +82,11 @@ QString MotionLibrary::toHtml() const
 
 void MotionLibrary::setSaveData(bool b)
 {
-    if (m_saveData != b) {
-        m_saveData = b;
-        emit saveDataChanged(m_saveData);
+    if (_saveData != b) {
+        _saveData = b;
+        emit saveDataChanged(_saveData);
 
-        foreach (AbstractMotion* m, m_motions) {
+        foreach (AbstractMotion* m, _motions) {
             if (TimeSeriesMotion *tsm = qobject_cast<TimeSeriesMotion *>(m)) {
                 tsm->setSaveData(b);
             }
@@ -96,13 +96,13 @@ void MotionLibrary::setSaveData(bool b)
 
 bool MotionLibrary::saveData() const
 {
-    return m_saveData;
+    return _saveData;
 }
 
 int MotionLibrary::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
-    return m_motions.size();
+    return _motions.size();
 }
 
 int MotionLibrary::columnCount(const QModelIndex & parent) const
@@ -119,23 +119,23 @@ QVariant MotionLibrary::data(const QModelIndex & index, int role) const
     if (role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()) {
         case NameColumn:
-            return m_motions.at(index.row())->name();
+            return _motions.at(index.row())->name();
         case DescriptionColumn:
-            return m_motions.at(index.row())->description();
+            return _motions.at(index.row())->description();
         case TypeColumn:
             if (role == Qt::DisplayRole) {
                 // Return a simple label
-                return AbstractMotion::typeList().at((int)m_motions.at(index.row())->type());
+                return AbstractMotion::typeList().at((int)_motions.at(index.row())->type());
             } else {
-                return (int)m_motions.at(index.row())->type();
+                return (int)_motions.at(index.row())->type();
             }
         case PgaColumn:
-            return QString::number(m_motions.at(index.row())->pga(), 'f', 2);
+            return QString::number(_motions.at(index.row())->pga(), 'f', 2);
         case PgvColumn:
-            return QString::number(m_motions.at(index.row())->pgv(), 'f', 2);
+            return QString::number(_motions.at(index.row())->pgv(), 'f', 2);
         case ScaleColumn:
             {
-                TimeSeriesMotion *motion = dynamic_cast<TimeSeriesMotion*>(m_motions.at(index.row()));
+                TimeSeriesMotion *motion = dynamic_cast<TimeSeriesMotion*>(_motions.at(index.row()));
 
                 if (motion) {
                     return QString::number(motion->scale(), 'f', 2);
@@ -145,7 +145,7 @@ QVariant MotionLibrary::data(const QModelIndex & index, int role) const
             return QVariant();
         }
     } else if (index.column() == NameColumn && role == Qt::CheckStateRole ) {
-        if ( m_motions.at(index.row())->enabled() )
+        if ( _motions.at(index.row())->enabled() )
             return QVariant( Qt::Checked );
         else
             return QVariant( Qt::Unchecked );
@@ -195,7 +195,7 @@ Qt::ItemFlags MotionLibrary::flags(const QModelIndex & index) const
         flags |= Qt::ItemIsEditable;
         break;
     case ScaleColumn:
-        if (m_approach == TimeSeries)
+        if (_approach == TimeSeries)
             flags |= Qt::ItemIsEditable;
         break;
     case PgvColumn:
@@ -208,7 +208,7 @@ Qt::ItemFlags MotionLibrary::flags(const QModelIndex & index) const
 
 bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    if (index.parent()!=QModelIndex() || m_readOnly)
+    if (index.parent()!=QModelIndex() || _readOnly)
         return false;
 
     if (role==Qt::EditRole) {
@@ -224,7 +224,7 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
 
                 if (ok)
                 {
-                    m_motions[index.row()]->setType(type);
+                    _motions[index.row()]->setType(type);
                 }
                 else
                     return false;
@@ -232,7 +232,7 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
             }
         case ScaleColumn:
             {
-                TimeSeriesMotion * tsMotion = qobject_cast<TimeSeriesMotion*>(m_motions[index.row()]);
+                TimeSeriesMotion * tsMotion = qobject_cast<TimeSeriesMotion*>(_motions[index.row()]);
 
                 bool ok;
                 const double d = value.toDouble(&ok);
@@ -250,7 +250,7 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
         // Signal that the data has changed
         dataChanged(index, index);
     } else if (role==Qt::CheckStateRole && index.column() == NameColumn) {
-        m_motions[index.row()]->setEnabled(value.toBool());
+        _motions[index.row()]->setEnabled(value.toBool());
         // Change entire row information
         dataChanged(index.sibling(index.row(), 0), index.sibling(index.row(), columnCount()));
     }
@@ -265,7 +265,7 @@ bool MotionLibrary::removeRows(int row, int count, const QModelIndex &parent)
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i) {
-        m_motions.takeAt(row)->deleteLater();
+        _motions.takeAt(row)->deleteLater();
     }
 
     emit endRemoveRows();
@@ -276,7 +276,7 @@ int MotionLibrary::motionCount() const
 {
     int count = 0;
 
-    foreach (const AbstractMotion* m, m_motions)
+    foreach (const AbstractMotion* m, _motions)
         if (m->enabled())
             ++count;
 
@@ -289,17 +289,17 @@ void MotionLibrary::addMotion(AbstractMotion *motion)
     motion->setParent(this);
 
     if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(motion))
-        tsm->setSaveData(m_saveData);
+        tsm->setSaveData(_saveData);
 
     emit beginInsertRows(QModelIndex(), row, row);
-    m_motions.insert(row, motion);
+    _motions.insert(row, motion);
     emit wasModified();
     emit endInsertRows();
 }
 
 AbstractMotion* MotionLibrary::motionAt(int row)
 {
-    return m_motions.at(row);
+    return _motions.at(row);
 }
 
 void MotionLibrary::updateRow(int row)
@@ -309,14 +309,14 @@ void MotionLibrary::updateRow(int row)
 
 MotionLibrary::Approach MotionLibrary::approach() const
 {
-    return m_approach;
+    return _approach;
 }
 
 void MotionLibrary::setApproach(Approach approach)
 {
-    if (m_approach != approach) {
-        m_approach = approach;
-        emit approachChanged(m_approach);
+    if (_approach != approach) {
+        _approach = approach;
+        emit approachChanged(_approach);
         // Clear the data
         removeRows(0, rowCount());
     }
@@ -331,8 +331,8 @@ void MotionLibrary::setReadOnly(bool readOnly)
 {
     MyAbstractTableModel::setReadOnly(readOnly);
 
-    for (int i = 0; i < m_motions.size(); ++i) {
-        m_motions[i]->setReadOnly(readOnly);
+    for (int i = 0; i < _motions.size(); ++i) {
+        _motions[i]->setReadOnly(readOnly);
     }
 }
 
@@ -350,8 +350,8 @@ void MotionLibrary::fromJson(const QJsonObject &json)
 
     beginResetModel();
 
-    while (m_motions.size())
-        m_motions.takeLast()->deleteLater();
+    while (_motions.size())
+        _motions.takeLast()->deleteLater();
 
     QJsonArray motions = json["motions"].toArray();
     foreach(const QJsonValue &value, motions)
@@ -362,20 +362,20 @@ void MotionLibrary::fromJson(const QJsonObject &json)
         if (className == "TimeSeriesMotion") {
             TimeSeriesMotion *m = new TimeSeriesMotion(this);
             qobject_cast<TimeSeriesMotion*>(m)->fromJson(mjo);
-            qobject_cast<TimeSeriesMotion*>(m)->setSaveData(m_saveData);
-            m_motions << m;
+            qobject_cast<TimeSeriesMotion*>(m)->setSaveData(_saveData);
+            _motions << m;
         } else if (className == "RvtMotion") {
             RvtMotion *m = new RvtMotion(this);
             qobject_cast<RvtMotion*>(m)->fromJson(mjo);
-            m_motions << m;
+            _motions << m;
         } else if (className == "CompatibleRvtMotion") {
             CompatibleRvtMotion *m = new CompatibleRvtMotion(this);
             qobject_cast<CompatibleRvtMotion*>(m)->fromJson(mjo);
-            m_motions << m;
+            _motions << m;
         } else if (className == "SourceTheoryRvtMotion") {
             SourceTheoryRvtMotion *m = new SourceTheoryRvtMotion(this);
             qobject_cast<SourceTheoryRvtMotion*>(m)->fromJson(mjo);
-            m_motions << m;
+            _motions << m;
         } else {
             qCritical("className '%s' not recognized!", qPrintable(className));
         }
@@ -387,11 +387,11 @@ void MotionLibrary::fromJson(const QJsonObject &json)
 // FIXME: Remove
 //void MotionLibrary::ptWrite(ptree &pt) const
 //{
-//    pt.put("approach", (int) m_approach);
-//    pt.put("saveData", m_saveData);
+//    pt.put("approach", (int) _approach);
+//    pt.put("saveData", _saveData);
 
 //    ptree motions;
-//    foreach(AbstractMotion *m, m_motions)
+//    foreach(AbstractMotion *m, _motions)
 //    {
 //        ptree motion;
 //        m->ptWrite(motion);
@@ -415,12 +415,12 @@ void MotionLibrary::fromJson(const QJsonObject &json)
 QJsonObject MotionLibrary::toJson() const
 {
     QJsonObject json;
-    json["approach"] = (int) m_approach;
-    json["saveData"] = m_saveData;
+    json["approach"] = (int) _approach;
+    json["saveData"] = _saveData;
 
     QJsonArray motions;
 
-    foreach (AbstractMotion *m, m_motions) {
+    foreach (AbstractMotion *m, _motions) {
         const QString &className = m->metaObject()->className();
         QJsonObject mjo;
 
@@ -445,9 +445,9 @@ QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml)
 {
     out << (quint8)1;
 
-    out << (int)ml->m_approach << ml->m_saveData << ml->m_motions.size();
+    out << (int)ml->_approach << ml->_saveData << ml->_motions.size();
 
-    foreach (const AbstractMotion * m, ml->m_motions) {
+    foreach (const AbstractMotion * m, ml->_motions) {
         const QString & className = m->metaObject()->className();
         out << className;
 
@@ -482,16 +482,16 @@ QDataStream & operator>> (QDataStream & in, MotionLibrary* ml)
     ml->beginResetModel();
     QString className;
 
-    while (ml->m_motions.size() < size) {
+    while (ml->_motions.size() < size) {
         in >> className;
 
         if (className == "TimeSeriesMotion") {
             TimeSeriesMotion *m = new TimeSeriesMotion(ml);
-            m->setSaveData(ml->m_saveData);
+            m->setSaveData(ml->_saveData);
             in >> m;
 
             if (m->accel().size()) {
-                ml->m_motions << m;
+                ml->_motions << m;
             } else {
                 m->deleteLater();
                 // Need to reduce the size of motions to load so we know when to stop
@@ -500,15 +500,15 @@ QDataStream & operator>> (QDataStream & in, MotionLibrary* ml)
         } else if (className == "RvtMotion") {
             RvtMotion *m = new RvtMotion(ml);
             in >> m;
-            ml->m_motions << m;
+            ml->_motions << m;
         } else if (className == "CompatibleRvtMotion") {
             CompatibleRvtMotion *m = new CompatibleRvtMotion(ml);
             in >> m;
-            ml->m_motions << m;
+            ml->_motions << m;
         } else if (className == "SourceTheoryRvtMotion") {
             SourceTheoryRvtMotion *m = new SourceTheoryRvtMotion(ml);
             in >> m;
-            ml->m_motions << m;
+            ml->_motions << m;
         }
     }
 

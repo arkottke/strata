@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,14 +37,14 @@
 TimeSeriesOutputCatalog::TimeSeriesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractMutableOutputCatalog(outputCatalog)
 {
-    m_lookup["Acceleration Time Series"] = "AccelTimeSeriesOutput";
-    m_lookup["Velocity Time Series"] = "VelTimeSeriesOutput";
-    m_lookup["Displacement Time Series"] = "DispTimeSeriesOutput";
-    m_lookup["Shear-Strain Time Series"] = "StrainTimeSeriesOutput";
-    m_lookup["Shear-Stress Time Series"] = "StressTimeSeriesOutput";
+    _lookup["Acceleration Time Series"] = "AccelTimeSeriesOutput";
+    _lookup["Velocity Time Series"] = "VelTimeSeriesOutput";
+    _lookup["Displacement Time Series"] = "DispTimeSeriesOutput";
+    _lookup["Shear-Strain Time Series"] = "StrainTimeSeriesOutput";
+    _lookup["Shear-Stress Time Series"] = "StressTimeSeriesOutput";
 
 #ifdef ADVANCED_OPTIONS
-    m_lookup["Visco-Elastic Shear-Stress Time Series"] = "ViscoElasticStressTimeSeriesOutput";
+    _lookup["Visco-Elastic Shear-Stress Time Series"] = "ViscoElasticStressTimeSeriesOutput";
 #endif
 }
 
@@ -57,7 +57,7 @@ int TimeSeriesOutputCatalog::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_outputs.size();
+    return _outputs.size();
 }
 
 int TimeSeriesOutputCatalog::columnCount(const QModelIndex & parent) const
@@ -74,19 +74,19 @@ QVariant TimeSeriesOutputCatalog::data(const QModelIndex & index, int role) cons
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         switch (index.column()) {
         case NameColumn:
-            return m_outputs.at(index.row())->name();
+            return _outputs.at(index.row())->name();
         case DepthColumn:
             if (role == Qt::DisplayRole) {
-                return locationToString(m_outputs.at(index.row())->depth());
+                return locationToString(_outputs.at(index.row())->depth());
             } else {
-                return m_outputs.at(index.row())->depth();
+                return _outputs.at(index.row())->depth();
             }
         case TypeColumn:
             if (role == Qt::DisplayRole) {
                 return AbstractMotion::typeList().at(
-                        m_outputs.at(index.row())->type());
+                        _outputs.at(index.row())->type());
             } else {
-                return m_outputs.at(index.row())->type();
+                return _outputs.at(index.row())->type();
             }
         default:
             return QVariant();
@@ -94,7 +94,7 @@ QVariant TimeSeriesOutputCatalog::data(const QModelIndex & index, int role) cons
     } else if (role == Qt::CheckStateRole) {
         switch (index.column()) {
         case CorrectedColumn:
-            return m_outputs.at(index.row())->baselineCorrect() ? Qt::Checked : Qt::Unchecked;
+            return _outputs.at(index.row())->baselineCorrect() ? Qt::Checked : Qt::Unchecked;
         default:
             return QVariant();
         }
@@ -105,7 +105,7 @@ QVariant TimeSeriesOutputCatalog::data(const QModelIndex & index, int role) cons
 
 bool TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    if (index.parent()!=QModelIndex() || m_readOnly)
+    if (index.parent()!=QModelIndex() || _readOnly)
         return false;
 
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
@@ -118,7 +118,7 @@ bool TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant 
                 const double d = value.toDouble(&ok);
 
                 if (ok) {
-                    m_outputs[index.row()]->setDepth(d);
+                    _outputs[index.row()]->setDepth(d);
                 } else {
                     return false;
                 }
@@ -130,7 +130,7 @@ bool TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant 
                 AbstractMotion::Type type = AbstractMotion::variantToType(value, &ok);
 
                 if (ok) {
-                    m_outputs[index.row()]->setType(type);
+                    _outputs[index.row()]->setType(type);
                 } else
                     return false;
 
@@ -140,7 +140,7 @@ bool TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant 
     } else if (role == Qt::CheckStateRole) {
         switch (index.column()) {
         case CorrectedColumn:
-            m_outputs[index.row()]->setBaselineCorrect(value.toBool());
+            _outputs[index.row()]->setBaselineCorrect(value.toBool());
             break;
         default:
             return false;
@@ -187,9 +187,9 @@ Qt::ItemFlags TimeSeriesOutputCatalog::flags(const QModelIndex & index) const
         flags |= Qt::ItemIsEditable;
         break;
     case TypeColumn:
-        if (qobject_cast<const StrainTimeSeriesOutput* const>(m_outputs.at(index.row()))
-            || qobject_cast<const StressTimeSeriesOutput* const>(m_outputs.at(index.row()))
-            || qobject_cast<const ViscoElasticStressTimeSeriesOutput* const>(m_outputs.at(index.row()))
+        if (qobject_cast<const StrainTimeSeriesOutput* const>(_outputs.at(index.row()))
+            || qobject_cast<const StressTimeSeriesOutput* const>(_outputs.at(index.row()))
+            || qobject_cast<const ViscoElasticStressTimeSeriesOutput* const>(_outputs.at(index.row()))
             ) {
             // Do nothing because it can only be within motions.
         } else {
@@ -214,7 +214,7 @@ bool TimeSeriesOutputCatalog::removeRows(int row, int count, const QModelIndex &
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i)
-        m_outputs.takeAt(row)->deleteLater();
+        _outputs.takeAt(row)->deleteLater();
 
     emit endRemoveRows();
     emit wasModified();
@@ -227,11 +227,11 @@ bool TimeSeriesOutputCatalog::removeRows(int row, int count, const QModelIndex &
 
 void TimeSeriesOutputCatalog::addRow(const QString &name)
 {
-    if (m_lookup.contains(name)) {
+    if (_lookup.contains(name)) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        m_outputs << factory(m_lookup.value(name), m_outputCatalog);
+        _outputs << factory(_lookup.value(name), _outputCatalog);
 
-        connect(m_outputs.last(), SIGNAL(wasModified()),
+        connect(_outputs.last(), SIGNAL(wasModified()),
                 this, SIGNAL(wasModified()));
 
         endInsertRows();
@@ -244,7 +244,7 @@ QList<AbstractOutput*> TimeSeriesOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach(AbstractTimeSeriesOutput* atso, m_outputs )
+    foreach(AbstractTimeSeriesOutput* atso, _outputs )
         list << static_cast<AbstractOutput*>(atso);
 
     return list;
@@ -278,14 +278,14 @@ void TimeSeriesOutputCatalog::fromJson(const QJsonArray &array)
 {
     beginResetModel();
 
-    while (m_outputs.size())
-        m_outputs.takeLast()->deleteLater();
+    while (_outputs.size())
+        _outputs.takeLast()->deleteLater();
 
     foreach (const QJsonValue &v, array) {
         QJsonObject json = v.toObject();
-        AbstractTimeSeriesOutput *atso = factory(json["className"].toString(), m_outputCatalog);
+        AbstractTimeSeriesOutput *atso = factory(json["className"].toString(), _outputCatalog);
         atso->fromJson(json);
-        m_outputs << atso;
+        _outputs << atso;
     }
 
     endResetModel();
@@ -294,7 +294,7 @@ void TimeSeriesOutputCatalog::fromJson(const QJsonArray &array)
 QJsonArray TimeSeriesOutputCatalog::toJson() const
 {
     QJsonArray array;
-    foreach (AbstractTimeSeriesOutput *atso, m_outputs)
+    foreach (AbstractTimeSeriesOutput *atso, _outputs)
         array << atso->toJson();
 
     return array;
@@ -305,9 +305,9 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc
 {
     out << (quint8)1;
 
-    out << tsoc->m_outputs.size();
+    out << tsoc->_outputs.size();
 
-    foreach (const AbstractTimeSeriesOutput* atso, tsoc->m_outputs)
+    foreach (const AbstractTimeSeriesOutput* atso, tsoc->_outputs)
         out << QString(atso->metaObject()->className()) << atso;
 
     return out;
@@ -323,10 +323,10 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesOutputCatalog* tsoc)
 
     tsoc->beginResetModel();
     QString name;
-    while (tsoc->m_outputs.size() < size) {
+    while (tsoc->_outputs.size() < size) {
         in >> name;
-        tsoc->m_outputs << tsoc->factory(name, tsoc->m_outputCatalog);
-        in >> tsoc->m_outputs.last();
+        tsoc->_outputs << tsoc->factory(name, tsoc->_outputCatalog);
+        in >> tsoc->_outputs.last();
     }
     tsoc->endResetModel();
 

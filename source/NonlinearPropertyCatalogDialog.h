@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +45,7 @@ protected slots:
 
 protected:    
     //! Table showing the current model
-    TableGroupBox *m_dataGroupBox;
+    TableGroupBox *_dataGroupBox;
 };
 
 #endif

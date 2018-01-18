@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -130,39 +130,39 @@ private:
     void run();
 
     //! If the model was modified since the last save
-    bool m_modified;
+    bool _modified;
 
     //! Filename that the binary is saved to
-    QString m_fileName;
+    QString _fileName;
 
     //! Notes on the project for sanity of the user
-    QTextDocument* m_notes;
+    QTextDocument* _notes;
 
     //! Method of analysis
-    Method m_method;
+    Method _method;
 
     //! Contains all information about the site
-    SoilProfile* m_siteProfile;
+    SoilProfile* _siteProfile;
 
     //! The object responsible for computing the site response
-    AbstractCalculator* m_calculator;
+    AbstractCalculator* _calculator;
 
     //! Random number generator
-    MyRandomNumGenerator* m_randNumGen;
+    MyRandomNumGenerator* _randNumGen;
 
     //! Okay to continue calculation.
-    bool m_okToContinue;
+    bool _okToContinue;
 
     //! A list of motions
-    MotionLibrary* m_motionLibrary;
+    MotionLibrary* _motionLibrary;
 
     //! Catalog of the output
-    OutputCatalog* m_outputCatalog;
+    OutputCatalog* _outputCatalog;
 
     //! If the model is loaded from a file
-    bool m_isLoaded;
+    bool _isLoaded;
 
     //! If the model has results from an analysis
-    bool m_hasResults;
+    bool _hasResults;
 };
 #endif

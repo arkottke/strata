@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,9 +43,9 @@ public slots:
     void setReadOnly(bool readOnly);
 
 protected:
-    QStackedLayout* m_stackedLayout;
-    EquivalentLinearCalculatorWidget* m_elcWidget;
-    FrequencyDependentCalculatorWidget* m_fdcWidget;
+    QStackedLayout* _stackedLayout;
+    EquivalentLinearCalculatorWidget* _elcWidget;
+    FrequencyDependentCalculatorWidget* _fdcWidget;
 };
 
 #endif // METHOD_GROUP_BOX_H

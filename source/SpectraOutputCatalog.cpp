@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,8 +31,8 @@
 SpectraOutputCatalog::SpectraOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractMutableOutputCatalog(outputCatalog)
 {
-    m_lookup["Fourier Amplitude Spectrum"] = "FourierSpectrumOutput";
-    m_lookup["Acceleration Response Spectrum"] = "ResponseSpectrumOutput";
+    _lookup["Fourier Amplitude Spectrum"] = "FourierSpectrumOutput";
+    _lookup["Acceleration Response Spectrum"] = "ResponseSpectrumOutput";
 }
 
 bool SpectraOutputCatalog::needsOutputConditions() const
@@ -44,7 +44,7 @@ int SpectraOutputCatalog::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_outputs.size();
+    return _outputs.size();
 }
 
 int SpectraOutputCatalog::columnCount(const QModelIndex & parent) const
@@ -62,19 +62,19 @@ QVariant SpectraOutputCatalog::data(const QModelIndex & index, int role) const
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
         switch (index.column()) {
         case NameColumn:
-            return m_outputs.at(index.row())->name();
+            return _outputs.at(index.row())->name();
         case DepthColumn:
             if (role == Qt::DisplayRole) {
-                return locationToString(m_outputs.at(index.row())->depth());
+                return locationToString(_outputs.at(index.row())->depth());
             } else {
-                return m_outputs.at(index.row())->depth();
+                return _outputs.at(index.row())->depth();
             }
         case TypeColumn:
             if (role == Qt::DisplayRole) {
                 return AbstractMotion::typeList().at(
-                        m_outputs.at(index.row())->type());
+                        _outputs.at(index.row())->type());
             } else {
-                return m_outputs.at(index.row())->type();
+                return _outputs.at(index.row())->type();
             }
         }
     }
@@ -84,7 +84,7 @@ QVariant SpectraOutputCatalog::data(const QModelIndex & index, int role) const
 
 bool SpectraOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    if (index.parent()!=QModelIndex() || m_readOnly)
+    if (index.parent()!=QModelIndex() || _readOnly)
         return false;
 
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
@@ -97,7 +97,7 @@ bool SpectraOutputCatalog::setData(const QModelIndex & index, const QVariant & v
                 const double d = value.toDouble(&ok);
 
                 if (ok) {
-                    m_outputs[index.row()]->setDepth(d);
+                    _outputs[index.row()]->setDepth(d);
                 } else {
                     return false;
                 }
@@ -109,7 +109,7 @@ bool SpectraOutputCatalog::setData(const QModelIndex & index, const QVariant & v
                 AbstractMotion::Type type = AbstractMotion::variantToType(value, &ok);
 
                 if (ok)
-                    m_outputs[index.row()]->setType(type);
+                    _outputs[index.row()]->setType(type);
                 else
                     return false;
 
@@ -168,12 +168,12 @@ bool SpectraOutputCatalog::removeRows(int row, int count, const QModelIndex &par
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i) {
-        AbstractLocationOutput* alo = m_outputs.takeAt(row);
+        AbstractLocationOutput* alo = _outputs.takeAt(row);
 
         if (alo->needsFreq()) {
             // Check if remaining outputs needs frequencies
             bool needsFreq = false;
-            foreach (AbstractLocationOutput* _alo, m_outputs) {
+            foreach (AbstractLocationOutput* _alo, _outputs) {
                 if (_alo->needsFreq()) {
                     needsFreq = true;
                     break;
@@ -186,7 +186,7 @@ bool SpectraOutputCatalog::removeRows(int row, int count, const QModelIndex &par
         } else if (alo->needsPeriod()) {
             // Check if remaining outputs needs period
             bool needsPeriod = false;
-            foreach (AbstractLocationOutput* _alo, m_outputs) {
+            foreach (AbstractLocationOutput* _alo, _outputs) {
                 if (_alo->needsPeriod()) {
                     needsPeriod = true;
                     break;
@@ -207,11 +207,11 @@ bool SpectraOutputCatalog::removeRows(int row, int count, const QModelIndex &par
 
 void SpectraOutputCatalog::addRow(const QString &name)
 {
-    if (m_lookup.contains(name)) {
+    if (_lookup.contains(name)) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        m_outputs << factory(m_lookup.value(name), m_outputCatalog);
+        _outputs << factory(_lookup.value(name), _outputCatalog);
 
-        connect(m_outputs.last(), SIGNAL(wasModified()),
+        connect(_outputs.last(), SIGNAL(wasModified()),
                 this, SIGNAL(wasModified()));
 
         endInsertRows();
@@ -224,7 +224,7 @@ QList<AbstractOutput*> SpectraOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach(AbstractLocationOutput* alo, m_outputs )
+    foreach(AbstractLocationOutput* alo, _outputs )
         list << static_cast<AbstractOutput*>(alo);
 
     return list;
@@ -250,14 +250,14 @@ AbstractLocationOutput* SpectraOutputCatalog::factory(const QString & className,
 void SpectraOutputCatalog::fromJson(const QJsonArray &array)
 {
     beginResetModel();
-    while (m_outputs.size())
-        m_outputs.takeLast()->deleteLater();
+    while (_outputs.size())
+        _outputs.takeLast()->deleteLater();
 
     foreach (const QJsonValue &v, array) {
         QJsonObject json = v.toObject();
-        AbstractLocationOutput *alo = factory(json["className"].toString(), m_outputCatalog);
+        AbstractLocationOutput *alo = factory(json["className"].toString(), _outputCatalog);
         alo->fromJson(json);
-        m_outputs << alo;
+        _outputs << alo;
     }
     endResetModel();
 }
@@ -265,7 +265,7 @@ void SpectraOutputCatalog::fromJson(const QJsonArray &array)
 QJsonArray SpectraOutputCatalog::toJson() const
 {
     QJsonArray array;
-    foreach (AbstractLocationOutput *alo, m_outputs)
+    foreach (AbstractLocationOutput *alo, _outputs)
         array << alo->toJson();
 
     return array;
@@ -276,9 +276,9 @@ QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc)
 {
     out << (quint8)1;
 
-    out << soc->m_outputs.size();
+    out << soc->_outputs.size();
 
-    foreach (const AbstractLocationOutput* alo, soc->m_outputs)
+    foreach (const AbstractLocationOutput* alo, soc->_outputs)
         out << QString(alo->metaObject()->className()) << alo;
 
     return out;
@@ -294,10 +294,10 @@ QDataStream & operator>> (QDataStream & in, SpectraOutputCatalog* soc)
 
     soc->beginResetModel();
     QString name;
-    while (soc->m_outputs.size() < size) {
+    while (soc->_outputs.size() < size) {
         in >> name;
-        soc->m_outputs << soc->factory(name, soc->m_outputCatalog);
-        in >> soc->m_outputs.last();
+        soc->_outputs << soc->factory(name, soc->_outputCatalog);
+        in >> soc->_outputs.last();
     }
     soc->endResetModel();
 

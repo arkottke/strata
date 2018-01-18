@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,17 +29,17 @@
 #include <QStringList>
 
 AbstractOutputCatalog::AbstractOutputCatalog(OutputCatalog *outputCatalog) :
-    MyAbstractTableModel(outputCatalog), m_outputCatalog(outputCatalog)
+    MyAbstractTableModel(outputCatalog), _outputCatalog(outputCatalog)
 {
 }
 
 void AbstractOutputCatalog::setApproach(int approach)
 {
     beginResetModel();
-    m_approach = (MotionLibrary::Approach)approach;
+    _approach = (MotionLibrary::Approach)approach;
 
     // Disable time series only outputs
-    if (m_approach == MotionLibrary::RandomVibrationTheory) {
+    if (_approach == MotionLibrary::RandomVibrationTheory) {
         foreach (AbstractOutput* ao, outputs()) {
             AbstractProfileOutput* apo = qobject_cast<AbstractProfileOutput*>(ao);
             if (apo && apo->timeSeriesOnly())

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,27 +56,27 @@ protected:
     QGroupBox* createDiscretizationGroupBox();
     //@}
 
-    QLineEdit* m_titleLineEdit;
-    QTextEdit* m_notesTextEdit;
-    QLineEdit* m_prefixLineEdit;
-    QComboBox* m_unitsComboBox;
-    QCheckBox* m_saveMotionDataCheckBox;
+    QLineEdit* _titleLineEdit;
+    QTextEdit* _notesTextEdit;
+    QLineEdit* _prefixLineEdit;
+    QComboBox* _unitsComboBox;
+    QCheckBox* _saveMotionDataCheckBox;
 
-    QComboBox* m_methodComboBox;
-    QComboBox* m_approachComboBox;
-    QCheckBox* m_propertiesAreVariedCheckBox;
+    QComboBox* _methodComboBox;
+    QComboBox* _approachComboBox;
+    QCheckBox* _propertiesAreVariedCheckBox;
 
-    QGroupBox* m_variationGroupBox;
-    QSpinBox* m_countSpinBox;
-    QCheckBox* m_nlPropertiesAreVariedCheckBox;
-    QCheckBox* m_siteIsVariedCheckBox;
-    QCheckBox* m_specifiedSeedCheckBox;
-    QSpinBox* m_seedSpinBox;
+    QGroupBox* _variationGroupBox;
+    QSpinBox* _countSpinBox;
+    QCheckBox* _nlPropertiesAreVariedCheckBox;
+    QCheckBox* _siteIsVariedCheckBox;
+    QCheckBox* _specifiedSeedCheckBox;
+    QSpinBox* _seedSpinBox;
 
-    MethodGroupBox* m_methodGroupBox;
+    MethodGroupBox* _methodGroupBox;
 
-    QDoubleSpinBox* m_maxFreqSpinBox;
-    QDoubleSpinBox* m_waveFractionSpinBox;
-    QCheckBox* m_disableDiscretzationCheckBox;
+    QDoubleSpinBox* _maxFreqSpinBox;
+    QDoubleSpinBox* _waveFractionSpinBox;
+    QCheckBox* _disableDiscretzationCheckBox;
 };
 #endif

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +93,7 @@ signals:
 protected:
 
     //! Type of distribution
-    Type m_type;
+    Type _type;
 
     //! Average of the distribution
     /*!
@@ -102,10 +102,10 @@ protected:
      * distributions this is the median of the distribution in linear space
      * (or the mean in log space).
      */
-    double m_avg;
+    double _avg;
 
     //! Varied value
-    double m_varied;
+    double _varied;
 
     //! Standard deviation of the distribution
     /*!
@@ -114,18 +114,18 @@ protected:
      * for log-normal distributions this is the standard deviation in log
      * space.
      */
-    double m_stdev;
+    double _stdev;
 
     //! If the distribution has a minimum
-    bool m_hasMin;
+    bool _hasMin;
 
     //! The minimum value of the distribution
-    double m_min;
+    double _min;
 
     //! If the distribution has a maximum
-    bool m_hasMax;
+    bool _hasMax;
 
     //! The maximum value of the distribution
-    double m_max;
+    double _max;
 };
 #endif // ABSTRACT_DISTRIBUTION_H

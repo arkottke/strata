@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,73 +27,73 @@
 SoilLayer::SoilLayer(QObject* parent)
     : VelocityLayer(parent)
 {
-    m_thickness = 0;
-    m_soilType = 0;
+    _thickness = 0;
+    _soilType = 0;
 }
 
 SoilLayer::SoilLayer(const SoilLayer* other)
 {
     // Abstract Distribution
-    m_avg = other->avg();
-    m_varied = other->shearVel();
-    m_stdev = other->stdev();
-    m_hasMin = other->hasMin();
-    m_min = other->min();
-    m_hasMax = other->hasMax();
-    m_max = other->max();
+    _avg = other->avg();
+    _varied = other->shearVel();
+    _stdev = other->stdev();
+    _hasMin = other->hasMin();
+    _min = other->min();
+    _hasMax = other->hasMax();
+    _max = other->max();
 
     // VelocityLayer Information
-    m_isVaried = other->isVaried();
-    m_depth = other->depth();
+    _isVaried = other->isVaried();
+    _depth = other->depth();
 
     // SoilLayer Information
-    m_soilType = other->soilType();
-    m_thickness = other->thickness();
+    _soilType = other->soilType();
+    _thickness = other->thickness();
 }
 
 SoilType * SoilLayer::soilType() const
 {
-    return m_soilType;
+    return _soilType;
 }
 
 void SoilLayer::setSoilType(SoilType * soilType)
 {
-    m_soilType = soilType;
+    _soilType = soilType;
 }
 
 double SoilLayer::thickness() const
 {
-    return m_thickness;
+    return _thickness;
 }
 
 void SoilLayer::setThickness(double thickness)
 {
-    m_thickness = thickness;
+    _thickness = thickness;
     emit wasModified();
 }
         
 double SoilLayer::depthToBase() const
 {
-    return m_depth + m_thickness;
+    return _depth + _thickness;
 }
 
 QString SoilLayer::toString() const
 {
-    return QString("%1 %2").arg(m_soilType->name()).arg(m_avg);
+    return QString("%1 %2").arg(_soilType->name()).arg(_avg);
 }
 
 double SoilLayer::untWt() const
 {
-    if (m_soilType)
-        return m_soilType->untWt();
+    if (_soilType)
+        return _soilType->untWt();
     else
         return -1;
 }
 
 double SoilLayer::density() const
 {
-    if (m_soilType)
-        return m_soilType->density();
+    if (_soilType)
+        return _soilType->density();
     else
         return -1;
 }
@@ -101,14 +101,14 @@ double SoilLayer::density() const
 void SoilLayer::fromJson(const QJsonObject &json)
 {
     VelocityLayer::fromJson(json);
-    m_thickness = json["thickness"].toDouble();
+    _thickness = json["thickness"].toDouble();
 }
 
 
 QJsonObject SoilLayer::toJson() const
 {
     QJsonObject json = VelocityLayer::toJson();
-    json["thickness"] = m_thickness;
+    json["thickness"] = _thickness;
 
     return json;
 }
@@ -119,7 +119,7 @@ QDataStream & operator<< (QDataStream & out, const SoilLayer* sl)
     out << (quint8)1;
 
     out << qobject_cast<const VelocityLayer*>(sl);
-    out << sl->m_thickness;
+    out << sl->_thickness;
 
     return out;
 }
@@ -130,7 +130,7 @@ QDataStream & operator>> (QDataStream & in, SoilLayer* sl)
     in >> ver;
 
     in >>  qobject_cast<VelocityLayer*>(sl);
-    in >>  sl->m_thickness;
+    in >>  sl->_thickness;
 
     return in;
 }

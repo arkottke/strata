@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -69,16 +69,16 @@ protected:
     void setInitialStrains();
 
     //! Maximum number of iterations in the equivalent linear loop
-    int m_maxIterations;
+    int _maxIterations;
 
     //! Error tolerance of the equivalent linear loop -- percent
-    double m_errorTolerance;
+    double _errorTolerance;
 
     //! Previous maximum strain
-    QVector<double> m_prevMaxStrain;
+    QVector<double> _prevMaxStrain;
 
     //! If the error tolerance was achieved
-    bool m_converged;
+    bool _converged;
 };
 
 #endif // ABSTRACT_ITERATIVE_CALCULATOR_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,11 +41,11 @@ public:
     bool save() const;
 
 protected:
-    ModulusFactory *m_modulusFactory;
-    DampingFactory *m_dampingFactory;
+    ModulusFactory *_modulusFactory;
+    DampingFactory *_dampingFactory;
 
     //! File for saving the user create models
-    QString m_fileName;
+    QString _fileName;
 };
 
 

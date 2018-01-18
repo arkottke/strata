@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -72,19 +72,19 @@ class TableGroupBox : public QGroupBox
 
     private:
         //! If table is read only
-        bool m_readOnly;
+        bool _readOnly;
 
         //! If the last row of the table should not be removed
-        bool m_lastRowFixed;
+        bool _lastRowFixed;
 
-        QHBoxLayout * m_buttonRow;
+        QHBoxLayout * _buttonRow;
 
-        QPushButton * m_addButton;
-        QPushButton * m_insertButton;
-        QPushButton * m_removeButton;
+        QPushButton * _addButton;
+        QPushButton * _insertButton;
+        QPushButton * _removeButton;
 
-        QList<QPushButton*> m_addedButtons;
+        QList<QPushButton*> _addedButtons;
 
-        MyTableView* m_table;
+        MyTableView* _table;
 };
 #endif

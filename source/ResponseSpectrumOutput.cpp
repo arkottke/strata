@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,8 +35,8 @@
 ResponseSpectrumOutput::ResponseSpectrumOutput(OutputCatalog* catalog)
     : AbstractLocationOutput(catalog)
 {    
-    m_statistics = new OutputStatistics(this);
-    connect(m_statistics, SIGNAL(wasModified()),
+    _statistics = new OutputStatistics(this);
+    connect(_statistics, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 }
 
@@ -79,7 +79,7 @@ const QVector<double>& ResponseSpectrumOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
 
-    return m_catalog->period()->data();
+    return _catalog->period()->data();
 }
 
 void ResponseSpectrumOutput::extract(AbstractCalculator* const calculator,
@@ -88,8 +88,8 @@ void ResponseSpectrumOutput::extract(AbstractCalculator* const calculator,
     Q_UNUSED(ref);
 
     data = calculator->motion()->computeSa(
-            m_catalog->period()->data(), m_catalog->damping(),
+            _catalog->period()->data(), _catalog->damping(),
             calculator->calcAccelTf(
                     calculator->site()->inputLocation(), calculator->motion()->type(),
-                    calculator->site()->depthToLocation(m_depth), m_type));
+                    calculator->site()->depthToLocation(_depth), _type));
 }

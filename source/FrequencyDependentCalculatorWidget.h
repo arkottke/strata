@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,8 +41,8 @@ public slots:
     void setReadOnly(bool readOnly);
 
 protected:
-    QDoubleSpinBox* m_errorToleranceSpinBox;
-    QSpinBox* m_maxIterationsSpinBox;
+    QDoubleSpinBox* _errorToleranceSpinBox;
+    QSpinBox* _maxIterationsSpinBox;
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_WIDGET_H

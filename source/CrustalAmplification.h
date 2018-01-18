@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -103,22 +103,22 @@ private:
     void clearInterp();
 
     //! Frequency
-    QVector<double> m_freq;
+    QVector<double> _freq;
 
     //! Amplification
-    QVector<double> m_amp;
+    QVector<double> _amp;
 
     //! Region of crustal model
-    Model m_model;
+    Model _model;
 
     //! Specific crustal model
-    CrustalModel *m_crustalModel;
+    CrustalModel *_crustalModel;
 
     //! GSL interpolator
-    gsl_interp *m_interpolator;
+    gsl_interp *_interpolator;
 
     //! Accelerator for the interpolation
-    gsl_interp_accel *m_accelerator;
+    gsl_interp_accel *_accelerator;
 };
 
 #endif // CRUSTAL_AMPLIFICATION_H

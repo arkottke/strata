@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,10 +29,10 @@
 DarendeliNonlinearProperty::DarendeliNonlinearProperty(Type type, QObject *parent)
     : NonlinearProperty(parent)
 {
-    m_name = "Darendeli & Stokoe (2001)";
-    m_type = type;
-    m_strain = Dimension::logSpace(pow(10.,-4), pow(10.,0.5), 19);
-    m_average.resize(m_strain.size());
+    _name = "Darendeli & Stokoe (2001)";
+    _type = type;
+    _strain = Dimension::logSpace(pow(10.,-4), pow(10.,0.5), 19);
+    _average.resize(_strain.size());
     initialize();
 }
 
@@ -45,12 +45,12 @@ void DarendeliNonlinearProperty::calculate(const SoilType *soilType)
     // Curvature coefficient of the hyperbolic strain model
     const double curv =  0.9190;
 
-    for (int i = 0; i < m_strain.size(); ++i) {
+    for (int i = 0; i < _strain.size(); ++i) {
         // Normalized shear modulus
-        const double shearMod = 1 / ( 1 + pow(m_strain.at(i) / refStrain, 0.9190));
+        const double shearMod = 1 / ( 1 + pow(_strain.at(i) / refStrain, 0.9190));
 
-        if (m_type == ModulusReduction) {
-            m_average[i] = shearMod;
+        if (_type == ModulusReduction) {
+            _average[i] = shearMod;
         } else {
             // Minimum damping based on soil properties
             const double minDamping = (0.8005 + 0.0129 * soilType->pi() * pow(soilType->ocr(), -0.1069))
@@ -58,8 +58,8 @@ void DarendeliNonlinearProperty::calculate(const SoilType *soilType)
 
             // Masing damping based on shear-modulus reduction
             const double masingDamping_a1 = (100./M_PI) *
-                                            (4 * (m_strain.at(i) - refStrain * log((m_strain.at(i) + refStrain)/ refStrain))
-                                             / (pow(m_strain.at(i),2.) / (m_strain.at(i) + refStrain)) - 2.);
+                                            (4 * (_strain.at(i) - refStrain * log((_strain.at(i) + refStrain)/ refStrain))
+                                             / (pow(_strain.at(i),2.) / (_strain.at(i) + refStrain)) - 2.);
 
             // Correction between perfect hyperbolic strain model and modified model.
             const double c1 = -1.1143 * curv * curv + 1.8618 * curv + 0.2523;
@@ -73,9 +73,9 @@ void DarendeliNonlinearProperty::calculate(const SoilType *soilType)
             const double b = 0.6329 - 0.00566 * log(soilType->nCycles());
 
             // Compute the damping in percent
-            m_average[i] = (minDamping + masingDamping * b * pow(shearMod, 0.1));
+            _average[i] = (minDamping + masingDamping * b * pow(shearMod, 0.1));
         }
     }
     emit dataChanged(index(0, PropertyColumn), index(rowCount(), PropertyColumn));
-    setVaried(m_average);
+    setVaried(_average);
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@ class HelpDialog : public QDialog
         void setCurrentAddress(const QUrl & url);
 
     private:
-        QTextBrowser * m_textBrowser;
-        QLineEdit * m_urlLineEdit;
+        QTextBrowser * _textBrowser;
+        QLineEdit * _urlLineEdit;
 };
 #endif

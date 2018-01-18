@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010-2016 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -34,82 +34,82 @@ NonlinearPropertyUncertaintyWidget::NonlinearPropertyUncertaintyWidget(const QSt
     layout->addWidget(new QLabel(title), row++, 0, 1, 2);
 
     // Ln. Stdev
-    m_lnStdevSpinBox = new QDoubleSpinBox;
-    m_lnStdevSpinBox->setDecimals(3);
-    m_lnStdevSpinBox->setSingleStep(0.01);
-    m_lnStdevSpinBox->setRange(0, 1.0);
+    _lnStdevSpinBox = new QDoubleSpinBox;
+    _lnStdevSpinBox->setDecimals(3);
+    _lnStdevSpinBox->setSingleStep(0.01);
+    _lnStdevSpinBox->setRange(0, 1.0);
 
     layout->addWidget(new QLabel(tr("Ln. Stdev:")), row, col++);
-    layout->addWidget(m_lnStdevSpinBox, row, col++);
+    layout->addWidget(_lnStdevSpinBox, row, col++);
 
     // Minimum
-    m_minSpinBox = new QDoubleSpinBox;
-    m_minSpinBox->setDecimals(2);
-    m_minSpinBox->setSingleStep(0.01);
+    _minSpinBox = new QDoubleSpinBox;
+    _minSpinBox->setDecimals(2);
+    _minSpinBox->setSingleStep(0.01);
 
     layout->addWidget(new QLabel(tr("Min:")), row, col++);
-    layout->addWidget(m_minSpinBox, row, col++);
+    layout->addWidget(_minSpinBox, row, col++);
 
     // Maximum
-    m_maxSpinBox = new QDoubleSpinBox;
-    m_maxSpinBox->setDecimals(2);
-    m_maxSpinBox->setSingleStep(0.01);
+    _maxSpinBox = new QDoubleSpinBox;
+    _maxSpinBox->setDecimals(2);
+    _maxSpinBox->setSingleStep(0.01);
 
     layout->addWidget(new QLabel(tr("Max:")), row, col++);
-    layout->addWidget(m_maxSpinBox, row, col++);
+    layout->addWidget(_maxSpinBox, row, col++);
 }
 
 void NonlinearPropertyUncertaintyWidget::setModel(NonlinearPropertyUncertainty* model)
 {
-    m_lnStdevSpinBox->setValue(model->lnStdev());
-    connect(m_lnStdevSpinBox, SIGNAL(valueChanged(double)),
+    _lnStdevSpinBox->setValue(model->lnStdev());
+    connect(_lnStdevSpinBox, SIGNAL(valueChanged(double)),
             model, SLOT(setLnStdev(double)));
 
-    m_minSpinBox->setValue(model->min());
-    connect(m_minSpinBox, SIGNAL(valueChanged(double)),
+    _minSpinBox->setValue(model->min());
+    connect(_minSpinBox, SIGNAL(valueChanged(double)),
             model, SLOT(setMin(double)));
 
-    m_maxSpinBox->setValue(model->max());
-    connect(m_maxSpinBox, SIGNAL(valueChanged(double)),
+    _maxSpinBox->setValue(model->max());
+    connect(_maxSpinBox, SIGNAL(valueChanged(double)),
             model, SLOT(setMax(double)));
 }
 
 void NonlinearPropertyUncertaintyWidget::setDecimals(int prec)
 {
-    m_minSpinBox->setDecimals(prec);
-    m_maxSpinBox->setDecimals(prec);
+    _minSpinBox->setDecimals(prec);
+    _maxSpinBox->setDecimals(prec);
 }
 
 void NonlinearPropertyUncertaintyWidget::setLnStdevRange(double min, double max)
 {
-    m_lnStdevSpinBox->setRange(min, max);
+    _lnStdevSpinBox->setRange(min, max);
 }
 
 void NonlinearPropertyUncertaintyWidget::setMinRange(double min, double max)
 {
-    m_minSpinBox->setRange(min, max);
+    _minSpinBox->setRange(min, max);
 }
 
 void NonlinearPropertyUncertaintyWidget::setMaxRange(double min, double max)
 {
-    m_maxSpinBox->setRange(min, max);
+    _maxSpinBox->setRange(min, max);
 }
 
 void NonlinearPropertyUncertaintyWidget::setSuffix(const QString& suffix)
 {
-    m_minSpinBox->setSuffix(suffix);
-    m_maxSpinBox->setSuffix(suffix);
+    _minSpinBox->setSuffix(suffix);
+    _maxSpinBox->setSuffix(suffix);
 }
 
 void NonlinearPropertyUncertaintyWidget::setReadOnly(bool readOnly)
 {
-    m_lnStdevSpinBox->setReadOnly(readOnly);
-    m_minSpinBox->setReadOnly(readOnly);
-    m_maxSpinBox->setReadOnly(readOnly);
+    _lnStdevSpinBox->setReadOnly(readOnly);
+    _minSpinBox->setReadOnly(readOnly);
+    _maxSpinBox->setReadOnly(readOnly);
 }
 
 void NonlinearPropertyUncertaintyWidget::setUncertaintyModel(int model)
 {
-    m_lnStdevSpinBox->setEnabled(
+    _lnStdevSpinBox->setEnabled(
                 (NonlinearPropertyRandomizer::Model)model == NonlinearPropertyRandomizer::SPID);
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,14 +46,14 @@ protected slots:
 
 private:
 
-    CompatibleRvtMotion *m_motion;
+    CompatibleRvtMotion *_motion;
 
-    QwtPlotCurve *m_fasCurve;
-    QwtPlotCurve *m_saCurve;
-    QwtPlotCurve *m_targetSaCurve;
+    QwtPlotCurve *_fasCurve;
+    QwtPlotCurve *_saCurve;
+    QwtPlotCurve *_targetSaCurve;
 
-    MyTableView *m_fasTableView;
-    MyTableView *m_rsTableView;
+    MyTableView *_fasTableView;
+    MyTableView *_rsTableView;
 };
 
 #endif // COMPATIBLE_RVT_MOTION_DIALOG_H

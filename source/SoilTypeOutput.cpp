@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,68 +27,68 @@
 #include <QDebug>
 
 SoilTypeOutput::SoilTypeOutput(SoilType* soilType, OutputCatalog* catalog) :
-    QObject(soilType), m_soilType(soilType), m_enabled(false)
+    QObject(soilType), _soilType(soilType), _enabled(false)
 {
-    m_modulus = new NonlinearPropertyOutput(soilType->modulusModel(), catalog);
+    _modulus = new NonlinearPropertyOutput(soilType->modulusModel(), catalog);
 
-    m_modulus->setSoilName(soilType->name());
-    connect(m_soilType, SIGNAL(nameChanged(QString)),
-            m_modulus, SLOT(setSoilName(QString)));
-    connect(m_soilType, SIGNAL(modulusModelChanged(NonlinearProperty*)),
-            m_modulus, SLOT(setNonlinearProperty(NonlinearProperty*)));
+    _modulus->setSoilName(soilType->name());
+    connect(_soilType, SIGNAL(nameChanged(QString)),
+            _modulus, SLOT(setSoilName(QString)));
+    connect(_soilType, SIGNAL(modulusModelChanged(NonlinearProperty*)),
+            _modulus, SLOT(setNonlinearProperty(NonlinearProperty*)));
 
-    m_damping = new NonlinearPropertyOutput(soilType->dampingModel(), catalog);
-    m_damping->setSoilName(soilType->name());
-    connect(m_soilType, SIGNAL(nameChanged(QString)),
-            m_damping, SLOT(setSoilName(QString)));
-    connect(m_soilType, SIGNAL(dampingModelChanged(NonlinearProperty*)),
-            m_damping, SLOT(setNonlinearProperty(NonlinearProperty*)));
+    _damping = new NonlinearPropertyOutput(soilType->dampingModel(), catalog);
+    _damping->setSoilName(soilType->name());
+    connect(_soilType, SIGNAL(nameChanged(QString)),
+            _damping, SLOT(setSoilName(QString)));
+    connect(_soilType, SIGNAL(dampingModelChanged(NonlinearProperty*)),
+            _damping, SLOT(setNonlinearProperty(NonlinearProperty*)));
 }
 
 SoilType* SoilTypeOutput::soilType() const
 {
-    return m_soilType;
+    return _soilType;
 }
 
 QString SoilTypeOutput::name() const
 {
-    return m_soilType->name();
+    return _soilType->name();
 }
 
 NonlinearPropertyOutput* SoilTypeOutput::modulus()
 {
-    return m_modulus;
+    return _modulus;
 }
 
 NonlinearPropertyOutput* SoilTypeOutput::damping()
 {
-    return m_damping;
+    return _damping;
 }
 
 bool SoilTypeOutput::enabled() const
 {
-    return m_enabled;
+    return _enabled;
 }
 
 void SoilTypeOutput::setEnabled(bool enabled)
 {
-    m_enabled = enabled;
+    _enabled = enabled;
     emit wasModified();
 }
 
 void SoilTypeOutput::fromJson(const QJsonObject &json)
 {
-    m_enabled = json["enabled"].toBool();
-    m_modulus->fromJson(json["modulus"].toObject());
-    m_damping->fromJson(json["damping"].toObject());
+    _enabled = json["enabled"].toBool();
+    _modulus->fromJson(json["modulus"].toObject());
+    _damping->fromJson(json["damping"].toObject());
 }
 
 QJsonObject SoilTypeOutput::toJson() const
 {
     QJsonObject json;
-    json["enabled"] = m_enabled;
-    json["modulus"] = m_modulus->toJson();
-    json["damping"] = m_damping->toJson();
+    json["enabled"] = _enabled;
+    json["modulus"] = _modulus->toJson();
+    json["damping"] = _damping->toJson();
     return json;
 }
 
@@ -97,9 +97,9 @@ QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto)
 {
     out << (quint8)1;
 
-    out << sto->m_enabled
-            << sto->m_modulus
-            << sto->m_damping;
+    out << sto->_enabled
+            << sto->_modulus
+            << sto->_damping;
 
     return out;
 }
@@ -109,9 +109,9 @@ QDataStream & operator>> (QDataStream & in, SoilTypeOutput* sto)
     quint8 ver;
     in >> ver;
 
-    in >> sto->m_enabled
-            >> sto->m_modulus
-            >> sto->m_damping;
+    in >> sto->_enabled
+            >> sto->_modulus
+            >> sto->_damping;
 
     return in;
 }

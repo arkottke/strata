@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -172,22 +172,22 @@ protected:
     QVector<double> calcFourierDisp() const;
 
     //! Oscillator corretion method
-    OscillatorCorrection m_oscCorrection;
+    OscillatorCorrection _oscCorrection;
 
     //! Amplitudes of the Fourier amplitude spectrum corresponding to the acceleration
-    QVector<double> m_fourierAcc;
+    QVector<double> _fourierAcc;
 
     //! Duration of the ground motion at the rock
-    double m_duration;
+    double _duration;
 
     //! If the current calculation should continue
-    bool m_okToContinue;
+    bool _okToContinue;
 
     //! Workspace for the peak factor integration
-    gsl_integration_workspace* m_workspace;
+    gsl_integration_workspace* _workspace;
 
     //! Name of the motion
-    QString m_name;
+    QString _name;
 };
 
 AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double scale = 1.);

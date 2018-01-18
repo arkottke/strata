@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,9 +40,9 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
     QPushButton * homePushButton = new QPushButton(QIcon(":/images/go-home.svg"), tr("Home"));
     layout->addWidget( homePushButton, 0, 2);
 
-    m_urlLineEdit = new QLineEdit;
-    m_urlLineEdit->setReadOnly(true);
-    layout->addWidget( m_urlLineEdit, 0, 3, 1, 2);
+    _urlLineEdit = new QLineEdit;
+    _urlLineEdit->setReadOnly(true);
+    layout->addWidget( _urlLineEdit, 0, 3, 1, 2);
 
 
     // QHBoxLayout * rowLayout = new QHBoxLayout;
@@ -54,21 +54,21 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
     // rowLayout->addWidget( tocBrowser );
 
     // Main view
-    m_textBrowser = new QTextBrowser;
-    // m_textBrowser->setSource(QUrl("qrc:/doc/manual3.html"));
-    m_textBrowser->setSource(QUrl("qrc:/docs/index.html"));
-    // connect( tocBrowser, SIGNAL(anchorClicked(QUrl)), m_textBrowser, SLOT(setSource(QUrl)));
-    connect( backPushButton, SIGNAL(clicked()), m_textBrowser, SLOT(backward()));
-    connect( m_textBrowser, SIGNAL(backwardAvailable(bool)), backPushButton, SLOT(setEnabled(bool)));
-    connect( forwardPushButton, SIGNAL(clicked()), m_textBrowser, SLOT(forward()));
-    connect( m_textBrowser, SIGNAL(forwardAvailable(bool)), forwardPushButton, SLOT(setEnabled(bool)));
-    connect( homePushButton, SIGNAL(clicked()), m_textBrowser, SLOT(home()));
-    connect( m_textBrowser, SIGNAL(sourceChanged(QUrl)), SLOT(setCurrentAddress(QUrl)));
+    _textBrowser = new QTextBrowser;
+    // _textBrowser->setSource(QUrl("qrc:/doc/manual3.html"));
+    _textBrowser->setSource(QUrl("qrc:/docs/index.html"));
+    // connect( tocBrowser, SIGNAL(anchorClicked(QUrl)), _textBrowser, SLOT(setSource(QUrl)));
+    connect( backPushButton, SIGNAL(clicked()), _textBrowser, SLOT(backward()));
+    connect( _textBrowser, SIGNAL(backwardAvailable(bool)), backPushButton, SLOT(setEnabled(bool)));
+    connect( forwardPushButton, SIGNAL(clicked()), _textBrowser, SLOT(forward()));
+    connect( _textBrowser, SIGNAL(forwardAvailable(bool)), forwardPushButton, SLOT(setEnabled(bool)));
+    connect( homePushButton, SIGNAL(clicked()), _textBrowser, SLOT(home()));
+    connect( _textBrowser, SIGNAL(sourceChanged(QUrl)), SLOT(setCurrentAddress(QUrl)));
 
-    // rowLayout->addWidget( m_textBrowser, 1 );
+    // rowLayout->addWidget( _textBrowser, 1 );
 
     // layout->addLayout( rowLayout, 1, 0, 1, 5);
-    layout->addWidget( m_textBrowser, 1, 0, 1, 5);
+    layout->addWidget( _textBrowser, 1, 0, 1, 5);
 
     QPushButton * closePushButton = new QPushButton(tr("Close"));
     connect( closePushButton, SIGNAL(clicked()), SLOT(close()));
@@ -84,12 +84,12 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
 
 void HelpDialog::setCurrentAddress(const QUrl & url)
 {
-    m_urlLineEdit->setText(url.toString());
+    _urlLineEdit->setText(url.toString());
 }
 
 void HelpDialog::gotoLink(const QString & link)
 {
-    m_textBrowser->setSource(QUrl(link));
+    _textBrowser->setSource(QUrl(link));
 
     // Show the dialog if it is hidden
     if (!isVisible())

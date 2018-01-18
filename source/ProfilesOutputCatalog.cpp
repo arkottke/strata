@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,24 +46,24 @@
 ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
     AbstractOutputCatalog(outputCatalog)
 {
-    m_outputs << new AriasIntensityProfileOutput(m_outputCatalog)
-              << new DampingProfileOutput(m_outputCatalog)
-              << new DissipatedEnergyProfileOutput(m_outputCatalog)
-              << new FinalVelProfileOutput(m_outputCatalog)
-              << new InitialVelProfileOutput(m_outputCatalog)
-              << new MaxAccelProfileOutput(m_outputCatalog)
-              << new MaxDispProfileOutput(m_outputCatalog)
-              << new MaxErrorProfileOutput(m_outputCatalog)
-              << new MaxStrainProfileOutput(m_outputCatalog)
-              << new MaxStressProfileOutput(m_outputCatalog)
-              << new MaxVelProfileOutput(m_outputCatalog)
-              << new ModulusProfileOutput(m_outputCatalog)
-              << new StressRatioProfileOutput(m_outputCatalog)
-              << new StressReducCoeffProfileOutput(m_outputCatalog)
-              << new VerticalTotalStressProfileOutput(m_outputCatalog)
-              << new VerticalEffectiveStressProfileOutput(m_outputCatalog);
+    _outputs << new AriasIntensityProfileOutput(_outputCatalog)
+              << new DampingProfileOutput(_outputCatalog)
+              << new DissipatedEnergyProfileOutput(_outputCatalog)
+              << new FinalVelProfileOutput(_outputCatalog)
+              << new InitialVelProfileOutput(_outputCatalog)
+              << new MaxAccelProfileOutput(_outputCatalog)
+              << new MaxDispProfileOutput(_outputCatalog)
+              << new MaxErrorProfileOutput(_outputCatalog)
+              << new MaxStrainProfileOutput(_outputCatalog)
+              << new MaxStressProfileOutput(_outputCatalog)
+              << new MaxVelProfileOutput(_outputCatalog)
+              << new ModulusProfileOutput(_outputCatalog)
+              << new StressRatioProfileOutput(_outputCatalog)
+              << new StressReducCoeffProfileOutput(_outputCatalog)
+              << new VerticalTotalStressProfileOutput(_outputCatalog)
+              << new VerticalEffectiveStressProfileOutput(_outputCatalog);
 
-    foreach (AbstractProfileOutput* output, m_outputs)
+    foreach (AbstractProfileOutput* output, _outputs)
         connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
@@ -71,7 +71,7 @@ int ProfilesOutputCatalog::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_outputs.size();;
+    return _outputs.size();;
 }
 
 int ProfilesOutputCatalog::columnCount(const QModelIndex & parent) const
@@ -87,9 +87,9 @@ QVariant ProfilesOutputCatalog::data(const QModelIndex & index, int role) const
         return QVariant();
 
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
-        return m_outputs.at(index.row())->name();
+        return _outputs.at(index.row())->name();
     } else if (role == Qt::CheckStateRole) {
-        return m_outputs.at(index.row())->enabled() ? Qt::Checked : Qt::Unchecked;
+        return _outputs.at(index.row())->enabled() ? Qt::Checked : Qt::Unchecked;
     }
 
     return AbstractOutputCatalog::data(index, role);
@@ -97,11 +97,11 @@ QVariant ProfilesOutputCatalog::data(const QModelIndex & index, int role) const
 
 bool ProfilesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    if (index.parent() != QModelIndex() || m_readOnly)
+    if (index.parent() != QModelIndex() || _readOnly)
         return false;
 
     if (role == Qt::CheckStateRole) {
-        m_outputs[index.row()]->setEnabled(value.toBool());
+        _outputs[index.row()]->setEnabled(value.toBool());
     } else {
         return false;
     }
@@ -131,8 +131,8 @@ Qt::ItemFlags ProfilesOutputCatalog::flags(const QModelIndex & index) const
     Qt::ItemFlags flags = Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     // Remove the Enabled flag for RVT motions if the output is for time series only.
-    if (m_approach == MotionLibrary::RandomVibrationTheory
-            && m_outputs.at(index.row())->timeSeriesOnly())
+    if (_approach == MotionLibrary::RandomVibrationTheory
+            && _outputs.at(index.row())->timeSeriesOnly())
         flags &= ~Qt::ItemIsEnabled;
 
     return flags;
@@ -145,7 +145,7 @@ bool ProfilesOutputCatalog::removeRows(int row, int count, const QModelIndex &pa
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i)
-        m_outputs.takeAt(row)->deleteLater();
+        _outputs.takeAt(row)->deleteLater();
 
     emit endRemoveRows();
     return true;
@@ -155,7 +155,7 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach(AbstractProfileOutput* apo, m_outputs )
+    foreach(AbstractProfileOutput* apo, _outputs )
         if (apo->enabled())
             list << static_cast<AbstractOutput*>(apo);
 
@@ -167,7 +167,7 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json)
     beginResetModel();
 
     QMap<QString, AbstractProfileOutput*> output_map;
-    foreach (AbstractProfileOutput* o, m_outputs)
+    foreach (AbstractProfileOutput* o, _outputs)
         output_map.insert(o->metaObject()->className(), o);
 
     foreach (const QJsonValue &qjv, json) {
@@ -183,7 +183,7 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json)
 QJsonArray ProfilesOutputCatalog::toJson() const
 {
     QJsonArray json;
-    foreach (AbstractProfileOutput *apo, m_outputs) {
+    foreach (AbstractProfileOutput *apo, _outputs) {
         json << apo->toJson();
     }
 
@@ -194,7 +194,7 @@ QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
 {
     out << (quint8)4;
 
-    foreach (AbstractProfileOutput* apo, poc->m_outputs) {
+    foreach (AbstractProfileOutput* apo, poc->_outputs) {
         out << apo;
     }
 
@@ -207,7 +207,7 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
     in >> ver;
     poc->beginResetModel();
 
-    foreach (AbstractProfileOutput* apo, poc->m_outputs) {
+    foreach (AbstractProfileOutput* apo, poc->_outputs) {
         // Skip profiles not included in earlier versions
         if (ver < 2 && qobject_cast<MaxDispProfileOutput*>(apo))
             continue;

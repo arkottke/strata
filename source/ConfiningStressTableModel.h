@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -65,9 +65,9 @@ protected slots:
     
 protected:
     //! Layers
-    QList<Layer*> m_layers;
+    QList<Layer*> _layers;
     
     //! Depth to the water table
-    double m_waterTableDepth; 
+    double _waterTableDepth; 
 };
 #endif

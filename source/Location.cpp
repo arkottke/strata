@@ -15,33 +15,33 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Location.h"
 
 Location::Location( int layer, double depth)
-    : m_layer(layer), m_depth(depth)
+    : _layer(layer), _depth(depth)
 {
 }
 
 int Location::layer() const
 {
-    return m_layer;
+    return _layer;
 }
 
 void Location::setLayer(const int layer)
 {
-    m_layer = layer;
+    _layer = layer;
 }
 
 double Location::depth() const
 {
-    return m_depth;
+    return _depth;
 }
 
 void Location::setDepth(const double depth)
 {
-    m_depth = depth;
+    _depth = depth;
 }

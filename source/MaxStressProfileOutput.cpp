@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@
 MaxStressProfileOutput::MaxStressProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-    m_offset = 1;
+    _offset = 1;
 }
 
 QString MaxStressProfileOutput::name() const

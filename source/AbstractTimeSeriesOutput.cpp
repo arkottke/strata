@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,15 +50,15 @@ AbstractTimeSeriesOutput::AbstractTimeSeriesOutput(OutputCatalog* catalog)
 
 bool AbstractTimeSeriesOutput::baselineCorrect() const
 {
-    return m_baselineCorrect;
+    return _baselineCorrect;
 }
 
 void AbstractTimeSeriesOutput::setBaselineCorrect(bool baseLineCorrect)
 {
-    if (m_baselineCorrect != baseLineCorrect) {
-        m_baselineCorrect = baseLineCorrect;
+    if (_baselineCorrect != baseLineCorrect) {
+        _baselineCorrect = baseLineCorrect;
 
-        emit baselineCorrectChanged(m_baselineCorrect);
+        emit baselineCorrectChanged(_baselineCorrect);
         emit wasModified();
     }
 }
@@ -96,12 +96,12 @@ const QString AbstractTimeSeriesOutput::xLabel() const
 const QVector<double>& AbstractTimeSeriesOutput::ref(int motion) const
 {
 
-    return m_catalog->time(motion);
+    return _catalog->time(motion);
 }
 
 const QString AbstractTimeSeriesOutput::suffix() const
 {
-    return (m_baselineCorrect ? "corrected" : "");
+    return (_baselineCorrect ? "corrected" : "");
 }
 
 int AbstractTimeSeriesOutput::fieldWidth() const
@@ -112,13 +112,13 @@ int AbstractTimeSeriesOutput::fieldWidth() const
 void AbstractTimeSeriesOutput::fromJson(const QJsonObject &json)
 {
     AbstractLocationOutput::fromJson(json);
-    m_baselineCorrect = json["baselineCorrect"].toBool();
+    _baselineCorrect = json["baselineCorrect"].toBool();
 }
 
 QJsonObject AbstractTimeSeriesOutput::toJson() const
 {
     QJsonObject json = AbstractLocationOutput::toJson();
-    json["baselineCorrect"] = m_baselineCorrect;
+    json["baselineCorrect"] = _baselineCorrect;
     return json;
 }
 
@@ -127,7 +127,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* ats
 {
     out << (quint8)2;
 
-    out << atso->m_baselineCorrect << qobject_cast<const AbstractLocationOutput*>(atso);
+    out << atso->_baselineCorrect << qobject_cast<const AbstractLocationOutput*>(atso);
 
     return out;
 }
@@ -137,7 +137,7 @@ QDataStream & operator>> (QDataStream & in, AbstractTimeSeriesOutput* atso)
     quint8 ver;
     in >> ver;
 
-    in >> atso->m_baselineCorrect;
+    in >> atso->_baselineCorrect;
 
     if (ver == 1) {
         // Version 1 did not save as AbstractTimeSeriesOutput

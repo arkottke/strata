@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010-2016 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,13 +67,13 @@ protected:
     double limit(double value) const;
 
     //! Minimum value
-    double m_min;
+    double _min;
 
     //! Maximum value
-    double m_max;
+    double _max;
 
     //! Logarithmic standard deviation for the SPID model
-    double m_lnStdev;
+    double _lnStdev;
 };
 
 #endif // NONLINEAR_PROPERTY_UNCERTAINTY_H

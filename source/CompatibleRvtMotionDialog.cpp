@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,7 @@
 #include <qwt_text.h>
 
 CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly, QWidget *parent) :
-    QDialog(parent), m_motion(motion)
+    QDialog(parent), _motion(motion)
 {
     int row = 0;
     // Input group box
@@ -61,22 +61,22 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
 
     // Name
     QLineEdit *lineEdit = new QLineEdit;
-    lineEdit->setText(m_motion->name());
+    lineEdit->setText(_motion->name());
     lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
-            m_motion, SLOT(setName(QString)));
+            _motion, SLOT(setName(QString)));
 
     layout->addWidget(new QLabel(tr("Name:")), row, 0);
     layout->addWidget(lineEdit, row++, 1);
 
     // Description
     lineEdit = new QLineEdit;
-    lineEdit->setText(m_motion->description());
+    lineEdit->setText(_motion->description());
     lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
-            m_motion, SLOT(setDescription(QString)));
+            _motion, SLOT(setDescription(QString)));
 
     layout->addWidget(new QLabel(tr("Description:")), row, 0);
     layout->addWidget(lineEdit, row++, 1);
@@ -84,10 +84,10 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     // Type
     QComboBox *comboBox = new QComboBox;
     comboBox->addItems(AbstractMotion::typeList());
-    comboBox->setCurrentIndex(m_motion->type());
+    comboBox->setCurrentIndex(_motion->type());
     comboBox->setDisabled(readOnly);
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
-            m_motion, SLOT(setType(int)));
+            _motion, SLOT(setType(int)));
 
     layout->addWidget(new QLabel(tr("Type:")), row, 0);
     layout->addWidget(comboBox, row++, 1);
@@ -98,11 +98,11 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     spinBox->setDecimals(2);
     spinBox->setSingleStep(0.10);
     spinBox->setSuffix(" s");
-    spinBox->setValue(m_motion->duration());
+    spinBox->setValue(_motion->duration());
     spinBox->setReadOnly(readOnly);
 
     connect(spinBox, SIGNAL(valueChanged(double)),
-            m_motion, SLOT(setDuration(double)));
+            _motion, SLOT(setDuration(double)));
 
     layout->addWidget(new QLabel(tr("Duration:")), row, 0);
     layout->addWidget(spinBox, row++, 1);
@@ -113,18 +113,18 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     spinBox->setDecimals(1);
     spinBox->setSingleStep(1);
     spinBox->setSuffix(" %");
-    spinBox->setValue(m_motion->targetRespSpec()->damping());
+    spinBox->setValue(_motion->targetRespSpec()->damping());
     spinBox->setReadOnly(readOnly);
 
     connect(spinBox, SIGNAL(valueChanged(double)),
-            m_motion->targetRespSpec(), SLOT(setDamping(double)));
+            _motion->targetRespSpec(), SLOT(setDamping(double)));
 
     layout->addWidget(new QLabel(tr("Damping of Target:")), row, 0);
     layout->addWidget(spinBox, row++, 1);
 
     // Target response specturm
     TableGroupBox *tableGroupBox = new TableGroupBox(tr("Target Response Spectrum"), this);
-    tableGroupBox->setModel(m_motion->targetRespSpec());
+    tableGroupBox->setModel(_motion->targetRespSpec());
     tableGroupBox->setReadOnly(readOnly);
     tableGroupBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);
 
@@ -132,8 +132,8 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
 
     // Limit
     QCheckBox *checkBox = new QCheckBox(tr("Limit shape of FAS"));
-    checkBox->setChecked(m_motion->limitFas());
-    connect(checkBox, SIGNAL(toggled(bool)), m_motion, SLOT(setLimitFas(bool)));
+    checkBox->setChecked(_motion->limitFas());
+    connect(checkBox, SIGNAL(toggled(bool)), _motion, SLOT(setLimitFas(bool)));
     layout->addWidget(checkBox, row++, 0, 1, 2);
 
 
@@ -166,19 +166,19 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     text.setText(tr("Spectral Accel. (g)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_saCurve = new QwtPlotCurve;
-    m_saCurve->setPen(QPen(Qt::blue));
-    m_saCurve->setSamples(m_motion->respSpec()->period(),
-                       m_motion->respSpec()->sa());
-    m_saCurve->attach(plot);
+    _saCurve = new QwtPlotCurve;
+    _saCurve->setPen(QPen(Qt::blue));
+    _saCurve->setSamples(_motion->respSpec()->period(),
+                       _motion->respSpec()->sa());
+    _saCurve->attach(plot);
 
-    m_targetSaCurve = new QwtPlotCurve;
-    m_targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
-    m_targetSaCurve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse, QBrush(),
+    _targetSaCurve = new QwtPlotCurve;
+    _targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
+    _targetSaCurve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse, QBrush(),
                                          QPen(Qt::red), QSize(5,5)));
-    m_targetSaCurve->setSamples(m_motion->targetRespSpec()->period(),
-                             m_motion->targetRespSpec()->sa());
-    m_targetSaCurve->attach(plot);
+    _targetSaCurve->setSamples(_motion->targetRespSpec()->period(),
+                             _motion->targetRespSpec()->sa());
+    _targetSaCurve->attach(plot);
 
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
@@ -208,10 +208,10 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     text.setText(tr("Fourier Amplitude (g-s)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_fasCurve = new QwtPlotCurve;
-    m_fasCurve->setPen(QPen(Qt::blue));
-    m_fasCurve->setSamples(m_motion->freq(),m_motion->fourierAcc());
-    m_fasCurve->attach(plot);
+    _fasCurve = new QwtPlotCurve;
+    _fasCurve->setPen(QPen(Qt::blue));
+    _fasCurve->setSamples(_motion->freq(),_motion->fourierAcc());
+    _fasCurve->attach(plot);
 
     scrollArea = new QScrollArea;
     scrollArea->setWidget(plot);
@@ -219,16 +219,16 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(CompatibleRvtMotion *motion
     tabWidget->addTab(scrollArea, tr("FAS Plot"));
 
     // Response spectrum table
-    m_rsTableView = new MyTableView;
-    m_rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_rsTableView->setModel(m_motion->respSpec());
-    tabWidget->addTab(m_rsTableView, tr("RS Data"));
+    _rsTableView = new MyTableView;
+    _rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    _rsTableView->setModel(_motion->respSpec());
+    tabWidget->addTab(_rsTableView, tr("RS Data"));
 
     // Fourier amplitude spectrum table
-    m_fasTableView = new MyTableView;
-    m_fasTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_fasTableView->setModel(m_motion);
-    tabWidget->addTab(m_fasTableView, tr("FAS Data"));
+    _fasTableView = new MyTableView;
+    _fasTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    _fasTableView->setModel(_motion);
+    tabWidget->addTab(_fasTableView, tr("FAS Data"));
 
     layout->addWidget(tabWidget, 0, 2, row, 1);
 
@@ -264,7 +264,7 @@ void CompatibleRvtMotionDialog::openFrequencyDialog()
 
     DimensionLayout* layout = new DimensionLayout;
     layout->setRange(0.001, 1000);
-    layout->setModel(m_motion->freqDimension());
+    layout->setModel(_motion->freqDimension());
     layout->setSuffix(" Hz");
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(
@@ -280,21 +280,21 @@ void CompatibleRvtMotionDialog::openFrequencyDialog()
 
 void CompatibleRvtMotionDialog::calculate()
 {
-    m_motion->calculate();
+    _motion->calculate();
 
-    m_fasTableView->resizeRowsToContents();
-    m_rsTableView->resizeRowsToContents();
+    _fasTableView->resizeRowsToContents();
+    _rsTableView->resizeRowsToContents();
 
-    m_fasCurve->setSamples(m_motion->freq(),m_motion->fourierAcc());
-    m_saCurve->setSamples(m_motion->respSpec()->period(),
-                          m_motion->respSpec()->sa());
-    m_targetSaCurve->setSamples(m_motion->targetRespSpec()->period(),
-                                m_motion->targetRespSpec()->sa());
+    _fasCurve->setSamples(_motion->freq(),_motion->fourierAcc());
+    _saCurve->setSamples(_motion->respSpec()->period(),
+                          _motion->respSpec()->sa());
+    _targetSaCurve->setSamples(_motion->targetRespSpec()->period(),
+                                _motion->targetRespSpec()->sa());
 }
 
 void CompatibleRvtMotionDialog::tryAccept()
 {
-    m_motion->calculate();
+    _motion->calculate();
     accept();
 }
 

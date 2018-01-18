@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -68,7 +68,7 @@ protected:
         CorrectedColumn
     };
 
-    QList<AbstractTimeSeriesOutput*> m_outputs;
+    QList<AbstractTimeSeriesOutput*> _outputs;
 };
 
 #endif // TIME_SERIES_OUTPUT_CATALOG_H

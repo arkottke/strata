@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ public:
 
 protected:
     //! If the curve should be saved to disk in the catalog
-    bool m_retain;
+    bool _retain;
 };
 
 #endif // CUSTOM_NONLINEAR_PROPERTY_H

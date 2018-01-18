@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -118,19 +118,19 @@ protected:
     const std::complex<double> waves(const int freqIdx, const Location & location, const AbstractMotion::Type type) const;
 
     //! Site profile
-    SoilProfile* m_site;
+    SoilProfile* _site;
 
     //! Motion that is propagated through the site profile.
-    AbstractMotion* m_motion;
+    AbstractMotion* _motion;
 
     //! Number of SubLayers in the site profile
-    int m_nsl;
+    int _nsl;
 
     //! Number of frequency points in the motion
-    int m_nf;
+    int _nf;
 
     //! If the calculation should continue
-    bool m_okToContinue;
+    bool _okToContinue;
 
     /*! @name Wave propagation parameters
      *
@@ -139,20 +139,20 @@ protected:
      */
     //@{
     //! Complex shear modulus
-    QVector<QVector<std::complex<double> > > m_shearMod;
+    QVector<QVector<std::complex<double> > > _shearMod;
 
     //! Up-going wave
-    QVector<QVector<std::complex<double> > > m_waveA;
+    QVector<QVector<std::complex<double> > > _waveA;
 
     //! Down-going wave
-    QVector<QVector<std::complex<double> > > m_waveB;
+    QVector<QVector<std::complex<double> > > _waveB;
 
     //! Complex wave number
-    QVector<QVector<std::complex<double> > > m_waveNum;
+    QVector<QVector<std::complex<double> > > _waveNum;
     //@}
 
     //! Text log to record calculation steps
-    TextLog * m_textLog;
+    TextLog * _textLog;
 };
 
 #endif // ABSTRACT_CALCULATOR_H

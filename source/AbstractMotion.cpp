@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,21 +35,21 @@
 AbstractMotion::AbstractMotion(QObject * parent)
     : MyAbstractTableModel(parent)
 {
-    m_enabled = true;
-    m_type = Outcrop;
-    m_respSpec = new ResponseSpectrum;    
+    _enabled = true;
+    _type = Outcrop;
+    _respSpec = new ResponseSpectrum;    
     // Default characteristics of the response spectrum
-    m_respSpec->setDamping(5.0);
-    m_respSpec->setPeriod(Dimension::logSpace(0.01, 5, 60));
+    _respSpec->setDamping(5.0);
+    _respSpec->setPeriod(Dimension::logSpace(0.01, 5, 60));
 
-    connect(m_respSpec, SIGNAL(wasModified()), SLOT(setModified()));
+    connect(_respSpec, SIGNAL(wasModified()), SLOT(setModified()));
     connect(Units::instance(), SIGNAL(systemChanged(int)),
             this, SLOT(scaleProperties()));
 }
 
 AbstractMotion::~AbstractMotion()
 {
-    m_respSpec->deleteLater();
+    _respSpec->deleteLater();
 }
 
 QStringList AbstractMotion::typeList()
@@ -97,20 +97,20 @@ AbstractMotion::Type AbstractMotion::variantToType(QVariant variant, bool* ok)
 
 bool AbstractMotion::modified() const
 {
-    return m_modified;
+    return _modified;
 }
 
 void AbstractMotion::setModified(bool modified)
 {
-    m_modified = modified;
+    _modified = modified;
 
-    if (m_modified)
+    if (_modified)
         emit wasModified();
 }
 
 AbstractMotion::Type AbstractMotion::type() const
 { 
-    return m_type;
+    return _type;
 }
 
 void AbstractMotion::setType(int type)
@@ -121,49 +121,49 @@ void AbstractMotion::setType(int type)
 
 void AbstractMotion::setType(AbstractMotion::Type type)
 {
-    m_type = type;
+    _type = type;
     setModified(true);
 }
 
 
 QString AbstractMotion::description() const
 {
-    return m_description;
+    return _description;
 }
 
 void AbstractMotion::setDescription(QString s)
 {
-    if (m_description != s) {
+    if (_description != s) {
         emit descriptionChanged(s);
         setModified(true);
     }
 
-    m_description = s;
+    _description = s;
 }
 
 bool AbstractMotion::enabled() const
 {
-    return m_enabled;
+    return _enabled;
 }
 
 void AbstractMotion::setEnabled(bool enabled)
 {
-    m_enabled = enabled;
+    _enabled = enabled;
 }
 
 ResponseSpectrum* AbstractMotion::respSpec()
 {
-    return m_respSpec;
+    return _respSpec;
 }
 
 double AbstractMotion::pga() const
 {
-    return m_pga;
+    return _pga;
 }
 
 double AbstractMotion::pgv() const
 {
-    return m_pgv;
+    return _pgv;
 }
 
 double AbstractMotion::freqMin() const
@@ -193,13 +193,13 @@ void AbstractMotion::scaleProperties()
         // Units changed from English to Metric
 
         // Convert PGV from in/sec to cm/sec
-        setPgv(m_pgv * 2.54);
+        setPgv(_pgv * 2.54);
         break;
     case Units::English:
         // Units changed from English to Metric
 
         // Convert PGV from cm/sec to in/sec
-        setPgv(m_pgv * 0.393700787);
+        setPgv(_pgv * 0.393700787);
         break;
     }
 }
@@ -226,21 +226,21 @@ QVector<std::complex<double> > AbstractMotion::calcSdofTf(const double period, c
 
 void AbstractMotion::setPga(double pga)
 {
-    m_pga = pga;
-    emit pgaChanged(m_pga);
+    _pga = pga;
+    emit pgaChanged(_pga);
 }
 
 void AbstractMotion::setPgv(double pgv)
 {
-    m_pgv = pgv;
-    emit pgvChanged(m_pgv);
+    _pgv = pgv;
+    emit pgvChanged(_pgv);
 }
 
 void AbstractMotion::fromJson(const QJsonObject &json)
 {
-    m_description = json["description"].toString();
-    m_enabled = json["enabled"].toVariant().toBool();
-    // m_enabled = json["enabled"].toBool();
+    _description = json["description"].toString();
+    _enabled = json["enabled"].toVariant().toBool();
+    // _enabled = json["enabled"].toBool();
 
     setType(json["type"].toInt());
 }
@@ -250,9 +250,9 @@ QJsonObject AbstractMotion::toJson() const
     QJsonObject json;
 
     json["className"] = metaObject()->className();
-    json["type"] = (int) m_type;
-    json["description"] = m_description;
-    json["enabled"] = m_enabled;
+    json["type"] = (int) _type;
+    json["description"] = _description;
+    json["enabled"] = _enabled;
 
     return json;
 }
@@ -261,9 +261,9 @@ QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)
 {
     out << (quint8)1;
 
-    out << (int)m->m_type
-        << m->m_description
-        << m->m_enabled;
+    out << (int)m->_type
+        << m->_description
+        << m->_enabled;
 
     return out;
 }
@@ -275,8 +275,8 @@ QDataStream & operator>> (QDataStream & in, AbstractMotion* m)
 
     int type;
     in >> type
-       >> m->m_description
-       >> m->m_enabled;
+       >> m->_description
+       >> m->_enabled;
 
     m->setType(type);
 

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +39,6 @@ public:
     void setCatalog(SoilTypeCatalog *catalog);
 
 protected:
-    SoilTypeCatalog* m_catalog;
+    SoilTypeCatalog* _catalog;
 };
 #endif // SOIL_TYPE_DELEGATE_H

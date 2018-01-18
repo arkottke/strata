@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,60 +133,60 @@ private:
     /*! Model of the parameters.
      * Loads default values from Campbell 2003
      */
-    Model m_model;
+    Model _model;
 
     //! Moment magnitude
-    double m_momentMag;
+    double _momentMag;
 
     /*! Seismic moment.
      * The seismic moment is calculated from the moment magnitude.
      */
-    double m_seismicMoment;
+    double _seismicMoment;
 
     //! Epicentral distance in km
-    double m_distance;
+    double _distance;
 
     //! Depth in km
-    double m_depth;
+    double _depth;
 
     //! Hypocentral distance in km
-    double m_hypoDistance;
+    double _hypoDistance;
 
     /*! Corner frequency.
      * The corner frequency is calculated from the stress drop and
      * seismic moment.
      */
-    double m_cornerFreq;
+    double _cornerFreq;
 
     //! Stress drop in bars
-    double m_stressDrop;
+    double _stressDrop;
 
     //! Geometric attenuation
-    double m_geoAtten;
+    double _geoAtten;
 
     //! Path duration coefficient
-    double m_pathDurCoeff;
+    double _pathDurCoeff;
 
     //! Path attenuation coefficient
-    double m_pathAttenCoeff;
+    double _pathAttenCoeff;
 
     //! Path attenuation power
-    double m_pathAttenPower;
+    double _pathAttenPower;
 
     //! Shear-velociy in km/sec
-    double m_shearVelocity;
+    double _shearVelocity;
 
     //! Density in gm/cm^3
-    double m_density;
+    double _density;
 
     //! Site attenuation
-    double m_siteAtten;
+    double _siteAtten;
 
     //! Amplification by site effects (changes in density and shear-wave velocity in the crustal)
-    CrustalAmplification *m_crustalAmp;
+    CrustalAmplification *_crustalAmp;
 
     //! Frequency dimension
-    Dimension* m_freq;
+    Dimension* _freq;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_H

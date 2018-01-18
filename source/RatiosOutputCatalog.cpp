@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,9 +33,9 @@
 RatiosOutputCatalog::RatiosOutputCatalog(OutputCatalog *outputCatalog)
     : AbstractMutableOutputCatalog(outputCatalog)
 {
-    m_lookup["Acceleration Transfer Function"] = "AccelTransferFunctionOutput";
-    m_lookup["Spectral Ratio"] = "SpectralRatioOutput";
-    m_lookup["Strain Transfer Function"] = "StrainTransferFunctionOutput";
+    _lookup["Acceleration Transfer Function"] = "AccelTransferFunctionOutput";
+    _lookup["Spectral Ratio"] = "SpectralRatioOutput";
+    _lookup["Strain Transfer Function"] = "StrainTransferFunctionOutput";
 }
 
 bool RatiosOutputCatalog::needsInputConditions() const
@@ -52,7 +52,7 @@ int RatiosOutputCatalog::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_outputs.size();
+    return _outputs.size();
 }
 
 int RatiosOutputCatalog::columnCount(const QModelIndex & parent) const
@@ -69,32 +69,32 @@ QVariant RatiosOutputCatalog::data(const QModelIndex & index, int role) const
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
         switch (index.column()) {
         case NameColumn:
-            return m_outputs.at(index.row())->name();
+            return _outputs.at(index.row())->name();
         case OutDepthColumn:
             if (role == Qt::DisplayRole) {
-                return locationToString(m_outputs.at(index.row())->outDepth());
+                return locationToString(_outputs.at(index.row())->outDepth());
             } else {
-                return m_outputs.at(index.row())->outDepth();
+                return _outputs.at(index.row())->outDepth();
             }
         case OutTypeColumn:
             if (role == Qt::DisplayRole) {
                 return AbstractMotion::typeList().at(
-                        m_outputs.at(index.row())->outType());
+                        _outputs.at(index.row())->outType());
             } else {
-                return m_outputs.at(index.row())->outType();
+                return _outputs.at(index.row())->outType();
             }
         case InDepthColumn:
             if (role == Qt::DisplayRole) {
-                return locationToString(m_outputs.at(index.row())->inDepth());
+                return locationToString(_outputs.at(index.row())->inDepth());
             } else {
-                return m_outputs.at(index.row())->inDepth();
+                return _outputs.at(index.row())->inDepth();
             }
         case InTypeColumn:
             if (role == Qt::DisplayRole) {
                 return AbstractMotion::typeList().at(
-                        m_outputs.at(index.row())->inType());
+                        _outputs.at(index.row())->inType());
             } else {
-                return m_outputs.at(index.row())->inType();
+                return _outputs.at(index.row())->inType();
             }
         default:
             return QVariant();
@@ -106,7 +106,7 @@ QVariant RatiosOutputCatalog::data(const QModelIndex & index, int role) const
 
 bool RatiosOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    if (index.parent() != QModelIndex() || m_readOnly)
+    if (index.parent() != QModelIndex() || _readOnly)
         return false;
 
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
@@ -121,9 +121,9 @@ bool RatiosOutputCatalog::setData(const QModelIndex & index, const QVariant & va
 
                 if (ok) {
                     if (index.column() == OutDepthColumn)
-                        m_outputs[index.row()]->setOutDepth(d);
+                        _outputs[index.row()]->setOutDepth(d);
                     else if (index.column() == InDepthColumn)
-                        m_outputs[index.row()]->setInDepth(d);
+                        _outputs[index.row()]->setInDepth(d);
                 } else {
                     return false;
                 }
@@ -137,9 +137,9 @@ bool RatiosOutputCatalog::setData(const QModelIndex & index, const QVariant & va
 
                 if (ok) {
                     if (index.column() == OutTypeColumn)
-                        m_outputs[index.row()]->setOutType(type);
+                        _outputs[index.row()]->setOutType(type);
                     else if (index.column() == InTypeColumn)
-                        m_outputs[index.row()]->setInType(type);
+                        _outputs[index.row()]->setInType(type);
                 } else
                     return false;
 
@@ -208,12 +208,12 @@ bool RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &pare
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i) {
-        AbstractRatioOutput* aro = m_outputs.takeAt(row);
+        AbstractRatioOutput* aro = _outputs.takeAt(row);
 
         if (aro->needsFreq()) {
             // Check if remaining outputs needs frequencies
             bool needsFreq = false;
-            foreach (AbstractRatioOutput* _aro, m_outputs) {
+            foreach (AbstractRatioOutput* _aro, _outputs) {
                 if (_aro->needsFreq()) {
                     needsFreq = true;
                     break;
@@ -226,7 +226,7 @@ bool RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &pare
         } else if (aro->needsPeriod()) {
             // Check if remaining outputs needs period
             bool needsPeriod = false;
-            foreach (AbstractRatioOutput* _aro, m_outputs) {
+            foreach (AbstractRatioOutput* _aro, _outputs) {
                 if (_aro->needsPeriod()) {
                     needsPeriod = true;
                     break;
@@ -249,12 +249,12 @@ bool RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &pare
 
 void RatiosOutputCatalog::addRow(const QString &name)
 {
-    if (m_lookup.contains(name)) {
+    if (_lookup.contains(name)) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-        m_outputs << factory(m_lookup.value(name), m_outputCatalog);
+        _outputs << factory(_lookup.value(name), _outputCatalog);
 
-        connect(m_outputs.last(), SIGNAL(wasModified()),
+        connect(_outputs.last(), SIGNAL(wasModified()),
                 this, SIGNAL(wasModified()));
 
         endInsertRows();
@@ -267,7 +267,7 @@ QList<AbstractOutput*> RatiosOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach (AbstractRatioOutput* aro, m_outputs)
+    foreach (AbstractRatioOutput* aro, _outputs)
         list << static_cast<AbstractOutput*>(aro);
 
     return list;
@@ -295,13 +295,13 @@ AbstractRatioOutput* RatiosOutputCatalog::factory(const QString & className, Out
 void RatiosOutputCatalog::fromJson(const QJsonArray &json)
 {
     beginResetModel();
-    m_outputs.clear();
+    _outputs.clear();
 
     foreach (const QJsonValue &qjv, json) {
         QJsonObject qjo = qjv.toObject();
-        AbstractRatioOutput *aro = factory(qjo["className"].toString(), m_outputCatalog);
+        AbstractRatioOutput *aro = factory(qjo["className"].toString(), _outputCatalog);
         aro->fromJson(qjo);
-        m_outputs << aro;
+        _outputs << aro;
     }
 
     endResetModel();
@@ -310,7 +310,7 @@ void RatiosOutputCatalog::fromJson(const QJsonArray &json)
 QJsonArray RatiosOutputCatalog::toJson() const
 {
     QJsonArray json;
-    foreach (AbstractRatioOutput *aro, m_outputs) {
+    foreach (AbstractRatioOutput *aro, _outputs) {
         json << aro->toJson();
     }
 
@@ -321,9 +321,9 @@ QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc)
 {
     out << (quint8)1;
 
-    out << roc->m_outputs.size();
+    out << roc->_outputs.size();
 
-    foreach (const AbstractRatioOutput* aro, roc->m_outputs)
+    foreach (const AbstractRatioOutput* aro, roc->_outputs)
         out << QString(aro->metaObject()->className()) << aro;
 
     return out;
@@ -339,10 +339,10 @@ QDataStream & operator>> (QDataStream & in, RatiosOutputCatalog* roc)
 
     roc->beginResetModel();
     QString name;
-    while (roc->m_outputs.size() < size) {
+    while (roc->_outputs.size() < size) {
         in >> name;
-        roc->m_outputs << roc->factory(name, roc->m_outputCatalog);
-        in >> roc->m_outputs.last();
+        roc->_outputs << roc->factory(name, roc->_outputCatalog);
+        in >> roc->_outputs.last();
     }
     roc->endResetModel();
 

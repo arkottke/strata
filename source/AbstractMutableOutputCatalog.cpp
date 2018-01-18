@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@ AbstractMutableOutputCatalog::AbstractMutableOutputCatalog(OutputCatalog *output
 
 QStringList AbstractMutableOutputCatalog::names() const
 {
-    return m_lookup.keys();
+    return _lookup.keys();
 }
 
 bool AbstractMutableOutputCatalog::needsInputConditions() const

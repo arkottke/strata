@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -103,47 +103,47 @@ signals:
 
 private:
     //! Unit weight of the layer
-    double m_untWt;
+    double _untWt;
 
     //! Damping of the layer
-    double m_damping;
+    double _damping;
 
     //! Name of the soil layer
-    QString m_name;
+    QString _name;
 
     //! Notes regarding the soil type
-    QString m_notes;
+    QString _notes;
 
     //! Switch which controls if the soil layer is varied
-    bool m_isVaried;
+    bool _isVaried;
 
     //! Save the nonlinear curve data during the trials
-    bool m_saveData;
+    bool _saveData;
 
     /*
      * Soil properties used for the Darendeli empirical relationship
      */
     //@{
     //! Mean stress in atmospheres
-    double m_meanStress;
+    double _meanStress;
 
     //! Plasticity Index
-    double m_pi;
+    double _pi;
 
     //! Over-consolidation ratio
-    double m_ocr;
+    double _ocr;
 
     //! Frequency of excitation
-    double m_freq;
+    double _freq;
 
     //! Number of cycles of excitation
-    int m_nCycles;
+    int _nCycles;
     //@}
     //! Shear modulus reduction
-    NonlinearProperty* m_modulusModel;
+    NonlinearProperty* _modulusModel;
 
     //! Damping
-    NonlinearProperty* m_dampingModel;
+    NonlinearProperty* _dampingModel;
 
     NonlinearProperty* deriveModel(NonlinearProperty::Type type, QString className);
 };

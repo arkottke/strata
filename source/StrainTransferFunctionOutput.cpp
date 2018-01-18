@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@
 StrainTransferFunctionOutput::StrainTransferFunctionOutput(OutputCatalog* catalog)
     : AbstractRatioOutput(catalog)
 {
-    m_interp = new LinearOutputInterpolater;
+    _interp = new LinearOutputInterpolater;
 }
 
 bool StrainTransferFunctionOutput::needsFreq() const
@@ -72,26 +72,26 @@ const QString StrainTransferFunctionOutput::xLabel() const
 const QString StrainTransferFunctionOutput::yLabel() const
 {
     return tr("FAS (strain) at %1 / FAS (accel) at %2")
-            .arg(locationToString(m_outDepth))
-            .arg(locationToString(m_inDepth));
+            .arg(locationToString(_outDepth))
+            .arg(locationToString(_inDepth));
 }
 
 const QVector<double>& StrainTransferFunctionOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
 
-    return m_catalog->frequency()->data();
+    return _catalog->frequency()->data();
 }
 
 void StrainTransferFunctionOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    const Location inLoc = calculator->site()->depthToLocation(m_inDepth);
-    const Location outLoc = calculator->site()->depthToLocation(m_outDepth);
+    const Location inLoc = calculator->site()->depthToLocation(_inDepth);
+    const Location outLoc = calculator->site()->depthToLocation(_outDepth);
 
     ref = calculator->motion()->freq();
     QVector<std::complex<double> > tf = calculator->calcStrainTf(
-            inLoc, m_inType, outLoc);
+            inLoc, _inType, outLoc);
 
     data.clear();
 

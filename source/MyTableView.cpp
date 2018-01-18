@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -147,7 +147,7 @@ void MyTableView::paste()
 
 void MyTableView::setReadOnly(bool readOnly)
 {
-    m_readOnly = readOnly;
+    _readOnly = readOnly;
 
     if (readOnly) {
         setEditTriggers(NoEditTriggers);
@@ -168,7 +168,7 @@ void MyTableView::contextMenuEvent(QContextMenuEvent * event)
     contextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"),
                            this, SLOT(copy()), QKeySequence::Copy);
 
-    if (!m_readOnly)
+    if (!_readOnly)
         contextMenu->addAction(QIcon(":/images/edit-paste.svg"), tr("Paste"),
                                this, SLOT(paste()), QKeySequence::Paste);
 

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +55,7 @@ public:
     QJsonArray toJson() const;
 
 protected:
-    QList<AbstractProfileOutput*> m_outputs;
+    QList<AbstractProfileOutput*> _outputs;
 };
 
 #endif // PROFILES_OUTPUT_CATALOG_H

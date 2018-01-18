@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -191,31 +191,31 @@ protected:
     void columnToSiteMotion(const int column, int* site, int* motion) const;
 
     //! If the output is to be exported and saved to a text file
-    bool m_exportEnabled;
+    bool _exportEnabled;
 
     //! Reference the catalog the stores the reference information
-    OutputCatalog* m_catalog;
+    OutputCatalog* _catalog;
 
     //! Data values
-    QList<QList<QVector<double> > > m_data;
+    QList<QList<QVector<double> > > _data;
 
     //! Statistics of the output
-    OutputStatistics* m_statistics;
+    OutputStatistics* _statistics;
 
     //! Interpolater used to interpolate the output
-    AbstractOutputInterpolater* m_interp;
+    AbstractOutputInterpolater* _interp;
 
     /*! Initial offset of the data for plotting
      * For some output the first data value is ignore because it is zero and
      * causes problems when plotting on a log-log scale.
      */
-    int m_offset;
+    int _offset;
 
     //! Which motion should be displayed by the table -- only important for output that needs time
-    int m_motionIndex;
+    int _motionIndex;
 
     //! Size of the longest output
-    int m_maxSize;
+    int _maxSize;
 };
 
 #endif // ABSTRACT_OUTPUT_H

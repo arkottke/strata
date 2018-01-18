@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -156,7 +156,7 @@ signals:
     void inputUnitsChanged(int units);
 
 public slots:
-    void setFileName(const QString & fileName);
+    void setFileName(QString fileName);
     void setTimeStep(double timeStep);
     void setPointCount(int count);
     void setScale(double scale);
@@ -212,48 +212,48 @@ protected:
     };
 
     //! The filename of the time series
-    QString m_fileName;
+    QString _fileName;
 
     //! The time step of the time series from the input file
-    double m_timeStep;
+    double _timeStep;
 
     //! The number of points in the time series
-    int m_pointCount;
+    int _pointCount;
 
     //! The scale factor that is applied to the motion
-    double m_scale;
+    double _scale;
 
     //! Units of the motion in the input file
-    InputUnits m_inputUnits;
+    InputUnits _inputUnits;
 
     //! The format of the text file
-    Format m_format;
+    Format _format;
 
     //! The column of the acceleration data
-    int m_dataColumn;
+    int _dataColumn;
 
     //! The line the data starts on
-    int m_startLine;
+    int _startLine;
 
     //! The line the data stops on, 0 for complete file.
-    int m_stopLine;
+    int _stopLine;
 
     //! The acceleration data points in g
-    QVector<double> m_accel;
+    QVector<double> _accel;
 
     //! Frequency of the Fourier amplitude spectrum
-    QVector<double> m_freq;
+    QVector<double> _freq;
 
     //! The complex valued Fourier amplitude of the acceleration time series
-    QVector<std::complex<double> > m_fourierAcc;
+    QVector<std::complex<double> > _fourierAcc;
 
     //! The complex valued Fourier amplitude of the velocity time series
-    QVector<std::complex<double> > m_fourierVel;
+    QVector<std::complex<double> > _fourierVel;
 
     //! If the acceleration data should be saved
-    bool m_saveData;
+    bool _saveData;
 
     //! If the motion has been loaded from the file
-    bool m_isLoaded;
+    bool _isLoaded;
 };
 #endif

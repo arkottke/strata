@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -78,13 +78,13 @@ private:
     QVector<double> vanmarckeInversion() const;
 
     //! If the FAS should be corrected to better fit theory
-    bool m_limitFas;
+    bool _limitFas;
 
     //! Target response spectrum
-    ResponseSpectrum * m_targetRespSpec;
+    ResponseSpectrum * _targetRespSpec;
 
     //! Frequency dimension
-    Dimension* m_freq;
+    Dimension* _freq;
 };
 
 #endif // COMPATIBLE_RVT_MOTION_H

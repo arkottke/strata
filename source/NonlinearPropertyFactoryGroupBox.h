@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -51,9 +51,9 @@ protected slots:
     void modelsInserted(const QModelIndex & parent, int start, int end);
 
 protected:
-    AbstractNonlinearPropertyFactory *m_model;
-    QListView *m_view;
-    QPushButton *m_removeButton;
+    AbstractNonlinearPropertyFactory *_model;
+    QListView *_view;
+    QPushButton *_removeButton;
 };
 
 #endif // NONLINEAR_PROPERTY_FACTORY_GROUP_BOX_H

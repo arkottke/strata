@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -65,9 +65,9 @@ protected:
                              QVector<double> & ref, QVector<double> & data) const;
 
     //! Name of the soil type associated with the nonlinear property
-    QString m_soilName;
+    QString _soilName;
 
     //! Nonlinear property to save
-    NonlinearProperty* m_nonlinearProperty;
+    NonlinearProperty* _nonlinearProperty;
 };
 #endif // NONLINEAR_PROPERTY_OUTPUT_H_

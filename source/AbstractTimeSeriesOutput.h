@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -66,7 +66,7 @@ protected:
     int fieldWidth() const;
 
     //! If the time series is baseline corrected
-    bool m_baselineCorrect;
+    bool _baselineCorrect;
 
 };
 #endif // ABSTRACT_TIME_SERIES_OUTPUT_H

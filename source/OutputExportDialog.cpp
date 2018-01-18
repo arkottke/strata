@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +39,7 @@
 
 
 OutputExportDialog::OutputExportDialog(OutputCatalog * model, QWidget * parent, Qt::WindowFlags f)
-    : QDialog(parent, f), m_model(model)
+    : QDialog(parent, f), _model(model)
 {
     createDialog();
 }
@@ -56,14 +56,14 @@ void OutputExportDialog::selectDirectory()
                            ).toString());
     if (!dirName.isEmpty()) {
         settings.setValue("exportDirectory", dirName);
-        m_destDirLineEdit->setText(dirName);
+        _destDirLineEdit->setText(dirName);
     }
 }
 
 void OutputExportDialog::exportData()
 {
     // Check to see if the directory is valid
-    QDir destDir( m_destDirLineEdit->text() );
+    QDir destDir( _destDirLineEdit->text() );
 
     if ( !destDir.exists() ) {
         // Prompt for the creation
@@ -80,12 +80,12 @@ void OutputExportDialog::exportData()
     }
 
     // Save the data to the model
-    for (int i = 0; i < m_model->outputs().size(); ++i)
-        m_model->outputs().at(i)->setExportEnabled(
-                m_tableWidget->item(i, 0)->checkState());
+    for (int i = 0; i < _model->outputs().size(); ++i)
+        _model->outputs().at(i)->setExportEnabled(
+                _tableWidget->item(i, 0)->checkState());
 
     // Output to CSV
-    m_model->exportData(destDir.path(), ",", m_prefixLineEdit->text() );
+    _model->exportData(destDir.path(), ",", _prefixLineEdit->text() );
 
     // Save the path
     QSettings settings;
@@ -106,28 +106,28 @@ void OutputExportDialog::createDialog()
     selectDirPushButton->setAutoDefault(false);
     connect( selectDirPushButton, SIGNAL(clicked()), this, SLOT(selectDirectory()));
 
-    m_destDirLineEdit = new QLineEdit;
+    _destDirLineEdit = new QLineEdit;
 
-    m_destDirLineEdit->setText(
+    _destDirLineEdit->setText(
             settings.value(
                     "outputExportDialog/path",
                     QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                     ).toString());
 
     layout->addWidget( selectDirPushButton, 0, 0);
-    layout->addWidget( m_destDirLineEdit, 0, 1 );
+    layout->addWidget( _destDirLineEdit, 0, 1 );
 
     // Prefix
-    m_prefixLineEdit = new QLineEdit( m_model->filePrefix() );
+    _prefixLineEdit = new QLineEdit( _model->filePrefix() );
     layout->addWidget( new QLabel("Prefix:"), 1, 0 );
-    layout->addWidget( m_prefixLineEdit, 1, 1 );
+    layout->addWidget( _prefixLineEdit, 1, 1 );
 
     // View of possible output
-    m_tableWidget = new QTableWidget(m_model->outputs().size(), 1, this);
-    m_tableWidget->setHorizontalHeaderLabels(QStringList() << tr("Output Name"));
+    _tableWidget = new QTableWidget(_model->outputs().size(), 1, this);
+    _tableWidget->setHorizontalHeaderLabels(QStringList() << tr("Output Name"));
 
-    for (int i = 0; i < m_model->outputs().size(); ++i) {
-        AbstractOutput* ao = m_model->outputs().at(i);
+    for (int i = 0; i < _model->outputs().size(); ++i) {
+        AbstractOutput* ao = _model->outputs().at(i);
 
         QTableWidgetItem* item = new QTableWidgetItem(ao->fullName());
 
@@ -137,13 +137,13 @@ void OutputExportDialog::createDialog()
                        | Qt::ItemIsUserCheckable
                        | Qt::ItemIsEnabled);
 
-        m_tableWidget->setItem(i, 0, item);
+        _tableWidget->setItem(i, 0, item);
     }
 
-    m_tableWidget->resizeColumnsToContents();
-    m_tableWidget->resizeRowsToContents();
+    _tableWidget->resizeColumnsToContents();
+    _tableWidget->resizeRowsToContents();
 
-    layout->addWidget(m_tableWidget, 2, 0, 1, 2);
+    layout->addWidget(_tableWidget, 2, 0, 1, 2);
 
     // Button box
     QDialogButtonBox * buttonBox = new QDialogButtonBox( 

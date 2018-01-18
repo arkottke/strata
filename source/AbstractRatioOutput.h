@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -72,16 +72,16 @@ protected:
     virtual const QString prefix() const;
 
     //! Input depth
-    double  m_inDepth;
+    double  _inDepth;
 
     //! Input type
-    AbstractMotion::Type m_inType;
+    AbstractMotion::Type _inType;
 
     //! Output depth
-    double  m_outDepth;
+    double  _outDepth;
 
     //! Output type
-    AbstractMotion::Type m_outType;
+    AbstractMotion::Type _outType;
 };
 
 #endif // ABSTRACT_RATIO_OUTPUT_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@ class MyPlot : public QwtPlot
     private:
         QwtPlot * plot;
 
-        QMenu * m_contextMenu;
+        QMenu * _contextMenu;
 
         //! Create the context menu
         void createContextMenu();

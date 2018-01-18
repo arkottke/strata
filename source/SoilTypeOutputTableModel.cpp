@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +24,7 @@
 #include <QBrush>
 
 SoilTypeOutputTableModel::SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent )
-    : QAbstractTableModel(parent), m_soilTypes(soilTypes)
+    : QAbstractTableModel(parent), _soilTypes(soilTypes)
 {
 }
 
@@ -32,7 +32,7 @@ int SoilTypeOutputTableModel::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_soilTypes.size();
+    return _soilTypes.size();
 }
 
 int SoilTypeOutputTableModel::columnCount(const QModelIndex & parent) const
@@ -85,12 +85,12 @@ QVariant SoilTypeOutputTableModel::data(const QModelIndex &index, int role) cons
         switch (index.column()) {
         case 0:
             // Name Column
-            return QVariant( m_soilTypes.at(index.row())->name() );
+            return QVariant( _soilTypes.at(index.row())->name() );
         default:
             return QVariant();
         }
     } else if (index.column() == 0 && role == Qt::CheckStateRole) {
-        if ( m_soilTypes.at(index.row())->saveData() )
+        if ( _soilTypes.at(index.row())->saveData() )
             return QVariant( Qt::Checked );
         else
             return QVariant( Qt::Unchecked );
@@ -102,7 +102,7 @@ QVariant SoilTypeOutputTableModel::data(const QModelIndex &index, int role) cons
 bool SoilTypeOutputTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if ( index.column() == 0 && role == Qt::CheckStateRole ) {
-        m_soilTypes[index.row()]->setSaveData(value.toBool());
+        _soilTypes[index.row()]->setSaveData(value.toBool());
         emit dataChanged( index, index);
         return true;
     } else {

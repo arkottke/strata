@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -62,10 +62,10 @@ protected slots:
     void removeOutput(SoilType* soilType);
 
 protected:
-    QList<SoilTypeOutput*> m_outputs;
+    QList<SoilTypeOutput*> _outputs;
 
     //! SoilType catalog
-    SoilTypeCatalog* m_soilTypeCatalog;
+    SoilTypeCatalog* _soilTypeCatalog;
 };
 
 #endif // SOIL_TYPES_OUTPUT_CATALOG_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ protected:
     void extrap(const QVector<double> & ref, QVector<double> & data, double layerThickness) const;
 
     //! If the output is enabled
-    bool m_enabled;
+    bool _enabled;
 };
 
 #endif // ABSTRACT_PROFILE_OUTPUT_H

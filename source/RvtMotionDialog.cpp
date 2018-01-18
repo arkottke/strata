@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@
 #include <qwt_text.h>
 
 RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent) :
-    QDialog(parent), m_motion(motion)
+    QDialog(parent), _motion(motion)
 {
     int row = 0;
     // Input group box
@@ -55,32 +55,32 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
 
     // Name
     QLineEdit *lineEdit = new QLineEdit;
-    lineEdit->setText(m_motion->name());
+    lineEdit->setText(_motion->name());
     lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
-            m_motion, SLOT(setName(QString)));
+            _motion, SLOT(setName(QString)));
 
     layout->addWidget(new QLabel(tr("Name:")), row, 0);
     layout->addWidget(lineEdit, row++, 1);
 
     // Description
     lineEdit = new QLineEdit;
-    lineEdit->setText(m_motion->description());
+    lineEdit->setText(_motion->description());
     lineEdit->setReadOnly(readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
-            m_motion, SLOT(setDescription(QString)));
+            _motion, SLOT(setDescription(QString)));
 
     layout->addWidget(new QLabel(tr("Description:")), row, 0);
     layout->addWidget(lineEdit, row++, 1);
 
     QComboBox *comboBox = new QComboBox;
     comboBox->addItems(AbstractMotion::typeList());
-    comboBox->setCurrentIndex(m_motion->type());
+    comboBox->setCurrentIndex(_motion->type());
     comboBox->setDisabled(readOnly);
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
-            m_motion, SLOT(setType(int)));
+            _motion, SLOT(setType(int)));
     
     layout->addWidget(new QLabel(tr("Type:")), row, 0);
     layout->addWidget(comboBox, row++, 1);
@@ -91,17 +91,17 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     spinBox->setDecimals(2);
     spinBox->setSingleStep(0.10);
     spinBox->setSuffix(" s");
-    spinBox->setValue(m_motion->duration());
+    spinBox->setValue(_motion->duration());
     spinBox->setReadOnly(readOnly);
 
     connect(spinBox, SIGNAL(valueChanged(double)),
-            m_motion, SLOT(setDuration(double)));
+            _motion, SLOT(setDuration(double)));
 
     layout->addWidget(new QLabel(tr("Duration:")), row, 0);
     layout->addWidget(spinBox, row++, 1);
 
     TableGroupBox *tableGroupBox = new TableGroupBox(tr("Fourier Amplitude Spectrum"));
-    tableGroupBox->setModel(m_motion);
+    tableGroupBox->setModel(_motion);
     tableGroupBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);
 
     layout->addWidget(tableGroupBox, row++, 0, 1, 2);
@@ -132,10 +132,10 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     text.setText(tr("Spectral Accel. (g)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_saCurve = new QwtPlotCurve;
-    m_saCurve->setPen(QPen(Qt::blue));
-    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
-    m_saCurve->attach(plot);
+    _saCurve = new QwtPlotCurve;
+    _saCurve->setPen(QPen(Qt::blue));
+    _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
+    _saCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("RS Plot"));
 
@@ -162,18 +162,18 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     text.setText(tr("Fourier Amplitude (g-s)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_fasCurve = new QwtPlotCurve;    
-    m_fasCurve->setPen(QPen(Qt::blue));
-    m_fasCurve->setSamples(m_motion->freq(), m_motion->fourierAcc());
-    m_fasCurve->attach(plot);
+    _fasCurve = new QwtPlotCurve;    
+    _fasCurve->setPen(QPen(Qt::blue));
+    _fasCurve->setSamples(_motion->freq(), _motion->fourierAcc());
+    _fasCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("FAS Plot"));
 
     // Response spectrum table
-    m_rsTableView = new MyTableView;
-    m_rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_rsTableView->setModel(m_motion->respSpec());
-    tabWidget->addTab(m_rsTableView, tr("RS Data"));
+    _rsTableView = new MyTableView;
+    _rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    _rsTableView->setModel(_motion->respSpec());
+    tabWidget->addTab(_rsTableView, tr("RS Data"));
 
     layout->addWidget(tabWidget, 0, 2, row, 1);
 
@@ -199,16 +199,16 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
 
 void RvtMotionDialog::calculate()
 {
-    m_motion->calculate();
+    _motion->calculate();
 
-    m_rsTableView->resizeRowsToContents();
+    _rsTableView->resizeRowsToContents();
 
-    m_fasCurve->setSamples(m_motion->freq(), m_motion->fourierAcc());
-    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
+    _fasCurve->setSamples(_motion->freq(), _motion->fourierAcc());
+    _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
 }
 
 void RvtMotionDialog::tryAccept()
 {
-    m_motion->calculate();
+    _motion->calculate();
     accept();
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -58,16 +58,16 @@ public slots:
 
 protected:
     //! Associated soilType
-    SoilType*  m_soilType;
+    SoilType*  _soilType;
 
     //! If the is enabled
-    bool m_enabled;
+    bool _enabled;
 
     //! Output for the shear modulus reduction
-    NonlinearPropertyOutput* m_modulus;
+    NonlinearPropertyOutput* _modulus;
 
     //! Output for the damping
-    NonlinearPropertyOutput* m_damping;
+    NonlinearPropertyOutput* _damping;
 };
 
 #endif // SOILTYPEOUTPUT_H

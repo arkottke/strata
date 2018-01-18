@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -76,13 +76,13 @@ private:
     static double averageValue(const QVector<double> & thickness, const QVector<double> & property, const double maxDepth );
 
     //! Thickness of the crustal layers
-    QVector<double> m_thickness;
+    QVector<double> _thickness;
 
     //! Shear-wave velocity of the crustal layers in km/sec
-    QVector<double> m_velocity;
+    QVector<double> _velocity;
 
     //! Density of the crustal layers in grams/cm^3
-    QVector<double> m_density;
+    QVector<double> _density;
 };
 
 #endif // CRUSTALMODEL_H

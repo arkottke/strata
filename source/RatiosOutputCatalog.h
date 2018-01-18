@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ protected:
         InTypeColumn
     };
 
-    QList<AbstractRatioOutput*> m_outputs;
+    QList<AbstractRatioOutput*> _outputs;
 };
 
 #endif // RATIOS_OUTPUT_CATALOG_H

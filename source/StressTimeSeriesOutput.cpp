@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@
 StressTimeSeriesOutput::StressTimeSeriesOutput(OutputCatalog* catalog)
     : AbstractTimeSeriesOutput(catalog)
 {
-    m_type = AbstractMotion::Within;
+    _type = AbstractMotion::Within;
 }
 
 QString StressTimeSeriesOutput::name() const
@@ -59,12 +59,12 @@ void StressTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 
     Q_ASSERT(tsm);
 
-    Location loc = calculator->site()->depthToLocation(m_depth);
+    Location loc = calculator->site()->depthToLocation(_depth);
 
     data = tsm->strainTimeSeries(
             calculator->calcStrainTf(
                     calculator->site()->inputLocation(),
-                    calculator->motion()->type(), loc), m_baselineCorrect);
+                    calculator->motion()->type(), loc), _baselineCorrect);
 
     // Convert to appropriate units
     const double shearMod = calculator->site()->shearMod(loc.layer());

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,54 +50,54 @@
 #include <cmath>
 
 SoilProfile::SoilProfile(SiteResponseModel * parent)
-    : MyAbstractTableModel(parent), m_siteResponseModel(parent)
+    : MyAbstractTableModel(parent), _siteResponseModel(parent)
 {
-    MyRandomNumGenerator* randNumGen = m_siteResponseModel->randNumGen();
+    MyRandomNumGenerator* randNumGen = _siteResponseModel->randNumGen();
 
-    m_bedrock = new RockLayer;
-    connect( m_bedrock, SIGNAL(wasModified()),
+    _bedrock = new RockLayer;
+    connect( _bedrock, SIGNAL(wasModified()),
              this, SIGNAL(wasModified()));
 
-    m_profileRandomizer = new ProfileRandomizer(
+    _profileRandomizer = new ProfileRandomizer(
             randNumGen->gsl_pointer(), this);
-    connect( m_profileRandomizer, SIGNAL(wasModified()),
+    connect( _profileRandomizer, SIGNAL(wasModified()),
              this, SIGNAL(wasModified()));
 
-    m_nonlinearPropertyRandomizer = new NonlinearPropertyRandomizer(
+    _nonlinearPropertyRandomizer = new NonlinearPropertyRandomizer(
             randNumGen->gsl_pointer(), this);
-    connect( m_nonlinearPropertyRandomizer, SIGNAL(wasModified()),
+    connect( _nonlinearPropertyRandomizer, SIGNAL(wasModified()),
              this, SIGNAL(wasModified()));
 
-    m_soilTypeCatalog = new SoilTypeCatalog;
-    connect(m_soilTypeCatalog, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+    _soilTypeCatalog = new SoilTypeCatalog;
+    connect(_soilTypeCatalog, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             this, SIGNAL(wasModified()));
 
     connect(Units::instance(), SIGNAL(systemChanged(int)),
             this, SLOT(updateUnits()));
 
-    m_isVaried = false;
-    m_profileCount = 100;
-    m_inputDepth = -1;
-    m_maxFreq = 20;
-    m_waveFraction = 0.20;
-    m_disableAutoDiscretization = false;
-    m_waterTableDepth = 0.;
-    m_layerSelectionMethod = MidDepth;
+    _isVaried = false;
+    _profileCount = 100;
+    _inputDepth = -1;
+    _maxFreq = 20;
+    _waveFraction = 0.20;
+    _disableAutoDiscretization = false;
+    _waterTableDepth = 0.;
+    _layerSelectionMethod = MidDepth;
 }
 
 SoilProfile::~SoilProfile()
 {
-    delete m_profileRandomizer;
-    delete m_nonlinearPropertyRandomizer;
-    delete m_bedrock;
-    delete m_soilTypeCatalog;
+    delete _profileRandomizer;
+    delete _nonlinearPropertyRandomizer;
+    delete _bedrock;
+    delete _soilTypeCatalog;
 }
 
 int SoilProfile::rowCount(const QModelIndex &parent) const
 {
    Q_UNUSED(parent);
 
-   return m_soilLayers.size() + 1;
+   return _soilLayers.size() + 1;
 }
 
 int SoilProfile::columnCount(const QModelIndex &parent) const
@@ -123,7 +123,7 @@ QVariant SoilProfile::data(const QModelIndex &index, int role) const
         case ThicknessColumn:
             if (index.row() < (rowCount() - 1)) {
                 // Soil layers
-                return QString::number(m_soilLayers.at(index.row())->thickness(), 'f', 2);
+                return QString::number(_soilLayers.at(index.row())->thickness(), 'f', 2);
             } else {
                 // Rock layer
                 return tr("Half-Space");
@@ -131,7 +131,7 @@ QVariant SoilProfile::data(const QModelIndex &index, int role) const
         case SoilTypeColumn:
             if (index.row() < (rowCount() - 1)) {
                 // Soil layers
-                SoilType* const st = m_soilLayers.at(index.row())->soilType();
+                SoilType* const st = _soilLayers.at(index.row())->soilType();
                 return st ? st->name() : "";
             } else {
                 // Rock layer
@@ -165,7 +165,7 @@ QVariant SoilProfile::data(const QModelIndex &index, int role) const
 
 bool SoilProfile::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if(index.parent()!=QModelIndex() || m_readOnly)
+    if(index.parent()!=QModelIndex() || _readOnly)
         return false;
 
     if (role == Qt::EditRole) {
@@ -179,7 +179,7 @@ bool SoilProfile::setData(const QModelIndex &index, const QVariant &value, int r
                 if (!success)
                     return false;
 
-                m_soilLayers.at(index.row())->setThickness(d);
+                _soilLayers.at(index.row())->setThickness(d);
                 updateDepths();
                 emit dataChanged(this->index(index.row(), DepthColumn),
                                  this->index(rowCount(), DepthColumn));
@@ -191,8 +191,8 @@ bool SoilProfile::setData(const QModelIndex &index, const QVariant &value, int r
         case SoilTypeColumn:
             // Check if it is the final layer and if the SoilType can be identified
             if (index.row() < (rowCount() - 1)) {
-                 if (SoilType* st = m_soilTypeCatalog->soilTypeOf(value)) {
-                    m_soilLayers.at(index.row())->setSoilType(st);
+                 if (SoilType* st = _soilTypeCatalog->soilTypeOf(value)) {
+                    _soilLayers.at(index.row())->setSoilType(st);
                     break;
                 }
             } else {
@@ -323,7 +323,7 @@ bool SoilProfile::insertRows(int row, int count, const QModelIndex &parent)
     emit beginInsertRows(parent, row, row+count-1);
 
     for (int i=0; i < count; ++i)
-        m_soilLayers.insert(row, new SoilLayer(this));
+        _soilLayers.insert(row, new SoilLayer(this));
 
     emit endInsertRows();
     return true;
@@ -334,13 +334,13 @@ bool SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
     if (!count)
         return false;
 
-    emit beginRemoveRows(parent, row, qMin(row + count - 1, m_soilLayers.size() - 1));
+    emit beginRemoveRows(parent, row, qMin(row + count - 1, _soilLayers.size() - 1));
 
     for (int i=0; i < count; ++i) {
-        if (m_soilLayers.isEmpty())
+        if (_soilLayers.isEmpty())
             break;
 
-        m_soilLayers.takeAt(row)->deleteLater();       
+        _soilLayers.takeAt(row)->deleteLater();       
     }
     emit endRemoveRows();
 
@@ -352,67 +352,67 @@ bool SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
 
 int SoilProfile::profileCount() const
 {
-    return m_profileCount;
+    return _profileCount;
 }
 
 void SoilProfile::setProfileCount(int count)
 {
-    if ( m_profileCount != count ) {
-        m_profileCount = count;
+    if ( _profileCount != count ) {
+        _profileCount = count;
 
-        emit profileCountChanged(m_profileCount);
+        emit profileCountChanged(_profileCount);
         emit wasModified();
     }
 }
 
 bool SoilProfile::isVaried() const
 {
-    return m_isVaried;
+    return _isVaried;
 }
 
 void SoilProfile::setIsVaried(bool isVaried)
 {
-    if ( m_isVaried != isVaried ) {
-        m_isVaried = isVaried;
+    if ( _isVaried != isVaried ) {
+        _isVaried = isVaried;
 
         emit wasModified();
-        emit isVariedChanged(m_isVaried);
+        emit isVariedChanged(_isVaried);
     }
 }
 
 QList<SoilLayer*> & SoilProfile::soilLayers()
 {
-    return m_soilLayers;
+    return _soilLayers;
 }
 
 QList<SubLayer> & SoilProfile::subLayers()
 {
-    return m_subLayers;
+    return _subLayers;
 }
 
 RockLayer* SoilProfile::bedrock()
 {
-    return m_bedrock;
+    return _bedrock;
 }
 
 double SoilProfile::inputDepth() const
 {
-    return m_inputDepth;
+    return _inputDepth;
 }
 
 void SoilProfile::setInputDepth(double depth)
 {
-    if ( m_inputDepth != depth ) {
-        m_inputDepth = depth;
+    if ( _inputDepth != depth ) {
+        _inputDepth = depth;
 
         emit wasModified();
-        emit inputDepthChanged(m_inputDepth);
+        emit inputDepthChanged(_inputDepth);
     }
 }
 
 const Location & SoilProfile::inputLocation() const
 {
-    return m_inputLocation;
+    return _inputLocation;
 }
 
 const Location SoilProfile::depthToLocation(const double depth) const
@@ -420,19 +420,19 @@ const Location SoilProfile::depthToLocation(const double depth) const
     int index = 0;
     double interDepth = 0;
 
-    if (depth < 0 || m_subLayers.last().depthToBase() <= depth) {
+    if (depth < 0 || _subLayers.last().depthToBase() <= depth) {
         // Use the surface of the bedrock
-        index = m_subLayers.size();
+        index = _subLayers.size();
         interDepth = 0;   
     } else {
         // Use the layer whose bottom depth is deeper
         index = 0;
 
-        while (index <= m_subLayers.size()
-                && m_subLayers.at(index).depthToBase() <= depth)
+        while (index <= _subLayers.size()
+                && _subLayers.at(index).depthToBase() <= depth)
             ++index;
 
-        interDepth = depth - m_subLayers.at(index).depth();
+        interDepth = depth - _subLayers.at(index).depth();
     }
 
     return Location(index, interDepth);
@@ -440,28 +440,28 @@ const Location SoilProfile::depthToLocation(const double depth) const
 
 ProfileRandomizer* SoilProfile::profileRandomizer()
 {
-    return m_profileRandomizer;
+    return _profileRandomizer;
 }
 
 NonlinearPropertyRandomizer* SoilProfile::nonlinearPropertyRandomizer()
 {
-    return m_nonlinearPropertyRandomizer;
+    return _nonlinearPropertyRandomizer;
 }
 
 SoilTypeCatalog* SoilProfile::soilTypeCatalog()
 {
-    return m_soilTypeCatalog;
+    return _soilTypeCatalog;
 }
 
 double SoilProfile::waterTableDepth() const
 {
-    return m_waterTableDepth;
+    return _waterTableDepth;
 }
 
 void SoilProfile::setWaterTableDepth(double waterTableDepth)
 {
-    if (m_waterTableDepth != waterTableDepth) {
-        m_waterTableDepth = waterTableDepth;
+    if (_waterTableDepth != waterTableDepth) {
+        _waterTableDepth = waterTableDepth;
 
         emit wasModified();
         emit waterTableDepthChanged(waterTableDepth);
@@ -470,46 +470,46 @@ void SoilProfile::setWaterTableDepth(double waterTableDepth)
 
 double SoilProfile::maxFreq() const
 {
-    return m_maxFreq;
+    return _maxFreq;
 }
 
 void SoilProfile::setMaxFreq(double maxFreq)
 {
-    if ( m_maxFreq != maxFreq ) {
-        m_maxFreq = maxFreq;
+    if ( _maxFreq != maxFreq ) {
+        _maxFreq = maxFreq;
 
         emit wasModified();
-        emit maxFreqChanged(m_maxFreq);
+        emit maxFreqChanged(_maxFreq);
     }
 }
 
 double SoilProfile::waveFraction() const
 {
-    return m_waveFraction;
+    return _waveFraction;
 }
 
 void SoilProfile::setWaveFraction(double waveFraction)
 {
-    if ( m_waveFraction != waveFraction ) {
-        m_waveFraction = waveFraction;
+    if ( _waveFraction != waveFraction ) {
+        _waveFraction = waveFraction;
 
         emit wasModified();
-        emit waveFractionChanged(m_waveFraction);
+        emit waveFractionChanged(_waveFraction);
     }
 }
 
 bool SoilProfile::disableAutoDiscretization() const
 {
-    return m_disableAutoDiscretization;
+    return _disableAutoDiscretization;
 }
 
 void SoilProfile::setDisableAutoDiscretization(bool disableAutoDiscretization)
 {
-    if (m_disableAutoDiscretization != disableAutoDiscretization) {
-        m_disableAutoDiscretization = disableAutoDiscretization;
+    if (_disableAutoDiscretization != disableAutoDiscretization) {
+        _disableAutoDiscretization = disableAutoDiscretization;
 
         emit wasModified();
-        emit disableAutoDiscretizationChanged(m_disableAutoDiscretization);
+        emit disableAutoDiscretizationChanged(_disableAutoDiscretization);
     }
 }
 
@@ -517,8 +517,8 @@ QStringList SoilProfile::soilLayerNameList() const
 {
     QStringList list;
 
-    for (int i = 0; i < m_soilLayers.size(); ++i)
-        list << QString("%1 %2").arg(i+1).arg(m_soilLayers.at(i)->toString());
+    for (int i = 0; i < _soilLayers.size(); ++i)
+        list << QString("%1 %2").arg(i+1).arg(_soilLayers.at(i)->toString());
     
     return list;
 }
@@ -528,50 +528,50 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     // Clear the previously generated sublayers and delete the soillayers if
     // they are not the used defined values.  This could be improved as it runs
     // regardless of it is really needed. FIXME
-    if (!m_subLayers.isEmpty()) {
+    if (!_subLayers.isEmpty()) {
         QList<SoilLayer*> soilLayers;
 
         // Create a list of unique soilLayers
-        foreach (SubLayer sl, m_subLayers) {
+        foreach (SubLayer sl, _subLayers) {
             if (!soilLayers.contains(sl.soilLayer()))
                 soilLayers << sl.soilLayer();
         }
 
         // Delete the SoilLayers created in the process of randomizing the site
         foreach (SoilLayer* sl, soilLayers) {
-            if (!m_soilLayers.contains(sl))
+            if (!_soilLayers.contains(sl))
                 delete sl;
         }
 
         // Clear the sublayers
-        m_subLayers.clear();
+        _subLayers.clear();
     }
 
     // Vary the nonlinear properties of the SoilTypes
-    if (m_nonlinearPropertyRandomizer->enabled()) {
+    if (_nonlinearPropertyRandomizer->enabled()) {
         if (textLog->level() > TextLog::Low) {
             textLog->append(QObject::tr("Varying dynamic properties of soil types"));
         }
 
         // Vary the nonlinear properties of the soil types
-        for (int i = 0; i < m_soilTypeCatalog->rowCount(); ++i) {
-            SoilType * st = m_soilTypeCatalog->soilType(i);
+        for (int i = 0; i < _soilTypeCatalog->rowCount(); ++i) {
+            SoilType * st = _soilTypeCatalog->soilType(i);
 
             if (st->isVaried()) {
                 // Vary the properties
                 if (textLog->level() > TextLog::Low) {
                     textLog->append(QString("\t%1").arg(st->name()));
                 }
-                m_nonlinearPropertyRandomizer->vary(st);
+                _nonlinearPropertyRandomizer->vary(st);
             }
         }
 
         // Vary the damping of the bedrock
-        if (m_nonlinearPropertyRandomizer->bedrockIsEnabled()) {
+        if (_nonlinearPropertyRandomizer->bedrockIsEnabled()) {
             if ( textLog->level() > TextLog::Low ) {
                 textLog->append(QObject::tr("Varying damping of bedrock"));
             }
-            m_nonlinearPropertyRandomizer->vary(m_bedrock);
+            _nonlinearPropertyRandomizer->vary(_bedrock);
         }
     }
     
@@ -579,14 +579,14 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     double depthToBedrock;
     const double minDepthToBedrock = 1.0;
 
-    if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
+    if (_profileRandomizer->bedrockDepthVariation()->enabled()) {
         if ( textLog->level() > TextLog::Low ) {
             textLog->append(QObject::tr("Varying depth to bedrock"));       
 }
-        m_profileRandomizer->bedrockDepthVariation()->setAvg(m_bedrock->depth());
+        _profileRandomizer->bedrockDepthVariation()->setAvg(_bedrock->depth());
 
 
-        depthToBedrock = m_profileRandomizer->bedrockDepthVariation()->rand();
+        depthToBedrock = _profileRandomizer->bedrockDepthVariation()->rand();
 
         if (depthToBedrock < minDepthToBedrock) {
             depthToBedrock = minDepthToBedrock;
@@ -595,18 +595,18 @@ void SoilProfile::createSubLayers(TextLog * textLog)
                                 Units::instance()->length()));
         }
     } else {
-        depthToBedrock = m_bedrock->depth();
+        depthToBedrock = _bedrock->depth();
     }
 
     // Vary the layering 
     QList<SoilLayer*> soilLayers;
-    if (m_profileRandomizer->layerThicknessVariation()->enabled()) {        
+    if (_profileRandomizer->layerThicknessVariation()->enabled()) {        
         if ( textLog->level() > TextLog::Low ) {
             textLog->append(QObject::tr("Varying the layering"));
         }
         // Randomize the layer thicknesses
         QList<double> thicknesses =
-                m_profileRandomizer->layerThicknessVariation()->vary(depthToBedrock);
+                _profileRandomizer->layerThicknessVariation()->vary(depthToBedrock);
 
         // For each thickness, determine the representative soil layer
         double depth = 0;
@@ -620,8 +620,8 @@ void SoilProfile::createSubLayers(TextLog * textLog)
             depth += thickness;
         }
     } else {
-        if (m_profileRandomizer->bedrockDepthVariation()->enabled()) {
-            foreach (SoilLayer * layer, m_soilLayers) {               
+        if (_profileRandomizer->bedrockDepthVariation()->enabled()) {
+            foreach (SoilLayer * layer, _soilLayers) {               
                 if (layer->depthToBase() > depthToBedrock) {
                     // Create a new SoilLayer since the thickness will be modified
                     soilLayers << new SoilLayer(layer);
@@ -644,22 +644,22 @@ void SoilProfile::createSubLayers(TextLog * textLog)
             }
         } else {
             // Copy over previous soil layers
-            soilLayers = m_soilLayers;
+            soilLayers = _soilLayers;
         }
     }
 
     // Vary the shear-wave velocity
-    if (m_profileRandomizer->velocityVariation()->enabled()) {
+    if (_profileRandomizer->velocityVariation()->enabled()) {
         if (textLog->level() > TextLog::Low )
             textLog->append(QObject::tr("Varying the shear-wave velocity"));
 
-        m_profileRandomizer->velocityVariation()->vary(soilLayers, m_bedrock);
+        _profileRandomizer->velocityVariation()->vary(soilLayers, _bedrock);
     } else {
         // Reset the values
         foreach (SoilLayer* sl, soilLayers)
             sl->reset();
 
-        m_bedrock->reset();
+        _bedrock->reset();
     }
 
     /* Create the SubLayers by dividing the thicknesses.  The height of the
@@ -669,9 +669,9 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     double depth = 0;
     double vTotalStress = 0;
 
-    if (m_disableAutoDiscretization) {
+    if (_disableAutoDiscretization) {
         foreach (SoilLayer* sl, soilLayers) {
-            m_subLayers << SubLayer(sl->thickness(), depth, vTotalStress, m_waterTableDepth, sl);
+            _subLayers << SubLayer(sl->thickness(), depth, vTotalStress, _waterTableDepth, sl);
 
             depth += sl->thickness();
             vTotalStress += sl->thickness() * sl->untWt();
@@ -679,14 +679,14 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     } else {
         foreach (SoilLayer* sl, soilLayers) {
             // Compute the optimal thickness of the sublayers
-            double optSubThickness = sl->shearVel() / m_maxFreq * m_waveFraction;
+            double optSubThickness = sl->shearVel() / _maxFreq * _waveFraction;
             // Compute the required number of sub-layers for this thickness
             int numSubLayers = int(ceil(sl->thickness() / optSubThickness));
             // The subThickness for an even number of layers
             double subThickness = sl->thickness() / numSubLayers;
 
             for (int j = 0; j < numSubLayers; ++j) {
-                m_subLayers << SubLayer(subThickness, depth, vTotalStress, m_waterTableDepth, sl);
+                _subLayers << SubLayer(subThickness, depth, vTotalStress, _waterTableDepth, sl);
                 // Increment the depth by the subThicknees
                 depth += subThickness;
                 // Compute the stress at the base of the layer and this to the total stress
@@ -696,63 +696,63 @@ void SoilProfile::createSubLayers(TextLog * textLog)
     }
     
     // Compute the SubLayer index associated with the input depth
-    m_inputLocation = depthToLocation(m_inputDepth);
+    _inputLocation = depthToLocation(_inputDepth);
 }
 
 void SoilProfile::resetSubLayers()
 {
-    for ( int i = 0; i < m_subLayers.size(); ++i ) {
-        m_subLayers[i].reset();
+    for ( int i = 0; i < _subLayers.size(); ++i ) {
+        _subLayers[i].reset();
     }
 }
 
 int SoilProfile::subLayerCount() const
 {
-    return m_subLayers.size();
+    return _subLayers.size();
 }
 
 double SoilProfile::untWt( int layer ) const
 {
-    if ( layer < m_subLayers.size() ) {
-        return m_subLayers.at(layer).untWt();
+    if ( layer < _subLayers.size() ) {
+        return _subLayers.at(layer).untWt();
     } else {
-        return m_bedrock->untWt();
+        return _bedrock->untWt();
     }
 }
 
 double SoilProfile::density( int layer ) const
 {
-    if ( layer < m_subLayers.size() ) {
-        return m_subLayers.at(layer).density();
+    if ( layer < _subLayers.size() ) {
+        return _subLayers.at(layer).density();
     } else {
-        return m_bedrock->density();
+        return _bedrock->density();
     }
 }
 
 double SoilProfile::shearVel( int layer ) const
 {
-    if ( layer < m_subLayers.size() ) {
-        return m_subLayers.at(layer).shearVel();
+    if ( layer < _subLayers.size() ) {
+        return _subLayers.at(layer).shearVel();
     } else {
-        return m_bedrock->shearVel();
+        return _bedrock->shearVel();
     }
 }
 
 double SoilProfile::shearMod(int layer) const
 {
-    if ( layer < m_subLayers.size() ) {
-        return m_subLayers.at(layer).shearMod();
+    if ( layer < _subLayers.size() ) {
+        return _subLayers.at(layer).shearMod();
     } else {
-        return m_bedrock->shearMod();
+        return _bedrock->shearMod();
     }
 }
 
 double SoilProfile::damping( int layer ) const
 {
-    if ( layer < m_subLayers.size() ) {
-        return m_subLayers.at(layer).damping();
+    if ( layer < _subLayers.size() ) {
+        return _subLayers.at(layer).damping();
     } else {
-        return m_bedrock->damping();
+        return _bedrock->damping();
     }
 }
 
@@ -760,10 +760,10 @@ QVector<double> SoilProfile::depthProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).depth();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).depth();
 
-    profile << m_bedrock->depth();
+    profile << _bedrock->depth();
 
     return profile;
 }
@@ -772,8 +772,8 @@ QVector<double> SoilProfile::depthToMidProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).depthToMid();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).depthToMid();
 
     return profile;
 }
@@ -782,11 +782,11 @@ QVector<double> SoilProfile::initialVelocityProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < m_subLayers.size(); ++i) {
-        profile << m_subLayers.at(i).initialShearVel();
+    for (int i = 0; i < _subLayers.size(); ++i) {
+        profile << _subLayers.at(i).initialShearVel();
     }
 
-    profile << m_bedrock->shearVel();
+    profile << _bedrock->shearVel();
 
     return profile;
 }
@@ -795,11 +795,11 @@ QVector<double> SoilProfile::finalVelocityProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < m_subLayers.size(); ++i) {
-        profile << m_subLayers.at(i).shearVel();
+    for (int i = 0; i < _subLayers.size(); ++i) {
+        profile << _subLayers.at(i).shearVel();
     }
 
-    profile << m_bedrock->shearVel();
+    profile << _bedrock->shearVel();
 
     return profile;
 }
@@ -808,10 +808,10 @@ QVector<double> SoilProfile::modulusProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).shearMod();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).shearMod();
 
-    profile << m_bedrock->shearMod();
+    profile << _bedrock->shearMod();
 
     return profile;
 }
@@ -820,10 +820,10 @@ QVector<double> SoilProfile::dampingProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).damping();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).damping();
 
-    profile << m_bedrock->damping();
+    profile << _bedrock->damping();
 
     return profile;
 }
@@ -835,8 +835,8 @@ QVector<double> SoilProfile::vTotalStressProfile() const
     // Add value at surface
     profile << 0.;
 
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).vTotalStress();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).vTotalStress();
 
     return profile;
 }
@@ -848,8 +848,8 @@ QVector<double> SoilProfile::vEffectiveStressProfile() const
     // Add value at surface
     profile << 0.;
 
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).vEffectiveStress();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).vEffectiveStress();
 
     return profile;
 }
@@ -858,8 +858,8 @@ QVector<double> SoilProfile::maxErrorProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).error();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).error();
 
     return profile;
 }
@@ -878,23 +878,23 @@ QVector<double> SoilProfile::stressReducCoeffProfile(const double pga) const
     // Defined to be 1 at surface
     profile << 1.0;
 
-    for (int i = 0; i < m_subLayers.size(); ++i) {
+    for (int i = 0; i < _subLayers.size(); ++i) {
         // Add the half layer to the total weight 
-        totalWeight += m_subLayers.at(i).untWt() *
-                       m_subLayers.at(i).thickness() / 2.;
+        totalWeight += _subLayers.at(i).untWt() *
+                       _subLayers.at(i).thickness() / 2.;
 
         const double rigidStress = totalWeight * pga;
 
-        profile << m_subLayers.at(i).shearStress() / rigidStress;
+        profile << _subLayers.at(i).shearStress() / rigidStress;
 
         // Add the half layer to the total weight 
-        totalWeight += m_subLayers.at(i).untWt() *
-                       m_subLayers.at(i).thickness() / 2.;
+        totalWeight += _subLayers.at(i).untWt() *
+                       _subLayers.at(i).thickness() / 2.;
 
     }
 
     // Add the value at the base of the profile
-    profile << m_subLayers.last().shearStress() / (totalWeight * pga);
+    profile << _subLayers.last().shearStress() / (totalWeight * pga);
 
     return profile;
 }
@@ -903,8 +903,8 @@ QVector<double> SoilProfile::maxShearStrainProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).maxStrain();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).maxStrain();
 
     return profile;
 }
@@ -913,8 +913,8 @@ QVector<double> SoilProfile::shearStressProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).shearStress();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).shearStress();
 
     return profile;
 }
@@ -923,8 +923,8 @@ QVector<double> SoilProfile::stressRatioProfile() const
 {
     QVector<double> profile;
     
-    for (int i = 0; i < m_subLayers.size(); ++i)
-        profile << m_subLayers.at(i).stressRatio();
+    for (int i = 0; i < _subLayers.size(); ++i)
+        profile << _subLayers.at(i).stressRatio();
 
     return profile;
 }
@@ -957,35 +957,35 @@ QString SoilProfile::subLayerTable() const
             "</tr>");
 
     // Create each of the rows
-    for (int i = 0; i < m_subLayers.size(); ++i)
+    for (int i = 0; i < _subLayers.size(); ++i)
         html += QString("<tr><td>%1<td>%2<td>%3<td>%4<td>%5<td>%6<td>%7<td>%8<td>%9<td>%10<td>%11<td>%12<td>%13</tr>")
         .arg(i+1)
-        .arg(m_subLayers.at(i).soilTypeName())
-        .arg(m_subLayers.at(i).depth(), 0, 'f', 2)
-        .arg(m_subLayers.at(i).thickness(), 0, 'f', 2)
-        .arg(m_subLayers.at(i).maxStrain(), 0, 'e', 2)
-        .arg(m_subLayers.at(i).effStrain(), 0, 'e', 2)
-        .arg(m_subLayers.at(i).damping(), 0, 'f', 2)
-        .arg(m_subLayers.at(i).oldDamping(), 0, 'f', 2)
-        .arg(m_subLayers.at(i).dampingError(), 0, 'f', 2)
-        .arg(m_subLayers.at(i).shearMod(), 0, 'f', 0)
-        .arg(m_subLayers.at(i).oldShearMod(), 0, 'f', 0)
-        .arg(m_subLayers.at(i).shearModError(), 0, 'f', 2)
-        .arg(m_subLayers.at(i).normShearMod(), 0, 'f', 3);
+        .arg(_subLayers.at(i).soilTypeName())
+        .arg(_subLayers.at(i).depth(), 0, 'f', 2)
+        .arg(_subLayers.at(i).thickness(), 0, 'f', 2)
+        .arg(_subLayers.at(i).maxStrain(), 0, 'e', 2)
+        .arg(_subLayers.at(i).effStrain(), 0, 'e', 2)
+        .arg(_subLayers.at(i).damping(), 0, 'f', 2)
+        .arg(_subLayers.at(i).oldDamping(), 0, 'f', 2)
+        .arg(_subLayers.at(i).dampingError(), 0, 'f', 2)
+        .arg(_subLayers.at(i).shearMod(), 0, 'f', 0)
+        .arg(_subLayers.at(i).oldShearMod(), 0, 'f', 0)
+        .arg(_subLayers.at(i).shearModError(), 0, 'f', 2)
+        .arg(_subLayers.at(i).normShearMod(), 0, 'f', 3);
 
     // Bedrock layer
     html += QString("<tr><td>%1<td>%2<td>%3<td>%4<td>%5<td>%6<td>%7<td>%8<td>%9<td>%10<td>%11<td>%12<td>%13<td>%14</tr>")
-            .arg(m_subLayers.size()+1)
+            .arg(_subLayers.size()+1)
             .arg(QObject::tr("Bedrock"))
-            .arg(m_subLayers.last().depthToBase(), 0, 'f', 2)
+            .arg(_subLayers.last().depthToBase(), 0, 'f', 2)
             .arg("--")
             .arg("--")
             .arg("--")
             .arg("--")
-            .arg(m_bedrock->damping(), 0, 'f', 2)
+            .arg(_bedrock->damping(), 0, 'f', 2)
             .arg("--")
             .arg("--")
-            .arg(m_bedrock->shearMod(), 0, 'f', 0)
+            .arg(_bedrock->shearMod(), 0, 'f', 0)
             .arg("--")
             .arg("--")
             .arg("--");
@@ -1003,21 +1003,21 @@ QString SoilProfile::toHtml() const
     // 
     // Soil Types
     //
-    QString html = m_soilTypeCatalog->toHtml();
+    QString html = _soilTypeCatalog->toHtml();
 
     html +=  QString(tr(
             "<li><a name=\"Bedrock\">Bedrock<a>"
             "<table border=\"0\">"
             "<tr><th>Unit weight:</th><td>%1 %2</td></tr>"
             "<tr><th>Damping:</th><td>%3</td></tr>"))
-            .arg(m_bedrock->untWt())
+            .arg(_bedrock->untWt())
             .arg(Units::instance()->untWt())
-            .arg(m_bedrock->damping());
+            .arg(_bedrock->damping());
 
 
-    if (m_isVaried)
+    if (_isVaried)
         html += QString("<tr><th>Varied:</th><td>%1</td></tr>").arg(
-                boolToString(m_bedrock->isVaried()));
+                boolToString(_bedrock->isVaried()));
 
 
     html += "</table></li></ol>";
@@ -1038,10 +1038,10 @@ QString SoilProfile::toHtml() const
             .arg(Units::instance()->length())
             .arg(Units::instance()->vel());
 
-    if (m_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
+    if (_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
         html += tr("<th>Stdev.</th>");
 
-    if (m_profileRandomizer->velocityVariation()->enabled())
+    if (_profileRandomizer->velocityVariation()->enabled())
         html += QString(tr(
                 "<th>Minimum Vs. (%1)</th>"
                 "<th>Maximum Vs. (%1)</th>"
@@ -1051,38 +1051,38 @@ QString SoilProfile::toHtml() const
     html += "</tr>";
 
     // Table information
-    for (int i = 0; i < m_soilLayers.size(); ++i ) {
+    for (int i = 0; i < _soilLayers.size(); ++i ) {
         html += QString("<tr><td>%1</td><td>%2</td><td><a href=\"#%3\">%3</a></td><td>%4</td>")
-                .arg(m_soilLayers.at(i)->depth())
-                .arg(m_soilLayers.at(i)->thickness())
-                .arg(m_soilLayers.at(i)->soilType()->name())
-                .arg(m_soilLayers.at(i)->avg());
+                .arg(_soilLayers.at(i)->depth())
+                .arg(_soilLayers.at(i)->thickness())
+                .arg(_soilLayers.at(i)->soilType()->name())
+                .arg(_soilLayers.at(i)->avg());
 
-        if (m_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
-            html += QString("<td>%1</td>").arg(m_soilLayers.at(i)->stdev());
+        if (_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
+            html += QString("<td>%1</td>").arg(_soilLayers.at(i)->stdev());
 
-        if (m_profileRandomizer->velocityVariation()->enabled())
+        if (_profileRandomizer->velocityVariation()->enabled())
             html += QString("<td>%1</td><td>%2</td><td>%3</td>")
-            .arg(m_soilLayers.at(i)->min())
-            .arg(m_soilLayers.at(i)->max())
-            .arg(boolToString(m_soilLayers.at(i)->isVaried()));
+            .arg(_soilLayers.at(i)->min())
+            .arg(_soilLayers.at(i)->max())
+            .arg(boolToString(_soilLayers.at(i)->isVaried()));
 
         html += "</tr>";
     }
 
     // Bedrock layer
     html += QString("<tr><td>%1</td><td>---</td><td><a href=\"#Bedrock\">Bedrock</a></td><td>%2</td>")
-            .arg(m_bedrock->depth())
-            .arg(m_bedrock->avg());
+            .arg(_bedrock->depth())
+            .arg(_bedrock->avg());
 
-    if (m_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
-        html += QString("<td>%1</td>").arg(m_bedrock->stdev());
+    if (_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
+        html += QString("<td>%1</td>").arg(_bedrock->stdev());
 
-    if (m_profileRandomizer->velocityVariation()->enabled())
+    if (_profileRandomizer->velocityVariation()->enabled())
         html += QString("<td>%1</td><td>%2</td><td>%3</td>")
-        .arg(m_bedrock->min())
-        .arg(m_bedrock->max())
-        .arg(boolToString(m_bedrock->isVaried()));
+        .arg(_bedrock->min())
+        .arg(_bedrock->max())
+        .arg(boolToString(_bedrock->isVaried()));
 
     html += "</tr>";
 
@@ -1093,15 +1093,15 @@ QString SoilProfile::toHtml() const
 
 void SoilProfile::updateDepths()
 {
-    if (m_soilLayers.size()) {
-        m_soilLayers[0]->setDepth(0);
+    if (_soilLayers.size()) {
+        _soilLayers[0]->setDepth(0);
 
         // Set the depth for the lowers below the one that changed
-        for (int i = 0; i < m_soilLayers.size()-1; ++i)
-            m_soilLayers[i+1]->setDepth(m_soilLayers.at(i)->depth() + m_soilLayers.at(i)->thickness());
+        for (int i = 0; i < _soilLayers.size()-1; ++i)
+            _soilLayers[i+1]->setDepth(_soilLayers.at(i)->depth() + _soilLayers.at(i)->thickness());
 
         // Update the depth of the rock layer
-        m_bedrock->setDepth(m_soilLayers.last()->depth() + m_soilLayers.last()->thickness());
+        _bedrock->setDepth(_soilLayers.last()->depth() + _soilLayers.last()->thickness());
 
         // Signal that the depths are updated
         emit depthsChanged();
@@ -1110,7 +1110,7 @@ void SoilProfile::updateDepths()
 
 SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
 {
-    if (m_layerSelectionMethod == MaximumTravelTime) {
+    if (_layerSelectionMethod == MaximumTravelTime) {
         // The representative layer is the layer with the most travel time
         // through it
         SoilLayer* selectedLayer = 0;
@@ -1118,10 +1118,10 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
         double longestTime = 0;
 
         // If the layer is deeper than the site profile, use the deepest layer
-        if (top > m_soilLayers.last()->depthToBase())
-            return new SoilLayer(m_soilLayers.last());
+        if (top > _soilLayers.last()->depthToBase())
+            return new SoilLayer(_soilLayers.last());
 
-        foreach (SoilLayer* sl, m_soilLayers) {
+        foreach (SoilLayer* sl, _soilLayers) {
             // Skip the layer if it isn't in the depth range of interest
             if ( sl->depthToBase() < top || sl->depth() > base )
                 continue;
@@ -1156,19 +1156,19 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
 
         Q_ASSERT(selectedLayer);
         return new SoilLayer(selectedLayer);                
-    } else if (m_layerSelectionMethod == MidDepth) {
+    } else if (_layerSelectionMethod == MidDepth) {
         const float midDepth = (top + base) / 2.0;
         SoilLayer * newLayer = 0;
 
         // Try each of the layers
-        foreach (SoilLayer* sl, m_soilLayers) {
+        foreach (SoilLayer* sl, _soilLayers) {
             if (sl->depth() < midDepth && midDepth <= sl->depthToBase()) {
                 newLayer = new SoilLayer(sl);
             }
         }
         // Use the last layer is none are found
         if (!newLayer)
-            newLayer = new SoilLayer(m_soilLayers.last());
+            newLayer = new SoilLayer(_soilLayers.last());
 
         return newLayer;
     }
@@ -1183,32 +1183,32 @@ void SoilProfile::updateUnits()
 
 VelocityLayer * SoilProfile::velocityLayer(int index) const
 {
-    if (index < m_soilLayers.size()) {
-        return m_soilLayers.at(index);
+    if (index < _soilLayers.size()) {
+        return _soilLayers.at(index);
     } else {
-        return m_bedrock;
+        return _bedrock;
     }
 }
 
 void SoilProfile::fromJson(const QJsonObject &json)
 {
-    m_inputDepth = json["inputDepth"].toDouble();
-    m_isVaried = json["isVaried"].toBool();
-    m_profileCount = json["profileCount"].toInt();
-    m_maxFreq = json["maxFreq"].toDouble();
-    m_waveFraction = json["waveFraction"].toDouble();
-    m_disableAutoDiscretization = json["disableAutoDiscretization"].toBool();
-    m_waterTableDepth = json["waterTableDepth"].toDouble();
+    _inputDepth = json["inputDepth"].toDouble();
+    _isVaried = json["isVaried"].toBool();
+    _profileCount = json["profileCount"].toInt();
+    _maxFreq = json["maxFreq"].toDouble();
+    _waveFraction = json["waveFraction"].toDouble();
+    _disableAutoDiscretization = json["disableAutoDiscretization"].toBool();
+    _waterTableDepth = json["waterTableDepth"].toDouble();
 
-    m_bedrock->fromJson(json["bedrock"].toObject());
-    m_nonlinearPropertyRandomizer->fromJson(json["nonlinearPropertyRandomizer"].toObject());
-    m_soilTypeCatalog->fromJson(json["soilTypeCatalog"].toArray());
-    m_profileRandomizer->fromJson(json["profileRandomizer"].toObject());
+    _bedrock->fromJson(json["bedrock"].toObject());
+    _nonlinearPropertyRandomizer->fromJson(json["nonlinearPropertyRandomizer"].toObject());
+    _soilTypeCatalog->fromJson(json["soilTypeCatalog"].toArray());
+    _profileRandomizer->fromJson(json["profileRandomizer"].toObject());
 
     beginResetModel();
     // Delete the old layers
-    while (m_soilLayers.size())
-        m_soilLayers.takeLast()->deleteLater();
+    while (_soilLayers.size())
+        _soilLayers.takeLast()->deleteLater();
 
     foreach (const QJsonValue &jv, json["soilLayers"].toArray()) {
         QJsonObject sljo = jv.toObject();
@@ -1217,9 +1217,9 @@ void SoilProfile::fromJson(const QJsonObject &json)
         sl->fromJson(sljo);
 
         const int row = sljo["soilType"].toInt();
-        sl->setSoilType(row < 0 ? 0 : m_soilTypeCatalog->soilType(row));
+        sl->setSoilType(row < 0 ? 0 : _soilTypeCatalog->soilType(row));
 
-        m_soilLayers << sl;
+        _soilLayers << sl;
     }
 
     updateDepths();
@@ -1229,24 +1229,24 @@ void SoilProfile::fromJson(const QJsonObject &json)
 QJsonObject SoilProfile::toJson() const
 {
     QJsonObject json;
-    json["inputDepth"] = m_inputDepth;
-    json["isVaried"] = m_isVaried;
-    json["profileCount"] = m_profileCount;
-    json["maxFreq"] = m_maxFreq;
-    json["waveFraction"] = m_waveFraction;
-    json["disableAutoDiscretization"] = m_disableAutoDiscretization;
-    json["waterTableDepth"] = m_waterTableDepth;
+    json["inputDepth"] = _inputDepth;
+    json["isVaried"] = _isVaried;
+    json["profileCount"] = _profileCount;
+    json["maxFreq"] = _maxFreq;
+    json["waveFraction"] = _waveFraction;
+    json["disableAutoDiscretization"] = _disableAutoDiscretization;
+    json["waterTableDepth"] = _waterTableDepth;
 
-    json["bedrock"] = m_bedrock->toJson();
-    json["nonlinearPropertyRandomizer"] = m_nonlinearPropertyRandomizer->toJson();
-    json["soilTypeCatalog"] = m_soilTypeCatalog->toJson();
-    json["profileRandomizer"] = m_profileRandomizer->toJson();
+    json["bedrock"] = _bedrock->toJson();
+    json["nonlinearPropertyRandomizer"] = _nonlinearPropertyRandomizer->toJson();
+    json["soilTypeCatalog"] = _soilTypeCatalog->toJson();
+    json["profileRandomizer"] = _profileRandomizer->toJson();
 
     QJsonArray soilLayers;
-    foreach (const SoilLayer &sl, m_soilLayers) {
+    foreach (const SoilLayer &sl, _soilLayers) {
         QJsonObject sljo = sl.toJson();
         // Save the soil type index
-        sljo["soilType"] = sl.soilType() ? m_soilTypeCatalog->rowOf(sl.soilType()) : -1;
+        sljo["soilType"] = sl.soilType() ? _soilTypeCatalog->rowOf(sl.soilType()) : -1;
         soilLayers << sljo;
     }
     json["soilLayers"] = soilLayers;
@@ -1259,33 +1259,33 @@ QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
     out << (quint8)3;
 
     // Save soil types
-    out << sp->m_soilTypeCatalog;
+    out << sp->_soilTypeCatalog;
 
     // Save soil layers
-    out << sp->m_soilLayers.size();
+    out << sp->_soilLayers.size();
 
-    foreach(const SoilLayer* sl, sp->m_soilLayers) {
+    foreach(const SoilLayer* sl, sp->_soilLayers) {
         out << sl;
 
         // Save which soil type the soil layer is connected to.
         if (sl->soilType()) {
-            out << sp->m_soilTypeCatalog->rowOf(sl->soilType());
+            out << sp->_soilTypeCatalog->rowOf(sl->soilType());
         } else {
             out << -1;
         }
     }
 
     // Save remaining information
-    out << sp->m_bedrock
-            << sp->m_profileRandomizer
-            << sp->m_nonlinearPropertyRandomizer
-            << sp->m_inputDepth
-            << sp->m_isVaried
-            << sp->m_profileCount
-            << sp->m_maxFreq
-            << sp->m_waveFraction
-            << sp->m_disableAutoDiscretization
-            << sp->m_waterTableDepth;
+    out << sp->_bedrock
+            << sp->_profileRandomizer
+            << sp->_nonlinearPropertyRandomizer
+            << sp->_inputDepth
+            << sp->_isVaried
+            << sp->_profileCount
+            << sp->_maxFreq
+            << sp->_waveFraction
+            << sp->_disableAutoDiscretization
+            << sp->_waterTableDepth;
 
     return out;
 }
@@ -1296,45 +1296,45 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
     in >> ver;
 
     // Load soil types
-    in >> sp->m_soilTypeCatalog;
+    in >> sp->_soilTypeCatalog;
 
     // Load soil layers
     sp->beginResetModel();
 
     int count;
     in >> count;
-    while (sp->m_soilLayers.size() < count) {
+    while (sp->_soilLayers.size() < count) {
         int row;
         SoilLayer* sl = new SoilLayer(sp);
 
         in >> sl >> row;
         // If no soil type is defined for the soil layer set it the pointer to be zero
         sl->setSoilType(
-                row < 0 ? 0 : sp->m_soilTypeCatalog->soilType(row));
+                row < 0 ? 0 : sp->_soilTypeCatalog->soilType(row));
 
-        sp->m_soilLayers << sl;
+        sp->_soilLayers << sl;
     }
     sp->updateDepths();
     sp->endResetModel();
 
     // Load remaining information
-    in >> sp->m_bedrock
-            >> sp->m_profileRandomizer
-            >> sp->m_nonlinearPropertyRandomizer
-            >> sp->m_inputDepth
-            >> sp->m_isVaried
-            >> sp->m_profileCount
-            >> sp->m_maxFreq
-            >> sp->m_waveFraction;
+    in >> sp->_bedrock
+            >> sp->_profileRandomizer
+            >> sp->_nonlinearPropertyRandomizer
+            >> sp->_inputDepth
+            >> sp->_isVaried
+            >> sp->_profileCount
+            >> sp->_maxFreq
+            >> sp->_waveFraction;
 
     if (ver > 1) {
         // Added disable auto-discretization in version 2
-        in >> sp->m_disableAutoDiscretization;
+        in >> sp->_disableAutoDiscretization;
     }
 
     if (ver > 2) {
         // Added water table depth in version 3
-        in >> sp->m_waterTableDepth;
+        in >> sp->_waterTableDepth;
     }
 
     return in;

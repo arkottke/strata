@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,21 +40,21 @@ ConfiningStressDialog::ConfiningStressDialog( QWidget * parent, Qt::WindowFlags 
     int row = 0;
 
     // Water table depth
-    m_waterDepthSpinBox = new QDoubleSpinBox;
-    m_waterDepthSpinBox->setRange( 0, 5000);
-    m_waterDepthSpinBox->setDecimals(1);
-    m_waterDepthSpinBox->setSingleStep(5);
-    m_waterDepthSpinBox->setSuffix(" " + Units::instance()->length());
+    _waterDepthSpinBox = new QDoubleSpinBox;
+    _waterDepthSpinBox->setRange( 0, 5000);
+    _waterDepthSpinBox->setDecimals(1);
+    _waterDepthSpinBox->setSingleStep(5);
+    _waterDepthSpinBox->setSuffix(" " + Units::instance()->length());
 
 
     layout->addWidget( new QLabel(tr("Depth to water table:")), row, 0);
-    layout->addWidget( m_waterDepthSpinBox, row, 1 );
+    layout->addWidget( _waterDepthSpinBox, row, 1 );
 
     // Soil profile table
     ConfiningStressTableModel * tableModel = new ConfiningStressTableModel;
 
-    m_waterDepthSpinBox->setValue( tableModel->waterTableDepth() );
-    connect( m_waterDepthSpinBox, SIGNAL(valueChanged(double)), tableModel, SLOT(setWaterTableDepth(double)));
+    _waterDepthSpinBox->setValue( tableModel->waterTableDepth() );
+    connect( _waterDepthSpinBox, SIGNAL(valueChanged(double)), tableModel, SLOT(setWaterTableDepth(double)));
 
     TableGroupBox* tgb = new TableGroupBox(tr("Soil Profile"));
     tgb->setModel(tableModel);
@@ -72,5 +72,5 @@ ConfiningStressDialog::ConfiningStressDialog( QWidget * parent, Qt::WindowFlags 
 
 void ConfiningStressDialog::updateLabels()
 {
-    m_waterDepthSpinBox->setSuffix(" " + Units::instance()->length());
+    _waterDepthSpinBox->setSuffix(" " + Units::instance()->length());
 }

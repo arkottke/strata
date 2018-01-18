@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -47,11 +47,11 @@ protected slots:
     void updateButtons();
 
 protected:
-    QPushButton* m_addButton;
-    QPushButton* m_removeButton;
-    MyTableView* m_tableView;
+    QPushButton* _addButton;
+    QPushButton* _removeButton;
+    MyTableView* _tableView;
 
-    AbstractMutableOutputCatalog* m_outputCatalog;
+    AbstractMutableOutputCatalog* _outputCatalog;
 };
 
 #endif // OUTPUT_TABLE_FRAME_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -114,42 +114,42 @@ private:
     bool okToClose();
 
     //! Help dialog
-    HelpDialog * m_helpDialog;
+    HelpDialog * _helpDialog;
 
-    ConfiningStressDialog * m_confiningStressDialog;
+    ConfiningStressDialog * _confiningStressDialog;
 
-    QAction * m_readOnlyAction;
+    QAction * _readOnlyAction;
 
-    QAction * m_newAction;
-    QAction * m_openAction;
+    QAction * _newAction;
+    QAction * _openAction;
 
-    QAction * m_exportAction;
+    QAction * _exportAction;
 
-    QAction * m_printAction;
-    QAction * m_printToPdfAction;
+    QAction * _printAction;
+    QAction * _printToPdfAction;
 
-    QAction * m_saveAction;
-    QAction * m_saveAsAction;
-    QAction * m_exitAction;
+    QAction * _saveAction;
+    QAction * _saveAsAction;
+    QAction * _exitAction;
 
-    QAction * m_nlCurveDatabaseAction;
-    QAction * m_confiningStressDialogAction;
+    QAction * _nlCurveDatabaseAction;
+    QAction * _confiningStressDialogAction;
 
-    QAction * m_helpAction;
-    QAction * m_updateAction;
-    QAction * m_aboutAction;
+    QAction * _helpAction;
+    QAction * _updateAction;
+    QAction * _aboutAction;
 
-    QToolBar * m_toolBar;
+    QToolBar * _toolBar;
 
-    QTabWidget * m_tabWidget;
+    QTabWidget * _tabWidget;
 
-    QPrinter * m_printer;
+    QPrinter * _printer;
 
-    QSettings * m_settings;
+    QSettings * _settings;
     
-    ResultsPage* m_resultsPage;
-    QList<AbstractPage*> m_pages;
+    ResultsPage* _resultsPage;
+    QList<AbstractPage*> _pages;
 
-    SiteResponseModel * m_model;
+    SiteResponseModel * _model;
 };
 #endif

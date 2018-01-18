@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -131,48 +131,48 @@ public:
 
 private:
     //! Thickness of the layer
-    double m_thickness;
+    double _thickness;
 
     //! Depth to the top of the layer
-    double m_depth;
+    double _depth;
 
     //! Depth to the water table
-    double m_waterTableDepth;
+    double _waterTableDepth;
 
     //! Total vertical stress at the center of the layer
-    double m_vTotalStress;
+    double _vTotalStress;
 
     //! SoilType associated with the SubLayer
-    SoilLayer* m_soilLayer;
+    SoilLayer* _soilLayer;
 
     //! Effective shear strain within the layer
-    double m_effStrain;
+    double _effStrain;
 
     //! Maximum strain within the layer
-    double m_maxStrain;
+    double _maxStrain;
 
     //! Shear modulus of the layer
-    double m_shearMod;
+    double _shearMod;
 
     //! Normalized shear modulus
-    double m_normShearMod;
+    double _normShearMod;
 
     //! Shear velocity of the layer
-    double m_shearVel;
+    double _shearVel;
 
     //! Damping of the layer
-    double m_damping;
+    double _damping;
 
     //! Previous shear modulus value
-    double m_oldShearMod;
+    double _oldShearMod;
 
     //! Previous damping value
-    double m_oldDamping;
+    double _oldDamping;
 
     //! Error in the shear modulus
-    double m_shearModError;
+    double _shearModError;
 
     //! Error in the damping
-    double m_dampingError;
+    double _dampingError;
 };
 #endif

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -73,34 +73,34 @@ private:
     //! Try to apply the settings to the motion
     bool tryApply();
 
-    TimeSeriesMotion * m_motion;
+    TimeSeriesMotion * _motion;
 
-    QTabWidget *m_tabWidget;
+    QTabWidget *_tabWidget;
 
-    QLineEdit *m_fileNameLineEdit;
-    QLineEdit *m_descripLineEdit;
+    QLineEdit *_fileNameLineEdit;
+    QLineEdit *_descripLineEdit;
 
-    QSpinBox *m_pointCountSpinBox;
-    QDoubleSpinBox *m_timeStepSpinBox;
-    QDoubleSpinBox *m_scaleSpinBox;
+    QSpinBox *_pointCountSpinBox;
+    QDoubleSpinBox *_timeStepSpinBox;
+    QDoubleSpinBox *_scaleSpinBox;
 
-    QComboBox *m_formatComboBox;
-    QSpinBox *m_dataColSpinBox;
+    QComboBox *_formatComboBox;
+    QSpinBox *_dataColSpinBox;
 
-    QComboBox *m_unitsComboBox;
-    QDoubleSpinBox *m_pgaSpinBox;
+    QComboBox *_unitsComboBox;
+    QDoubleSpinBox *_pgaSpinBox;
 
-    QSpinBox *m_startLineSpinBox;
-    QSpinBox *m_stopLineSpinBox;
+    QSpinBox *_startLineSpinBox;
+    QSpinBox *_stopLineSpinBox;
 
-    QSpinBox *m_positionSpinBox;
-    QTextEdit *m_textEdit;
+    QSpinBox *_positionSpinBox;
+    QTextEdit *_textEdit;
 
-    QwtPlotCurve *m_atsCurve;
-    QwtPlotCurve *m_saCurve;
-    QwtPlotCurve *m_fasCurve;
+    QwtPlotCurve *_atsCurve;
+    QwtPlotCurve *_saCurve;
+    QwtPlotCurve *_fasCurve;
 
     //! Total number of lines in the file
-    int m_lineCount;
+    int _lineCount;
 };
 #endif

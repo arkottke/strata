@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,10 +50,10 @@ private:
     //! Create the GUI for the source theory inputs
     QTabWidget* createSourceTheoryForm(bool readOnly);
 
-    SourceTheoryRvtMotion *m_motion;
+    SourceTheoryRvtMotion *_motion;
 
-    QwtPlotCurve *m_fasCurve;
-    QwtPlotCurve *m_saCurve;
+    QwtPlotCurve *_fasCurve;
+    QwtPlotCurve *_saCurve;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_DIALOG_H

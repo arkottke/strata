@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,22 +38,22 @@
 
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
 {    
-    m_oscCorrection = LiuPezeshk;
-    m_duration = 0;
-    m_okToContinue = false;
-    m_workspace = gsl_integration_workspace_alloc(1024);
+    _oscCorrection = LiuPezeshk;
+    _duration = 0;
+    _okToContinue = false;
+    _workspace = gsl_integration_workspace_alloc(1024);
 }
 
 AbstractRvtMotion::~AbstractRvtMotion()
 {
-    gsl_integration_workspace_free(m_workspace);
+    gsl_integration_workspace_free(_workspace);
 }
 
 int AbstractRvtMotion::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return qMin(freq().size(), m_fourierAcc.size());
+    return qMin(freq().size(), _fourierAcc.size());
 }
 
 int AbstractRvtMotion::columnCount(const QModelIndex & parent) const
@@ -74,7 +74,7 @@ QVariant AbstractRvtMotion::data(const QModelIndex & index, int role) const
         case FrequencyColumn:
             return QString::number(freq().at(index.row()), 'e', 2);
         case AmplitudeColumn:
-            return QString::number(m_fourierAcc.at(index.row()), 'e', 2);
+            return QString::number(_fourierAcc.at(index.row()), 'e', 2);
         }
     }
 
@@ -104,28 +104,28 @@ QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation,
 
 const QVector<double> & AbstractRvtMotion::fourierAcc() const
 {
-    return m_fourierAcc;
+    return _fourierAcc;
 }
 
 double AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const
 {
-    return calcMax(absFourierAcc(tf), m_duration);
+    return calcMax(absFourierAcc(tf), _duration);
 }
 
 double AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf) const
 {   
-    return Units::instance()->tsConv() * calcMax(absFourierVel(tf), m_duration);
+    return Units::instance()->tsConv() * calcMax(absFourierVel(tf), _duration);
 }
 
 double AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf) const
 {
-    return Units::instance()->tsConv() * calcMax(absFourierDisp(tf), m_duration);
+    return Units::instance()->tsConv() * calcMax(absFourierDisp(tf), _duration);
 }
 
 QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, double damping, const QVector<std::complex<double> >& tf )
 {
     QVector<double> sa(period.size());
-    QVector<double> fas = m_fourierAcc;
+    QVector<double> fas = _fourierAcc;
 
     // Apply the transfer function to the motion
     if (!tf.isEmpty()) {
@@ -146,14 +146,14 @@ QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, doub
 
 const QVector<double> AbstractRvtMotion::absFourierAcc(const QVector<std::complex<double> >& tf) const
 {
-    QVector<double> absFas(m_fourierAcc.size());
+    QVector<double> absFas(_fourierAcc.size());
 
     if (!tf.isEmpty()) {
         // Apply the transfer function to the fas
-        for (int i = 0; i < m_fourierAcc.size(); ++i)
-            absFas[i] = abs(tf.at(i)) * m_fourierAcc.at(i);
+        for (int i = 0; i < _fourierAcc.size(); ++i)
+            absFas[i] = abs(tf.at(i)) * _fourierAcc.at(i);
     } else {
-        absFas = m_fourierAcc;
+        absFas = _fourierAcc;
     }
 
     return absFas;
@@ -192,18 +192,18 @@ double AbstractRvtMotion::freqMax() const
 
 double AbstractRvtMotion::duration() const
 {
-    return m_duration;
+    return _duration;
 }
 
 QString AbstractRvtMotion::name() const
 {
-    return m_name;
+    return _name;
 }
 
 void AbstractRvtMotion::setName(const QString &name)
 {
-    if (m_name != name) {
-        m_name = name;
+    if (_name != name) {
+        _name = name;
 
         emit wasModified();
     }
@@ -211,24 +211,24 @@ void AbstractRvtMotion::setName(const QString &name)
 
 void AbstractRvtMotion::stop()
 {
-    m_okToContinue = false;
+    _okToContinue = false;
 }
 
 bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
 {
     Q_UNUSED(scale);
 
-    m_name = extractColumn(stream.readLine(), 1);
-    m_description = extractColumn(stream.readLine(), 1);
+    _name = extractColumn(stream.readLine(), 1);
+    _description = extractColumn(stream.readLine(), 1);
 
     bool ok;
-    m_type = variantToType(extractColumn(stream.readLine(), 1), &ok);
+    _type = variantToType(extractColumn(stream.readLine(), 1), &ok);
     if (!ok) {
         qWarning() << "Unabled to parse motion type";
         return false;
     }
 
-    m_duration = extractColumn(stream.readLine(), 1).toFloat(&ok);
+    _duration = extractColumn(stream.readLine(), 1).toFloat(&ok);
     if (!ok) {
         qWarning() << "Unable to parse duration!";
         return false;
@@ -239,10 +239,10 @@ bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
 
 void AbstractRvtMotion::setOscCorrection(OscillatorCorrection oscCorrection)
 {
-    if (m_oscCorrection != oscCorrection) {
-         m_oscCorrection = oscCorrection;
+    if (_oscCorrection != oscCorrection) {
+         _oscCorrection = oscCorrection;
 
-         emit oscCorrectionChanged(m_oscCorrection);
+         emit oscCorrectionChanged(_oscCorrection);
          emit wasModified();
     }
 }
@@ -259,8 +259,8 @@ void AbstractRvtMotion::calculate()
     setPgv(maxVel());
 
     // Compute the response spectra
-    m_respSpec->setSa(computeSa(
-            m_respSpec->period(), m_respSpec->damping()));
+    _respSpec->setSa(computeSa(
+            _respSpec->period(), _respSpec->damping()));
 }
 
 struct peakFactorParams
@@ -272,7 +272,7 @@ struct peakFactorParams
 double AbstractRvtMotion::calcMax( const QVector<double> & fas, double durationRms ) const
 {
     if ( durationRms < 0 ) {
-        durationRms = m_duration;
+        durationRms = _duration;
     }
 
     // Square the Fourier amplitude spectrum
@@ -292,7 +292,7 @@ double AbstractRvtMotion::calcMax( const QVector<double> & fas, double durationR
     double bandWidth = sqrt((m2 * m2 )/( m0 * m4));
 
     // Compute the number extrema
-    double numExtrema = sqrt(m4/m2) * m_duration / M_PI;
+    double numExtrema = sqrt(m4/m2) * _duration / M_PI;
 
     // If the number of extrema is less than 2, increase to 2.  There must be
     // one full cycle (two peaks)
@@ -321,7 +321,7 @@ double AbstractRvtMotion::calcMax( const QVector<double> & fas, double durationR
         if (file.open(QFile::WriteOnly)) {
             QTextStream fout(&file);
 
-            fout << "durationGm: " << m_duration << endl;
+            fout << "durationGm: " << _duration << endl;
             fout << "durationRms: " << durationRms << endl;
             fout << "m0: " << m0 << endl;
             fout << "m2: " << m2 << endl;
@@ -336,7 +336,7 @@ double AbstractRvtMotion::calcMax( const QVector<double> & fas, double durationR
 
         result = 1.0;
     } else {
-        gsl_integration_qagiu( &F, 0, 0, 1e-7, 1000, m_workspace, &result, &error);
+        gsl_integration_qagiu( &F, 0, 0, 1e-7, 1000, _workspace, &result, &error);
     }
 
     const double peakFactor = sqrt(2) * result;
@@ -372,7 +372,7 @@ double AbstractRvtMotion::moment( int power, const QVector<double> & fasSqr) con
 {
     // The moment is found by:
     //           /
-    // m_n = 2 * | ( 2 * pi * freq )^n * FAS^2 * df
+    // _n = 2 * | ( 2 * pi * freq )^n * FAS^2 * df
     //           /
     double sum = 0;
     double dFreq = 0;
@@ -405,7 +405,7 @@ double AbstractRvtMotion::peakFactorEqn(double z, void * p)
 double AbstractRvtMotion::calcRmsDuration(const double period, const double damping, const QVector<double> & fas) const
 {
     // Use BooreJoyner if there is no FAS defined
-    OscillatorCorrection oscCorrection = fas.isEmpty() ? BooreJoyner : m_oscCorrection;
+    OscillatorCorrection oscCorrection = fas.isEmpty() ? BooreJoyner : _oscCorrection;
 
     // Duration of the oscillator
     const double durOsc = period / (2 * M_PI * damping / 100);
@@ -434,9 +434,9 @@ double AbstractRvtMotion::calcRmsDuration(const double period, const double damp
         break;
     }
 
-    const double foo = pow(m_duration / period, power);
+    const double foo = pow(_duration / period, power);
 
-    const double durationRms = m_duration + durOsc * (foo / (foo + bar));
+    const double durationRms = _duration + durOsc * (foo / (foo + bar));
 
     return durationRms;
 }
@@ -459,12 +459,12 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
     AbstractMotion::fromJson(json);
     bool oscCorrection = json["oscCorrection"].toBool();
     setOscCorrection(oscCorrection);
-    m_duration = json["duration"].toDouble();
-    m_name = json["name"].toString();
+    _duration = json["duration"].toDouble();
+    _name = json["name"].toString();
 
-    m_fourierAcc.clear();
+    _fourierAcc.clear();
     foreach (const QJsonValue &v, json["fourierAcc"].toArray())  {
-        m_fourierAcc << v.toDouble();
+        _fourierAcc << v.toDouble();
     }
 
     endResetModel();
@@ -473,12 +473,12 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
 QJsonObject AbstractRvtMotion::toJson() const
 {
     QJsonObject json = AbstractMotion::toJson();
-    json["oscCorrection"] = m_oscCorrection;
-    json["duration"] = m_duration;
-    json["name"] = m_name;
+    json["oscCorrection"] = _oscCorrection;
+    json["duration"] = _duration;
+    json["name"] = _name;
 
     QJsonArray fourierAcc;
-    foreach (const double &d, m_fourierAcc) {
+    foreach (const double &d, _fourierAcc) {
         fourierAcc << QJsonValue(d);
     }
     json["fourierAcc"] = fourierAcc;
@@ -493,10 +493,10 @@ QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
 
     out << qobject_cast<const AbstractMotion*>(arm);
 
-    out << (int)arm->m_oscCorrection
-            << arm->m_fourierAcc
-            << arm->m_duration
-            << arm->m_name;
+    out << (int)arm->_oscCorrection
+            << arm->_fourierAcc
+            << arm->_duration
+            << arm->_name;
 
     return out;
 }
@@ -512,9 +512,9 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
 
     arm->beginResetModel();
     in >> oscCorrection
-            >> arm->m_fourierAcc
-            >> arm->m_duration
-            >> arm->m_name;
+            >> arm->_fourierAcc
+            >> arm->_duration
+            >> arm->_name;
 
     arm->setOscCorrection(oscCorrection);
     arm->endResetModel();
