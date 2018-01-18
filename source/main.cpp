@@ -19,8 +19,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "MainWindow.h"
 #include "BatchRunner.h"
+#include "MainWindow.h"
+#include "defines.h"
 
 #include <QtCore>
 #include <QCommandLineOption>
@@ -77,8 +78,8 @@ int main(int argc, char* argv[])
     QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
 
     QCoreApplication::setOrganizationName("ARKottke");
-    QCoreApplication::setApplicationName("Strata");
-    QCoreApplication::setApplicationVersion(VERSION);
+    QCoreApplication::setApplicationName(PROJECT_LONGNAME);
+    QCoreApplication::setApplicationVersion(PROJECT_VERSION);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
