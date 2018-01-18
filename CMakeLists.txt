@@ -14,18 +14,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.2)
 
 # Default configuration values. These must be before the project command or
 # they won't work in Windows.
 # If no build type is specified, default to "Release"
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "None Debug Release RelWithDebInfo MinSizeRel" FORCE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "None Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 # Install to "dist" directory in Windows for testing and as a staging directory
 # for the installer.
 if (WIN32 AND NOT CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX dist CACHE STRING "Install path prefix.")
+    set(CMAKE_INSTALL_PREFIX dist CACHE STRING "Install path prefix.")
 endif()
 
 project(strata)
@@ -58,15 +58,17 @@ set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
 
 # Enable the C++14 standard
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 if (ADVANCED_FEATURES)
     add_definitions(-DADVANCED_FEATURES)
 endif()
 
 if(MSVC)
-  # Add GSL DLL definition for MSVC
-  add_definitions(-DGSL_DLL)
+    # Add GSL DLL definition for MSVC
+    add_definitions(-DGSL_DLL)
+else()
+    # Add optimization for GCC
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
 # Testing configuration
@@ -78,5 +80,5 @@ add_subdirectory(source)
 add_subdirectory(tests)
 
 if (WIN32)
-  add_subdirectory(win)
+    add_subdirectory(win)
 endif()
