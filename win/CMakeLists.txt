@@ -47,7 +47,11 @@ if (MSVC)
     # Visual Studio
     set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP true)
     include(InstallRequiredSystemLibraries)
-    install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION .)
+    install(
+        FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} 
+        DESTINATION .
+        COMPONENT dependencies
+        )
 else()
     # MinGW
     get_filename_component(MINGW_DLL_DIR ${CMAKE_CXX_COMPILER} PATH)
@@ -56,6 +60,7 @@ else()
         ${MINGW_DLL_DIR}/libstdc++-6.dll
         ${QT_DLL_DIR}/libwinpthread-1.dll
         DESTINATION .
+        COMPONENT dependencies
         )
 endif()
 
@@ -70,39 +75,28 @@ install(FILES
     ${QT_DLL_DIR}/Qt5Xml.dll
     ${CMAKE_SOURCE_DIR}/win/qt.conf
     DESTINATION .
+    COMPONENT dependencies
     )
 # Qwt Library
 get_filename_component(QWT_DLL_DIR ${QWT_LIBRARY} PATH)
 install(FILES
     ${QWT_DLL_DIR}/qwt.dll
     DESTINATION .
+    COMPONENT dependencies
     )
 # GSL Library
 get_filename_component(GSL_DLL_DIR ${GSL_LIBRARY} PATH)
 install(FILES
     ${GSL_DLL_DIR}/../bin/gsl.dll
     DESTINATION .
+    COMPONENT dependencies
     )  
 # Qt Platform Plugin
 install(FILES
     ${QT_DLL_DIR}/../plugins/platforms/qwindows.dll
     DESTINATION plugins/platforms
+    COMPONENT dependencies
     )
-# Custom target to build the WiX installer. Should be run after the install
-# target.
-if (WIX_PATH)
-    add_custom_target(installer
-        COMMAND ${WIX_PATH}/candle.exe 
-        -arch $ENV{platform}
-        ${CMAKE_CURRENT_BINARY_DIR}/installer.wxs
-        COMMAND ${WIX_PATH}/light.exe -ext WixUIExtension -ext WixUtilExtension
-        -b ${CMAKE_INSTALL_PREFIX} -b ${CMAKE_SOURCE_DIR}/win
-        -out "${PROJECT_LONGNAME}-$ENV{platform}-v${PROJECT_VERSION}-${PROJECT_GITHASH}.msi"
-        installer.wixobj
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        VERBATIM
-        )
-endif()
 
 if (7Z_PATH)
     message(${CMAKE_BINARY_DIR})
@@ -115,3 +109,55 @@ if (7Z_PATH)
         VERBATIM
         )
 endif()
+
+# Qt Installer Framework 
+set(CPACK_PACKAGE_NAME SigmaSpectra)
+set(CPACK_PACKAGE_FILE_NAME 
+    SigmaSpectra-$ENV{platform}-v${PROJECT_VERSION}-${PROJECT_GITHASH}
+)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Installation Tool")
+set(CPACK_PACKAGE_VERSION "1.0.0") # Version of installer
+set(CPACK_COMPONENTS_ALL executable dependencies manual example)
+set(CPACK_IFW_PACKAGE_START_MENU_DIRECTORY SigmaSpectra)
+set(CPACK_GENERATOR IFW)
+set(CPACK_IFW_VERBOSE ON)
+
+include(CPack REQUIRED)
+include(CPackIFW REQUIRED)
+
+cpack_add_component(
+    executable
+    DISPLAY_NAME "Executable"
+    DESCRIPTION "SigmaSpectra executable"
+    REQUIRED
+)
+
+cpack_ifw_configure_component(
+    executable
+    FORCED_INSTALLATION
+    NAME arkottke.sigmaspectra.executable
+    VERSION ${PROJECT_VERSION} # Version of component
+    LICENSES License ${CMAKE_SOURCE_DIR}/LICENSE
+    DEFAULT TRUE
+)
+
+cpack_add_component(
+    dependencies
+    DISPLAY_NAME "Dependencies"
+    DESCRIPTION "SigmaSpectra dependencies"
+    REQUIRED
+)
+
+cpack_add_component(
+    manual
+    NAME arkottke.sigmaspectra.manual
+    DISPLAY_NAME "User's manual"
+    DESCRIPTION "User's manual"
+)
+
+cpack_add_component(
+    example
+    NAME arkottke.sigmaspectra.example
+    DISPLAY_NAME "Example"
+    DESCRIPTION "Example target and motions"
+)
