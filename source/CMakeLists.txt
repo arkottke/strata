@@ -58,7 +58,7 @@ if (UNIX)
     install(TARGETS ${CMAKE_PROJECT_NAME}
             RUNTIME DESTINATION usr/bin)
     install(FILES
-            ${CMAKE_BINARY_DIR}/resources/sigmaspectra.desktop
+            ${CMAKE_BINARY_DIR}/resources/strata.desktop
             DESTINATION share/${CMAKE_PROJECT_NAME}/application
             )
     # Manual and example
