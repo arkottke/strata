@@ -20,7 +20,7 @@ DEFINES += "VERSION=\\\"$${VER_MAJ}.$${VER_MIN}.$${VER_PAT}-$${GIT_VER}\\\""
 # Enable advanced options that should not be included in the version for
 # standard users. If only the basic features are needed, comment out the
 # following line.
-DEFINES += ADVANCED_OPTIONS
+DEFINES += ADVANCED_FEATURES
 
 # Load configuration from strataconfig.pri if it exists
 include( strataconfig.pri )

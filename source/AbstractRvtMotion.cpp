@@ -325,19 +325,16 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
 
     in >> qobject_cast<AbstractMotion*>(arm);
 
-    int oscCorrection;
-
     arm->beginResetModel();
-    in >> oscCorrection
-       >> arm->_fourierAcc
+    if (ver == 1) {
+        int i;
+        in >> i;
+        Q_UNUSED(i);
+    }
+    in >> arm->_fourierAcc
        >> arm->_duration
        >> arm->_name;
-
-    // Not used anymore
-    Q_UNUSED(oscCorrection);
-
     arm->endResetModel();
-
     return in;
 }
 

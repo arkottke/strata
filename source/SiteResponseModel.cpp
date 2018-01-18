@@ -109,7 +109,7 @@ QStringList SiteResponseModel::methodList()
     list << tr("Linear Elastic")
          << tr("Equivalent Linear (EQL)");
 
-#ifdef ADVANCED_OPTIONS
+#ifdef ADVANCED_FEATURES
     list << tr("Frequency Dependent EQL");
 #endif
 

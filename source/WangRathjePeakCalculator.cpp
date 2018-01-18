@@ -6,6 +6,9 @@
 
 #include <cmath>
 
+#include <complex>
+
+#include <QDebug>
 
 
 WangRathjePeakCalculator::WangRathjePeakCalculator() {
@@ -35,8 +38,20 @@ double WangRathjePeakCalculator::calcDurationRms(
         }
     }
 
+    bool validTransFunc = false;
+    validTransFunc &= siteTransFunc.size() == _freqs.size();
+    if (validTransFunc) {
+        bool allOne = true;
+        for (std::complex<double> stf : siteTransFunc) {
+            if (fabs(fabs(stf) - 1.) > 1E-3) {
+                allOne &= false;
+            }
+        }
+        validTransFunc &= !allOne;
+    }
+
     // Modify the duration for the soil response
-    if (siteTransFunc.size() > 0) {
+    if (validTransFunc) {
         QList<double> modeFreqs;
         QList<double> modeAmps;
 
@@ -50,7 +65,9 @@ double WangRathjePeakCalculator::calcDurationRms(
         bool valid;
         for (int i = offset; i < (_freqs.size() - offset); ++i) {
             valid = true;
-            for (int j = (i - offset); i <= (i + offset); ++i) {
+            qDebug() << _freqs.at(i) << absSiteTransFunc.at(i);
+
+            for (int j = (i - offset); j <= (i + offset); ++j) {
                 if (j < i) {
                     valid &= absSiteTransFunc.at(j) < absSiteTransFunc.at(i);
                 } else if (i < j) {

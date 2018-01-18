@@ -21,14 +21,12 @@
 
 #include "FrequencyDependentCalculator.h"
 
-#include "AbstractMotion.h"
+#include "EquivalentLinearCalculator.h"
 #include "SoilProfile.h"
 #include "SubLayer.h"
 #include "Units.h"
 
 #include <QDebug>
-
-#include <cmath>
 
 FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     : AbstractIterativeCalculator(parent)
@@ -50,12 +48,15 @@ QString FrequencyDependentCalculator::toHtml() const
             .arg(_maxIterations);
 }
 
-bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::complex<double> > strainTf)
+bool FrequencyDependentCalculator::updateSubLayer(
+        int index,
+        const QVector<std::complex<double> > &strainTf)
 {
     const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
-    if (strainMax <= 0)
+    if (strainMax <= 0) {
         return false;
+    }
 
     const QVector<double> strainFas = _motion->absFourierVel(strainTf);
 
@@ -144,6 +145,28 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
 
     return true;
 }
+
+
+void FrequencyDependentCalculator::estimateInitialStrains()
+{
+    auto *calc = new EquivalentLinearCalculator();
+    calc->setTextLog(_textLog);
+    calc->run(_motion, _site);
+
+    for (SubLayer &sl : _site->subLayers()) {
+        sl.setInitialStrain(sl.effStrain());
+    }
+
+    // Compute the complex shear modulus and complex shear-wave velocity for
+    // each soil layer -- initially this is assumed to be frequency independent
+    for (int i = 0; i < _nsl; ++i ) {
+        _shearMod[i].fill(calcCompShearMod(
+                _site->shearMod(i), _site->damping(i) / 100.));
+    }
+
+    calc->deleteLater();
+}
+
 
 void FrequencyDependentCalculator::fromJson(const QJsonObject &json)
 {

@@ -43,6 +43,8 @@ set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+option(ADVANCED_FEATURES "Compile with advanced features" ON)
+
 # Configure libraries
 find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -57,6 +59,10 @@ set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
 # Enable the C++14 standard
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+if (ADVANCED_FEATURES)
+    add_definitions(-DADVANCED_FEATURES)
+endif()
 
 if(MSVC)
   # Add GSL DLL definition for MSVC

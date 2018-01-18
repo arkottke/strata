@@ -110,8 +110,6 @@ QGroupBox*  GeneralPage::createAnalysisGroupBox()
     // Approach
     _approachComboBox = new QComboBox;
     _approachComboBox->addItems(MotionLibrary::approachList());
-    connect(_approachComboBox, SIGNAL(currentIndexChanged(QString)), this,
-            SLOT(updateApproach(QString)));
     layout->addRow(tr("Approach:"), _approachComboBox);
 
     // Site varied

@@ -45,7 +45,8 @@ public:
     QJsonObject toJson() const;
 
 protected:
-    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf);
+    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf);
+    virtual void estimateInitialStrains();
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_H

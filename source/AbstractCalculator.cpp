@@ -77,27 +77,34 @@ double AbstractCalculator::surfacePGA() const
 
 void AbstractCalculator::init(AbstractMotion* motion, SoilProfile* site)
 {
-    _motion = motion;
-    _site = site;
-
-    // Determine the number of SubLayers and freqAtuency points
-    _nsl = _site->subLayerCount();
-    _nf = _motion->freqCount();
-
-    // Size the vectors
-    _shearMod.resize(_nsl + 1);
-    _waveA.resize(_nsl + 1);
-    _waveB.resize(_nsl + 1);
-    _waveNum.resize(_nsl + 1);
-
-    for ( int i = 0; i <= _nsl; ++i ) {
-        _shearMod[i].resize(_nf);
-        _waveA[i].resize(_nf);
-        _waveB[i].resize(_nf);
-        _waveNum[i].resize(_nf);
+    bool motionChanged = false;
+    if (_motion != motion) {
+        _motion = motion;
+        _nf = _motion->freqCount();
+        motionChanged = true;
     }
 
-    Q_ASSERT(_nsl);
+    bool siteChanged = false;
+    if (_site != site) {
+        _site = site;
+        _nsl = _site->subLayerCount();
+        siteChanged = true;
+    }
+
+    if (siteChanged || motionChanged) {
+        // Size the vectors
+        _shearMod.resize(_nsl + 1);
+        _waveA.resize(_nsl + 1);
+        _waveB.resize(_nsl + 1);
+        _waveNum.resize(_nsl + 1);
+
+        for (int i = 0; i <= _nsl; ++i) {
+            _shearMod[i].resize(_nf);
+            _waveA[i].resize(_nf);
+            _waveB[i].resize(_nf);
+            _waveNum[i].resize(_nf);
+        }
+    }
 }
 
 std::complex<double> AbstractCalculator::calcCompShearMod(const double shearMod, const double damping) const

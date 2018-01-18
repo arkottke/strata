@@ -52,7 +52,9 @@ public slots:
     void setStrainRatio(double strainRatio);
 
 protected:
-    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf);
+    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf);
+
+    virtual void estimateInitialStrains();
 
     //! Ratio between the maximum strain and the strain of the layer
     double _strainRatio;

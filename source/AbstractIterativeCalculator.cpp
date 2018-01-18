@@ -48,7 +48,7 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     _shearMod[_nsl].fill(calcCompShearMod(
             _site->bedrock()->shearMod(), _site->bedrock()->damping() / 100.));
 
-    setInitialStrains();
+    estimateInitialStrains();
 
     // Initialize the loop control variables
     int iter = 0;
@@ -59,12 +59,14 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     // and the number of iterations is under the maximum compute the strain
     // compatible properties.
     do {
-        if (!_okToContinue)
+        if (!_okToContinue) {
             return false;
+        }
 
         // Compute the upgoing and downgoing waves
-        if (!calcWaves())
+        if (!calcWaves()) {
             return false;
+        }
 
         // Compute the strain in each of the layers
         for (int i = 0; i < _nsl; ++i) {
@@ -72,25 +74,30 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
                                     Location(i, _site->subLayers().at(i).thickness() / 2));
 
             // Update the soil layer with the new strain -- only changes the complex shear modulus
-            if (!updateSubLayer(i, strainTf))
+            if (!updateSubLayer(i, strainTf)) {
                 return false;
+            }
 
             // Save the error for the first layer or if the error within the layer is larger than the previously saved max
-            if (!i || maxError < _site->subLayers().at(i).error())
+            if (!i || maxError < _site->subLayers().at(i).error()) {
                 maxError = _site->subLayers().at(i).error();
+            }
 
-            if (!_okToContinue)
+            if (!_okToContinue) {
                 return false;
+            }
         }
 
         // Print information regarding the iteration
-        if ( _textLog->level() > TextLog::Low )
+        if ( _textLog->level() > TextLog::Low ) {
             _textLog->append(QString(QObject::tr("\t\t\tIteration: %1 Maximum Error: %2 %"))
-                              .arg(iter+1)
-                              .arg(maxError, 0, 'f', 2));
+                                     .arg(iter + 1)
+                                     .arg(maxError, 0, 'f', 2));
+        }
 
-        if ( _textLog->level() > TextLog::Medium )
+        if ( _textLog->level() > TextLog::Medium ) {
             _textLog->append("\t\t" + _site->subLayerTable());
+        }
 
         // Step the iteration
         ++iter;
@@ -108,24 +115,6 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     }
 
     return true;
-}
-
-void AbstractIterativeCalculator::setInitialStrains()
-{
-    // Estimate the intial strain from the ratio of peak ground velocity of the
-    //  motion and the shear-wave velocity of the layer.
-    double estimatedStrain = 0;
-    for (int i = 0; i < _nsl; ++i) {
-        estimatedStrain = _motion->pgv() / _site->subLayers().at(i).shearVel();
-        _site->subLayers()[i].setInitialStrain(estimatedStrain);
-    }
-
-    // Compute the complex shear modulus and complex shear-wave velocity for
-    // each soil layer -- initially this is assumed to be frequency independent
-    for (int i = 0; i < _nsl; ++i ) {
-        _shearMod[i].fill(calcCompShearMod(
-                _site->shearMod(i), _site->damping(i) / 100.));
-    }
 }
 
 int AbstractIterativeCalculator::maxIterations() const

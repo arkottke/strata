@@ -54,7 +54,7 @@ AbstractMotion::~AbstractMotion()
 
 QStringList AbstractMotion::typeList()
 {
-#ifdef ADVANCED_OPTIONS
+#ifdef ADVANCED_FEATURES
     return QStringList() << tr("Outcrop (2A)")
             << tr("Within (A+B)")
             << tr("Incoming Only (A)");

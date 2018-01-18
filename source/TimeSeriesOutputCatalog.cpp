@@ -43,7 +43,7 @@ TimeSeriesOutputCatalog::TimeSeriesOutputCatalog(OutputCatalog *outputCatalog) :
     _lookup["Shear-Strain Time Series"] = "StrainTimeSeriesOutput";
     _lookup["Shear-Stress Time Series"] = "StressTimeSeriesOutput";
 
-#ifdef ADVANCED_OPTIONS
+#ifdef ADVANCED_FEATURES
     _lookup["Visco-Elastic Shear-Stress Time Series"] = "ViscoElasticStressTimeSeriesOutput";
 #endif
 }

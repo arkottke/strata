@@ -468,7 +468,7 @@ void MainWindow::about()
                           "<p>For comments and suggestions contact Albert at "
                           "<a href=\"mailto:albert.kottke@gmail.com\">albert.kottke@gmail.com</a></p>"
                           "<p>Version: %1</p>"
-#ifdef ADVANCED_OPTIONS
+#ifdef ADVANCED_FEATURES
                           "<p>Compiled with advanced options</p>"
 #endif
                           ).arg(QCoreApplication::applicationVersion()));

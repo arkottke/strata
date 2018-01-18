@@ -57,7 +57,7 @@ public slots:
 
 protected:
     //! Compute the nonlinear properties
-    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf) = 0;
+    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf) = 0;
 
     //! Compute the relative error between two values
     static inline double relError(double value, double reference);
@@ -66,7 +66,7 @@ protected:
     double maxError(const QVector<double> & maxStrain);
 
     //! Set initial strains of the layers
-    void setInitialStrains();
+    virtual void estimateInitialStrains() = 0;
 
     //! Maximum number of iterations in the equivalent linear loop
     int _maxIterations;

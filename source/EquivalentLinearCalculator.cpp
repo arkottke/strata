@@ -62,7 +62,9 @@ void EquivalentLinearCalculator::setStrainRatio(double strainRatio)
     }
 }
 
-bool EquivalentLinearCalculator::updateSubLayer(int index, const QVector<std::complex<double> > strainTf)
+bool EquivalentLinearCalculator::updateSubLayer(
+        int index,
+        const QVector<std::complex<double> > &strainTf)
 {
     const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
@@ -79,6 +81,24 @@ bool EquivalentLinearCalculator::updateSubLayer(int index, const QVector<std::co
             _site->subLayers().at(index).damping() / 100.));
 
     return true;
+}
+
+void EquivalentLinearCalculator::estimateInitialStrains()
+{
+    // Estimate the intial strain from the ratio of peak ground velocity of the
+    //  motion and the shear-wave velocity of the layer.
+    double estimatedStrain = 0;
+    for (int i = 0; i < _nsl; ++i) {
+        estimatedStrain = _motion->pgv() / _site->subLayers().at(i).shearVel();
+        _site->subLayers()[i].setInitialStrain(estimatedStrain);
+    }
+
+    // Compute the complex shear modulus and complex shear-wave velocity for
+    // each soil layer -- initially this is assumed to be frequency independent
+    for (int i = 0; i < _nsl; ++i ) {
+        _shearMod[i].fill(calcCompShearMod(
+                _site->shearMod(i), _site->damping(i) / 100.));
+    }
 }
 
 void EquivalentLinearCalculator::fromJson(const QJsonObject &json)
@@ -98,7 +118,6 @@ QDataStream & operator<< (QDataStream & out,
                                  const EquivalentLinearCalculator* elc)
 {
     out << (quint8)1;
-
     out << qobject_cast<const AbstractIterativeCalculator*>(elc)
             << elc->_strainRatio;
 
