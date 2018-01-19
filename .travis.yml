@@ -1,37 +1,32 @@
-sudo: required
 language: cpp
-dist: trusty
 branches:
   except:
-  - "/^appveyor.*$/"
-before_install:
-- sudo add-apt-repository --yes ppa:beineri/opt-qt591-trusty
-- sudo apt-get update -qq
+    - "/^appveyor.*$/"
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+    - os: osx
+      osx_image: xcode9.2
 install:
-- sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
-- source /opt/qt59/bin/qt59-env.sh
-- cd $TRAVIS_BUILD_DIR/..
-- svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
-- cd qwt
-- QWT_ROOT_DIR=`pwd`
-- LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
-- qmake
-- make -j$(nproc)
+  - echo $TRAVIS_OS_NAME
+  - sh .travis/install_$TRAVIS_OS_NAME.sh
 script:
-- cd $TRAVIS_BUILD_DIR
-- mkdir build
-- cd build
-- cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
-- echo $PROJECT_VERSION
-- make -j$(nproc)
-- make install
-- wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-- chmod a+x linuxdeployqt*.AppImage
-- ldd dist/usr/bin/strata
-- "./linuxdeployqt-*.AppImage dist/strata.desktop -bundle-non-qt-libs -no-translations"
-- "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage"
-- find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f
-  2-3 | sort | uniq
+  - cd $TRAVIS_BUILD_DIR
+  - mkdir build
+  - cd build
+  - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+  - echo $PROJECT_VERSION
+  - make -j$(nproc)
+  - make install
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt*.AppImage
+  - ldd dist/usr/bin/strata
+  - "./linuxdeployqt-*.AppImage dist/strata.desktop -bundle-non-qt-libs -no-translations"
+  - "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage"
+  - find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f
+    2-3 | sort | uniq
 after_success:
 - ls -lh
 - VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
