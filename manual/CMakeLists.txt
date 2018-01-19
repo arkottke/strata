@@ -9,7 +9,7 @@ include(UseLATEX.cmake)
 add_latex_document(
     manual.tex
     BIBFILES references.bib
-    IMAGE_DIRS figures
+    IMAGE_DIRS figures/rand figures/siteResponse figures/strata
     FORCE_PDF
     EXCLUDE_FROM_ALL
     )

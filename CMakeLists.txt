@@ -83,6 +83,11 @@ add_subdirectory(resources)
 add_subdirectory(source)
 add_subdirectory(tests)
 
+find_program(PDFLATEX_PATH pdflatex)
+if (PDFLATEX_PATH) 
+    add_subdirectory(manual)
+endif()
+
 if (WIN32)
     add_subdirectory(win)
 endif()
