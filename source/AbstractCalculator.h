@@ -41,7 +41,7 @@ class AbstractCalculator : public QObject
     Q_OBJECT
 
 public:
-    explicit AbstractCalculator(QObject *parent = 0);
+    explicit AbstractCalculator(QObject *parent = nullptr);
 
     //! Produce an HTML table summarizing the calculator
     virtual QString toHtml() const;

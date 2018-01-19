@@ -37,7 +37,7 @@ class EquivalentLinearCalculator : public AbstractIterativeCalculator
                                      EquivalentLinearCalculator* elc);
 
 public:
-    EquivalentLinearCalculator(QObject* parent = 0);
+    EquivalentLinearCalculator(QObject *parent = nullptr);
 
     virtual QString toHtml() const;
     double strainRatio() const;

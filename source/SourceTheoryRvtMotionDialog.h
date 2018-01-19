@@ -34,7 +34,8 @@ class SourceTheoryRvtMotionDialog : public QDialog
 {
 Q_OBJECT
 public:
-    explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly, QWidget *parent = 0);
+    explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly,
+                                         QWidget *parent = nullptr);
 
 signals:
 

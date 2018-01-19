@@ -31,7 +31,7 @@ int Location::layer() const
     return _layer;
 }
 
-void Location::setLayer(const int layer)
+void Location::setLayer(int layer)
 {
     _layer = layer;
 }
@@ -41,7 +41,7 @@ double Location::depth() const
     return _depth;
 }
 
-void Location::setDepth(const double depth)
+void Location::setDepth(double depth)
 {
     _depth = depth;
 }

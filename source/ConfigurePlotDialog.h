@@ -39,7 +39,7 @@ class AxisOptions : public QGroupBox
     Q_OBJECT
 
     public:
-        AxisOptions( const QString & title, QWidget * parent = 0 );
+    AxisOptions(const QString &title, QWidget *parent = nullptr);
 
         /*! Set the default values from the current axis properties.
          *
@@ -72,7 +72,7 @@ class ConfigurePlotDialog : public QDialog
     Q_OBJECT
 
     public:
-        ConfigurePlotDialog( QwtPlot * plot, QWidget * parent = 0);
+    ConfigurePlotDialog(QwtPlot *plot, QWidget *parent = nullptr);
        
 
     protected slots:

@@ -38,7 +38,7 @@ class MyRandomNumGenerator : public QObject
     friend QDataStream & operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator);
 
 public:
-    MyRandomNumGenerator(QObject* parent = 0);
+    MyRandomNumGenerator(QObject *parent = nullptr);
     ~MyRandomNumGenerator();
     
     bool seedSpecified() const;

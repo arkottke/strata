@@ -33,7 +33,7 @@ class EquivalentLinearCalculatorWidget : public QWidget
 {
 Q_OBJECT
 public:
-    explicit EquivalentLinearCalculatorWidget(QWidget *parent = 0);
+    explicit EquivalentLinearCalculatorWidget(QWidget *parent = nullptr);
 
 public slots:
     void setCalculator(EquivalentLinearCalculator* elc);

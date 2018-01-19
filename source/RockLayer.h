@@ -38,7 +38,7 @@ class RockLayer : public VelocityLayer
     friend QDataStream & operator>> (QDataStream & in, RockLayer* rl);
 
 public:
-    RockLayer(QObject * parent = 0);
+    RockLayer(QObject *parent = nullptr);
 
     double untWt() const;
     double density() const;

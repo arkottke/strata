@@ -40,7 +40,7 @@ class CompatibleRvtMotion : public AbstractRvtMotion
     friend QDataStream & operator>> (QDataStream & in, CompatibleRvtMotion* crm);
 
 public:
-    CompatibleRvtMotion(QObject* parent = 0);
+    CompatibleRvtMotion(QObject *parent = nullptr);
     virtual ~CompatibleRvtMotion();
 
     virtual const QVector<double> & freq() const;

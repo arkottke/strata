@@ -29,7 +29,7 @@
 class Serializer
 {
     public:
-        Serializer();
+    Serializer() = default;
        
         static QList<QVariant> toVariantList(const QList<double> & list); 
         static QList<QVariant> toVariantList(const QVector<double> & vector); 

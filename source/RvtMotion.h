@@ -41,7 +41,7 @@ class RvtMotion : public AbstractRvtMotion
 
 public:
     //! Constructor
-    RvtMotion(QObject * parent = 0);
+    explicit RvtMotion(QObject *parent = nullptr);
 
     //!{@ Method for editing the model with a QTableView
     virtual Qt::ItemFlags flags( const QModelIndex & index) const;

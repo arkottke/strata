@@ -40,7 +40,7 @@ class MotionPage : public AbstractPage
     Q_OBJECT
 
 public:
-    MotionPage(QWidget*  parent = 0, Qt::WindowFlags f = 0 );
+    explicit MotionPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     void setModel(SiteResponseModel* model);
 

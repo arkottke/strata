@@ -28,7 +28,7 @@ class OnlyIncreasingDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit OnlyIncreasingDelegate(QObject *parent = 0);
+    explicit OnlyIncreasingDelegate(QObject *parent = nullptr);
 
     virtual QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 

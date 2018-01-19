@@ -1,7 +1,5 @@
 #include "SeriesSmoother.h"
 
-#include <cmath>
-
 #include <gsl_blas.h>
 #include <gsl_matrix.h>
 #include <gsl_linalg.h>

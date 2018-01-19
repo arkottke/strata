@@ -29,7 +29,7 @@ class ModulusFactory : public AbstractNonlinearPropertyFactory
     Q_OBJECT
 
 public:
-    ModulusFactory(QObject *parent = 0);
+    ModulusFactory(QObject *parent = nullptr);
 };
 
 #endif // MODULUSREDUCTIONNONLINEARPROPERTYFACTORY_H

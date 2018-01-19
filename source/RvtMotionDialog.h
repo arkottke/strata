@@ -33,7 +33,7 @@ class RvtMotionDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = 0);
+    explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
 
 signals:
 

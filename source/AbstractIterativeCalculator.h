@@ -35,7 +35,7 @@ class AbstractIterativeCalculator : public AbstractCalculator
     friend QDataStream & operator>> (QDataStream & in, AbstractIterativeCalculator* aic);
 
 public:
-    explicit AbstractIterativeCalculator(QObject* parent = 0);
+    explicit AbstractIterativeCalculator(QObject *parent = nullptr);
 
     //! Perform the site response calculation
     virtual bool run(AbstractMotion* motion, SoilProfile* site);

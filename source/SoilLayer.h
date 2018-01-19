@@ -42,8 +42,9 @@ class SoilLayer : public VelocityLayer
     friend class SoilProfile;
 
 public:
-    SoilLayer(QObject* parent = 0);
-    SoilLayer(const SoilLayer* soilLayer);
+    explicit SoilLayer(QObject *parent = nullptr);
+
+    explicit SoilLayer(const SoilLayer *soilLayer);
 
     SoilType* soilType() const;
     void setSoilType(SoilType* soilType);

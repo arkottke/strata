@@ -43,7 +43,7 @@ class AbstractRvtMotion : public AbstractMotion
     friend QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm);
 
 public:
-    AbstractRvtMotion(QObject * parent = 0);
+    AbstractRvtMotion(QObject *parent = nullptr);
     virtual ~AbstractRvtMotion();
 
     //!@{ Methods for viewing the Fourier amplitude spectrum of the motion

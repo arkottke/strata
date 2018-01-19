@@ -700,9 +700,8 @@ void SoilProfile::createSubLayers(TextLog * textLog)
 
 void SoilProfile::resetSubLayers()
 {
-    for ( int i = 0; i < _subLayers.size(); ++i ) {
-        _subLayers[i].reset();
-    }
+    for (SubLayer &sl : _subLayers)
+        sl.reset();
 }
 
 int SoilProfile::subLayerCount() const
@@ -759,8 +758,8 @@ QVector<double> SoilProfile::depthProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).depth();
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.depth();
 
     profile << _bedrock->depth();
 
@@ -771,8 +770,8 @@ QVector<double> SoilProfile::depthToMidProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).depthToMid();
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.depthToMid();
 
     return profile;
 }
@@ -781,9 +780,8 @@ QVector<double> SoilProfile::initialVelocityProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < _subLayers.size(); ++i) {
-        profile << _subLayers.at(i).initialShearVel();
-    }
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.initialShearVel();
 
     profile << _bedrock->shearVel();
 
@@ -794,9 +792,8 @@ QVector<double> SoilProfile::finalVelocityProfile() const
 {
     QVector<double> profile;
 
-    for (int i = 0; i < _subLayers.size(); ++i) {
-        profile << _subLayers.at(i).shearVel();
-    }
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.shearVel();
 
     profile << _bedrock->shearVel();
 
@@ -806,9 +803,9 @@ QVector<double> SoilProfile::finalVelocityProfile() const
 QVector<double> SoilProfile::modulusProfile() const
 {
     QVector<double> profile;
-    
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).shearMod();
+
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.shearMod();
 
     profile << _bedrock->shearMod();
 
@@ -818,9 +815,8 @@ QVector<double> SoilProfile::modulusProfile() const
 QVector<double> SoilProfile::dampingProfile() const
 {
     QVector<double> profile;
-    
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).damping();
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.damping();
 
     profile << _bedrock->damping();
 
@@ -834,8 +830,8 @@ QVector<double> SoilProfile::vTotalStressProfile() const
     // Add value at surface
     profile << 0.;
 
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).vTotalStress();
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.vTotalStress();
 
     return profile;
 }
@@ -847,8 +843,8 @@ QVector<double> SoilProfile::vEffectiveStressProfile() const
     // Add value at surface
     profile << 0.;
 
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).vEffectiveStress();
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.vEffectiveStress();
 
     return profile;
 }
@@ -856,9 +852,9 @@ QVector<double> SoilProfile::vEffectiveStressProfile() const
 QVector<double> SoilProfile::maxErrorProfile() const
 {
     QVector<double> profile;
-    
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).error();
+
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.error();
 
     return profile;
 }
@@ -877,19 +873,16 @@ QVector<double> SoilProfile::stressReducCoeffProfile(const double pga) const
     // Defined to be 1 at surface
     profile << 1.0;
 
-    for (int i = 0; i < _subLayers.size(); ++i) {
+    for (const SubLayer &sl : _subLayers) {
         // Add the half layer to the total weight 
-        totalWeight += _subLayers.at(i).untWt() *
-                       _subLayers.at(i).thickness() / 2.;
+        totalWeight += sl.untWt() * sl.thickness() / 2.;
 
         const double rigidStress = totalWeight * pga;
 
-        profile << _subLayers.at(i).shearStress() / rigidStress;
+        profile << sl.shearStress() / rigidStress;
 
         // Add the half layer to the total weight 
-        totalWeight += _subLayers.at(i).untWt() *
-                       _subLayers.at(i).thickness() / 2.;
-
+        totalWeight += sl.untWt() * sl.thickness() / 2.;
     }
 
     // Add the value at the base of the profile
@@ -911,9 +904,9 @@ QVector<double> SoilProfile::maxShearStrainProfile() const
 QVector<double> SoilProfile::shearStressProfile() const
 {
     QVector<double> profile;
-    
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).shearStress();
+
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.shearStress();
 
     return profile;
 }
@@ -921,9 +914,9 @@ QVector<double> SoilProfile::shearStressProfile() const
 QVector<double> SoilProfile::stressRatioProfile() const
 {
     QVector<double> profile;
-    
-    for (int i = 0; i < _subLayers.size(); ++i)
-        profile << _subLayers.at(i).stressRatio();
+
+    for (const SubLayer &sl : _subLayers)
+        profile << sl.stressRatio();
 
     return profile;
 }
@@ -1120,7 +1113,7 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
         if (top > _soilLayers.last()->depthToBase())
             return new SoilLayer(_soilLayers.last());
 
-        foreach (SoilLayer* sl, _soilLayers) {
+        for (SoilLayer *sl : _soilLayers) {
             // Skip the layer if it isn't in the depth range of interest
             if ( sl->depthToBase() < top || sl->depth() > base )
                 continue;
@@ -1160,7 +1153,7 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
         SoilLayer * newLayer = 0;
 
         // Try each of the layers
-        foreach (SoilLayer* sl, _soilLayers) {
+        for (SoilLayer *sl : _soilLayers) {
             if (sl->depth() < midDepth && midDepth <= sl->depthToBase()) {
                 newLayer = new SoilLayer(sl);
             }
@@ -1209,7 +1202,7 @@ void SoilProfile::fromJson(const QJsonObject &json)
     while (_soilLayers.size())
         _soilLayers.takeLast()->deleteLater();
 
-    foreach (const QJsonValue &jv, json["soilLayers"].toArray()) {
+    for (const QJsonValue &jv : json["soilLayers"].toArray()) {
         QJsonObject sljo = jv.toObject();
 
         SoilLayer * sl = new SoilLayer(this);
@@ -1242,10 +1235,10 @@ QJsonObject SoilProfile::toJson() const
     json["profileRandomizer"] = _profileRandomizer->toJson();
 
     QJsonArray soilLayers;
-    foreach (const SoilLayer &sl, _soilLayers) {
-        QJsonObject sljo = sl.toJson();
+    for (const SoilLayer *sl : _soilLayers) {
+        QJsonObject sljo = sl->toJson();
         // Save the soil type index
-        sljo["soilType"] = sl.soilType() ? _soilTypeCatalog->rowOf(sl.soilType()) : -1;
+        sljo["soilType"] = sl->soilType() ? _soilTypeCatalog->rowOf(sl->soilType()) : -1;
         soilLayers << sljo;
     }
     json["soilLayers"] = soilLayers;
@@ -1262,10 +1255,8 @@ QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
 
     // Save soil layers
     out << sp->_soilLayers.size();
-
-    foreach(const SoilLayer* sl, sp->_soilLayers) {
+    for (const SoilLayer *sl : sp->_soilLayers) {
         out << sl;
-
         // Save which soil type the soil layer is connected to.
         if (sl->soilType()) {
             out << sp->_soilTypeCatalog->rowOf(sl->soilType());

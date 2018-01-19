@@ -47,7 +47,7 @@ OutputPage::OutputPage(QWidget * parent, Qt::WindowFlags f)
     _ratiosTableFrame = new OutputTableFrame;
     _soilTypesTableView = new QTableView;
 
-    QGridLayout* layout = new QGridLayout;    
+    auto *layout = new QGridLayout;
     layout->setRowStretch(3, 1);
 
     // Tab widget
@@ -168,7 +168,7 @@ QGroupBox* OutputPage::createFreqGroupBox()
 
 QGroupBox* OutputPage::createLogGroupBox()
 {
-    QFormLayout* layout = new QFormLayout;
+    auto *layout = new QFormLayout;
 
     // Logging combo box
     _logLevelComboBox = new QComboBox;

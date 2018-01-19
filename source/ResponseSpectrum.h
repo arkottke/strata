@@ -39,7 +39,7 @@ class ResponseSpectrum : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, ResponseSpectrum* rs);
 
 public:
-    ResponseSpectrum(QObject * parent = 0);
+    ResponseSpectrum(QObject *parent = nullptr);
 
     bool modified() const;
 

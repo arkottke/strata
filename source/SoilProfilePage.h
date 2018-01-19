@@ -44,7 +44,7 @@ class SoilProfilePage : public AbstractPage
     Q_OBJECT
 
 public:
-    SoilProfilePage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
+    SoilProfilePage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     void setModel(SiteResponseModel* model);
 

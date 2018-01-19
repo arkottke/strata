@@ -30,9 +30,8 @@
 #include <QDebug>
 
 ComputePage::ComputePage(QWidget * parent, Qt::WindowFlags f )
-    : AbstractPage(parent, f), _model(0)
-{
-    QGridLayout * layout = new QGridLayout;
+        : AbstractPage(parent, f), _model(nullptr) {
+    auto *layout = new QGridLayout;
 
     // Progress bar
     _progressBar = new QProgressBar;

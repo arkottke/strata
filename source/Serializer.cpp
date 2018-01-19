@@ -21,16 +21,13 @@
 
 #include "Serializer.h"
 
-Serializer::Serializer()
-{
-}
 
 QList<QVariant> Serializer::toVariantList(const QList<double> & list)
 {
 	QList<QVariant> newList;
 
-	for (int i = 0; i < list.size(); ++i )
-		newList << QVariant(list.at(i));
+    for (const double &d : list)
+        newList << QVariant(d);
 
 	return newList;
 }

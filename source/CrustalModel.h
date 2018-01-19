@@ -36,7 +36,7 @@ class CrustalModel : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, CrustalModel* cm);
 
 public:
-    CrustalModel(QObject *parent=0);
+    explicit CrustalModel(QObject *parent = 0);
 
     enum Columns {
         ThicknessColumn,
@@ -45,8 +45,9 @@ public:
     };
 
     //!@{ Methods for QAbstractTableModel
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent) const;
+
+    virtual int columnCount(const QModelIndex &parent) const;
 
     virtual QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
@@ -73,7 +74,8 @@ private:
      * \param maxDepth depth to which the average is computed
      * \return average value
      */
-    static double averageValue(const QVector<double> & thickness, const QVector<double> & property, const double maxDepth );
+    static double averageValue(const QVector<double> &thickness, const QVector<double> &property,
+                               double maxDepth);
 
     //! Thickness of the crustal layers
     QVector<double> _thickness;

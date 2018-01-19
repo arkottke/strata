@@ -44,7 +44,7 @@ class OutputPage : public AbstractPage
     Q_OBJECT
 
 public:
-    OutputPage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
+    explicit OutputPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     void setModel(SiteResponseModel* model);
 

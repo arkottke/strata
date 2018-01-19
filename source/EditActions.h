@@ -46,7 +46,7 @@ class EditActions : public QObject
         void clear();
 
     protected:
-        EditActions(QObject * parent = 0);
+    explicit EditActions(QObject *parent = nullptr);
 
         static EditActions * _instance;
         

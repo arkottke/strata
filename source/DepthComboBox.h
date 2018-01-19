@@ -31,7 +31,7 @@ class DepthComboBox : public QComboBox
     Q_OBJECT
 
     public:
-        DepthComboBox( QWidget * parent = 0 );
+    explicit DepthComboBox(QWidget *parent = nullptr);
 
         double depth() const;
         void setDepth(double depth);

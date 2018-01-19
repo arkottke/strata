@@ -50,7 +50,7 @@ class SoilProfile : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, SoilProfile* siteProfile);
 
 public:
-    SoilProfile(SiteResponseModel* parent = 0);
+    explicit SoilProfile(SiteResponseModel *parent = nullptr);
     ~SoilProfile();
 
     //! Columns of the table
@@ -99,7 +99,7 @@ public:
          * \param depth depth in the site profile
          * \return Location corresponding to the depth.
          */
-    const Location depthToLocation(const double depth) const;
+    const Location depthToLocation(double depth) const;
 
     QStringList soilLayerNameList() const;
 
@@ -157,7 +157,7 @@ public:
          * \param pga peak ground acceleration in g
          * \return a list of cofficients at the top of each layer.
          */
-    QVector<double> stressReducCoeffProfile(const double pga ) const;
+    QVector<double> stressReducCoeffProfile(double pga) const;
     QVector<double> maxShearStrainProfile() const;
     QVector<double> shearStressProfile() const;
     QVector<double> stressRatioProfile() const;

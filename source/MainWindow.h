@@ -48,7 +48,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QMainWindow *parent = 0);
+    explicit MainWindow(QMainWindow *parent = nullptr);
     ~MainWindow();
 
 protected:

@@ -41,7 +41,7 @@ class TableGroupBox : public QGroupBox
     Q_OBJECT
 
     public:
-        TableGroupBox(const QString & title, QWidget * parent = 0);
+    explicit TableGroupBox(const QString &title, QWidget *parent = nullptr);
 
         void setModel(QAbstractTableModel *model);
         void setItemDelegateForColumn(int column, QAbstractItemDelegate* delegate);

@@ -36,7 +36,7 @@ class AbstractDistribution : public QObject
     friend QDataStream & operator>> (QDataStream & in, AbstractDistribution* d);
 
 public:
-    explicit AbstractDistribution(QObject *parent = 0);
+    explicit AbstractDistribution(QObject *parent = nullptr);
 
     enum Type {
         Uniform, //!< Uniform distribution

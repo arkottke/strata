@@ -45,7 +45,7 @@ class SiteResponseModel : public QThread
     friend QDataStream & operator>> (QDataStream & in, SiteResponseModel* srm);
 
 public:
-    explicit SiteResponseModel( QObject * parent = 0);
+    explicit SiteResponseModel(QObject *parent = nullptr);
 
     //! Method used to compute the site response
     enum Method {

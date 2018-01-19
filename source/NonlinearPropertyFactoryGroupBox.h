@@ -34,7 +34,7 @@ class NonlinearPropertyFactoryGroupBox : public QGroupBox
 
 public:
     explicit NonlinearPropertyFactoryGroupBox(AbstractNonlinearPropertyFactory *model,
-                                     const QString & title, QWidget *parent = 0);
+                                              const QString &title, QWidget *parent = nullptr);
 
     void selectRow(int row);
 signals:

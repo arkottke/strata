@@ -102,7 +102,7 @@ void MyTableView::paste()
         QStringList rows = QApplication::clipboard()->text().split(QRegExp("\\n"), QString::SkipEmptyParts);
 
         // Return if the row list is empty
-        if (rows.size() == 0) 
+        if (rows.isEmpty())
             return;
 
         foreach (QString row, rows)
@@ -163,7 +163,7 @@ void MyTableView::setReadOnly(bool readOnly)
 void MyTableView::contextMenuEvent(QContextMenuEvent * event)
 {
     // Create the context menu
-    QMenu *contextMenu = new QMenu;
+    auto *contextMenu = new QMenu;
 
     contextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"),
                            this, SLOT(copy()), QKeySequence::Copy);

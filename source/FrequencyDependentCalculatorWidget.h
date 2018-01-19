@@ -34,7 +34,7 @@ class FrequencyDependentCalculatorWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit FrequencyDependentCalculatorWidget(QWidget *parent = 0);
+    explicit FrequencyDependentCalculatorWidget(QWidget *parent = nullptr);
 
 public slots:
     void setCalculator(FrequencyDependentCalculator* fdc);

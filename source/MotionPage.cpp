@@ -57,7 +57,7 @@ MotionPage::MotionPage(QWidget * parent, Qt::WindowFlags f)
     : AbstractPage(parent,f), _readOnly(false)
 {   
     // Set the layout of the widget
-    QVBoxLayout * layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
     layout->addWidget(createInputLocationGroupBox());
     layout->addWidget(createMotionsTableGroupBox(), 1);
 
@@ -104,7 +104,7 @@ void MotionPage::setApproach(int i)
 
 QGroupBox* MotionPage::createInputLocationGroupBox()
 {
-    QHBoxLayout* layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
 
     layout->addWidget(new QLabel(tr("Specify the location to input the motion(s):")));
 
@@ -120,9 +120,9 @@ QGroupBox* MotionPage::createInputLocationGroupBox()
 
 QGroupBox* MotionPage::createMotionsTableGroupBox()
 {
-    QVBoxLayout *layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
     // Create the buttons
-    QHBoxLayout *buttonRow = new QHBoxLayout;
+    auto *buttonRow = new QHBoxLayout;
 
     _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
     connect(_addButton, SIGNAL(clicked()),
@@ -169,13 +169,13 @@ QGroupBox* MotionPage::createMotionsTableGroupBox()
 
 void MotionPage::add()
 {
-    QDialog *dialog = 0;
-    AbstractMotion *motion = 0;
+    QDialog *dialog = nullptr;
+    AbstractMotion *motion = nullptr;
 
     switch (_motionLibrary->approach()) {
     case MotionLibrary::TimeSeries:
         {
-            TimeSeriesMotion *_motion = new TimeSeriesMotion(_motionLibrary);
+            auto *_motion = new TimeSeriesMotion(_motionLibrary);
             _motion->setSaveData(_motionLibrary->saveData());
 
             dialog = (QDialog*)(new TimeSeriesMotionDialog(_motion, _readOnly, this));
@@ -201,7 +201,7 @@ void MotionPage::add()
             case 0:
                 {
                     // User defined FAS
-                    RvtMotion *_motion = new RvtMotion(_motionLibrary);
+                    auto *_motion = new RvtMotion(_motionLibrary);
                     dialog = (QDialog*)(new RvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
@@ -209,7 +209,7 @@ void MotionPage::add()
             case 1:
                 {
                     // Response Spectrum Compatible
-                    CompatibleRvtMotion *_motion = new CompatibleRvtMotion(_motionLibrary);
+                    auto *_motion = new CompatibleRvtMotion(_motionLibrary);
                     dialog = (QDialog*)(new CompatibleRvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
@@ -217,7 +217,7 @@ void MotionPage::add()
             case 2:
                 {
                     // User defined FAS
-                    SourceTheoryRvtMotion *_motion = new SourceTheoryRvtMotion(_motionLibrary);
+                    auto *_motion = new SourceTheoryRvtMotion(_motionLibrary);
                     dialog = (QDialog*)(new SourceTheoryRvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
@@ -292,7 +292,7 @@ void MotionPage::importSuite()
 
                 const QString _fileName = args.takeFirst();
 
-                if (args.size() > 0) {
+                if (!args.isEmpty()) {
                     // First argument is the scale that is applied to the motion
                     // Test to see if we can parse the scale
                     bool ok = false;
@@ -345,7 +345,7 @@ void MotionPage::importSuite()
                 double scale = i.value().at(0).toDouble();
                 AbstractMotion::Type type = AbstractMotion::variantToType(i.value().at(1), &successful);
 
-                TimeSeriesMotion* tsm = new TimeSeriesMotion(i.key(), scale, type, &successful);
+                auto *tsm = new TimeSeriesMotion(i.key(), scale, type, &successful);
 
                 if (successful)
                     _motionLibrary->addMotion(tsm);
@@ -378,7 +378,7 @@ void MotionPage::edit()
     // Save the current state of the motion
     dataStream << motion;
 
-    QDialog* dialog = 0;
+    QDialog *dialog = nullptr;
 
     if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(motion)) {
         dialog = new TimeSeriesMotionDialog(tsm, _readOnly, this);

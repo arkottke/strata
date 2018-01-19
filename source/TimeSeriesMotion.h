@@ -37,10 +37,10 @@ class TimeSeriesMotion : public AbstractMotion
     friend QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm);
 
 public:
-    TimeSeriesMotion(QObject * parent = 0);
+    TimeSeriesMotion(QObject *parent = nullptr);
     TimeSeriesMotion(const QString & fileName = "", double scale = 1.0,
                      AbstractMotion::Type type = AbstractMotion::Outcrop,
-                     bool * successful = 0, QObject * parent = 0);
+                     bool *successful = 0, QObject *parent = nullptr);
     virtual ~TimeSeriesMotion();
 
     //! Format of the text file

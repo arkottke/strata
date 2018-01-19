@@ -26,7 +26,6 @@
 
 #include <cfloat>
 
-
 Dimension::Dimension(QObject * parent)
         : QObject(parent)
 {

@@ -38,7 +38,7 @@ class AbstractNonlinearPropertyFactory : public QAbstractListModel
 
 public:
 
-    AbstractNonlinearPropertyFactory(QObject *parent = 0);
+    AbstractNonlinearPropertyFactory(QObject *parent = nullptr);
     ~AbstractNonlinearPropertyFactory();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;

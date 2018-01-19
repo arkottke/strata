@@ -54,11 +54,11 @@
 #endif
 
 ResultsPage::ResultsPage(QWidget * parent)
-    : AbstractPage(parent), _outputCatalog(0), _selectedOutput(0)
+        : AbstractPage(parent), _outputCatalog(nullptr), _selectedOutput(nullptr)
 {
     _statsNeedUpdate = false;
 
-    QSplitter* splitter = new QSplitter;
+    auto *splitter = new QSplitter;
 
     splitter->addWidget(createOutputGroup());
     splitter->setStretchFactor(0, 1);
@@ -66,7 +66,7 @@ ResultsPage::ResultsPage(QWidget * parent)
     splitter->addWidget(createDataTabWidget());
     splitter->setStretchFactor(1, 4);
 
-    QHBoxLayout* layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
     layout->addWidget(splitter);
     setLayout(layout);
 
@@ -74,12 +74,12 @@ ResultsPage::ResultsPage(QWidget * parent)
 }
 
 void ResultsPage::setModel(SiteResponseModel* model) {
-    _selectedOutput = 0;
+    _selectedOutput = nullptr;
     _selectedRow = -1;
 
     // Remove the previous model and delete the selectionModel
     if (QItemSelectionModel* m = _catalogTableView->selectionModel()) {
-        _catalogTableView->setModel(0);
+        _catalogTableView->setModel(nullptr);
         delete m;
     }
 
@@ -146,7 +146,7 @@ void ResultsPage::copyPlot()
 
 void ResultsPage::configurePlot()
 {
-    ConfigurePlotDialog * dialog = new ConfigurePlotDialog(_plot);
+    auto *dialog = new ConfigurePlotDialog(_plot);
 
     if (dialog->exec())
         _plot->replot();
@@ -230,7 +230,7 @@ void ResultsPage::setSelectedOutput(int index)
 
     // Remove the previous model and delete the selectionModel
     if (QItemSelectionModel *m = _outputTableView->selectionModel()) {
-        _outputTableView->setModel(0);
+        _outputTableView->setModel(nullptr);
         delete m;
     }
     _outputTableView->setModel(_selectedOutput);
@@ -354,7 +354,7 @@ void ResultsPage::recomputeStats()
 
 QGroupBox* ResultsPage::createOutputGroup()
 {
-    QGridLayout * layout = new QGridLayout;
+    auto *layout = new QGridLayout;
     layout->setColumnStretch(2,1);
 
     // Type combo box
@@ -407,7 +407,7 @@ QGroupBox* ResultsPage::createOutputGroup()
 
 QTabWidget* ResultsPage::createDataTabWidget()
 {
-    QTabWidget *tabWidget = new QTabWidget;
+    auto *tabWidget = new QTabWidget;
 
     // Plot
     _plot = new QwtPlot(tabWidget);
@@ -420,15 +420,15 @@ QTabWidget* ResultsPage::createDataTabWidget()
     
     // Picker to allow for selection of the closest curve and displays curve
     // coordinates with a cross rubber band.
-    QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPicker::CrossRubberBand, QwtPicker::ActiveOnly,
-                                              _plot->canvas());
+    auto *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
+                                     QwtPicker::CrossRubberBand, QwtPicker::ActiveOnly,
+                                     _plot->canvas());
     picker->setStateMachine(new QwtPickerDragPointMachine());
 
     connect(picker, SIGNAL(appended(QPoint)), this, SLOT(pointSelected(QPoint)));
 
     // Legend
-    QwtLegend* legend = new QwtLegend;
+    auto *legend = new QwtLegend;
     legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
     _plot->insertLegend(legend, QwtPlot::BottomLegend);
 #if QWT_VERSION >= 0x060100
@@ -446,7 +446,7 @@ QTabWidget* ResultsPage::createDataTabWidget()
 
     QPair<QString, Qt::GlobalColor> pair;
     foreach (pair, pairs) {
-        QwtPlotCurve *curve = new QwtPlotCurve(pair.first);
+            auto *curve = new QwtPlotCurve(pair.first);
 
         curve->setLegendIconSize(QSize(32, 8));
         curve->setPen(QPen(QBrush(pair.second), 2));
@@ -457,8 +457,8 @@ QTabWidget* ResultsPage::createDataTabWidget()
         _plot->updateLegend(curve);
 #endif
     }
-	
-    QScrollArea *scrollArea = new QScrollArea;
+
+    auto *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(_plot);
 

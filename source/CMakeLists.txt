@@ -55,6 +55,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         )
 
 if (UNIX)
+    target_link_libraries(${CMAKE_PROJECT_NAME} m)
+
     install(TARGETS ${CMAKE_PROJECT_NAME}
             RUNTIME DESTINATION usr/bin)
     install(FILES

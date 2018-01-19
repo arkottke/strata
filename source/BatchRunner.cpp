@@ -6,7 +6,7 @@
 #include <QtDebug>
 #include <QTextDocument>
 
-BatchRunner::BatchRunner(QStringList fileNames):
+BatchRunner::BatchRunner(const QStringList &fileNames) :
     _fileNames(fileNames), _begin(0), _end(100)
 {
     startNext();
@@ -14,8 +14,9 @@ BatchRunner::BatchRunner(QStringList fileNames):
 
 void BatchRunner::startNext()
 {
-    if (!_fileNames.size())
+    if (!_fileNames.isEmpty()) {
         exit(0);
+    }
 
     const QString fileName = _fileNames.takeFirst();
     qInfo().noquote() << "[BATCH] Opening:" << fileName;

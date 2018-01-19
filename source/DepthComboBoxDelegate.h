@@ -31,7 +31,7 @@ class DepthComboBoxDelegate : public QItemDelegate
     Q_OBJECT
 
     public:
-        DepthComboBoxDelegate( QObject * parent = 0 );
+    DepthComboBoxDelegate(QObject *parent = nullptr);
 
         QWidget * createEditor ( QWidget *parent, const QStyleOptionViewItem
                 &option, const QModelIndex &index ) const;

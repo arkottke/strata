@@ -34,7 +34,7 @@ class MethodGroupBox : public QGroupBox
 {
 Q_OBJECT
 public:
-    explicit MethodGroupBox(QWidget* parent = 0);
+    explicit MethodGroupBox(QWidget *parent = nullptr);
 
 signals:
 

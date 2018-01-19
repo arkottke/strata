@@ -48,7 +48,7 @@ class ResultsPage : public AbstractPage
     Q_OBJECT
 	
     public:
-        ResultsPage(QWidget * parent = 0);
+    explicit ResultsPage(QWidget *parent = nullptr);
 
         virtual void setModel(SiteResponseModel* model);
 

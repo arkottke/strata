@@ -40,7 +40,7 @@ class VelocityLayer : public AbstractDistribution
     friend QDataStream & operator>> (QDataStream & in, VelocityLayer* vl);
 
 public:
-    VelocityLayer(QObject * parent = 0);
+    explicit VelocityLayer(QObject *parent = nullptr);
     virtual ~VelocityLayer() = 0;
     
     double depth() const;

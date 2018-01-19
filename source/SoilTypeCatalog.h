@@ -38,7 +38,7 @@ class SoilTypeCatalog : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, SoilTypeCatalog* stc);
 
 public:
-    SoilTypeCatalog(QObject *parent = 0);
+    SoilTypeCatalog(QObject *parent = nullptr);
 
     enum Columns {
         NameColumn,

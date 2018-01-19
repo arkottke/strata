@@ -29,7 +29,7 @@ class MyAbstractTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    MyAbstractTableModel(QObject * parent = 0);
+    MyAbstractTableModel(QObject *parent = nullptr);
 
     virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     bool readOnly() const;

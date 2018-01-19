@@ -32,7 +32,7 @@ class OutputTableFrame : public QFrame
 {
 Q_OBJECT
 public:
-    explicit OutputTableFrame(QWidget *parent = 0);
+    explicit OutputTableFrame(QWidget *parent = nullptr);
 
     void setModel(AbstractMutableOutputCatalog* amoc);
     void setReadOnly(bool readOnly);

@@ -25,13 +25,15 @@
 class Location
 {
     public:
-        Location( int layer = 0, double depth = 0);
+    explicit Location(int layer = 0, double depth = 0);
 
         int layer() const;
-        void setLayer(const int layer);
+
+    void setLayer(int layer);
 
         double depth() const;
-        void setDepth(const double depth);
+
+    void setDepth(double depth);
 
     private:
         //! Sublayer index of the location

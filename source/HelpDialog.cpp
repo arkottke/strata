@@ -28,7 +28,7 @@
 HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
     : QDialog(parent, f)
 {
-    QGridLayout * layout = new QGridLayout;
+    auto *layout = new QGridLayout;
     layout->setColumnStretch(3,1);
 
     QPushButton * backPushButton = new QPushButton(QIcon(":/images/go-previous.svg"), tr("Back"));

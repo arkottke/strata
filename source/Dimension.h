@@ -41,7 +41,7 @@ class Dimension : public QObject
     friend QDataStream & operator>> (QDataStream & in, Dimension* d);
 
 public:
-    Dimension(QObject * parent = 0);
+    explicit Dimension(QObject *parent = nullptr);
 
     enum Spacing{
         Linear, //!< Equally spaced in linear space

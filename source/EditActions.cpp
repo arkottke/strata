@@ -24,7 +24,7 @@
 #include <QApplication>
 #include <QDebug>
 
-EditActions * EditActions::_instance = 0;
+EditActions *EditActions::_instance = nullptr;
 
 EditActions::EditActions( QObject * parent ) : QObject(parent)
 {
@@ -50,7 +50,7 @@ EditActions::EditActions( QObject * parent ) : QObject(parent)
 
 EditActions * EditActions::instance()
 {
-    if ( _instance == 0 ) {
+    if (_instance == nullptr) {
         _instance = new EditActions;
     }
 

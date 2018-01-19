@@ -31,7 +31,7 @@ class Distribution : public AbstractDistribution
     Q_OBJECT
 
 public:
-    Distribution(gsl_rng * rng, QObject * parent = 0);
+    explicit Distribution(gsl_rng *rng, QObject *parent = nullptr);
 
     //! Return a random variable from the distribution
     double rand();

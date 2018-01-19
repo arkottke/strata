@@ -33,7 +33,8 @@ class CompatibleRvtMotionDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly, QWidget *parent = 0);
+    explicit CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly,
+                                       QWidget *parent = nullptr);
 
 signals:
 

@@ -29,7 +29,7 @@ class DampingFactory : public AbstractNonlinearPropertyFactory
     Q_OBJECT
 
 public:
-    DampingFactory(QObject *parent = 0);
+    DampingFactory(QObject *parent = nullptr);
 };
 
 #endif // DAMPING_FACTORY_H

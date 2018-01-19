@@ -12,7 +12,7 @@ class BatchRunner : public QObject
     Q_OBJECT
 
 public:
-    BatchRunner(QStringList fileNames);
+    explicit BatchRunner(const QStringList &fileNames);
     void startNext();
 
 public slots:

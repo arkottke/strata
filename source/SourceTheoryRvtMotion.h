@@ -40,7 +40,7 @@ class SourceTheoryRvtMotion : public AbstractRvtMotion
     friend QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm);
 
 public:
-    SourceTheoryRvtMotion(QObject * parent = 0);
+    SourceTheoryRvtMotion(QObject *parent = nullptr);
     virtual ~SourceTheoryRvtMotion();
 
     //! Location of model

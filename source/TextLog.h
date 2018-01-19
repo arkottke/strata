@@ -39,7 +39,7 @@ class TextLog : public QObject
     friend QDataStream & operator>> (QDataStream & in, TextLog* tl);
 
     public:
-        TextLog( QObject * parent = 0 );
+    explicit TextLog(QObject *parent = nullptr);
         
         //! Level of detail of the logging
         enum Level {

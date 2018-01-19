@@ -56,12 +56,12 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-MainWindow::MainWindow(QMainWindow * parent) 
-    : QMainWindow(parent), _model(0)
+MainWindow::MainWindow(QMainWindow * parent)
+        : QMainWindow(parent), _model(nullptr)
 {
     // Initialize the help dialog, but keep it hidden
     _helpDialog = new HelpDialog(this);
-    _confiningStressDialog = 0;
+    _confiningStressDialog = nullptr;
 
     _printer = new QPrinter;
     
@@ -184,7 +184,7 @@ void MainWindow::createPages()
     _tabWidget->addTab(_pages.last(), tr("Results"));
 
     // Place the tab widget in a scroll area
-    QScrollArea * scrollArea = new QScrollArea;
+    auto *scrollArea = new QScrollArea;
     scrollArea->setWidget(_tabWidget);
     scrollArea->setWidgetResizable(true);
     
@@ -308,7 +308,7 @@ void MainWindow::open(QString fileName)
     // Save the state
     _settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
 
-    SiteResponseModel* srm = new SiteResponseModel;
+    auto *srm = new SiteResponseModel;
     if (fileName.endsWith(".strata")) {
         srm->loadBinary(fileName);
     } else if (fileName.endsWith(".json")) {
@@ -489,12 +489,12 @@ void MainWindow::updateTabs()
 
     // Enable/Disable all actions and menus
     foreach (QObject* object, children()) {
-        if (QAction* action = qobject_cast<QAction*>(object))
+            if (auto *action = qobject_cast<QAction *>(object))
             action->setDisabled(isBusy);
     }
 
     foreach (QObject* object, menuBar()->children()) {
-        if (QMenu* menu = qobject_cast<QMenu*>(object))
+            if (auto *menu = qobject_cast<QMenu *>(object))
             menu->setDisabled(isBusy);
     }
 
@@ -534,7 +534,7 @@ void MainWindow::tabChanged(int tab)
         // Create a dialog box that reminds the user that they are in a
         // read-only environment.
 
-        QVBoxLayout* layout = new QVBoxLayout;
+        auto *layout = new QVBoxLayout;
 
         QLabel* label = new QLabel(tr(
                 "Strata input fields are locked in a read-only state. "

@@ -32,7 +32,7 @@ class NonlinearPropertyDelegate : public QItemDelegate
 {
 Q_OBJECT
 public:
-    explicit NonlinearPropertyDelegate(QObject *parent = 0);
+    explicit NonlinearPropertyDelegate(QObject *parent = nullptr);
 
     void setModel(AbstractNonlinearPropertyFactory* factory);
 

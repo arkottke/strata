@@ -37,7 +37,7 @@ class FrequencyDependentCalculator : public AbstractIterativeCalculator
                                      FrequencyDependentCalculator* fdc);
 
 public:
-    explicit FrequencyDependentCalculator(QObject *parent = 0);
+    explicit FrequencyDependentCalculator(QObject *parent = nullptr);
 
     virtual QString toHtml() const;
 

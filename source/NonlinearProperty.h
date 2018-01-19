@@ -54,10 +54,10 @@ public:
         PropertyColumn
     };
 
-    NonlinearProperty(QObject *parent = 0);
+    NonlinearProperty(QObject *parent = nullptr);
     NonlinearProperty(const QString &name, Type type,
                       const QVector<double> &strain, const QVector<double> &property,
-                      QObject *parent = 0);
+                      QObject *parent = nullptr);
     ~NonlinearProperty();
 
     Type type() const;

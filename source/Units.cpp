@@ -25,7 +25,7 @@
 #include <QDataStream>
 #include <QDebug>
 
-Units * Units::_instance = 0;
+Units *Units::_instance = nullptr;
 
 Units::Units( QObject * parent )
     : QObject(parent)
@@ -36,7 +36,7 @@ Units::Units( QObject * parent )
 
 Units * Units::instance()
 {
-    if ( _instance == 0 ) {
+    if (_instance == nullptr) {
         _instance = new Units;
     }
 

@@ -32,7 +32,7 @@ class ConfiningStressDialog : public QDialog
     Q_OBJECT
 
     public:
-        ConfiningStressDialog( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    ConfiningStressDialog(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     protected slots:
         void updateLabels();

@@ -34,7 +34,7 @@ class DimensionLayout : public QFormLayout
 {
     Q_OBJECT
 public:
-    explicit DimensionLayout(QWidget *parent = 0);
+    explicit DimensionLayout(QWidget *parent = nullptr);
 
     void setModel(Dimension* dimension);
     void setSuffix(const QString &suffix);

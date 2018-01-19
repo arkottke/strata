@@ -432,7 +432,7 @@ QDataStream & operator>> (QDataStream & in, SoilType* st)
 
 NonlinearProperty * SoilType::deriveModel(NonlinearProperty::Type type, QString className)
 {
-    NonlinearProperty* np = 0;
+    NonlinearProperty *np = nullptr;
     if (className == "CustomNonlinearProperty") {
         np = qobject_cast<NonlinearProperty*>(new CustomNonlinearProperty(type));
     } else if (className == "DarendeliNonlinearProperty") {

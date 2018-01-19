@@ -29,7 +29,7 @@ class DarendeliNonlinearProperty : public NonlinearProperty
     Q_OBJECT
 
 public:
-    DarendeliNonlinearProperty(Type type, QObject *parent = 0);
+    DarendeliNonlinearProperty(Type type, QObject *parent = nullptr);
 
     // Compute the curves
     void calculate(const SoilType *soilType);

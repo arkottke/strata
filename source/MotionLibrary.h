@@ -36,7 +36,7 @@ class MotionLibrary : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, MotionLibrary* ml);
 
 public:
-    explicit MotionLibrary(QObject *parent = 0);
+    explicit MotionLibrary(QObject *parent = nullptr);
 
     //! Table columns
     enum Column {

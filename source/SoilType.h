@@ -41,7 +41,7 @@ class SoilType : public QObject
     friend QDataStream & operator>> (QDataStream & in, SoilType* soilType);
 
 public:
-    SoilType(QObject * parent = 0);
+    explicit SoilType(QObject *parent = nullptr);
 
     double untWt() const;
     void setUntWt(double untWt);

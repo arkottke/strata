@@ -102,7 +102,7 @@ signals:
     void systemChanged(int system);
 
 protected:
-    Units(QObject* parent = 0);
+    explicit Units(QObject *parent = nullptr);
 
     static Units* _instance;
 

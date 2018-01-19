@@ -32,7 +32,7 @@ class SoilTypeOutputTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent = 0 );
+    SoilTypeOutputTableModel(QList<SoilType *> &soilTypes, QObject *parent = nullptr);
 
     int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
     int columnCount ( const QModelIndex &parent = QModelIndex() ) const;

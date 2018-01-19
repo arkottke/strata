@@ -51,7 +51,7 @@ class OutputCatalog : public QAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, OutputCatalog* oc);
 
 public:
-    explicit OutputCatalog(QObject *parent = 0);
+    explicit OutputCatalog(QObject *parent = nullptr);
 
     enum Columns {
         EnabledColumn,

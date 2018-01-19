@@ -41,7 +41,7 @@ class AbstractMotion : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, AbstractMotion* m);
 
 public:
-    AbstractMotion(QObject * parent = 0);
+    AbstractMotion(QObject *parent = nullptr);
     virtual ~AbstractMotion() = 0;
 
     //! Type of motion

@@ -29,7 +29,7 @@ class CustomNonlinearProperty : public NonlinearProperty
     Q_OBJECT
 
 public:
-    CustomNonlinearProperty(Type type, bool retain = false, QObject *parent = 0);
+    CustomNonlinearProperty(Type type, bool retain = false, QObject *parent = nullptr);
 
     void setName( const QString &name);
     bool retain() const;

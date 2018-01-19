@@ -29,7 +29,7 @@ class LinearElasticCalculator : public AbstractCalculator
     Q_OBJECT
 
 public:
-    explicit LinearElasticCalculator(QObject* parent = 0);
+    explicit LinearElasticCalculator(QObject *parent = nullptr);
 
     virtual bool run(AbstractMotion* motion, SoilProfile* site);
 };

@@ -29,7 +29,7 @@ class MotionTypeDelegate : public QItemDelegate
 {
 Q_OBJECT
 public:
-    explicit MotionTypeDelegate(QObject *parent = 0);
+    explicit MotionTypeDelegate(QObject *parent = nullptr);
 
     QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem
                            &option, const QModelIndex &index) const;

@@ -8,7 +8,7 @@ AbstractPeakCalculator::AbstractPeakCalculator(const QString &name)
 
 
 double AbstractPeakCalculator::limitZeroCrossings(double num) const {
-    return max(num, 1.33);
+    return std::max(num, 1.33);
 }
 
 void AbstractPeakCalculator::initCache(const QVector<double> &freqs,

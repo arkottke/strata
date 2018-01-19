@@ -28,7 +28,7 @@ SoilLayer::SoilLayer(QObject* parent)
     : VelocityLayer(parent)
 {
     _thickness = 0;
-    _soilType = 0;
+    _soilType = nullptr;
 }
 
 SoilLayer::SoilLayer(const SoilLayer* other)

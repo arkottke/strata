@@ -30,8 +30,9 @@
 class MyPlot : public QwtPlot
 {
     public:
-        MyPlot(QWidget * parent = 0);
-        MyPlot(const QwtText & title, QWidget * parent = 0);
+    explicit MyPlot(QWidget *parent = nullptr);
+
+    explicit MyPlot(const QwtText &title, QWidget *parent = nullptr);
 
     protected:
         void contextMenuEvent( QContextMenuEvent * event );
