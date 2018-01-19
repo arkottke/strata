@@ -34,6 +34,7 @@
 #include <QVariant>
 #include <QList>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 SoilType::SoilType(QObject *parent)

@@ -47,6 +47,7 @@
 #include <QStringList>
 #include <QVariant>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 SoilProfile::SoilProfile(SiteResponseModel * parent)

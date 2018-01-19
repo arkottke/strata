@@ -27,6 +27,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 CrustalAmplification::CrustalAmplification(QObject *parent) :

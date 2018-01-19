@@ -44,6 +44,7 @@
 
 #include <gsl/gsl_multifit.h>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)

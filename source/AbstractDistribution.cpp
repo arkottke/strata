@@ -25,6 +25,7 @@
 #include <QJsonObject>
 
 #include <cfloat>
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 AbstractDistribution::AbstractDistribution( QObject * parent)

@@ -36,6 +36,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
 

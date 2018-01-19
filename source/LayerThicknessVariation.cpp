@@ -27,6 +27,7 @@
 #include "Units.h"
 
 #include <cfloat>
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 #include <gsl/gsl_randist.h>

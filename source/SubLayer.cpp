@@ -26,6 +26,7 @@
 
 #include <QDebug>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 SubLayer::SubLayer(double thickness, double depth, double vTotalStress, double waterTableDepth, SoilLayer * soilLayer)
