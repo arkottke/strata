@@ -66,9 +66,9 @@ void DissipatedEnergyProfileOutput::extract(AbstractCalculator* const calculator
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-    foreach (double depth, this->ref()) {
+    for (const double &depth : this->ref()) {
         if (abs(depth - 0) < 0.01) {
             // No values at the surface
             data << 0.;

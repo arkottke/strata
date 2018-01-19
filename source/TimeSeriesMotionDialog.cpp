@@ -222,7 +222,7 @@ void TimeSeriesMotionDialog::tryAccept()
 void TimeSeriesMotionDialog::apply()
 {
     // Clear the plots
-    foreach (QwtPlotCurve *curve, QList<QwtPlotCurve *>() << _atsCurve << _saCurve << _fasCurve) {
+    for (auto *curve : {_atsCurve, _saCurve, _fasCurve}) {
         curve->setSamples(QVector<double>(), QVector<double>());
     }
 

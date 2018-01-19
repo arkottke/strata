@@ -63,7 +63,7 @@ ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
               << new VerticalTotalStressProfileOutput(_outputCatalog)
               << new VerticalEffectiveStressProfileOutput(_outputCatalog);
 
-    foreach (AbstractProfileOutput* output, _outputs)
+    for (auto *output : _outputs)
         connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
@@ -155,7 +155,7 @@ QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach(AbstractProfileOutput* apo, _outputs )
+    for (AbstractProfileOutput *apo : _outputs)
         if (apo->enabled())
             list << static_cast<AbstractOutput*>(apo);
 
@@ -167,10 +167,10 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json)
     beginResetModel();
 
     QMap<QString, AbstractProfileOutput*> output_map;
-    foreach (AbstractProfileOutput* o, _outputs)
+    for (AbstractProfileOutput *o : _outputs)
         output_map.insert(o->metaObject()->className(), o);
 
-    foreach (const QJsonValue &qjv, json) {
+    for (const QJsonValue &qjv : json) {
         QJsonObject qjo = qjv.toObject();
         QString key = qjo["className"].toString();
         if (output_map.contains(key))
@@ -183,7 +183,7 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json)
 QJsonArray ProfilesOutputCatalog::toJson() const
 {
     QJsonArray json;
-    foreach (AbstractProfileOutput *apo, _outputs) {
+    for (AbstractProfileOutput *apo : _outputs) {
         json << apo->toJson();
     }
 
@@ -194,7 +194,7 @@ QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
 {
     out << (quint8)4;
 
-    foreach (AbstractProfileOutput* apo, poc->_outputs) {
+    for (AbstractProfileOutput *apo : poc->_outputs) {
         out << apo;
     }
 
@@ -207,7 +207,7 @@ QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
     in >> ver;
     poc->beginResetModel();
 
-    foreach (AbstractProfileOutput* apo, poc->_outputs) {
+    for (AbstractProfileOutput *apo : poc->_outputs) {
         // Skip profiles not included in earlier versions
         if (ver < 2 && qobject_cast<MaxDispProfileOutput*>(apo))
             continue;

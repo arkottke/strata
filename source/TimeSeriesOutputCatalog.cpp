@@ -244,7 +244,7 @@ QList<AbstractOutput*> TimeSeriesOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach(AbstractTimeSeriesOutput* atso, _outputs )
+    for (auto *atso : _outputs)
         list << static_cast<AbstractOutput*>(atso);
 
     return list;
@@ -281,7 +281,7 @@ void TimeSeriesOutputCatalog::fromJson(const QJsonArray &array)
     while (_outputs.size())
         _outputs.takeLast()->deleteLater();
 
-    foreach (const QJsonValue &v, array) {
+    for (const QJsonValue &v : array) {
         QJsonObject json = v.toObject();
         AbstractTimeSeriesOutput *atso = factory(json["className"].toString(), _outputCatalog);
         atso->fromJson(json);
@@ -294,7 +294,7 @@ void TimeSeriesOutputCatalog::fromJson(const QJsonArray &array)
 QJsonArray TimeSeriesOutputCatalog::toJson() const
 {
     QJsonArray array;
-    foreach (AbstractTimeSeriesOutput *atso, _outputs)
+    for (auto *atso : _outputs)
         array << atso->toJson();
 
     return array;
@@ -307,7 +307,7 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc
 
     out << tsoc->_outputs.size();
 
-    foreach (const AbstractTimeSeriesOutput* atso, tsoc->_outputs)
+    for (auto *atso : tsoc->_outputs)
         out << QString(atso->metaObject()->className()) << atso;
 
     return out;

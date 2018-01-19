@@ -282,9 +282,9 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
     _name = json["name"].toString();
 
     _fourierAcc.clear();
-            foreach (const QJsonValue &v, json["fourierAcc"].toArray())  {
-            _fourierAcc << v.toDouble();
-        }
+    for (const QJsonValue &v : json["fourierAcc"].toArray()) {
+        _fourierAcc << v.toDouble();
+    }
 
     endResetModel();
 }

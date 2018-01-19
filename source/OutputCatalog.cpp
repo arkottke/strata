@@ -413,11 +413,11 @@ void OutputCatalog::initialize(int siteCount, MotionLibrary* motionLibrary)
 {
     // Create a list of all enabled outputs
     _outputs.clear();
-    foreach (AbstractOutputCatalog* catalog, _catalogs) {
-        foreach (AbstractOutput* output, catalog->outputs()) {
-            if (!output->needsTime() ||
-                (output->needsTime()
-                 && motionLibrary->approach() == MotionLibrary::TimeSeries)) {
+    for (auto *catalog : _catalogs) {
+        for (auto *output : catalog->outputs()) {
+            if (!output->needsTime()
+                || (output->needsTime()
+                    && motionLibrary->approach() == MotionLibrary::TimeSeries)) {
                 connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
                 _outputs << output;
             }
@@ -433,8 +433,7 @@ void OutputCatalog::initialize(int siteCount, MotionLibrary* motionLibrary)
         if (motionLibrary->motionAt(i)->enabled()) {
             _motionNames << motionLibrary->motionAt(i)->name();
 
-            if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(
-                    motionLibrary->motionAt(i)))
+            if (auto *tsm = qobject_cast<TimeSeriesMotion *>(motionLibrary->motionAt(i)))
                 _time << tsm->time();
         }
     }
@@ -462,8 +461,8 @@ void OutputCatalog::clear()
     _enabled.clear();
 
     // Need to loop over the catalogs as _outputs my have previously deleted pointers
-    foreach (AbstractOutputCatalog* catalog, _catalogs) {
-        foreach (AbstractOutput* output, catalog->outputs()) {
+    for (auto *catalog : _catalogs) {
+        for (auto *output : catalog->outputs()) {
             output->clear();
         }
     }
@@ -472,8 +471,8 @@ void OutputCatalog::clear()
 }
 
 void OutputCatalog::finalize()
-{   
-    foreach (AbstractOutput* output, _outputs)
+{
+    for (AbstractOutput *output : _outputs)
         output->finalize();
 
     emit wasModified();
@@ -481,7 +480,7 @@ void OutputCatalog::finalize()
 
 void OutputCatalog::setReadOnly(bool readOnly)
 {
-    foreach (AbstractOutputCatalog* catalog, _catalogs)
+    for (AbstractOutputCatalog *catalog : _catalogs)
         catalog->setReadOnly(readOnly);
 }
 
@@ -493,14 +492,14 @@ void OutputCatalog::saveResults(int motion, AbstractCalculator* const calculator
     populateDepthVector(
                 calculator->site()->subLayers().last().depthToBase());
 
-    foreach (AbstractOutput* output, _outputs) {
+    for (AbstractOutput *output : _outputs) {
         output->addData(motion, calculator);
     }
 }
 
 void OutputCatalog::removeLastSite()
 {
-    foreach (AbstractOutput* output, _outputs)
+    for (AbstractOutput *output : _outputs)
         output->removeLastSite();
 }
 
@@ -544,7 +543,7 @@ QStringList OutputCatalog::outputNames() const
 {
     QStringList list;
 
-    foreach (AbstractOutput* output, _outputs)
+    for (AbstractOutput *output : _outputs)
         list << output->fullName();
 
     return list;
@@ -557,7 +556,7 @@ const QList<AbstractOutput*> & OutputCatalog::outputs() const
 
 void OutputCatalog::exportData(const QString &path, const QString &separator, const QString &prefix)
 {
-    foreach (AbstractOutput* output, _outputs) {
+    for (AbstractOutput *output : _outputs) {
         if (output->exportEnabled())
             output->exportData(path, separator, prefix);
     }
@@ -622,11 +621,10 @@ void OutputCatalog::fromJson(const QJsonObject &json)
     }
 
     _enabled.clear();
-    foreach (const QJsonValue &value, json["enabled"].toArray()) {
+    for (const QJsonValue &value : json["enabled"].toArray()) {
         QList<bool> l;
-        foreach (const QJsonValue &v, value.toArray())
+        for (const QJsonValue &v : value.toArray())
             l << v.toBool();
-
         _enabled << l;
     }
 
@@ -654,9 +652,9 @@ QJsonObject OutputCatalog::toJson() const
     json["depth"] = _depth.size() ? _depth.last() : -1;
 
     QJsonArray enabled;
-    foreach (const QList<bool> &l, _enabled) {
+    for (const QList<bool> &l : _enabled) {
         QJsonArray qja;
-        foreach (const bool &b, l)
+        for (const bool &b : l)
             qja << QJsonValue(b);
 
         enabled << qja;

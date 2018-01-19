@@ -94,6 +94,6 @@ void AccelTransferFunctionOutput::extract(AbstractCalculator* const calculator,
 
     data.clear();
 
-    foreach (std::complex<double> c, tf)
+    for (const std::complex<double> &c : tf)
         data << abs(c);
 }

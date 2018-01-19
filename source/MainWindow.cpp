@@ -488,18 +488,17 @@ void MainWindow::updateTabs()
     const bool isBusy = _model->isRunning();
 
     // Enable/Disable all actions and menus
-    foreach (QObject* object, children()) {
+    for (QObject *object : children()) {
             if (auto *action = qobject_cast<QAction *>(object))
             action->setDisabled(isBusy);
     }
 
-    foreach (QObject* object, menuBar()->children()) {
+    for (QObject *object : menuBar()->children()) {
             if (auto *menu = qobject_cast<QMenu *>(object))
             menu->setDisabled(isBusy);
     }
 
-    setCursor(isBusy ?
-              Qt::WaitCursor : Qt::ArrowCursor);
+    setCursor(isBusy ? Qt::WaitCursor : Qt::ArrowCursor);
 
     // Set all tabs to be enabled or disabled
     for (int i = 0; i < _tabWidget->count(); ++i)
@@ -509,7 +508,7 @@ void MainWindow::updateTabs()
 void MainWindow::setReadOnly(bool readOnly)
 {
     // Set all of the pages to be read only
-    foreach (AbstractPage* page, _pages)
+    for (auto *page : _pages)
         page->setReadOnly(readOnly);
 
     // Change the icon and label of the button
@@ -568,7 +567,7 @@ void MainWindow::setModel(SiteResponseModel *model)
     _model = model;
 
     // Update all of the pages
-    foreach (AbstractPage* page, _pages)
+    for (auto *page : _pages)
         page->setModel(_model);
 
     updateTabs();

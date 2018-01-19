@@ -25,15 +25,19 @@
 #include <QList>
 #include <QVector>
 #include <QVariant>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
 
-class Serializer
-{
-    public:
-    Serializer() = default;
-       
-        static QList<QVariant> toVariantList(const QList<double> & list); 
-        static QList<QVariant> toVariantList(const QVector<double> & vector); 
+namespace Serialize {
+    QJsonArray toJsonArray(const QVector<double> &vector);
 
-        static QList<double> fromVariantList(const QList<QVariant> & list);
+    void toDoubleVector(const QJsonValue &object, QVector<double> &vector);
+
+    QList<QVariant> toVariantList(const QList<double> &list);
+
+    QList<QVariant> toVariantList(const QVector<double> &vector);
+
+    QList<double> fromVariantList(const QList<QVariant> &list);
 };
 #endif

@@ -56,7 +56,7 @@ void MaxStressProfileOutput::extract(AbstractCalculator* const calculator,
     ref.clear();
 
     ref << 0;
-    foreach (const SubLayer & sl, subLayers)
+    for (const SubLayer &sl : subLayers)
         ref << sl.depthToMid();
 
     ref << subLayers.last().depthToBase();

@@ -91,7 +91,7 @@ void TextLog::fromJson(const QJsonObject &json)
     _level = (TextLog::Level) json["level"].toInt();
 
     _text.clear();
-    foreach (const QJsonValue &v, json["text"].toArray())
+    for (const QJsonValue &v : json["text"].toArray())
         _text << v.toString();
 }
 
@@ -101,7 +101,7 @@ QJsonObject TextLog::toJson() const
     json["level"] = (int) _level;
 
     QJsonArray text;
-    foreach (const QString &l, _text)
+    for (const QString &l : _text)
         text << QJsonValue(l);
     json["text"] = text;
     return json;

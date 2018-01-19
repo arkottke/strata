@@ -177,6 +177,6 @@ void TableGroupBox::setReadOnly(bool readOnly)
     _insertButton->setHidden(readOnly);
     _removeButton->setHidden(readOnly);
 
-    foreach (QPushButton* button, _addedButtons)
+    for (auto *button : _addedButtons)
         button->setHidden(readOnly);
 }

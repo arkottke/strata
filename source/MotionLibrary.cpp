@@ -86,8 +86,8 @@ void MotionLibrary::setSaveData(bool b)
         _saveData = b;
         emit saveDataChanged(_saveData);
 
-        foreach (AbstractMotion* m, _motions) {
-            if (TimeSeriesMotion *tsm = qobject_cast<TimeSeriesMotion *>(m)) {
+        for (auto *m : _motions) {
+            if (auto *tsm = qobject_cast<TimeSeriesMotion *>(m)) {
                 tsm->setSaveData(b);
             }
         }
@@ -276,9 +276,10 @@ int MotionLibrary::motionCount() const
 {
     int count = 0;
 
-    foreach (const AbstractMotion* m, _motions)
+    for (auto *m : _motions) {
         if (m->enabled())
             ++count;
+    }
 
     return count;
 }
@@ -354,8 +355,7 @@ void MotionLibrary::fromJson(const QJsonObject &json)
         _motions.takeLast()->deleteLater();
 
     QJsonArray motions = json["motions"].toArray();
-    foreach(const QJsonValue &value, motions)
-    {
+    for (const QJsonValue &value : motions) {
         QJsonObject mjo = value.toObject();
         QString className = mjo["className"].toString();
 
@@ -420,7 +420,7 @@ QJsonObject MotionLibrary::toJson() const
 
     QJsonArray motions;
 
-    foreach (AbstractMotion *m, _motions) {
+    for (auto *m : _motions) {
         const QString &className = m->metaObject()->className();
         QJsonObject mjo;
 
@@ -447,7 +447,7 @@ QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml)
 
     out << (int)ml->_approach << ml->_saveData << ml->_motions.size();
 
-    foreach (const AbstractMotion * m, ml->_motions) {
+    for (auto *m : ml->_motions) {
         const QString & className = m->metaObject()->className();
         out << className;
 

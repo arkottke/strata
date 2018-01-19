@@ -49,6 +49,6 @@ void AbstractSteppedProfileOutput::extract(AbstractCalculator* const calculator,
     // Populate the reference with the depth to the base of the layers
     ref.clear();
 
-    foreach (const SubLayer & sl, subLayers)
+    for (const SubLayer &sl : subLayers)
         ref << sl.depthToBase();
 }

@@ -94,7 +94,7 @@ void ComputePage::setModel(SiteResponseModel *model)
             this, SLOT(reset()));
 
     _logView->clear();
-    foreach (const QString &line, model->outputCatalog()->log()->text())
+    for (const QString &line : model->outputCatalog()->log()->text())
         _logView->append(line);
 
     connect( model->outputCatalog()->log(), SIGNAL(textChanged(QString)),

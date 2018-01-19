@@ -21,6 +21,8 @@
 
 #include "ResponseSpectrum.h"
 
+#include <Serialize.h>
+
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonValue>
@@ -208,13 +210,8 @@ void ResponseSpectrum::fromJson(const QJsonObject &json)
     _modified = json["modified"].toBool();
     _damping = json["damping"].toDouble();
 
-    _period.clear();
-    foreach (const QJsonValue &v, json["period"].toArray())
-        _period << v.toDouble();
-
-    _sa.clear();
-    foreach (const QJsonValue &v, json["sa"].toArray())
-        _sa << v.toDouble();
+    Serialize::toDoubleVector(json["period"], _period);
+    Serialize::toDoubleVector(json["sa"], _sa);
 }
 
 QJsonObject ResponseSpectrum::toJson() const
@@ -222,16 +219,8 @@ QJsonObject ResponseSpectrum::toJson() const
     QJsonObject json;
     json["modified"] = _modified;
     json["damping"] = _damping;
-
-    QJsonArray period;
-    foreach (const double &d, _period)
-        period << QJsonValue(d);
-    json["period"] = period;
-
-    QJsonArray sa;
-    foreach (const double &d, _sa)
-        sa << QJsonValue(d);
-    json["sa"] = sa;
+    json["period"] = Serialize::toJsonArray(_period);
+    json["sa"] = Serialize::toJsonArray(_sa);
 
     return json;
 }

@@ -336,11 +336,11 @@ void CrustalAmplification::fromJson(const QJsonObject &json)
             beginResetModel();
 
             _freq.clear();
-            foreach (const QJsonValue &d, json["freq"].toArray())
+            for (const QJsonValue &d : json["freq"].toArray())
                 _freq << d.toDouble();
 
             _amp.clear();
-            foreach (const QJsonValue &d, json["amp"].toArray())
+            for (const QJsonValue &d : json["amp"].toArray())
                 _amp << d.toDouble();
 
             endResetModel();
@@ -366,12 +366,12 @@ QJsonObject CrustalAmplification::toJson() const
         case CrustalAmplification::Custom:
         {
             QJsonArray freq;
-            foreach(const double &d, _freq)
+            for (const double &d : _freq)
                 freq << QJsonValue(d);
             json["freq"] = freq;
 
             QJsonArray amp;
-            foreach(const double &d, _amp)
+            for (const double &d : _amp)
                 amp << QJsonValue(d);
             json["amp"] = amp;
             break;

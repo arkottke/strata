@@ -180,7 +180,7 @@ NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(QVariant value)
 
 void AbstractNonlinearPropertyFactory::fromJson(const QJsonObject &json)
 {
-    foreach (const QJsonValue &v, json["models"].toArray()) {
+    for (const QJsonValue &v : json["models"].toArray()) {
         CustomNonlinearProperty * np = new CustomNonlinearProperty(_type, true);
         np->fromJson(v.toObject());
         _models << np;
@@ -190,7 +190,7 @@ void AbstractNonlinearPropertyFactory::fromJson(const QJsonObject &json)
 QJsonObject AbstractNonlinearPropertyFactory::toJson() const
 {
     QJsonArray models;
-    foreach (NonlinearProperty* np, _models) {
+    for (auto *np : _models) {
         const CustomNonlinearProperty *cnp = qobject_cast<CustomNonlinearProperty*>(np);
         if (cnp && cnp->retain()) {
             models.append(np->toJson());
@@ -209,7 +209,7 @@ QDataStream & operator<<(QDataStream & out, const AbstractNonlinearPropertyFacto
 
     // Create a list of models that need to be saved
     QList<NonlinearProperty*>models;
-    foreach (NonlinearProperty* np, anpf._models) {
+    for (auto *np : anpf._models) {
         const CustomNonlinearProperty *cnp = qobject_cast<const CustomNonlinearProperty*>(np);
 
         if (cnp && cnp->retain()) {

@@ -220,17 +220,17 @@ void CrustalModel::fromJson(const QJsonObject &json)
     beginResetModel();
 
     _thickness.clear();
-    foreach (const QJsonValue &v, json["thickness"].toArray()) {
+    for (const QJsonValue &v : json["thickness"].toArray()) {
         _thickness << v.toDouble();
     }
 
     _velocity.clear();
-    foreach (const QJsonValue &v, json["velocity"].toArray()) {
+    for (const QJsonValue &v : json["velocity"].toArray()) {
         _velocity << v.toDouble();
     }
 
     _density.clear();
-    foreach (const QJsonValue &v, json["density"].toArray()) {
+    for (const QJsonValue &v : json["density"].toArray()) {
         _density << v.toDouble();
     }
 
@@ -242,19 +242,20 @@ QJsonObject CrustalModel::toJson() const
     QJsonObject json;
 
     QJsonArray thickness;
-    foreach (const double &d, _thickness) {
+    for (const double &d : _thickness) {
         thickness << QJsonValue(d);
     }
     json["thickness"] = thickness;
 
     QJsonArray velocity;
-    foreach (const double &d, _velocity) {
+    for (const double &d : _velocity) {
         velocity << QJsonValue(d);
     }
     json["velocity"] = velocity;
 
+    // FIXME create a function for this
     QJsonArray density;
-    foreach (const double &d, _density) {
+    for (const double &d : _density) {
         density << QJsonValue(d);
     }
     json["density"] = density;

@@ -111,7 +111,7 @@ void AbstractProfileOutput::extract(AbstractCalculator* const calculator,
     // Populate the reference with the depth to the top of the layers
     ref.clear();
 
-    foreach (const SubLayer & sl, subLayers)
+    for (const SubLayer &sl : subLayers)
         ref << sl.depth();
 
     // Add the depth at the surface of the bedrock

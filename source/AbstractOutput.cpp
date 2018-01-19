@@ -450,11 +450,11 @@ void AbstractOutput::fromJson(const QJsonObject &json)
     _exportEnabled = json["exportEnabled"].toBool();
 
     QJsonArray data = json["data"].toArray();
-    foreach (const QJsonValue &site, data) {
+    for (const QJsonValue &site : data) {
         QList<QVector<double> > l;
-        foreach (const QJsonValue &motion, site.toArray()) {
+        for (const QJsonValue &motion : site.toArray()) {
             QVector<double> v;
-            foreach (const QJsonValue &qjv, motion.toArray()) {
+            for (const QJsonValue &qjv : motion.toArray()) {
                 v << qjv.toDouble();
             }
             l << v;
@@ -465,8 +465,8 @@ void AbstractOutput::fromJson(const QJsonObject &json)
     }
 
     _maxSize = 0;
-    foreach (const QList<QVector<double> > &l, _data) {
-        foreach (const QVector<double> &v, l) {
+    for (const QList<QVector<double> > &l : _data) {
+        for (const QVector<double> &v : l) {
             if (_maxSize < v.size())
                 _maxSize = v.size();
         }
@@ -480,11 +480,11 @@ QJsonObject AbstractOutput::toJson() const
     json["exportEnabled"] = _exportEnabled;
 
     QJsonArray data;
-    foreach(const QList<QVector<double> > &l, _data) {
+    for (const QList<QVector<double> > &l : _data) {
         QJsonArray site;
-        foreach(const QVector<double> &v, l) {
+        for (const QVector<double> &v : l) {
             QJsonArray motion;
-            foreach(const double &d, v) {
+            for (const double &d : v) {
                 motion << QJsonValue(d);
             }
             // FIXME: Need the QJV?
@@ -515,8 +515,8 @@ QDataStream & operator>> (QDataStream & in, AbstractOutput* ao)
     in >> ao->_exportEnabled >> ao->_data;
 
     // Find the maximum length of all data vectors
-    foreach (const QList<QVector<double> > &l, ao->_data) {
-        foreach (const QVector<double> &v, l) {
+    for (const QList<QVector<double> > &l : ao->_data) {
+        for (const QVector<double> &v : l) {
             if (ao->_maxSize < v.size())
                 ao->_maxSize = v.size();
         }

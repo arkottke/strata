@@ -23,6 +23,7 @@
 
 #include "Dimension.h"
 #include "SoilType.h"
+#include "Serialize.h"
 
 #include <QBrush>
 #include <QColor>
@@ -250,15 +251,8 @@ void NonlinearProperty::fromJson(const QJsonObject &json)
     _name = json["name"].toString();
     _type = (NonlinearProperty::Type) json["type"].toInt();
 
-    _strain.clear();
-    QJsonArray strain = json["strain"].toArray();
-    foreach(const QJsonValue &v, strain)
-        _strain << v.toDouble();
-
-    _average.clear();
-    QJsonArray average = json["average"].toArray();
-    foreach(const QJsonValue &v, average)
-        _average << v.toDouble();
+    Serialize::toDoubleVector(json["strain"], _strain);
+    Serialize::toDoubleVector(json["average"], _average);
 
     setVaried(_average);
     endResetModel();
@@ -269,16 +263,8 @@ QJsonObject NonlinearProperty::toJson() const
     QJsonObject json;
     json["name"] = _name;
     json["type"] = (int) _type;
-
-    QJsonArray strain;
-    foreach (const double &d, _strain)
-        strain << QJsonValue(d);
-    json["strain"] = strain;
-
-    QJsonArray average;
-    foreach (const double &d, _average)
-        average << QJsonValue(d);
-    json["average"] = average;
+    json["strain"] = Serialize::toJsonArray(_strain);
+    json["average"] = Serialize::toJsonArray(_average);
 
     return json;
 }

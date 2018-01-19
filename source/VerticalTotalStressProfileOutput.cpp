@@ -59,7 +59,7 @@ void VerticalTotalStressProfileOutput::extract(AbstractCalculator* const calcula
     ref << 0.;
     data << 0.;
 
-    foreach (const SubLayer & sl, subLayers) {
+    for (const SubLayer &sl : subLayers) {
         ref << sl.depthToMid();
         data << sl.vTotalStress();
     }

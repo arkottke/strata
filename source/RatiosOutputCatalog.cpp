@@ -208,12 +208,12 @@ bool RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &pare
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i) {
-        AbstractRatioOutput* aro = _outputs.takeAt(row);
+        auto *aro = _outputs.takeAt(row);
 
         if (aro->needsFreq()) {
             // Check if remaining outputs needs frequencies
             bool needsFreq = false;
-            foreach (AbstractRatioOutput* _aro, _outputs) {
+            for (auto *_aro : _outputs) {
                 if (_aro->needsFreq()) {
                     needsFreq = true;
                     break;
@@ -226,7 +226,7 @@ bool RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &pare
         } else if (aro->needsPeriod()) {
             // Check if remaining outputs needs period
             bool needsPeriod = false;
-            foreach (AbstractRatioOutput* _aro, _outputs) {
+            for (AbstractRatioOutput *_aro : _outputs) {
                 if (_aro->needsPeriod()) {
                     needsPeriod = true;
                     break;
@@ -267,7 +267,7 @@ QList<AbstractOutput*> RatiosOutputCatalog::outputs() const
 {
     QList<AbstractOutput*> list;
 
-    foreach (AbstractRatioOutput* aro, _outputs)
+    for (AbstractRatioOutput *aro : _outputs)
         list << static_cast<AbstractOutput*>(aro);
 
     return list;
@@ -297,7 +297,7 @@ void RatiosOutputCatalog::fromJson(const QJsonArray &json)
     beginResetModel();
     _outputs.clear();
 
-    foreach (const QJsonValue &qjv, json) {
+    for (const QJsonValue &qjv : json) {
         QJsonObject qjo = qjv.toObject();
         AbstractRatioOutput *aro = factory(qjo["className"].toString(), _outputCatalog);
         aro->fromJson(qjo);
@@ -310,7 +310,7 @@ void RatiosOutputCatalog::fromJson(const QJsonArray &json)
 QJsonArray RatiosOutputCatalog::toJson() const
 {
     QJsonArray json;
-    foreach (AbstractRatioOutput *aro, _outputs) {
+    for (auto *aro : _outputs) {
         json << aro->toJson();
     }
 
@@ -323,7 +323,7 @@ QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc)
 
     out << roc->_outputs.size();
 
-    foreach (const AbstractRatioOutput* aro, roc->_outputs)
+    for (auto *aro : roc->_outputs)
         out << QString(aro->metaObject()->className()) << aro;
 
     return out;

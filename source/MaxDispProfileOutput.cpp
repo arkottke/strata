@@ -58,7 +58,7 @@ void MaxDispProfileOutput::extract(AbstractCalculator* const calculator,
     // Outcrop for the first layer. Within for subsequent.
     AbstractMotion::Type type = AbstractMotion::Outcrop;
 
-    foreach (double depth, this->ref()) {
+    for (const double &depth : this->ref()) {
         data << motion->maxDisp(calculator->calcAccelTf(
                                 site->inputLocation(), motion->type(),
                                 site->depthToLocation(depth), type));

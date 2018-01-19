@@ -22,6 +22,7 @@
 #include "TimeSeriesMotion.h"
 
 #include "ResponseSpectrum.h"
+#include "Serialize.h"
 #include "Units.h"
 
 #include <QDataStream>
@@ -718,7 +719,7 @@ double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
     //  Assume the first value is the largest
     double max = fabs(v.at(0));
     // Check the remaining values
-    foreach (double d, v)
+    for (const double &d : v)
         if (fabs(d) > max)
             max = fabs(d);
 
@@ -1097,9 +1098,7 @@ void TimeSeriesMotion::fromJson(const QJsonObject &json)
     setInputUnits(json["inputUnits"].toInt());
 
     if (_saveData) {
-        _accel.clear();
-        foreach (const QJsonValue &v, json["accel"].toArray())
-            _accel << v.toDouble();
+        Serialize::toDoubleVector(json["accel"], _accel);
     } else {
         load(_fileName, false, _scale);
     }
@@ -1125,12 +1124,8 @@ QJsonObject TimeSeriesMotion::toJson() const
     json["inputUnits"] = (int) _inputUnits;
 
     if (_saveData) {
-        QJsonArray accel;
-        foreach (const double &d, _accel)
-            accel << QJsonValue(d);
-        json["accel"] = accel;
+        json["accel"] = Serialize::toJsonArray(_accel);
     }
-
     return json;
 }
 

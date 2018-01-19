@@ -58,7 +58,7 @@ void StressReducCoeffProfileOutput::extract(AbstractCalculator* const calculator
     ref.clear();
 
     ref << 0;
-    foreach (const SubLayer & sl, subLayers)
+    for (const SubLayer &sl : subLayers)
         ref << sl.depthToMid();
 
     // Add the depth at the surface of the bedrock

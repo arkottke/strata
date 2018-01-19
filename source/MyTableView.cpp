@@ -105,7 +105,7 @@ void MyTableView::paste()
         if (rows.isEmpty())
             return;
 
-        foreach (QString row, rows)
+        for (const QString &row : rows)
             data << row.split("\t", QString::KeepEmptyParts);
     }
 

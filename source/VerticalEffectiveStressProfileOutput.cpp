@@ -59,7 +59,7 @@ void VerticalEffectiveStressProfileOutput::extract(AbstractCalculator* const cal
     ref << 0.;
     data << 0.;
 
-    foreach (const SubLayer & sl, subLayers) {
+    for (const SubLayer &sl : subLayers) {
         ref << sl.depthToMid();
         data << sl.vEffectiveStress();
     }
