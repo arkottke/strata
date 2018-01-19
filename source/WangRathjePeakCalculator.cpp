@@ -39,7 +39,7 @@ double WangRathjePeakCalculator::calcDurationRms(
     if (validTransFunc) {
         bool allOne = true;
         for (std::complex<double> stf : siteTransFunc) {
-            if (fabs(fabs(stf) - 1.) > 1E-3) {
+            if (fabs(abs(stf) - 1.) > 1E-3) {
                 allOne &= false;
             }
         }
