@@ -19,16 +19,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <cfloat>
+
 #include "LayerThicknessVariation.h"
 
 #include <QDataStream>
 
 #include "ProfileRandomizer.h"
 #include "Units.h"
-
-#include <cfloat>
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 #include <gsl/gsl_randist.h>
 

@@ -19,14 +19,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "AbstractDistribution.h"
 
 #include <QDebug>
 #include <QJsonObject>
 
 #include <cfloat>
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 AbstractDistribution::AbstractDistribution( QObject * parent)
     : QObject(parent)

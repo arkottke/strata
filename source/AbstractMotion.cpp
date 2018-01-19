@@ -19,6 +19,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "AbstractMotion.h"
 
 #include "Dimension.h"
@@ -29,8 +32,7 @@
 #include <QDebug>
 
 #include <gsl/gsl_math.h>
-#define _USE_MATH_DEFINES
-#include <cmath>
+
 #include <iostream>
 
 AbstractMotion::AbstractMotion(QObject * parent)

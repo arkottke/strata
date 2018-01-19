@@ -19,12 +19,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "Distribution.h"
 
 #include <gsl/gsl_randist.h>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 Distribution::Distribution(gsl_rng * rng, QObject * parent)
     : AbstractDistribution(parent), _rng(rng)

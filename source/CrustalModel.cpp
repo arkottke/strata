@@ -19,13 +19,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "CrustalModel.h"
 
 #include <QJsonArray>
 #include <QJsonValue>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 CrustalModel::CrustalModel(QObject *parent) :
         MyAbstractTableModel(parent)

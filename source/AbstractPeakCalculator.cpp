@@ -1,7 +1,8 @@
-#include "AbstractPeakCalculator.h"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+
+#include "AbstractPeakCalculator.h"
 
 AbstractPeakCalculator::AbstractPeakCalculator(const QString &name)
         : _name(name) {}

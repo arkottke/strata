@@ -19,6 +19,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "NonlinearPropertyRandomizer.h"
 
 #include "NonlinearPropertyUncertainty.h"
@@ -33,9 +36,6 @@
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfile* siteProfile)
     : QObject(siteProfile), _rng(rng), _siteProfile(siteProfile)
