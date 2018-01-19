@@ -19,13 +19,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <cfloat>
+
 #include "VelocityLayer.h"
 
 #include <QDebug>
-
-#define _USE_MATH_DEFINES
-#include <cmath> 
-#include <cfloat>
 
 #include <gsl/gsl_cdf.h>
 

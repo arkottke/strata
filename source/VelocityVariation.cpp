@@ -19,6 +19,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath> 
+#include <cfloat>
+
 #include "VelocityVariation.h"
 
 #include "ProfileRandomizer.h"
@@ -27,10 +31,6 @@
 #include "Units.h"
 
 #include <gsl/gsl_randist.h>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <cfloat>
 
 VelocityVariation::VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
     _rng(rng), _profileRandomizer(profileRandomizer)

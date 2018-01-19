@@ -19,6 +19,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <algorithm>
+
 #include "ProfileRandomizer.h"
 
 #include "BedrockDepthVariation.h"
@@ -35,10 +39,6 @@
 
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <algorithm>
 
 ProfileRandomizer::ProfileRandomizer(gsl_rng * rng, SoilProfile* siteProfile)
     : _siteProfile(siteProfile)

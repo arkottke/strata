@@ -19,6 +19,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "TimeSeriesMotion.h"
 
 #include "ResponseSpectrum.h"
@@ -43,9 +46,6 @@
 #endif
 
 #include <gsl/gsl_multifit.h>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
         : AbstractMotion(parent)
