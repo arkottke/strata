@@ -9,9 +9,30 @@ matrix:
       sudo: required
     - os: osx
       osx_image: xcode9.2
+before_install:
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo add-apt-repository --yes ppa:beineri/opt-qt593-trusty
+      sudo apt-get update -qq
+      sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
+    else
+
+    fi
 install:
-  - echo $TRAVIS_OS_NAME
-  - source .travis/install_$TRAVIS_OS_NAME.sh
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      ls -l /opt/qt59/bin
+      source /opt/qt59/bin/qt59-env.sh
+
+      # Instal QWT
+      cd $TRAVIS_BUILD_DIR/..
+      svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+      cd qwt
+      QWT_ROOT_DIR=`pwd`
+      LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+      qmake
+      make -j$(nproc)
+    fi
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build
@@ -20,20 +41,25 @@ script:
   - echo $PROJECT_VERSION
   - make -j$(nproc)
   - make install
-  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-  - chmod a+x linuxdeployqt*.AppImage
-  - ldd dist/usr/bin/strata
-  - "./linuxdeployqt-*.AppImage dist/strata.desktop -bundle-non-qt-libs -no-translations"
-  - "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage"
-  - find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f
-    2-3 | sort | uniq
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+      chmod a+x linuxdeployqt*.AppImage
+      ldd dist/usr/bin/strata
+      "./linuxdeployqt-*.AppImage dist/strata.desktop -bundle-non-qt-libs -no-translations"
+      "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage"
+      find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+    fi
 after_success:
-- ls -lh
-- VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
-- GITHASH=$(git rev-parse --short HEAD)
-- APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
-- mv Strata-x86_64.AppImage $APPIMAGE
-- curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      ls -lh
+      VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
+      GITHASH=$(git rev-parse --short HEAD)
+      APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
+      mv Strata-x86_64.AppImage $APPIMAGE
+      curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
+    fi
 deploy:
   skip_cleanup: true
   provider: releases
@@ -41,5 +67,6 @@ deploy:
     secure: Z2q1ECai8J5HcnofI8v/BkI0BVPrMzibyXw9gM6+xa2kUG14yTQCnO845HN+PkSbTcMbmmILxrssytlLoibQDFad6pbJKGRKxOrI9TSqnfl79ZzX/Q9Nbq3yvpksG4lWF2XHJvN74N+yVxkw2JsFdu8ikJEv0qR242uWY5/GodNMl/w0ck+aOwtGWNmyKA86opkg9p4kA3ZxzhzGyc9jKNdob/z/gG0SHKMp4j58xxRSC1ZohI8CssVOVZpyduGJuCLxHekd/0T1VXQGGhIWKnM72GYz1BjCus47I4S2Ss4xUWL2tDHdK2lfbZLeybeVFM8cQX17gmRZeyCikl8d0BlROGGu6Hb5TbLyok4j0QC1HRq9JVNHgv+OzahqLdoKYWeCcHewOZyQQ/0RErrQzDUw9SIbdf6RMC+9WXx7eVgv8PPsqNNgkRkQIldcbN6uB2wU58x1vx3VaU22eXolDNjKbhrYGi1k8CDjnFNg8P7G4B1jOWAFUMfs3CYfj9Hmf7UUA0HJV2KyVtsNilRV10Qz8DGmIc/umXITQS3UB0klEzfzS16QWRRMKXmTCD0JLpRukkXjcKpBxgIj6JcRxGzDlMd3qYFyM2VTXfWMS4UK5eEr+x2j8Z660ErSycNUIW3TblABhbOoFHsyjbvEVojhSGExzD6l1rSspvmL60A=
   file: $APPIMAGE
   on:
+    os: linux
     repo: arkottke/strata
     tags: true
