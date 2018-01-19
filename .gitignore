@@ -16,3 +16,19 @@ tags.temp
 
 # Ignore deploy
 deploy/
+
+# Include latex temporary files
+manual/manual.aux
+manual/manual.bbl
+manual/manual.blg
+manual/manual.fdb_latexmk
+manual/manual.fls
+manual/manual.idx
+manual/manual.ilg
+manual/manual.ind
+manual/manual.lof
+manual/manual.log
+manual/manual.lot
+manual/manual.out
+manual/manual.synctex.gz
+manual/manual.toc
