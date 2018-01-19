@@ -11,7 +11,7 @@ matrix:
       osx_image: xcode9.2
 install:
   - echo $TRAVIS_OS_NAME
-  - sh .travis/install_$TRAVIS_OS_NAME.sh
+  - source .travis/install_$TRAVIS_OS_NAME.sh
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build

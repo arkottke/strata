@@ -3,9 +3,11 @@
 # Install dependencies
 #  - Qt 5.9
 #  - GSL
-sudo add-apt-repository --yes ppa:beineri/opt-qt591-trusty
+sudo add-apt-repository --yes ppa:beineri/opt-qt593-trusty
 sudo apt-get update -qq
 sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
+
+ls -l /opt/qt59/bin
 source /opt/qt59/bin/qt59-env.sh
 
 # Instal QWT
