@@ -4,10 +4,11 @@ REM Set up the CPP environment
 REM https://www.appveyor.com/docs/lang/cpp/
 IF %PLATFORM%==x86 (
     ECHO "Using x86 Environment"
-    CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+    CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 ) ELSE (
     ECHO "Using x64 Environment"
-    CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    CALL "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 
+    CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 )
 
 SET PATH=%QT5%\bin;C:\Program Files (x86)\WiX Toolset v3.11\bin;%PATH%
@@ -22,10 +23,10 @@ IF EXIST gsl (
     CD gsl
 )
 
-REM -DMSVC_RUNTIME_DYNAMIC:BOOL=ON^
 cmake ^
  -DGSL_DISABLE_WARNINGS:BOOL=ON^
  -DBUILD_SHARED_LIBS:BOOL=ON^
+ -DMSVC_RUNTIME_DYNAMIC:BOOL=ON^
  -DCMAKE_BUILD_TYPE="Release"^
  -G "%CMAKE_GENERATOR%"^
  .

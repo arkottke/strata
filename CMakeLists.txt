@@ -35,7 +35,7 @@ execute_process(
     COMMAND git rev-parse --short HEAD 
     OUTPUT_VARIABLE PROJECT_GITHASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(PROJECT_VERSION "1.1.0")
+set(PROJECT_VERSION "1.2.0")
 
 # Global CMake options
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -43,6 +43,8 @@ set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# Enable advanced features like:
+#  - frequency-dependent moduli
 option(ADVANCED_FEATURES "Compile with advanced features" ON)
 
 # Configure libraries
@@ -67,7 +69,7 @@ if(MSVC)
     # Add GSL DLL definition for MSVC. Add define for math constants
     add_definitions(-DGSL_DLL -D_USE_MATH_DEFINES)
     # Optimize for speed and link dynamically "-MD"
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+    # set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 else()
     # Add optimization for GCC
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
