@@ -79,7 +79,6 @@ endif()
 enable_testing()
 set(TEST_LINK_LIBRARIES Qt5::Test)
 
-add_subdirectory(manual)
 add_subdirectory(resources)
 add_subdirectory(source)
 add_subdirectory(tests)
