@@ -26,8 +26,6 @@
 #include "SubLayer.h"
 #include "TextLog.h"
 
-#include "math.h"
-
 AbstractIterativeCalculator::AbstractIterativeCalculator(QObject *parent)
     : AbstractCalculator(parent), _maxIterations(0), _errorTolerance(0),
     _converged(false)

@@ -1,7 +1,6 @@
 #include "AbstractPeakCalculator.h"
 
 #define _USE_MATH_DEFINES
-#include <cmath>
 
 AbstractPeakCalculator::AbstractPeakCalculator(const QString &name)
         : _name(name) {}
@@ -33,7 +32,7 @@ AbstractPeakCalculator::calcPeak(double duration, const QVector<double> &freqs,
                                  const QVector<double> &fourierAmps,
                                  double oscFreq,
                                  double oscDamping,
-                                 const QVector<std::complex<double> > siteTransFunc) {
+                                 const QVector<std::complex<double> > &siteTransFunc) {
     initCache(freqs, fourierAmps);
 
     double peakFactor = calcPeakFactor(duration, oscFreq, oscDamping);

@@ -17,7 +17,7 @@ public:
             const QVector<double> &fourierAmps,
             double oscFreq = 0,
             double oscDamping = 0,
-            const QVector<std::complex<double> > siteTransFunc = QVector<std::complex<double> >());
+            const QVector<std::complex<double> > &siteTransFunc = QVector<std::complex<double> >());
 
     virtual double calcDurationRms(
             double duration,
@@ -42,7 +42,7 @@ protected:
     QVector<double> _freqs;
     QVector<double> _squaredAmps;
 
-    QMap<int,float> _momentCache;
+    QMap<int, double> _momentCache;
 };
 
 #endif // ABSTRACTPEAKCALCULATOR_H

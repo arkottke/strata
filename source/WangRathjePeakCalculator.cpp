@@ -4,11 +4,6 @@
 
 #include "WangRathjePeakCalculator.h"
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-#include <complex>
-
 #include <QDebug>
 
 
@@ -62,7 +57,7 @@ double WangRathjePeakCalculator::calcDurationRms(
         }
 
         // Compute the location of the peaks in the transfer function
-        const double offset = 2;
+        const int offset = 2;
         bool valid;
         for (int i = offset; i < (_freqs.size() - offset); ++i) {
             valid = true;
