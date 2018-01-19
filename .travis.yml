@@ -16,7 +16,8 @@ before_install:
       sudo apt-get update -qq
       sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
     else
-
+      brew update
+      brew qt gsl qwt
     fi
 install:
   - |
