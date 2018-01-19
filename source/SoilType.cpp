@@ -33,7 +33,8 @@
 #include <QMap>
 #include <QVariant>
 #include <QList>
-#include <QtMath>
+
+#include <cmath>
 
 SoilType::SoilType(QObject *parent)
     : QObject(parent)

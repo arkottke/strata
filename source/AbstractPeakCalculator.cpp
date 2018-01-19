@@ -1,7 +1,7 @@
 
 #include "AbstractPeakCalculator.h"
 
-#include <QtMath>
+#include <cmath>
 
 AbstractPeakCalculator::AbstractPeakCalculator(const QString &name)
         : _name(name) {}

@@ -22,11 +22,11 @@
 #include "VelocityLayer.h"
 
 #include <QDebug>
-#include <QtMath>
 
 #include <gsl/gsl_cdf.h>
 
 #include <cfloat>
+#include <cmath>
 
 VelocityLayer::VelocityLayer(QObject* parent)
     : AbstractDistribution(parent)

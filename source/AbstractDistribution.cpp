@@ -23,8 +23,8 @@
 
 #include <QDebug>
 #include <QJsonObject>
-#include <QtMath>
 
+#include <cmath>
 #include <cfloat>
 
 AbstractDistribution::AbstractDistribution( QObject * parent)

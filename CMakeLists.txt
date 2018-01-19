@@ -64,10 +64,10 @@ if (ADVANCED_FEATURES)
 endif()
 
 if(MSVC)
-    # Add GSL DLL definition for MSVC
-    add_definitions(-DGSL_DLL)
+    # Add GSL DLL definition for MSVC. Add define for math constants
+    add_definitions(-DGSL_DLL -D_USE_MATH_DEFINES)
     # Optimize for speed
-    set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 else()
     # Add optimization for GCC
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")

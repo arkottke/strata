@@ -22,9 +22,9 @@
 #include "Dimension.h"
 
 #include <QDebug>
-#include <QtMath>
 
 #include <cfloat>
+#include <cmath>
 
 Dimension::Dimension(QObject * parent)
         : QObject(parent)

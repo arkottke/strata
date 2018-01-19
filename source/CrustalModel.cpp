@@ -23,7 +23,8 @@
 
 #include <QJsonArray>
 #include <QJsonValue>
-#include <QtMath>
+
+#include <cmath>
 
 CrustalModel::CrustalModel(QObject *parent) :
         MyAbstractTableModel(parent)

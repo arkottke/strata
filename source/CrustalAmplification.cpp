@@ -26,7 +26,8 @@
 
 #include <QJsonArray>
 #include <QJsonValue>
-#include <QtMath>
+
+#include <cmath>
 
 CrustalAmplification::CrustalAmplification(QObject *parent) :
         MyAbstractTableModel(parent)

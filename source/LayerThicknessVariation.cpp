@@ -25,11 +25,11 @@
 #include "Units.h"
 
 #include <QDataStream>
-#include <QtMath>
 
 #include <gsl/gsl_randist.h>
 
 #include <cfloat>
+#include <cmath>
 
 LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
     _rng(rng), _profileRandomizer(profileRandomizer)

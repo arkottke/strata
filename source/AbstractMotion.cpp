@@ -27,10 +27,11 @@
 
 #include <QDataStream>
 #include <QDebug>
-#include <QtMath>
+
 
 #include <gsl/gsl_math.h>
 
+#include <cmath>
 #include <iostream>
 
 AbstractMotion::AbstractMotion(QObject * parent)

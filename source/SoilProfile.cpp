@@ -46,7 +46,8 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include <QtMath>
+
+#include <cmath>
 
 SoilProfile::SoilProfile(SiteResponseModel * parent)
     : MyAbstractTableModel(parent), _siteResponseModel(parent)

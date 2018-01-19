@@ -30,10 +30,11 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QtMath>
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+
+#include <cmath>
 
 NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfile* siteProfile)
     : QObject(siteProfile), _rng(rng), _siteProfile(siteProfile)

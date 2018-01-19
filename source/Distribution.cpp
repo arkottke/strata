@@ -21,9 +21,9 @@
 
 #include "Distribution.h"
 
-#include <QtMath>
-
 #include <gsl/gsl_randist.h>
+
+#include <cmath>
 
 Distribution::Distribution(gsl_rng * rng, QObject * parent)
     : AbstractDistribution(parent), _rng(rng)

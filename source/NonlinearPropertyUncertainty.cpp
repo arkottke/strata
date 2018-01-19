@@ -24,9 +24,9 @@
 #include <QDebug>
 
 #include <QtAlgorithms>
-#include <QtMath>
 
 #include <cfloat>
+#include <cmath>
 
 NonlinearPropertyUncertainty::NonlinearPropertyUncertainty(double lnStdev,
                                                            double min,

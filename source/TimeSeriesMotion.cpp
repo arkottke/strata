@@ -34,7 +34,7 @@
 #include <QJsonValue>
 #include <QRegExp>
 #include <QTextStream>
-#include <QtMath>
+
 
 #ifdef USE_FFTW
 #include <fftw3.h>
@@ -45,6 +45,8 @@
 #endif
 
 #include <gsl/gsl_multifit.h>
+
+#include <cmath>
 
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
         : AbstractMotion(parent)

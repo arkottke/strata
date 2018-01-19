@@ -27,11 +27,10 @@
 #include "SoilLayer.h"
 #include "Units.h"
 
-#include <QtMath>
-
 #include <gsl/gsl_randist.h>
 
 #include <cfloat>
+#include <cmath>
 
 VelocityVariation::VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
     _rng(rng), _profileRandomizer(profileRandomizer)
