@@ -16,15 +16,13 @@ before_install:
       sudo apt-get update -qq
       sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
     else
-      brew update
-      brew qt gsl qwt
+      brew update --quiet
+      brew install qt gsl qwt
     fi
 install:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      ls -l /opt/qt59/bin
       source /opt/qt59/bin/qt59-env.sh
-
       # Instal QWT
       cd $TRAVIS_BUILD_DIR/..
       svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
