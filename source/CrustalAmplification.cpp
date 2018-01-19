@@ -19,9 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "CrustalAmplification.h"
 
 #include "CrustalModel.h"
@@ -29,6 +26,7 @@
 
 #include <QJsonArray>
 #include <QJsonValue>
+#include <QtMath>
 
 CrustalAmplification::CrustalAmplification(QObject *parent) :
         MyAbstractTableModel(parent)

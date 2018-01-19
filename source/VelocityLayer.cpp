@@ -19,15 +19,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <cfloat>
-
 #include "VelocityLayer.h"
 
 #include <QDebug>
+#include <QtMath>
 
 #include <gsl/gsl_cdf.h>
+
+#include <cfloat>
 
 VelocityLayer::VelocityLayer(QObject* parent)
     : AbstractDistribution(parent)

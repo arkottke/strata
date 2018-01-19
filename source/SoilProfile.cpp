@@ -19,9 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "SoilProfile.h"
 
 #include "Algorithms.h"
@@ -49,6 +46,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <QtMath>
 
 SoilProfile::SoilProfile(SiteResponseModel * parent)
     : MyAbstractTableModel(parent), _siteResponseModel(parent)

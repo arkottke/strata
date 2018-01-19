@@ -19,10 +19,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "Distribution.h"
+
+#include <QtMath>
 
 #include <gsl/gsl_randist.h>
 

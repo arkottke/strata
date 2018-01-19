@@ -19,14 +19,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <cfloat>
-
 #include "NonlinearPropertyUncertainty.h"
 
-#include <QtAlgorithms>
 #include <QDebug>
+
+#include <QtAlgorithms>
+#include <QtMath>
+
+#include <cfloat>
 
 NonlinearPropertyUncertainty::NonlinearPropertyUncertainty(double lnStdev,
                                                            double min,

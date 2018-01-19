@@ -19,9 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "NonlinearPropertyRandomizer.h"
 
 #include "NonlinearPropertyUncertainty.h"
@@ -33,6 +30,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QtMath>
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>

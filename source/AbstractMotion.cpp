@@ -19,9 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "AbstractMotion.h"
 
 #include "Dimension.h"
@@ -30,6 +27,7 @@
 
 #include <QDataStream>
 #include <QDebug>
+#include <QtMath>
 
 #include <gsl/gsl_math.h>
 

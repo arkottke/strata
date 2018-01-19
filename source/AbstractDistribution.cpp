@@ -19,13 +19,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "AbstractDistribution.h"
 
 #include <QDebug>
 #include <QJsonObject>
+#include <QtMath>
 
 #include <cfloat>
 

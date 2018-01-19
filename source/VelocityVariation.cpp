@@ -19,18 +19,19 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath> 
-#include <cfloat>
-
 #include "VelocityVariation.h"
 
 #include "ProfileRandomizer.h"
+
 #include "RockLayer.h"
 #include "SoilLayer.h"
 #include "Units.h"
 
+#include <QtMath>
+
 #include <gsl/gsl_randist.h>
+
+#include <cfloat>
 
 VelocityVariation::VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
     _rng(rng), _profileRandomizer(profileRandomizer)

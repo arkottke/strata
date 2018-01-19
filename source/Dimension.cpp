@@ -19,13 +19,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <cfloat>
-
 #include "Dimension.h"
 
 #include <QDebug>
+#include <QtMath>
+
+#include <cfloat>
 
 
 Dimension::Dimension(QObject * parent)

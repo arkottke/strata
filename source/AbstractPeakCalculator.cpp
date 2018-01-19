@@ -1,15 +1,14 @@
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "AbstractPeakCalculator.h"
+
+#include <QtMath>
 
 AbstractPeakCalculator::AbstractPeakCalculator(const QString &name)
         : _name(name) {}
 
 
 double AbstractPeakCalculator::limitZeroCrossings(double num) const {
-    return std::max(num, 1.33);
+    return max(num, 1.33);
 }
 
 void AbstractPeakCalculator::initCache(const QVector<double> &freqs,

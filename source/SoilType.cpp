@@ -19,9 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "SoilType.h"
 
 #include "Algorithms.h"
@@ -36,6 +33,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QList>
+#include <QtMath>
 
 SoilType::SoilType(QObject *parent)
     : QObject(parent)

@@ -19,18 +19,17 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <cfloat>
-
 #include "LayerThicknessVariation.h"
-
-#include <QDataStream>
 
 #include "ProfileRandomizer.h"
 #include "Units.h"
 
+#include <QDataStream>
+#include <QtMath>
+
 #include <gsl/gsl_randist.h>
+
+#include <cfloat>
 
 LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
     _rng(rng), _profileRandomizer(profileRandomizer)

@@ -19,15 +19,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "SubLayer.h"
 
 #include "SoilType.h"
 #include "Units.h"
 
 #include <QDebug>
+#include <QtMath>
 
 SubLayer::SubLayer(double thickness, double depth, double vTotalStress, double waterTableDepth, SoilLayer * soilLayer)
     : _thickness(thickness), _depth(depth), _waterTableDepth(waterTableDepth), _soilLayer(soilLayer)

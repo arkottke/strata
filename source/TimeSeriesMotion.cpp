@@ -19,9 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "TimeSeriesMotion.h"
 
 #include "ResponseSpectrum.h"
@@ -36,6 +33,7 @@
 #include <QJsonValue>
 #include <QRegExp>
 #include <QTextStream>
+#include <QtMath>
 
 #ifdef USE_FFTW
 #include <fftw3.h>
