@@ -64,7 +64,6 @@ if (UNIX)
     # Manual and example
     install(FILES
             ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-            ${CMAKE_SOURCE_DIR}/manual/example-target.csv
             DESTINATION share/${CMAKE_PROJECT_NAME}/doc
             )
     install(DIRECTORY
@@ -76,7 +75,6 @@ elseif (WIN32)
     # Manual and example
     install(FILES
             ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-            ${CMAKE_SOURCE_DIR}/manual/example-target.csv
             DESTINATION doc
             )
     install(DIRECTORY
