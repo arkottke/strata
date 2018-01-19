@@ -20,11 +20,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Distribution.h"
-#include <QObject>
-#include <QDebug>
 
 #include <gsl/gsl_randist.h>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 Distribution::Distribution(gsl_rng * rng, QObject * parent)
