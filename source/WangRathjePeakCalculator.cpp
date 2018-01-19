@@ -36,14 +36,14 @@ double WangRathjePeakCalculator::calcDurationRms(
 
     bool validTransFunc = false;
     validTransFunc &= siteTransFunc.size() == _freqs.size();
+    // Make sure there are some values greater than 1
     if (validTransFunc) {
-        bool allOne = true;
         for (std::complex<double> stf : siteTransFunc) {
-            if (fabs(abs(stf) - 1.) > 1E-3) {
-                allOne &= false;
+            if (fabs(abs(stf) - 1.) > 1E-1) {
+                validTransFunc = true;
+                break;
             }
         }
-        validTransFunc &= !allOne;
     }
 
     // Modify the duration for the soil response
@@ -53,7 +53,7 @@ double WangRathjePeakCalculator::calcDurationRms(
 
         QVector<double> absSiteTransFunc;
         for (std::complex<double> stf : siteTransFunc) {
-            absSiteTransFunc << std::fabs(stf);
+            absSiteTransFunc << abs(stf);
         }
 
         // Compute the location of the peaks in the transfer function
