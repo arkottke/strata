@@ -97,6 +97,16 @@ install(FILES
     DESTINATION plugins/platforms
     COMPONENT dependencies
     )
+install(FILES
+    ${QT_DLL_DIR}/../plugins/imageformats/qsvg.dll
+    DESTINATION plugins/imageformats
+    COMPONENT dependencies
+    )
+install(FILES
+    ${QT_DLL_DIR}/../plugins/iconengines/qsvgicon.dll
+    DESTINATION plugins/iconengines
+    COMPONENT dependencies
+    )
 
 if (7Z_PATH)
     message(${CMAKE_BINARY_DIR})
