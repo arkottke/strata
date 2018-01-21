@@ -18,6 +18,7 @@ before_install:
     else
       brew update --quiet
       brew install qt gsl qwt
+      export PATH="/usr/local/opt/qt/bin:$PATH"
     fi
 install:
   - |
