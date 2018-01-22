@@ -17,25 +17,19 @@ before_install:
       sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
     else
       brew update --quiet
-      brew install qt gsl qwt
+      brew install qt gsl
       export PATH="/usr/local/opt/qt/bin:$PATH"      
-      # There must be a better way to do this with CMake
-      QWT_ROOT_DIR=$(find '/usr/local/Cellar/qwt' -name 'qwt_plot.h' | sed 's/\/qwt\/qwt_plot.h//' )
-      echo $QWT_ROOT_DIR
     fi
 install:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      source /opt/qt59/bin/qt59-env.sh
-      # Instal QWT
-      cd $TRAVIS_BUILD_DIR/..
-      svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
-      cd qwt
-      QWT_ROOT_DIR=`pwd`
-      LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
-      qmake
-      make -j$(nproc)
-    fi
+  - source /opt/qt59/bin/qt59-env.sh
+  - # Instal QWT
+  - cd $TRAVIS_BUILD_DIR/..
+  - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - cd qwt
+  - QWT_ROOT_DIR=`pwd`
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+  - qmake
+  - make -j$(nproc)
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build
