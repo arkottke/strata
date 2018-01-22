@@ -18,7 +18,8 @@ before_install:
     else
       brew update --quiet
       brew install qt gsl qwt
-      export PATH="/usr/local/opt/qt/bin:$PATH"
+      export PATH="/usr/local/opt/qt/bin:$PATH"      
+      QWT_ROOT_DIR="/usr/local/Cellar/qwt"
     fi
 install:
   - |
