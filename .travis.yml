@@ -19,7 +19,9 @@ before_install:
       brew update --quiet
       brew install qt gsl qwt
       export PATH="/usr/local/opt/qt/bin:$PATH"      
-      QWT_ROOT_DIR="/usr/local/Cellar/qwt"
+      # There must be a better way to do this with CMake
+      QWT_ROOT_DIR=$(find '/usr/local/Cellar/qwt' -name 'qwt_plot.h' | sed 's/\/qwt\/qwt_plot.h//' )
+      echo $QWT_ROOT_DIR
     fi
 install:
   - |
