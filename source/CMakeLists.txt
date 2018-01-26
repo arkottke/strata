@@ -66,9 +66,10 @@ if (UNIX)
         )
     # Manual and example
     install(FILES
-        ${CMAKE_SOURCE_DIR}/manual/manual.pdf
+        ${CMAKE_SOURCE_DIR}/manual/manual-201310.pdf
         DESTINATION share/${CMAKE_PROJECT_NAME}/doc
         COMPONENT manual
+        RENAME manual.pdf
         )
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
@@ -81,9 +82,10 @@ elseif (WIN32)
         )
     # Manual and example
     install(FILES
-        ${CMAKE_SOURCE_DIR}/manual/manual.pdf
+        ${CMAKE_SOURCE_DIR}/manual/manual-201310.pdf
         DESTINATION doc
         COMPONENT manual
+        RENAME manual.pdf
         )
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
