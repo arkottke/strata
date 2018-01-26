@@ -26,6 +26,8 @@
 #include "SubLayer.h"
 #include "Units.h"
 
+#include <cmath>
+
 #include <QDebug>
 
 FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
@@ -123,24 +125,21 @@ bool FrequencyDependentCalculator::updateSubLayer(
     // Compute the complex shear modulus and complex shear-wave velocity
     // for each soil layer -- these change because the damping and shear
     // modulus change.
-    double modulus;
+    double shearMod;
     double damping;
     double strain;
     const SubLayer &sl = _site->subLayers().at(index);
 
     for (int i = 0; i < _nf; ++i) {
         // Compute the strain from the function
-        if (freq.at(i) < freqAvg) {
-            strain = 1.;
-        } else {
-            strain = exp(-alpha * freq.at(i) / freqAvg)
-                     / pow(freq.at(i) / freqAvg, beta);
-        }
+        // Use a slightly different formulation from Assimaki and Kausel to provide a smooth taper
+        strain = std::min(1.0, exp(-alpha * freq.at(i) / freqAvg)
+                / pow(freq.at(i) / freqAvg, beta));
         // Scale strain by maximum strain
         strain *= strainMax;
 
-        sl.interp(strain, &modulus, &damping);
-        _shearMod[index][i] = calcCompShearMod(modulus, damping / 100.);
+        sl.interp(strain, &shearMod, &damping);
+        _shearMod[index][i] = calcCompShearMod(shearMod, damping / 100.);
     }
 
     return true;
