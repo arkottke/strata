@@ -42,9 +42,9 @@ for dll in libbz2-1.dll \
     libgslcblas-0.dll \
     libharfbuzz-0.dll \
     libiconv-2.dll \
-    libicudt58.dll \
-    libicuin58.dll \
-    libicuuc58.dll \
+    libicudt61.dll \
+    libicuin61.dll \
+    libicuuc61.dll \
     libintl-8.dll \
     libpcre-1.dll \
     libpcre2-16-0.dll \
