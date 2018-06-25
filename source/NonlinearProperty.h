@@ -99,6 +99,9 @@ protected:
     //! Strain of the property
     QVector<double> m_strain;
 
+    //! Log of the strain
+    QVector<double> m_lnStrain;
+
     //! Average value of the property
     QVector<double> m_average;
 

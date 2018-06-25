@@ -30,6 +30,8 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
+#include <cmath>
+
 NonlinearProperty::NonlinearProperty(QObject *parent)
     : QAbstractTableModel(parent)
 {
@@ -70,7 +72,6 @@ const QString & NonlinearProperty::name() const
 double NonlinearProperty::interp(const double strain)
 {
     double d;
-
     if (strain < m_strain.first()) {
         d = m_varied.first();
     } else if (strain > m_strain.last()) {
@@ -82,7 +83,7 @@ double NonlinearProperty::interp(const double strain)
         if (!m_interp)
             initialize();
 
-        d = gsl_interp_eval(m_interp, m_strain.data(), m_varied.data(), strain, m_acc);
+        d = gsl_interp_eval(m_interp, m_lnStrain.data(), m_varied.data(), strain, m_acc);
     }
 
     return d;
@@ -219,6 +220,12 @@ void NonlinearProperty::setVaried(const QVector<double> &varied)
         }
     }
 
+    // Compute log strains
+    m_lnStrain.clear();
+    for (double s : m_strain) {
+        m_lnStrain << log(s);
+    }
+
     // Free the interpolator and reset the pointer to zero
     if (m_interp) {
         gsl_interp_free(m_interp);
@@ -228,12 +235,13 @@ void NonlinearProperty::setVaried(const QVector<double> &varied)
 
 void NonlinearProperty::initialize()
 {
-    if (m_strain.size() > 2) {
-        if (m_interp)
+    if (m_lnStrain.size() > 2) {
+        if (m_interp) {
             gsl_interp_free(m_interp);
+        }
 
-        m_interp = gsl_interp_alloc(gsl_interp_cspline, m_strain.size());
-        gsl_interp_init(m_interp, m_strain.data(), m_varied.data(), m_strain.size());
+        m_interp = gsl_interp_alloc(gsl_interp_linear, m_lnStrain.size());
+        gsl_interp_init(m_interp, m_lnStrain.data(), m_varied.data(), m_lnStrain.size());
         gsl_interp_accel_reset(m_acc);
     }
 }
