@@ -83,7 +83,7 @@ double NonlinearProperty::interp(const double strain)
         if (!m_interp)
             initialize();
 
-        d = gsl_interp_eval(m_interp, m_lnStrain.data(), m_varied.data(), strain, m_acc);
+        d = gsl_interp_eval(m_interp, m_lnStrain.data(), m_varied.data(), log(strain), m_acc);
     }
 
     return d;
