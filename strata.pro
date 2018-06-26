@@ -8,7 +8,7 @@
 
 TEMPLATE = app
 TARGET = strata
-QT += gui printsupport widgets xml core opengl
+QT += gui printsupport widgets xml core
 
 # Version information
 VER_MAJ = 0

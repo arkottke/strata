@@ -30,7 +30,7 @@ cp -r example deploy/
 cp LICENSE.txt deploy/
 
 # Copy Qt DLLs
-windeployqt deploy/strata.exe --compiler-runtime
+windeployqt deploy/strata.exe --compiler-runtime -opengl
 
 # Copy other required DLLs
 for dll in libbz2-1.dll \
