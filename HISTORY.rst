@@ -1,3 +1,7 @@
+v0.5.10 (2018-06-25)
+--------------------
+- Changed from cubic spline to log-linear interpolation of nonlinear curves.
+
 v0.5.9 (2017-12-02)
 -------------------
 - Fixed name of the PCRE DLL.
