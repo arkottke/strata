@@ -31,6 +31,7 @@
 
 class CrustalAmplification;
 class Dimension;
+class PathDurationModel;
 
 class SourceTheoryRvtMotion : public AbstractRvtMotion
 {
@@ -43,34 +44,18 @@ public:
     SourceTheoryRvtMotion(QObject *parent = nullptr);
     virtual ~SourceTheoryRvtMotion();
 
-    //! Location of model
-    enum Model {
-        Custom, //!< Custom location
-        WUS, //!< Generic Western North America Parameters
-        CEUS //!< Generic Eastern North America Parameters
-    };
-
-    static QStringList sourceList();
-
+    virtual void setRegion(AbstractRvtMotion::Region region);
 
     virtual const QVector<double> & freq() const;
     Dimension* freqDimension();
 
-    QString nameTemplate() const;
-    virtual QString name() const;
-
     virtual QString toHtml() const;
 
-    Model model() const;
-    void setModel(Model s);
-
-    double momentMag() const;
-    double distance() const;
+    bool isCustomized() const;
     double depth() const;
     double hypoDistance() const;
     double stressDrop() const;
     double geoAtten() const;
-    double pathDurCoeff() const;
     double pathAttenCoeff() const;
     double pathAttenPower() const;
     double shearVelocity() const;
@@ -78,19 +63,20 @@ public:
     double siteAtten() const;
     double duration() const;
 
-    //! Site amplification
+    //! Crustal amplification
     CrustalAmplification* crustalAmp();
+
+    //! Path duration model
+    PathDurationModel* pathDuration();
 
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
 
 signals:
-    void isCustomizeable(bool b);
+    void isCustomizedChanged(bool b);
 
-    void momentMagChanged(double d);
     void stressDropChanged(double d);
     void geoAttenChanged(double d);
-    void pathDurCoeffChanged(double d);
     void pathAttenCoeffChanged(double d);
     void pathAttenPowerChanged(double d);
     void shearVelocityChanged(double d);
@@ -98,20 +84,19 @@ signals:
     void siteAttenChanged(double d);
     void durationChanged(double d);
 
-    void hypoDistanceChanged(double hypoDistance);    
+    void hypoDistanceChanged(double hypoDistance);
 
 public slots:
-    void setModel(int s);
-    void setMomentMag(double momentMag);
-    void setDistance(double distance);
+    void setDensity(double density);
     void setDepth(double depth);
-    void setStressDrop(double stressDrop);
-    void setPathDurCoeff(double pathDurCoeff);
+    void setDistance(double dist);
     void setGeoAtten(double geoAtten);
+    void setIsCustomized(bool b);
+    void setMagnitude(double mag);
+    void setStressDrop(double stressDrop);
     void setPathAttenCoeff(double pathAttenCoeff);
     void setPathAttenPower(double pathAttenPower);
     void setShearVelocity(double shearVelocity);
-    void setDensity(double density);
     void setSiteAtten(double siteAtten);
 
     //! Calculate the FAS and associated response spectrum
@@ -130,21 +115,13 @@ private:
     //! Calculate the geometric attenuation
     void calcGeoAtten();
 
-    /*! Model of the parameters.
-     * Loads default values from Campbell 2003
-     */
-    Model _model;
-
-    //! Moment magnitude
-    double _momentMag;
+    //! If the model is custom
+    bool _isCustomized;
 
     /*! Seismic moment.
      * The seismic moment is calculated from the moment magnitude.
      */
     double _seismicMoment;
-
-    //! Epicentral distance in km
-    double _distance;
 
     //! Depth in km
     double _depth;
@@ -164,9 +141,6 @@ private:
     //! Geometric attenuation
     double _geoAtten;
 
-    //! Path duration coefficient
-    double _pathDurCoeff;
-
     //! Path attenuation coefficient
     double _pathAttenCoeff;
 
@@ -183,7 +157,10 @@ private:
     double _siteAtten;
 
     //! Amplification by site effects (changes in density and shear-wave velocity in the crustal)
-    CrustalAmplification *_crustalAmp;
+    CrustalAmplification* _crustalAmp;
+
+    //! Model for the distance dependent duration;
+    PathDurationModel* _pathDuration;
 
     //! Frequency dimension
     Dimension* _freq;

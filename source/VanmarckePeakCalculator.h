@@ -7,7 +7,7 @@
 
 class VanmarckePeakCalculator : public AbstractPeakCalculator {
 public:
-    VanmarckePeakCalculator();
+    explicit VanmarckePeakCalculator();
     ~VanmarckePeakCalculator();
 
 

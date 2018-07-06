@@ -2,8 +2,8 @@
 
 #include <QDebug>
 
-VanmarckePeakCalculator::VanmarckePeakCalculator()
-        : AbstractPeakCalculator("Vanmarcke (1975)") {
+VanmarckePeakCalculator::VanmarckePeakCalculator() {
+    _name = "Vanmarcke (1975)";
     _workspace = gsl_integration_workspace_alloc(1000);
 }
 
@@ -44,22 +44,10 @@ double VanmarckePeakCalculator::calcPeakFactor(double duration, double oscFreq, 
     double peakFactor, error;
     struct ccdfParams params = {zeroCrossings, bandwidthEff};
 
-//    qDebug() << m0 << m1 << m2;
-
     gsl_function F;
     F.function = &calcCCDF;
     F.params = &params;
 
     gsl_integration_qagiu(&F, 0, 1e-4, 1e-4, 1000, _workspace, &peakFactor, &error);
-
-//    qDebug() << m0 << m1 << m2 << bandwidth << bandwidthEff << peakFactor;
-//    printf("result          = % .18f\n", peakFactor);
-//    printf("estimated error = % .18f\n", error);
-//    printf("intervals       = %zu\n", _workspace->size);
-
-    //      if osc_freq and osc_damping
-    //      : peak_factor *=
-    //        self.nonstationarity_factor(osc_damping, osc_freq, duration)
-
     return peakFactor;
 }

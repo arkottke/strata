@@ -3,9 +3,10 @@
 
 #include <cmath>
 
-AbstractPeakCalculator::AbstractPeakCalculator(const QString &name)
-        : _name(name) {}
+AbstractPeakCalculator::AbstractPeakCalculator()
+{
 
+}
 
 double AbstractPeakCalculator::limitZeroCrossings(double num) const {
     return std::max(num, 1.33);
@@ -29,7 +30,8 @@ void AbstractPeakCalculator::clearCache() {
 }
 
 double
-AbstractPeakCalculator::calcPeak(double duration, const QVector<double> &freqs,
+AbstractPeakCalculator::calcPeak(double duration,
+                                 const QVector<double> &freqs,
                                  const QVector<double> &fourierAmps,
                                  double oscFreq,
                                  double oscDamping,

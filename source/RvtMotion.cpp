@@ -28,7 +28,7 @@
 RvtMotion::RvtMotion(QObject * parent) : AbstractRvtMotion(parent)
 {
     _duration = 5.0;
-    _name = "RVT Motion";
+    _name = tr("RVT Motion (M $mag @ $dist km)");
 }
 
 Qt::ItemFlags RvtMotion::flags(const QModelIndex & index) const

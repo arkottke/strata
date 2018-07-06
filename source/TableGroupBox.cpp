@@ -172,10 +172,9 @@ void TableGroupBox::cellSelected()//const QModelIndex & /* current */, const QMo
 void TableGroupBox::setReadOnly(bool readOnly)
 { 
     _table->setReadOnly(readOnly);
-    // Hide the buttons
-    _addButton->setHidden(readOnly);
-    _insertButton->setHidden(readOnly);
-    _removeButton->setHidden(readOnly);
+
+    for (auto *button : {_addButton, _insertButton, _removeButton})
+        button->setHidden(readOnly);
 
     for (auto *button : _addedButtons)
         button->setHidden(readOnly);

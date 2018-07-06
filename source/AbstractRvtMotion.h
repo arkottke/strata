@@ -46,6 +46,21 @@ public:
     AbstractRvtMotion(QObject *parent = nullptr);
     virtual ~AbstractRvtMotion();
 
+    //! Location of model
+    enum Region {
+        WUS, //!< Generic Western North America Parameters
+        CEUS, //!< Generic Eastern North America Parameters
+        Unknown //!< Unknown region
+    };
+
+    static QStringList regionList();
+
+    Region region() const;
+    double magnitude() const;
+    double distance() const;
+
+    virtual void setRegion(AbstractRvtMotion::Region region);
+
     //!@{ Methods for viewing the Fourier amplitude spectrum of the motion
     virtual int rowCount(const QModelIndex& parent) const;
     virtual int columnCount(const QModelIndex& parent) const;
@@ -54,7 +69,7 @@ public:
     virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
     //!@}
 
-    //! Compute the maximum reponse of the motion and the applied transfer function
+    //! Compute the maximum response of the motion and the applied transfer function
     double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
     double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
     double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
@@ -77,7 +92,10 @@ public:
     double duration() const;
 
     //! Suitable name of the motion
-    virtual QString name() const;
+    QString name() const;
+
+    //! Template without the scenario filled in
+    const QString& nameTemplate() const;
 
     //! Create a html document containing the information of the model
     virtual QString toHtml() const = 0;
@@ -95,6 +113,9 @@ public slots:
     //! Calculate the response spectrum of the motion
     virtual void calculate();
 
+    void setRegion(int region);
+    void setMagnitude(double magnitude);
+    void setDistance(double distance);
     void setName(const QString &name);
 
 signals:
@@ -104,6 +125,10 @@ signals:
     void fourierSpectrumChanged();
 
     void oscCorrectionChanged(double oscChanged);
+
+    void regionChanged(int region);
+    void magnitudeChanged(double magnitude);
+    void distanceChanged(double distance);
 
 protected:
     //! Columns for the table
@@ -126,6 +151,9 @@ protected:
     //! Take a comma separated string, split the columns, and return the specified column
     static QString extractColumn(const QString &line, int column=1);
 
+    //! Update the scenario of the peak calculator if needed
+    void updatePeakCalculatorScenario();
+
     //! Amplitudes of the Fourier amplitude spectrum corresponding to the acceleration
     QVector<double> _fourierAcc;
 
@@ -140,6 +168,10 @@ protected:
 
     //! Peak calculator
     AbstractPeakCalculator *_peakCalculator;
+
+    Region _region;
+    double _magnitude;
+    double _distance;
 };
 
 AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double scale = 1.);

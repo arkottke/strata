@@ -60,27 +60,22 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
         if (!_okToContinue) {
             return false;
         }
-
         // Compute the upgoing and downgoing waves
         if (!calcWaves()) {
             return false;
         }
-
         // Compute the strain in each of the layers
         for (int i = 0; i < _nsl; ++i) {
             strainTf = calcStrainTf(_site->inputLocation(), _motion->type(),
                                     Location(i, _site->subLayers().at(i).thickness() / 2));
-
             // Update the soil layer with the new strain -- only changes the complex shear modulus
             if (!updateSubLayer(i, strainTf)) {
                 return false;
             }
-
             // Save the error for the first layer or if the error within the layer is larger than the previously saved max
             if (!i || maxError < _site->subLayers().at(i).error()) {
                 maxError = _site->subLayers().at(i).error();
             }
-
             if (!_okToContinue) {
                 return false;
             }
@@ -92,11 +87,9 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
                                      .arg(iter + 1)
                                      .arg(maxError, 0, 'f', 2));
         }
-
         if ( _textLog->level() > TextLog::Medium ) {
             _textLog->append("\t\t" + _site->subLayerTable());
         }
-
         // Step the iteration
         ++iter;
 
@@ -150,7 +143,6 @@ bool AbstractIterativeCalculator::converged() const
     return _converged;
 }
 
-
 double AbstractIterativeCalculator::relError(double value, double reference)
 {
     return 100. * (value - reference) / reference;
@@ -159,7 +151,6 @@ double AbstractIterativeCalculator::relError(double value, double reference)
 double AbstractIterativeCalculator::maxError(const QVector<double> &maxStrain)
 {
     Q_ASSERT(_prevMaxStrain.size() == maxStrain.size());
-
     double max = relError(maxStrain.first(), _prevMaxStrain.first());
 
     for (int i = 1; i < maxStrain.size(); ++i) {
@@ -195,7 +186,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractIterativeCalculator* 
     out << (quint8)1;
 
     out << aic->_maxIterations
-            << aic->_errorTolerance;
+        << aic->_errorTolerance;
 
     return out;
 }
@@ -206,7 +197,7 @@ QDataStream & operator>> (QDataStream & in, AbstractIterativeCalculator* aic)
     in >> ver;
 
     in >> aic->_maxIterations
-            >> aic->_errorTolerance;
+       >> aic->_errorTolerance;
 
     return in;
 }

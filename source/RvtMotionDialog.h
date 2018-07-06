@@ -22,34 +22,21 @@
 #ifndef RVT_MOTION_DIALOG_H
 #define RVT_MOTION_DIALOG_H
 
-#include "RvtMotion.h"
-#include "MyTableView.h"
+#include "AbstractRvtMotionDialog.h"
 
-#include <QDialog>
+#include "RvtMotion.h"
 
 #include <qwt_plot_curve.h>
 
-class RvtMotionDialog : public QDialog
+class RvtMotionDialog : public AbstractRvtMotionDialog
 {
     Q_OBJECT
 public:
     explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
 
-signals:
-
-public slots:
-
-private slots:
-    void calculate();
-    void tryAccept();
-
-private:
-    RvtMotion *_motion;
-
-    QwtPlotCurve *_fasCurve;
-    QwtPlotCurve *_saCurve;
-
-    MyTableView *_rsTableView;
+protected:
+    virtual QFormLayout* createParametersLayout();
+    virtual QTabWidget* createTabWidget();
 };
 
 #endif // RVT_MOTION_DIALOG_H

@@ -24,6 +24,8 @@
 
 #include "MyAbstractTableModel.h"
 
+#include "AbstractRvtMotion.h"
+
 #include <QDataStream>
 #include <QJsonObject>
 #include <QString>
@@ -45,19 +47,22 @@ public:
     CrustalAmplification(QObject *parent=0);
     ~CrustalAmplification();
 
-    enum Model {
-        Custom, //!< Custom location
-        WUS, //!< Generic Western North America Parameters
-        CEUS, //!< Generic Eastern North America Parameters
-        Calculated //!< Calculate from Crustal Model
-    };
-
     enum Columns {
         FreqColumn,
         AmpColumn
     };
 
+    enum Source {
+        Default,
+        Specified,
+        Calculated
+    };
+
     static QStringList sourceList();
+
+    void setRegion(AbstractRvtMotion::Region region);
+    void setSource(Source source);
+    Source source() const;
 
     //!@{ Methods for QAbstractTableModel
     virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -74,9 +79,6 @@ public:
     virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     //!@}
 
-    Model model() const;
-    void setModel(Model s);
-
     CrustalModel* crustalModel();
 
     double interpAmpAt(double freq);
@@ -85,12 +87,13 @@ public:
     QJsonObject toJson() const;
 
 signals:
-    void modelChanged(int i);
     void readOnlyChanged(bool b);
-    void needsCrustalModelChanged(bool b);
+    void sourceChanged(int source);
+    void wasModified();
 
 public slots:
-    void setModel(int s);
+    void setRegion(int region);
+    void setSource(int source);
 
 private slots:
     void calculate();
@@ -102,14 +105,14 @@ private:
     //! Clear the interpolator
     void clearInterp();
 
+    //! If the amplification is calculated
+    Source _source;
+
     //! Frequency
     QVector<double> _freq;
 
     //! Amplification
     QVector<double> _amp;
-
-    //! Region of crustal model
-    Model _model;
 
     //! Specific crustal model
     CrustalModel *_crustalModel;

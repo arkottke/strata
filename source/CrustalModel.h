@@ -67,6 +67,9 @@ public:
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
 
+signals:
+    void wasModified();
+
 private:
     /*! Compute the average value of a property to a max depth.
      * \param thickness vector of the layer thicknesses

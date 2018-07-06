@@ -21,6 +21,8 @@
 
 #include "CrustalModel.h"
 
+#include "Serialize.h"
+
 #include <QJsonArray>
 #include <QJsonValue>
 
@@ -114,6 +116,7 @@ bool CrustalModel::setData( const QModelIndex & index, const QVariant & value, i
             break;
         }
         dataChanged(index, index);
+        emit wasModified();
         return true;
     } else {
         return false;
@@ -133,6 +136,7 @@ bool CrustalModel::insertRows(int row, int count, const QModelIndex &parent)
     _velocity.insert(row, count, 0);
     _density.insert(row, count, 0);
 
+    emit wasModified();
     emit endInsertRows();
 
     return true;
@@ -146,6 +150,7 @@ bool CrustalModel::removeRows(int row, int count, const QModelIndex &parent)
     _velocity.remove(row, count);
     _density.remove(row, count);
 
+    emit wasModified();
     emit endRemoveRows();
 
     return true;
@@ -219,22 +224,9 @@ QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
 void CrustalModel::fromJson(const QJsonObject &json)
 {
     beginResetModel();
-
-    _thickness.clear();
-    for (const QJsonValue &v : json["thickness"].toArray()) {
-        _thickness << v.toDouble();
-    }
-
-    _velocity.clear();
-    for (const QJsonValue &v : json["velocity"].toArray()) {
-        _velocity << v.toDouble();
-    }
-
-    _density.clear();
-    for (const QJsonValue &v : json["density"].toArray()) {
-        _density << v.toDouble();
-    }
-
+    Serialize::toDoubleVector(json["thickness"], _thickness);
+    Serialize::toDoubleVector(json["velocity"], _velocity);
+    Serialize::toDoubleVector(json["density"], _density);
     endResetModel();
 }
 
@@ -242,24 +234,9 @@ QJsonObject CrustalModel::toJson() const
 {
     QJsonObject json;
 
-    QJsonArray thickness;
-    for (const double &d : _thickness) {
-        thickness << QJsonValue(d);
-    }
-    json["thickness"] = thickness;
-
-    QJsonArray velocity;
-    for (const double &d : _velocity) {
-        velocity << QJsonValue(d);
-    }
-    json["velocity"] = velocity;
-
-    // FIXME create a function for this
-    QJsonArray density;
-    for (const double &d : _density) {
-        density << QJsonValue(d);
-    }
-    json["density"] = density;
+    json["thickness"] = Serialize::toJsonArray(_thickness);
+    json["velocity"] = Serialize::toJsonArray(_velocity);
+    json["density"] = Serialize::toJsonArray(_density);
 
     return json;
 }

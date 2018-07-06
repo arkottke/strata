@@ -42,12 +42,12 @@ CompatibleRvtMotion::CompatibleRvtMotion(QObject* parent)
     _fourierAcc = QVector<double>(freq().size(), 0.);
 
     _duration = 5.0;
-    _limitFas = true;
+    _limitFas = false;
 
     _targetRespSpec = new ResponseSpectrum;
     _targetRespSpec->setDamping(5.0);
 
-    _name = tr("Compatible RVT Motion");
+    _name = tr("Compatible RVT Motion (M $mag @ $dist km)");
 }
 
 CompatibleRvtMotion::~CompatibleRvtMotion()

@@ -3,6 +3,7 @@
 //
 
 #include "WangRathjePeakCalculator.h"
+#include "BooreThompsonPeakCalculator.h"
 
 #include <QDebug>
 
@@ -19,7 +20,8 @@ double WangRathjePeakCalculator::calcDurationRms(
         double oscDamping,
         const QVector<std::complex<double> > &siteTransFunc)
 {
-    double durationRms = duration;
+    double durationRms = BooreThompsonPeakCalculator::calcDurationRms(
+                duration, oscFreq, oscDamping, siteTransFunc);
 
     // Modify the duration for the oscillator response
     if (0.1 <= oscFreq) {

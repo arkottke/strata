@@ -196,13 +196,14 @@ void MotionPage::add()
             if (!ok) {
                 return;
             }
-
+            
             switch (items.indexOf(item)) {
             case 0:
                 {
                     // User defined FAS
                     auto *_motion = new RvtMotion(_motionLibrary);
-                    dialog = (QDialog*)(new RvtMotionDialog(_motion, _readOnly, this));
+                    dialog = (QDialog*)(
+                            new RvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
                 }
@@ -210,7 +211,8 @@ void MotionPage::add()
                 {
                     // Response Spectrum Compatible
                     auto *_motion = new CompatibleRvtMotion(_motionLibrary);
-                    dialog = (QDialog*)(new CompatibleRvtMotionDialog(_motion, _readOnly, this));
+                    dialog = (QDialog*)(
+                            new CompatibleRvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
                 }
@@ -218,7 +220,8 @@ void MotionPage::add()
                 {
                     // User defined FAS
                     auto *_motion = new SourceTheoryRvtMotion(_motionLibrary);
-                    dialog = (QDialog*)(new SourceTheoryRvtMotionDialog(_motion, _readOnly, this));
+                    dialog = (QDialog*)(
+                            new SourceTheoryRvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
                 }

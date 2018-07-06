@@ -49,10 +49,10 @@
 
 AbstractRvtMotionDialog::AbstractRvtMotionDialog(
         AbstractRvtMotion *motion, bool readOnly, QWidget *parent) :
-    QDialog(parent), _motion(motion)
+    QDialog(parent), _motion(motion), _readOnly(readOnly)
 {}
 
-void AbstractRvtMotionDialog::init(bool readOnly)
+void AbstractRvtMotionDialog::init()
 {
     // Buttons
     auto buttonBox = new QDialogButtonBox(
@@ -64,16 +64,18 @@ void AbstractRvtMotionDialog::init(bool readOnly)
     connect(buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()),
             this, SLOT(calculate()));
 
-    auto pushButton = new QPushButton(tr("Frequency Parameters..."));
-    connect(pushButton, SIGNAL(clicked()), this, SLOT(openFrequencyDialog()));
-    buttonBox->addButton(pushButton, QDialogButtonBox::ActionRole);
+    if (!qobject_cast<RvtMotion*>(_motion)) {
+        auto pushButton = new QPushButton(tr("Frequency Parameters..."));
+        connect(pushButton, SIGNAL(clicked()), this, SLOT(openFrequencyDialog()));
+        buttonBox->addButton(pushButton, QDialogButtonBox::ActionRole);
+    }
 
     auto layout = new QGridLayout;
     layout->setRowStretch(0, 1);
     layout->setColumnStretch(1, 1);
 
-    layout->addLayout(createParametersLayout(readOnly), 0, 0);
-    layout->addWidget(createTabWidget(readOnly), 0, 1);
+    layout->addLayout(createParametersLayout(), 0, 0);
+    layout->addWidget(createTabWidget(), 0, 1);
     layout->addWidget(buttonBox, 1, 0, 1, 2);
 
     setLayout(layout);
@@ -83,14 +85,14 @@ void AbstractRvtMotionDialog::init(bool readOnly)
     addAction(EditActions::instance()->pasteAction());
 }
 
-QFormLayout* AbstractRvtMotionDialog::createParametersLayout(bool readOnly) 
+QFormLayout* AbstractRvtMotionDialog::createParametersLayout()
 {
     auto layout = new QFormLayout;
     
     // Name
     auto lineEdit = new QLineEdit;
     lineEdit->setText(_motion->nameTemplate());
-    lineEdit->setReadOnly(readOnly);
+    lineEdit->setReadOnly(_readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             _motion, SLOT(setName(QString)));
@@ -100,7 +102,7 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout(bool readOnly)
     // Description
     lineEdit = new QLineEdit;
     lineEdit->setText(_motion->description());
-    lineEdit->setReadOnly(readOnly);
+    lineEdit->setReadOnly(_readOnly);
 
     connect(lineEdit, SIGNAL(textChanged(QString)),
             _motion, SLOT(setDescription(QString)));
@@ -120,7 +122,7 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout(bool readOnly)
     spinBox->setRange(4, 9);
     spinBox->setDecimals(2);
     spinBox->setSingleStep(0.1);
-    spinBox->setReadOnly(readOnly);
+    spinBox->setReadOnly(_readOnly);
 
     spinBox->setValue(_motion->magnitude());
     connect(spinBox, SIGNAL(valueChanged(double)),
@@ -134,7 +136,7 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout(bool readOnly)
     spinBox->setDecimals(1);
     spinBox->setSingleStep(1);
     spinBox->setSuffix(" km");
-    spinBox->setReadOnly(readOnly);
+    spinBox->setReadOnly(_readOnly);
 
     spinBox->setValue(_motion->distance());
     connect(spinBox, SIGNAL(valueChanged(double)),
@@ -146,7 +148,8 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout(bool readOnly)
     comboBox = new QComboBox;
     comboBox->addItems(AbstractMotion::typeList());
     comboBox->setCurrentIndex(_motion->type());
-    comboBox->setDisabled(readOnly);
+    // Only permit setting type for RvtMotions
+    comboBox->setDisabled(_readOnly || !qobject_cast<RvtMotion*>(_motion));
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             _motion, SLOT(setType(int)));
 
@@ -155,19 +158,19 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout(bool readOnly)
     return layout;
 }
 
-QTabWidget* AbstractRvtMotionDialog::createTabWidget(bool readOnly) 
+QTabWidget* AbstractRvtMotionDialog::createTabWidget()
 {
-    auto tabWidget = new QTabWidget;
-
-    tabWidget->addTab(createRSPlotWidget(), tr("RS Plot"));
+    _dataTabWidget = new QTabWidget;
+    _dataTabWidget->addTab(createRSPlotWidget(), tr("RS Plot"));
     
     // Response spectrum table
     _rsTableView = new MyTableView;
     _rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     _rsTableView->setModel(_motion->respSpec());
-    tabWidget->addTab(_rsTableView, tr("RS Data"));
+    _rsTableView->setReadOnly(true);
+    _dataTabWidget->addTab(_rsTableView, tr("RS Data"));
 
-    tabWidget->addTab(createFSPlotWidget(), tr("FAS Plot"));
+    _dataTabWidget->addTab(createFSPlotWidget(), tr("FAS Plot"));
 
     // Fourier amplitude spectrum table
     _fsTableView = new MyTableView;
@@ -176,11 +179,11 @@ QTabWidget* AbstractRvtMotionDialog::createTabWidget(bool readOnly)
         _fsTableView->setModel(rm);
     } else {
         _fsTableView->setModel(_motion);
-        _fsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        _fsTableView->setReadOnly(true);
     }
-    tabWidget->addTab(_fsTableView, tr("FAS Data"));
+    _dataTabWidget->addTab(_fsTableView, tr("FAS Data"));
 
-    return tabWidget;
+    return _dataTabWidget;
 }
 
 QWidget* AbstractRvtMotionDialog::createRSPlotWidget()
@@ -296,6 +299,8 @@ void AbstractRvtMotionDialog::calculate()
 
     _faCurve->setSamples(_motion->freq(),_motion->fourierAcc());
     _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
+
+    _dataTabWidget->setCurrentIndex(0);
     // FIXME 
     // _targetSaCurve->setSamples(_motion->targetRespSpec()->period(),
     //                           _motion->targetRespSpec()->sa());

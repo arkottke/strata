@@ -23,11 +23,12 @@
 
 #include "CrustalAmplification.h"
 #include "Dimension.h"
+#include "PathDurationModel.h"
 
 #include <QDebug>
 
 SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject * parent)
-    : AbstractRvtMotion(parent)
+        : AbstractRvtMotion(parent)
 {
     _freq = new Dimension(this);
     _freq->setMin(0.05);
@@ -38,23 +39,26 @@ SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject * parent)
     _fourierAcc = QVector<double>(freqCount(), 0.);
 
     _crustalAmp = new CrustalAmplification;
+    connect(_crustalAmp, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+    connect(this, SIGNAL(regionChanged(int)), _crustalAmp, SLOT(setRegion(int)));
 
-    setDistance(20.);
+    _pathDuration = new PathDurationModel;
+    connect(_pathDuration, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+    connect(this, SIGNAL(regionChanged(int)), _pathDuration, SLOT(setRegion(int)));
+
+    // Reset the parameters
+    setRegion(_region);
+    setMagnitude(_magnitude);
+    setDistance(_distance);
     setDepth(8.);
-    setMomentMag(6.5);
-    setModel(WUS);
 
-    _name = tr("Source Theory (M= $mag, R= $dist km)");
+    _name = tr("Source Theory RVT Motion (M $mag @ $dist km)");
 }
 
 SourceTheoryRvtMotion::~SourceTheoryRvtMotion()
 {
     _crustalAmp->deleteLater();
-}
-
-QStringList SourceTheoryRvtMotion::sourceList()
-{
-    return QStringList() << tr("Custom") << tr("Western NA") << tr("Eastern NA");
+    _pathDuration->deleteLater();
 }
 
 const QVector<double> & SourceTheoryRvtMotion::freq() const
@@ -67,73 +71,44 @@ Dimension*  SourceTheoryRvtMotion::freqDimension()
     return _freq;
 }
 
-QString SourceTheoryRvtMotion::nameTemplate() const
-{
-    return _name;
-}
-
-QString SourceTheoryRvtMotion::name() const
-{
-    QString s = _name;
-
-    return s
-            .replace("$mag",
-                     QString::number(_momentMag, 'f', 1),
-                     Qt::CaseInsensitive)
-            .replace("$dist",
-                     QString::number(_distance, 'f', 1),
-                     Qt::CaseInsensitive);
-}
-
 QString SourceTheoryRvtMotion::toHtml() const
 {
     //FIXME
-
     return QString();
 }
 
-SourceTheoryRvtMotion::Model SourceTheoryRvtMotion::model() const
+void SourceTheoryRvtMotion::setRegion(AbstractRvtMotion::Region region)
 {
-    return _model;
-}
+    AbstractRvtMotion::setRegion(region);
 
-void SourceTheoryRvtMotion::setModel(Model s)
-{
-    _model = s;
-    if (_model != Custom)
-        _crustalAmp->setModel(s);
+    _crustalAmp->setRegion(_region);
+    _pathDuration->setRegion(_region);
 
-    switch (_model) {
-    case WUS:
-        setStressDrop(100);
-        setPathAttenCoeff(180);
-        setPathAttenPower(0.45);
-        setShearVelocity(3.5);
-        setDensity(2.8);
-        setSiteAtten(0.04);
-        break;
-    case CEUS:
-        setStressDrop(150);
-        setPathAttenCoeff(680);
-        setPathAttenPower(0.36);
-        setShearVelocity(3.6);
-        setDensity(2.8);
-        setSiteAtten(0.006);
-        break;
-    case Custom:
-        // Do nothing
-        break;
+    switch (_region) {
+        case AbstractRvtMotion::WUS:
+            setStressDrop(100);
+            setPathAttenCoeff(180);
+            setPathAttenPower(0.45);
+            setShearVelocity(3.5);
+            setDensity(2.8);
+            setSiteAtten(0.04);
+            break;
+        case AbstractRvtMotion::CEUS:
+            setStressDrop(150);
+            setPathAttenCoeff(680);
+            setPathAttenPower(0.36);
+            setShearVelocity(3.6);
+            setDensity(2.8);
+            setSiteAtten(0.006);
+            break;
+        default:
+            break;
     }
+
     // Geometric attenuation may have changed
     calcGeoAtten();
-
-    emit isCustomizeable(_model == Custom);
 }
 
-void SourceTheoryRvtMotion::setModel(int s)
-{
-    setModel((Model)s);
-}
 
 //QString SourceTheoryRvtMotion::toHtml() const
 //{
@@ -201,33 +176,28 @@ void SourceTheoryRvtMotion::setModel(int s)
 //    return html;
 //}
 
-double SourceTheoryRvtMotion::momentMag() const
-{
-    return _momentMag;
-}
+bool SourceTheoryRvtMotion::isCustomized() const {return _isCustomized;}
 
-void SourceTheoryRvtMotion::setMomentMag(double momentMag)
-{    
-    if (_momentMag != momentMag) {
-        _momentMag = momentMag;
-
-        // Compute seismic moment based on the moment magnitude
-        _seismicMoment = pow(10, 1.5 * (_momentMag + 10.7));
-
-        emit momentMagChanged(_momentMag);
-        calcCornerFreq();
+void SourceTheoryRvtMotion::setIsCustomized(bool b) {
+    if (_isCustomized != b) {
+        _isCustomized = b;
+        emit isCustomizedChanged(b);
+        emit wasModified();
     }
 }
 
-double SourceTheoryRvtMotion::distance() const
+void SourceTheoryRvtMotion::setMagnitude(double magnitude)
 {
-    return _distance;
+    AbstractRvtMotion::setMagnitude(magnitude);
+    // Compute seismic moment based on the moment magnitude
+    _seismicMoment = pow(10, 1.5 * (_magnitude + 10.7));
+    calcCornerFreq();
 }
+
 
 void SourceTheoryRvtMotion::setDistance(double distance)
 {
-    _distance = distance;
-
+    AbstractRvtMotion::setDistance(distance);
     calcHypoDistance();
 }
 
@@ -255,21 +225,6 @@ void SourceTheoryRvtMotion::setStressDrop(double stressDrop)
 
         emit stressDropChanged(stressDrop);
         calcCornerFreq();
-    }
-}
-
-double SourceTheoryRvtMotion::pathDurCoeff() const
-{
-    return _pathDurCoeff;
-}
-
-void SourceTheoryRvtMotion::setPathDurCoeff(double pathDurCoeff)
-{
-    if (_pathDurCoeff != pathDurCoeff) {
-        _pathDurCoeff = pathDurCoeff;
-
-        emit pathDurCoeffChanged(pathDurCoeff);
-        calcDuration();
     }
 }
 
@@ -368,6 +323,11 @@ CrustalAmplification* SourceTheoryRvtMotion::crustalAmp()
     return _crustalAmp;
 }
 
+PathDurationModel* SourceTheoryRvtMotion::pathDuration()
+{
+    return _pathDuration;
+}
+
 void SourceTheoryRvtMotion::calcHypoDistance()
 {
     if (_depth > 0 && _distance > 0) {
@@ -391,56 +351,11 @@ void SourceTheoryRvtMotion::calcDuration()
 {
     if (_cornerFreq > 0) {
         // Compute source component
-        const double sourceDur = 1 / _cornerFreq;
-
-        // Offset distance
-        double offsetDist = 0;
-        // Duration at offset
-        double offsetDur = 0;
-
-        switch (_model)
-        {
-        case Custom:
-            // Do nothing
-            break;
-            // Values proposed by Campbell 2003
-        case WUS:
-            _pathDurCoeff = 0.05;
-            break;
-        case CEUS:
-            // The duration is assumed to be piece-wise linear with the equal
-            // values at the intersections.
-            if (_hypoDistance <= 10.) {
-                _pathDurCoeff = 0;
-
-                offsetDur = 0;
-                offsetDist = 0;
-            } else if (_hypoDistance <= 70.) {
-                // slope of 0.16 during this segment
-                _pathDurCoeff = 0.16;
-
-                offsetDur = 0;
-                offsetDist = 10.;
-            } else if (_hypoDistance <= 130.) {
-                _pathDurCoeff = -0.03;
-
-                offsetDur = 0.16 * (70.-10.);
-                offsetDist = 70.;
-            } else {
-                _pathDurCoeff = 0.04;
-
-                offsetDur = 0.16 * (70.-10.) - 0.03 * (130.-70.);
-                offsetDist = 130.;
-            }
-            break;
-        }
-        emit pathDurCoeffChanged(_pathDurCoeff);
-
-        // Compute the path duration component
-        double pathDur = offsetDur + _pathDurCoeff * (_hypoDistance - offsetDist);
+        double sourceDur = 1 / _cornerFreq;
+        // Path duration
+        double pathDur = _pathDuration->duration(_hypoDistance);
 
         _duration = sourceDur + pathDur;
-
         emit durationChanged(_duration);
     }
 }
@@ -450,24 +365,25 @@ void SourceTheoryRvtMotion::calcGeoAtten()
     if (_hypoDistance > 0) {
         // Determine the geometric attenuation based on a piecewise linear
         // calculation
-        switch (_model) {
-        case Custom:
-            // Do nothing
-            break;
-        case WUS:
-            if (_hypoDistance < 40.)
-                _geoAtten = 1. / _hypoDistance;
-            else
-                _geoAtten = 1./40. * sqrt(40./_hypoDistance);
-            break;
-        case CEUS:
-            if (_hypoDistance < 70.)
-                _geoAtten = 1. / _hypoDistance;
-            else if (_hypoDistance < 130.)
-                _geoAtten = 1. / 70.;
-            else
-                _geoAtten = 1./70. * sqrt(130./_hypoDistance);
-            break;
+        switch (_region) {
+            case AbstractRvtMotion::WUS:
+                if (_hypoDistance < 40.) {
+                    _geoAtten = 1. / _hypoDistance;
+                } else {
+                    _geoAtten = 1./40. * sqrt(40./_hypoDistance);
+                }
+                break;
+            case AbstractRvtMotion::CEUS:
+                if (_hypoDistance < 70.) {
+                    _geoAtten = 1. / _hypoDistance;
+                } else if (_hypoDistance < 130.) {
+                    _geoAtten = 1. / 70.;
+                } else {
+                    _geoAtten = 1./70. * sqrt(130./_hypoDistance);
+                }
+                break;
+            default:
+                break;
         }
 
         emit geoAttenChanged(_geoAtten);
@@ -510,17 +426,11 @@ void SourceTheoryRvtMotion::calculate()
 void SourceTheoryRvtMotion::fromJson(const QJsonObject &json)
 {
     AbstractRvtMotion::fromJson(json);
-    setModel(json["model"].toInt());
-    setMomentMag(json["momentMag"].toDouble());
-    setDistance(json["distance"].toDouble());
-    setDepth(json["depth"].toDouble());
 
-    _freq->fromJson(json["freq"].toObject());
-
-    if (_model == SourceTheoryRvtMotion::Custom) {
+    if (_isCustomized) {
+        setDepth(json["depth"].toDouble());
         setStressDrop(json["stressDrop"].toDouble());
         setGeoAtten(json["geoAtten"].toDouble());
-        setPathDurCoeff(json["pathDurCoeff"].toDouble());
         setPathAttenCoeff(json["pathAttenCoeff"].toDouble());
         setPathAttenPower(json["pathAttenPower"].toDouble());
         setShearVelocity(json["shearVelocity"].toDouble());
@@ -528,32 +438,29 @@ void SourceTheoryRvtMotion::fromJson(const QJsonObject &json)
         setSiteAtten(json["siteAtten"].toDouble());
 
         _crustalAmp->fromJson(json["crustalAmp"].toObject());
+        _pathDuration->fromJson(json["pathDuration"].toObject());
+    } else {
+        setRegion(_region);
     }
-
     calculate();
 }
 
 QJsonObject SourceTheoryRvtMotion::toJson() const
 {
     QJsonObject json = AbstractRvtMotion::toJson();
-    json["model"] = (int) _model;
-    json["momentMag"] = _momentMag;
-    json["distance"] = _distance;
     json["depth"] = _depth;
-
     json["freq"] = _freq->toJson();
 
-    if (_model == SourceTheoryRvtMotion::Custom) {
+    if (_isCustomized) {
         json["stresDrop"] = _stressDrop;
         json["geoAtten"] = _geoAtten;
-        json["pathDurCoeff"] = _pathDurCoeff;
         json["pathAttenCoeff"] = _pathAttenCoeff;
         json["pathAttenPower"] = _pathAttenPower;
         json["shearVelocity"] = _shearVelocity;
         json["density"] = _density;
         json["siteAtten"] = _siteAtten;
-
         json["crustalAmp"] = _crustalAmp->toJson();
+        json["pathDuration"] = _pathDuration->toJson();
     }
     return json;
 }
@@ -562,30 +469,21 @@ QJsonObject SourceTheoryRvtMotion::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm)
 {
-    out << (quint8)1;
-
+    out << (quint8)3;
     out << qobject_cast<const AbstractRvtMotion*>(strm);
-
     // Properties of SourceTheoryRvtMotion
-    out << (int)strm->_model
-            << strm->_momentMag
-            << strm->_distance
-            << strm->_depth
-            << strm->_freq;
-
-    if (strm->_model == SourceTheoryRvtMotion::Custom) {
-        out
-               << strm->_stressDrop
-               << strm->_geoAtten
-               << strm->_pathDurCoeff
-               << strm->_pathAttenCoeff
-               << strm->_pathAttenPower
-               << strm->_shearVelocity
-               << strm->_density
-               << strm->_siteAtten
-               << strm->_crustalAmp;
+    out << strm->_depth << strm->_freq;
+    if (strm->_isCustomized) {
+        out << strm->_stressDrop
+            << strm->_geoAtten
+            << strm->_pathAttenCoeff
+            << strm->_pathAttenPower
+            << strm->_shearVelocity
+            << strm->_density
+            << strm->_siteAtten
+            << strm->_crustalAmp
+            << strm->_pathDuration;
     }
-
     return out;
 }
 
@@ -597,23 +495,14 @@ QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm)
     in >> qobject_cast<AbstractRvtMotion*>(strm);
 
     // Properties of SourceTheoryRvtMotion
-    int model;
-    double momentMag;
-    double distance;
     double depth;
 
-    in >> model
-            >> momentMag
-            >> distance
-            >> depth
-            >> strm->_freq;
+    in >> depth
+       >> strm->_freq;
 
-    strm->setMomentMag(momentMag);
-    strm->setDistance(distance);
     strm->setDepth(depth);
-    strm->setModel(model);
 
-    if (strm->_model == SourceTheoryRvtMotion::Custom) {
+    if (strm->_isCustomized) {
         double stressDrop;
         double geoAtten;
         double pathDurCoeff;
@@ -624,19 +513,20 @@ QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm)
         double siteAtten;
 
         in >> stressDrop
-                >> geoAtten
-                >> pathDurCoeff
-                >> pathAttenCoeff
-                >> pathAttenPower
-                >> shearVelocity
-                >> density
-                >> siteAtten
-                >> strm->_crustalAmp;
+           >> geoAtten
+           >> pathDurCoeff
+           >> pathAttenCoeff
+           >> pathAttenPower
+           >> shearVelocity
+           >> density
+           >> siteAtten
+           >> strm->_crustalAmp
+           >> strm->_pathDuration;
 
+        // FIXME: Move to one function
         // Use set methods to calculate dependent parameters
         strm->setStressDrop(stressDrop);
         strm->setGeoAtten(geoAtten);
-        strm->setPathDurCoeff(pathDurCoeff);
         strm->setPathAttenCoeff(pathAttenCoeff);
         strm->setPathAttenPower(pathAttenPower);
         strm->setShearVelocity(shearVelocity);
@@ -644,9 +534,11 @@ QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm)
         strm->setSiteAtten(siteAtten);
     }
 
+    strm->setRegion(strm->_region);
+    strm->setMagnitude(strm->_magnitude);
+    strm->setDistance(strm->_distance);
     // Compute the FAS
     strm->calculate();
-
     return in;
 
 }

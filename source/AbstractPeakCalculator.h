@@ -9,7 +9,7 @@
 
 class AbstractPeakCalculator {
 public:
-    explicit AbstractPeakCalculator(const QString &name);
+    explicit AbstractPeakCalculator();
 
     double calcPeak(
             double duration,

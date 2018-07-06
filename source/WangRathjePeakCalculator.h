@@ -5,7 +5,7 @@
 #ifndef WANG_RATHJE_PEAK_CALCULATOR_H
 #define WANG_RATHJE_PEAK_CALCULATOR_H
 
-#include "VanmarckePeakCalculator.h"
+#include "BooreThompsonPeakCalculator.h"
 
 struct WangRathjeCoef {
     int mode;
@@ -16,7 +16,7 @@ struct WangRathjeCoef {
     double sd;
 };
 
-class WangRathjePeakCalculator : public VanmarckePeakCalculator {
+class WangRathjePeakCalculator : public BooreThompsonPeakCalculator {
 
 public:
     WangRathjePeakCalculator();

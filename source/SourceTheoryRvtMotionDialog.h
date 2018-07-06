@@ -22,39 +22,31 @@
 #ifndef SOURCE_THEORY_RVT_MOTION_DIALOG_H
 #define SOURCE_THEORY_RVT_MOTION_DIALOG_H
 
-#include "SourceTheoryRvtMotion.h"
-#include "MyTableView.h"
+#include "AbstractRvtMotionDialog.h"
 
-#include <QDialog>
-#include <QTabWidget>
+class TableGroupBox;
+class SourceTheoryRvtMotion;
 
-#include <qwt_plot_curve.h>
-
-class SourceTheoryRvtMotionDialog : public QDialog
+class SourceTheoryRvtMotionDialog : public AbstractRvtMotionDialog
 {
 Q_OBJECT
 public:
     explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly,
                                          QWidget *parent = nullptr);
+protected slots:
+    void updatePathDurSource(int source);
+    void updateCrustalAmpSource(int source);
 
-signals:
+protected:
+    virtual QFormLayout* createParametersLayout();
 
-public slots:
-private slots:
-    void openFrequencyDialog();
+    int _crustModelIndex;
 
-    void calculate();
-    void tryAccept();
+    QTabWidget* _paramsTabWidget;
 
-
-private:
-    //! Create the GUI for the source theory inputs
-    QTabWidget* createSourceTheoryForm(bool readOnly);
-
-    SourceTheoryRvtMotion *_motion;
-
-    QwtPlotCurve *_fasCurve;
-    QwtPlotCurve *_saCurve;
+    TableGroupBox* _pathDurTableGroupBox;
+    TableGroupBox* _crustalModelGroupBox;
+    TableGroupBox* _crustalAmpGroupBox;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_DIALOG_H

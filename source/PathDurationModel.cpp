@@ -29,9 +29,47 @@
 #include <cmath>
 
 PathDurationModel::PathDurationModel(QObject *parent) :
-        MyAbstractTableModel(parent)
+    MyAbstractTableModel(parent), _source(Default)
 {
+}
 
+void PathDurationModel::setRegion(AbstractRvtMotion::Region region)
+{
+    beginResetModel();
+    // WUS and CEUS amplification from Campbell (2003)
+    if (region == AbstractRvtMotion::CEUS) {
+        _distance = {0};
+        _rate = {0.05};
+    } else if (region == AbstractRvtMotion::WUS) {
+        _distance = {0., 10., 70., 130.};
+        _rate = {0., 0.16, -0.03, 0.04};
+    }
+    endResetModel();
+    emit wasModified();
+}
+
+void PathDurationModel::setRegion(int region)
+{
+    setRegion((AbstractRvtMotion::Region)region);
+}
+
+QStringList PathDurationModel::sourceList() {
+    return {tr("Default"), tr("Specified")};
+}
+
+void PathDurationModel::setSource(Source source) {
+    if (_source != source) {
+        _source = source;
+        emit sourceChanged(_source);
+    }
+}
+
+void PathDurationModel::setSource(int source) {
+    setSource((Source)source);
+}
+
+PathDurationModel::Source PathDurationModel::source() const {
+    return _source;
 }
 
 int PathDurationModel::rowCount(const QModelIndex & parent) const
@@ -147,22 +185,6 @@ bool PathDurationModel::removeRows(int row, int count, const QModelIndex &parent
     return true;
 }
 
-void PathDurationModel::setRegion(AbstractRvtMotion::Region region) {
-    switch (region) {
-        case AbstractRvtMotion::WUS:
-            _distance = {0.,};
-            _rate = {0.05};
-            break;
-        case AbstractRvtMotion::CEUS:
-            _distance = {0., 10., 70., 130.};
-            _rate = {0., 0.16, -0.03, 0.04};
-            break;
-        default:
-            break;
-    }
-    emit wasModified();
-}
-
 double PathDurationModel::duration(double distance) const {
     double dur = 0;
     double incrDist;
@@ -175,6 +197,7 @@ double PathDurationModel::duration(double distance) const {
         }
         incrDist -= _distance.at(i);
         dur += incrDist * _rate.at(i);
+        i += 1;
     } while (i < _distance.size() && _distance.at(i) < distance);
 
     return dur;

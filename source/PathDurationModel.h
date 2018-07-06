@@ -45,7 +45,16 @@ public:
         RateColumn,
     };
 
+    enum Source {
+        Default,
+        Specified
+    };
+
+    static QStringList sourceList();
+
     void setRegion(AbstractRvtMotion::Region region);
+    void setSource(Source source);
+    Source source() const;
 
     //!@{ Methods for QAbstractTableModel
     virtual int rowCount(const QModelIndex &parent) const;
@@ -72,8 +81,15 @@ public:
 
 signals:
     void wasModified();
+    void sourceChanged(int source);
+
+public slots:
+    void setRegion(int region);
+    void setSource(int source);
 
 private:
+    //! Model source
+    Source _source;
     //! Distance (km)
     QVector<double> _distance;
     //! Duration rate (sec)

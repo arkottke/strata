@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+ ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
 //
@@ -33,7 +33,20 @@
 FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     : AbstractIterativeCalculator(parent)
 {
+    _useSmoothSpectrum = true;
     reset();
+}
+
+bool FrequencyDependentCalculator::useSmoothSpectrum() {
+    return _useSmoothSpectrum;
+}
+
+void FrequencyDependentCalculator::setUseSmoothSpectrum(bool b) {
+    if (_useSmoothSpectrum != b) {
+        _useSmoothSpectrum = b;
+        emit useSmoothSpectrumChanged(b);
+        emit wasModified();
+    }
 }
 
 QString FrequencyDependentCalculator::toHtml() const
@@ -94,52 +107,66 @@ bool FrequencyDependentCalculator::updateSubLayer(
     // Update the sublayer with the representative strain -- FIXME strainAvg doesn't appear to be representative
     _site->subLayers()[index].setStrain(strainMax, strainMax);
 
-    // Calculate model parameter using a least squares fit
-    const int n = _nf - offset;
-    double chisq;
-    gsl_multifit_linear_workspace* work = gsl_multifit_linear_alloc(n, 2);
-    gsl_matrix* model = gsl_matrix_alloc(n, 2);
-    gsl_vector* data = gsl_vector_alloc(n);
-    gsl_vector* params = gsl_vector_alloc(2);
-    gsl_matrix* cov = gsl_matrix_alloc(2, 2);
-
-    for (int i = 0; i < n; ++i) {
-        gsl_matrix_set(model, i, 0, -freq.at(i + offset) / freqAvg);
-        gsl_matrix_set(model, i, 1, -log(freq.at(i + offset) / freqAvg));
-
-        gsl_vector_set(data, i, log(strainFas.at(i + offset) / strainAvg));
-    }        
-
-    gsl_multifit_linear(model, data, params, cov, &chisq, work);
-
-    const double alpha = gsl_vector_get(params, 0);
-    const double beta = gsl_vector_get(params, 1);
-
-    // Clean up
-    gsl_multifit_linear_free(work);
-    gsl_matrix_free(model);
-    gsl_vector_free(data);
-    gsl_vector_free(params);
-    gsl_matrix_free(cov);
-
-    // Compute the complex shear modulus and complex shear-wave velocity
-    // for each soil layer -- these change because the damping and shear
-    // modulus change.
     double shearMod;
     double damping;
     double strain;
     const SubLayer &sl = _site->subLayers().at(index);
 
-    for (int i = 0; i < _nf; ++i) {
-        // Compute the strain from the function
-        // Use a slightly different formulation from Assimaki and Kausel to provide a smooth taper
-        strain = std::min(1.0, exp(-alpha * freq.at(i) / freqAvg)
-                / pow(freq.at(i) / freqAvg, beta));
-        // Scale strain by maximum strain
-        strain *= strainMax;
+    if (_useSmoothSpectrum) {
+        // Calculate model parameter using a least squares fit
+        const int n = _nf - offset;
+        double chisq;
+        gsl_multifit_linear_workspace* work = gsl_multifit_linear_alloc(n, 2);
+        gsl_matrix* model = gsl_matrix_alloc(n, 2);
+        gsl_vector* data = gsl_vector_alloc(n);
+        gsl_vector* params = gsl_vector_alloc(2);
+        gsl_matrix* cov = gsl_matrix_alloc(2, 2);
 
-        sl.interp(strain, &shearMod, &damping);
-        _shearMod[index][i] = calcCompShearMod(shearMod, damping / 100.);
+        for (int i = 0; i < n; ++i) {
+            gsl_matrix_set(model, i, 0, -freq.at(i + offset) / freqAvg);
+            gsl_matrix_set(model, i, 1, -log(freq.at(i + offset) / freqAvg));
+
+            gsl_vector_set(data, i, log(strainFas.at(i + offset) / strainAvg));
+        }
+
+        gsl_multifit_linear(model, data, params, cov, &chisq, work);
+
+        const double alpha = gsl_vector_get(params, 0);
+        const double beta = gsl_vector_get(params, 1);
+
+        // Clean up
+        gsl_multifit_linear_free(work);
+        gsl_matrix_free(model);
+        gsl_vector_free(data);
+        gsl_vector_free(params);
+        gsl_matrix_free(cov);
+
+        // Compute the complex shear modulus and complex shear-wave velocity
+        // for each soil layer -- these change because the damping and shear
+        // modulus change.
+        for (int i = 0; i < _nf; ++i) {
+            // Compute the strain from the function
+            // Use a slightly different formulation from Assimaki and Kausel to provide a smooth taper
+            strain = std::min(1.0, exp(-alpha * freq.at(i) / freqAvg)
+                    / pow(freq.at(i) / freqAvg, beta));
+            // Scale strain by maximum strain
+            strain *= strainMax;
+
+            sl.interp(strain, &shearMod, &damping);
+            _shearMod[index][i] = calcCompShearMod(shearMod, damping / 100.);
+        }
+
+        return true;
+    } else {
+        double maxFas = 0;
+        for (const double &d : strainFas) {
+            maxFas = std::max(d, maxFas);
+        }
+        for (int i = 0; i < _nf; ++i) {
+            strain = strainMax * strainFas.at(i) / maxFas;
+            sl.interp(strain, &shearMod, &damping);
+            _shearMod[index][i] = calcCompShearMod(shearMod, damping / 100.);
+        }
     }
 
     return true;
@@ -180,9 +207,10 @@ QJsonObject FrequencyDependentCalculator::toJson() const
 QDataStream & operator<<(QDataStream & out,
                                  const FrequencyDependentCalculator* fdc)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     out << qobject_cast<const AbstractIterativeCalculator*>(fdc);
+    out << fdc->_useSmoothSpectrum;
 
     return out;
 }
@@ -194,6 +222,9 @@ QDataStream & operator>>(QDataStream & in,
     in >> ver;
 
     in >> qobject_cast<AbstractIterativeCalculator*>(fdc);
+    if (ver > 1) {
+        in >> fdc->_useSmoothSpectrum;
+    }
 
     return in;
 }

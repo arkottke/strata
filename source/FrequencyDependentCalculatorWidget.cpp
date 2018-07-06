@@ -46,6 +46,10 @@ FrequencyDependentCalculatorWidget::FrequencyDependentCalculatorWidget(QWidget *
 
     layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
 
+    // Use smooth Strain FAS shape
+    _useSmoothStrainCheckBox = new QCheckBox(tr("Use smooth strain spectrum"));
+    layout->addRow(_useSmoothStrainCheckBox);
+
     setLayout(layout);
 }
 
@@ -58,10 +62,15 @@ void FrequencyDependentCalculatorWidget::setCalculator(FrequencyDependentCalcula
     _maxIterationsSpinBox->setValue(fdc->maxIterations());
     connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)),
             fdc, SLOT(setMaxIterations(int)));
+
+    _useSmoothStrainCheckBox->setChecked(fdc->useSmoothSpectrum());
+    connect(_useSmoothStrainCheckBox, SIGNAL(toggled(bool)),
+            fdc, SLOT(setUseSmoothSpectrum(bool)));
 }
 
 void FrequencyDependentCalculatorWidget::setReadOnly(bool readOnly)
 {
     _errorToleranceSpinBox->setReadOnly(readOnly);
     _maxIterationsSpinBox->setReadOnly(readOnly);
+    _useSmoothStrainCheckBox->setDisabled(readOnly);
 }

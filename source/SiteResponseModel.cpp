@@ -285,7 +285,6 @@ bool SiteResponseModel::loadJson(const QString &fileName) {
 
     QByteArray savedData = file.readAll();
     QJsonDocument jsonDoc = QJsonDocument::fromJson(savedData);
-
     QJsonObject json = jsonDoc.object();
 
     //

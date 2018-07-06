@@ -46,13 +46,17 @@ private slots:
     void openFrequencyDialog();
 
 protected:
-    void init(bool readOnly);
-    virtual QFormLayout* createParametersLayout(bool readOnly); 
-    virtual QTabWidget* createTabWidget(bool readOnly); 
+    void init();
+    virtual QFormLayout* createParametersLayout();
+    virtual QTabWidget* createTabWidget();
     virtual QWidget* createRSPlotWidget();
     virtual QWidget* createFSPlotWidget();
 
+    bool _readOnly;
+
     AbstractRvtMotion *_motion;
+
+    QTabWidget* _dataTabWidget;
 
     QwtPlot* _rsPlot;
     QwtPlotCurve *_saCurve;

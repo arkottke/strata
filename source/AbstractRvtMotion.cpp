@@ -24,30 +24,38 @@
 #include "CompatibleRvtMotion.h"
 #include "ResponseSpectrum.h"
 #include "RvtMotion.h"
+#include "Serialize.h"
 #include "SourceTheoryRvtMotion.h"
 #include "Units.h"
-#include "VanmarckePeakCalculator.h"
 #include "WangRathjePeakCalculator.h"
 
 #include <QApplication>
 #include <QDebug>
-#include <QFile>
-#include <QJsonArray>
-#include <QJsonValue>
 
 #include <qwt_scale_engine.h>
 #include <qwt_text.h>
 
-AbstractRvtMotion::AbstractRvtMotion(QObject * parent) : AbstractMotion(parent)
+AbstractRvtMotion::AbstractRvtMotion(QObject * parent) 
+    : AbstractMotion(parent),
+    _duration(0),
+    _magnitude(6),
+    _distance(20),
+    _okToContinue(false),
+    _peakCalculator(nullptr),
+    _region(AbstractRvtMotion::Unknown)
 {
     _peakCalculator = new WangRathjePeakCalculator;
-    _duration = 0;
-    _okToContinue = false;
+    setRegion(WUS);
 }
 
 AbstractRvtMotion::~AbstractRvtMotion()
 {
     delete _peakCalculator;
+}
+
+QStringList AbstractRvtMotion::regionList()
+{
+    return {tr("Western NA"), tr("Eastern NA")}; //, tr("Unknown")};
 }
 
 int AbstractRvtMotion::rowCount(const QModelIndex & parent) const
@@ -60,7 +68,6 @@ int AbstractRvtMotion::rowCount(const QModelIndex & parent) const
 int AbstractRvtMotion::columnCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent)
-
     return 2;
 }
 
@@ -103,6 +110,36 @@ QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
+AbstractRvtMotion::Region AbstractRvtMotion::region() const
+{
+    return _region;
+}
+
+void AbstractRvtMotion::setRegion(AbstractRvtMotion::Region region) {
+    if (region != _region) {
+        _region = region;
+        updatePeakCalculatorScenario();
+        emit regionChanged((int)region);
+        emit wasModified();
+    }
+}
+
+void AbstractRvtMotion::setRegion(int region) {
+    setRegion((Region)region);
+
+}
+
+double AbstractRvtMotion::magnitude() const {return _magnitude;}
+
+void AbstractRvtMotion::setMagnitude(double magnitude) {
+    if (fabs(_magnitude - magnitude) > 1E-4) {
+        _magnitude = magnitude;
+        updatePeakCalculatorScenario();
+        emit magnitudeChanged(magnitude);
+        emit wasModified();
+    }
+}
+
 const QVector<double> & AbstractRvtMotion::fourierAcc() const
 {
     return _fourierAcc;
@@ -127,12 +164,13 @@ QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, doub
                                              const QVector<std::complex<double> >& accelTf )
 {
     // Compute the response at each period
+    updatePeakCalculatorScenario();
     QVector<double> sa;
     QVector<double> fourierAcc(_fourierAcc.size());
     for (double oscPeriod : period ) {
         const QVector<std::complex<double> > sdofTf = calcSdofTf(oscPeriod, damping);
         Q_ASSERT(sdofTf.size() == fourierAcc.size());
-
+        
         for (int i = 0; i < fourierAcc.size(); ++i) {
             fourierAcc[i] = abs(sdofTf.at(i)) * _fourierAcc.at(i);
             if (accelTf.size()) {
@@ -200,10 +238,22 @@ double AbstractRvtMotion::duration() const
     return _duration;
 }
 
-QString AbstractRvtMotion::name() const
+const QString& AbstractRvtMotion::nameTemplate() const
 {
     return _name;
 }
+
+QString AbstractRvtMotion::name() const
+{
+    return QString(_name)
+            .replace("$mag",
+                         QString::number(_magnitude, 'f', 1),
+                         Qt::CaseSensitive)
+            .replace("$dist",
+                     QString::number(_distance, 'f', 1),
+                     Qt::CaseSensitive);
+}
+
 
 void AbstractRvtMotion::setName(const QString &name)
 {
@@ -222,7 +272,6 @@ void AbstractRvtMotion::stop()
 bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
 {
     Q_UNUSED(scale);
-
     _name = extractColumn(stream.readLine(), 1);
     _description = extractColumn(stream.readLine(), 1);
 
@@ -262,6 +311,17 @@ double AbstractRvtMotion::calcMax(const QVector<double> &fourierAmps) const
     );
 }
 
+void AbstractRvtMotion::updatePeakCalculatorScenario() {
+    if (BooreThompsonPeakCalculator *btpc =
+            dynamic_cast<BooreThompsonPeakCalculator*>(_peakCalculator)) {
+        if (fabs(_magnitude - btpc->mag()) > 0.01 ||
+            fabs(_distance - btpc->dist()) > 0.01 ||
+                _region != btpc->region()) {
+            btpc->setScenario(_magnitude, _distance, _region);
+        }
+    }
+}
+
 QString AbstractRvtMotion::extractColumn(const QString &line, int column)
 {
     QStringList parts = line.split(",");
@@ -279,12 +339,14 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
 
     AbstractMotion::fromJson(json);
     _duration = json["duration"].toDouble();
+
     _name = json["name"].toString();
 
-    _fourierAcc.clear();
-    for (const QJsonValue &v : json["fourierAcc"].toArray()) {
-        _fourierAcc << v.toDouble();
-    }
+    _magnitude = json["magnitude"].toDouble();
+    _distance = json["distance"].toDouble();
+    setRegion(json["region"].toInt());
+
+    Serialize::toDoubleVector(json["fourierAcc"], _fourierAcc);
 
     endResetModel();
 }
@@ -294,26 +356,26 @@ QJsonObject AbstractRvtMotion::toJson() const
     QJsonObject json = AbstractMotion::toJson();
     json["duration"] = _duration;
     json["name"] = _name;
-
-    QJsonArray fourierAcc;
-    for (double d : _fourierAcc) {
-        fourierAcc << QJsonValue(d);
-    }
-    json["fourierAcc"] = fourierAcc;
-
+    json["region"] = (int)_region;
+    json["magnitude"] = _magnitude;
+    json["distance"] = _distance;
+    json["fourierAcc"] = Serialize::toJsonArray(_fourierAcc);
     return json;
 }
 
 
 QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
 {
-    out << (quint8)2;
+    out << (quint8)3;
 
     out << qobject_cast<const AbstractMotion*>(arm);
 
     out << arm->_fourierAcc
         << arm->_duration
-        << arm->_name;
+        << arm->_name
+        << (int)arm->_region
+        << arm->_magnitude
+        << arm->_distance;
 
     return out;
 }
@@ -322,7 +384,6 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
 {
     quint8 ver;
     in >> ver;
-
     in >> qobject_cast<AbstractMotion*>(arm);
 
     arm->beginResetModel();
@@ -334,8 +395,29 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
     in >> arm->_fourierAcc
        >> arm->_duration
        >> arm->_name;
+
+    if (ver > 1) {
+        int region;
+        in >> region
+            >> arm->_magnitude
+            >> arm->_distance;
+        arm->setRegion(region);
+    }
     arm->endResetModel();
     return in;
+}
+
+double AbstractRvtMotion::distance() const {
+    return _distance;
+}
+
+void AbstractRvtMotion::setDistance(double distance) {
+    if (fabs(_distance - distance) > 1E-4) {
+        _distance = distance;
+        updatePeakCalculatorScenario();
+        emit distanceChanged(distance);
+        emit wasModified();
+    }
 }
 
 // FIXME: Might be out of date.
@@ -354,7 +436,7 @@ AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double sca
 
     QString className = line.split(',').at(1);
 
-    AbstractRvtMotion *rvtMotion = 0;
+    AbstractRvtMotion *rvtMotion = nullptr;
     if (className == "RvtMotion") {
         rvtMotion = new RvtMotion;
     } else if (className == "CompatibleRvtMotion") {

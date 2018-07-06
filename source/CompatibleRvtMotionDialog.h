@@ -22,39 +22,24 @@
 #ifndef COMPATIBLE_RVT_MOTION_DIALOG_H
 #define COMPATIBLE_RVT_MOTION_DIALOG_H
 
-#include <QDialog>
-
-#include <qwt_plot_curve.h>
+#include "AbstractRvtMotionDialog.h"
 
 class MyTableView;
 class CompatibleRvtMotion;
 
-class CompatibleRvtMotionDialog : public QDialog
+class CompatibleRvtMotionDialog : public AbstractRvtMotionDialog
 {
-    Q_OBJECT
+Q_OBJECT
 public:
     explicit CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly,
                                        QWidget *parent = nullptr);
 
-signals:
+protected:
+    virtual QFormLayout* createParametersLayout();
+    virtual QTabWidget* createTabWidget();
 
-public slots:
-    void calculate();
-    void tryAccept();
-
-protected slots:
-    void openFrequencyDialog();
-
-private:
-
-    CompatibleRvtMotion *_motion;
-
-    QwtPlotCurve *_fasCurve;
-    QwtPlotCurve *_saCurve;
+    MyTableView *_targetSaTableView;
     QwtPlotCurve *_targetSaCurve;
-
-    MyTableView *_fasTableView;
-    MyTableView *_rsTableView;
 };
 
 #endif // COMPATIBLE_RVT_MOTION_DIALOG_H

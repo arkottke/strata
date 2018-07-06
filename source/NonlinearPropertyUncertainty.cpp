@@ -48,8 +48,9 @@ void NonlinearPropertyUncertainty::vary(NonlinearPropertyRandomizer::Model model
             // While this is referred to as the SPID approach, it is best described
             // in PNNL (2014) by Coppersmith et al.
 
-            // Translate the standard deviation to the transformed space. Instead of contraining the standard deviation
-            // at a specific strain, the standard deviation is constrained at G/Gmax of 0.5.
+            // Translate the standard deviation to the transformed space.
+            // Instead of contraining the standard deviation at a specific
+            // strain, the standard deviation is constrained at G/Gmax of 0.5.
             // This is modified from Equation 9.44 of PNNL (2014).
             const double f_std = _lnStdev * (1 / (1 - 0.5));
             double f_avg;

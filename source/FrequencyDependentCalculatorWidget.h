@@ -24,6 +24,7 @@
 
 #include <QWidget>
 
+#include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 
@@ -43,6 +44,7 @@ public slots:
 protected:
     QDoubleSpinBox* _errorToleranceSpinBox;
     QSpinBox* _maxIterationsSpinBox;
+    QCheckBox* _useSmoothStrainCheckBox;
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_WIDGET_H

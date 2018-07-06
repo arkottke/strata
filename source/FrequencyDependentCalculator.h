@@ -44,9 +44,19 @@ public:
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
 
+    bool useSmoothSpectrum();
+
+signals:
+    void useSmoothSpectrumChanged(bool b);
+
+public slots:
+    void setUseSmoothSpectrum(bool b);
+
 protected:
     virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf);
     virtual void estimateInitialStrains();
+
+    bool _useSmoothSpectrum;
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_H

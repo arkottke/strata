@@ -19,8 +19,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SERIALIZER_H_
-#define SERIALIZER_H_
+#ifndef SERIALIZE_H_
+#define SERIALIZE_H_
 
 #include <QList>
 #include <QVector>
