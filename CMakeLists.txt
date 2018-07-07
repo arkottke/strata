@@ -70,6 +70,8 @@ if(MSVC)
     add_definitions(-DGSL_DLL -D_USE_MATH_DEFINES)
     # Optimize for speed and link dynamically "-MD"
     set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+    # Dynamic linking
+    set(CMAKE_CXX_FLAGS_RELEASE "/MD")
 else()
     # Add optimization for GCC
     # SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
