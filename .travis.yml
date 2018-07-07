@@ -45,14 +45,13 @@ script:
   - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
   - echo $PROJECT_VERSION
   - make -j$(nproc)
-  - make install
+  - cmake --build . --target install
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
       chmod a+x linuxdeployqt*.AppImage
       ldd dist/usr/bin/strata
-      "./linuxdeployqt-*.AppImage dist/strata.desktop -bundle-non-qt-libs -no-translations"
-      "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage"
+      "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage -no-translations"
       find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
     fi
 after_success:
