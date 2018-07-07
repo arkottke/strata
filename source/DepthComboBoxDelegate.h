@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@ class DepthComboBoxDelegate : public QItemDelegate
     Q_OBJECT
 
     public:
-        DepthComboBoxDelegate( QObject * parent = 0 );
+    DepthComboBoxDelegate(QObject *parent = nullptr);
 
         QWidget * createEditor ( QWidget *parent, const QStyleOptionViewItem
                 &option, const QModelIndex &index ) const;

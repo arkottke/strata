@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -70,22 +70,22 @@ protected:
     QwtPlotCurve* plotCurve(QwtPlot* const plot, const QVector<double> & data, Qt::PenStyle penStyle) const;
 
     //! Parent AbstractOutput
-    AbstractOutput* m_output;
+    AbstractOutput* _output;
 
     //! Assumed distribution
-    Distribution m_distribution;
+    Distribution _distribution;
 
     //! Average value
-    QVector<double> m_average;
+    QVector<double> _average;
 
     //! Standard deviation of the mode
-    QVector<double> m_stdev;
+    QVector<double> _stdev;
 
     //! Median plus one standard deviation
-    QVector<double> m_plusStd;
+    QVector<double> _plusStd;
 
     //! Median minus one standard deviation
-    QVector<double> m_minusStd;
+    QVector<double> _minusStd;
 };
 
 #endif // OUTPUTSTATISTICS_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,11 +37,11 @@
 #include <qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
-    : QAbstractTableModel(catalog), m_catalog(catalog), m_statistics(0), m_interp(0), m_offset(0)
+    : QAbstractTableModel(catalog), _catalog(catalog), _statistics(0), _interp(0), _offset(0)
 {
-    m_exportEnabled = false;
-    m_motionIndex = 0;
-    m_maxSize = 0;
+    _exportEnabled = false;
+    _motionIndex = 0;
+    _maxSize = 0;
 }
 
 int AbstractOutput::rowCount(const QModelIndex & parent) const
@@ -49,9 +49,9 @@ int AbstractOutput::rowCount(const QModelIndex & parent) const
     Q_UNUSED(parent);
 
     if (needsTime()) {
-        return ref(m_motionIndex).size();
+        return ref(_motionIndex).size();
     } else {
-        return m_maxSize - m_offset;
+        return _maxSize - _offset;
     }
 }
 
@@ -62,7 +62,7 @@ int AbstractOutput::columnCount(const QModelIndex & parent) const
     int count = needsTime() ?
                 (1 + siteCount()) : (1 + siteCount() * motionCount());
 
-    if (m_statistics && m_statistics->hasEnoughData())
+    if (_statistics && _statistics->hasEnoughData())
         count += 2;
 
     return count;
@@ -79,17 +79,17 @@ QVariant AbstractOutput::data(const QModelIndex & index, int role) const
     if (role==Qt::DisplayRole) {
         if (index.column() == 0) {
             return ref(motion).at(index.row());
-        } else if (m_statistics && m_statistics->hasEnoughData()
+        } else if (_statistics && _statistics->hasEnoughData()
             && index.column() == columnCount() - 2) {
-            return index.row() < m_statistics->average().size()?
-                    QVariant(m_statistics->average().at(index.row())) : QVariant();
-        } else if (m_statistics && m_statistics->hasEnoughData()
+            return index.row() < _statistics->average().size()?
+                    QVariant(_statistics->average().at(index.row())) : QVariant();
+        } else if (_statistics && _statistics->hasEnoughData()
             && index.column() == columnCount() - 1) {
-            return index.row() < m_statistics->stdev().size() ?
-                    QVariant(m_statistics->stdev().at(index.row())) : QVariant();
+            return index.row() < _statistics->stdev().size() ?
+                    QVariant(_statistics->stdev().at(index.row())) : QVariant();
         } else {
-            return index.row() < m_data.at(site).at(motion).size() ?
-                    QVariant(m_data.at(site).at(motion).at(index.row())) : QVariant("NaN");
+            return index.row() < _data.at(site).at(motion).size() ?
+                    QVariant(_data.at(site).at(motion).at(index.row())) : QVariant("NaN");
         }
     }
 
@@ -106,12 +106,12 @@ QVariant AbstractOutput::headerData(int section, Qt::Orientation orientation, in
         if (section == 0) {
             return (curveType() == Yfx) ?
                     xLabel() : yLabel();
-        } else if (m_statistics && m_statistics->hasEnoughData()
+        } else if (_statistics && _statistics->hasEnoughData()
             && section == columnCount() - 2) {
-            return m_statistics->averageLabel();
-        } else if (m_statistics && m_statistics->hasEnoughData()
+            return _statistics->averageLabel();
+        } else if (_statistics && _statistics->hasEnoughData()
             && section == columnCount() - 1) {
-            return m_statistics->stdevLabel();
+            return _statistics->stdevLabel();
         } else {
             int site, motion;
             columnToSiteMotion(section, &site, &motion);
@@ -119,18 +119,18 @@ QVariant AbstractOutput::headerData(int section, Qt::Orientation orientation, in
             if (motionIndependent()) {
                 return QString("S-%1%2")
                             .arg(site + 1) // Start at 1
-                            .arg(m_catalog->siteEnabled(site) ?
+                            .arg(_catalog->siteEnabled(site) ?
                                  "" : " (disabled)");
             } else if (siteIndependent()) {
                 return QString("M-%1%2")
-                            .arg(m_catalog->motionNameAt(motion))
-                            .arg(m_catalog->motionEnabled(motion) ?
+                            .arg(_catalog->motionNameAt(motion))
+                            .arg(_catalog->motionEnabled(motion) ?
                                  "" : " (disabled)");
             } else {
                 return QString("S-%1-M-%2%3")
                         .arg(site + 1) // Start at 1
-                        .arg(m_catalog->motionNameAt(motion))
-                        .arg(m_catalog->enabledAt(section - 1) ?
+                        .arg(_catalog->motionNameAt(motion))
+                        .arg(_catalog->enabledAt(section - 1) ?
                              "" : " (disabled)");
             }
         }
@@ -148,30 +148,30 @@ void AbstractOutput::addData(int motion, AbstractCalculator* const calculator)
 
     extract(calculator, ref, data);
 
-    if (m_interp)
-        data = m_interp->calculate(ref, data, this->ref(motion));
+    if (_interp)
+        data = _interp->calculate(ref, data, this->ref(motion));
 
     if (motion == 0)
-        m_data << QList<QVector<double > >();
+        _data << QList<QVector<double > >();
 
     if (!motionIndependent() || motion == 0)
         // Save the data for the first motion or for motion depedent results
-        m_data.last() << data;
+        _data.last() << data;
 
-    if (m_maxSize < data.size())
-        m_maxSize = data.size();
+    if (_maxSize < data.size())
+        _maxSize = data.size();
 }
 
 void AbstractOutput::removeLastSite()
 {
-    if (m_data.size())
-        m_data.takeLast();
+    if (_data.size())
+        _data.takeLast();
 }
 
 void AbstractOutput::finalize()
 {
-    if (m_statistics)
-        m_statistics->calculate();
+    if (_statistics)
+        _statistics->calculate();
 }
 
 void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves) const
@@ -191,19 +191,19 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
         for (int j = 0; j < motionCount(); ++j) {
 
             const QVector<double> & x = (curveType() == Yfx) ?
-                                        ref(j) : m_data.at(i).at(j);
+                                        ref(j) : _data.at(i).at(j);
 
             const QVector<double> & y = (curveType() == Yfx) ?
-                                        m_data.at(i).at(j) : ref(j);
+                                        _data.at(i).at(j) : ref(j);
 
-            const int n = m_data.at(i).at(j).size();
+            const int n = _data.at(i).at(j).size();
 
             QwtPlotCurve* curve = new QwtPlotCurve;
 
             curve->setSamples(
-                    x.data() + m_offset,
-                    y.data() + m_offset,
-                    n - m_offset);
+                    x.data() + _offset,
+                    y.data() + _offset,
+                    n - _offset);
             curve->setPen(QPen(Qt::darkGray));
             curve->setZ(zOrder());
 
@@ -217,18 +217,18 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
         }
     }
 
-    if (m_statistics)
-        m_statistics->plot(qwtPlot);
+    if (_statistics)
+        _statistics->plot(qwtPlot);
 
     qwtPlot->replot();
 }
 
 void AbstractOutput::exportData(const QString &path, const QString &separator, const QString &prefix)
 {
-    const int oldMotionIndex = m_motionIndex;
+    const int oldMotionIndex = _motionIndex;
 
     for (int m = 0; m < motionCount(); ++m) { 
-        m_motionIndex = m;
+        _motionIndex = m;
         QFile file(QDir(path).absoluteFilePath(prefix + fileName(m) + ".csv"));
 
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -239,7 +239,7 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
 
         // Header data
         out << "# Strata Output: " << name() << endl;
-        out << "# Project:" << m_catalog->title() << endl;
+        out << "# Project:" << _catalog->title() << endl;
 
         // Column names
         out << "# ";        
@@ -268,7 +268,7 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
             break;
     }
 
-    m_motionIndex = oldMotionIndex;
+    _motionIndex = oldMotionIndex;
 }
 
 void AbstractOutput::intToSiteMotion(int i, int* site, int* motion) const
@@ -290,42 +290,42 @@ int AbstractOutput::intToMotion(int i) const
 void AbstractOutput::clear()
 {
     emit beginResetModel();
-    m_data.clear();
-    m_motionIndex = 0;
-    m_maxSize = 0;    
+    _data.clear();
+    _motionIndex = 0;
+    _maxSize = 0;    
     emit endResetModel();
 }
 
 bool AbstractOutput::seriesEnabled(int site, int motion)
 {
-    return m_catalog->enabledAt(site, motion);
+    return _catalog->enabledAt(site, motion);
 }
 
 bool AbstractOutput::exportEnabled() const
 {
-    return m_exportEnabled;
+    return _exportEnabled;
 }
 
 void AbstractOutput::setExportEnabled(bool exportEnabled)
 {
-    if ( m_exportEnabled != exportEnabled ) {
-        m_exportEnabled = exportEnabled;
+    if ( _exportEnabled != exportEnabled ) {
+        _exportEnabled = exportEnabled;
 
-        emit exportEnabledChanged(m_exportEnabled);
+        emit exportEnabledChanged(_exportEnabled);
         emit wasModified();
     }
 }
 
 int AbstractOutput::motionIndex() const
 {
-    return m_motionIndex;
+    return _motionIndex;
 }
 
 void AbstractOutput::setMotionIndex(int motionIndex)
 {
     Q_ASSERT(motionIndex < motionCount());
     beginResetModel();
-    m_motionIndex = motionIndex;
+    _motionIndex = motionIndex;
 
     // Reset the table model
     endResetModel();
@@ -386,15 +386,15 @@ int AbstractOutput::zOrder()
 
 int AbstractOutput::offset() const
 {
-    return m_offset;
+    return _offset;
 }
 
 const QVector<double>& AbstractOutput::data(int site, int motion) const
 {
-    Q_ASSERT(site < m_data.size());
-    Q_ASSERT(motion < m_data.at(site).size());
+    Q_ASSERT(site < _data.size());
+    Q_ASSERT(motion < _data.at(site).size());
 
-    return m_data.at(site).at(motion);
+    return _data.at(site).at(motion);
 }
 
 bool AbstractOutput::siteIndependent() const
@@ -409,26 +409,26 @@ bool AbstractOutput::motionIndependent() const
 
 int AbstractOutput::siteCount() const
 {
-    return siteIndependent() ? 1 : m_catalog->siteCount();
+    return siteIndependent() ? 1 : _catalog->siteCount();
 }
 
 int AbstractOutput::motionCount() const
 {
-    return motionIndependent() ? 1 : m_catalog->motionCount();
+    return motionIndependent() ? 1 : _catalog->motionCount();
 }
 
 void AbstractOutput::columnToSiteMotion(const int column, int *site, int *motion) const
 {
     *site = -1;
-    *motion = m_motionIndex;
+    *motion = _motionIndex;
     const int end = columnCount() -
-                    ((m_statistics && m_statistics->hasEnoughData()) ? 2 : 0);
+                    ((_statistics && _statistics->hasEnoughData()) ? 2 : 0);
 
     if (0 < column && column < end) {
         // Only find values of the site and motion indices for the data columns (column != 0)
         if (needsTime()) {
             *site = column - 1;
-            *motion = m_motionIndex;
+            *motion = _motionIndex;
         } else {
             intToSiteMotion(column - 1, site, motion);
         }
@@ -447,28 +447,28 @@ const QString AbstractOutput::suffix() const
 
 void AbstractOutput::fromJson(const QJsonObject &json)
 {
-    m_exportEnabled = json["exportEnabled"].toBool();
+    _exportEnabled = json["exportEnabled"].toBool();
 
     QJsonArray data = json["data"].toArray();
-    foreach (const QJsonValue &site, data) {
+    for (const QJsonValue &site : data) {
         QList<QVector<double> > l;
-        foreach (const QJsonValue &motion, site.toArray()) {
+        for (const QJsonValue &motion : site.toArray()) {
             QVector<double> v;
-            foreach (const QJsonValue &qjv, motion.toArray()) {
+            for (const QJsonValue &qjv : motion.toArray()) {
                 v << qjv.toDouble();
             }
             l << v;
         }
 
         if (l.size() > 0)
-            m_data << l;
+            _data << l;
     }
 
-    m_maxSize = 0;
-    foreach (const QList<QVector<double> > &l, m_data) {
-        foreach (const QVector<double> &v, l) {
-            if (m_maxSize < v.size())
-                m_maxSize = v.size();
+    _maxSize = 0;
+    for (const QList<QVector<double> > &l : _data) {
+        for (const QVector<double> &v : l) {
+            if (_maxSize < v.size())
+                _maxSize = v.size();
         }
     }
 }
@@ -477,14 +477,14 @@ QJsonObject AbstractOutput::toJson() const
 {
     QJsonObject json;
     json["className"] = metaObject()->className();
-    json["exportEnabled"] = m_exportEnabled;
+    json["exportEnabled"] = _exportEnabled;
 
     QJsonArray data;
-    foreach(const QList<QVector<double> > &l, m_data) {
+    for (const QList<QVector<double> > &l : _data) {
         QJsonArray site;
-        foreach(const QVector<double> &v, l) {
+        for (const QVector<double> &v : l) {
             QJsonArray motion;
-            foreach(const double &d, v) {
+            for (const double &d : v) {
                 motion << QJsonValue(d);
             }
             // FIXME: Need the QJV?
@@ -502,7 +502,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)
 {
     out << (quint8)1;
 
-    out << ao->m_exportEnabled << ao->m_data;
+    out << ao->_exportEnabled << ao->_data;
 
     return out;
 }
@@ -512,13 +512,13 @@ QDataStream & operator>> (QDataStream & in, AbstractOutput* ao)
     quint8 ver;
     in >> ver;
 
-    in >> ao->m_exportEnabled >> ao->m_data;
+    in >> ao->_exportEnabled >> ao->_data;
 
     // Find the maximum length of all data vectors
-    foreach (const QList<QVector<double> > &l, ao->m_data) {
-        foreach (const QVector<double> &v, l) {
-            if (ao->m_maxSize < v.size())
-                ao->m_maxSize = v.size();
+    for (const QList<QVector<double> > &l : ao->_data) {
+        for (const QVector<double> &v : l) {
+            if (ao->_maxSize < v.size())
+                ao->_maxSize = v.size();
         }
     }
 

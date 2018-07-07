@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -78,18 +78,18 @@ protected slots:
 
 private:
     //! Enable variation of the profile
-    bool m_enabled;
+    bool _enabled;
 
     //! Model for the shear-wave velocity variation
-    VelocityVariation* m_velocityVariation;
+    VelocityVariation* _velocityVariation;
 
     //! Model for layering thickness
-    LayerThicknessVariation* m_layerThicknessVariation;
+    LayerThicknessVariation* _layerThicknessVariation;
 
     //! Variation of the bedrock layer
-    BedrockDepthVariation* m_bedrockDepthVariation;
+    BedrockDepthVariation* _bedrockDepthVariation;
 
     //! Site profile
-    SoilProfile* m_siteProfile;
+    SoilProfile* _siteProfile;
 };
 #endif

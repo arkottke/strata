@@ -15,30 +15,30 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "LayerThicknessVariation.h"
 
-#include <QDataStream>
-
 #include "ProfileRandomizer.h"
 #include "Units.h"
+
+#include <QDataStream>
+
+#include <gsl/gsl_randist.h>
 
 #include <cfloat>
 #include <cmath>
 
-#include <gsl/gsl_randist.h>
-
 LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
-    m_rng(rng), m_profileRandomizer(profileRandomizer)
+    _rng(rng), _profileRandomizer(profileRandomizer)
 {
-    connect(m_profileRandomizer, SIGNAL(enabledChanged(bool)),
+    connect(_profileRandomizer, SIGNAL(enabledChanged(bool)),
             this, SLOT(updateEnabled()));
 
-    m_enabled = false;
-    m_model = Custom;
+    _enabled = false;
+    _model = Custom;
     setModel(Default);
 }
 
@@ -54,13 +54,13 @@ QStringList LayerThicknessVariation::modelList()
 
 bool LayerThicknessVariation::enabled() const
 {
-    return m_profileRandomizer->enabled() && m_enabled;
+    return _profileRandomizer->enabled() && _enabled;
 }
 
 void LayerThicknessVariation::setEnabled(bool enabled)
 {
-    if (m_enabled != enabled) {
-        m_enabled = enabled;
+    if (_enabled != enabled) {
+        _enabled = enabled;
 
         emit enabledChanged(this->enabled());
         emit wasModified();
@@ -74,15 +74,15 @@ void LayerThicknessVariation::updateEnabled()
 
 LayerThicknessVariation::Model LayerThicknessVariation::model()
 {
-    return m_model;
+    return _model;
 }
 
 void LayerThicknessVariation::setModel(LayerThicknessVariation::Model model)
 {
-    if (m_model != model) {
-        m_model = model;
+    if (_model != model) {
+        _model = model;
 
-        switch (m_model) {
+        switch (_model) {
         case Default:
             setCoeff(1.98);
             setInitial(10.86);
@@ -92,7 +92,7 @@ void LayerThicknessVariation::setModel(LayerThicknessVariation::Model model)
             break;
         }
 
-        emit modelChanged(m_model);
+        emit modelChanged(_model);
         emit customEnabledChanged(customEnabled());
         emit wasModified();
     }
@@ -105,50 +105,50 @@ void LayerThicknessVariation::setModel(int model)
 
 bool LayerThicknessVariation::customEnabled() const
 {
-    return m_model == Custom;
+    return _model == Custom;
 }
 
 double LayerThicknessVariation::coeff() const
 {
-    return m_coeff;
+    return _coeff;
 }
 
 void LayerThicknessVariation::setCoeff(double coeff)
 {
-    if (fabs(m_coeff - coeff) > DBL_EPSILON) {
-        m_coeff = coeff;
+    if (fabs(_coeff - coeff) > DBL_EPSILON) {
+        _coeff = coeff;
 
-        emit coeffChanged(m_coeff);
+        emit coeffChanged(_coeff);
         emit wasModified();
     }
 }
 
 double LayerThicknessVariation::initial() const
 {
-    return m_initial;
+    return _initial;
 }
 
 void LayerThicknessVariation::setInitial(double initial)
 {
-    if (fabs(m_initial - initial) > DBL_EPSILON) {
-        m_initial = initial;
+    if (fabs(_initial - initial) > DBL_EPSILON) {
+        _initial = initial;
 
-        emit initialChanged(m_initial);
+        emit initialChanged(_initial);
         emit wasModified();
     }
 }
 
 double LayerThicknessVariation::exponent() const
 {
-    return m_exponent;
+    return _exponent;
 }
 
 void LayerThicknessVariation::setExponent(double exponent)
 {
-    if (fabs(m_exponent - exponent) > DBL_EPSILON) {
-        m_exponent = exponent;
+    if (fabs(_exponent - exponent) > DBL_EPSILON) {
+        _exponent = exponent;
 
-        emit exponentChanged(m_exponent);
+        emit exponentChanged(_exponent);
         emit wasModified();
     }
 }
@@ -184,15 +184,15 @@ QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
 
     while ( prevDepth < depthToBedrock ) {
         // Add a random increment
-        sum += gsl_ran_exponential(m_rng, 1.0);
+        sum += gsl_ran_exponential(_rng, 1.0);
 
         // Convert between x and depth using the inverse of \Lambda(t)
         double depth =
-            pow((m_exponent * sum) / m_coeff
-                    + sum / m_coeff
-                    + pow(m_initial, m_exponent + 1)
-                    , 1 / (m_exponent + 1)
-               ) - m_initial;
+            pow((_exponent * sum) / _coeff
+                    + sum / _coeff
+                    + pow(_initial, _exponent + 1)
+                    , 1 / (_exponent + 1)
+               ) - _initial;
 
         // Add the thickness
         thicknesses << depth - prevDepth;
@@ -213,26 +213,26 @@ QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
 
 void LayerThicknessVariation::fromJson(const QJsonObject &json)
 {
-    m_enabled = json["enabled"].toBool();
+    _enabled = json["enabled"].toBool();
     int model = json["model"].toInt();
     setModel(model);
-    if (m_model == LayerThicknessVariation::Custom)
+    if (_model == LayerThicknessVariation::Custom)
     {
-        m_coeff = json["coeff"].toDouble();
-        m_initial = json["initial"].toDouble();
-        m_exponent = json["exponent"].toDouble();
+        _coeff = json["coeff"].toDouble();
+        _initial = json["initial"].toDouble();
+        _exponent = json["exponent"].toDouble();
     }
 }
 
 QJsonObject LayerThicknessVariation::toJson() const
 {
     QJsonObject json;
-    json["enabled"] = m_enabled;
-    json["model"] = (int) m_model;
-    if (m_model == LayerThicknessVariation::Custom) {
-        json["coeff"] = m_coeff;
-        json["initial"] = m_initial;
-        json["exponent"] = m_exponent;
+    json["enabled"] = _enabled;
+    json["model"] = (int) _model;
+    if (_model == LayerThicknessVariation::Custom) {
+        json["coeff"] = _coeff;
+        json["initial"] = _initial;
+        json["exponent"] = _exponent;
     }
     return json;
 }
@@ -241,13 +241,13 @@ QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)
 {
     out << (quint8)1;
 
-    out << ltv->m_enabled
-        << (int)ltv->m_model;
+    out << ltv->_enabled
+        << (int)ltv->_model;
 
-    if (ltv->m_model == LayerThicknessVariation::Custom) {
-        out << ltv->m_coeff
-            << ltv->m_initial
-            << ltv->m_exponent;
+    if (ltv->_model == LayerThicknessVariation::Custom) {
+        out << ltv->_coeff
+            << ltv->_initial
+            << ltv->_exponent;
     }
 
     return out;
@@ -260,14 +260,14 @@ QDataStream & operator>> (QDataStream & in, LayerThicknessVariation* ltv)
 
     int model;
 
-    in >> ltv->m_enabled
+    in >> ltv->_enabled
             >> model;
 
     ltv->setModel(model);
-    if (ltv->m_model == LayerThicknessVariation::Custom) {
-        in >> ltv->m_coeff
-           >> ltv->m_initial
-           >> ltv->m_exponent;
+    if (ltv->_model == LayerThicknessVariation::Custom) {
+        in >> ltv->_coeff
+           >> ltv->_initial
+           >> ltv->_exponent;
     }
 
     return in;

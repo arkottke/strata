@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ class SoilTypeOutputTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    SoilTypeOutputTableModel( QList<SoilType*> & soilTypes, QObject * parent = 0 );
+    SoilTypeOutputTableModel(QList<SoilType *> &soilTypes, QObject *parent = nullptr);
 
     int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
     int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
@@ -44,6 +44,6 @@ public:
     Qt::ItemFlags flags ( const QModelIndex &index ) const;
 
 private:
-    QList<SoilType*> & m_soilTypes;
+    QList<SoilType*> & _soilTypes;
 };
 #endif

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +39,7 @@ class TextLog : public QObject
     friend QDataStream & operator>> (QDataStream & in, TextLog* tl);
 
     public:
-        TextLog( QObject * parent = 0 );
+    explicit TextLog(QObject *parent = nullptr);
         
         //! Level of detail of the logging
         enum Level {
@@ -76,10 +76,10 @@ class TextLog : public QObject
 
     private:
         //! Level of detail in the log
-        Level m_level;
+        Level _level;
 
         //! Text
-        QStringList m_text;
+        QStringList _text;
 };
         
 TextLog & operator<< ( TextLog & log, const QString & string );

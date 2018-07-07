@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@
 AccelTransferFunctionOutput::AccelTransferFunctionOutput(OutputCatalog* catalog)
     : AbstractRatioOutput(catalog)
 {
-    m_interp = new LinearOutputInterpolater;
+    _interp = new LinearOutputInterpolater;
 }
 
 bool AccelTransferFunctionOutput::needsFreq() const
@@ -71,29 +71,29 @@ const QString AccelTransferFunctionOutput::xLabel() const
 const QString AccelTransferFunctionOutput::yLabel() const
 {
     return tr("FAS (accel) at %1 / FAS (accel) at %2")
-            .arg(locationToString(m_outDepth))
-            .arg(locationToString(m_inDepth));
+            .arg(locationToString(_outDepth))
+            .arg(locationToString(_inDepth));
 }
 
 const QVector<double>& AccelTransferFunctionOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
 
-    return m_catalog->frequency()->data();
+    return _catalog->frequency()->data();
 }
 
 void AccelTransferFunctionOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
-    const Location inLoc = calculator->site()->depthToLocation(m_inDepth);
-    const Location outLoc = calculator->site()->depthToLocation(m_outDepth);
+    const Location inLoc = calculator->site()->depthToLocation(_inDepth);
+    const Location outLoc = calculator->site()->depthToLocation(_outDepth);
 
     ref = calculator->motion()->freq();
     QVector<std::complex<double> > tf = calculator->calcAccelTf(
-            inLoc, m_inType, outLoc, m_outType);
+            inLoc, _inType, outLoc, _outType);
 
     data.clear();
 
-    foreach (std::complex<double> c, tf)
+    for (const std::complex<double> &c : tf)
         data << abs(c);
 }

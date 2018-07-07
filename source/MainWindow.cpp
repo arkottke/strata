@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,17 +56,17 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-MainWindow::MainWindow(QMainWindow * parent) 
-    : QMainWindow(parent), m_model(0)
+MainWindow::MainWindow(QMainWindow * parent)
+        : QMainWindow(parent), _model(nullptr)
 {
     // Initialize the help dialog, but keep it hidden
-    m_helpDialog = new HelpDialog(this);
-    m_confiningStressDialog = 0;
+    _helpDialog = new HelpDialog(this);
+    _confiningStressDialog = nullptr;
 
-    m_printer = new QPrinter;
+    _printer = new QPrinter;
     
     // Create the settings
-    m_settings = new QSettings(this);
+    _settings = new QSettings(this);
 
     // Setup up the mainwindow
     createActions();
@@ -79,113 +79,113 @@ MainWindow::MainWindow(QMainWindow * parent)
 
 MainWindow::~MainWindow()
 {
-    delete m_printer;
+    delete _printer;
 }
 
 void MainWindow::createActions()
 {
     // Read-only
-    m_readOnlyAction = new QAction(QIcon(":/images/edit-delete.svg"), tr("Delete results"), this);
-    m_readOnlyAction->setShortcut(tr("F2"));
-    m_readOnlyAction->setEnabled(false);
+    _readOnlyAction = new QAction(QIcon(":/images/edit-delete.svg"), tr("Delete results"), this);
+    _readOnlyAction->setShortcut(tr("F2"));
+    _readOnlyAction->setEnabled(false);
 
 
     // New
-    m_newAction = new QAction(QIcon(":/images/document-new.svg"), tr("&New"),this);
-    m_newAction->setShortcut(tr("Ctrl+n"));
-    connect(m_newAction, SIGNAL(triggered()), this, SLOT(newModel()));
+    _newAction = new QAction(QIcon(":/images/document-new.svg"), tr("&New"),this);
+    _newAction->setShortcut(tr("Ctrl+n"));
+    connect(_newAction, SIGNAL(triggered()), this, SLOT(newModel()));
 
     // Open
-    m_openAction = new QAction(QIcon(":/images/document-open.svg"), tr("&Open..."),this);
-    m_openAction->setShortcut(tr("Ctrl+o"));
-    connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
+    _openAction = new QAction(QIcon(":/images/document-open.svg"), tr("&Open..."),this);
+    _openAction->setShortcut(tr("Ctrl+o"));
+    connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
     // Save
-    m_saveAction = new QAction(QIcon(":/images/document-save.svg"), tr("&Save"),this);
-    m_saveAction->setShortcut(tr("Ctrl+s"));
-    connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+    _saveAction = new QAction(QIcon(":/images/document-save.svg"), tr("&Save"),this);
+    _saveAction->setShortcut(tr("Ctrl+s"));
+    connect(_saveAction, SIGNAL(triggered()), this, SLOT(save()));
     // Save As
-    m_saveAsAction = new QAction(QIcon(":/images/document-save-as.svg"), tr("Save &As..."),this);
-    connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+    _saveAsAction = new QAction(QIcon(":/images/document-save-as.svg"), tr("Save &As..."),this);
+    connect(_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
     
     // Export the data to text file
-    m_exportAction = new QAction(QIcon(":/images/document-export.svg"), tr("&Export..."), this);
-    m_exportAction->setEnabled(false);
-    connect(m_exportAction, SIGNAL(triggered()), this, SLOT(exportData()));
+    _exportAction = new QAction(QIcon(":/images/document-export.svg"), tr("&Export..."), this);
+    _exportAction->setEnabled(false);
+    connect(_exportAction, SIGNAL(triggered()), this, SLOT(exportData()));
     
     // Print
-    m_printAction = new QAction(QIcon(":/images/document-print.svg"), tr("&Print..."), this);
-    m_printAction->setShortcut(tr("Ctrl+p"));
-    connect(m_printAction, SIGNAL(triggered()), this, SLOT(print()));
+    _printAction = new QAction(QIcon(":/images/document-print.svg"), tr("&Print..."), this);
+    _printAction->setShortcut(tr("Ctrl+p"));
+    connect(_printAction, SIGNAL(triggered()), this, SLOT(print()));
     
     // Print to pdf
-    m_printToPdfAction = new QAction(tr("&Print to PDF..."), this);
-    connect(m_printToPdfAction, SIGNAL(triggered()), this, SLOT(printToPdf()));
+    _printToPdfAction = new QAction(tr("&Print to PDF..."), this);
+    connect(_printToPdfAction, SIGNAL(triggered()), this, SLOT(printToPdf()));
 
     // Exit
-    m_exitAction = new QAction(tr("E&xit"),this);
-    connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
+    _exitAction = new QAction(tr("E&xit"),this);
+    connect(_exitAction, SIGNAL(triggered()), this, SLOT(close()));
     
     // Non Linear Curve Database
-    m_nlCurveDatabaseAction = new QAction(QIcon(":/images/system-file-manager.svg"), tr("Add/Remove Nonlinear Curves"), this);
-    connect( m_nlCurveDatabaseAction, SIGNAL(triggered()), this, SLOT(showNonlinearDialog()));
+    _nlCurveDatabaseAction = new QAction(QIcon(":/images/system-file-manager.svg"), tr("Add/Remove Nonlinear Curves"), this);
+    connect( _nlCurveDatabaseAction, SIGNAL(triggered()), this, SLOT(showNonlinearDialog()));
 
     // Confining Stress Calculator
-    m_confiningStressDialogAction = new QAction(QIcon(":/images/accessories-calculator.svg"), tr("Confining Stress Calculator"), this);
-    connect( m_confiningStressDialogAction, SIGNAL(triggered()), this, SLOT(showConfiningStressDialog()));
+    _confiningStressDialogAction = new QAction(QIcon(":/images/accessories-calculator.svg"), tr("Confining Stress Calculator"), this);
+    connect( _confiningStressDialogAction, SIGNAL(triggered()), this, SLOT(showConfiningStressDialog()));
 
     // Help Action
-    m_helpAction = new QAction(QIcon(":/images/help-browser.svg"), tr("&User Manual"), this);
-    m_helpAction->setShortcut(tr("F1"));
-    connect(m_helpAction, SIGNAL(triggered()), this, SLOT(help()));
+    _helpAction = new QAction(QIcon(":/images/help-browser.svg"), tr("&User Manual"), this);
+    _helpAction->setShortcut(tr("F1"));
+    connect(_helpAction, SIGNAL(triggered()), this, SLOT(help()));
 
     // Check for updates
-    // m_updateAction = new QAction(tr("&Check for updates..."), this);
-    // connect(m_updateAction, SIGNAL(triggered()), this, SLOT(update()));
+    // _updateAction = new QAction(tr("&Check for updates..."), this);
+    // connect(_updateAction, SIGNAL(triggered()), this, SLOT(update()));
 
     // About action
-    m_aboutAction = new QAction(tr("&About"), this);
-    m_aboutAction->setStatusTip(tr("Show the application's About box"));
-    connect(m_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+    _aboutAction = new QAction(tr("&About"), this);
+    _aboutAction->setStatusTip(tr("Show the application's About box"));
+    connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 }
 
 void MainWindow::createPages()
 {
-    m_tabWidget = new QTabWidget;
-    connect( m_tabWidget, SIGNAL(currentChanged(int)),
+    _tabWidget = new QTabWidget;
+    connect( _tabWidget, SIGNAL(currentChanged(int)),
              this, SLOT(tabChanged(int)));
 
     // Create the pages
-    m_pages << new GeneralPage;
-    m_tabWidget->addTab(m_pages.last(), tr("General Settings"));
+    _pages << new GeneralPage;
+    _tabWidget->addTab(_pages.last(), tr("General Settings"));
 
-    m_pages << new SoilTypePage;
-    connect(m_pages.last(), SIGNAL(linkActivated(QString)),
-            m_helpDialog, SLOT(gotoLink(QString)));
-    m_tabWidget->addTab(m_pages.last(), tr("Soil Types"));
+    _pages << new SoilTypePage;
+    connect(_pages.last(), SIGNAL(linkActivated(QString)),
+            _helpDialog, SLOT(gotoLink(QString)));
+    _tabWidget->addTab(_pages.last(), tr("Soil Types"));
 
-    m_pages << new SoilProfilePage;
-    m_tabWidget->addTab(m_pages.last(), tr("Soil Profile"));
+    _pages << new SoilProfilePage;
+    _tabWidget->addTab(_pages.last(), tr("Soil Profile"));
 
-    m_pages <<  new MotionPage;
-    m_tabWidget->addTab(m_pages.last(), tr("Motion(s)"));
+    _pages <<  new MotionPage;
+    _tabWidget->addTab(_pages.last(), tr("Motion(s)"));
 
-    m_pages << new OutputPage;
-    m_tabWidget->addTab(m_pages.last(), tr("Output Specification"));
+    _pages << new OutputPage;
+    _tabWidget->addTab(_pages.last(), tr("Output Specification"));
 
     ComputePage* cp = new ComputePage;
     connect(cp, SIGNAL(saveRequested()),
             this, SLOT(save()));
-    m_pages << cp;
-    m_tabWidget->addTab(m_pages.last(), tr("Compute"));
+    _pages << cp;
+    _tabWidget->addTab(_pages.last(), tr("Compute"));
 
-    m_resultsPage = new ResultsPage;
-    m_pages << m_resultsPage;
-    m_tabWidget->addTab(m_pages.last(), tr("Results"));
+    _resultsPage = new ResultsPage;
+    _pages << _resultsPage;
+    _tabWidget->addTab(_pages.last(), tr("Results"));
 
     // Place the tab widget in a scroll area
-    QScrollArea * scrollArea = new QScrollArea;
-    scrollArea->setWidget(m_tabWidget);
+    auto *scrollArea = new QScrollArea;
+    scrollArea->setWidget(_tabWidget);
     scrollArea->setWidgetResizable(true);
     
     setCentralWidget(scrollArea);
@@ -194,18 +194,18 @@ void MainWindow::createPages()
 void MainWindow::createMenus()
 {
     QMenu * fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(m_newAction);
-    fileMenu->addAction(m_openAction);
+    fileMenu->addAction(_newAction);
+    fileMenu->addAction(_openAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(m_saveAction);
-    fileMenu->addAction(m_saveAsAction);
+    fileMenu->addAction(_saveAction);
+    fileMenu->addAction(_saveAsAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(m_exportAction);
+    fileMenu->addAction(_exportAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(m_printAction);
-    fileMenu->addAction(m_printToPdfAction);
+    fileMenu->addAction(_printAction);
+    fileMenu->addAction(_printToPdfAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(m_exitAction);
+    fileMenu->addAction(_exitAction);
 
     QMenu * editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(EditActions::instance()->cutAction());
@@ -214,45 +214,45 @@ void MainWindow::createMenus()
     editMenu->addAction(EditActions::instance()->clearAction());
 
     QMenu * toolsMenu = menuBar()->addMenu(tr("&Tools"));
-    toolsMenu->addAction(m_readOnlyAction);
+    toolsMenu->addAction(_readOnlyAction);
     toolsMenu->addSeparator();
-    toolsMenu->addAction(m_nlCurveDatabaseAction);
-    toolsMenu->addAction(m_confiningStressDialogAction);
+    toolsMenu->addAction(_nlCurveDatabaseAction);
+    toolsMenu->addAction(_confiningStressDialogAction);
 
     QMenu * windowMenu = menuBar()->addMenu(tr("&Window"));
-    windowMenu->addAction(m_toolBar->toggleViewAction());
+    windowMenu->addAction(_toolBar->toggleViewAction());
 
     QMenu * helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(m_helpAction);
+    helpMenu->addAction(_helpAction);
     helpMenu->addSeparator();
     // FIXME: Update is currently disabled until hosting service can be figured out.
-    //helpMenu->addAction(m_updateAction);
-    helpMenu->addAction(m_aboutAction);
+    //helpMenu->addAction(_updateAction);
+    helpMenu->addAction(_aboutAction);
 }
 
 void MainWindow::createToolbar()
 {
-    m_toolBar = new QToolBar(tr("Main ToolBar"), this);
+    _toolBar = new QToolBar(tr("Main ToolBar"), this);
 
-    m_toolBar->addAction( m_readOnlyAction );
+    _toolBar->addAction( _readOnlyAction );
 
-    m_toolBar->addSeparator();
-    m_toolBar->addAction(m_newAction);
-    m_toolBar->addAction(m_openAction);
-    m_toolBar->addAction(m_saveAction);
-    m_toolBar->addAction(m_saveAsAction);
+    _toolBar->addSeparator();
+    _toolBar->addAction(_newAction);
+    _toolBar->addAction(_openAction);
+    _toolBar->addAction(_saveAction);
+    _toolBar->addAction(_saveAsAction);
 
-    m_toolBar->addSeparator();
-    m_toolBar->addAction(m_printAction);
-    m_toolBar->addAction(m_exportAction);
+    _toolBar->addSeparator();
+    _toolBar->addAction(_printAction);
+    _toolBar->addAction(_exportAction);
     
-    m_toolBar->addSeparator();
-    m_toolBar->addAction(m_nlCurveDatabaseAction);
+    _toolBar->addSeparator();
+    _toolBar->addAction(_nlCurveDatabaseAction);
 
-    m_toolBar->addSeparator();
-    m_toolBar->addAction(m_helpAction );
+    _toolBar->addSeparator();
+    _toolBar->addAction(_helpAction );
 
-    addToolBar(m_toolBar);
+    addToolBar(_toolBar);
 }
 
 void MainWindow::newModel()
@@ -285,11 +285,11 @@ void MainWindow::open(QString fileName)
         fileName = QFileDialog::getOpenFileName(
                     this,
                     tr("Open strata file..."),
-                    (m_model->fileName().isEmpty() ?
-                     m_settings->value("projectDirectory",
+                    (_model->fileName().isEmpty() ?
+                     _settings->value("projectDirectory",
                                        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                                        ).toString()
-                                           : m_model->fileName()),
+                                           : _model->fileName()),
                     "Strata Files (*.strata *.json);;"
                     "Strata Binary File (*.strata);;"
                     "Strata JSON File (*.json);;");
@@ -306,9 +306,9 @@ void MainWindow::open(QString fileName)
     }
 
     // Save the state
-    m_settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
+    _settings->setValue("projectDirectory", QFileInfo(fileName).filePath());
 
-    SiteResponseModel* srm = new SiteResponseModel;
+    auto *srm = new SiteResponseModel;
     if (fileName.endsWith(".strata")) {
         srm->loadBinary(fileName);
     } else if (fileName.endsWith(".json")) {
@@ -323,16 +323,16 @@ void MainWindow::open(QString fileName)
 bool MainWindow::save()
 {
     // If no file name is selected run saveAs
-    if (m_model->fileName().isEmpty())
+    if (_model->fileName().isEmpty())
         return saveAs();
 
-    const QString &fileName = m_model->fileName();
+    const QString &fileName = _model->fileName();
 
     // Save the model
     if (fileName.endsWith(".strata")){
-        m_model->saveBinary();
+        _model->saveBinary();
     } else if (fileName.endsWith(".json")) {
-        m_model->saveJson();
+        _model->saveJson();
     } else {
         showExtensionError(this);
         return false;
@@ -347,11 +347,11 @@ bool MainWindow::saveAs()
     QString fileName = QFileDialog::getSaveFileName(
             this,
             tr("Save file as..."),
-            (m_model->fileName().isEmpty() ?
-             m_settings->value("projectDirectory",
+            (_model->fileName().isEmpty() ?
+             _settings->value("projectDirectory",
                                QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                                ).toString()
-                                   : m_model->fileName()),
+                                   : _model->fileName()),
                 "Strata Files (*.strata *.json);;"
                 "Strata Binary File (*.strata);;"
                 "Strata JSON File (*.json);;");
@@ -363,9 +363,9 @@ bool MainWindow::saveAs()
         }
 
         // Save the state
-        m_settings->setValue("projectDirectory", QFileInfo(fileName).path());
+        _settings->setValue("projectDirectory", QFileInfo(fileName).path());
         // Update the document title
-        m_model->setFileName(fileName);
+        _model->setFileName(fileName);
         // Save the model if a file was selected
         return save();
     } else {
@@ -375,22 +375,22 @@ bool MainWindow::saveAs()
 
 void MainWindow::exportData()
 {
-    m_resultsPage->exportData();
+    _resultsPage->exportData();
 }
 
 void MainWindow::print()
 {
     // Create a dialog to select the printer
-    QPrintDialog printDialog(m_printer);
+    QPrintDialog printDialog(_printer);
 
     if ( printDialog.exec()) {
-        if ( m_tabWidget->currentIndex() == RESULTS_PAGE ) {
-            m_resultsPage->print(m_printer);
+        if ( _tabWidget->currentIndex() == RESULTS_PAGE ) {
+            _resultsPage->print(_printer);
         } else {
             QTextDocument doc;
-            doc.setHtml(m_model->toHtml());
+            doc.setHtml(_model->toHtml());
             // Print the report
-            doc.print(m_printer);
+            doc.print(_printer);
         }
     }
 }
@@ -401,30 +401,30 @@ void MainWindow::printToPdf()
     QString fileName = QFileDialog::getSaveFileName(
             this,
             tr("Select output file..."),
-            m_settings->value("exportDirectory",
+            _settings->value("exportDirectory",
                               QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                               ).toString(),
             "PDF File (*.pdf)");
 
     if (!fileName.isEmpty()) {
         // Save the state
-        m_settings->setValue("exportDirectory", QFileInfo(fileName).filePath());
-        m_printer->setOutputFileName(fileName);
+        _settings->setValue("exportDirectory", QFileInfo(fileName).filePath());
+        _printer->setOutputFileName(fileName);
         
-        if ( m_tabWidget->currentIndex() == RESULTS_PAGE ) {
-            m_resultsPage->print(m_printer);
+        if ( _tabWidget->currentIndex() == RESULTS_PAGE ) {
+            _resultsPage->print(_printer);
         } else {
             QTextDocument doc;
-            doc.setHtml(m_model->toHtml());
+            doc.setHtml(_model->toHtml());
             // Print the report
-            doc.print(m_printer);
+            doc.print(_printer);
         }
     }
 }
 
 void MainWindow::showNonlinearDialog()
 {   
-    NonlinearPropertyCatalogDialog dialog(m_model->siteProfile()->soilTypeCatalog()->nlCatalog());
+    NonlinearPropertyCatalogDialog dialog(_model->siteProfile()->soilTypeCatalog()->nlCatalog());
 
     dialog.addAction(EditActions::instance()->cutAction());
     dialog.addAction(EditActions::instance()->copyAction());
@@ -433,22 +433,22 @@ void MainWindow::showNonlinearDialog()
     dialog.exec();
 
     // Save the modified library
-    m_model->siteProfile()->soilTypeCatalog()->nlCatalog()->save();
+    _model->siteProfile()->soilTypeCatalog()->nlCatalog()->save();
 }
 
 void MainWindow::showConfiningStressDialog()
 {
-    if (!m_confiningStressDialog) {
-        m_confiningStressDialog = new ConfiningStressDialog(this);
+    if (!_confiningStressDialog) {
+        _confiningStressDialog = new ConfiningStressDialog(this);
     }
-    m_confiningStressDialog->show();
-    m_confiningStressDialog->raise();
-    m_confiningStressDialog->activateWindow();
+    _confiningStressDialog->show();
+    _confiningStressDialog->raise();
+    _confiningStressDialog->activateWindow();
 }
 
 void MainWindow::help()
 {
-    m_helpDialog->show();
+    _helpDialog->show();
 }
 
 /*
@@ -468,7 +468,7 @@ void MainWindow::about()
                           "<p>For comments and suggestions contact Albert at "
                           "<a href=\"mailto:albert.kottke@gmail.com\">albert.kottke@gmail.com</a></p>"
                           "<p>Version: %1</p>"
-#ifdef ADVANCED_OPTIONS
+#ifdef ADVANCED_FEATURES
                           "<p>Compiled with advanced options</p>"
 #endif
                           ).arg(QCoreApplication::applicationVersion()));
@@ -485,56 +485,55 @@ void MainWindow::closeEvent(QCloseEvent * event)
 
 void MainWindow::updateTabs()
 {
-    const bool isBusy = m_model->isRunning();
+    const bool isBusy = _model->isRunning();
 
     // Enable/Disable all actions and menus
-    foreach (QObject* object, children()) {
-        if (QAction* action = qobject_cast<QAction*>(object))
+    for (QObject *object : children()) {
+            if (auto *action = qobject_cast<QAction *>(object))
             action->setDisabled(isBusy);
     }
 
-    foreach (QObject* object, menuBar()->children()) {
-        if (QMenu* menu = qobject_cast<QMenu*>(object))
+    for (QObject *object : menuBar()->children()) {
+            if (auto *menu = qobject_cast<QMenu *>(object))
             menu->setDisabled(isBusy);
     }
 
-    setCursor(isBusy ?
-              Qt::WaitCursor : Qt::ArrowCursor);
+    setCursor(isBusy ? Qt::WaitCursor : Qt::ArrowCursor);
 
     // Set all tabs to be enabled or disabled
-    for (int i = 0; i < m_tabWidget->count(); ++i)
-        m_tabWidget->setTabEnabled(i, !isBusy || i == COMPUTE_PAGE);
+    for (int i = 0; i < _tabWidget->count(); ++i)
+        _tabWidget->setTabEnabled(i, !isBusy || i == COMPUTE_PAGE);
 }
 
 void MainWindow::setReadOnly(bool readOnly)
 {
     // Set all of the pages to be read only
-    foreach (AbstractPage* page, m_pages)
+    for (auto *page : _pages)
         page->setReadOnly(readOnly);
 
     // Change the icon and label of the button
-    m_readOnlyAction->setEnabled(readOnly);
+    _readOnlyAction->setEnabled(readOnly);
 
     // readOnly means that the model has results and
     // therefore the Results tab needs to be enabled.
-    m_tabWidget->setTabEnabled(RESULTS_PAGE, readOnly);
+    _tabWidget->setTabEnabled(RESULTS_PAGE, readOnly);
     if (readOnly) {
-        m_tabWidget->setCurrentIndex(RESULTS_PAGE);
-        m_resultsPage->setModel(m_model);
+        _tabWidget->setCurrentIndex(RESULTS_PAGE);
+        _resultsPage->setModel(_model);
     }
 
-    m_exportAction->setEnabled(readOnly);
+    _exportAction->setEnabled(readOnly);
 }
 
 void MainWindow::tabChanged(int tab)
 {
-    if ( m_settings->value("mainwindow/warnAboutReadOnly", true).toBool() 
-        && m_model && m_model->hasResults() && tab != RESULTS_PAGE) {
+    if ( _settings->value("mainwindow/warnAboutReadOnly", true).toBool() 
+        && _model && _model->hasResults() && tab != RESULTS_PAGE) {
 
         // Create a dialog box that reminds the user that they are in a
         // read-only environment.
 
-        QVBoxLayout* layout = new QVBoxLayout;
+        auto *layout = new QVBoxLayout;
 
         QLabel* label = new QLabel(tr(
                 "Strata input fields are locked in a read-only state. "
@@ -556,44 +555,44 @@ void MainWindow::tabChanged(int tab)
         dialog.setLayout(layout);
 
         if (dialog.exec())
-            m_settings->setValue("mainwindow/warnAboutReadOnly", !checkBox->isChecked());
+            _settings->setValue("mainwindow/warnAboutReadOnly", !checkBox->isChecked());
     }
 }
 
 void MainWindow::setModel(SiteResponseModel *model)
 {
-    if (m_model)
-        m_model->deleteLater();
+    if (_model)
+        _model->deleteLater();
 
-    m_model = model;
+    _model = model;
 
     // Update all of the pages
-    foreach (AbstractPage* page, m_pages)
-        page->setModel(m_model);
+    for (auto *page : _pages)
+        page->setModel(_model);
 
     updateTabs();
-    connect(m_readOnlyAction, SIGNAL(triggered()),
-            m_model, SLOT(clearResults()));
-    setReadOnly(m_model->hasResults());
-    connect(m_model, SIGNAL(hasResultsChanged(bool)),
+    connect(_readOnlyAction, SIGNAL(triggered()),
+            _model, SLOT(clearResults()));
+    setReadOnly(_model->hasResults());
+    connect(_model, SIGNAL(hasResultsChanged(bool)),
             this, SLOT(setReadOnly(bool)));
 
     setWindowModified(false);
-    connect(m_model, SIGNAL(modifiedChanged(bool)),
+    connect(_model, SIGNAL(modifiedChanged(bool)),
             this, SLOT(setWindowModified(bool)));
 
-    updateWindowTitle(m_model->fileName());
-    connect(m_model, SIGNAL(fileNameChanged(QString)),
+    updateWindowTitle(_model->fileName());
+    connect(_model, SIGNAL(fileNameChanged(QString)),
             this, SLOT(updateWindowTitle(QString)));
 
-    connect(m_model, SIGNAL(started()),
+    connect(_model, SIGNAL(started()),
             this, SLOT(updateTabs()));
-    connect(m_model, SIGNAL(finished()),
+    connect(_model, SIGNAL(finished()),
             this, SLOT(updateTabs()));
 
     // During this process clear() is called on the OutputCatalog which flags
     // the SiteResponseModel as being modified. We should reset this flag.
-    // m_model->setModified(false);
+    // _model->setModified(false);
     // FIXME
 }
 
@@ -605,7 +604,7 @@ void MainWindow::updateWindowTitle(const QString &fileName)
 bool MainWindow::okToClose()
 {
     // Prompt that the input has been modified
-    if (m_model && m_model->modified()) {
+    if (_model && _model->modified()) {
         QMessageBox msgBox(this);
         msgBox.setText("The document has been modified.");
         msgBox.setInformativeText("Do you want to save your changes?");

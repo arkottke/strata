@@ -1,49 +1,52 @@
-# version format
 version: '{build}'
 
 branches:
-  only:
-    - master
+    except:
+        - /^travis.*$/
 
-platform: x64
+init:
+    - git config --global core.autocrlf input
+
+clone_depth: 1
+
+# https://www.appveyor.com/docs/build-environment/#build-worker-images
+image: Visual Studio 2015
+
 environment:
   fast_finish: true
   matrix:
-#  - ARCH: "i686"
-  - ARCH: "x86_64"
+        - PLATFORM: x86
+          QT5: C:\Qt\5.11\msvc2015
+          CMAKE_GENERATOR: "NMake Makefiles"
+        - PLATFORM: x64
+          QT5: C:\Qt\5.11\msvc2015_64
+          CMAKE_GENERATOR: "NMake Makefiles"
 
 configuration: Release
     
 # Configure git linebreaks
-init:
-  - git config --global core.autocrlf input
-    # Add RDP for debugging
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+cache:
+    - c:\projects\gsl -> appveyor.yml
+    - c:\projects\qwt -> appveyor.yml
   
-# Install dependencies
 install:
-  - set PATH=C:\msys64\usr\bin;%PATH%
-  - pacman -S --noconfirm --quiet pacman-mirrors
-  - pacman -Syu --noconfirm --quiet 
-  # Need to re-run Syu after update
-  - pacman -Syu --noconfirm --quiet 
-  - pacman -S --noconfirm --quiet mingw-w64-%ARCH%-qwt-qt5 mingw-w64-%ARCH%-gsl mingw-w64-%ARCH%-qt5
+    - contrib\install_appveyor_dependencies.bat
 
 build_script:
-  - C:\msys64\usr\bin\sh --login /c/projects/strata/scripts/build_msys.sh
+    - CD C:\projects\strata
+    - MKDIR build
+    - CD build
+    - cmake .. -DGSL_ROOT_DIR=%GSL_ROOT_DIR% -DQWT_ROOT_DIR=%QWT_ROOT_DIR% -G "%CMAKE_GENERATOR%"
+    - cmake --build . --target install
+    - cmake --build . --target package
+    - cmake --build . --target archive
 
 artifacts:
-    - path: Strata-mingw64-*.exe
-      name: Strata Installer (64-bit)
+    - path: build\Strata-*.zip
+      name: Zip Archive
 
-    - path: Strata-mingw64-*.zip
-      name: Strata Archive (64-bit)
-
-    - path: Strata-mingw32-*.exe
-      name: Strata Installer (32-bit)
-
-    - path: Strata-mingw32-*.zip
-      name: Strata Archive (32-bit)
+    - path: build\Strata-*.exe
+      name: Installer
 
 deploy:
     description: 'Release description'
@@ -56,3 +59,4 @@ deploy:
         # branch: /v\d+\.\d+\.\d+/       # Match against the version tag
         branch: master
         appveyor_repo_tag: true        # deploy on tag push only
+

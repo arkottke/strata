@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +39,7 @@ class AxisOptions : public QGroupBox
     Q_OBJECT
 
     public:
-        AxisOptions( const QString & title, QWidget * parent = 0 );
+    AxisOptions(const QString &title, QWidget *parent = nullptr);
 
         /*! Set the default values from the current axis properties.
          *
@@ -57,12 +57,12 @@ class AxisOptions : public QGroupBox
         double max() const;
 
     private:
-        QComboBox * m_spacingComboBox;
+        QComboBox * _spacingComboBox;
 
-        QCheckBox * m_autoCheckBox;
+        QCheckBox * _autoCheckBox;
 
-        QLineEdit * m_minLineEdit;
-        QLineEdit * m_maxLineEdit;
+        QLineEdit * _minLineEdit;
+        QLineEdit * _maxLineEdit;
 };
 
 //! Dialog used to configure the axes of a QwtPlot.
@@ -72,7 +72,7 @@ class ConfigurePlotDialog : public QDialog
     Q_OBJECT
 
     public:
-        ConfigurePlotDialog( QwtPlot * plot, QWidget * parent = 0);
+    ConfigurePlotDialog(QwtPlot *plot, QWidget *parent = nullptr);
        
 
     protected slots:
@@ -82,10 +82,10 @@ class ConfigurePlotDialog : public QDialog
         void setAxis( int axisid, const AxisOptions * axisOptions );
 
     private:
-        QwtPlot * m_plot;
+        QwtPlot * _plot;
 
-        AxisOptions* m_xAxisOptions;
-        AxisOptions* m_yAxisOptions;
+        AxisOptions* _xAxisOptions;
+        AxisOptions* _yAxisOptions;
 };
 
 #endif

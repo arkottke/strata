@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,15 +37,26 @@ class FrequencyDependentCalculator : public AbstractIterativeCalculator
                                      FrequencyDependentCalculator* fdc);
 
 public:
-    explicit FrequencyDependentCalculator(QObject *parent = 0);
+    explicit FrequencyDependentCalculator(QObject *parent = nullptr);
 
     virtual QString toHtml() const;
 
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
 
+    bool useSmoothSpectrum();
+
+signals:
+    void useSmoothSpectrumChanged(bool b);
+
+public slots:
+    void setUseSmoothSpectrum(bool b);
+
 protected:
-    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf);
+    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf);
+    virtual void estimateInitialStrains();
+
+    bool _useSmoothSpectrum;
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_H

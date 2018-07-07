@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,7 +67,7 @@ protected:
         TypeColumn
     };
 
-    QList<AbstractLocationOutput*> m_outputs;
+    QList<AbstractLocationOutput*> _outputs;
 };
 
 #endif // SPECTRA_OUTPUT_CATALOG_H

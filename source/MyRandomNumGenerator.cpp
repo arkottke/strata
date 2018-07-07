@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,37 +28,37 @@
 MyRandomNumGenerator::MyRandomNumGenerator(QObject * parent)
     : QObject(parent)
 {
-    m_gsl_rng = gsl_rng_alloc(gsl_rng_mt19937);
-    m_seedSpecified = false;
+    _gsl_rng = gsl_rng_alloc(gsl_rng_mt19937);
+    _seedSpecified = false;
     init();
 }
 
 MyRandomNumGenerator::~MyRandomNumGenerator()
 {
-    gsl_rng_free(m_gsl_rng);
+    gsl_rng_free(_gsl_rng);
 }
 
 bool MyRandomNumGenerator::seedSpecified() const
 {
-    return m_seedSpecified;
+    return _seedSpecified;
 }
 
 quint32 MyRandomNumGenerator::seed() const
 {
-    return m_seed;
+    return _seed;
 }
 
 gsl_rng * MyRandomNumGenerator::gsl_pointer()
 {
-    return m_gsl_rng;
+    return _gsl_rng;
 }
 
 void MyRandomNumGenerator::setSeedSpecified(bool seedSpecified)
 {
-    if (m_seedSpecified != seedSpecified) {
-        m_seedSpecified = seedSpecified;
+    if (_seedSpecified != seedSpecified) {
+        _seedSpecified = seedSpecified;
 
-        emit seedSpecifiedChanged(m_seedSpecified);
+        emit seedSpecifiedChanged(_seedSpecified);
         emit wasModified();
     }
 }
@@ -70,32 +70,32 @@ void MyRandomNumGenerator::setSeed(int seed)
 
 void MyRandomNumGenerator::setSeed(quint32 seed)
 {
-    if (m_seed != seed) {
-        m_seed = seed;
-        emit seedChanged((int)m_seed);
+    if (_seed != seed) {
+        _seed = seed;
+        emit seedChanged((int)_seed);
         emit wasModified();
     }    
 }
 
 void MyRandomNumGenerator::init()
 {
-    if (!m_seedSpecified){
+    if (!_seedSpecified){
         setSeed(1 + rand() % 65534);
     }
-    gsl_rng_set(m_gsl_rng, m_seed);
+    gsl_rng_set(_gsl_rng, _seed);
 }
 
 void MyRandomNumGenerator::fromJson(const QJsonObject &json)
 {
-    m_seedSpecified = json["seedSpecified"].toBool();
-    m_seed = (quint32)json["seed"].toInt();
+    _seedSpecified = json["seedSpecified"].toBool();
+    _seed = (quint32)json["seed"].toInt();
 }
 
 QJsonObject MyRandomNumGenerator::toJson() const
 {
     QJsonObject json;
-    json["seedSpecified"] = m_seedSpecified;
-    json["seed"] = (int) m_seed;
+    json["seedSpecified"] = _seedSpecified;
+    json["seed"] = (int) _seed;
     return json;
 }
 
@@ -104,8 +104,8 @@ QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGener
 {
     out << (quint8)1;
     
-    out << myGenerator->m_seedSpecified
-        << myGenerator->m_seed;
+    out << myGenerator->_seedSpecified
+        << myGenerator->_seed;
 
     return out;
 }
@@ -115,8 +115,8 @@ QDataStream & operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator)
     quint8 version;
     in >> version;
 
-    in >> myGenerator->m_seedSpecified
-        >> myGenerator->m_seed;
+    in >> myGenerator->_seedSpecified
+        >> myGenerator->_seed;
 
     return in;
 }

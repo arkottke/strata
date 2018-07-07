@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -95,22 +95,22 @@ protected slots:
 
 protected:
     //! If the model is to be used
-    bool m_enabled;
+    bool _enabled;
 
     //! Model to use
-    Model m_model;
+    Model _model;
 
     //@{ Model parameters
-    double m_coeff;
-    double m_initial;
-    double m_exponent;
+    double _coeff;
+    double _initial;
+    double _exponent;
     //@}
 
     //! Random number generator
-    gsl_rng* m_rng;
+    gsl_rng* _rng;
 
     //! Reference to the parent class for controlling if the model is to be used
-    ProfileRandomizer* m_profileRandomizer;
+    ProfileRandomizer* _profileRandomizer;
 };
 
 #endif // LAYERTHICKNESSVARIATION_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class VelocityLayer : public AbstractDistribution
     friend QDataStream & operator>> (QDataStream & in, VelocityLayer* vl);
 
 public:
-    VelocityLayer(QObject * parent = 0);
+    explicit VelocityLayer(QObject *parent = nullptr);
     virtual ~VelocityLayer() = 0;
     
     double depth() const;
@@ -75,9 +75,9 @@ public slots:
 
 protected:
     //! If the shear-wave velocity is varied with randomization
-    bool m_isVaried;
+    bool _isVaried;
 
     //! Depth to the top of the layer
-    double m_depth;
+    double _depth;
 };
 #endif 

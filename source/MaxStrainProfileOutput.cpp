@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,9 +28,9 @@
 #include "Units.h"
 
 MaxStrainProfileOutput::MaxStrainProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
+        : AbstractProfileOutput(catalog)
 {
-    m_offset = 1;
+    _offset = 1;
 }
 
 QString MaxStrainProfileOutput::name() const
@@ -49,19 +49,19 @@ const QString MaxStrainProfileOutput::xLabel() const
 }
 
 void MaxStrainProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
+                                     QVector<double> &ref, QVector<double> &data) const
 {
     const QList<SubLayer> & subLayers = calculator->site()->subLayers();
     // Uses depth from the center of the layer
     ref.clear();
 
     ref << 0;
-    foreach (const SubLayer & sl, subLayers)
+    for (const SubLayer &sl : subLayers)
         ref << sl.depthToMid();
 
     ref << subLayers.last().depthToBase();
 
-    data = calculator->site()->maxShearStrainProfile();    
+    data = calculator->site()->maxShearStrainProfile();
     data.prepend(0);
 
     extrap(ref, data, subLayers.last().thickness());

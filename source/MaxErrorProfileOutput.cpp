@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@
 MaxErrorProfileOutput::MaxErrorProfileOutput(OutputCatalog* catalog)
     : AbstractSteppedProfileOutput(catalog)
 {
-    m_statistics = 0;
+    _statistics = 0;
 }
 
 QString MaxErrorProfileOutput::name() const

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,46 +36,46 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 ProfileRandomizer::ProfileRandomizer(gsl_rng * rng, SoilProfile* siteProfile)
-    : m_siteProfile(siteProfile)
+    : _siteProfile(siteProfile)
 {
-    connect(m_siteProfile, SIGNAL(isVariedChanged(bool)),
+    connect(_siteProfile, SIGNAL(isVariedChanged(bool)),
             this, SLOT(updateEnabled()));
 
-    m_bedrockDepthVariation = new BedrockDepthVariation(rng, this);
-    connect(m_bedrockDepthVariation, SIGNAL(wasModified()),
+    _bedrockDepthVariation = new BedrockDepthVariation(rng, this);
+    connect(_bedrockDepthVariation, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 
-    m_layerThicknessVariation = new LayerThicknessVariation(rng, this);
-    connect(m_layerThicknessVariation, SIGNAL(wasModified()),
+    _layerThicknessVariation = new LayerThicknessVariation(rng, this);
+    connect(_layerThicknessVariation, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 
-    m_velocityVariation = new VelocityVariation(rng, this);
-    connect(m_velocityVariation, SIGNAL(wasModified()),
+    _velocityVariation = new VelocityVariation(rng, this);
+    connect(_velocityVariation, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 
-    m_enabled = false;
+    _enabled = false;
 }
 
 ProfileRandomizer::~ProfileRandomizer()
 {
-    m_bedrockDepthVariation->deleteLater();
-    m_layerThicknessVariation->deleteLater();
-    m_velocityVariation->deleteLater();
+    _bedrockDepthVariation->deleteLater();
+    _layerThicknessVariation->deleteLater();
+    _velocityVariation->deleteLater();
 }
 
 bool ProfileRandomizer::enabled() const
 {
-    return m_siteProfile->isVaried() && m_enabled;
+    return _siteProfile->isVaried() && _enabled;
 }
 
 void ProfileRandomizer::setEnabled(bool enabled)
 {
-    if (m_enabled != enabled) {
-        m_enabled = enabled;
+    if (_enabled != enabled) {
+        _enabled = enabled;
 
         emit enabledChanged(this->enabled());
         emit wasModified();
@@ -89,24 +89,24 @@ void ProfileRandomizer::updateEnabled()
 
 BedrockDepthVariation* ProfileRandomizer::bedrockDepthVariation()
 {
-    return m_bedrockDepthVariation;
+    return _bedrockDepthVariation;
 }
 
 LayerThicknessVariation* ProfileRandomizer::layerThicknessVariation()
 {
-    return m_layerThicknessVariation;
+    return _layerThicknessVariation;
 }
 
 VelocityVariation* ProfileRandomizer::velocityVariation()
 {
-    return m_velocityVariation;
+    return _velocityVariation;
 }
 
 void ProfileRandomizer::fromJson(const QJsonObject &json)
 {
-    m_bedrockDepthVariation->fromJson(json["bedrockDepthVariation"].toObject());
-    m_layerThicknessVariation->fromJson(json["layerThicknessVariation"].toObject());
-    m_velocityVariation->fromJson(json["velocityVariation"].toObject());
+    _bedrockDepthVariation->fromJson(json["bedrockDepthVariation"].toObject());
+    _layerThicknessVariation->fromJson(json["layerThicknessVariation"].toObject());
+    _velocityVariation->fromJson(json["velocityVariation"].toObject());
 
     bool enabled = json["enabled"].toBool();
     setEnabled(enabled);
@@ -115,11 +115,11 @@ void ProfileRandomizer::fromJson(const QJsonObject &json)
 QJsonObject ProfileRandomizer::toJson() const
 {
     QJsonObject json;
-    json["enabled"] = m_enabled;
+    json["enabled"] = _enabled;
 
-    json["bedrockDepthVariation"] = m_bedrockDepthVariation->toJson();
-    json["layerThicknessVariation"] = m_layerThicknessVariation->toJson();
-    json["velocityVariation"] = m_velocityVariation->toJson();
+    json["bedrockDepthVariation"] = _bedrockDepthVariation->toJson();
+    json["layerThicknessVariation"] = _layerThicknessVariation->toJson();
+    json["velocityVariation"] = _velocityVariation->toJson();
     return json;
 }
 
@@ -127,10 +127,10 @@ QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pv)
 {
     out << (quint8)1;
 
-    out << pv->m_enabled
-        << pv->m_velocityVariation
-        << pv->m_layerThicknessVariation
-        << pv->m_bedrockDepthVariation;
+    out << pv->_enabled
+        << pv->_velocityVariation
+        << pv->_layerThicknessVariation
+        << pv->_bedrockDepthVariation;
 
     return out;
 }
@@ -143,9 +143,9 @@ QDataStream & operator>> (QDataStream & in, ProfileRandomizer* pv)
     bool enabled;
 
     in >> enabled
-       >> pv->m_velocityVariation
-       >> pv->m_layerThicknessVariation
-       >> pv->m_bedrockDepthVariation;
+       >> pv->_velocityVariation
+       >> pv->_layerThicknessVariation
+       >> pv->_bedrockDepthVariation;
 
     pv->setEnabled(enabled);
 

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ class ResultsPage : public AbstractPage
     Q_OBJECT
 	
     public:
-        ResultsPage(QWidget * parent = 0);
+    explicit ResultsPage(QWidget *parent = nullptr);
 
         virtual void setModel(SiteResponseModel* model);
 
@@ -97,32 +97,32 @@ class ResultsPage : public AbstractPage
         //! Create context menu for the chart
         void createContextMenu();
 
-        QComboBox *m_outputComboBox;
-        QTableView *m_catalogTableView;
+        QComboBox *_outputComboBox;
+        QTableView *_catalogTableView;
 
-        QPushButton *m_enableMotionPushButton;
-        QPushButton *m_enableSitePushButton;
-        QPushButton *m_recomputePushButton;
-        QPushButton *m_viewDataPushButton;
+        QPushButton *_enableMotionPushButton;
+        QPushButton *_enableSitePushButton;
+        QPushButton *_recomputePushButton;
+        QPushButton *_viewDataPushButton;
 
-        QwtPlot * m_plot; 
-        QList<QwtPlotCurve*> m_curves;
+        QwtPlot * _plot; 
+        QList<QwtPlotCurve*> _curves;
 
-        QMenu * m_plotContextMenu;
+        QMenu * _plotContextMenu;
 
-        MyTableView *m_outputTableView;
+        MyTableView *_outputTableView;
 
         //! Catalog containing all of the output
-        OutputCatalog* m_outputCatalog;
+        OutputCatalog* _outputCatalog;
 
         //! Current selected output
-        AbstractOutput* m_selectedOutput;
+        AbstractOutput* _selectedOutput;
 
         //! Currently selected row
-        int m_selectedRow;
+        int _selectedRow;
 
         //! If the statistics need to be re-computed
-        bool m_statsNeedUpdate;
+        bool _statsNeedUpdate;
 };
 #endif
 

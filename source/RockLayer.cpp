@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,26 +27,26 @@
 RockLayer::RockLayer(QObject * parent)
     : VelocityLayer(parent)
 {
-    m_untWt = 22.0;
+    _untWt = 22.0;
     setAvgDamping(1.0);
 }
 
 double RockLayer::untWt() const
 {
-    return m_untWt;
+    return _untWt;
 }
 
 void RockLayer::setUntWt(double untWt)
 {
-    m_untWt = untWt;
+    _untWt = untWt;
 
     emit wasModified();
-    emit untWtChanged(m_untWt);
+    emit untWtChanged(_untWt);
 }
 
 double RockLayer::density() const
 {
-    return m_untWt / Units::instance()->gravity();
+    return _untWt / Units::instance()->gravity();
 }
 
 QString RockLayer::toString() const
@@ -56,33 +56,33 @@ QString RockLayer::toString() const
 
 double RockLayer::damping() const
 {
-    return m_damping;
+    return _damping;
 }
        
 void RockLayer::setDamping(double damping)
 {
-    m_damping = damping;
+    _damping = damping;
 }
 
 double RockLayer::avgDamping() const
 {
-    return m_avgDamping;
+    return _avgDamping;
 }
 
 void RockLayer::setAvgDamping(double damping )
 {
 
-    m_damping = damping;
-    m_avgDamping = damping;
+    _damping = damping;
+    _avgDamping = damping;
 
     emit wasModified();
-    emit avgDampingChanged(m_avgDamping);
+    emit avgDampingChanged(_avgDamping);
 }
 
 void RockLayer::fromJson(const QJsonObject &json)
 {
     VelocityLayer::fromJson(json);
-    m_untWt = json["untWt"].toDouble();
+    _untWt = json["untWt"].toDouble();
     double avgDamping = json["avgDamping"].toDouble();
     setAvgDamping(avgDamping);
 }
@@ -90,8 +90,8 @@ void RockLayer::fromJson(const QJsonObject &json)
 QJsonObject RockLayer::toJson() const
 {
     QJsonObject json = VelocityLayer::toJson();
-    json["untWt"] = m_untWt;
-    json["avgDamping"] = m_avgDamping;
+    json["untWt"] = _untWt;
+    json["avgDamping"] = _avgDamping;
     return json;
 }
 
@@ -101,7 +101,7 @@ QDataStream & operator<< (QDataStream & out, const RockLayer* rl)
     out << (quint8)1;
 
     out << qobject_cast<const VelocityLayer*>(rl);
-    out << rl->m_untWt << rl->m_avgDamping;
+    out << rl->_untWt << rl->_avgDamping;
 
     return out;
 }
@@ -114,7 +114,7 @@ QDataStream & operator>> (QDataStream & in, RockLayer* rl)
     double avgDamping;
 
     in >> qobject_cast<VelocityLayer*>(rl);
-    in >> rl->m_untWt >> avgDamping;
+    in >> rl->_untWt >> avgDamping;
 
     rl->setAvgDamping(avgDamping);
 

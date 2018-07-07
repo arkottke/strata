@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class CompatibleRvtMotion : public AbstractRvtMotion
     friend QDataStream & operator>> (QDataStream & in, CompatibleRvtMotion* crm);
 
 public:
-    CompatibleRvtMotion(QObject* parent = 0);
+    CompatibleRvtMotion(QObject *parent = nullptr);
     virtual ~CompatibleRvtMotion();
 
     virtual const QVector<double> & freq() const;
@@ -58,8 +58,8 @@ public:
     //! Load the motion from a TextStream
     virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
 
-    void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    virtual void fromJson(const QJsonObject &json);
+    virtual QJsonObject toJson() const;
 
 public slots:
     void setDuration(double duration);
@@ -78,13 +78,13 @@ private:
     QVector<double> vanmarckeInversion() const;
 
     //! If the FAS should be corrected to better fit theory
-    bool m_limitFas;
+    bool _limitFas;
 
     //! Target response spectrum
-    ResponseSpectrum * m_targetRespSpec;
+    ResponseSpectrum * _targetRespSpec;
 
     //! Frequency dimension
-    Dimension* m_freq;
+    Dimension* _freq;
 };
 
 #endif // COMPATIBLE_RVT_MOTION_H

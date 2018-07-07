@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -66,9 +66,9 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(NonlinearProperty
             modulus, SLOT(clearSelection()));
 
    // Data group box
-   m_dataGroupBox = new TableGroupBox(tr("Nonlinear Curve Data"));
+   _dataGroupBox = new TableGroupBox(tr("Nonlinear Curve Data"));
 
-   layout->addWidget(m_dataGroupBox, 0, 1, 2, 2);
+   layout->addWidget(_dataGroupBox, 0, 1, 2, 2);
 
    // Information regard permanent models
    layout->addWidget( new QLabel(tr("Gray background indicates immutable model.")), 2, 0 );
@@ -88,7 +88,7 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(NonlinearProperty
 
 void NonlinearPropertyCatalogDialog::setDataModel(NonlinearProperty *np, bool readOnly)
 {
-    m_dataGroupBox->setModel(np);
-    m_dataGroupBox->setReadOnly(readOnly);
+    _dataGroupBox->setModel(np);
+    _dataGroupBox->setReadOnly(readOnly);
 }
 

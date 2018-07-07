@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -48,9 +48,9 @@ public slots:
     void setUncertaintyModel(int model);
 
 protected:
-    QDoubleSpinBox* m_lnStdevSpinBox;
-    QDoubleSpinBox* m_minSpinBox;
-    QDoubleSpinBox* m_maxSpinBox;
+    QDoubleSpinBox* _lnStdevSpinBox;
+    QDoubleSpinBox* _minSpinBox;
+    QDoubleSpinBox* _maxSpinBox;
 };
 
 #endif // NONLINEAR_PROPERTY_UNCERTAINTY_WIDGET_H

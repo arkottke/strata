@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -98,27 +98,27 @@ protected slots:
 
 private:
     //! If the variation is enabled.    
-    int m_enabled;
+    int _enabled;
 
     //! Model for the standard deviation
-    Model m_model;
+    Model _model;
 
     //! If the damping of the bedrock is enabled
-    bool m_bedrockIsEnabled;
+    bool _bedrockIsEnabled;
 
     //! Correlation between shear modulus and damping
-    double m_correl;
+    double _correl;
 
     //! Uncertainty model for the shear modulus reduction
-    NonlinearPropertyUncertainty* m_modulusUncert;
+    NonlinearPropertyUncertainty* _modulusUncert;
 
     //! Uncertainty model for the damping ratio
-    NonlinearPropertyUncertainty* m_dampingUncert;
+    NonlinearPropertyUncertainty* _dampingUncert;
 
     //! Random number generator
-    gsl_rng * m_rng;
+    gsl_rng * _rng;
 
     //! Site response model
-    SoilProfile* m_siteProfile;
+    SoilProfile* _siteProfile;
 };
 #endif

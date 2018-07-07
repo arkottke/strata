@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ class SoilProfilePage : public AbstractPage
     Q_OBJECT
 
 public:
-    SoilProfilePage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
+    SoilProfilePage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     void setModel(SiteResponseModel* model);
 
@@ -79,7 +79,7 @@ private:
     //! Create the bedrock depth variation group box
     QFrame* createBedrockDepthFrame();
 
-    QToolBox* m_parameterToolBox;
+    QToolBox* _parameterToolBox;
 
     enum Index {
         VelocityIndex,
@@ -87,42 +87,42 @@ private:
         BedrockDepthIndex
     };
 
-    TableGroupBox* m_soilProfileTableGroup;
-    SoilTypeDelegate* m_soilTypeDelegate;
+    TableGroupBox* _soilProfileTableGroup;
+    SoilTypeDelegate* _soilTypeDelegate;
 
-    QGroupBox* m_profileVariationGroupBox;
+    QGroupBox* _profileVariationGroupBox;
 
-    QCheckBox* m_isVelocityVariedCheckBox;
-    QCheckBox* m_isLayeringVariedCheckBox;
-    QCheckBox* m_isBedrockDepthVariedCheckBox;
+    QCheckBox* _isVelocityVariedCheckBox;
+    QCheckBox* _isLayeringVariedCheckBox;
+    QCheckBox* _isBedrockDepthVariedCheckBox;
 
-    QFrame* m_velocityVariationFrame;
-    QCheckBox* m_layerSpecificCheckBox;
-    QComboBox* m_distributionComboBox;
-    QComboBox* m_stdevModelComboBox;
-    QDoubleSpinBox* m_stdevSpinBox;
-    QComboBox* m_correlModelComboBox;
-    QGroupBox* m_correlGroupBox;
-    QDoubleSpinBox* m_correlInitialSpinBox;
-    QDoubleSpinBox* m_correlFinalSpinBox;
-    QDoubleSpinBox* m_correlDeltaSpinBox;
-    QDoubleSpinBox* m_correlInterceptSpinBox;
-    QDoubleSpinBox* m_correlExponentSpinBox;
+    QFrame* _velocityVariationFrame;
+    QCheckBox* _layerSpecificCheckBox;
+    QComboBox* _distributionComboBox;
+    QComboBox* _stdevModelComboBox;
+    QDoubleSpinBox* _stdevSpinBox;
+    QComboBox* _correlModelComboBox;
+    QGroupBox* _correlGroupBox;
+    QDoubleSpinBox* _correlInitialSpinBox;
+    QDoubleSpinBox* _correlFinalSpinBox;
+    QDoubleSpinBox* _correlDeltaSpinBox;
+    QDoubleSpinBox* _correlInterceptSpinBox;
+    QDoubleSpinBox* _correlExponentSpinBox;
 
-    QFrame* m_layerVariationFrame;
-    QComboBox* m_layeringModelComboBox;
-    QDoubleSpinBox* m_layeringCoeffSpinBox;
-    QDoubleSpinBox* m_layeringInitialSpinBox;
-    QDoubleSpinBox* m_layeringExponentSpinBox;
+    QFrame* _layerVariationFrame;
+    QComboBox* _layeringModelComboBox;
+    QDoubleSpinBox* _layeringCoeffSpinBox;
+    QDoubleSpinBox* _layeringInitialSpinBox;
+    QDoubleSpinBox* _layeringExponentSpinBox;
 
-    QFrame* m_bedrockDepthFrame;
-    QComboBox* m_bedrockModelComboBox;
-    QDoubleSpinBox* m_bedrockStdevSpinBox;
-    QCheckBox* m_bedrockDepthMinCheckBox;
-    QDoubleSpinBox* m_bedrockDepthMinSpinBox;
-    QCheckBox* m_bedrockDepthMaxCheckBox;
-    QDoubleSpinBox* m_bedrockDepthMaxSpinBox;
+    QFrame* _bedrockDepthFrame;
+    QComboBox* _bedrockModelComboBox;
+    QDoubleSpinBox* _bedrockStdevSpinBox;
+    QCheckBox* _bedrockDepthMinCheckBox;
+    QDoubleSpinBox* _bedrockDepthMinSpinBox;
+    QCheckBox* _bedrockDepthMaxCheckBox;
+    QDoubleSpinBox* _bedrockDepthMaxSpinBox;
 
-    VelocityVariation* m_velocityVariation;
+    VelocityVariation* _velocityVariation;
 };
 #endif

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -52,23 +52,23 @@
 #include <climits>
 
 TimeSeriesMotionDialog::TimeSeriesMotionDialog(TimeSeriesMotion * motion,  bool readOnly, QWidget *parent, Qt::WindowFlags f)
-        : QDialog(parent, f), m_motion(motion)
+        : QDialog(parent, f), _motion(motion)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
-    m_tabWidget = new QTabWidget;
+    _tabWidget = new QTabWidget;
 
-    m_tabWidget->addTab(createInputFrame(readOnly), tr("Input"));
-    m_tabWidget->addTab(createPlotsFrame(), tr("Plots"));    
+    _tabWidget->addTab(createInputFrame(readOnly), tr("Input"));
+    _tabWidget->addTab(createPlotsFrame(), tr("Plots"));    
 
     // Plot the motion if available
-    if (m_motion->accel().size()) {
+    if (_motion->accel().size()) {
         plot();
     } else {
-        m_tabWidget->setTabEnabled(1, false);
+        _tabWidget->setTabEnabled(1, false);
     };
 
-    layout->addWidget(m_tabWidget);
+    layout->addWidget(_tabWidget);
 
     // Button Row
     QDialogButtonBox * buttonBox = 0;
@@ -90,8 +90,8 @@ TimeSeriesMotionDialog::TimeSeriesMotionDialog(TimeSeriesMotion * motion,  bool 
 
     setLayout(layout);
 
-    if (!m_motion->fileName().isEmpty()) {
-        loadPreview(m_motion->fileName());
+    if (!_motion->fileName().isEmpty()) {
+        loadPreview(_motion->fileName());
         updateTextEdit();
     }
 }
@@ -112,39 +112,39 @@ void TimeSeriesMotionDialog::openFile()
         QFileInfo fileInfo = QFileInfo(fileName);
         settings.setValue("motionDirectory", fileInfo.absoluteFilePath());
 
-        m_fileNameLineEdit->setText(fileInfo.absoluteFilePath());
+        _fileNameLineEdit->setText(fileInfo.absoluteFilePath());
         loadPreview(fileName);
 
         // Try to load the file
-        bool success = m_motion->load(fileName, true);
+        bool success = _motion->load(fileName, true);
         if (success) {
             updateTextEdit();
             plot();
         } else {
             // Clear input boxes
-            m_descripLineEdit->clear();
-            m_pointCountSpinBox->clear();
-            m_timeStepSpinBox->clear();
+            _descripLineEdit->clear();
+            _pointCountSpinBox->clear();
+            _timeStepSpinBox->clear();
         }
 
         // Update the dialog
-        m_tabWidget->setTabEnabled(1, success);
+        _tabWidget->setTabEnabled(1, success);
     }
 }
 
 void TimeSeriesMotionDialog::updateTextEdit()
 {
-    m_textEdit->blockSignals(true);
-    int startLine = m_startLineSpinBox->value() - 1;
-    int stopLine = m_stopLineSpinBox->value();
+    _textEdit->blockSignals(true);
+    int startLine = _startLineSpinBox->value() - 1;
+    int stopLine = _stopLineSpinBox->value();
     // If a stop line is set correct the line number
     if (stopLine) {
         --stopLine;
     }
     // Original format
-    QTextCharFormat format = m_textEdit->currentCharFormat();
+    QTextCharFormat format = _textEdit->currentCharFormat();
     // Grab the cursor which is used to process the textedit
-    QTextCursor cursor = m_textEdit->textCursor();
+    QTextCursor cursor = _textEdit->textCursor();
     // Move the cursor to the start of the document
     cursor.movePosition( QTextCursor::Start );
     //
@@ -176,7 +176,7 @@ void TimeSeriesMotionDialog::updateTextEdit()
     //
     // Extra lines
     //
-    if ( m_stopLineSpinBox->value() && stopLine < m_lineCount) {
+    if ( _stopLineSpinBox->value() && stopLine < _lineCount) {
         // Move the cursor to start of the document
         cursor.movePosition( QTextCursor::Start );
         // Reset the anchor at the beginning of the next line
@@ -189,20 +189,20 @@ void TimeSeriesMotionDialog::updateTextEdit()
         cursor.setCharFormat(format);
     }
 
-    m_textEdit->blockSignals(false);
+    _textEdit->blockSignals(false);
 }
 
 void TimeSeriesMotionDialog::updatePosition()
 {
-    m_positionSpinBox->setValue(m_textEdit->textCursor().blockNumber()+1);
+    _positionSpinBox->setValue(_textEdit->textCursor().blockNumber()+1);
 }
 
 void TimeSeriesMotionDialog::updateDataColumn(int index)
 {
     if (index == 1) {
-        m_dataColSpinBox->setEnabled(true);
+        _dataColSpinBox->setEnabled(true);
     } else {
-        m_dataColSpinBox->setEnabled(false);
+        _dataColSpinBox->setEnabled(false);
     }
 }
 
@@ -222,7 +222,7 @@ void TimeSeriesMotionDialog::tryAccept()
 void TimeSeriesMotionDialog::apply()
 {
     // Clear the plots
-    foreach (QwtPlotCurve *curve, QList<QwtPlotCurve *>() << m_atsCurve << m_saCurve << m_fasCurve) {
+    for (auto *curve : {_atsCurve, _saCurve, _fasCurve}) {
         curve->setSamples(QVector<double>(), QVector<double>());
     }
 
@@ -246,188 +246,188 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
             this, SLOT(openFile()));
     layout->addWidget( pushButton, 0, 0 );
 
-    m_fileNameLineEdit = new QLineEdit;
-    m_fileNameLineEdit->setWhatsThis(tr("Filename of acceleration time series."));
-    m_fileNameLineEdit->setReadOnly(true);
-    m_fileNameLineEdit->setText(m_motion->fileName());
+    _fileNameLineEdit = new QLineEdit;
+    _fileNameLineEdit->setWhatsThis(tr("Filename of acceleration time series."));
+    _fileNameLineEdit->setReadOnly(true);
+    _fileNameLineEdit->setText(_motion->fileName());
 
-    layout->addWidget(m_fileNameLineEdit, 0, 1, 1, 8);
+    layout->addWidget(_fileNameLineEdit, 0, 1, 1, 8);
 
     // Create the description row
-    m_descripLineEdit = new QLineEdit;
-    m_descripLineEdit->setWhatsThis(tr("A description of the time series file (optional)."));
-    m_descripLineEdit->setText(m_motion->description());
-    m_descripLineEdit->setReadOnly(readOnly);
+    _descripLineEdit = new QLineEdit;
+    _descripLineEdit->setWhatsThis(tr("A description of the time series file (optional)."));
+    _descripLineEdit->setText(_motion->description());
+    _descripLineEdit->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(descriptionChanged(QString)),
-            m_descripLineEdit, SLOT(setText(QString)));
-    connect(m_descripLineEdit, SIGNAL(textChanged(QString)),
-            m_motion, SLOT(setDescription(QString)));
+    connect(_motion, SIGNAL(descriptionChanged(QString)),
+            _descripLineEdit, SLOT(setText(QString)));
+    connect(_descripLineEdit, SIGNAL(textChanged(QString)),
+            _motion, SLOT(setDescription(QString)));
 
     layout->addWidget(new QLabel(tr("Description:")), 1, 0); 
-    layout->addWidget(m_descripLineEdit, 1, 1, 1, 8);
+    layout->addWidget(_descripLineEdit, 1, 1, 1, 8);
 
     // Create the time step, point count, and  scale row
-    m_pointCountSpinBox = new QSpinBox;
-    m_pointCountSpinBox->setWhatsThis(tr("The number of data points in the time series."));
-    m_pointCountSpinBox->setRange(0, INT_MAX);
-    m_pointCountSpinBox->setValue(m_motion->pointCount());
-    m_pointCountSpinBox->setReadOnly(readOnly);
+    _pointCountSpinBox = new QSpinBox;
+    _pointCountSpinBox->setWhatsThis(tr("The number of data points in the time series."));
+    _pointCountSpinBox->setRange(0, INT_MAX);
+    _pointCountSpinBox->setValue(_motion->pointCount());
+    _pointCountSpinBox->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(pointCountChanged(int)),
-            m_pointCountSpinBox, SLOT(setValue(int)));
-    connect(m_pointCountSpinBox, SIGNAL(valueChanged(int)),
-            m_motion, SLOT(setPointCount(int)));
+    connect(_motion, SIGNAL(pointCountChanged(int)),
+            _pointCountSpinBox, SLOT(setValue(int)));
+    connect(_pointCountSpinBox, SIGNAL(valueChanged(int)),
+            _motion, SLOT(setPointCount(int)));
 
     layout->addWidget(new QLabel(tr("Point count:")), 2, 0);
-    layout->addWidget(m_pointCountSpinBox, 2, 1);
+    layout->addWidget(_pointCountSpinBox, 2, 1);
 
-    m_timeStepSpinBox = new QDoubleSpinBox;
-    m_timeStepSpinBox->setWhatsThis(tr("The time step between data points."));
-    m_timeStepSpinBox->setRange(0.0001, 0.05);
-    m_timeStepSpinBox->setSingleStep(0.001);
-    m_timeStepSpinBox->setDecimals(4);
-    m_timeStepSpinBox->setSuffix(" s");
-    m_timeStepSpinBox->setValue(m_motion->timeStep());
-    m_timeStepSpinBox->setReadOnly(readOnly);
+    _timeStepSpinBox = new QDoubleSpinBox;
+    _timeStepSpinBox->setWhatsThis(tr("The time step between data points."));
+    _timeStepSpinBox->setRange(0.0001, 0.05);
+    _timeStepSpinBox->setSingleStep(0.001);
+    _timeStepSpinBox->setDecimals(4);
+    _timeStepSpinBox->setSuffix(" s");
+    _timeStepSpinBox->setValue(_motion->timeStep());
+    _timeStepSpinBox->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(timeStepChanged(double)),
-            m_timeStepSpinBox, SLOT(setValue(double)));
-    connect(m_timeStepSpinBox, SIGNAL(valueChanged(double)),
-            m_motion, SLOT(setTimeStep(double)));
+    connect(_motion, SIGNAL(timeStepChanged(double)),
+            _timeStepSpinBox, SLOT(setValue(double)));
+    connect(_timeStepSpinBox, SIGNAL(valueChanged(double)),
+            _motion, SLOT(setTimeStep(double)));
 
     layout->addWidget(new QLabel(tr("Time step:")), 2, 2);
-    layout->addWidget(m_timeStepSpinBox, 2, 3 );
+    layout->addWidget(_timeStepSpinBox, 2, 3 );
 
-    m_scaleSpinBox = new QDoubleSpinBox;
-    m_scaleSpinBox->setWhatsThis(tr("The scale factor that is applied to the motion."));
-    m_scaleSpinBox->setRange(0.001, 20);
-    m_scaleSpinBox->setDecimals(4);
-    m_scaleSpinBox->setSingleStep(0.01);
-    m_scaleSpinBox->setValue(m_motion->scale());
-    m_scaleSpinBox->setReadOnly(readOnly);
+    _scaleSpinBox = new QDoubleSpinBox;
+    _scaleSpinBox->setWhatsThis(tr("The scale factor that is applied to the motion."));
+    _scaleSpinBox->setRange(0.001, 20);
+    _scaleSpinBox->setDecimals(4);
+    _scaleSpinBox->setSingleStep(0.01);
+    _scaleSpinBox->setValue(_motion->scale());
+    _scaleSpinBox->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(scaleChanged(double)),
-            m_scaleSpinBox, SLOT(setValue(double)));
-    connect(m_scaleSpinBox, SIGNAL(valueChanged(double)),
-            m_motion, SLOT(setScale(double)));
+    connect(_motion, SIGNAL(scaleChanged(double)),
+            _scaleSpinBox, SLOT(setValue(double)));
+    connect(_scaleSpinBox, SIGNAL(valueChanged(double)),
+            _motion, SLOT(setScale(double)));
 
     layout->addWidget(new QLabel(tr("Scale factor:")), 2, 6);
-    layout->addWidget(m_scaleSpinBox, 2, 7);
+    layout->addWidget(_scaleSpinBox, 2, 7);
 
     // Data format row
-    m_formatComboBox = new QComboBox;
-    m_formatComboBox->setWhatsThis(tr("The format of the data file. <i>Rows</i> "
+    _formatComboBox = new QComboBox;
+    _formatComboBox->setWhatsThis(tr("The format of the data file. <i>Rows</i> "
                 "reads every number on every row.  <i>Columns</i> reads data "
                 "from a specific column."));
-    m_formatComboBox->addItems(TimeSeriesMotion::formatList());
-    m_formatComboBox->setCurrentIndex(m_motion->format());
-    m_formatComboBox->setEnabled(!readOnly);
+    _formatComboBox->addItems(TimeSeriesMotion::formatList());
+    _formatComboBox->setCurrentIndex(_motion->format());
+    _formatComboBox->setEnabled(!readOnly);
 
-    connect(m_formatComboBox, SIGNAL(currentIndexChanged(int)),
+    connect(_formatComboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(updateDataColumn(int)));
-    connect(m_motion, SIGNAL(formatChanged(int)),
-            m_formatComboBox, SLOT(setCurrentIndex(int)));
-    connect(m_formatComboBox, SIGNAL(currentIndexChanged(int)),
-            m_motion, SLOT(setFormat(int)));
+    connect(_motion, SIGNAL(formatChanged(int)),
+            _formatComboBox, SLOT(setCurrentIndex(int)));
+    connect(_formatComboBox, SIGNAL(currentIndexChanged(int)),
+            _motion, SLOT(setFormat(int)));
 
     layout->addWidget( new QLabel(tr("Format:")), 3, 0);
-    layout->addWidget(m_formatComboBox, 3, 1);
+    layout->addWidget(_formatComboBox, 3, 1);
     
-    m_dataColSpinBox = new QSpinBox;
-    m_dataColSpinBox->setWhatsThis(tr("The column of the acceleration data."));
-    m_dataColSpinBox->setRange(1, 100);
-    m_dataColSpinBox->setEnabled(m_motion->format() == TimeSeriesMotion::Columns);
-    m_dataColSpinBox->setValue(m_motion->dataColumn());
-    m_dataColSpinBox->setReadOnly(readOnly);
+    _dataColSpinBox = new QSpinBox;
+    _dataColSpinBox->setWhatsThis(tr("The column of the acceleration data."));
+    _dataColSpinBox->setRange(1, 100);
+    _dataColSpinBox->setEnabled(_motion->format() == TimeSeriesMotion::Columns);
+    _dataColSpinBox->setValue(_motion->dataColumn());
+    _dataColSpinBox->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(dataColumnChanged(int)),
-            m_dataColSpinBox, SLOT(setValue(int)));
-    connect(m_dataColSpinBox, SIGNAL(valueChanged(int)),
-            m_motion, SLOT(setDataColumn(int)));
+    connect(_motion, SIGNAL(dataColumnChanged(int)),
+            _dataColSpinBox, SLOT(setValue(int)));
+    connect(_dataColSpinBox, SIGNAL(valueChanged(int)),
+            _motion, SLOT(setDataColumn(int)));
 
     layout->addWidget(new QLabel(tr("Data column:")), 3, 2);
-    layout->addWidget(m_dataColSpinBox, 3, 3);
+    layout->addWidget(_dataColSpinBox, 3, 3);
 
     // Units specification
-    m_unitsComboBox = new QComboBox;
-    m_unitsComboBox->setWhatsThis(tr("Units of the time series."));
-    m_unitsComboBox->addItems(TimeSeriesMotion::inputUnitsList());
-    m_unitsComboBox->setCurrentIndex(m_motion->inputUnits());
-    connect(m_motion, SIGNAL(inputUnitsChanged(int)),
-            m_unitsComboBox, SLOT(setCurrentIndex(int)));
-    connect(m_unitsComboBox, SIGNAL(currentIndexChanged(int)),
-            m_motion, SLOT(setInputUnits(int)));
+    _unitsComboBox = new QComboBox;
+    _unitsComboBox->setWhatsThis(tr("Units of the time series."));
+    _unitsComboBox->addItems(TimeSeriesMotion::inputUnitsList());
+    _unitsComboBox->setCurrentIndex(_motion->inputUnits());
+    connect(_motion, SIGNAL(inputUnitsChanged(int)),
+            _unitsComboBox, SLOT(setCurrentIndex(int)));
+    connect(_unitsComboBox, SIGNAL(currentIndexChanged(int)),
+            _motion, SLOT(setInputUnits(int)));
 
     layout->addWidget(new QLabel(tr("Units:")), 3, 4);
-    layout->addWidget(m_unitsComboBox, 3, 5);
+    layout->addWidget(_unitsComboBox, 3, 5);
 
     // PGA of the motion
-    m_pgaSpinBox = new QDoubleSpinBox;
-    m_pgaSpinBox->setWhatsThis(tr("The peak ground acceleration of the motion."));
-    m_pgaSpinBox->setRange(0.001, 10.0);
-    m_pgaSpinBox->setDecimals(3);
-    m_pgaSpinBox->setSingleStep(0.01);
-    m_pgaSpinBox->setSuffix(" g");
-    m_pgaSpinBox->setReadOnly(true);
-    m_pgaSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    m_pgaSpinBox->setValue(m_motion->pga());
+    _pgaSpinBox = new QDoubleSpinBox;
+    _pgaSpinBox->setWhatsThis(tr("The peak ground acceleration of the motion."));
+    _pgaSpinBox->setRange(0.001, 10.0);
+    _pgaSpinBox->setDecimals(3);
+    _pgaSpinBox->setSingleStep(0.01);
+    _pgaSpinBox->setSuffix(" g");
+    _pgaSpinBox->setReadOnly(true);
+    _pgaSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    _pgaSpinBox->setValue(_motion->pga());
 
-    connect(m_motion, SIGNAL(pgaChanged(double)),
-            m_pgaSpinBox, SLOT(setValue(double)));
+    connect(_motion, SIGNAL(pgaChanged(double)),
+            _pgaSpinBox, SLOT(setValue(double)));
 
     layout->addWidget(new QLabel(tr("PGA:")), 3, 6);
-    layout->addWidget(m_pgaSpinBox, 3, 7);
+    layout->addWidget(_pgaSpinBox, 3, 7);
 
     // Lines row
-    m_startLineSpinBox = new QSpinBox;
-    m_startLineSpinBox->setRange(1, INT_MAX);
-    m_startLineSpinBox->setWhatsThis(tr("The line number at which to start reading the data"));
-    m_startLineSpinBox->setValue(m_motion->startLine());
-    m_startLineSpinBox->setReadOnly(readOnly);
+    _startLineSpinBox = new QSpinBox;
+    _startLineSpinBox->setRange(1, INT_MAX);
+    _startLineSpinBox->setWhatsThis(tr("The line number at which to start reading the data"));
+    _startLineSpinBox->setValue(_motion->startLine());
+    _startLineSpinBox->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(startLineChanged(int)),
-            m_startLineSpinBox, SLOT(setValue(int)));
-    connect(m_startLineSpinBox, SIGNAL(valueChanged(int)),
-            m_motion, SLOT(setStartLine(int)));
+    connect(_motion, SIGNAL(startLineChanged(int)),
+            _startLineSpinBox, SLOT(setValue(int)));
+    connect(_startLineSpinBox, SIGNAL(valueChanged(int)),
+            _motion, SLOT(setStartLine(int)));
 
     layout->addWidget(new QLabel(tr("Start line:")), 4, 0);
-    layout->addWidget(m_startLineSpinBox, 4, 1);
+    layout->addWidget(_startLineSpinBox, 4, 1);
 
-    m_stopLineSpinBox = new QSpinBox;
-    m_stopLineSpinBox->setRange(0, INT_MAX);
-    m_stopLineSpinBox->setWhatsThis(tr("The line number to stop reading the data. If set to 0 the entire file is processed."));
-    m_stopLineSpinBox->setValue(m_motion->stopLine());
-    m_stopLineSpinBox->setReadOnly(readOnly);
+    _stopLineSpinBox = new QSpinBox;
+    _stopLineSpinBox->setRange(0, INT_MAX);
+    _stopLineSpinBox->setWhatsThis(tr("The line number to stop reading the data. If set to 0 the entire file is processed."));
+    _stopLineSpinBox->setValue(_motion->stopLine());
+    _stopLineSpinBox->setReadOnly(readOnly);
 
-    connect(m_motion, SIGNAL(stopLineChanged(int)),
-            m_stopLineSpinBox, SLOT(setValue(int)));
-    connect(m_stopLineSpinBox, SIGNAL(valueChanged(int)),
-            m_motion, SLOT(setStopLine(int)));
+    connect(_motion, SIGNAL(stopLineChanged(int)),
+            _stopLineSpinBox, SLOT(setValue(int)));
+    connect(_stopLineSpinBox, SIGNAL(valueChanged(int)),
+            _motion, SLOT(setStopLine(int)));
 
     layout->addWidget(new QLabel(tr("Stop line:")), 4, 2);
-    layout->addWidget( m_stopLineSpinBox, 4, 3 );
+    layout->addWidget( _stopLineSpinBox, 4, 3 );
 
-    m_positionSpinBox = new QSpinBox;
-    m_positionSpinBox->setWhatsThis(tr("Current line number"));
-    m_positionSpinBox->setReadOnly(true);
-    m_positionSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    m_positionSpinBox->setReadOnly(readOnly);
+    _positionSpinBox = new QSpinBox;
+    _positionSpinBox->setWhatsThis(tr("Current line number"));
+    _positionSpinBox->setReadOnly(true);
+    _positionSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    _positionSpinBox->setReadOnly(readOnly);
 
     layout->addWidget(new QLabel(tr("Current Line:")), 4, 4);
-    layout->addWidget( m_positionSpinBox, 4, 5);
+    layout->addWidget( _positionSpinBox, 4, 5);
 
     // Text edit
-    m_textEdit = new QTextEdit;
-    m_textEdit->setWhatsThis(tr("A preview of the file.  Green are header"
+    _textEdit = new QTextEdit;
+    _textEdit->setWhatsThis(tr("A preview of the file.  Green are header"
                 "lines, blue are data lines, and red are extraneous lines."));
-    m_textEdit->setLineWrapMode(QTextEdit::NoWrap);
-    m_textEdit->setReadOnly(true);
-    m_textEdit->setFontFamily("Courier");
+    _textEdit->setLineWrapMode(QTextEdit::NoWrap);
+    _textEdit->setReadOnly(true);
+    _textEdit->setFontFamily("Courier");
 
-    connect(m_textEdit, SIGNAL(cursorPositionChanged()), this, SLOT(updatePosition()));
+    connect(_textEdit, SIGNAL(cursorPositionChanged()), this, SLOT(updatePosition()));
 
-    layout->addWidget(m_textEdit, 5, 0, 1, 9);
+    layout->addWidget(_textEdit, 5, 0, 1, 9);
 
 
     QFrame *frame = new QFrame;
@@ -460,9 +460,9 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
     text.setText(tr("Acceleration (g)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_atsCurve = new QwtPlotCurve;
-    m_atsCurve->setPen(QPen(Qt::blue));
-    m_atsCurve->attach(plot);
+    _atsCurve = new QwtPlotCurve;
+    _atsCurve->setPen(QPen(Qt::blue));
+    _atsCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("Accel. Time Series"));
 
@@ -489,9 +489,9 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
     text.setText(tr("Spectral Accel. (g)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_saCurve = new QwtPlotCurve;
-    m_saCurve->setPen(QPen(Qt::blue));
-    m_saCurve->attach(plot);
+    _saCurve = new QwtPlotCurve;
+    _saCurve->setPen(QPen(Qt::blue));
+    _saCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("Response Spectrum"));
 
@@ -518,9 +518,9 @@ QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
     text.setText(tr("Fourier Amplitude (g-s)"));
     plot->setAxisTitle(QwtPlot::yLeft, text);
 
-    m_fasCurve = new QwtPlotCurve;
-    m_fasCurve->setPen(QPen(Qt::blue));
-    m_fasCurve->attach(plot);
+    _fasCurve = new QwtPlotCurve;
+    _fasCurve->setPen(QPen(Qt::blue));
+    _fasCurve->attach(plot);
 
     tabWidget->addTab(plot, tr("Fourier Amp. Spectrum"));
 
@@ -533,13 +533,13 @@ void TimeSeriesMotionDialog::loadPreview(const QString &fileName)
     QFile data(fileName);
     if (data.open(QFile::ReadOnly)) {
         QTextStream stream(&data);
-        m_textEdit->setText(stream.readAll());
+        _textEdit->setText(stream.readAll());
 
-        m_lineCount = m_textEdit->document()->blockCount();
-        m_startLineSpinBox->setMaximum(m_lineCount);
-        m_stopLineSpinBox->setMaximum(m_lineCount);
+        _lineCount = _textEdit->document()->blockCount();
+        _startLineSpinBox->setMaximum(_lineCount);
+        _stopLineSpinBox->setMaximum(_lineCount);
 
-        m_positionSpinBox->setRange(0, m_lineCount);
+        _positionSpinBox->setRange(0, _lineCount);
     } else {
         qCritical() << "Error opening file: " << qPrintable(fileName);
         return;
@@ -548,29 +548,29 @@ void TimeSeriesMotionDialog::loadPreview(const QString &fileName)
 
 void TimeSeriesMotionDialog::plot()
 {
-    m_atsCurve->setSamples(m_motion->time(), m_motion->timeSeries(TimeSeriesMotion::Acceleration));
-    m_saCurve->setSamples(m_motion->respSpec()->period(), m_motion->respSpec()->sa());
+    _atsCurve->setSamples(_motion->time(), _motion->timeSeries(TimeSeriesMotion::Acceleration));
+    _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
 
     // Don't plot the first point (0 Hz)
-    m_fasCurve->setSamples(
-            m_motion->freq().data() + 1,
-            m_motion->absFourierAcc().data() + 1,
-            m_motion->freq().size() - 1);
+    _fasCurve->setSamples(
+            _motion->freq().data() + 1,
+            _motion->absFourierAcc().data() + 1,
+            _motion->freq().size() - 1);
 }
 
 bool TimeSeriesMotionDialog::tryApply()
 {
     bool success = true;
 
-    if (!m_motion->isLoaded()) {
+    if (!_motion->isLoaded()) {
         // Need to read the motion from the file        
-        success = m_motion->load(m_fileNameLineEdit->text(), false);
+        success = _motion->load(_fileNameLineEdit->text(), false);
     } else {
         // Just apply the new settings
-        m_motion->calculate();
+        _motion->calculate();
     }
 
-    m_tabWidget->setTabEnabled(1, success);
+    _tabWidget->setTabEnabled(1, success);
 
     return success;
 }

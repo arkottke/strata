@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,57 +24,57 @@
 #include <QApplication>
 #include <QDebug>
 
-EditActions * EditActions::m_instance = 0;
+EditActions *EditActions::_instance = nullptr;
 
 EditActions::EditActions( QObject * parent ) : QObject(parent)
 {
     // Paste Action
-    m_pasteAction = new QAction(QIcon(":/images/edit-paste.svg"), tr("&Paste"),this);
-    m_pasteAction->setShortcut(QKeySequence::Paste);
-    connect(m_pasteAction, SIGNAL(triggered()), SLOT(paste()));
+    _pasteAction = new QAction(QIcon(":/images/edit-paste.svg"), tr("&Paste"),this);
+    _pasteAction->setShortcut(QKeySequence::Paste);
+    connect(_pasteAction, SIGNAL(triggered()), SLOT(paste()));
     
     // Copy Action
-    m_copyAction = new QAction(QIcon(":/images/edit-copy.svg"), tr("&Copy"),this);
-    m_copyAction->setShortcut(QKeySequence::Copy);
-    connect(m_copyAction, SIGNAL(triggered()), SLOT(copy()));
+    _copyAction = new QAction(QIcon(":/images/edit-copy.svg"), tr("&Copy"),this);
+    _copyAction->setShortcut(QKeySequence::Copy);
+    connect(_copyAction, SIGNAL(triggered()), SLOT(copy()));
 
     // Cut Action
-    m_cutAction = new QAction(QIcon(":/images/edit-cut.svg"), tr("Cu&t"),this);
-    m_cutAction->setShortcut(QKeySequence::Cut);
-    connect(m_cutAction, SIGNAL(triggered()), SLOT(cut()));
+    _cutAction = new QAction(QIcon(":/images/edit-cut.svg"), tr("Cu&t"),this);
+    _cutAction->setShortcut(QKeySequence::Cut);
+    connect(_cutAction, SIGNAL(triggered()), SLOT(cut()));
 
     // Clear Action
-    m_clearAction = new QAction(QIcon(":/images/edit-clear.svg"), tr("Clear"),this);
-    connect(m_clearAction, SIGNAL(triggered()), SLOT(clear()));
+    _clearAction = new QAction(QIcon(":/images/edit-clear.svg"), tr("Clear"),this);
+    connect(_clearAction, SIGNAL(triggered()), SLOT(clear()));
 }
 
 EditActions * EditActions::instance()
 {
-    if ( m_instance == 0 ) {
-        m_instance = new EditActions;
+    if (_instance == nullptr) {
+        _instance = new EditActions;
     }
 
-    return m_instance;
+    return _instance;
 }
 
 QAction * EditActions::cutAction()
 {
-    return m_cutAction;
+    return _cutAction;
 }
 
 QAction * EditActions::copyAction()
 {
-    return m_copyAction;
+    return _copyAction;
 }
 
 QAction * EditActions::pasteAction()
 {
-    return m_pasteAction;
+    return _pasteAction;
 }
 
 QAction * EditActions::clearAction()
 {
-    return m_clearAction;
+    return _clearAction;
 }
 
 void EditActions::cut() 

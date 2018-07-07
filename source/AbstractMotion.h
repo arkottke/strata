@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ class AbstractMotion : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, AbstractMotion* m);
 
 public:
-    AbstractMotion(QObject * parent = 0);
+    AbstractMotion(QObject *parent = nullptr);
     virtual ~AbstractMotion() = 0;
 
     //! Type of motion
@@ -159,30 +159,30 @@ protected:
 
     //! If the motion has been modified and attributes need to be re-computed
     // FIXME still needed?
-    bool m_modified;
+    bool _modified;
 
     //! Type of motion
-    Type m_type;
+    Type _type;
 
     //! The description of the time series
-    QString m_description;
+    QString _description;
 
     //! The peak ground acceleration in the time domain in units of g
-    double m_pga;
+    double _pga;
 
     //! The peak ground velocity in the defined units either cm/sec or in/sec
-    double m_pgv;
+    double _pgv;
 
     //! Controls if the AbstractMotions is to be used
-    bool m_enabled;
+    bool _enabled;
 
     //! Response spectrum
-    ResponseSpectrum * m_respSpec;
+    ResponseSpectrum * _respSpec;
 
     //! Store if the SDOF transfer function has been computed
-    bool m_sdofTfIsComputed;
+    bool _sdofTfIsComputed;
 
     //! The single-degree-of-freedom oscillator transfer function
-    QVector<QVector<std::complex<double> > > m_sdofTf;
+    QVector<QVector<std::complex<double> > > _sdofTf;
 };
 #endif // ABSTRACT_MOTION_H_

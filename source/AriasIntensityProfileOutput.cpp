@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@
 AriasIntensityProfileOutput::AriasIntensityProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
 {
-    m_offset = 1;
+    _offset = 1;
 }
 
 QString AriasIntensityProfileOutput::name() const
@@ -72,7 +72,7 @@ void AriasIntensityProfileOutput::extract(AbstractCalculator* const calculator,
     // Outcrop for the first layer. Within for subsequent.
     AbstractMotion::Type type = AbstractMotion::Outcrop;
 
-    foreach (double depth, this->ref()) {
+    for (const double &depth : this->ref()) {
         data << tsm->ariasIntensity(calculator->calcAccelTf(
                                 site->inputLocation(), tsm->type(),
                                         site->depthToLocation(depth), type)).last();

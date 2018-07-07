@@ -41,5 +41,10 @@
 	<file>images/preferences-system.svg</file>
 	<file>images/process-stop.svg</file>
 	<file>images/system-file-manager.svg</file>
+
+        <file>data/cena_bt12_trms4osc.json</file>
+        <file>data/cena_bt15_trms4osc.json</file>
+        <file>data/wna_bt12_trms4osc.json</file>
+        <file>data/wna_bt15_trms4osc.json</file>
     </qresource>
 </RCC>

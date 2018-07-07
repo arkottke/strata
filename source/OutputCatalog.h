@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +51,7 @@ class OutputCatalog : public QAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, OutputCatalog* oc);
 
 public:
-    explicit OutputCatalog(QObject *parent = 0);
+    explicit OutputCatalog(QObject *parent = nullptr);
 
     enum Columns {
         EnabledColumn,
@@ -185,65 +185,65 @@ protected:
     void populateDepthVector(double maxDepth);
 
     //! List of all enabled outputs
-    QList<AbstractOutput*> m_outputs;
+    QList<AbstractOutput*> _outputs;
 
     //! Title of the project
-    QString m_title;
+    QString _title;
 
     //! Filename prefix for the exported text files
-    QString m_filePrefix;
+    QString _filePrefix;
 
     //! If the output is enabled
-    QList<QList<bool> > m_enabled;
+    QList<QList<bool> > _enabled;
 
     //! Depth values
-    QVector<double> m_depth;
+    QVector<double> _depth;
 
     //! Names of input motions
-    QStringList m_motionNames;
+    QStringList _motionNames;
 
     //! Number of sites analyzed
-    int m_siteCount;
+    int _siteCount;
 
     //! Number of motions analyzed
-    int m_motionCount;
+    int _motionCount;
 
     //! Time vectors for the various time series
-    QList<QVector<double> > m_time;
+    QList<QVector<double> > _time;
 
     //! If the times are needed
-    bool m_timesAreNeeded;
+    bool _timesAreNeeded;
 
     //! Frequency
-    Dimension* m_frequency;
+    Dimension* _frequency;
 
     //! If the frequency is needed
-    bool m_frequencyIsNeeded;
+    bool _frequencyIsNeeded;
 
     //! Period
-    Dimension* m_period;
+    Dimension* _period;
 
     //! If the period is needed
-    bool m_periodIsNeeded;
+    bool _periodIsNeeded;
 
     //! Damping of the single-degree-of-freedom system
-    double m_damping;
+    double _damping;
 
     //! Catalogs of output
-    ProfilesOutputCatalog* m_profilesOutputCatalog;
-    RatiosOutputCatalog* m_ratiosOutputCatalog;
-    SoilTypesOutputCatalog* m_soilTypesOutputCatalog;
-    SpectraOutputCatalog* m_spectraOutputCatalog;
-    TimeSeriesOutputCatalog* m_timeSeriesOutputCatalog;
+    ProfilesOutputCatalog* _profilesOutputCatalog;
+    RatiosOutputCatalog* _ratiosOutputCatalog;
+    SoilTypesOutputCatalog* _soilTypesOutputCatalog;
+    SpectraOutputCatalog* _spectraOutputCatalog;
+    TimeSeriesOutputCatalog* _timeSeriesOutputCatalog;
 
     //! List of the catalogs
-    QList<AbstractOutputCatalog*> m_catalogs;
+    QList<AbstractOutputCatalog*> _catalogs;
 
     //! Log of the analysis
-    TextLog* m_log;
+    TextLog* _log;
 
     //! The output the is currently selected by the view
-    AbstractOutput* m_selectedOutput;
+    AbstractOutput* _selectedOutput;
 };
 
 #endif // OUTPUT_CATALOG_H

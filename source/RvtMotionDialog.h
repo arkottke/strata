@@ -15,41 +15,28 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef RVT_MOTION_DIALOG_H
 #define RVT_MOTION_DIALOG_H
 
-#include "RvtMotion.h"
-#include "MyTableView.h"
+#include "AbstractRvtMotionDialog.h"
 
-#include <QDialog>
+#include "RvtMotion.h"
 
 #include <qwt_plot_curve.h>
 
-class RvtMotionDialog : public QDialog
+class RvtMotionDialog : public AbstractRvtMotionDialog
 {
     Q_OBJECT
 public:
-    explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = 0);
+    explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
 
-signals:
-
-public slots:
-
-private slots:
-    void calculate();
-    void tryAccept();
-
-private:
-    RvtMotion *m_motion;
-
-    QwtPlotCurve *m_fasCurve;
-    QwtPlotCurve *m_saCurve;
-
-    MyTableView *m_rsTableView;
+protected:
+    virtual QFormLayout* createParametersLayout();
+    virtual QTabWidget* createTabWidget();
 };
 
 #endif // RVT_MOTION_DIALOG_H

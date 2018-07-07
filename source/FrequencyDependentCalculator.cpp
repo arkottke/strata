@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+ ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
 //
@@ -15,25 +15,38 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "FrequencyDependentCalculator.h"
 
-#include "AbstractMotion.h"
+#include "EquivalentLinearCalculator.h"
 #include "SoilProfile.h"
 #include "SubLayer.h"
 #include "Units.h"
 
-#include <QDebug>
-
 #include <cmath>
+
+#include <QDebug>
 
 FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     : AbstractIterativeCalculator(parent)
 {
+    _useSmoothSpectrum = true;
     reset();
+}
+
+bool FrequencyDependentCalculator::useSmoothSpectrum() {
+    return _useSmoothSpectrum;
+}
+
+void FrequencyDependentCalculator::setUseSmoothSpectrum(bool b) {
+    if (_useSmoothSpectrum != b) {
+        _useSmoothSpectrum = b;
+        emit useSmoothSpectrumChanged(b);
+        emit wasModified();
+    }
 }
 
 QString FrequencyDependentCalculator::toHtml() const
@@ -46,20 +59,23 @@ QString FrequencyDependentCalculator::toHtml() const
             "</table>"
             "</li>"
             )
-            .arg(m_errorTolerance)
-            .arg(m_maxIterations);
+            .arg(_errorTolerance)
+            .arg(_maxIterations);
 }
 
-bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::complex<double> > strainTf)
+bool FrequencyDependentCalculator::updateSubLayer(
+        int index,
+        const QVector<std::complex<double> > &strainTf)
 {
-    const double strainMax = 100 * m_motion->calcMaxStrain(strainTf);
+    const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
-    if (strainMax <= 0)
+    if (strainMax <= 0) {
         return false;
+    }
 
-    const QVector<double> strainFas = m_motion->absFourierVel(strainTf);
+    const QVector<double> strainFas = _motion->absFourierVel(strainTf);
 
-    const QVector<double> &freq = m_motion->freq();
+    const QVector<double> &freq = _motion->freq();
 
     // Compute the mean frequency and mean strain parameters defined by Kausel and Assimaki (2002)
     double numer = 0;
@@ -89,61 +105,93 @@ bool FrequencyDependentCalculator::updateSubLayer(int index, const QVector<std::
     const double strainAvg = sum / freqAvg;
 
     // Update the sublayer with the representative strain -- FIXME strainAvg doesn't appear to be representative
-    m_site->subLayers()[index].setStrain(strainMax, strainMax);
+    _site->subLayers()[index].setStrain(strainMax, strainMax);
 
-    // Calculate model parameter using a least squares fit
-    const int n = m_nf - offset;
-    double chisq;
-    gsl_multifit_linear_workspace* work = gsl_multifit_linear_alloc(n, 2);
-    gsl_matrix* model = gsl_matrix_alloc(n, 2);
-    gsl_vector* data = gsl_vector_alloc(n);
-    gsl_vector* params = gsl_vector_alloc(2);
-    gsl_matrix* cov = gsl_matrix_alloc(2, 2);
-
-    for (int i = 0; i < n; ++i) {
-        gsl_matrix_set(model, i, 0, -freq.at(i + offset) / freqAvg);
-        gsl_matrix_set(model, i, 1, -log(freq.at(i + offset) / freqAvg));
-
-        gsl_vector_set(data, i, log(strainFas.at(i + offset) / strainAvg));
-    }        
-
-    gsl_multifit_linear(model, data, params, cov, &chisq, work);
-
-    const double alpha = gsl_vector_get(params, 0);
-    const double beta = gsl_vector_get(params, 1);
-
-    // Clean up
-    gsl_multifit_linear_free(work);
-    gsl_matrix_free(model);
-    gsl_vector_free(data);
-    gsl_vector_free(params);
-    gsl_matrix_free(cov);
-
-    // Compute the complex shear modulus and complex shear-wave velocity
-    // for each soil layer -- these change because the damping and shear
-    // modulus change.
-    double modulus;
+    double shearMod;
     double damping;
     double strain;
-    const SubLayer &sl = m_site->subLayers().at(index);
+    const SubLayer &sl = _site->subLayers().at(index);
 
-    for (int i = 0; i < m_nf; ++i) {
-        // Compute the strain from the function
-        if (freq.at(i) < freqAvg) {
-            strain = 1.;
-        } else {
-            strain = exp(-alpha * freq.at(i) / freqAvg)
-                     / pow(freq.at(i) / freqAvg, beta);
+    if (_useSmoothSpectrum) {
+        // Calculate model parameter using a least squares fit
+        const int n = _nf - offset;
+        double chisq;
+        gsl_multifit_linear_workspace* work = gsl_multifit_linear_alloc(n, 2);
+        gsl_matrix* model = gsl_matrix_alloc(n, 2);
+        gsl_vector* data = gsl_vector_alloc(n);
+        gsl_vector* params = gsl_vector_alloc(2);
+        gsl_matrix* cov = gsl_matrix_alloc(2, 2);
+
+        for (int i = 0; i < n; ++i) {
+            gsl_matrix_set(model, i, 0, -freq.at(i + offset) / freqAvg);
+            gsl_matrix_set(model, i, 1, -log(freq.at(i + offset) / freqAvg));
+            gsl_vector_set(data, i, log(strainFas.at(i + offset) / strainAvg));
         }
-        // Scale strain by maximum strain
-        strain *= strainMax;
 
-        sl.interp(strain, &modulus, &damping);
-        m_shearMod[index][i] = calcCompShearMod(modulus, damping / 100.);
+        gsl_multifit_linear(model, data, params, cov, &chisq, work);
+
+        const double alpha = gsl_vector_get(params, 0);
+        const double beta = gsl_vector_get(params, 1);
+
+        // Clean up
+        gsl_multifit_linear_free(work);
+        gsl_matrix_free(model);
+        gsl_vector_free(data);
+        gsl_vector_free(params);
+        gsl_matrix_free(cov);
+
+        // Compute the complex shear modulus and complex shear-wave velocity
+        // for each soil layer -- these change because the damping and shear
+        // modulus change.
+        for (int i = 0; i < _nf; ++i) {
+            // Compute the strain from the function
+            // Use a slightly different formulation from Assimaki and Kausel to provide a smooth taper
+            strain = std::min(1.0, exp(-alpha * freq.at(i) / freqAvg)
+                    / pow(freq.at(i) / freqAvg, beta));
+            // Scale strain by maximum strain
+            strain *= strainMax;
+
+            sl.interp(strain, &shearMod, &damping);
+            _shearMod[index][i] = calcCompShearMod(shearMod, damping / 100.);
+        }
+
+        return true;
+    } else {
+        double maxFas = 0;
+        for (const double &d : strainFas) {
+            maxFas = std::max(d, maxFas);
+        }
+        for (int i = 0; i < _nf; ++i) {
+            strain = strainMax * strainFas.at(i) / maxFas;
+            sl.interp(strain, &shearMod, &damping);
+            _shearMod[index][i] = calcCompShearMod(shearMod, damping / 100.);
+        }
     }
 
     return true;
 }
+
+
+void FrequencyDependentCalculator::estimateInitialStrains()
+{
+    auto *calc = new EquivalentLinearCalculator();
+    calc->setTextLog(_textLog);
+    calc->run(_motion, _site);
+
+    for (SubLayer &sl : _site->subLayers()) {
+        sl.setInitialStrain(sl.effStrain());
+    }
+
+    // Compute the complex shear modulus and complex shear-wave velocity for
+    // each soil layer -- initially this is assumed to be frequency independent
+    for (int i = 0; i < _nsl; ++i ) {
+        _shearMod[i].fill(calcCompShearMod(
+                _site->shearMod(i), _site->damping(i) / 100.));
+    }
+
+    calc->deleteLater();
+}
+
 
 void FrequencyDependentCalculator::fromJson(const QJsonObject &json)
 {
@@ -158,9 +206,10 @@ QJsonObject FrequencyDependentCalculator::toJson() const
 QDataStream & operator<<(QDataStream & out,
                                  const FrequencyDependentCalculator* fdc)
 {
-    out << (quint8)1;
+    out << (quint8)2;
 
     out << qobject_cast<const AbstractIterativeCalculator*>(fdc);
+    out << fdc->_useSmoothSpectrum;
 
     return out;
 }
@@ -172,6 +221,9 @@ QDataStream & operator>>(QDataStream & in,
     in >> ver;
 
     in >> qobject_cast<AbstractIterativeCalculator*>(fdc);
+    if (ver > 1) {
+        in >> fdc->_useSmoothSpectrum;
+    }
 
     return in;
 }

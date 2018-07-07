@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class ConfiningStressTableModel : public MyAbstractTableModel
     Q_OBJECT
     
 public:
-    ConfiningStressTableModel( QObject *parent = 0);
+    ConfiningStressTableModel(QObject *parent = nullptr);
     
     int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
     int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
@@ -65,9 +65,9 @@ protected slots:
     
 protected:
     //! Layers
-    QList<Layer*> m_layers;
+    QList<Layer*> _layers;
     
     //! Depth to the water table
-    double m_waterTableDepth; 
+    double _waterTableDepth; 
 };
 #endif

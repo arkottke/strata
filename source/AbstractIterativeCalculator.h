@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@ class AbstractIterativeCalculator : public AbstractCalculator
     friend QDataStream & operator>> (QDataStream & in, AbstractIterativeCalculator* aic);
 
 public:
-    explicit AbstractIterativeCalculator(QObject* parent = 0);
+    explicit AbstractIterativeCalculator(QObject *parent = nullptr);
 
     //! Perform the site response calculation
     virtual bool run(AbstractMotion* motion, SoilProfile* site);
@@ -57,7 +57,7 @@ public slots:
 
 protected:
     //! Compute the nonlinear properties
-    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > strainTf) = 0;
+    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf) = 0;
 
     //! Compute the relative error between two values
     static inline double relError(double value, double reference);
@@ -66,19 +66,19 @@ protected:
     double maxError(const QVector<double> & maxStrain);
 
     //! Set initial strains of the layers
-    void setInitialStrains();
+    virtual void estimateInitialStrains() = 0;
 
     //! Maximum number of iterations in the equivalent linear loop
-    int m_maxIterations;
+    int _maxIterations;
 
     //! Error tolerance of the equivalent linear loop -- percent
-    double m_errorTolerance;
+    double _errorTolerance;
 
     //! Previous maximum strain
-    QVector<double> m_prevMaxStrain;
+    QVector<double> _prevMaxStrain;
 
     //! If the error tolerance was achieved
-    bool m_converged;
+    bool _converged;
 };
 
 #endif // ABSTRACT_ITERATIVE_CALCULATOR_H

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@
 SoilTypeCatalog::SoilTypeCatalog(QObject *parent)
     : MyAbstractTableModel(parent)
 {
-    m_nlCatalog = new NonlinearPropertyCatalog;
+    _nlCatalog = new NonlinearPropertyCatalog;
 
     connect(Units::instance(), SIGNAL(systemChanged(int)),
             this, SLOT(updateUnits()));
@@ -46,7 +46,7 @@ QString SoilTypeCatalog::toHtml() const
     // Create hyper links for soil types
     html += "<ol>";
 
-    foreach (const SoilType* st, m_soilTypes)
+    foreach (const SoilType* st, _soilTypes)
         html += QString("<li><a href=\"#%1\">%1</a></li>").arg(st->name());
 
     // Bedrock information defined in SoilProfile::toHtml()
@@ -56,7 +56,7 @@ QString SoilTypeCatalog::toHtml() const
 
     // Generate the output for each soil type
     html += "<ol>";
-    foreach (const SoilType* st, m_soilTypes)
+    foreach (const SoilType* st, _soilTypes)
         html += "<li>" + st->toHtml() + "</li>";
 
     // Need to leave the ordered list open because the bedrock data will be added to it.
@@ -68,7 +68,7 @@ int SoilTypeCatalog::rowCount(const QModelIndex &parent) const
 {
    Q_UNUSED(parent);
 
-   return m_soilTypes.size();
+   return _soilTypes.size();
 }
 
 int SoilTypeCatalog::columnCount(const QModelIndex &parent) const
@@ -86,23 +86,23 @@ QVariant SoilTypeCatalog::data(const QModelIndex &index, int role) const
     if (role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()) {
         case NameColumn:
-            return m_soilTypes.at(index.row())->name();
+            return _soilTypes.at(index.row())->name();
         case UnitWeightColumn:
-            return QString::number(m_soilTypes.at(index.row())->untWt(), 'f', 2);
+            return QString::number(_soilTypes.at(index.row())->untWt(), 'f', 2);
         case DampingColumn:
-            return QString::number(m_soilTypes.at(index.row())->damping(), 'f', 2);
+            return QString::number(_soilTypes.at(index.row())->damping(), 'f', 2);
         case ModulusModelColumn:
-            return m_soilTypes.at(index.row())->modulusModel()->name();
+            return _soilTypes.at(index.row())->modulusModel()->name();
         case DampingModelColumn:
-            return m_soilTypes.at(index.row())->dampingModel()->name();
+            return _soilTypes.at(index.row())->dampingModel()->name();
         case NotesColumn:
-            return m_soilTypes.at(index.row())->notes();
+            return _soilTypes.at(index.row())->notes();
         case IsVariedColumn:
         default:
             return QVariant();
         }
     } else if (index.column() == IsVariedColumn && role == Qt::CheckStateRole) {
-        return m_soilTypes.at(index.row())->isVaried() ? Qt::Checked : Qt::Unchecked;
+        return _soilTypes.at(index.row())->isVaried() ? Qt::Checked : Qt::Unchecked;
     }
 
     return MyAbstractTableModel::data(index, role);
@@ -110,13 +110,13 @@ QVariant SoilTypeCatalog::data(const QModelIndex &index, int role) const
 
 bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if(index.parent()!=QModelIndex() || m_readOnly)
+    if(index.parent()!=QModelIndex() || _readOnly)
         return false;
 
     if (role == Qt::EditRole) {
         switch (index.column()) {
         case NameColumn:
-            m_soilTypes.at(index.row())->setName(value.toString());
+            _soilTypes.at(index.row())->setName(value.toString());
             break;
         case UnitWeightColumn:
             {
@@ -124,7 +124,7 @@ bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, i
                 double d = value.toDouble(&success);
 
                 if (success) {
-                    m_soilTypes.at(index.row())->setUntWt(d);
+                    _soilTypes.at(index.row())->setUntWt(d);
                     break;
                 } else {
                     return false;
@@ -136,35 +136,35 @@ bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, i
                 double d = value.toDouble(&success);
 
                 if (success) {
-                    m_soilTypes.at(index.row())->setDamping(d);
+                    _soilTypes.at(index.row())->setDamping(d);
                     break;
                 } else {
                     return false;
                 }
             }
         case ModulusModelColumn:
-            if (NonlinearProperty* np = m_nlCatalog->modulusFactory()->duplicateAt(value)) {
-                m_soilTypes.at(index.row())->setModulusModel(np);
+            if (NonlinearProperty* np = _nlCatalog->modulusFactory()->duplicateAt(value)) {
+                _soilTypes.at(index.row())->setModulusModel(np);
                 break;
             } else {
                 return false;
             }
         case DampingModelColumn:
-            if (NonlinearProperty* np = m_nlCatalog->dampingFactory()->duplicateAt(value)) {
-                m_soilTypes.at(index.row())->setDampingModel(np);
+            if (NonlinearProperty* np = _nlCatalog->dampingFactory()->duplicateAt(value)) {
+                _soilTypes.at(index.row())->setDampingModel(np);
                 break;
             } else {
                 return false;
             }
         case NotesColumn:
-            m_soilTypes.at(index.row())->setNotes(value.toString());
+            _soilTypes.at(index.row())->setNotes(value.toString());
             break;
         case IsVariedColumn:
         default:
             return false;
         }
     } else if (index.column() == IsVariedColumn && role == Qt::CheckStateRole) {
-        m_soilTypes.at(index.row())->setIsVaried(value.toBool());
+        _soilTypes.at(index.row())->setIsVaried(value.toBool());
     } else {
         return false;
     }
@@ -220,8 +220,8 @@ bool SoilTypeCatalog::insertRows(int row, int count, const QModelIndex &parent)
     emit beginInsertRows(parent, row, row+count-1);
 
     for (int i=0; i < count; ++i) {
-        m_soilTypes.insert(row, new SoilType(this));
-        emit soilTypeAdded(m_soilTypes.at(row));
+        _soilTypes.insert(row, new SoilType(this));
+        emit soilTypeAdded(_soilTypes.at(row));
     }
 
     emit endInsertRows();
@@ -236,8 +236,8 @@ bool SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent)
     emit beginRemoveRows(parent, row, row+count-1);
 
     for (int i = 0; i < count; ++i){
-        emit soilTypeRemoved(m_soilTypes.at(row));
-        m_soilTypes.takeAt(row)->deleteLater();
+        emit soilTypeRemoved(_soilTypes.at(row));
+        _soilTypes.takeAt(row)->deleteLater();
     }
 
     emit endRemoveRows();
@@ -247,13 +247,13 @@ bool SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent)
 
 SoilType* SoilTypeCatalog::soilType(int row)
 {
-    return m_soilTypes.at(row);
+    return _soilTypes.at(row);
 }
 
 int SoilTypeCatalog::rowOf(SoilType* st) const
 {
-    if (m_soilTypes.contains(st)) {
-        return m_soilTypes.indexOf(st);
+    if (_soilTypes.contains(st)) {
+        return _soilTypes.indexOf(st);
     } else {
         return -1;
     }
@@ -272,8 +272,8 @@ SoilType* SoilTypeCatalog::soilTypeOf(QVariant value)
         i = s.toInt(&ok);
 
         if (!ok) {
-            for (int j = 0; j < m_soilTypes.size(); ++j) {
-                if (m_soilTypes.at(j)->name() == s) {
+            for (int j = 0; j < _soilTypes.size(); ++j) {
+                if (_soilTypes.at(j)->name() == s) {
                     i = j;
                     break;
                 }
@@ -282,7 +282,7 @@ SoilType* SoilTypeCatalog::soilTypeOf(QVariant value)
     }
 
     if (0 <= i && i < rowCount()) {
-        return m_soilTypes.at(i);
+        return _soilTypes.at(i);
     } else {
         return 0;
     }
@@ -290,7 +290,7 @@ SoilType* SoilTypeCatalog::soilTypeOf(QVariant value)
 
 NonlinearPropertyCatalog* SoilTypeCatalog::nlCatalog()
 {
-    return m_nlCatalog;
+    return _nlCatalog;
 }
 
 void SoilTypeCatalog::updateUnits()
@@ -301,13 +301,13 @@ void SoilTypeCatalog::updateUnits()
 void SoilTypeCatalog::fromJson(const QJsonArray &json)
 {
     beginResetModel();
-    while (m_soilTypes.size())
-        m_soilTypes.takeLast()->deleteLater();
+    while (_soilTypes.size())
+        _soilTypes.takeLast()->deleteLater();
 
     foreach (const QJsonValue &v, json) {
         SoilType *st = new SoilType(this);
         st->fromJson(v.toObject());
-        m_soilTypes << st;
+        _soilTypes << st;
     }
 
     endResetModel();
@@ -316,7 +316,7 @@ void SoilTypeCatalog::fromJson(const QJsonArray &json)
 QJsonArray SoilTypeCatalog::toJson() const
 {
     QJsonArray json;
-    foreach (const SoilType *st, m_soilTypes)
+    foreach (const SoilType *st, _soilTypes)
         json << st->toJson();
     return json;
 }
@@ -326,9 +326,9 @@ QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc)
 {
     out << (quint8)1;
 
-    out << stc->m_soilTypes.size();
+    out << stc->_soilTypes.size();
 
-    foreach (SoilType* st, stc->m_soilTypes)
+    foreach (SoilType* st, stc->_soilTypes)
         out << st;
 
     return out;
@@ -344,10 +344,10 @@ QDataStream & operator>> (QDataStream & in, SoilTypeCatalog* stc)
     int size;
     in >> size;
 
-    while (stc->m_soilTypes.size() < size) {
+    while (stc->_soilTypes.size() < size) {
         SoilType* st = new SoilType(stc);
         in >> st;
-        stc->m_soilTypes << st;
+        stc->_soilTypes << st;
     }
 
     stc->endResetModel();

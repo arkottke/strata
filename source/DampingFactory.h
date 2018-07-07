@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ class DampingFactory : public AbstractNonlinearPropertyFactory
     Q_OBJECT
 
 public:
-    DampingFactory(QObject *parent = 0);
+    DampingFactory(QObject *parent = nullptr);
 };
 
 #endif // DAMPING_FACTORY_H

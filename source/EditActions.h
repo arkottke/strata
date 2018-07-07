@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,12 +46,12 @@ class EditActions : public QObject
         void clear();
 
     protected:
-        EditActions(QObject * parent = 0);
+    explicit EditActions(QObject *parent = nullptr);
 
-        static EditActions * m_instance;
+        static EditActions * _instance;
         
-        QAction * m_copyAction;
-        QAction * m_pasteAction;
-        QAction * m_cutAction;
-        QAction * m_clearAction;
+        QAction * _copyAction;
+        QAction * _pasteAction;
+        QAction * _cutAction;
+        QAction * _clearAction;
 };

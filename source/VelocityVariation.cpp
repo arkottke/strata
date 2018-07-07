@@ -15,35 +15,36 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "VelocityVariation.h"
 
 #include "ProfileRandomizer.h"
+
 #include "RockLayer.h"
 #include "SoilLayer.h"
 #include "Units.h"
 
 #include <gsl/gsl_randist.h>
 
-#include <cmath>
 #include <cfloat>
+#include <cmath>
 
 VelocityVariation::VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
-    m_rng(rng), m_profileRandomizer(profileRandomizer)
+    _rng(rng), _profileRandomizer(profileRandomizer)
 {
-    connect(m_profileRandomizer, SIGNAL(enabledChanged(bool)),
+    connect(_profileRandomizer, SIGNAL(enabledChanged(bool)),
             this, SLOT(updateEnabled()));
 
-    m_enabled = false;
-    m_stdevIsLayerSpecific = false;
+    _enabled = false;
+    _stdevIsLayerSpecific = false;
 
-    m_stdevModel = Custom;
+    _stdevModel = Custom;
     setStdevModel(USGS_C);
 
-    m_correlModel = Custom;
+    _correlModel = Custom;
     setCorrelModel(USGS_C);
 }
 
@@ -76,13 +77,13 @@ QStringList VelocityVariation::modelList()
 
 bool VelocityVariation::enabled() const
 {
-    return m_profileRandomizer->enabled() && m_enabled;
+    return _profileRandomizer->enabled() && _enabled;
 }
 
 void VelocityVariation::setEnabled(bool enabled)
 {
-    if (m_enabled != enabled) {
-        m_enabled = enabled;
+    if (_enabled != enabled) {
+        _enabled = enabled;
 
         emit enabledChanged(this->enabled());
         emit stdevIsLayerSpecificChanged(stdevIsLayerSpecific());
@@ -98,20 +99,20 @@ void VelocityVariation::updateEnabled()
 
 VelocityVariation::Model VelocityVariation::stdevModel() const
 {
-    return m_stdevModel;
+    return _stdevModel;
 }
 
 bool VelocityVariation::stdevCustomEnabled() const
 {
-    return m_stdevModel == Custom;
+    return _stdevModel == Custom;
 }
 
 void VelocityVariation::setStdevModel(Model model)
 {
-    if (m_stdevModel != model) {
-        m_stdevModel = model;
+    if (_stdevModel != model) {
+        _stdevModel = model;
 
-        switch (m_stdevModel) {
+        switch (_stdevModel) {
         case Custom:
             break;
         case GeoMatrix_AB:
@@ -140,7 +141,7 @@ void VelocityVariation::setStdevModel(Model model)
             break;
         }
 
-        emit stdevModelChanged(m_stdevModel);
+        emit stdevModelChanged(_stdevModel);
         emit stdevCustomEnabledChanged(stdevCustomEnabled());
         emit wasModified();
     }
@@ -153,13 +154,13 @@ void VelocityVariation::setStdevModel(int model)
 
 bool VelocityVariation::stdevIsLayerSpecific() const
 {
-    return m_stdevIsLayerSpecific;
+    return _stdevIsLayerSpecific;
 }
 
 void VelocityVariation::setStdevIsLayerSpecific(bool b)
 {
-    if (m_stdevIsLayerSpecific != b) {
-        m_stdevIsLayerSpecific = b;
+    if (_stdevIsLayerSpecific != b) {
+        _stdevIsLayerSpecific = b;
 
         emit stdevIsLayerSpecificChanged(b);
         emit wasModified();
@@ -168,35 +169,35 @@ void VelocityVariation::setStdevIsLayerSpecific(bool b)
 
 double VelocityVariation::stdev() const
 {
-    return m_stdev;
+    return _stdev;
 }
 
 void VelocityVariation::setStdev(double stdev)
 {
-    if (fabs(m_stdev - stdev) > DBL_EPSILON) {
-        m_stdev = stdev;
+    if (fabs(_stdev - stdev) > DBL_EPSILON) {
+        _stdev = stdev;
 
-        emit stdevChanged(m_stdev);
+        emit stdevChanged(_stdev);
         emit wasModified();
     }
 }
 
 VelocityVariation::Model VelocityVariation::correlModel() const
 {
-    return m_correlModel;
+    return _correlModel;
 }
 
 bool VelocityVariation::correlCustomEnabled() const
 {
-    return m_correlModel == Custom;
+    return _correlModel == Custom;
 }
 
 void VelocityVariation::setCorrelModel(Model model)
 {
-    if (m_correlModel != model) {
-        m_correlModel = model;
+    if (_correlModel != model) {
+        _correlModel = model;
 
-        switch (m_correlModel) {
+        switch (_correlModel) {
         case Custom:
             break;
         case GeoMatrix_AB:
@@ -257,7 +258,7 @@ void VelocityVariation::setCorrelModel(Model model)
             break;
         }
 
-        emit correlModelChanged(m_correlModel);
+        emit correlModelChanged(_correlModel);
         emit correlCustomEnabledChanged(correlCustomEnabled());
         emit wasModified();
     }
@@ -270,75 +271,75 @@ void VelocityVariation::setCorrelModel(int model)
 
 double VelocityVariation::correlInitial() const
 {
-    return m_correlInitial;
+    return _correlInitial;
 }
 
 void VelocityVariation::setCorrelInitial(double correlInitial)
 {
-    if (fabs(m_correlInitial - correlInitial) > DBL_EPSILON) {
-        m_correlInitial = correlInitial;
+    if (fabs(_correlInitial - correlInitial) > DBL_EPSILON) {
+        _correlInitial = correlInitial;
 
-        emit correlInitialChanged(m_correlInitial);
+        emit correlInitialChanged(_correlInitial);
         emit wasModified();
     }
 }
 
 double VelocityVariation::correlFinal() const
 {
-    return m_correlFinal;
+    return _correlFinal;
 }
 
 void VelocityVariation::setCorrelFinal(double correlFinal)
 {
-    if (fabs(m_correlFinal - correlFinal) > DBL_EPSILON) {
-        m_correlFinal = correlFinal;
+    if (fabs(_correlFinal - correlFinal) > DBL_EPSILON) {
+        _correlFinal = correlFinal;
 
-        emit correlFinalChanged(m_correlFinal);
+        emit correlFinalChanged(_correlFinal);
         emit wasModified();
     }
 }
 
 double VelocityVariation::correlDelta() const
 {
-    return m_correlDelta;
+    return _correlDelta;
 }
 
 void VelocityVariation::setCorrelDelta(double correlDelta)
 {
-    if (fabs(m_correlDelta - correlDelta) > DBL_EPSILON) {
-        m_correlDelta = correlDelta;
+    if (fabs(_correlDelta - correlDelta) > DBL_EPSILON) {
+        _correlDelta = correlDelta;
 
-        emit correlDeltaChanged(m_correlDelta);
+        emit correlDeltaChanged(_correlDelta);
         emit wasModified();
     }
 }
 
 double VelocityVariation::correlIntercept() const
 {
-    return m_correlIntercept;
+    return _correlIntercept;
 }
 
 void VelocityVariation::setCorrelIntercept(double correlIntercept)
 {
-    if (fabs(m_correlIntercept - correlIntercept) > DBL_EPSILON) {
-        m_correlIntercept = correlIntercept;
+    if (fabs(_correlIntercept - correlIntercept) > DBL_EPSILON) {
+        _correlIntercept = correlIntercept;
 
-        emit correlInterceptChanged(m_correlIntercept);
+        emit correlInterceptChanged(_correlIntercept);
         emit wasModified();
     }
 }
 
 double VelocityVariation::correlExponent() const
 {
-    return m_correlExponent;
+    return _correlExponent;
 }
 
 void VelocityVariation::setCorrelExponent(double correlExponent)
 {
-    if (fabs(m_correlExponent - correlExponent) > DBL_EPSILON) {
-        m_correlExponent = correlExponent;
+    if (fabs(_correlExponent - correlExponent) > DBL_EPSILON) {
+        _correlExponent = correlExponent;
 
-        emit correlExponentChanged(m_correlExponent);
+        emit correlExponentChanged(_correlExponent);
         emit wasModified();
     }
 }
@@ -354,11 +355,11 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
     const double toMeters = Units::instance()->toMeters();
 
     for (int i = 0; i < soilLayers.size(); ++i) {
-        stdev = m_stdevIsLayerSpecific ? soilLayers.at(i)->stdev() : m_stdev;
+        stdev = _stdevIsLayerSpecific ? soilLayers.at(i)->stdev() : _stdev;
 
         if (i == 0) {
             // First layer is not correlated
-            randVar = gsl_ran_gaussian(m_rng, stdev);
+            randVar = gsl_ran_gaussian(_rng, stdev);
         } else {
             // Depth at the middle of the layer
             double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
@@ -368,12 +369,12 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
 
             // Depth dependent correlation
             const double dCorrel =  (depthToMid <= 200) ?
-                                    m_correlFinal * pow((depthToMid + m_correlInitial)
-                                                        / (200 + m_correlInitial), m_correlExponent)
-                                                            : m_correlFinal;
+                                    _correlFinal * pow((depthToMid + _correlInitial)
+                                                        / (200 + _correlInitial), _correlExponent)
+                                                            : _correlFinal;
             // Thickness dependent correlation. Again convert to meters
-            const double tCorrel = m_correlInitial * exp( -toMeters *
-                    soilLayers.at(i)->thickness() / m_correlDelta );
+            const double tCorrel = _correlInitial * exp( -toMeters *
+                    soilLayers.at(i)->thickness() / _correlDelta );
 
             // Combine the correlations
             double correl = (1 - dCorrel) * tCorrel + dCorrel;
@@ -381,7 +382,7 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
             // Compute the random variable taking into account the correlation from
             // the previous layer.
             randVar = correl * prevRandVar
-                             + gsl_ran_gaussian(m_rng, stdev) * sqrt( 1 - correl * correl);
+                             + gsl_ran_gaussian(_rng, stdev) * sqrt( 1 - correl * correl);
         }
 
         if (soilLayers.at(i)->isVaried()) {
@@ -406,7 +407,7 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
         double randVar = prevRandVar;
 
         // Adjust the random variable by the ratio of the standard deviation
-        if (m_stdevIsLayerSpecific) {
+        if (_stdevIsLayerSpecific) {
             randVar *= bedrock->stdev() / soilLayers.last()->stdev();
         }
 
@@ -422,42 +423,42 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
 
 void VelocityVariation::fromJson(const QJsonObject &json)
 {
-    m_enabled = json["enabled"].toBool();
+    _enabled = json["enabled"].toBool();
 
     setStdevModel(json["stdevModel"].toInt());
-    if (m_stdevModel == VelocityVariation::Custom) {
-         m_stdevIsLayerSpecific = json["stdevIsLayerSpecific"].toBool();
-         m_stdev = json["stdev"].toDouble();
+    if (_stdevModel == VelocityVariation::Custom) {
+         _stdevIsLayerSpecific = json["stdevIsLayerSpecific"].toBool();
+         _stdev = json["stdev"].toDouble();
     }
 
     setCorrelModel(json["correlModel"].toInt());
-    if (m_correlModel == VelocityVariation::Custom) {
-        m_correlInitial = json["correlInitial"].toDouble();
-        m_correlFinal = json["correlFinal"].toDouble();
-        m_correlDelta = json["correlDelta"].toDouble();
-        m_correlIntercept = json["correlIntercept"].toDouble();
-        m_correlExponent = json["correlExponent"].toDouble();
+    if (_correlModel == VelocityVariation::Custom) {
+        _correlInitial = json["correlInitial"].toDouble();
+        _correlFinal = json["correlFinal"].toDouble();
+        _correlDelta = json["correlDelta"].toDouble();
+        _correlIntercept = json["correlIntercept"].toDouble();
+        _correlExponent = json["correlExponent"].toDouble();
     }
 }
 
 QJsonObject VelocityVariation::toJson() const
 {
     QJsonObject json;
-    json["enabled"] = m_enabled;
-    json["stdevModel"] = (int) m_stdevModel;
-    json["correlModel"] = (int) m_correlModel;
+    json["enabled"] = _enabled;
+    json["stdevModel"] = (int) _stdevModel;
+    json["correlModel"] = (int) _correlModel;
 
-    if (m_stdevModel == VelocityVariation::Custom) {
-        json["stdevIsLayerSpecific"] = m_stdevIsLayerSpecific;
-        json["stdev"] = m_stdev;
+    if (_stdevModel == VelocityVariation::Custom) {
+        json["stdevIsLayerSpecific"] = _stdevIsLayerSpecific;
+        json["stdev"] = _stdev;
     }
 
-    if (m_correlModel == VelocityVariation::Custom) {
-        json["correlInitial"] = m_correlInitial;
-        json["correlFinal"] = m_correlFinal;
-        json["correlDelta"] = m_correlDelta;
-        json["correlIntercept"] = m_correlIntercept;
-        json["correlExponent"] = m_correlExponent;
+    if (_correlModel == VelocityVariation::Custom) {
+        json["correlInitial"] = _correlInitial;
+        json["correlFinal"] = _correlFinal;
+        json["correlDelta"] = _correlDelta;
+        json["correlIntercept"] = _correlIntercept;
+        json["correlExponent"] = _correlExponent;
     }
 
     return json;
@@ -467,22 +468,22 @@ QDataStream & operator<< (QDataStream & out, const VelocityVariation* vv)
 {
     out << (quint8)1;
 
-    out << vv->m_enabled
-        << (int)vv->m_stdevModel;
+    out << vv->_enabled
+        << (int)vv->_stdevModel;
 
-    if (vv->m_stdevModel == VelocityVariation::Custom) {
-        out << vv->m_stdevIsLayerSpecific
-            << vv->m_stdev;
+    if (vv->_stdevModel == VelocityVariation::Custom) {
+        out << vv->_stdevIsLayerSpecific
+            << vv->_stdev;
     }
 
-    out << (int)vv->m_correlModel;
+    out << (int)vv->_correlModel;
 
-    if (vv->m_correlModel == VelocityVariation::Custom) {
-        out << vv->m_correlInitial
-            << vv->m_correlFinal
-            << vv->m_correlDelta
-            << vv->m_correlIntercept
-            << vv->m_correlExponent;
+    if (vv->_correlModel == VelocityVariation::Custom) {
+        out << vv->_correlInitial
+            << vv->_correlFinal
+            << vv->_correlDelta
+            << vv->_correlIntercept
+            << vv->_correlExponent;
     }
 
     return out;
@@ -496,26 +497,26 @@ QDataStream & operator>> (QDataStream & in, VelocityVariation* vv)
     int stdevModel;
     int correlModel;
 
-    in >> vv->m_enabled
+    in >> vv->_enabled
        >> stdevModel;
 
     // Need to call set model to update values
     vv->setStdevModel(stdevModel);
 
-    if (vv->m_stdevModel == VelocityVariation::Custom) {
-        in >> vv->m_stdevIsLayerSpecific
-           >> vv->m_stdev;
+    if (vv->_stdevModel == VelocityVariation::Custom) {
+        in >> vv->_stdevIsLayerSpecific
+           >> vv->_stdev;
     }
 
     in >> correlModel;
     vv->setCorrelModel(correlModel);
 
-    if (vv->m_correlModel == VelocityVariation::Custom) {
-        in >> vv->m_correlInitial
-           >> vv->m_correlFinal
-           >> vv->m_correlDelta
-           >> vv->m_correlIntercept
-           >> vv->m_correlExponent;
+    if (vv->_correlModel == VelocityVariation::Custom) {
+        in >> vv->_correlInitial
+           >> vv->_correlFinal
+           >> vv->_correlDelta
+           >> vv->_correlIntercept
+           >> vv->_correlExponent;
     }
 
     return in;

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,19 +25,21 @@
 class Location
 {
     public:
-        Location( int layer = 0, double depth = 0);
+    explicit Location(int layer = 0, double depth = 0);
 
         int layer() const;
-        void setLayer(const int layer);
+
+    void setLayer(int layer);
 
         double depth() const;
-        void setDepth(const double depth);
+
+    void setDepth(double depth);
 
     private:
         //! Sublayer index of the location
-        int m_layer;
+        int _layer;
 
         //! Depth from the top of the layer
-        double m_depth;
+        double _depth;
 };
 #endif // LOCATION_H_

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,14 +38,15 @@ class NonlinearPropertyCatalogDialog : public QDialog
     Q_OBJECT
 
 public:
-    NonlinearPropertyCatalogDialog(NonlinearPropertyCatalog* const catalog, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    NonlinearPropertyCatalogDialog(NonlinearPropertyCatalog *const catalog,
+                                   QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
 protected slots:
     void setDataModel(NonlinearProperty *np, bool readOnly);
 
 protected:    
     //! Table showing the current model
-    TableGroupBox *m_dataGroupBox;
+    TableGroupBox *_dataGroupBox;
 };
 
 #endif

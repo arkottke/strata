@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@
 DissipatedEnergyProfileOutput::DissipatedEnergyProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
 {
-    m_offset = 1;
+    _offset = 1;
 }
 
 QString DissipatedEnergyProfileOutput::name() const
@@ -66,9 +66,9 @@ void DissipatedEnergyProfileOutput::extract(AbstractCalculator* const calculator
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-    foreach (double depth, this->ref()) {
+    for (const double &depth : this->ref()) {
         if (abs(depth - 0) < 0.01) {
             // No values at the surface
             data << 0.;

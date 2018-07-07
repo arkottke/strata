@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -26,29 +26,27 @@
 #include "SubLayer.h"
 #include "TextLog.h"
 
-#include "math.h"
-
 AbstractIterativeCalculator::AbstractIterativeCalculator(QObject *parent)
-    : AbstractCalculator(parent), m_maxIterations(0), m_errorTolerance(0),
-    m_converged(false)
+    : AbstractCalculator(parent), _maxIterations(0), _errorTolerance(0),
+    _converged(false)
 {
-    m_maxIterations = 10;
-    m_errorTolerance = 2.;
-    m_converged = false;
+    _maxIterations = 10;
+    _errorTolerance = 2.;
+    _converged = false;
 }
 
 bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
 {
     init(motion, site);
-    m_okToContinue = true;
-    m_converged = false;
+    _okToContinue = true;
+    _converged = false;
 
     // Compute the bedrock properties -- these do not change during the process.
     // The shear modulus is constant over the frequency range.
-    m_shearMod[m_nsl].fill(calcCompShearMod(
-            m_site->bedrock()->shearMod(), m_site->bedrock()->damping() / 100.));
+    _shearMod[_nsl].fill(calcCompShearMod(
+            _site->bedrock()->shearMod(), _site->bedrock()->damping() / 100.));
 
-    setInitialStrains();
+    estimateInitialStrains();
 
     // Initialize the loop control variables
     int iter = 0;
@@ -59,110 +57,91 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     // and the number of iterations is under the maximum compute the strain
     // compatible properties.
     do {
-        if (!m_okToContinue)
+        if (!_okToContinue) {
             return false;
-
+        }
         // Compute the upgoing and downgoing waves
-        if (!calcWaves())
+        if (!calcWaves()) {
             return false;
-
+        }
         // Compute the strain in each of the layers
-        for (int i = 0; i < m_nsl; ++i) {
-            strainTf = calcStrainTf(m_site->inputLocation(), m_motion->type(),
-                                    Location(i, m_site->subLayers().at(i).thickness() / 2));
-
+        for (int i = 0; i < _nsl; ++i) {
+            strainTf = calcStrainTf(_site->inputLocation(), _motion->type(),
+                                    Location(i, _site->subLayers().at(i).thickness() / 2));
             // Update the soil layer with the new strain -- only changes the complex shear modulus
-            if (!updateSubLayer(i, strainTf))
+            if (!updateSubLayer(i, strainTf)) {
                 return false;
-
+            }
             // Save the error for the first layer or if the error within the layer is larger than the previously saved max
-            if (!i || maxError < m_site->subLayers().at(i).error())
-                maxError = m_site->subLayers().at(i).error();
-
-            if (!m_okToContinue)
+            if (!i || maxError < _site->subLayers().at(i).error()) {
+                maxError = _site->subLayers().at(i).error();
+            }
+            if (!_okToContinue) {
                 return false;
+            }
         }
 
         // Print information regarding the iteration
-        if ( m_textLog->level() > TextLog::Low )
-            m_textLog->append(QString(QObject::tr("\t\t\tIteration: %1 Maximum Error: %2 %"))
-                              .arg(iter+1)
-                              .arg(maxError, 0, 'f', 2));
-
-        if ( m_textLog->level() > TextLog::Medium )
-            m_textLog->append("\t\t" + m_site->subLayerTable());
-
+        if ( _textLog->level() > TextLog::Low ) {
+            _textLog->append(QString(QObject::tr("\t\t\tIteration: %1 Maximum Error: %2 %"))
+                                     .arg(iter + 1)
+                                     .arg(maxError, 0, 'f', 2));
+        }
+        if ( _textLog->level() > TextLog::Medium ) {
+            _textLog->append("\t\t" + _site->subLayerTable());
+        }
         // Step the iteration
         ++iter;
 
-    } while((maxError > m_errorTolerance)  && (iter < m_maxIterations));
+    } while((maxError > _errorTolerance)  && (iter < _maxIterations));
 
-    if ((iter == m_maxIterations ) && ( maxError > m_errorTolerance ) ) {
-        m_textLog->append(QString(QObject::tr("\t\t\t!! -- Maximum number of iterations reached (%1). Maximum Error: %2 %"))
+    if ((iter == _maxIterations ) && ( maxError > _errorTolerance ) ) {
+        _textLog->append(QString(QObject::tr("\t\t\t!! -- Maximum number of iterations reached (%1). Maximum Error: %2 %"))
                           .arg(iter)
                           .arg(maxError, 0, 'f', 2));
 
-        m_converged = false;
+        _converged = false;
     } else {
-        m_converged = true;
+        _converged = true;
     }
 
     return true;
 }
 
-void AbstractIterativeCalculator::setInitialStrains()
-{
-    // Estimate the intial strain from the ratio of peak ground velocity of the
-    //  motion and the shear-wave velocity of the layer.
-    double estimatedStrain = 0;
-    for (int i = 0; i < m_nsl; ++i) {
-        estimatedStrain = m_motion->pgv() / m_site->subLayers().at(i).shearVel();
-        m_site->subLayers()[i].setInitialStrain(estimatedStrain);
-    }
-
-    // Compute the complex shear modulus and complex shear-wave velocity for
-    // each soil layer -- initially this is assumed to be frequency independent
-    for (int i = 0; i < m_nsl; ++i ) {
-        m_shearMod[i].fill(calcCompShearMod(
-                m_site->shearMod(i), m_site->damping(i) / 100.));
-    }
-}
-
 int AbstractIterativeCalculator::maxIterations() const
 {
-    return m_maxIterations;
+    return _maxIterations;
 }
 
 void AbstractIterativeCalculator::setMaxIterations(int maxIterations)
 {
-    if (m_maxIterations != maxIterations) {
-        m_maxIterations = maxIterations;
+    if (_maxIterations != maxIterations) {
+        _maxIterations = maxIterations;
 
-        emit maxIterationsChanged(m_maxIterations);
+        emit maxIterationsChanged(_maxIterations);
         emit wasModified();
     }
 }
 
 double AbstractIterativeCalculator::errorTolerance() const
 {
-    return m_errorTolerance;
+    return _errorTolerance;
 }
 
 void AbstractIterativeCalculator::setErrorTolerance(double errorTolerance)
 {
-    if (m_errorTolerance != errorTolerance) {
-        m_errorTolerance = errorTolerance;
+    if (_errorTolerance != errorTolerance) {
+        _errorTolerance = errorTolerance;
 
-        emit errorToleranceChanged(m_errorTolerance);
+        emit errorToleranceChanged(_errorTolerance);
         emit wasModified();
     }
 }
 
 bool AbstractIterativeCalculator::converged() const
 {
-    return m_converged;
+    return _converged;
 }
-
 
 double AbstractIterativeCalculator::relError(double value, double reference)
 {
@@ -171,34 +150,33 @@ double AbstractIterativeCalculator::relError(double value, double reference)
 
 double AbstractIterativeCalculator::maxError(const QVector<double> &maxStrain)
 {
-    Q_ASSERT(m_prevMaxStrain.size() == maxStrain.size());
-
-    double max = relError(maxStrain.first(), m_prevMaxStrain.first());
+    Q_ASSERT(_prevMaxStrain.size() == maxStrain.size());
+    double max = relError(maxStrain.first(), _prevMaxStrain.first());
 
     for (int i = 1; i < maxStrain.size(); ++i) {
-        const double re = relError(maxStrain.at(i), m_prevMaxStrain.at(i));
+        const double re = relError(maxStrain.at(i), _prevMaxStrain.at(i));
 
         if (re > max)
             max = re;
     }
 
     // Save the maximum strains
-    m_prevMaxStrain = maxStrain;
+    _prevMaxStrain = maxStrain;
 
     return max;
 }
 
 void AbstractIterativeCalculator::fromJson(const QJsonObject &json)
 {
-    m_maxIterations = json["maxIterations"].toInt();
-    m_errorTolerance = json["errorTolerance"].toDouble();
+    _maxIterations = json["maxIterations"].toInt();
+    _errorTolerance = json["errorTolerance"].toDouble();
 }
 
 QJsonObject AbstractIterativeCalculator::toJson() const
 {
     QJsonObject json;
-    json["maxIterations"] = m_maxIterations;
-    json["errorTolerance"] = m_errorTolerance;
+    json["maxIterations"] = _maxIterations;
+    json["errorTolerance"] = _errorTolerance;
     return json;
 }
 
@@ -207,8 +185,8 @@ QDataStream & operator<< (QDataStream & out, const AbstractIterativeCalculator* 
 {
     out << (quint8)1;
 
-    out << aic->m_maxIterations
-            << aic->m_errorTolerance;
+    out << aic->_maxIterations
+        << aic->_errorTolerance;
 
     return out;
 }
@@ -218,8 +196,8 @@ QDataStream & operator>> (QDataStream & in, AbstractIterativeCalculator* aic)
     quint8 ver;
     in >> ver;
 
-    in >> aic->m_maxIterations
-            >> aic->m_errorTolerance;
+    in >> aic->_maxIterations
+       >> aic->_errorTolerance;
 
     return in;
 }

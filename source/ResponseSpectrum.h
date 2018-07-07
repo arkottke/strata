@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +39,7 @@ class ResponseSpectrum : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, ResponseSpectrum* rs);
 
 public:
-    ResponseSpectrum(QObject * parent = 0);
+    ResponseSpectrum(QObject *parent = nullptr);
 
     bool modified() const;
 
@@ -85,15 +85,15 @@ private:
     };
 
     //! If the data has been modified -- FIXME still needed?
-    bool m_modified;
+    bool _modified;
 
     //! Damping in percent
-    double m_damping;
+    double _damping;
 
     //! Period values in seconds
-    QVector<double> m_period;
+    QVector<double> _period;
 
     //! Spectral acceleration in gravity
-    QVector<double> m_sa;
+    QVector<double> _sa;
 };
 #endif

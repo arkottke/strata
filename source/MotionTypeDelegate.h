@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ class MotionTypeDelegate : public QItemDelegate
 {
 Q_OBJECT
 public:
-    explicit MotionTypeDelegate(QObject *parent = 0);
+    explicit MotionTypeDelegate(QObject *parent = nullptr);
 
     QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem
                            &option, const QModelIndex &index) const;

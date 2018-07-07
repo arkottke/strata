@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,17 +30,17 @@
 
 NonlinearPropertyOutput::NonlinearPropertyOutput(
         NonlinearProperty* nonlinearProperty, OutputCatalog* catalog)
-    : AbstractOutput(catalog), m_nonlinearProperty(nonlinearProperty)
+    : AbstractOutput(catalog), _nonlinearProperty(nonlinearProperty)
 {
-    m_statistics = new OutputStatistics(this);
-    connect(m_statistics, SIGNAL(wasModified()),
+    _statistics = new OutputStatistics(this);
+    connect(_statistics, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 }
 
 
 QString NonlinearPropertyOutput::name() const
 {
-    switch (m_nonlinearProperty->type()) {
+    switch (_nonlinearProperty->type()) {
     case NonlinearProperty::Damping:
         return tr("Damping Ratio");
     case NonlinearProperty::ModulusReduction:
@@ -59,7 +59,7 @@ QString NonlinearPropertyOutput::fullName() const
 
 QString NonlinearPropertyOutput::shortName() const
 {
-    switch (m_nonlinearProperty->type()) {
+    switch (_nonlinearProperty->type()) {
     case NonlinearProperty::Damping:
         return "damping";
     case NonlinearProperty::ModulusReduction:
@@ -83,20 +83,20 @@ QString NonlinearPropertyOutput::fileName(int motion) const
 
 const QString& NonlinearPropertyOutput::soilName() const
 {
-    return m_soilName;
+    return _soilName;
 }
 
 void NonlinearPropertyOutput::setNonlinearProperty(NonlinearProperty* nonlinearProperty)
 {
-    m_nonlinearProperty = nonlinearProperty;
+    _nonlinearProperty = nonlinearProperty;
 }
 
 void NonlinearPropertyOutput::setSoilName(const QString &soilName)
 {
-    if (m_soilName != soilName) {
-        m_soilName = soilName;
+    if (_soilName != soilName) {
+        _soilName = soilName;
 
-        emit soilNameChanged(m_soilName);
+        emit soilNameChanged(_soilName);
         emit wasModified();
     }
 }
@@ -118,7 +118,7 @@ const QString NonlinearPropertyOutput::xLabel() const
 
 const QString NonlinearPropertyOutput::yLabel() const
 {
-    switch (m_nonlinearProperty->type()) {
+    switch (_nonlinearProperty->type()) {
     case NonlinearProperty::Damping:
         return tr("Damping (%)");
     case NonlinearProperty::ModulusReduction:
@@ -130,7 +130,7 @@ const QString NonlinearPropertyOutput::yLabel() const
 
 const QString NonlinearPropertyOutput::prefix() const
 {
-    return m_soilName;
+    return _soilName;
 }
 
 const QString NonlinearPropertyOutput::suffix() const
@@ -142,7 +142,7 @@ const QVector<double>& NonlinearPropertyOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
 
-    return m_nonlinearProperty->strain();
+    return _nonlinearProperty->strain();
 }
 
 void NonlinearPropertyOutput::extract(AbstractCalculator* const calculator,
@@ -151,5 +151,5 @@ void NonlinearPropertyOutput::extract(AbstractCalculator* const calculator,
     Q_UNUSED(calculator);
     Q_UNUSED(ref);
 
-    data = m_nonlinearProperty->varied();
+    data = _nonlinearProperty->varied();
 }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@
 StrainTimeSeriesOutput::StrainTimeSeriesOutput(OutputCatalog* catalog)
     : AbstractTimeSeriesOutput(catalog)
 {
-    m_type = AbstractMotion::Within;
+    _type = AbstractMotion::Within;
 }
 
 QString StrainTimeSeriesOutput::name() const
@@ -59,7 +59,7 @@ void StrainTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 
     data = tsm->strainTimeSeries(calculator->calcStrainTf(
             calculator->site()->inputLocation(), calculator->motion()->type(),
-            calculator->site()->depthToLocation(m_depth)), m_baselineCorrect);
+            calculator->site()->depthToLocation(_depth)), _baselineCorrect);
     
     // Convert to percent
     for (int i = 0; i < data.size(); ++i)

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@ VerticalTotalStressProfileOutput::VerticalTotalStressProfileOutput(OutputCatalog
     : AbstractProfileOutput(catalog)
 {
     // Skip the zero at the surface
-    m_offset = 1;
+    _offset = 1;
 }
 
 QString VerticalTotalStressProfileOutput::name() const
@@ -59,7 +59,7 @@ void VerticalTotalStressProfileOutput::extract(AbstractCalculator* const calcula
     ref << 0.;
     data << 0.;
 
-    foreach (const SubLayer & sl, subLayers) {
+    for (const SubLayer &sl : subLayers) {
         ref << sl.depthToMid();
         data << sl.vTotalStress();
     }

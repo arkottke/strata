@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,67 +31,67 @@
 #include <QDebug>
 
 CompatibleRvtMotion::CompatibleRvtMotion(QObject* parent)
-    : AbstractRvtMotion(parent)
+        : AbstractRvtMotion(parent)
 {
-    m_freq = new Dimension(this);
-    m_freq->setMin(0.05);
-    m_freq->setMax(50);
-    m_freq->setSize(1024);
-    m_freq->setSpacing(Dimension::Log);
+    _freq = new Dimension(this);
+    _freq->setMin(0.05);
+    _freq->setMax(50);
+    _freq->setSize(1024);
+    _freq->setSpacing(Dimension::Log);
 
-    m_fourierAcc = QVector<double>(freq().size(), 0.);
+    _fourierAcc = QVector<double>(freq().size(), 0.);
 
-    m_duration = 5.0;
-    m_limitFas = true;
+    _duration = 5.0;
+    _limitFas = false;
 
-    m_targetRespSpec = new ResponseSpectrum;
-    m_targetRespSpec->setDamping(5.0);
+    _targetRespSpec = new ResponseSpectrum;
+    _targetRespSpec->setDamping(5.0);
 
-    m_name = tr("Compatible RVT Motion");
+    _name = tr("Compatible RVT Motion (M $mag @ $dist km)");
 }
 
 CompatibleRvtMotion::~CompatibleRvtMotion()
 {
-    m_targetRespSpec->deleteLater();
+    _targetRespSpec->deleteLater();
 }
 
 const QVector<double> & CompatibleRvtMotion::freq() const
 {
-    return m_freq->data();
+    return _freq->data();
 }
 
 Dimension*  CompatibleRvtMotion::freqDimension()
 {
-    return m_freq;
+    return _freq;
 }
 
 ResponseSpectrum * CompatibleRvtMotion::targetRespSpec()
 {
-    return m_targetRespSpec;
+    return _targetRespSpec;
 }
 
 bool CompatibleRvtMotion::limitFas() const
 {
-    return m_limitFas;
+    return _limitFas;
 }
 
 void CompatibleRvtMotion::setLimitFas(bool limitFas)
 {
-    if ( m_limitFas != limitFas ) {
-        m_modified = true;
+    if ( _limitFas != limitFas ) {
+        _modified = true;
         emit wasModified();
     }
 
-    m_limitFas = limitFas;
+    _limitFas = limitFas;
 }
 
 void CompatibleRvtMotion::setDuration(double duration)
 {
-    if (m_duration != duration) {
+    if (_duration != duration) {
         setModified(true);
     }
 
-    m_duration = duration;
+    _duration = duration;
 }
 
 QString CompatibleRvtMotion::toHtml() const
@@ -136,8 +136,8 @@ bool CompatibleRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
         line = stream.readLine();
     }
 
-    m_targetRespSpec->setPeriod(period);
-    m_targetRespSpec->setSa(sa);
+    _targetRespSpec->setPeriod(period);
+    _targetRespSpec->setSa(sa);
 
     calculate();
 
@@ -148,16 +148,16 @@ void CompatibleRvtMotion::calculate()
 {
     beginResetModel();
     // Check that both period and sa have some length
-    if ( m_targetRespSpec->period().size() == 0 ||
-         m_targetRespSpec->sa().size() != m_targetRespSpec->period().size()
-        ) {
+    if ( _targetRespSpec->period().size() == 0 ||
+         _targetRespSpec->sa().size() != _targetRespSpec->period().size()
+            ) {
         qCritical("Both period and sa must be defined.");
         return;
     }
 
     // Check that the given period is constantly increasing
-    for( int i = 0; i < m_targetRespSpec->period().size() - 1; ++i) {
-        if( m_targetRespSpec->period().at(i) > m_targetRespSpec->period().at(i+1) ) {
+    for( int i = 0; i < _targetRespSpec->period().size() - 1; ++i) {
+        if( _targetRespSpec->period().at(i) > _targetRespSpec->period().at(i+1) ) {
             qCritical("The given period must be increasing");
             return;
         }
@@ -169,30 +169,30 @@ void CompatibleRvtMotion::calculate()
     const QVector<double> estimateFas = vanmarckeInversion();
 
     // Interpolate the FAS using a cubic spline, extrapolate at low frequencies.
-    const double targetMinFreq = 1. / m_targetRespSpec->period().last();
+    const double targetMinFreq = 1. / _targetRespSpec->period().last();
 
-//    m_freq = Dimension::logSpace( qMin(targetMinFreq / 2., 0.05), m_maxEngFreq, 1024 );
-//    m_fourierAcc.resize(freq().size());
+//    _freq = Dimension::logSpace( qMin(targetMinFreq / 2., 0.05), _maxEngFreq, 1024 );
+//    _fourierAcc.resize(freq().size());
     int offset = 0;
 
     gsl_interp_accel * acc = gsl_interp_accel_alloc ();
-    gsl_spline * spline = gsl_spline_alloc(gsl_interp_cspline, m_targetRespSpec->period().size());
+    gsl_spline * spline = gsl_spline_alloc(gsl_interp_cspline, _targetRespSpec->period().size());
 
-    gsl_spline_init (spline, m_targetRespSpec->period().data(),
-                     estimateFas.data(), m_targetRespSpec->period().size());
+    gsl_spline_init (spline, _targetRespSpec->period().data(),
+                     estimateFas.data(), _targetRespSpec->period().size());
 
     const double logFas0 = log(estimateFas.first());
-    const double freq0 = 1 / m_targetRespSpec->period().last();
+    const double freq0 = 1 / _targetRespSpec->period().last();
 
     for (int i = 0; i < freq().size(); ++i) {
         if (freq().at(i) < targetMinFreq) {
             // Linearly extrapolate in log-log space.  This extrapolation is
             // not very rigorous, but it is just used to develop an initial
             // estimate of the FAS.
-            m_fourierAcc[i] = exp(1.92 * log(freq().at(i)/freq0) + logFas0);
+            _fourierAcc[i] = exp(1.92 * log(freq().at(i)/freq0) + logFas0);
             offset = i;
         } else {
-            m_fourierAcc[i] = gsl_spline_eval(spline, 1. / freq().at(i), acc);
+            _fourierAcc[i] = gsl_spline_eval(spline, 1. / freq().at(i), acc);
         }
     }
 
@@ -203,10 +203,10 @@ void CompatibleRvtMotion::calculate()
 
     // Interpolation for the ratio between target and calculated response spectrum
     acc = gsl_interp_accel_alloc();
-    spline = gsl_spline_alloc(gsl_interp_cspline, m_targetRespSpec->period().size());
+    spline = gsl_spline_alloc(gsl_interp_cspline, _targetRespSpec->period().size());
 
     // Loop over ratio correction while the rmse error is larger than FIXME
-    m_okToContinue = true;
+    _okToContinue = true;
     double rmse = 0;
     double maxError = 0;
     double oldRmse = 1;
@@ -217,11 +217,11 @@ void CompatibleRvtMotion::calculate()
     int count = 0;
 
     // Initial response spectrum
-    m_respSpec->setDamping(m_targetRespSpec->damping());
-    m_respSpec->setPeriod(m_targetRespSpec->period());
-    m_respSpec->setSa(computeSa(m_targetRespSpec->period(), m_targetRespSpec->damping()));
+    _respSpec->setDamping(_targetRespSpec->damping());
+    _respSpec->setPeriod(_targetRespSpec->period());
+    _respSpec->setSa(computeSa(_targetRespSpec->period(), _targetRespSpec->damping()));
 
-    QVector<double> ratio(m_respSpec->sa().size());
+    QVector<double> ratio(_respSpec->sa().size());
 
     // Set the maximum value of the progress
     emit progressRangeChanged(0, maxCount);
@@ -231,37 +231,39 @@ void CompatibleRvtMotion::calculate()
 
         // Determine the correction ratio
         for (int i = 0; i < ratio.size(); ++i)
-            ratio[i] = m_targetRespSpec->sa().at(i) / m_respSpec->sa().at(i);
+            ratio[i] = _targetRespSpec->sa().at(i) / _respSpec->sa().at(i);
 
         // Apply the ratio correction to the FAS
-        gsl_spline_init(spline, m_respSpec->period().data(), ratio.data(), ratio.size());
+        gsl_spline_init(spline, _respSpec->period().data(), ratio.data(), ratio.size());
 
-        for (int i = offset; i < freq().size(); ++i)
-            m_fourierAcc[i] *= gsl_spline_eval(spline, 1. / freq().at(i), acc);
+        for (int i = offset; i < freq().size(); ++i) {
+            _fourierAcc[i] *= gsl_spline_eval(spline, 1. / freq().at(i), acc);
+        }
 
         // Extrapolate the low frequency values
         double logFreq0 = log(freq().at(offset));
-        double logFas0 = log(m_fourierAcc.at(offset));
-		
-		// The theoretical slope at low frequenc
-        double slope = m_limitFas ? 2 :
-                       (log(m_fourierAcc.at(offset)/m_fourierAcc.at(offset+1))
-                        / log( freq().at(offset)/freq().at(offset+1)));
+        double logFas0 = log(_fourierAcc.at(offset));
 
-        for (int i = 0; i < offset; ++i)
-            m_fourierAcc[i] = exp( slope * (log(freq().at(i)) - logFreq0 ) + logFas0 );
+        // The theoretical slope at low frequenc
+        double slope = _limitFas ? 2 :
+                       (log(_fourierAcc.at(offset) / _fourierAcc.at(offset + 1))
+                        / log(freq().at(offset) / freq().at(offset + 1)));
+
+        for (int i = 0; i < offset; ++i) {
+            _fourierAcc[i] = exp(slope * (log(freq().at(i)) - logFreq0) + logFas0);
+        }
 
         // Force down the high frequency tail
 
         // Find the minimum slope
-        if (m_limitFas) {
+        if (_limitFas) {
             double minSlope = 0;
             int minSlopeIdx = 0;
             int i = offset;
 
-            while (i < freq().size()-1) {
-                const double slope = log(m_fourierAcc.at(i)/m_fourierAcc.at(i+1)) / log(freq().at(i)/freq().at(i+1));
-
+            while (i < freq().size() - 1) {
+                slope = log(_fourierAcc.at(i) / _fourierAcc.at(i + 1)) /
+                        log(freq().at(i) / freq().at(i + 1));
                 if (slope < minSlope) {
                     minSlope = slope;
                     minSlopeIdx = i;
@@ -269,29 +271,29 @@ void CompatibleRvtMotion::calculate()
                 ++i;
             }
 
-
             // Extrapolate from deviation
             i = minSlopeIdx;
             double x0 = log(freq().at(i));
-            double y0 = log(m_fourierAcc.at(i));
+            double y0 = log(_fourierAcc.at(i));
             //double kappa0 = exp( -M_PI * 0.01 * freq().at(idx) );
 
             ++i;
-            while ( i < m_fourierAcc.size() ) {
+            while (i < _fourierAcc.size()) {
                 // Extrapolate the value based, but reduce the value using a kappa filter
-                //m_fourierAcc[idx] = exp( cutoff * (log(freq().at(idx)) - x0 ) + y0 ) * exp(-M_PI * 0.01 * freq().at(idx) ) / kappa0 ;
-                m_fourierAcc[i] = exp( -slope * (log(freq().at(i)) - x0 ) + y0 );
+                //_fourierAcc[idx] = exp( cutoff * (log(freq().at(idx)) - x0 ) + y0 ) * exp(-M_PI * 0.01 * freq().at(idx) ) / kappa0 ;
+                _fourierAcc[i] = exp(-slope * (log(freq().at(i)) - x0) + y0);
                 ++i;
             }
         }
 
         // Re-compute the Sa
-        m_respSpec->setSa(computeSa(m_targetRespSpec->period(), m_targetRespSpec->damping()));
+        _respSpec->setSa(computeSa(_targetRespSpec->period(), _targetRespSpec->damping()));
 
         // Compute the root-mean-squared error
         double sumError = 0;
-        for (int i = 0; i < m_respSpec->sa().size(); ++i) {
-            const double e = (m_respSpec->sa().at(i) - m_targetRespSpec->sa().at(i) ) / m_targetRespSpec->sa().at(i);
+        for (int i = 0; i < _respSpec->sa().size(); ++i) {
+            const double e = (_respSpec->sa().at(i) - _targetRespSpec->sa().at(i)) /
+                             _targetRespSpec->sa().at(i);
 
             // Save the maximum error
             if (fabs(maxError) < fabs(e)) {
@@ -301,17 +303,19 @@ void CompatibleRvtMotion::calculate()
             // Add the squared error to the sum
             sumError += e * e;
         }
-        rmse = sqrt(sumError / m_respSpec->sa().size());
+        rmse = sqrt(sumError / _respSpec->sa().size());
 
         // Increment the count
         ++count;
 
         // Stop if the RMSE is below the specified RMSE
-        if (rmse < minRmse || fabs(oldRmse-rmse) < minRmseChange)
+        if (rmse < minRmse || fabs(oldRmse - rmse) < minRmseChange) {
             break;
+        }
         // Allow the user to cancel the operation
-        if (!m_okToContinue)
+        if (!_okToContinue) {
             break;
+        }
         // Save old rmse
         oldRmse = rmse;
     } while (count < maxCount);
@@ -324,7 +328,7 @@ void CompatibleRvtMotion::calculate()
     emit progressValueChanged(maxCount);
 
     // Reset the modified target flag
-    m_targetRespSpec->setModified(false);
+    _targetRespSpec->setModified(false);
 
     // Signal that the changes have taken place
     endResetModel();
@@ -334,26 +338,26 @@ void CompatibleRvtMotion::calculate()
 
 QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
 {
-    if (m_targetRespSpec->sa().size() < 10) {
+    if (_targetRespSpec->sa().size() < 10) {
         // Loglog interpolate prior to performing the inversion
-        QVector<double> targetPeriod = m_targetRespSpec->period();
-        QVector<double> targetSa = m_targetRespSpec->sa();
+        QVector<double> targetPeriod = _targetRespSpec->period();
+        QVector<double> targetSa = _targetRespSpec->sa();
         const double decades = log10(targetPeriod.last() / targetPeriod.first());
 
         QVector<double> period = Dimension::logSpace(
-                    targetPeriod.first(), targetPeriod.last(),
-                    int(10 * decades));
+                targetPeriod.first(), targetPeriod.last(),
+                int(10 * decades));
 
         QVector<double>sa;
         logLogInterp(
-            m_targetRespSpec->period(), m_targetRespSpec->sa(),
-            period, sa);
+                _targetRespSpec->period(), _targetRespSpec->sa(),
+                period, sa);
 
-        m_targetRespSpec->setPeriod(period);
-        m_targetRespSpec->setSa(sa);
+        _targetRespSpec->setPeriod(period);
+        _targetRespSpec->setSa(sa);
     }
 
-    QVector<double> fas(m_targetRespSpec->period().size());
+    QVector<double> fas(_targetRespSpec->period().size());
 
     // Assume a constant peak factor
     double peakFactor = 2.5;
@@ -362,17 +366,18 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
     double sum = 0;
 
     // Single degree of freedom factor
-    double sdofFactor = M_PI / ( 4 * m_targetRespSpec->damping() / 100. ) - 1;
-    const double damping = m_targetRespSpec->damping();
+    double sdofFactor = M_PI / ( 4 * _targetRespSpec->damping() / 100. ) - 1;
+    const double damping = _targetRespSpec->damping();
 
     for ( int i = fas.size()-1; i > -1; --i ) {
-        double freq = 1 / m_targetRespSpec->period().at(i);
-        double sa = m_targetRespSpec->sa().at(i);
-        const double rmsDuration = calcRmsDuration(1/freq, damping);
+        double freq = 1 / _targetRespSpec->period().at(i);
+        double sa = _targetRespSpec->sa().at(i);
+        const double rmsDuration = _peakCalculator->calcDurationRms(
+                _duration, freq, damping, QVector<std::complex<double> >());
 
         // Compute the squared Fourier amplitude spectrum
         fasSqr = ( ( rmsDuration * pow(sa,2) ) / ( 2 * pow( peakFactor, 2) ) - sum ) /
-            ( freq * sdofFactor );
+                 ( freq * sdofFactor );
 
         if ( fasSqr < 0 )
             fasSqr = prevFasSqr;
@@ -380,11 +385,11 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
         // Convert from spectral density into FAS
         fas[i] = sqrt(fasSqr);
 
-        if ( i == fas.size()-1 )
+        if ( i == fas.size()-1 ) {
             sum = fasSqr * freq / 2;
-        else
-            sum += ( fasSqr - prevFasSqr ) / 2 * ( freq - (1/m_targetRespSpec->period().at(i+1)) );
-
+        } else {
+            sum += (fasSqr - prevFasSqr) / 2 * (freq - (1 / _targetRespSpec->period().at(i + 1)));
+        }
         prevFasSqr = fasSqr;
     }
 
@@ -394,18 +399,18 @@ QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
 void CompatibleRvtMotion::fromJson(const QJsonObject &json)
 {
     AbstractRvtMotion::fromJson(json);
-    m_limitFas = json["limitFas"].toBool();
-    m_freq->fromJson(json["freq"].toObject());
-    m_targetRespSpec->fromJson(json["targetRespSpec"].toObject());
+    _limitFas = json["limitFas"].toBool();
+    _freq->fromJson(json["freq"].toObject());
+    _targetRespSpec->fromJson(json["targetRespSpec"].toObject());
     calculate();
 }
 
 QJsonObject CompatibleRvtMotion::toJson() const
 {
     QJsonObject json = AbstractRvtMotion::toJson();
-    json["freq"] = m_freq->toJson();
-    json["limitFas"] = m_limitFas;
-    json["targetRespSpec"] = m_targetRespSpec->toJson();
+    json["freq"] = _freq->toJson();
+    json["limitFas"] = _limitFas;
+    json["targetRespSpec"] = _targetRespSpec->toJson();
     return json;
 }
 
@@ -414,7 +419,7 @@ QDataStream & operator<< (QDataStream & out, const CompatibleRvtMotion* crm)
     out << (quint8)1;
 
     out << qobject_cast<const AbstractRvtMotion*>(crm);
-    out << crm->m_freq << crm->m_limitFas << crm->m_targetRespSpec;
+    out << crm->_freq << crm->_limitFas << crm->_targetRespSpec;
 
     return out;
 }
@@ -425,7 +430,7 @@ QDataStream & operator>> (QDataStream & in, CompatibleRvtMotion* crm)
     in >> ver;
 
     in >> qobject_cast<AbstractRvtMotion*>(crm);
-    in >> crm->m_freq >> crm->m_limitFas >> crm->m_targetRespSpec;
+    in >> crm->_freq >> crm->_limitFas >> crm->_targetRespSpec;
 
     crm->calculate();
     return in;

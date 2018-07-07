@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,64 +40,64 @@
 #include <QJsonValue>
 
 OutputCatalog::OutputCatalog(QObject *parent) :
-    QAbstractTableModel(parent), m_selectedOutput(0)
+    QAbstractTableModel(parent), _selectedOutput(0)
 {    
-    m_log = new TextLog(this);
-    connect(m_log, SIGNAL(wasModified()),
+    _log = new TextLog(this);
+    connect(_log, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 
-    m_frequency = new Dimension(this);
-    m_frequency->setMin(0.05);
-    m_frequency->setMax(100);
-    m_frequency->setSize(512);
-    m_frequency->setSpacing(Dimension::Log);
-    m_frequencyIsNeeded = false;
+    _frequency = new Dimension(this);
+    _frequency->setMin(0.05);
+    _frequency->setMax(100);
+    _frequency->setSize(512);
+    _frequency->setSpacing(Dimension::Log);
+    _frequencyIsNeeded = false;
 
-    m_damping = 5.;
-    m_period = new Dimension(this);
-    m_period->setMin(0.01);
-    m_period->setMax(10.0);
-    m_period->setSize(91);
-    m_period->setSpacing(Dimension::Log);
-    m_periodIsNeeded = false;
+    _damping = 5.;
+    _period = new Dimension(this);
+    _period->setMin(0.01);
+    _period->setMax(10.0);
+    _period->setSize(91);
+    _period->setSpacing(Dimension::Log);
+    _periodIsNeeded = false;
 
-    m_profilesOutputCatalog = new ProfilesOutputCatalog(this);
-    connect(m_profilesOutputCatalog, SIGNAL(wasModified()),
+    _profilesOutputCatalog = new ProfilesOutputCatalog(this);
+    connect(_profilesOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    m_catalogs << m_profilesOutputCatalog;
+    _catalogs << _profilesOutputCatalog;
 
-    m_ratiosOutputCatalog = new RatiosOutputCatalog(this);
-    connect(m_ratiosOutputCatalog, SIGNAL(wasModified()),
+    _ratiosOutputCatalog = new RatiosOutputCatalog(this);
+    connect(_ratiosOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    connect(m_ratiosOutputCatalog, SIGNAL(periodIsNeededChanged(bool)),
+    connect(_ratiosOutputCatalog, SIGNAL(periodIsNeededChanged(bool)),
             this, SLOT(setPeriodIsNeeded(bool)));
-    connect(m_ratiosOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
+    connect(_ratiosOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
             this, SLOT(setFrequencyIsNeeded(bool)));
 
-    m_catalogs << m_ratiosOutputCatalog;
+    _catalogs << _ratiosOutputCatalog;
 
-    m_soilTypesOutputCatalog = new SoilTypesOutputCatalog(this);
-    connect(m_soilTypesOutputCatalog, SIGNAL(wasModified()),
+    _soilTypesOutputCatalog = new SoilTypesOutputCatalog(this);
+    connect(_soilTypesOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    m_catalogs << m_soilTypesOutputCatalog;
+    _catalogs << _soilTypesOutputCatalog;
 
-    m_spectraOutputCatalog = new SpectraOutputCatalog(this);
-    connect(m_spectraOutputCatalog, SIGNAL(wasModified()),
+    _spectraOutputCatalog = new SpectraOutputCatalog(this);
+    connect(_spectraOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    connect(m_spectraOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
+    connect(_spectraOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)),
             this, SLOT(setFrequencyIsNeeded(bool)));
-    connect(m_spectraOutputCatalog, SIGNAL(periodIsNeededChanged(bool)),
+    connect(_spectraOutputCatalog, SIGNAL(periodIsNeededChanged(bool)),
             this, SLOT(setPeriodIsNeeded(bool)));
 
-    m_catalogs << m_spectraOutputCatalog;
+    _catalogs << _spectraOutputCatalog;
 
-    m_timeSeriesOutputCatalog = new TimeSeriesOutputCatalog(this);
-    connect(m_timeSeriesOutputCatalog, SIGNAL(wasModified()),
+    _timeSeriesOutputCatalog = new TimeSeriesOutputCatalog(this);
+    connect(_timeSeriesOutputCatalog, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
-    connect(m_timeSeriesOutputCatalog, SIGNAL(timesAreNeededChanged(bool)),
+    connect(_timeSeriesOutputCatalog, SIGNAL(timesAreNeededChanged(bool)),
             this, SLOT(setTimesAreNeeded(bool)));
 
-    m_catalogs << m_timeSeriesOutputCatalog;
+    _catalogs << _timeSeriesOutputCatalog;
 
 }
 
@@ -105,8 +105,8 @@ int OutputCatalog::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    if (m_selectedOutput) {
-        return m_selectedOutput->motionCount() * m_selectedOutput->siteCount();
+    if (_selectedOutput) {
+        return _selectedOutput->motionCount() * _selectedOutput->siteCount();
     } else {
         return 0;
     }
@@ -126,21 +126,21 @@ QVariant OutputCatalog::data(const QModelIndex & index, int role) const
 
     int site;
     int motion;
-    m_selectedOutput->intToSiteMotion(index.row(), &site, &motion);
+    _selectedOutput->intToSiteMotion(index.row(), &site, &motion);
 
     if (role==Qt::DisplayRole || role==Qt::EditRole) {
         switch (index.column()) {
         case SiteColumn:
             return site;
         case MotionColumn:
-            return m_motionNames.at(motion);
+            return _motionNames.at(motion);
         case EnabledColumn:
         default:
             return QVariant();
         }
     } else if (role == Qt::CheckStateRole && index.column() == EnabledColumn) {
-        if (site < m_enabled.size() && motion < m_enabled.at(site).size())
-            return m_enabled.at(site).at(motion) ?
+        if (site < _enabled.size() && motion < _enabled.at(site).size())
+            return _enabled.at(site).at(motion) ?
                     Qt::Checked : Qt::Unchecked;
     }
 
@@ -156,18 +156,18 @@ bool OutputCatalog::setData(const QModelIndex & index, const QVariant & value, i
         const bool b = value.toBool();
         int site;
         int motion;
-        m_selectedOutput->intToSiteMotion(index.row(), &site, &motion);
+        _selectedOutput->intToSiteMotion(index.row(), &site, &motion);
 
         // Adjust what is changed based on what is currently shown. If the
         // initially shear-wave velocity profile (which is motionIndepedent) is
         // currently active and the user disables the site, then all of those
         // sites should be disabled.
-        if (m_selectedOutput->motionIndependent()) {
+        if (_selectedOutput->motionIndependent()) {
             setSiteEnabled(site, b);
-        } else if (m_selectedOutput->siteIndependent()) {
+        } else if (_selectedOutput->siteIndependent()) {
             setMotionEnabled(motion, b);
         } else {
-            m_enabled[site][motion] = b;
+            _enabled[site][motion] = b;
         }
 
         emit enabledChanged(index.row());
@@ -214,136 +214,136 @@ Qt::ItemFlags OutputCatalog::flags(const QModelIndex & index) const
 
 ProfilesOutputCatalog* OutputCatalog::profilesCatalog()
 {
-    return m_profilesOutputCatalog;
+    return _profilesOutputCatalog;
 }
 
 RatiosOutputCatalog* OutputCatalog::ratiosCatalog()
 {
-    return m_ratiosOutputCatalog;
+    return _ratiosOutputCatalog;
 }
 
 SoilTypesOutputCatalog* OutputCatalog::soilTypesCatalog()
 {
-    return m_soilTypesOutputCatalog;
+    return _soilTypesOutputCatalog;
 }
 
 SpectraOutputCatalog* OutputCatalog::spectraCatalog()
 {
-    return m_spectraOutputCatalog;
+    return _spectraOutputCatalog;
 }
 
 TimeSeriesOutputCatalog* OutputCatalog::timeSeriesCatalog()
 {
-    return m_timeSeriesOutputCatalog;
+    return _timeSeriesOutputCatalog;
 }
 
 const QString& OutputCatalog::title() const
 {
-    return m_title;
+    return _title;
 }
 
 void OutputCatalog::setTitle(const QString &title)
 {
-    m_title = title;
+    _title = title;
 
     emit wasModified();
 }
 
 const QString& OutputCatalog::filePrefix() const
 {
-    return m_filePrefix;
+    return _filePrefix;
 }
 
 void OutputCatalog::setFilePrefix(const QString &prefix)
 {
-    m_filePrefix = prefix;
+    _filePrefix = prefix;
 
     emit wasModified();
 }
 
 AbstractOutput* OutputCatalog::setSelectedOutput(int index)
 {
-    Q_ASSERT(index >= 0 && index < m_outputs.size());
+    Q_ASSERT(index >= 0 && index < _outputs.size());
     beginResetModel();
-    m_selectedOutput = m_outputs[index];
+    _selectedOutput = _outputs[index];
     endResetModel();
-    return m_selectedOutput;
+    return _selectedOutput;
 }
 
 TextLog* OutputCatalog::log()
 {
-    return m_log;
+    return _log;
 }
 
 const QVector<double>& OutputCatalog::depth() const
 {
-    return m_depth;
+    return _depth;
 }
 
 const QVector<double>& OutputCatalog::time(int motion) const
 {
-    return m_time.at(motion);
+    return _time.at(motion);
 }
 
 Dimension* OutputCatalog::frequency()
 {
-    return m_frequency;
+    return _frequency;
 }
 
 Dimension* OutputCatalog::period()
 {
-    return m_period;
+    return _period;
 }
 
 double OutputCatalog::damping() const
 {
-    return m_damping;
+    return _damping;
 }
 
 void OutputCatalog::setDamping(double damping)
 {
-    m_damping = damping;
+    _damping = damping;
 
     emit wasModified();
 }
 
 int OutputCatalog::motionCount() const
 {
-    return m_motionCount;
+    return _motionCount;
 }
 
 int OutputCatalog::siteCount() const
 {
-    return m_siteCount;
+    return _siteCount;
 }
 
 bool OutputCatalog::enabledAt(int site, int motion) const
 {
-    return m_enabled.at(site).at(motion);
+    return _enabled.at(site).at(motion);
 }
 
 bool OutputCatalog::enabledAt(int row) const
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
     int motion;
     int site;
-    m_selectedOutput->intToSiteMotion(row, &site, &motion);
+    _selectedOutput->intToSiteMotion(row, &site, &motion);
 
-    return m_enabled.at(site).at(motion);
+    return _enabled.at(site).at(motion);
 }
 
 bool OutputCatalog::siteEnabled(int row) const
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
-    const int site = m_selectedOutput->intToSite(row);
+    const int site = _selectedOutput->intToSite(row);
 
-    if (site >= m_enabled.size())
+    if (site >= _enabled.size())
         return false;
 
-    for (int i = 0; i < m_motionCount; ++i) {
-        if (!m_enabled.at(site).at(i))
+    for (int i = 0; i < _motionCount; ++i) {
+        if (!_enabled.at(site).at(i))
             return false;
     }
 
@@ -352,12 +352,12 @@ bool OutputCatalog::siteEnabled(int row) const
 
 void OutputCatalog::setSiteEnabled(int row, bool enabled)
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
-    const int site = m_selectedOutput->intToSite(row);
+    const int site = _selectedOutput->intToSite(row);
 
-    for (int i = 0; i < m_motionCount; ++i)
-        m_enabled[site][i] = enabled;
+    for (int i = 0; i < _motionCount; ++i)
+        _enabled[site][i] = enabled;
 
     emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
     emit wasModified();
@@ -365,12 +365,12 @@ void OutputCatalog::setSiteEnabled(int row, bool enabled)
 
 bool OutputCatalog::motionEnabled(int row) const
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
-    const int motion = m_selectedOutput->intToMotion(row);
+    const int motion = _selectedOutput->intToMotion(row);
 
-    for (int i = 0; i < m_siteCount; ++i) {
-        if (!m_enabled.at(i).at(motion))
+    for (int i = 0; i < _siteCount; ++i) {
+        if (!_enabled.at(i).at(motion))
             return false;
     }
 
@@ -379,12 +379,12 @@ bool OutputCatalog::motionEnabled(int row) const
 
 void OutputCatalog::setMotionEnabled(int row, bool enabled)
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
-    const int motion = m_selectedOutput->intToMotion(row);
+    const int motion = _selectedOutput->intToMotion(row);
 
-    for (int i = 0; i < m_siteCount; ++i)
-        m_enabled[i][motion] = enabled;
+    for (int i = 0; i < _siteCount; ++i)
+        _enabled[i][motion] = enabled;
 
     emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
     emit wasModified();
@@ -392,78 +392,77 @@ void OutputCatalog::setMotionEnabled(int row, bool enabled)
 
 int OutputCatalog::siteNumberAt(int row) const
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
-    return m_selectedOutput->intToSite(row);
+    return _selectedOutput->intToSite(row);
 }
 
 const QString OutputCatalog::motionNameAt(int row) const
 {
-    Q_ASSERT(m_selectedOutput);
+    Q_ASSERT(_selectedOutput);
 
     int site;
     int motion;
-    m_selectedOutput->intToSiteMotion(row, &site, &motion);
+    _selectedOutput->intToSiteMotion(row, &site, &motion);
 
-    return m_motionNames.at(motion);
+    return _motionNames.at(motion);
 }
 
 
 void OutputCatalog::initialize(int siteCount, MotionLibrary* motionLibrary)
 {
     // Create a list of all enabled outputs
-    m_outputs.clear();
-    foreach (AbstractOutputCatalog* catalog, m_catalogs) {
-        foreach (AbstractOutput* output, catalog->outputs()) {
-            if (!output->needsTime() ||
-                (output->needsTime()
-                 && motionLibrary->approach() == MotionLibrary::TimeSeries)) {
+    _outputs.clear();
+    for (auto *catalog : _catalogs) {
+        for (auto *output : catalog->outputs()) {
+            if (!output->needsTime()
+                || (output->needsTime()
+                    && motionLibrary->approach() == MotionLibrary::TimeSeries)) {
                 connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
-                m_outputs << output;
+                _outputs << output;
             }
         }
     }
 
-    m_siteCount = siteCount;
+    _siteCount = siteCount;
 
-    m_motionNames.clear();
-    m_time.clear();
+    _motionNames.clear();
+    _time.clear();
     // Generate a list of names of enabled motions
     for (int i = 0; i < motionLibrary->rowCount(); ++i) {
         if (motionLibrary->motionAt(i)->enabled()) {
-            m_motionNames << motionLibrary->motionAt(i)->name();
+            _motionNames << motionLibrary->motionAt(i)->name();
 
-            if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(
-                    motionLibrary->motionAt(i)))
-                m_time << tsm->time();
+            if (auto *tsm = qobject_cast<TimeSeriesMotion *>(motionLibrary->motionAt(i)))
+                _time << tsm->time();
         }
     }
-    m_motionCount = m_motionNames.size();
+    _motionCount = _motionNames.size();
 
-    m_enabled.clear();
-    for (int i = 0; i < m_siteCount; ++i) {
-        m_enabled << QList<bool>();
-        for (int j = 0; j < m_motionCount; ++j)
-            m_enabled.last() << true;
+    _enabled.clear();
+    for (int i = 0; i < _siteCount; ++i) {
+        _enabled << QList<bool>();
+        for (int j = 0; j < _motionCount; ++j)
+            _enabled.last() << true;
     }
 
-    m_period->init();
-    m_frequency->init();
+    _period->init();
+    _frequency->init();
 }
 
 void OutputCatalog::clear()
 {
-    m_log->clear();
-    m_depth.clear();
-    m_frequency->clear();
-    m_period->clear();
-    m_time.clear();
-    m_motionNames.clear();
-    m_enabled.clear();
+    _log->clear();
+    _depth.clear();
+    _frequency->clear();
+    _period->clear();
+    _time.clear();
+    _motionNames.clear();
+    _enabled.clear();
 
-    // Need to loop over the catalogs as m_outputs my have previously deleted pointers
-    foreach (AbstractOutputCatalog* catalog, m_catalogs) {
-        foreach (AbstractOutput* output, catalog->outputs()) {
+    // Need to loop over the catalogs as _outputs my have previously deleted pointers
+    for (auto *catalog : _catalogs) {
+        for (auto *output : catalog->outputs()) {
             output->clear();
         }
     }
@@ -472,8 +471,8 @@ void OutputCatalog::clear()
 }
 
 void OutputCatalog::finalize()
-{   
-    foreach (AbstractOutput* output, m_outputs)
+{
+    for (AbstractOutput *output : _outputs)
         output->finalize();
 
     emit wasModified();
@@ -481,7 +480,7 @@ void OutputCatalog::finalize()
 
 void OutputCatalog::setReadOnly(bool readOnly)
 {
-    foreach (AbstractOutputCatalog* catalog, m_catalogs)
+    for (AbstractOutputCatalog *catalog : _catalogs)
         catalog->setReadOnly(readOnly);
 }
 
@@ -493,58 +492,58 @@ void OutputCatalog::saveResults(int motion, AbstractCalculator* const calculator
     populateDepthVector(
                 calculator->site()->subLayers().last().depthToBase());
 
-    foreach (AbstractOutput* output, m_outputs) {
+    for (AbstractOutput *output : _outputs) {
         output->addData(motion, calculator);
     }
 }
 
 void OutputCatalog::removeLastSite()
 {
-    foreach (AbstractOutput* output, m_outputs)
+    for (AbstractOutput *output : _outputs)
         output->removeLastSite();
 }
 
 bool OutputCatalog::timesAreNeeded() const
 {
-    return m_timesAreNeeded;
+    return _timesAreNeeded;
 }
 
 void OutputCatalog::setTimesAreNeeded(bool timesAreNeeded)
 {
-    m_timesAreNeeded = timesAreNeeded;
+    _timesAreNeeded = timesAreNeeded;
 
-    emit timesAreNeededChanged(m_timesAreNeeded);
+    emit timesAreNeededChanged(_timesAreNeeded);
 }
 
 bool OutputCatalog::periodIsNeeded() const
 {
-    return m_periodIsNeeded;
+    return _periodIsNeeded;
 }
 
 void OutputCatalog::setPeriodIsNeeded(bool periodIsNeeded)
 {
-    m_periodIsNeeded = periodIsNeeded;
+    _periodIsNeeded = periodIsNeeded;
 
-    emit periodIsNeededChanged(m_periodIsNeeded);
+    emit periodIsNeededChanged(_periodIsNeeded);
 }
 
 bool OutputCatalog::frequencyIsNeeded() const
 {
-    return m_frequencyIsNeeded;
+    return _frequencyIsNeeded;
 }
 
 void OutputCatalog::setFrequencyIsNeeded(bool frequencyIsNeeded)
 {
-    m_frequencyIsNeeded = frequencyIsNeeded;
+    _frequencyIsNeeded = frequencyIsNeeded;
 
-    emit frequencyIsNeededChanged(m_frequencyIsNeeded);
+    emit frequencyIsNeededChanged(_frequencyIsNeeded);
 }
 
 QStringList OutputCatalog::outputNames() const
 {
     QStringList list;
 
-    foreach (AbstractOutput* output, m_outputs)
+    for (AbstractOutput *output : _outputs)
         list << output->fullName();
 
     return list;
@@ -552,12 +551,12 @@ QStringList OutputCatalog::outputNames() const
 
 const QList<AbstractOutput*> & OutputCatalog::outputs() const
 {
-    return m_outputs;
+    return _outputs;
 }
 
 void OutputCatalog::exportData(const QString &path, const QString &separator, const QString &prefix)
 {
-    foreach (AbstractOutput* output, m_outputs) {
+    for (AbstractOutput *output : _outputs) {
         if (output->exportEnabled())
             output->exportData(path, separator, prefix);
     }
@@ -566,8 +565,8 @@ void OutputCatalog::exportData(const QString &path, const QString &separator, co
 void OutputCatalog::populateDepthVector(double maxDepth)
 {
     // Add a point at the surface
-    if (m_depth.isEmpty()) {
-        m_depth << 0;
+    if (_depth.isEmpty()) {
+        _depth << 0;
     }
 
     // Amount to increment the depth by
@@ -575,14 +574,14 @@ void OutputCatalog::populateDepthVector(double maxDepth)
 
     // If the depth exceeds the maxDepth stop.  The depth must exceed the
     // final depth so that values for the bedrock can be recorded.
-    while (m_depth.last() < maxDepth) {
-        if (m_depth.last() < 20) {
+    while (_depth.last() < maxDepth) {
+        if (_depth.last() < 20) {
             increment = 1;
-        } else if (m_depth.last() < 60) {
+        } else if (_depth.last() < 60) {
             increment = 2;
-        } else if (m_depth.last() < 160) {
+        } else if (_depth.last() < 160) {
             increment = 5;
-        } else if (m_depth.last() < 360) {
+        } else if (_depth.last() < 360) {
             increment = 10;
         } else {
             increment = 20;
@@ -593,7 +592,7 @@ void OutputCatalog::populateDepthVector(double maxDepth)
             increment *=  0.3048;
 
         // Add the depth to the vector
-        m_depth << m_depth.last() + increment;
+        _depth << _depth.last() + increment;
     }
 }
 
@@ -601,33 +600,32 @@ void OutputCatalog::fromJson(const QJsonObject &json)
 {
     beginResetModel();
 
-    m_title = json["title"].toString();
-    m_filePrefix = json["filePrefix"].toString();
-    m_frequencyIsNeeded = json["frequencyIsNeeded"].toBool();
-    m_frequency->fromJson(json["frequency"].toObject());
-    m_periodIsNeeded = json["periodIsNeeded"].toBool();
-    m_period->fromJson(json["period"].toObject());
-    m_damping = json["damping"].toDouble();
+    _title = json["title"].toString();
+    _filePrefix = json["filePrefix"].toString();
+    _frequencyIsNeeded = json["frequencyIsNeeded"].toBool();
+    _frequency->fromJson(json["frequency"].toObject());
+    _periodIsNeeded = json["periodIsNeeded"].toBool();
+    _period->fromJson(json["period"].toObject());
+    _damping = json["damping"].toDouble();
 
-    m_log->fromJson(json["log"].toObject());
-    m_profilesOutputCatalog->fromJson(json["profilesOutputCatalog"].toArray());
-    m_ratiosOutputCatalog->fromJson(json["ratiosOutputCatalog"].toArray());
-    m_soilTypesOutputCatalog->fromJson(json["soilTypesOutputCatalog"].toArray());
-    m_spectraOutputCatalog->fromJson(json["spectraOutputCatalog"].toArray());
-    m_timeSeriesOutputCatalog->fromJson(json["timeSeriesOutputCatalog"].toArray());
+    _log->fromJson(json["log"].toObject());
+    _profilesOutputCatalog->fromJson(json["profilesOutputCatalog"].toArray());
+    _ratiosOutputCatalog->fromJson(json["ratiosOutputCatalog"].toArray());
+    _soilTypesOutputCatalog->fromJson(json["soilTypesOutputCatalog"].toArray());
+    _spectraOutputCatalog->fromJson(json["spectraOutputCatalog"].toArray());
+    _timeSeriesOutputCatalog->fromJson(json["timeSeriesOutputCatalog"].toArray());
 
     double depth = json["depth"].toDouble();
     if (depth > 0) {
         populateDepthVector(depth);
     }
 
-    m_enabled.clear();
-    foreach (const QJsonValue &value, json["enabled"].toArray()) {
+    _enabled.clear();
+    for (const QJsonValue &value : json["enabled"].toArray()) {
         QList<bool> l;
-        foreach (const QJsonValue &v, value.toArray())
+        for (const QJsonValue &v : value.toArray())
             l << v.toBool();
-
-        m_enabled << l;
+        _enabled << l;
     }
 
     endResetModel();
@@ -636,27 +634,27 @@ void OutputCatalog::fromJson(const QJsonObject &json)
 QJsonObject OutputCatalog::toJson() const
 {
     QJsonObject json;
-    json["title"] = m_title;
-    json["filePrefix"] = m_filePrefix;
-    json["frequencyIsNeeded"] = m_frequencyIsNeeded;
-    json["frequency"] = m_frequency->toJson();
-    json["periodIsNeeded"] = m_periodIsNeeded;
-    json["period"] = m_period->toJson();
-    json["damping"] = m_damping;
-    json["log"] = m_log->toJson();
+    json["title"] = _title;
+    json["filePrefix"] = _filePrefix;
+    json["frequencyIsNeeded"] = _frequencyIsNeeded;
+    json["frequency"] = _frequency->toJson();
+    json["periodIsNeeded"] = _periodIsNeeded;
+    json["period"] = _period->toJson();
+    json["damping"] = _damping;
+    json["log"] = _log->toJson();
 
-    json["profilesOutputCatalog"] = m_profilesOutputCatalog->toJson();
-    json["ratiosOutputCatalog"] = m_ratiosOutputCatalog->toJson();
-    json["soilTypesOutputCatalog"] = m_soilTypesOutputCatalog->toJson();
-    json["spectraOutputCatalog"] = m_spectraOutputCatalog->toJson();
-    json["timeSeriesOutputCatalog"] = m_timeSeriesOutputCatalog->toJson();
+    json["profilesOutputCatalog"] = _profilesOutputCatalog->toJson();
+    json["ratiosOutputCatalog"] = _ratiosOutputCatalog->toJson();
+    json["soilTypesOutputCatalog"] = _soilTypesOutputCatalog->toJson();
+    json["spectraOutputCatalog"] = _spectraOutputCatalog->toJson();
+    json["timeSeriesOutputCatalog"] = _timeSeriesOutputCatalog->toJson();
 
-    json["depth"] = m_depth.size() ? m_depth.last() : -1;
+    json["depth"] = _depth.size() ? _depth.last() : -1;
 
     QJsonArray enabled;
-    foreach (const QList<bool> &l, m_enabled) {
+    for (const QList<bool> &l : _enabled) {
         QJsonArray qja;
-        foreach (const bool &b, l)
+        for (const bool &b : l)
             qja << QJsonValue(b);
 
         enabled << qja;
@@ -672,21 +670,21 @@ QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)
     out << (quint8)1;
 
     out
-            << oc->m_title
-            << oc->m_filePrefix
-            << oc->m_enabled
-            << oc->m_frequency
-            << oc->m_frequencyIsNeeded
-            << oc->m_period
-            << oc->m_periodIsNeeded
-            << oc->m_damping
-            << oc->m_profilesOutputCatalog
-            << oc->m_ratiosOutputCatalog
-            << oc->m_soilTypesOutputCatalog
-            << oc->m_spectraOutputCatalog
-            << oc->m_timeSeriesOutputCatalog
-            << oc->m_log
-            << (oc->m_depth.size() ? oc->m_depth.last() : -1);
+            << oc->_title
+            << oc->_filePrefix
+            << oc->_enabled
+            << oc->_frequency
+            << oc->_frequencyIsNeeded
+            << oc->_period
+            << oc->_periodIsNeeded
+            << oc->_damping
+            << oc->_profilesOutputCatalog
+            << oc->_ratiosOutputCatalog
+            << oc->_soilTypesOutputCatalog
+            << oc->_spectraOutputCatalog
+            << oc->_timeSeriesOutputCatalog
+            << oc->_log
+            << (oc->_depth.size() ? oc->_depth.last() : -1);
 
     return out;
 }
@@ -700,20 +698,20 @@ QDataStream & operator>> (QDataStream & in, OutputCatalog* oc)
 
     oc->beginResetModel();
 
-    in >> oc->m_title;
-    in >> oc->m_filePrefix;
-    in >> oc->m_enabled;
-    in >> oc->m_frequency;
-    in >> oc->m_frequencyIsNeeded;
-    in >> oc->m_period;
-    in >> oc->m_periodIsNeeded;
-    in >> oc->m_damping;
-    in >> oc->m_profilesOutputCatalog;
-    in >> oc->m_ratiosOutputCatalog;
-    in >> oc->m_soilTypesOutputCatalog;
-    in >> oc->m_spectraOutputCatalog;
-    in >> oc->m_timeSeriesOutputCatalog;
-    in >> oc->m_log;
+    in >> oc->_title;
+    in >> oc->_filePrefix;
+    in >> oc->_enabled;
+    in >> oc->_frequency;
+    in >> oc->_frequencyIsNeeded;
+    in >> oc->_period;
+    in >> oc->_periodIsNeeded;
+    in >> oc->_damping;
+    in >> oc->_profilesOutputCatalog;
+    in >> oc->_ratiosOutputCatalog;
+    in >> oc->_soilTypesOutputCatalog;
+    in >> oc->_spectraOutputCatalog;
+    in >> oc->_timeSeriesOutputCatalog;
+    in >> oc->_log;
     in >> maxDepth;
 
     if (maxDepth > 0)

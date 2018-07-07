@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,8 +27,8 @@
 
 RvtMotion::RvtMotion(QObject * parent) : AbstractRvtMotion(parent)
 {
-    m_duration = 5.0;
-    m_name = "RVT Motion";
+    _duration = 5.0;
+    _name = tr("RVT Motion (M $mag @ $dist km)");
 }
 
 Qt::ItemFlags RvtMotion::flags(const QModelIndex & index) const
@@ -48,10 +48,10 @@ bool RvtMotion::setData( const QModelIndex & index, const QVariant & value, int 
     if (b) {
         switch (index.column()) {
         case FrequencyColumn:
-            m_freq[index.row()] = d;
+            _freq[index.row()] = d;
             break;
         case AmplitudeColumn:
-            m_fourierAcc[index.row()] = d;
+            _fourierAcc[index.row()] = d;
             break;
         }
         dataChanged(index, index);
@@ -68,8 +68,8 @@ bool RvtMotion::insertRows(int row, int count, const QModelIndex &parent)
 
     emit beginInsertRows( parent, row, row+count-1 );
 
-    m_freq.insert(row, count, 0);
-    m_fourierAcc.insert(row, count, 0);
+    _freq.insert(row, count, 0);
+    _fourierAcc.insert(row, count, 0);
 
     emit endInsertRows();
 
@@ -83,8 +83,8 @@ bool RvtMotion::removeRows(int row, int count, const QModelIndex &parent)
 
     emit beginRemoveRows( parent, row, row+count-1);
 
-    m_freq.remove(row, count);
-    m_fourierAcc.remove(row, count);
+    _freq.remove(row, count);
+    _fourierAcc.remove(row, count);
 
     emit endRemoveRows();
     return true;
@@ -93,7 +93,7 @@ bool RvtMotion::removeRows(int row, int count, const QModelIndex &parent)
 void RvtMotion::setDuration(double d)
 {
     setModified(true);
-    m_duration = d;
+    _duration = d;
 }
 
 
@@ -218,7 +218,7 @@ void smooth(QVector<double> & data, int window)
 
 const QVector<double> & RvtMotion::freq() const
 {
-    return m_freq;
+    return _freq;
 }
 
 QString RvtMotion::toHtml() const
@@ -232,37 +232,37 @@ QString RvtMotion::toHtml() const
 //                "<tr><th>Source:</th><td>%3</td></tr>"
 //
 //                ))
-//        .arg(typeList().at(m_type))
-//        .arg(m_duration)
-//        .arg(sourceList().at(m_source));
+//        .arg(typeList().at(_type))
+//        .arg(_duration)
+//        .arg(sourceList().at(_source));
 //
-//    switch (m_source)
+//    switch (_source)
 //    {
 //        case DefinedFourierSpectrum:
 //            html += tr("</table><table><tr><th>Frequency (Hz)</th><th>FAS (g-s)</th></tr>");
 //
-//            for ( int i = 0; i < m_freq.size(); ++i )
+//            for ( int i = 0; i < _freq.size(); ++i )
 //                html += QString("<tr><td>%1</td><td>%2</td></tr>")
-//                    .arg( m_freq.at(i) )
-//                    .arg( m_fourierAcc.at(i) );
+//                    .arg( _freq.at(i) )
+//                    .arg( _fourierAcc.at(i) );
 //
 //            html += "</table>";
 //            break;
 //        case DefinedResponseSpectrum:
 //            html += QString(tr("<tr><th>Damping:</th><td>%1</td></tr>"))
-//                .arg(m_targetRespSpec->damping());
+//                .arg(_targetRespSpec->damping());
 //
 //            html += tr("</table><table><tr><th>Period (s)</th><th>Spectral Accel. (g)</th></tr>");
 //
-//            for ( int i = 0; i < m_targetRespSpec->period().size(); ++i )
+//            for ( int i = 0; i < _targetRespSpec->period().size(); ++i )
 //                html += QString("<tr><td>%1</td><td>%2</td></tr>")
-//                    .arg( m_targetRespSpec->period().at(i) )
-//                    .arg( m_targetRespSpec->sa().at(i) );
+//                    .arg( _targetRespSpec->period().at(i) )
+//                    .arg( _targetRespSpec->sa().at(i) );
 //
 //            html += "</table>";
 //            break;
 //        case CalculatedFourierSpectrum:
-//            html += m_pointSourceModel->toHtml();
+//            html += _pointSourceModel->toHtml();
 //            break;
 //    }
     return html;
@@ -276,8 +276,8 @@ bool RvtMotion::loadFromTextStream(QTextStream &stream, double scale)
     // Skip the column header line
     stream.readLine();
 
-    m_freq.clear();
-    m_fourierAcc.clear();
+    _freq.clear();
+    _fourierAcc.clear();
 
     double d;
     bool ok = false;
@@ -300,14 +300,14 @@ bool RvtMotion::loadFromTextStream(QTextStream &stream, double scale)
             // Need to divide by frequency to compute the velocity, so we must
             // limit the lowest frequency. This is terribly sloppy and there
             // should be check in the when data is pasted into the table.
-            m_freq << d;
+            _freq << d;
 
             d = parts.at(1).toFloat(&ok);
             if (!ok) {
                 qWarning() << "Unable to parse the amplitude in line:" << line;
                 return false;
             } else {
-                m_fourierAcc << (scale * d);
+                _fourierAcc << (scale * d);
             }
 
         }
@@ -322,9 +322,9 @@ void RvtMotion::fromJson(const QJsonObject &json)
 {
     AbstractRvtMotion::fromJson(json);
 
-    m_freq.clear();
+    _freq.clear();
     foreach (const QJsonValue &v, json["freq"].toArray())
-        m_freq << v.toDouble();
+        _freq << v.toDouble();
 
     calculate();
 }
@@ -334,7 +334,7 @@ QJsonObject RvtMotion::toJson() const
     QJsonObject json = AbstractRvtMotion::toJson();
 
     QJsonArray freq;
-    foreach (const double &d, m_freq)
+    foreach (const double &d, _freq)
         freq << QJsonValue(d);
     json["freq"] = freq;
 
@@ -346,7 +346,7 @@ QDataStream & operator<< (QDataStream & out, const RvtMotion* rm)
     out << (quint8)1;
 
     out << qobject_cast<const AbstractRvtMotion*>(rm);
-    out << rm->m_freq;
+    out << rm->_freq;
 
     return out;
 }
@@ -357,7 +357,7 @@ QDataStream & operator>> (QDataStream & in, RvtMotion* rm)
     in >> ver;
 
     in >> qobject_cast<AbstractRvtMotion*>(rm);
-    in >> rm->m_freq;
+    in >> rm->_freq;
 
     rm->calculate();
 

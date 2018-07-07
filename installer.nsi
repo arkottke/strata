@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ;Installer for Strata
 ;Written by Albert Kottke
 

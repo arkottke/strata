@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010-2016 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "NonlinearPropertyUncertainty.h"
 
-#include <QtAlgorithms>
 #include <QDebug>
 
+#include <QtAlgorithms>
 
 #include <cfloat>
 #include <cmath>
@@ -32,7 +32,7 @@ NonlinearPropertyUncertainty::NonlinearPropertyUncertainty(double lnStdev,
                                                            double min,
                                                            double max,
                                                            QObject *parent) :
-    QObject(parent), m_min(min), m_max(max), m_lnStdev(lnStdev)
+    QObject(parent), _min(min), _max(max), _lnStdev(lnStdev)
 {
 }
 
@@ -48,10 +48,11 @@ void NonlinearPropertyUncertainty::vary(NonlinearPropertyRandomizer::Model model
             // While this is referred to as the SPID approach, it is best described
             // in PNNL (2014) by Coppersmith et al.
 
-            // Translate the standard deviation to the transformed space. Instead of contraining the standard deviation
-            // at a specific strain, the standard deviation is constrained at G/Gmax of 0.5.
+            // Translate the standard deviation to the transformed space.
+            // Instead of contraining the standard deviation at a specific
+            // strain, the standard deviation is constrained at G/Gmax of 0.5.
             // This is modified from Equation 9.44 of PNNL (2014).
-            const double f_std = m_lnStdev * (1 / (1 - 0.5));
+            const double f_std = _lnStdev * (1 / (1 - 0.5));
             double f_avg;
             double f_varied;
             for (int i = 0; i < varied.size(); ++i) {
@@ -87,7 +88,7 @@ double NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::
     double varied = 0;
     if (model == NonlinearPropertyRandomizer::SPID) {
         // SPID
-        varied = limit(exp(rand * m_lnStdev) * average);
+        varied = limit(exp(rand * _lnStdev) * average);
     } else {
         // Darendeli
         const double stdev = exp(-5) + exp(-0.25) * sqrt(average);
@@ -98,38 +99,38 @@ double NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::
 
 double NonlinearPropertyUncertainty::limit(double value) const
 {
-    return qBound(m_min, value, m_max);
+    return qBound(_min, value, _max);
 }
 
 double NonlinearPropertyUncertainty::min() const
 {
-    return m_min;
+    return _min;
 }
 
 double NonlinearPropertyUncertainty::max() const
 {
-    return m_max;
+    return _max;
 }
 
 double NonlinearPropertyUncertainty::lnStdev() const
 {
-    return m_lnStdev;
+    return _lnStdev;
 }
 
 void NonlinearPropertyUncertainty::setMin(double min)
 {
-    if (fabs(m_min - min) > DBL_EPSILON) {
-        m_min = min;
-        emit minChanged(m_min);
+    if (fabs(_min - min) > DBL_EPSILON) {
+        _min = min;
+        emit minChanged(_min);
         emit wasModified();
     }
 }
 
 void NonlinearPropertyUncertainty::setMax(double max)
 {
-    if (fabs(m_max - max) > DBL_EPSILON) {
-        m_max = max;
-        emit maxChanged(m_max);
+    if (fabs(_max - max) > DBL_EPSILON) {
+        _max = max;
+        emit maxChanged(_max);
         emit wasModified();
     }
 }
@@ -142,8 +143,8 @@ void NonlinearPropertyUncertainty::setRange(double min, double max)
 
 void NonlinearPropertyUncertainty::setLnStdev(double lnStdev)
 {
-    if (fabs(m_lnStdev - lnStdev) > DBL_EPSILON) {
-        m_lnStdev = lnStdev;
+    if (fabs(_lnStdev - lnStdev) > DBL_EPSILON) {
+        _lnStdev = lnStdev;
         emit maxChanged(lnStdev);
         emit wasModified();
     }
@@ -151,25 +152,24 @@ void NonlinearPropertyUncertainty::setLnStdev(double lnStdev)
 
 void NonlinearPropertyUncertainty::fromJson(const QJsonObject &json)
 {
-    m_min = json["min"].toDouble();
-    m_max = json["max"].toDouble();
-    m_lnStdev = json["lnStdev"].toDouble();
+    _min = json["min"].toDouble();
+    _max = json["max"].toDouble();
+    _lnStdev = json["lnStdev"].toDouble();
 }
 
 QJsonObject NonlinearPropertyUncertainty::toJson() const
 {
     QJsonObject json;
-    json["min"] = m_min;
-    json["max"] = m_max;
-    json["lnStdev"] = m_lnStdev;
+    json["min"] = _min;
+    json["max"] = _max;
+    json["lnStdev"] = _lnStdev;
     return json;
 }
-
 
 QDataStream& operator<< (QDataStream & out, const NonlinearPropertyUncertainty* npu)
 {
     out << (quint8)1;
-    out << npu->m_min << npu->m_max <<  npu->m_lnStdev;
+    out << npu->_min << npu->_max <<  npu->_lnStdev;
     return out;
 }
 
@@ -177,6 +177,6 @@ QDataStream& operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu)
 {
     quint8 ver;
     in >> ver;
-    in >> npu->m_min >> npu->m_max >> npu->m_lnStdev;
+    in >> npu->_min >> npu->_max >> npu->_lnStdev;
     return in;
 }

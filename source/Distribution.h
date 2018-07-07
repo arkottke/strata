@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,13 +31,13 @@ class Distribution : public AbstractDistribution
     Q_OBJECT
 
 public:
-    Distribution(gsl_rng * rng, QObject * parent = 0);
+    explicit Distribution(gsl_rng *rng, QObject *parent = nullptr);
 
     //! Return a random variable from the distribution
     double rand();
 
 protected:
     //! The random number generator of the distribution
-    gsl_rng * m_rng;
+    gsl_rng * _rng;
 };
 #endif

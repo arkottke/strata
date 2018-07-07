@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ class MyAbstractTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    MyAbstractTableModel(QObject * parent = 0);
+    MyAbstractTableModel(QObject *parent = nullptr);
 
     virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     bool readOnly() const;
@@ -39,6 +39,6 @@ public slots:
 
 protected:
     //! If the table is read-only
-    bool m_readOnly;
+    bool _readOnly;
 };
 #endif

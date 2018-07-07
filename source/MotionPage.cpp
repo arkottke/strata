@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,10 +54,10 @@
 #include <QVBoxLayout>
 
 MotionPage::MotionPage(QWidget * parent, Qt::WindowFlags f)
-    : AbstractPage(parent,f), m_readOnly(false)
+    : AbstractPage(parent,f), _readOnly(false)
 {   
     // Set the layout of the widget
-    QVBoxLayout * layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
     layout->addWidget(createInputLocationGroupBox());
     layout->addWidget(createMotionsTableGroupBox(), 1);
 
@@ -66,119 +66,119 @@ MotionPage::MotionPage(QWidget * parent, Qt::WindowFlags f)
 
 void MotionPage::setModel(SiteResponseModel *model)
 {
-    m_motionLibrary = model->motionLibrary();
+    _motionLibrary = model->motionLibrary();
 
-    m_depthComboBox->setDepth(model->siteProfile()->inputDepth());
-    connect(m_depthComboBox, SIGNAL(depthChanged(double)),
+    _depthComboBox->setDepth(model->siteProfile()->inputDepth());
+    connect(_depthComboBox, SIGNAL(depthChanged(double)),
             model->siteProfile(), SLOT(setInputDepth(double)));
 
-    m_tableView->setModel(m_motionLibrary);
-    connect(m_tableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+    _tableView->setModel(_motionLibrary);
+    connect(_tableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(updateButtons()));
-    m_tableView->resizeColumnsToContents();
-    m_tableView->resizeRowsToContents();
+    _tableView->resizeColumnsToContents();
+    _tableView->resizeRowsToContents();
 
-    setApproach(m_motionLibrary->approach());
-    connect(m_motionLibrary, SIGNAL(approachChanged(int)),
+    setApproach(_motionLibrary->approach());
+    connect(_motionLibrary, SIGNAL(approachChanged(int)),
             this, SLOT(setApproach(int)));
 }
 
 void MotionPage::setReadOnly(bool readOnly)
 {
-    m_readOnly = readOnly;
-    m_depthComboBox->setDisabled(readOnly);
-    m_tableView->setReadOnly(readOnly);
+    _readOnly = readOnly;
+    _depthComboBox->setDisabled(readOnly);
+    _tableView->setReadOnly(readOnly);
 
-    m_addButton->setHidden(readOnly);
-    m_removeButton->setHidden(readOnly);
-    m_importButton->setHidden(readOnly);
-    m_editButton->setText(readOnly ? tr("View") : tr("Edit"));
+    _addButton->setHidden(readOnly);
+    _removeButton->setHidden(readOnly);
+    _importButton->setHidden(readOnly);
+    _editButton->setText(readOnly ? tr("View") : tr("Edit"));
 }
 
 void MotionPage::setApproach(int i)
 {
-    m_tableView->setColumnHidden(
+    _tableView->setColumnHidden(
             MotionLibrary::ScaleColumn,
             i == MotionLibrary::RandomVibrationTheory);
 }
 
 QGroupBox* MotionPage::createInputLocationGroupBox()
 {
-    QHBoxLayout* layout = new QHBoxLayout;
+    auto *layout = new QHBoxLayout;
 
     layout->addWidget(new QLabel(tr("Specify the location to input the motion(s):")));
 
-    m_depthComboBox = new DepthComboBox;
-    layout->addWidget(m_depthComboBox);
+    _depthComboBox = new DepthComboBox;
+    layout->addWidget(_depthComboBox);
     layout->addStretch(1);
 
-    m_inputLocationGroupBox = new QGroupBox(tr("Motion Input Location"));
-    m_inputLocationGroupBox->setLayout(layout);
+    _inputLocationGroupBox = new QGroupBox(tr("Motion Input Location"));
+    _inputLocationGroupBox->setLayout(layout);
 
-    return m_inputLocationGroupBox;
+    return _inputLocationGroupBox;
 }
 
 QGroupBox* MotionPage::createMotionsTableGroupBox()
 {
-    QVBoxLayout *layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
     // Create the buttons
-    QHBoxLayout *buttonRow = new QHBoxLayout;
+    auto *buttonRow = new QHBoxLayout;
 
-    m_addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-    connect(m_addButton, SIGNAL(clicked()),
+    _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
+    connect(_addButton, SIGNAL(clicked()),
             this, SLOT(add()));
-    buttonRow->addWidget(m_addButton);
+    buttonRow->addWidget(_addButton);
 
-    m_removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
-    m_removeButton->setEnabled(false);
-    connect(m_removeButton, SIGNAL(clicked()),
+    _removeButton = new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
+    _removeButton->setEnabled(false);
+    connect(_removeButton, SIGNAL(clicked()),
             this, SLOT(remove()));
-    buttonRow->addWidget(m_removeButton);
+    buttonRow->addWidget(_removeButton);
 
-    m_editButton = new QPushButton;
-    m_editButton->setEnabled(false);
-    connect(m_editButton, SIGNAL(clicked()),
+    _editButton = new QPushButton;
+    _editButton->setEnabled(false);
+    connect(_editButton, SIGNAL(clicked()),
             this, SLOT(edit()));
-    buttonRow->addWidget(m_editButton);
+    buttonRow->addWidget(_editButton);
 
-    m_importButton = new QPushButton(QIcon(":/images/document-import.svg"), tr("Load Suite"));
-    connect(m_importButton, SIGNAL(clicked()),
+    _importButton = new QPushButton(QIcon(":/images/document-import.svg"), tr("Load Suite"));
+    connect(_importButton, SIGNAL(clicked()),
             this, SLOT(importSuite()));
 
     buttonRow->addStretch(1);
-    buttonRow->addWidget(m_importButton);
+    buttonRow->addWidget(_importButton);
 
     layout->addLayout(buttonRow);
 
     // Create table
-    m_tableView = new MyTableView(this);
-    m_tableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    m_tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_tableView->setItemDelegateForColumn(2, new MotionTypeDelegate);
+    _tableView = new MyTableView(this);
+    _tableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+    _tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    _tableView->setItemDelegateForColumn(2, new MotionTypeDelegate);
 
-    connect(m_tableView, SIGNAL(doubleClicked(QModelIndex)),
+    connect(_tableView, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(edit()));
-    layout->addWidget(m_tableView, 1);
+    layout->addWidget(_tableView, 1);
 
     // Form the groupbox
-    m_motionsTableGroupBox = new QGroupBox(tr("Input Motions"));
-    m_motionsTableGroupBox->setLayout(layout);
+    _motionsTableGroupBox = new QGroupBox(tr("Input Motions"));
+    _motionsTableGroupBox->setLayout(layout);
 
-    return m_motionsTableGroupBox;
+    return _motionsTableGroupBox;
 }
 
 void MotionPage::add()
 {
-    QDialog *dialog = 0;
-    AbstractMotion *motion = 0;
+    QDialog *dialog = nullptr;
+    AbstractMotion *motion = nullptr;
 
-    switch (m_motionLibrary->approach()) {
+    switch (_motionLibrary->approach()) {
     case MotionLibrary::TimeSeries:
         {
-            TimeSeriesMotion *_motion = new TimeSeriesMotion(m_motionLibrary);
-            _motion->setSaveData(m_motionLibrary->saveData());
+            auto *_motion = new TimeSeriesMotion(_motionLibrary);
+            _motion->setSaveData(_motionLibrary->saveData());
 
-            dialog = (QDialog*)(new TimeSeriesMotionDialog(_motion, m_readOnly, this));
+            dialog = (QDialog*)(new TimeSeriesMotionDialog(_motion, _readOnly, this));
             motion = (AbstractMotion*)_motion;
             break;
         }
@@ -196,29 +196,32 @@ void MotionPage::add()
             if (!ok) {
                 return;
             }
-
+            
             switch (items.indexOf(item)) {
             case 0:
                 {
                     // User defined FAS
-                    RvtMotion *_motion = new RvtMotion(m_motionLibrary);
-                    dialog = (QDialog*)(new RvtMotionDialog(_motion, m_readOnly, this));
+                    auto *_motion = new RvtMotion(_motionLibrary);
+                    dialog = (QDialog*)(
+                            new RvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
                 }
             case 1:
                 {
                     // Response Spectrum Compatible
-                    CompatibleRvtMotion *_motion = new CompatibleRvtMotion(m_motionLibrary);
-                    dialog = (QDialog*)(new CompatibleRvtMotionDialog(_motion, m_readOnly, this));
+                    auto *_motion = new CompatibleRvtMotion(_motionLibrary);
+                    dialog = (QDialog*)(
+                            new CompatibleRvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
                 }
             case 2:
                 {
                     // User defined FAS
-                    SourceTheoryRvtMotion *_motion = new SourceTheoryRvtMotion(m_motionLibrary);
-                    dialog = (QDialog*)(new SourceTheoryRvtMotionDialog(_motion, m_readOnly, this));
+                    auto *_motion = new SourceTheoryRvtMotion(_motionLibrary);
+                    dialog = (QDialog*)(
+                            new SourceTheoryRvtMotionDialog(_motion, _readOnly, this));
                     motion = (AbstractMotion*)_motion;
                     break;
                 }
@@ -227,9 +230,9 @@ void MotionPage::add()
     }
 
     if (dialog->exec()) {
-        m_motionLibrary->addMotion(motion);
-        m_tableView->resizeColumnsToContents();
-        m_tableView->resizeRowsToContents();
+        _motionLibrary->addMotion(motion);
+        _tableView->resizeColumnsToContents();
+        _tableView->resizeRowsToContents();
     } else {
         // FIXME deleting the motions causes a segfault!
         motion->deleteLater();
@@ -240,8 +243,8 @@ void MotionPage::add()
 
 void MotionPage::remove()
 {
-    QModelIndexList selectedRows = m_tableView->selectionModel()->selectedRows();
-    m_motionLibrary->removeRows(selectedRows.first().row(), selectedRows.size());
+    QModelIndexList selectedRows = _tableView->selectionModel()->selectedRows();
+    _motionLibrary->removeRows(selectedRows.first().row(), selectedRows.size());
 }
 
 void MotionPage::importSuite()
@@ -272,10 +275,10 @@ void MotionPage::importSuite()
         }
 
         // Clear the previous motions
-        const int rowCount = m_motionLibrary->rowCount();
+        const int rowCount = _motionLibrary->rowCount();
 
         if (rowCount)
-            m_motionLibrary->removeRows(0, rowCount);
+            _motionLibrary->removeRows(0, rowCount);
 
         // Load each of the filename/scale pairs in a map
         QMap<QString, QStringList> map;
@@ -292,7 +295,7 @@ void MotionPage::importSuite()
 
                 const QString _fileName = args.takeFirst();
 
-                if (args.size() > 0) {
+                if (!args.isEmpty()) {
                     // First argument is the scale that is applied to the motion
                     // Test to see if we can parse the scale
                     bool ok = false;
@@ -339,36 +342,36 @@ void MotionPage::importSuite()
         while (i.hasNext() && !progressDialog.wasCanceled()) {
             i.next();
 
-            if (m_motionLibrary->approach() == MotionLibrary::TimeSeries) {
+            if (_motionLibrary->approach() == MotionLibrary::TimeSeries) {
                 // Load the motion
                 bool successful = true;
                 double scale = i.value().at(0).toDouble();
                 AbstractMotion::Type type = AbstractMotion::variantToType(i.value().at(1), &successful);
 
-                TimeSeriesMotion* tsm = new TimeSeriesMotion(i.key(), scale, type, &successful);
+                auto *tsm = new TimeSeriesMotion(i.key(), scale, type, &successful);
 
                 if (successful)
-                    m_motionLibrary->addMotion(tsm);
+                    _motionLibrary->addMotion(tsm);
             } else {
                 double scale = i.value().at(0).toDouble();
                 AbstractRvtMotion* arm = loadRvtMotionFromTextFile(i.key(), scale);
 
                 if (arm)
-                    m_motionLibrary->addMotion(arm);
+                    _motionLibrary->addMotion(arm);
             }
 
-            progressDialog.setValue(m_motionLibrary->rowCount());
+            progressDialog.setValue(_motionLibrary->rowCount());
         }
     }
 
-    m_tableView->resizeColumnsToContents();
-    m_tableView->resizeRowsToContents();
+    _tableView->resizeColumnsToContents();
+    _tableView->resizeRowsToContents();
 }
 
 void MotionPage::edit()
 {
-    const QModelIndex& index = m_tableView->currentIndex();
-    AbstractMotion *motion = m_motionLibrary->motionAt(index.row());
+    const QModelIndex& index = _tableView->currentIndex();
+    AbstractMotion *motion = _motionLibrary->motionAt(index.row());
 
     // Buffer to save the state of the motion
     QBuffer buffer;
@@ -378,23 +381,23 @@ void MotionPage::edit()
     // Save the current state of the motion
     dataStream << motion;
 
-    QDialog* dialog = 0;
+    QDialog *dialog = nullptr;
 
     if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(motion)) {
-        dialog = new TimeSeriesMotionDialog(tsm, m_readOnly, this);
+        dialog = new TimeSeriesMotionDialog(tsm, _readOnly, this);
     } else if (RvtMotion* rm = qobject_cast<RvtMotion*>(motion)) {
-        dialog = new RvtMotionDialog(rm, m_readOnly, this);
+        dialog = new RvtMotionDialog(rm, _readOnly, this);
     } else if (CompatibleRvtMotion* crm = qobject_cast<CompatibleRvtMotion*>(motion)) {
-        dialog = new CompatibleRvtMotionDialog(crm, m_readOnly, this);
+        dialog = new CompatibleRvtMotionDialog(crm, _readOnly, this);
     } else if (SourceTheoryRvtMotion* _motion = qobject_cast<SourceTheoryRvtMotion*>(motion)) {
-        dialog = new SourceTheoryRvtMotionDialog(_motion, m_readOnly, this);
+        dialog = new SourceTheoryRvtMotionDialog(_motion, _readOnly, this);
     }
 
     if (!dialog->exec()) {
         buffer.seek(0);
         // Revert to the previous state
         dataStream >> motion;
-        m_motionLibrary->updateRow(index.row());
+        _motionLibrary->updateRow(index.row());
     }
 
     dialog->deleteLater();
@@ -402,8 +405,8 @@ void MotionPage::edit()
 
 void MotionPage::updateButtons()
 {
-    bool enabled = !m_tableView->selectionModel()->selectedRows().isEmpty();
+    bool enabled = !_tableView->selectionModel()->selectedRows().isEmpty();
 
-    m_removeButton->setEnabled(enabled);
-    m_editButton->setEnabled(enabled);
+    _removeButton->setEnabled(enabled);
+    _editButton->setEnabled(enabled);
 }

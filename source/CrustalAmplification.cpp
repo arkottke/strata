@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,6 +23,7 @@
 
 #include "CrustalModel.h"
 #include "Dimension.h"
+#include "Serialize.h"
 
 #include <QJsonArray>
 #include <QJsonValue>
@@ -30,39 +31,75 @@
 #include <cmath>
 
 CrustalAmplification::CrustalAmplification(QObject *parent) :
-        MyAbstractTableModel(parent)
+    MyAbstractTableModel(parent), _source(Default)
 {
-    m_crustalModel = new CrustalModel;
-    connect(m_crustalModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+    _crustalModel = new CrustalModel;
+    connect(_crustalModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             this, SLOT(calculate()));
 
-    m_interpolator = 0;
-    m_accelerator =  gsl_interp_accel_alloc();
+    _interpolator = 0;
+    _accelerator =  gsl_interp_accel_alloc();
 }
 
 CrustalAmplification::~CrustalAmplification()
 {
-    gsl_interp_accel_free(m_accelerator);
-    if (m_interpolator)
-        gsl_interp_free(m_interpolator);
+    gsl_interp_accel_free(_accelerator);
+    if (_interpolator)
+        gsl_interp_free(_interpolator);
 
-    m_crustalModel->deleteLater();
+    _crustalModel->deleteLater();
 }
 
-QStringList CrustalAmplification::sourceList()
+QStringList CrustalAmplification::sourceList() {
+    return {tr("Default"), tr("Specified"), tr("Calculated")};
+}
+
+void CrustalAmplification::setRegion(AbstractRvtMotion::Region region)
+{     
+    beginResetModel();
+    // WUS and CEUS amplification from Campbell (2003)
+    if (region == AbstractRvtMotion::CEUS) {
+        _freq = {0.01, 0.09, 0.16, 0.51, 0.84, 1.25, 2.26, 3.17, 6.05,
+                 16.60, 61.20, 100.00};
+        _amp  = {1.00, 1.02, 1.03, 1.05, 1.07, 1.09, 1.11, 1.12, 1.13,
+                 1.14, 1.15, 1.15, 1.15, 1.15, 1.15};
+    } else if (region == AbstractRvtMotion::WUS) {
+        // The final pair (100 Hz, 4.40) in this site amplication is estimated
+        // from extrapolation of the data.
+        _freq = {0.01, 0.09, 0.16, 0.51, 0.84, 1.25, 2.26, 3.17, 6.05,
+                 16.60, 61.20, 100.00};
+        _amp  = {1.00, 1.10, 1.18, 1.42, 1.58, 1.74, 2.06, 2.25, 2.58,
+                 3.13, 4.00, 4.40};
+    }
+    endResetModel();
+    clearInterp();
+}
+
+void CrustalAmplification::setRegion(int region)
 {
-    return QStringList()
-            << tr("Custom")
-            << tr("Western NA")
-            << tr("Eastern NA")
-            << tr("Calculated");
+    setRegion((AbstractRvtMotion::Region)region);
+}
+
+void CrustalAmplification::setSource(Source source) {
+    if (_source != source) {
+        _source = source;
+        emit sourceChanged(_source);
+    }
+}
+
+void CrustalAmplification::setSource(int source) {
+    setSource((Source)source);
+}
+
+CrustalAmplification::Source CrustalAmplification::source() const {
+    return _source;
 }
 
 int CrustalAmplification::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    return m_freq.size();
+    return _freq.size();
 }
 
 int CrustalAmplification::columnCount(const QModelIndex & parent) const
@@ -105,9 +142,9 @@ QVariant CrustalAmplification::data(const QModelIndex & index, int role) const
         switch (index.column())
         {
         case FreqColumn:
-            return QString::number(m_freq.at(index.row()), 'e', 2);
+            return QString::number(_freq.at(index.row()), 'e', 2);
         case AmpColumn:
-            return QString::number(m_amp.at(index.row()));
+            return QString::number(_amp.at(index.row()));
         }
     }
 
@@ -126,10 +163,10 @@ bool CrustalAmplification::setData( const QModelIndex & index, const QVariant & 
     if (b) {
         switch (index.column()) {
         case FreqColumn:
-            m_freq[index.row()] = d;
+            _freq[index.row()] = d;
             break;
         case AmpColumn:
-            m_amp[index.row()] = d;
+            _amp[index.row()] = d;
             break;
         }
         dataChanged(index, index);
@@ -141,7 +178,7 @@ bool CrustalAmplification::setData( const QModelIndex & index, const QVariant & 
 
 Qt::ItemFlags CrustalAmplification::flags( const QModelIndex & index) const
 {
-    if (m_model == Custom) {
+    if (_source == Specified) {
         return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
     } else {
         return QAbstractTableModel::flags(index);
@@ -152,8 +189,8 @@ bool CrustalAmplification::insertRows(int row, int count, const QModelIndex &par
 {
     emit beginInsertRows(parent, row, row+count-1);
 
-    m_freq.insert(row, count, 0);
-    m_amp.insert(row, count, 0);
+    _freq.insert(row, count, 0);
+    _amp.insert(row, count, 0);
 
     emit endInsertRows();
 
@@ -167,8 +204,8 @@ bool CrustalAmplification::removeRows(int row, int count, const QModelIndex &par
 {
     emit beginRemoveRows(parent, row, row+count-1 );
 
-    m_freq.remove(row, count);
-    m_amp.remove(row, count);
+    _freq.remove(row, count);
+    _amp.remove(row, count);
 
     emit endRemoveRows();
 
@@ -178,211 +215,85 @@ bool CrustalAmplification::removeRows(int row, int count, const QModelIndex &par
     return true;
 }
 
-CrustalAmplification::Model CrustalAmplification::model() const
-{
-    return m_model;
-}
-
-void CrustalAmplification::setModel(Model s)
-{
-    beginResetModel();
-    m_model = s;
-
-    switch (m_model) {
-        // WUS and CEUS amplification from Campbell (2003)
-    case WUS:
-        // The final pair (100 Hz, 4.40) in this site amplication is estimated
-        // from extrapolation of the data.
-        m_freq.clear();
-        m_freq  << 0.01
-                << 0.09
-                << 0.16
-                << 0.51
-                << 0.84
-                << 1.25
-                << 2.26
-                << 3.17
-                << 6.05
-                << 16.60
-                << 61.20
-                << 100.00;
-
-        m_amp.clear();
-        m_amp  << 1.00
-                << 1.10
-                << 1.18
-                << 1.42
-                << 1.58
-                << 1.74
-                << 2.06
-                << 2.25
-                << 2.58
-                << 3.13
-                << 4.00
-                << 4.40;
-
-        break;
-    case CEUS:
-        m_freq.clear();
-        m_freq << 0.01
-                << 0.10
-                << 0.20
-                << 0.30
-                << 0.50
-                << 0.90
-                << 1.25
-                << 1.80
-                << 3.00
-                << 5.30
-                << 8.00
-                << 14.00
-                << 30.00
-                << 60.00
-                << 100.00;
-
-        m_amp.clear();
-        m_amp  << 1.00
-                << 1.02
-                << 1.03
-                << 1.05
-                << 1.07
-                << 1.09
-                << 1.11
-                << 1.12
-                << 1.13
-                << 1.14
-                << 1.15
-                << 1.15
-                << 1.15
-                << 1.15
-                << 1.15;
-
-        break;
-    case Custom:
-    case Calculated:
-        m_freq.clear();
-        m_amp.clear();
-        break;
-    }
-    Q_ASSERT(m_freq.size() == m_amp.size());
-    endResetModel();
-
-    // Reset the interpolator
-    clearInterp();
-
-    emit modelChanged(m_model);
-    emit needsCrustalModelChanged(m_model == Calculated);
-    emit readOnlyChanged(m_model != Custom);
-}
-
-void CrustalAmplification::setModel(int s)
-{
-    setModel((Model)s);
-}
-
 CrustalModel* CrustalAmplification::crustalModel()
 {
-    return m_crustalModel;
+    return _crustalModel;
 }
 
 double CrustalAmplification::interpAmpAt(double freq)
 {
-    if (!m_interpolator) {
+    if (!_interpolator) {
         // Make sure the interpolator has been intialized
         initInterp();
     }
 
-    if (freq < m_freq.first()) {
-        return m_amp.first();
-    } else if (m_freq.last() < freq) {
-        return m_amp.last();
+    if (freq < _freq.first()) {
+        return _amp.first();
+    } else if (_freq.last() < freq) {
+        return _amp.last();
     } else {
-        return gsl_interp_eval(m_interpolator, m_freq.data(), m_amp.data(), freq, m_accelerator);
+        return gsl_interp_eval(_interpolator, _freq.data(), _amp.data(), freq, _accelerator);
     }
 }
 
 void CrustalAmplification::calculate()
 {
-    if (m_model == Calculated) {
+    if (_source == Calculated) {
         beginResetModel();
-
-        m_freq = Dimension::logSpace(0.01, 100., 20);
-        m_amp = m_crustalModel->calculate(m_freq);
+        _freq = Dimension::logSpace(0.01, 100., 20);
+        _amp = _crustalModel->calculate(_freq);
         endResetModel();
     }
 }
 
 void CrustalAmplification::initInterp()
 {
-    m_interpolator = gsl_interp_alloc(gsl_interp_linear, m_freq.size());
-    gsl_interp_init(m_interpolator, m_freq.data(), m_amp.data(), m_freq.size());
+    _interpolator = gsl_interp_alloc(gsl_interp_linear, _freq.size());
+    gsl_interp_init(_interpolator, _freq.data(), _amp.data(), _freq.size());
 }
 
 void CrustalAmplification::clearInterp()
 {
-    if (m_interpolator) {
-        gsl_interp_free(m_interpolator);
-        m_interpolator = 0;
+    if (_interpolator) {
+        gsl_interp_free(_interpolator);
+        _interpolator = 0;
     }
 }
 
 void CrustalAmplification::fromJson(const QJsonObject &json)
 {
-    int model = json["model"].toInt();
-    setModel(model);
+    int source = json["source"].toInt();
+    setSource(source);
 
-    switch (m_model) {
-        case CrustalAmplification::Custom:
-        {
-            beginResetModel();
-
-            m_freq.clear();
-            foreach (const QJsonValue &d, json["freq"].toArray())
-                m_freq << d.toDouble();
-
-            m_amp.clear();
-            foreach (const QJsonValue &d, json["amp"].toArray())
-                m_amp << d.toDouble();
-
-            endResetModel();
-            break;
-        }
-        case CrustalAmplification::WUS:
-        case CrustalAmplification::CEUS:
-            break;
-        case CrustalAmplification::Calculated:
-        {
-            m_crustalModel->fromJson(json["crustalModel"].toObject());
-            calculate();
-            break;
-        }
+    switch (_source) {
+    case CrustalAmplification::Specified:
+        beginResetModel();
+        Serialize::toDoubleVector(json["freq"], _freq);
+        Serialize::toDoubleVector(json["amp"], _amp);
+        endResetModel();
+    case CrustalAmplification::Calculated:
+        _crustalModel->fromJson(json["crustalModel"].toObject());
+        calculate();
+        break;
+    default:
+        break;
     }
 }
 
 QJsonObject CrustalAmplification::toJson() const
 {
     QJsonObject json;
-    json["model"] = (int) m_model;
-    switch (m_model) {
-        case CrustalAmplification::Custom:
-        {
-            QJsonArray freq;
-            foreach(const double &d, m_freq)
-                freq << QJsonValue(d);
-            json["freq"] = freq;
-
-            QJsonArray amp;
-            foreach(const double &d, m_amp)
-                amp << QJsonValue(d);
-            json["amp"] = amp;
-            break;
-        }
-        case CrustalAmplification::WUS:
-        case CrustalAmplification::CEUS:
-            break;
-        case CrustalAmplification::Calculated:
-            json["crustalModel"] = m_crustalModel->toJson();
-            break;
+    json["source"] = (int)_source;
+    switch (_source) {
+    case CrustalAmplification::Specified:
+        json["freq"] = Serialize::toJsonArray(_freq);
+        json["amp"] = Serialize::toJsonArray(_amp);
+        break;
+    case CrustalAmplification::Calculated:
+        json["crustalModel"] = _crustalModel->toJson();
+        break;
+    default:
+        break;
     }
     return json;
 }
@@ -390,21 +301,18 @@ QJsonObject CrustalAmplification::toJson() const
 QDataStream & operator<< (QDataStream & out, const CrustalAmplification* ca)
 {
     out << (quint8)1;
+    out << (int)ca->_source;
 
-    out << (int)ca->m_model;
-
-    switch (ca->m_model) {
-    case CrustalAmplification::Custom:
-        out << ca->m_freq << ca->m_amp;
-        break;
-    case CrustalAmplification::WUS:
-    case CrustalAmplification::CEUS:
+    switch (ca->_source) {
+    case CrustalAmplification::Specified:
+        out << ca->_freq << ca->_amp;
         break;
     case CrustalAmplification::Calculated:
-        out << ca->m_crustalModel;
+        out << ca->_crustalModel;
+        break;
+    default:
         break;
     }
-
     return out;
 }
 
@@ -413,24 +321,22 @@ QDataStream & operator>> (QDataStream & in, CrustalAmplification* ca)
     quint8 ver;
     in >> ver;
 
-    int model;
-    in >> model;
-    ca->setModel(model);
+    int source;
+    in >> source;
+    ca->setSource(source);
 
-    switch (ca->m_model) {
-    case CrustalAmplification::Custom:
+    switch (ca->_source) {
+    case CrustalAmplification::Specified:
         ca->beginResetModel();
-        in >> ca->m_freq >> ca->m_amp;
+        in >> ca->_freq >> ca->_amp;
         ca->endResetModel();
         break;
-    case CrustalAmplification::WUS:
-    case CrustalAmplification::CEUS:
-        break;
     case CrustalAmplification::Calculated:
-        in >> ca->m_crustalModel;
+        in >> ca->_crustalModel;
         ca->calculate();
         break;
+    default:
+        break;
     }
-
     return in;
 }

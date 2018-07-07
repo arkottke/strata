@@ -15,45 +15,38 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef SOURCE_THEORY_RVT_MOTION_DIALOG_H
 #define SOURCE_THEORY_RVT_MOTION_DIALOG_H
 
-#include "SourceTheoryRvtMotion.h"
-#include "MyTableView.h"
+#include "AbstractRvtMotionDialog.h"
 
-#include <QDialog>
-#include <QTabWidget>
+class TableGroupBox;
+class SourceTheoryRvtMotion;
 
-#include <qwt_plot_curve.h>
-
-class SourceTheoryRvtMotionDialog : public QDialog
+class SourceTheoryRvtMotionDialog : public AbstractRvtMotionDialog
 {
 Q_OBJECT
 public:
-    explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly, QWidget *parent = 0);
+    explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly,
+                                         QWidget *parent = nullptr);
+protected slots:
+    void updatePathDurSource(int source);
+    void updateCrustalAmpSource(int source);
 
-signals:
+protected:
+    virtual QFormLayout* createParametersLayout();
 
-public slots:
-private slots:
-    void openFrequencyDialog();
+    int _crustModelIndex;
 
-    void calculate();
-    void tryAccept();
+    QTabWidget* _paramsTabWidget;
 
-
-private:
-    //! Create the GUI for the source theory inputs
-    QTabWidget* createSourceTheoryForm(bool readOnly);
-
-    SourceTheoryRvtMotion *m_motion;
-
-    QwtPlotCurve *m_fasCurve;
-    QwtPlotCurve *m_saCurve;
+    TableGroupBox* _pathDurTableGroupBox;
+    TableGroupBox* _crustalModelGroupBox;
+    TableGroupBox* _crustalAmpGroupBox;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_DIALOG_H

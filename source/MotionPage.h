@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class MotionPage : public AbstractPage
     Q_OBJECT
 
 public:
-    MotionPage(QWidget*  parent = 0, Qt::WindowFlags f = 0 );
+    explicit MotionPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     void setModel(SiteResponseModel* model);
 
@@ -64,20 +64,20 @@ private:
     //! Create the group box for editting the input motions
     QGroupBox* createMotionsTableGroupBox();
 
-    QGroupBox* m_inputLocationGroupBox;
-    QGroupBox* m_motionsTableGroupBox;
+    QGroupBox* _inputLocationGroupBox;
+    QGroupBox* _motionsTableGroupBox;
 
-    QPushButton* m_addButton;
-    QPushButton* m_removeButton;
-    QPushButton* m_editButton;
-    QPushButton* m_importButton;
-    MyTableView* m_tableView;
+    QPushButton* _addButton;
+    QPushButton* _removeButton;
+    QPushButton* _editButton;
+    QPushButton* _importButton;
+    MyTableView* _tableView;
 
-    DepthComboBox* m_depthComboBox;
+    DepthComboBox* _depthComboBox;
 
-    MotionLibrary* m_motionLibrary;
+    MotionLibrary* _motionLibrary;
 
     //! If the model is in read-only mode
-    bool m_readOnly;
+    bool _readOnly;
 };
 #endif

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,10 +54,10 @@ public:
         PropertyColumn
     };
 
-    NonlinearProperty(QObject *parent = 0);
+    NonlinearProperty(QObject *parent = nullptr);
     NonlinearProperty(const QString &name, Type type,
                       const QVector<double> &strain, const QVector<double> &property,
-                      QObject *parent = 0);
+                      QObject *parent = nullptr);
     ~NonlinearProperty();
 
     Type type() const;
@@ -91,27 +91,27 @@ protected:
     void initialize();
 
     //! Name of the model
-    QString m_name;
+    QString _name;
 
     //! Type of curve
-    Type m_type;
+    Type _type;
 
     //! Strain of the property
-    QVector<double> m_strain;
+    QVector<double> _strain;
 
     //! Log of the strain
     QVector<double> m_lnStrain;
 
     //! Average value of the property
-    QVector<double> m_average;
+    QVector<double> _average;
 
     //! Varied value of the property
-    QVector<double> m_varied;
+    QVector<double> _varied;
 
     //! Accelerator for the interpolation
-    gsl_interp_accel *m_acc;
+    gsl_interp_accel *_acc;
 
     //! GSL Spline for the interpolation
-    gsl_interp *m_interp;
+    gsl_interp *_interp;
 };
 #endif // NONLINEAR_PROPERTY_H_

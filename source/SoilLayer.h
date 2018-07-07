@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,8 +42,9 @@ class SoilLayer : public VelocityLayer
     friend class SoilProfile;
 
 public:
-    SoilLayer(QObject* parent = 0);
-    SoilLayer(const SoilLayer* soilLayer);
+    explicit SoilLayer(QObject *parent = nullptr);
+
+    explicit SoilLayer(const SoilLayer *soilLayer);
 
     SoilType* soilType() const;
     void setSoilType(SoilType* soilType);
@@ -65,9 +66,9 @@ protected:
 
 private:
     //! Soil type of the layer
-    QPointer<SoilType> m_soilType;
+    QPointer<SoilType> _soilType;
 
     //! Total thickness of the layer
-    double m_thickness;
+    double _thickness;
 };
 #endif

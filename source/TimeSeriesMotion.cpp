@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "TimeSeriesMotion.h"
 
 #include "ResponseSpectrum.h"
+#include "Serialize.h"
 #include "Units.h"
 
 #include <QDataStream>
@@ -33,6 +34,7 @@
 #include <QJsonValue>
 #include <QRegExp>
 #include <QTextStream>
+
 
 #ifdef USE_FFTW
 #include <fftw3.h>
@@ -49,36 +51,36 @@
 TimeSeriesMotion::TimeSeriesMotion(QObject * parent)
         : AbstractMotion(parent)
 {
-    m_isLoaded = false;
-    m_saveData = true;
+    _isLoaded = false;
+    _saveData = true;
     // Initialize the values -- appropriate values for an AT2 file
-    m_inputUnits = Gravity;
-    m_timeStep = 0;
-    m_pointCount = 0;
-    m_format = Rows;
-    m_dataColumn = 2;
-    m_startLine = 5;
-    m_stopLine = 0;
-    m_scale = 1.0;
+    _inputUnits = Gravity;
+    _timeStep = 0;
+    _pointCount = 0;
+    _format = Rows;
+    _dataColumn = 2;
+    _startLine = 5;
+    _stopLine = 0;
+    _scale = 1.0;
 }
 
 TimeSeriesMotion::TimeSeriesMotion(const QString & fileName, double scale,  AbstractMotion::Type type, bool * successful, QObject * parent)
-    : AbstractMotion(parent), m_fileName(QDir::cleanPath(fileName))
+    : AbstractMotion(parent), _fileName(QDir::cleanPath(fileName))
 { 
-    m_isLoaded = false;
-    m_saveData = true;
-    m_type = type;
+    _isLoaded = false;
+    _saveData = true;
+    _type = type;
     // Initialize the values -- appropriate values for an AT2 file
-    m_inputUnits = Gravity;
-    m_timeStep = 0;
-    m_pointCount = 0;
-    m_format = Rows;
-    m_dataColumn = 2;
-    m_startLine = 5;
-    m_stopLine = 0;
-    m_scale = 1.0;
+    _inputUnits = Gravity;
+    _timeStep = 0;
+    _pointCount = 0;
+    _format = Rows;
+    _dataColumn = 2;
+    _startLine = 5;
+    _stopLine = 0;
+    _scale = 1.0;
 
-    if (!m_fileName.isEmpty() && load(m_fileName, true, scale)) {
+    if (!_fileName.isEmpty() && load(_fileName, true, scale)) {
         *successful = true;
     } else {
         *successful = false;
@@ -97,19 +99,20 @@ QStringList TimeSeriesMotion::formatList()
 
 QString TimeSeriesMotion::fileName() const
 {
-    return m_fileName;
+    return _fileName;
 }
 
-void TimeSeriesMotion::setFileName(const QString & fileName)
+void TimeSeriesMotion::setFileName(QString fileName)
 {    
+    // Convert to an absolute path.
     QFileInfo fileInfo(fileName);
-    const QString _fileName = QDir::cleanPath(fileInfo.absoluteFilePath());
+    fileName = QDir::cleanPath(fileInfo.absoluteFilePath());
 
-    if (m_fileName != _fileName) {
-        emit fileNameChanged(_fileName);
+    if (_fileName != fileName) {
+        emit fileNameChanged(fileName);
     }
 
-    m_fileName = _fileName;   
+    _fileName = fileName;   
     setIsLoaded(false);
 }
 
@@ -120,7 +123,7 @@ double TimeSeriesMotion::freqMax() const
 
 double TimeSeriesMotion::freqNyquist() const
 {
-    return 1. / (2. * m_timeStep);
+    return 1. / (2. * _timeStep);
 }
 
 QStringList TimeSeriesMotion::inputUnitsList()
@@ -130,7 +133,7 @@ QStringList TimeSeriesMotion::inputUnitsList()
 
 TimeSeriesMotion::InputUnits TimeSeriesMotion::inputUnits() const
 {
-    return m_inputUnits;
+    return _inputUnits;
 }
 
 void TimeSeriesMotion::setInputUnits(int inputUnits)
@@ -140,18 +143,18 @@ void TimeSeriesMotion::setInputUnits(int inputUnits)
 
 void TimeSeriesMotion::setInputUnits(TimeSeriesMotion::InputUnits inputUnits)
 {
-    if (m_inputUnits != inputUnits) {
+    if (_inputUnits != inputUnits) {
         // Save the previously used conversation and scale factors
         const double prevFactor = unitConversionFactor();
-        const double prevScale = m_scale;
+        const double prevScale = _scale;
 
-        m_inputUnits = inputUnits;
+        _inputUnits = inputUnits;
         setModified(true);
 
         // Need to modify the scale to correct for the change in units.
-        // This is done by modifying the m_scale parameter which is then
+        // This is done by modifying the _scale parameter which is then
         // used in rescale the appropriate values.
-        m_scale *= prevFactor / unitConversionFactor();
+        _scale *= prevFactor / unitConversionFactor();
         setScale(prevScale);
 
         emit inputUnitsChanged(inputUnits);
@@ -162,7 +165,7 @@ void TimeSeriesMotion::setInputUnits(TimeSeriesMotion::InputUnits inputUnits)
 
 double TimeSeriesMotion::unitConversionFactor() const
 {
-    switch (m_inputUnits) {
+    switch (_inputUnits) {
     case CentimetersPerSecondSquared:
         return 1. / (100. * 9.80665);
     case InchesPerSecondSquared:
@@ -174,13 +177,13 @@ double TimeSeriesMotion::unitConversionFactor() const
 
 int TimeSeriesMotion::pointCount() const
 {
-    return m_pointCount;
+    return _pointCount;
 }
 
 void TimeSeriesMotion::setPointCount(int count)
 {
-    if (m_pointCount != count) {
-        m_pointCount = count;
+    if (_pointCount != count) {
+        _pointCount = count;
         emit pointCountChanged(count);
 
         setIsLoaded(false);
@@ -189,15 +192,15 @@ void TimeSeriesMotion::setPointCount(int count)
 
 double TimeSeriesMotion::timeStep() const
 {
-    return m_timeStep;
+    return _timeStep;
 }
 
 void TimeSeriesMotion::setTimeStep(double timeStep)
 {
-    if (fabs(m_timeStep - timeStep) > DBL_EPSILON) {
-        m_timeStep = timeStep;
+    if (fabs(_timeStep - timeStep) > DBL_EPSILON) {
+        _timeStep = timeStep;
 
-        emit timeStepChanged(m_timeStep);
+        emit timeStepChanged(_timeStep);
 
         setIsLoaded(false);
     }
@@ -205,46 +208,46 @@ void TimeSeriesMotion::setTimeStep(double timeStep)
 
 double TimeSeriesMotion::scale() const
 {
-    return m_scale;
+    return _scale;
 }
 
 void TimeSeriesMotion::setScale(double scale)
 {
-    if (fabs(m_scale - scale) > DBL_EPSILON) {
+    if (fabs(_scale - scale) > DBL_EPSILON) {
         // Compute the ratio and apply this to the acceleration
-        const double ratio = scale / m_scale;
+        const double ratio = scale / _scale;
 
-        m_scale = scale;
+        _scale = scale;
         emit scaleChanged(scale);
 
-        if (m_isLoaded) {
+        if (_isLoaded) {
             // Scale the various spectra
-            for (int i = 0; i < m_accel.size(); ++i) {
-                m_accel[i] = ratio * m_accel.at(i);
+            for (int i = 0; i < _accel.size(); ++i) {
+                _accel[i] = ratio * _accel.at(i);
             }
 
-            for (int i = 0; i < m_fourierAcc.size(); ++i) {
-                m_fourierAcc[i] *= ratio;
-                m_fourierVel[i] *= ratio;
+            for (int i = 0; i < _fourierAcc.size(); ++i) {
+                _fourierAcc[i] *= ratio;
+                _fourierVel[i] *= ratio;
             }
 
-            m_respSpec->scaleBy(ratio);
+            _respSpec->scaleBy(ratio);
 
-            setPga(ratio * m_pga);
-            setPgv(ratio * m_pgv);
+            setPga(ratio * _pga);
+            setPgv(ratio * _pgv);
         }
     }
 }
 
 TimeSeriesMotion::Format TimeSeriesMotion::format() const
 {
-    return m_format;
+    return _format;
 }
 
 void TimeSeriesMotion::setFormat(Format format)
 {
-    if (m_format != format) {
-        m_format = format;
+    if (_format != format) {
+        _format = format;
         emit formatChanged(format);
 
         setIsLoaded(false);
@@ -258,13 +261,13 @@ void TimeSeriesMotion::setFormat(int format)
 
 int TimeSeriesMotion::dataColumn() const
 {
-    return m_dataColumn;
+    return _dataColumn;
 }
 
 void TimeSeriesMotion::setDataColumn(int column)
 {
-    if (m_dataColumn != column) {
-        m_dataColumn = column;
+    if (_dataColumn != column) {
+        _dataColumn = column;
         emit dataColumnChanged(column);
 
         setIsLoaded(false);
@@ -273,13 +276,13 @@ void TimeSeriesMotion::setDataColumn(int column)
 
 int TimeSeriesMotion::startLine() const
 {
-    return m_startLine;
+    return _startLine;
 }
 
 void TimeSeriesMotion::setStartLine(int line)
 {
-    if (m_startLine != line) {
-        m_startLine = line;
+    if (_startLine != line) {
+        _startLine = line;
         emit startLineChanged(line);
 
         setIsLoaded(false);
@@ -288,13 +291,13 @@ void TimeSeriesMotion::setStartLine(int line)
 
 int TimeSeriesMotion::stopLine() const
 {
-    return m_stopLine;
+    return _stopLine;
 }
 
 void TimeSeriesMotion::setStopLine(int line)
 {
-    if (m_stopLine != line) {
-        m_stopLine = line;
+    if (_stopLine != line) {
+        _stopLine = line;
         emit stopLineChanged(line);
 
         setIsLoaded(false);
@@ -303,7 +306,7 @@ void TimeSeriesMotion::setStopLine(int line)
 
 const QVector<double> & TimeSeriesMotion::freq() const
 {
-    return m_freq;
+    return _freq;
 }
 
 QVector<double> TimeSeriesMotion::time() const
@@ -311,9 +314,9 @@ QVector<double> TimeSeriesMotion::time() const
     // Time step based on the max frequency
     const double dt = timeStep();
 
-    QVector<double> v(m_pointCount);
+    QVector<double> v(_pointCount);
 
-    for (int i = 0; i < m_pointCount; ++i) {
+    for (int i = 0; i < _pointCount; ++i) {
         v[i] = i * dt;
     }
 
@@ -322,17 +325,17 @@ QVector<double> TimeSeriesMotion::time() const
 
 const QVector<double> & TimeSeriesMotion::accel() const
 {
-    return m_accel;
+    return _accel;
 }
 
 QVector<double> TimeSeriesMotion::timeSeries(
         MotionType type, const QVector<std::complex<double> > & tf, const bool baselineCorrect) const
 {
     // Compute the time series
-    QVector<double> ts = calcTimeSeries(m_fourierAcc, tf);
+    QVector<double> ts = calcTimeSeries(_fourierAcc, tf);
 
     // Remove the zero padded values from the time series
-    ts.resize(m_pointCount);
+    ts.resize(_pointCount);
 
     if (baselineCorrect) {
         const double dt = timeStep();
@@ -383,7 +386,7 @@ QVector<double> TimeSeriesMotion::timeSeries(
 
 QString TimeSeriesMotion::name() const
 {
-    QFileInfo fileInfo(m_fileName);
+    QFileInfo fileInfo(_fileName);
     // Return the folder and file name
     return fileInfo.dir().dirName() + QString(QDir::separator()) + fileInfo.fileName();
 }
@@ -402,25 +405,25 @@ QString TimeSeriesMotion::toHtml() const
             "</tr>"
             )
             .arg(name())
-            .arg(m_description)
-            .arg(typeList().at(m_type))
-            .arg(m_scale)
-            .arg(m_pga);
+            .arg(_description)
+            .arg(typeList().at(_type))
+            .arg(_scale)
+            .arg(_pga);
 
     return html;
 }
 
 bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale)
 {
-    m_accel.clear();
+    _accel.clear();
 
     setFileName(fileName);
-    const QString ext = m_fileName.right(3).toUpper();
+    const QString ext = _fileName.right(3).toUpper();
 
     // Load the file
-    QFile file(m_fileName);
+    QFile file(_fileName);
     if (!file.open( QIODevice::ReadOnly | QIODevice::Text )) {
-        qWarning() << "Unable to open the time series file:" << qPrintable(m_fileName);
+        qWarning() << "Unable to open the time series file:" << qPrintable(_fileName);
         return false;
     }
     QTextStream stream(&file);
@@ -483,11 +486,11 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         }
     } else {
         // Check the input
-        if (m_timeStep <= 0) {
+        if (_timeStep <= 0) {
             qCritical("Time step must be greater than one");
             return false;
         }
-        if (m_startLine < 0) {
+        if (_startLine < 0) {
             qCritical("Number of header lines must be positive");
             return false;
         }
@@ -498,7 +501,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
 
     int lineNum = 1;
     // Skip the header lines
-    while (lineNum < m_startLine) {
+    while (lineNum < _startLine) {
         Q_UNUSED(stream.readLine());
         ++lineNum;
     }
@@ -510,13 +513,13 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
     bool stopLineReached = false;
 
     // Modify the scale for unit conversion
-    scale = unitConversionFactor() * m_scale;
+    scale = unitConversionFactor() * _scale;
 
     while (!finished && !line.isNull()) {
         // Stop if line exceeds number of lines.  The line number has
         // to be increased by one because the user display starts at
         // line number 1 instead of 0
-        if (m_stopLine > 0 &&  m_stopLine <= lineNum+1) {
+        if (_stopLine > 0 &&  _stopLine <= lineNum+1) {
             stopLineReached = true;
             break;
         }
@@ -533,17 +536,17 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
 
         // Process the row based on the format
         bool ok;
-        switch (m_format) {
+        switch (_format) {
         case Rows:
             // Use all parts of the data
             for(int i = 0; i < row.size(); ++i) {
-                if ( m_pointCount && m_accel.size() >= m_pointCount ) {
+                if ( _pointCount && _accel.size() >= _pointCount ) {
                     qWarning("Point count reached before end of data!");
                     finished = true;
                     break;
                 }
                 // Apply the scale factor and read the acceleration
-                m_accel << scale * row.at(i).trimmed().toDouble(&ok);
+                _accel << scale * row.at(i).trimmed().toDouble(&ok);
                 // Stop if there was an error in the conversion
                 if (!ok) {
                     continue;
@@ -551,7 +554,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             }
             break;
         case Columns:
-            if ( m_pointCount && m_accel.size() >= m_pointCount ) {
+            if ( _pointCount && _accel.size() >= _pointCount ) {
                 qWarning("Point count reached before end of data!");
                 finished = true;
                 break;
@@ -560,8 +563,8 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             // file that column may not exist -- this only happens when the
             // row format is applied, but it still causes the program to
             // crash.
-            if ( m_dataColumn - 1 < row.size() ) {
-                m_accel << scale * row.at(m_dataColumn-1).trimmed().toDouble(&ok);
+            if ( _dataColumn - 1 < row.size() ) {
+                _accel << scale * row.at(_dataColumn-1).trimmed().toDouble(&ok);
             }
             break;
         }
@@ -580,7 +583,7 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
         }
     }
 
-    if (m_pointCount && m_pointCount != m_accel.size()) {
+    if (_pointCount && _pointCount != _accel.size()) {
         if (stopLineReached) {
             qWarning() << "Number of points limited by stop line.";
         } else {
@@ -590,11 +593,11 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
     }
 
     // Update counts that might not have been set
-    if (m_pointCount == 0)
-        setPointCount(m_accel.size());
+    if (_pointCount == 0)
+        setPointCount(_accel.size());
 
-    if (m_stopLine == 0)
-        setStopLine(m_pointCount + m_startLine - 1);
+    if (_stopLine == 0)
+        setStopLine(_pointCount + _startLine - 1);
 
     // Compute motion properties
     calculate();
@@ -607,47 +610,47 @@ void TimeSeriesMotion::calculate()
 {      
     // Compute the next largest power of two
     int n = 1;
-    while (n <= m_accel.size())
+    while (n <= _accel.size())
         n <<= 1;
 
     // Pad the acceleration data with zeroes
     QVector<double> accel(n, 0);
 
-    for (int i = 0; i < m_accel.size(); ++i)
-        accel[i] = m_accel.at(i);
+    for (int i = 0; i < _accel.size(); ++i)
+        accel[i] = _accel.at(i);
 
     // Compute the Fourier amplitude spectrum.  The FAS computed through this
     // method is only the postive frequencies and is of length n/2+1 where n is
     // the lenght of the acceleration time history.
-    fft(accel, m_fourierAcc);
+    fft(accel, _fourierAcc);
 
     // Test the FFT/IFFT methods
     // QVector<double> test;
-    // ifft(m_fourierAcc, test);
+    // ifft(_fourierAcc, test);
     // for (int i = 0; i < test.size(); ++i)
     //     Q_ASSERT(fabs(test.at(i) - accel.at(i)) < 1E-5);
 
     // Compute FAS of the velocity time series
-    fft(integrate(accel), m_fourierVel);
+    fft(integrate(accel), _fourierVel);
 
     // Create the frequency array truncated at the maximum frequency
-    const double delta = 1 / (2. * m_timeStep * (m_fourierAcc.size() - 1));
-    m_freq.resize(m_fourierAcc.size());
-    for (int i = 0; i < m_freq.size(); ++i)
-        m_freq[i] = i * delta;
+    const double delta = 1 / (2. * _timeStep * (_fourierAcc.size() - 1));
+    _freq.resize(_fourierAcc.size());
+    for (int i = 0; i < _freq.size(); ++i)
+        _freq[i] = i * delta;
 
     // Compute PGA and PGV
     setPga(findMaxAbs(accel));
     setPgv(findMaxAbs(integrate(accel)) * Units::instance()->tsConv());
 
     // Compute the response spectrum
-    m_respSpec->setSa(computeSa(m_respSpec->period(), m_respSpec->damping()));
+    _respSpec->setSa(computeSa(_respSpec->period(), _respSpec->damping()));
 }
 
 int TimeSeriesMotion::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
-    return m_accel.size();
+    return _accel.size();
 }
 
 int TimeSeriesMotion::columnCount(const QModelIndex & parent) const
@@ -664,9 +667,9 @@ QVariant TimeSeriesMotion::data(const QModelIndex & index, int role) const
 
     switch (index.column()) {
     case TimeColumn:
-        return QString::number(m_timeStep * index.row(), 'f', 3);
+        return QString::number(_timeStep * index.row(), 'f', 3);
     case AccelColumn:
-        return QString::number(m_accel.at(index.row()), 'e', 2);
+        return QString::number(_accel.at(index.row()), 'e', 2);
     }
 
     return QVariant();
@@ -695,22 +698,22 @@ QVariant TimeSeriesMotion::headerData( int section, Qt::Orientation orientation,
 
 void TimeSeriesMotion::setSaveData(bool b)
 {
-    m_saveData = b;
+    _saveData = b;
 }
 
 bool TimeSeriesMotion::saveData() const
 {
-    return m_saveData;
+    return _saveData;
 }
 
 bool TimeSeriesMotion::isLoaded() const
 {
-    return m_isLoaded;
+    return _isLoaded;
 }
 
 void TimeSeriesMotion::setIsLoaded(bool isLoaded)
 {
-    m_isLoaded = isLoaded;
+    _isLoaded = isLoaded;
 }
 
 double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
@@ -718,7 +721,7 @@ double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
     //  Assume the first value is the largest
     double max = fabs(v.at(0));
     // Check the remaining values
-    foreach (double d, v)
+    for (const double &d : v)
         if (fabs(d) > max)
             max = fabs(d);
 
@@ -729,7 +732,7 @@ double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
 double TimeSeriesMotion::max(const QVector<std::complex<double> > & tf) const
 {
     // Return the maximum value in the time history
-    return findMaxAbs(calcTimeSeries(m_fourierAcc, tf));
+    return findMaxAbs(calcTimeSeries(_fourierAcc, tf));
 } 	
 
 double TimeSeriesMotion::maxVel(const QVector<std::complex<double> > &tf) const
@@ -745,11 +748,11 @@ double TimeSeriesMotion::maxDisp(const QVector<std::complex<double> > &tf) const
 QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf )
 {
     if (!accelTf.isEmpty())
-        Q_ASSERT(accelTf.size() == m_freq.size());
+        Q_ASSERT(accelTf.size() == _freq.size());
 
     QVector<double> sa(period.size());
 
-    const double deltaFreq = 1 / (m_timeStep * m_accel.size());
+    const double deltaFreq = 1 / (_timeStep * _accel.size());
 
     // Compute the response at each period
     for ( int i = 0; i < sa.size(); ++i ) {
@@ -762,7 +765,7 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
         which allows for resolution of the time series.
         */
         const double f = 1 / period.at(i);       
-        const int minSize = qMax(m_freq.size(), int((f * 5.0) / deltaFreq));
+        const int minSize = qMax(_freq.size(), int((f * 5.0) / deltaFreq));
 
         int size = 1;
         while (size < minSize)
@@ -777,7 +780,7 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
 
         // The amplitude of the FAS needs to be scaled to reflect the increased
         // number of points.
-        const double scale = double(size) / double(m_freq.size());
+        const double scale = double(size) / double(_freq.size());
 
         for (int j = 0; j < tf.size(); ++j )
             tf[j] *= scale;
@@ -802,12 +805,12 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
 
 const QVector<double> TimeSeriesMotion::absFourierAcc(const QVector<std::complex<double> >& tf) const
 {
-    return absFourier(m_fourierAcc, tf);
+    return absFourier(_fourierAcc, tf);
 }
 
 const QVector<double> TimeSeriesMotion::absFourierVel(const QVector<std::complex<double> >& tf) const
 {
-    return absFourier(m_fourierVel, tf);
+    return absFourier(_fourierVel, tf);
 }
 
 double TimeSeriesMotion::calcMaxStrain(const QVector<std::complex<double> >& tf) const
@@ -817,7 +820,7 @@ double TimeSeriesMotion::calcMaxStrain(const QVector<std::complex<double> >& tf)
 
 QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<double> >& tf, const bool baseLineCorrect) const
 {
-    QVector<double> strain = calcTimeSeries(m_fourierVel, tf);
+    QVector<double> strain = calcTimeSeries(_fourierVel, tf);
 
     // Use a simple subtraction of the average to correct the record.
     if (baseLineCorrect) {
@@ -838,7 +841,7 @@ QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<do
 
 QVector<double> TimeSeriesMotion::ariasIntensity(const QVector<std::complex<double> > & tf) const
 {
-    QVector<double> accelTs = calcTimeSeries(m_fourierAcc, tf);
+    QVector<double> accelTs = calcTimeSeries(_fourierAcc, tf);
 
     QVector<double> accelTsSqr = QVector<double>(accelTs.size());
     for (int i = 0; i < accelTs.size(); ++i)
@@ -852,7 +855,7 @@ QVector<double> TimeSeriesMotion::ariasIntensity(const QVector<std::complex<doub
      * rule. The time step and 1/2 factor are pulled out and combined with the
      * constant factor.
      */
-    const double foo = m_timeStep * M_PI / (4 * Units::instance()->gravity());
+    const double foo = _timeStep * M_PI / (4 * Units::instance()->gravity());
 
     for (int i = 1; i < ai.size(); ++i)
         ai[i] = foo * (accelTsSqr.at(i - 1) + accelTsSqr.at(i)) + ai[i - 1];
@@ -889,7 +892,7 @@ const QVector<double> TimeSeriesMotion::baselineFit( const int term, const QVect
                 // Don't use the first two terms in the fitting
                 gsl_matrix_set(X, i, j, 0);
             } else {
-                gsl_matrix_set(X, i, j, pow(m_timeStep * i, j));
+                gsl_matrix_set(X, i, j, pow(_timeStep * i, j));
             }
         }
     }
@@ -906,7 +909,7 @@ const QVector<double> TimeSeriesMotion::baselineFit( const int term, const QVect
     double chisq = 0;
     gsl_multifit_linear(X, y, c, cov, &chisq, work);
 
-    // Copy coefficients over to m_coeffs
+    // Copy coefficients over to _coeffs
     QVector<double> coeffs(term);
 
     for ( int i = 0; i < term; ++i )
@@ -1084,53 +1087,47 @@ void TimeSeriesMotion::fromJson(const QJsonObject &json)
 {
     AbstractMotion::fromJson(json);
 
-    m_saveData = json["saveData"].toBool();
-    m_fileName = json["fileName"].toString();
-    m_timeStep = json["timeStep"].toDouble();
-    m_pointCount = json["pointCount"].toInt();
-    m_scale = json["scale"].toDouble();
-    m_dataColumn = json["dataColumn"].toInt();
-    m_startLine = json["startLine"].toInt();
-    m_stopLine = json["stopLine"].toInt();
+    _saveData = json["saveData"].toBool();
+    _fileName = json["fileName"].toString();
+    _timeStep = json["timeStep"].toDouble();
+    _pointCount = json["pointCount"].toInt();
+    _scale = json["scale"].toDouble();
+    _dataColumn = json["dataColumn"].toInt();
+    _startLine = json["startLine"].toInt();
+    _stopLine = json["stopLine"].toInt();
 
     setFormat(json["format"].toInt());
     setInputUnits(json["inputUnits"].toInt());
 
-    if (m_saveData) {
-        m_accel.clear();
-        foreach (const QJsonValue &v, json["accel"].toArray())
-            m_accel << v.toDouble();
+    if (_saveData) {
+        Serialize::toDoubleVector(json["accel"], _accel);
     } else {
-        load(m_fileName, false, m_scale);
+        load(_fileName, false, _scale);
     }
 
-    if (m_accel.size()) {
+    if (_accel.size()) {
         calculate();
-        m_isLoaded = true;
+        _isLoaded = true;
     }
 }
 
 QJsonObject TimeSeriesMotion::toJson() const
 {
     QJsonObject json = AbstractMotion::toJson();
-    json["saveData"] = m_saveData;
-    json["fileName"] = m_fileName;
-    json["timeStep"] = m_timeStep;
-    json["pointCount"] = m_pointCount;
-    json["scale"] = m_scale;
-    json["format"] = m_format;
-    json["dataColumn"] = m_dataColumn;
-    json["startLine"] = m_startLine;
-    json["stopLine"] = m_stopLine;
-    json["inputUnits"] = (int) m_inputUnits;
+    json["saveData"] = _saveData;
+    json["fileName"] = _fileName;
+    json["timeStep"] = _timeStep;
+    json["pointCount"] = _pointCount;
+    json["scale"] = _scale;
+    json["format"] = _format;
+    json["dataColumn"] = _dataColumn;
+    json["startLine"] = _startLine;
+    json["stopLine"] = _stopLine;
+    json["inputUnits"] = (int) _inputUnits;
 
-    if (m_saveData) {
-        QJsonArray accel;
-        foreach (const double &d, m_accel)
-            accel << QJsonValue(d);
-        json["accel"] = accel;
+    if (_saveData) {
+        json["accel"] = Serialize::toJsonArray(_accel);
     }
-
     return json;
 }
 
@@ -1143,22 +1140,22 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
 
     // Properties for TimeSeriesMotion
     out
-            << tsm->m_saveData
-            << tsm->m_fileName
-            << tsm->m_timeStep
-            << tsm->m_pointCount
-            << tsm->m_scale
-            << (int)tsm->m_format
-            << tsm->m_dataColumn
-            << tsm->m_startLine
-            << tsm->m_stopLine;
+            << tsm->_saveData
+            << tsm->_fileName
+            << tsm->_timeStep
+            << tsm->_pointCount
+            << tsm->_scale
+            << (int)tsm->_format
+            << tsm->_dataColumn
+            << tsm->_startLine
+            << tsm->_stopLine;
 
     // Added in version 2
-    out << (int)tsm->m_inputUnits;
+    out << (int)tsm->_inputUnits;
 
     // Save the data internally if requested
-    if (tsm->m_saveData) {
-        out << tsm->m_accel;
+    if (tsm->_saveData) {
+        out << tsm->_accel;
     }
 
     return out;
@@ -1174,7 +1171,7 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
     // Propertise for TimeSeriesMotion
     int format;
 
-    in >> tsm->m_saveData;
+    in >> tsm->_saveData;
 
     if (ver < 3) {
         // Removed in version 3
@@ -1182,14 +1179,14 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
         in >> freqMax;
     }
 
-    in >> tsm->m_fileName
-            >> tsm->m_timeStep
-            >> tsm->m_pointCount
-            >> tsm->m_scale
+    in >> tsm->_fileName
+            >> tsm->_timeStep
+            >> tsm->_pointCount
+            >> tsm->_scale
             >> format
-            >> tsm->m_dataColumn
-            >> tsm->m_startLine
-            >> tsm->m_stopLine;
+            >> tsm->_dataColumn
+            >> tsm->_startLine
+            >> tsm->_stopLine;
 
     tsm->setFormat(format);
 
@@ -1201,15 +1198,15 @@ QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
     }
 
     // Save the data internally if requested
-    if (tsm->m_saveData) {
-        in >> tsm->m_accel;
+    if (tsm->_saveData) {
+        in >> tsm->_accel;
     } else {
-        tsm->load(tsm->m_fileName, false, tsm->m_scale);
+        tsm->load(tsm->_fileName, false, tsm->_scale);
     }
 
-    if (tsm->m_accel.size()) {
+    if (tsm->_accel.size()) {
         tsm->calculate();
-        tsm->m_isLoaded = true;
+        tsm->_isLoaded = true;
     }
 
     return in;

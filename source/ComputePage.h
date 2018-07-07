@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class ComputePage : public AbstractPage
     Q_OBJECT
 
 public:
-    ComputePage(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit ComputePage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     virtual void setModel(SiteResponseModel* model);
 
@@ -58,16 +58,16 @@ protected slots:
     void reset();
 
 protected:
-    QTextEdit * m_logView;
+    QTextEdit * _logView;
 
-    QProgressBar * m_progressBar;
-    QLineEdit * m_etaLineEdit;
+    QProgressBar * _progressBar;
+    QLineEdit * _etaLineEdit;
 
-    QPushButton * m_computeButton;
-    QPushButton * m_cancelButton;
+    QPushButton * _computeButton;
+    QPushButton * _cancelButton;
 
-    QTime m_timer;
+    QTime _timer;
 
-    SiteResponseModel* m_model;
+    SiteResponseModel* _model;
 };
 #endif

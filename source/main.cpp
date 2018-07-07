@@ -15,12 +15,13 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "MainWindow.h"
 #include "BatchRunner.h"
+#include "MainWindow.h"
+#include "defines.h"
 
 #include <QtCore>
 #include <QCommandLineOption>
@@ -77,8 +78,8 @@ int main(int argc, char* argv[])
     QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
 
     QCoreApplication::setOrganizationName("ARKottke");
-    QCoreApplication::setApplicationName("Strata");
-    QCoreApplication::setApplicationVersion(VERSION);
+    QCoreApplication::setApplicationName(PROJECT_LONGNAME);
+    QCoreApplication::setApplicationVersion(PROJECT_VERSION);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
@@ -106,15 +107,15 @@ int main(int argc, char* argv[])
         qInstallMessageHandler(myMessageOutput);
 #endif
         qobject_cast<QApplication *>(app.data())->setWindowIcon(QIcon(":/images/application-icon.svg"));
-        MainWindow * mainWindow = new MainWindow;
-        if (args.size())
+        auto *mainWindow = new MainWindow;
+        if (!args.isEmpty())
             mainWindow->open(args.at(0));
         mainWindow->showMaximized();
     } else {
         // start non-GUI version...
         qInstallMessageHandler(myMessageOutput);
 
-        if (args.size() < 1) {
+        if (args.isEmpty()) {
             qFatal("At least one file must be specified.");
             return 1;
         }

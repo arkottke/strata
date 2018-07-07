@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,6 +31,7 @@
 
 class CrustalAmplification;
 class Dimension;
+class PathDurationModel;
 
 class SourceTheoryRvtMotion : public AbstractRvtMotion
 {
@@ -40,37 +41,21 @@ class SourceTheoryRvtMotion : public AbstractRvtMotion
     friend QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm);
 
 public:
-    SourceTheoryRvtMotion(QObject * parent = 0);
+    SourceTheoryRvtMotion(QObject *parent = nullptr);
     virtual ~SourceTheoryRvtMotion();
 
-    //! Location of model
-    enum Model {
-        Custom, //!< Custom location
-        WUS, //!< Generic Western North America Parameters
-        CEUS //!< Generic Eastern North America Parameters
-    };
-
-    static QStringList sourceList();
-
+    virtual void setRegion(AbstractRvtMotion::Region region);
 
     virtual const QVector<double> & freq() const;
     Dimension* freqDimension();
 
-    QString nameTemplate() const;
-    virtual QString name() const;
-
     virtual QString toHtml() const;
 
-    Model model() const;
-    void setModel(Model s);
-
-    double momentMag() const;
-    double distance() const;
+    bool isCustomized() const;
     double depth() const;
     double hypoDistance() const;
     double stressDrop() const;
     double geoAtten() const;
-    double pathDurCoeff() const;
     double pathAttenCoeff() const;
     double pathAttenPower() const;
     double shearVelocity() const;
@@ -78,19 +63,20 @@ public:
     double siteAtten() const;
     double duration() const;
 
-    //! Site amplification
+    //! Crustal amplification
     CrustalAmplification* crustalAmp();
+
+    //! Path duration model
+    PathDurationModel* pathDuration();
 
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
 
 signals:
-    void isCustomizeable(bool b);
+    void isCustomizedChanged(bool b);
 
-    void momentMagChanged(double d);
     void stressDropChanged(double d);
     void geoAttenChanged(double d);
-    void pathDurCoeffChanged(double d);
     void pathAttenCoeffChanged(double d);
     void pathAttenPowerChanged(double d);
     void shearVelocityChanged(double d);
@@ -98,20 +84,19 @@ signals:
     void siteAttenChanged(double d);
     void durationChanged(double d);
 
-    void hypoDistanceChanged(double hypoDistance);    
+    void hypoDistanceChanged(double hypoDistance);
 
 public slots:
-    void setModel(int s);
-    void setMomentMag(double momentMag);
-    void setDistance(double distance);
+    void setDensity(double density);
     void setDepth(double depth);
-    void setStressDrop(double stressDrop);
-    void setPathDurCoeff(double pathDurCoeff);
+    void setDistance(double dist);
     void setGeoAtten(double geoAtten);
+    void setIsCustomized(bool b);
+    void setMagnitude(double mag);
+    void setStressDrop(double stressDrop);
     void setPathAttenCoeff(double pathAttenCoeff);
     void setPathAttenPower(double pathAttenPower);
     void setShearVelocity(double shearVelocity);
-    void setDensity(double density);
     void setSiteAtten(double siteAtten);
 
     //! Calculate the FAS and associated response spectrum
@@ -130,63 +115,55 @@ private:
     //! Calculate the geometric attenuation
     void calcGeoAtten();
 
-    /*! Model of the parameters.
-     * Loads default values from Campbell 2003
-     */
-    Model m_model;
-
-    //! Moment magnitude
-    double m_momentMag;
+    //! If the model is custom
+    bool _isCustomized;
 
     /*! Seismic moment.
      * The seismic moment is calculated from the moment magnitude.
      */
-    double m_seismicMoment;
-
-    //! Epicentral distance in km
-    double m_distance;
+    double _seismicMoment;
 
     //! Depth in km
-    double m_depth;
+    double _depth;
 
     //! Hypocentral distance in km
-    double m_hypoDistance;
+    double _hypoDistance;
 
     /*! Corner frequency.
      * The corner frequency is calculated from the stress drop and
      * seismic moment.
      */
-    double m_cornerFreq;
+    double _cornerFreq;
 
     //! Stress drop in bars
-    double m_stressDrop;
+    double _stressDrop;
 
     //! Geometric attenuation
-    double m_geoAtten;
-
-    //! Path duration coefficient
-    double m_pathDurCoeff;
+    double _geoAtten;
 
     //! Path attenuation coefficient
-    double m_pathAttenCoeff;
+    double _pathAttenCoeff;
 
     //! Path attenuation power
-    double m_pathAttenPower;
+    double _pathAttenPower;
 
     //! Shear-velociy in km/sec
-    double m_shearVelocity;
+    double _shearVelocity;
 
     //! Density in gm/cm^3
-    double m_density;
+    double _density;
 
     //! Site attenuation
-    double m_siteAtten;
+    double _siteAtten;
 
     //! Amplification by site effects (changes in density and shear-wave velocity in the crustal)
-    CrustalAmplification *m_crustalAmp;
+    CrustalAmplification* _crustalAmp;
+
+    //! Model for the distance dependent duration;
+    PathDurationModel* _pathDuration;
 
     //! Frequency dimension
-    Dimension* m_freq;
+    Dimension* _freq;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_H

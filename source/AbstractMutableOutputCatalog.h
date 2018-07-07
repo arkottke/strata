@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@ public:
 
 protected:
     //! Relationship between human readable and QMetaObject classnames
-    QMap<QString, QString> m_lookup;
+    QMap<QString, QString> _lookup;
 };
 
 #endif // ABSTRACT_MUTABLE_OUTPUT_CATALOG_H

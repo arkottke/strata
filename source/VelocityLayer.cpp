@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,16 +23,16 @@
 
 #include <QDebug>
 
-#include <cmath> 
-#include <cfloat>
-
 #include <gsl/gsl_cdf.h>
+
+#include <cfloat>
+#include <cmath>
 
 VelocityLayer::VelocityLayer(QObject* parent)
     : AbstractDistribution(parent)
 {
-    m_isVaried = true;
-    m_depth = 0;
+    _isVaried = true;
+    _depth = 0;
 }
 
 VelocityLayer::~VelocityLayer()
@@ -41,16 +41,16 @@ VelocityLayer::~VelocityLayer()
 
 double VelocityLayer::depth() const
 {
-    return m_depth;
+    return _depth;
 }
 void VelocityLayer::setDepth(double depth)
 {
-    m_depth = depth;
+    _depth = depth;
 }
 
 double VelocityLayer::shearVel() const
 {
-    return m_varied;
+    return _varied;
 }
 
 double VelocityLayer::shearMod() const
@@ -60,51 +60,51 @@ double VelocityLayer::shearMod() const
 
 bool VelocityLayer::isVaried() const
 {
-    return m_isVaried;
+    return _isVaried;
 }
 
 void VelocityLayer::setIsVaried(bool isVaried)
 {
-    m_isVaried = isVaried;
+    _isVaried = isVaried;
 }
 
 QString VelocityLayer::toString() const
 {
-    return QString("%1").arg(m_avg);
+    return QString("%1").arg(_avg);
 }
 
 void VelocityLayer::vary(double randVar)
 {
-    if (m_isVaried) {
+    if (_isVaried) {
         // Randomize the velocity
-        switch (m_type) {
+        switch (_type) {
         case Normal:
-            setVaried(m_avg + gsl_cdf_gaussian_Pinv(randVar, m_stdev));
+            setVaried(_avg + gsl_cdf_gaussian_Pinv(randVar, _stdev));
             break;
         case LogNormal:
-            setVaried(m_avg * exp(gsl_cdf_gaussian_Pinv(randVar, m_stdev)));
+            setVaried(_avg * exp(gsl_cdf_gaussian_Pinv(randVar, _stdev)));
             break;
         case Uniform:
-            m_varied = gsl_cdf_flat_Pinv(randVar, m_min, m_max);
+            _varied = gsl_cdf_flat_Pinv(randVar, _min, _max);
             break;
         }
     } else {
-        m_varied = m_avg;
+        _varied = _avg;
     }
 }
 
 void VelocityLayer::fromJson(const QJsonObject &json)
 {
     AbstractDistribution::fromJson(json);
-    m_isVaried = json["isVaried"].toBool();
-    m_depth = json["depth"].toDouble();
+    _isVaried = json["isVaried"].toBool();
+    _depth = json["depth"].toDouble();
 }
 
 QJsonObject VelocityLayer::toJson() const
 {
     QJsonObject json = AbstractDistribution::toJson();
-    json["isVaried"] = m_isVaried;
-    json["depth"] = m_depth;
+    json["isVaried"] = _isVaried;
+    json["depth"] = _depth;
     return json;
 }
 
@@ -114,7 +114,7 @@ QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl)
 
     out << qobject_cast<const AbstractDistribution*>(vl);
 
-    out << vl->m_isVaried << vl->m_depth;
+    out << vl->_isVaried << vl->_depth;
 
     return out;
 }
@@ -126,7 +126,7 @@ QDataStream & operator>> (QDataStream & in, VelocityLayer* vl)
 
     in >> qobject_cast<AbstractDistribution*>(vl);
 
-    in >> vl->m_isVaried >> vl->m_depth;
+    in >> vl->_isVaried >> vl->_depth;
 
     return in;
 }

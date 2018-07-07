@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,10 +37,10 @@
 FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog* catalog)
     : AbstractLocationOutput(catalog)
 {
-    m_interp = new LinearOutputInterpolater;
+    _interp = new LinearOutputInterpolater;
 
-    m_statistics = new OutputStatistics(this);
-    connect(m_statistics, SIGNAL(wasModified()),
+    _statistics = new OutputStatistics(this);
+    connect(_statistics, SIGNAL(wasModified()),
             this, SIGNAL(wasModified()));
 }
 
@@ -84,7 +84,7 @@ const QVector<double>& FourierSpectrumOutput::ref(int motion) const
 {
     Q_UNUSED(motion);
 
-    return m_catalog->frequency()->data();
+    return _catalog->frequency()->data();
 }
 
 
@@ -92,7 +92,7 @@ void FourierSpectrumOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const
 {
     // Layer associated with the depth
-    const Location loc = calculator->site()->depthToLocation(m_depth);
+    const Location loc = calculator->site()->depthToLocation(_depth);
 
     ref = calculator->motion()->freq();
 
@@ -101,7 +101,7 @@ void FourierSpectrumOutput::extract(AbstractCalculator* const calculator,
                     // Input parameters
                     calculator->site()->inputLocation(), calculator->motion()->type(),
                     // Output parameters
-                    loc, m_type));
+                    loc, _type));
 
     if (qobject_cast<TimeSeriesMotion*>(calculator->motion())) {
         // Apply a little bit of smoothing

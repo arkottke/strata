@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@
 #include <QDebug>
 
 ConfiningStressTableModel::ConfiningStressTableModel(QObject * parent)
-    : MyAbstractTableModel(parent), m_waterTableDepth(0.0)
+    : MyAbstractTableModel(parent), _waterTableDepth(0.0)
 {
     connect( Units::instance(), SIGNAL(systemChanged(int)),
              this, SLOT(computeStress()));
@@ -37,7 +37,7 @@ ConfiningStressTableModel::ConfiningStressTableModel(QObject * parent)
 
 int ConfiningStressTableModel::rowCount ( const QModelIndex& /* index */ ) const
 {
-    return m_layers.size();
+    return _layers.size();
 }
 
 int ConfiningStressTableModel::columnCount ( const QModelIndex& /* parent */ ) const
@@ -86,16 +86,16 @@ QVariant ConfiningStressTableModel::data ( const QModelIndex &index, int role ) 
         switch (index.column()) {
         case 0:
             // Thickness
-            return QString::number(m_layers.at(index.row())->thick);
+            return QString::number(_layers.at(index.row())->thick);
         case 1:
             // Unit Weight
-            return QString::number(m_layers.at(index.row())->untWt);
+            return QString::number(_layers.at(index.row())->untWt);
         case 2:
             // At Rest Coefficient
-            return QString::number(m_layers.at(index.row())->atRestCoeff);
+            return QString::number(_layers.at(index.row())->atRestCoeff);
         case 3:
             // Mean Effective stress
-            return QString::number(m_layers.at(index.row())->mEffStress);
+            return QString::number(_layers.at(index.row())->mEffStress);
         }
     }
 
@@ -111,17 +111,17 @@ bool ConfiningStressTableModel::setData( const QModelIndex &index, const QVarian
         switch (index.column()){
         case 0:
             // Thickness
-            m_layers[index.row()]->thick = value.toDouble();
+            _layers[index.row()]->thick = value.toDouble();
             computeStress(index.row());
             break;
         case 1:
             // Unit Weight
-            m_layers[index.row()]->untWt = value.toDouble();
+            _layers[index.row()]->untWt = value.toDouble();
             computeStress(index.row());
             break;
         case 2:
             // At Rest Coefficient
-            m_layers[index.row()]->atRestCoeff = value.toDouble();
+            _layers[index.row()]->atRestCoeff = value.toDouble();
             computeStress(index.row());
             break;
         case 3:
@@ -148,11 +148,11 @@ bool ConfiningStressTableModel::insertRows ( int row, int count, const QModelInd
     emit beginInsertRows( parent, row, row+count-1 );
 
     for (int i=0; i < count; ++i)  {
-        m_layers.insert( row, new Layer );
+        _layers.insert( row, new Layer );
 
-        m_layers[row]->thick = 0.;
-        m_layers[row]->untWt = 0.;
-        m_layers[row]->atRestCoeff = 0.5;
+        _layers[row]->thick = 0.;
+        _layers[row]->untWt = 0.;
+        _layers[row]->atRestCoeff = 0.5;
     }
     
     emit endInsertRows();
@@ -165,7 +165,7 @@ bool ConfiningStressTableModel::removeRows ( int row, int count, const QModelInd
     emit beginRemoveRows( parent, row, row+count-1);
 
     for (int i=0; i < count; ++i)
-        delete m_layers.takeAt(row);
+        delete _layers.takeAt(row);
     
     emit endRemoveRows();
 
@@ -174,12 +174,12 @@ bool ConfiningStressTableModel::removeRows ( int row, int count, const QModelInd
 
 double ConfiningStressTableModel::waterTableDepth()
 {
-    return m_waterTableDepth;
+    return _waterTableDepth;
 }
 
 void ConfiningStressTableModel::setWaterTableDepth(double depth)
 {
-    m_waterTableDepth = depth;
+    _waterTableDepth = depth;
     computeStress();
 }
 
@@ -189,32 +189,32 @@ void ConfiningStressTableModel::computeStress(int layer)
     double vStress = 0;
     // Compute the depth and initial stress up to the first layer
     for (int i = 0; i < layer; ++i) {
-        depth += m_layers.at(i)->thick;
-        vStress += m_layers.at(i)->thick * m_layers.at(i)->untWt;
+        depth += _layers.at(i)->thick;
+        vStress += _layers.at(i)->thick * _layers.at(i)->untWt;
     }
 
     // Compute the stress at each of the layers
-    for (int i = layer; i < m_layers.size(); ++i) {
-        double halfThick = m_layers.at(i)->thick;
+    for (int i = layer; i < _layers.size(); ++i) {
+        double halfThick = _layers.at(i)->thick;
         // Add the first half
         depth += halfThick;
-        vStress += halfThick * m_layers.at(i)->untWt;
+        vStress += halfThick * _layers.at(i)->untWt;
 
-        double porePressure = ( depth < m_waterTableDepth ) ? 0 : (depth - m_waterTableDepth) * Units::instance()->waterUntWt();
+        double porePressure = ( depth < _waterTableDepth ) ? 0 : (depth - _waterTableDepth) * Units::instance()->waterUntWt();
         
         double vEffStress = vStress - porePressure;
         
-        double mEffStress = vEffStress * ( 1. + 2. * m_layers.at(i)->atRestCoeff ) / 3.;
+        double mEffStress = vEffStress * ( 1. + 2. * _layers.at(i)->atRestCoeff ) / 3.;
 
         // Convert to atm
-        m_layers[i]->mEffStress = mEffStress * Units::instance()->toAtm();
+        _layers[i]->mEffStress = mEffStress * Units::instance()->toAtm();
         
         // Add the second half of the layer
         depth += halfThick;
-        vStress += halfThick * m_layers.at(i)->untWt;
+        vStress += halfThick * _layers.at(i)->untWt;
     }
 
-    emit dataChanged( index( layer, 3 ), index( layer, m_layers.size() ));
+    emit dataChanged( index( layer, 3 ), index( layer, _layers.size() ));
 }
 
 void ConfiningStressTableModel::updateHeader()

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ class LinearElasticCalculator : public AbstractCalculator
     Q_OBJECT
 
 public:
-    explicit LinearElasticCalculator(QObject* parent = 0);
+    explicit LinearElasticCalculator(QObject *parent = nullptr);
 
     virtual bool run(AbstractMotion* motion, SoilProfile* site);
 };

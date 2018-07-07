@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,37 +31,46 @@ FrequencyDependentCalculatorWidget::FrequencyDependentCalculatorWidget(QWidget *
     QFormLayout* layout = new QFormLayout;
 
     // Error tolerance row
-    m_errorToleranceSpinBox = new QDoubleSpinBox;
-    m_errorToleranceSpinBox->setRange( 0.5, 10.0);
-    m_errorToleranceSpinBox->setDecimals(1);
-    m_errorToleranceSpinBox->setSingleStep(0.25);
-    m_errorToleranceSpinBox->setSuffix(" %");
+    _errorToleranceSpinBox = new QDoubleSpinBox;
+    _errorToleranceSpinBox->setRange( 0.5, 10.0);
+    _errorToleranceSpinBox->setDecimals(1);
+    _errorToleranceSpinBox->setSingleStep(0.25);
+    _errorToleranceSpinBox->setSuffix(" %");
 
-    layout->addRow(tr("Error tolerance:"), m_errorToleranceSpinBox);
+    layout->addRow(tr("Error tolerance:"), _errorToleranceSpinBox);
 
     // Max Iterations row
-    m_maxIterationsSpinBox = new QSpinBox;
-    m_maxIterationsSpinBox->setMinimum(2);
-    m_maxIterationsSpinBox->setMaximum(30);
+    _maxIterationsSpinBox = new QSpinBox;
+    _maxIterationsSpinBox->setMinimum(2);
+    _maxIterationsSpinBox->setMaximum(30);
 
-    layout->addRow(tr("Maximum number of iterations:"), m_maxIterationsSpinBox);
+    layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
+
+    // Use smooth Strain FAS shape
+    _useSmoothStrainCheckBox = new QCheckBox(tr("Use smooth strain spectrum"));
+    layout->addRow(_useSmoothStrainCheckBox);
 
     setLayout(layout);
 }
 
 void FrequencyDependentCalculatorWidget::setCalculator(FrequencyDependentCalculator* fdc)
 {
-    m_errorToleranceSpinBox->setValue(fdc->errorTolerance());
-    connect(m_errorToleranceSpinBox, SIGNAL(valueChanged(double)),
+    _errorToleranceSpinBox->setValue(fdc->errorTolerance());
+    connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)),
             fdc, SLOT(setErrorTolerance(double)));
 
-    m_maxIterationsSpinBox->setValue(fdc->maxIterations());
-    connect(m_maxIterationsSpinBox, SIGNAL(valueChanged(int)),
+    _maxIterationsSpinBox->setValue(fdc->maxIterations());
+    connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)),
             fdc, SLOT(setMaxIterations(int)));
+
+    _useSmoothStrainCheckBox->setChecked(fdc->useSmoothSpectrum());
+    connect(_useSmoothStrainCheckBox, SIGNAL(toggled(bool)),
+            fdc, SLOT(setUseSmoothSpectrum(bool)));
 }
 
 void FrequencyDependentCalculatorWidget::setReadOnly(bool readOnly)
 {
-    m_errorToleranceSpinBox->setReadOnly(readOnly);
-    m_maxIterationsSpinBox->setReadOnly(readOnly);
+    _errorToleranceSpinBox->setReadOnly(readOnly);
+    _maxIterationsSpinBox->setReadOnly(readOnly);
+    _useSmoothStrainCheckBox->setDisabled(readOnly);
 }

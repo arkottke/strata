@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,26 +41,26 @@
 OutputPage::OutputPage(QWidget * parent, Qt::WindowFlags f)
     : AbstractPage(parent,f)
 {
-    m_profilesTableView = new QTableView;
-    m_timeSeriesTableFrame = new OutputTableFrame;
-    m_spectraTableFrame = new OutputTableFrame;
-    m_ratiosTableFrame = new OutputTableFrame;
-    m_soilTypesTableView = new QTableView;
+    _profilesTableView = new QTableView;
+    _timeSeriesTableFrame = new OutputTableFrame;
+    _spectraTableFrame = new OutputTableFrame;
+    _ratiosTableFrame = new OutputTableFrame;
+    _soilTypesTableView = new QTableView;
 
-    QGridLayout* layout = new QGridLayout;    
+    auto *layout = new QGridLayout;
     layout->setRowStretch(3, 1);
 
     // Tab widget
     // Left Column
-    m_tabWidget = new QTabWidget;
+    _tabWidget = new QTabWidget;
 
-    m_tabWidget->addTab(m_profilesTableView, tr("Profiles"));
-    m_tabWidget->addTab(m_timeSeriesTableFrame, tr("Time Series"));
-    m_tabWidget->addTab(m_spectraTableFrame, tr("Response and Fourier Spectra"));
-    m_tabWidget->addTab(m_ratiosTableFrame, tr("Ratios"));
-    m_tabWidget->addTab(m_soilTypesTableView, tr("Soil Types"));
+    _tabWidget->addTab(_profilesTableView, tr("Profiles"));
+    _tabWidget->addTab(_timeSeriesTableFrame, tr("Time Series"));
+    _tabWidget->addTab(_spectraTableFrame, tr("Response and Fourier Spectra"));
+    _tabWidget->addTab(_ratiosTableFrame, tr("Ratios"));
+    _tabWidget->addTab(_soilTypesTableView, tr("Soil Types"));
 
-    layout->addWidget(m_tabWidget, 0, 0, 4, 1);
+    layout->addWidget(_tabWidget, 0, 0, 4, 1);
     layout->addWidget(createRespSpecGroupBox(), 0, 1);
 
     layout->addWidget(createFreqGroupBox(), 1, 1);
@@ -74,33 +74,33 @@ void OutputPage::setModel(SiteResponseModel *model)
 {    
     OutputCatalog* oc = model->outputCatalog();
 
-    m_profilesTableView->setModel(oc->profilesCatalog());
-    m_profilesTableView->resizeColumnsToContents();
-    m_profilesTableView->resizeRowsToContents();
+    _profilesTableView->setModel(oc->profilesCatalog());
+    _profilesTableView->resizeColumnsToContents();
+    _profilesTableView->resizeRowsToContents();
 
-    m_timeSeriesTableFrame->setModel(oc->timeSeriesCatalog());
-    m_spectraTableFrame->setModel(oc->spectraCatalog());
-    m_ratiosTableFrame->setModel(oc->ratiosCatalog());
-    m_soilTypesTableView->setModel(oc->soilTypesCatalog());
+    _timeSeriesTableFrame->setModel(oc->timeSeriesCatalog());
+    _spectraTableFrame->setModel(oc->spectraCatalog());
+    _ratiosTableFrame->setModel(oc->ratiosCatalog());
+    _soilTypesTableView->setModel(oc->soilTypesCatalog());
 
-    m_respSpecGroupBox->setVisible(oc->periodIsNeeded());
+    _respSpecGroupBox->setVisible(oc->periodIsNeeded());
     connect(oc, SIGNAL(periodIsNeededChanged(bool)),
-            m_respSpecGroupBox, SLOT(setVisible(bool)));
+            _respSpecGroupBox, SLOT(setVisible(bool)));
 
-    m_dampingSpinBox->setValue(oc->damping());
-    connect( m_dampingSpinBox, SIGNAL(valueChanged(double)),
+    _dampingSpinBox->setValue(oc->damping());
+    connect( _dampingSpinBox, SIGNAL(valueChanged(double)),
              oc, SLOT(setDamping(double)));
 
-    m_periodLayout->setModel(oc->period());
+    _periodLayout->setModel(oc->period());
 
-    m_freqGroupBox->setVisible(oc->frequencyIsNeeded());
+    _freqGroupBox->setVisible(oc->frequencyIsNeeded());
     connect(oc, SIGNAL(frequencyIsNeededChanged(bool)),
-            m_freqGroupBox, SLOT(setVisible(bool)));
+            _freqGroupBox, SLOT(setVisible(bool)));
 
-    m_frequencyLayout->setModel(oc->frequency());
+    _frequencyLayout->setModel(oc->frequency());
 
-    m_logLevelComboBox->setCurrentIndex(oc->log()->level());
-    connect(m_logLevelComboBox, SIGNAL(currentIndexChanged(int)),
+    _logLevelComboBox->setCurrentIndex(oc->log()->level());
+    connect(_logLevelComboBox, SIGNAL(currentIndexChanged(int)),
             oc->log(), SLOT(setLevel(int)));
 
     setApproach(model->motionLibrary()->approach());
@@ -110,16 +110,16 @@ void OutputPage::setModel(SiteResponseModel *model)
 
 void OutputPage::setReadOnly(bool readOnly)
 {
-    m_timeSeriesTableFrame->setReadOnly(readOnly);
-    m_spectraTableFrame->setReadOnly(readOnly);
-    m_ratiosTableFrame->setReadOnly(readOnly);
+    _timeSeriesTableFrame->setReadOnly(readOnly);
+    _spectraTableFrame->setReadOnly(readOnly);
+    _ratiosTableFrame->setReadOnly(readOnly);
 
-    m_dampingSpinBox->setReadOnly(readOnly);
-    m_periodLayout->setReadOnly(readOnly);
+    _dampingSpinBox->setReadOnly(readOnly);
+    _periodLayout->setReadOnly(readOnly);
 
-    m_frequencyLayout->setReadOnly(readOnly);
+    _frequencyLayout->setReadOnly(readOnly);
 
-    m_logLevelComboBox->setDisabled(readOnly);
+    _logLevelComboBox->setDisabled(readOnly);
 }
 
 void OutputPage::setApproach(int approach)
@@ -127,57 +127,57 @@ void OutputPage::setApproach(int approach)
     const int tsIndex = 1;
     const bool enabled = (MotionLibrary::Approach)approach == MotionLibrary::TimeSeries;
 
-    m_tabWidget->setTabEnabled(tsIndex, enabled);
+    _tabWidget->setTabEnabled(tsIndex, enabled);
 
-    if (!enabled && m_tabWidget->currentIndex() == tsIndex)
-        m_tabWidget->setCurrentIndex(0);
+    if (!enabled && _tabWidget->currentIndex() == tsIndex)
+        _tabWidget->setCurrentIndex(0);
 }
 
 QGroupBox* OutputPage::createRespSpecGroupBox()
 {
     // Damping
-    m_dampingSpinBox = new QDoubleSpinBox;
-    m_dampingSpinBox->setSuffix(" %");
-    m_dampingSpinBox->setRange(1, 50);
-    m_dampingSpinBox->setSingleStep(1);
-    m_dampingSpinBox->setDecimals(1);
+    _dampingSpinBox = new QDoubleSpinBox;
+    _dampingSpinBox->setSuffix(" %");
+    _dampingSpinBox->setRange(1, 50);
+    _dampingSpinBox->setSingleStep(1);
+    _dampingSpinBox->setDecimals(1);
 
-    m_periodLayout = new DimensionLayout(this);
-    m_periodLayout->setRange(0.001, 100);
-    m_periodLayout->setSuffix(" s");
+    _periodLayout = new DimensionLayout(this);
+    _periodLayout->setRange(0.001, 100);
+    _periodLayout->setSuffix(" s");
 
-    m_periodLayout->insertRow(0, "Damping:", m_dampingSpinBox);
+    _periodLayout->insertRow(0, "Damping:", _dampingSpinBox);
 
-    m_respSpecGroupBox = new QGroupBox(tr("Response Spectrum Properties"), this);
-    m_respSpecGroupBox->setLayout(m_periodLayout);
+    _respSpecGroupBox = new QGroupBox(tr("Response Spectrum Properties"), this);
+    _respSpecGroupBox->setLayout(_periodLayout);
 
-    return m_respSpecGroupBox;
+    return _respSpecGroupBox;
 }
 
 QGroupBox* OutputPage::createFreqGroupBox()
 {
-    m_frequencyLayout = new DimensionLayout(this);
-    m_frequencyLayout->setRange(0.001, 1000);
-    m_frequencyLayout->setSuffix(" Hz");
+    _frequencyLayout = new DimensionLayout(this);
+    _frequencyLayout->setRange(0.001, 1000);
+    _frequencyLayout->setSuffix(" Hz");
 
-    m_freqGroupBox = new QGroupBox(tr("Frequency Properties"), this);
-    m_freqGroupBox->setLayout(m_frequencyLayout);
+    _freqGroupBox = new QGroupBox(tr("Frequency Properties"), this);
+    _freqGroupBox->setLayout(_frequencyLayout);
 
-    return m_freqGroupBox;
+    return _freqGroupBox;
 }
 
 QGroupBox* OutputPage::createLogGroupBox()
 {
-    QFormLayout* layout = new QFormLayout;
+    auto *layout = new QFormLayout;
 
     // Logging combo box
-    m_logLevelComboBox = new QComboBox;
-    m_logLevelComboBox->addItems(TextLog::levelList());
+    _logLevelComboBox = new QComboBox;
+    _logLevelComboBox->addItems(TextLog::levelList());
 
-    layout->addRow(tr("Logging level:"), m_logLevelComboBox);
+    layout->addRow(tr("Logging level:"), _logLevelComboBox);
 
-    m_logGroupBox = new QGroupBox(tr("Logging Properties"));
-    m_logGroupBox->setLayout(layout);
+    _logGroupBox = new QGroupBox(tr("Logging Properties"));
+    _logGroupBox->setLayout(layout);
 
-    return m_logGroupBox;
+    return _logGroupBox;
 }

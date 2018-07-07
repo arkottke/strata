@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +59,6 @@ void VelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
     data = motion->timeSeries(TimeSeriesMotion::Velocity,
                               calculator->calcAccelTf(
                                       calculator->site()->inputLocation(), motion->type(),
-                                      calculator->site()->depthToLocation(m_depth), m_type),
-                              m_baselineCorrect);
+                                      calculator->site()->depthToLocation(_depth), _type),
+                              _baselineCorrect);
 }

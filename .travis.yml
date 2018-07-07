@@ -1,36 +1,77 @@
-sudo: required
 language: cpp
-dist: trusty
-
+branches:
+  except:
+    - "/^appveyor.*$/"
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      #     - os: osx
+      #       osx_image: xcode9.2
 before_install:
-    # https://launchpad.net/~beineri/+archive/ubuntu/opt-qt562
-    - sudo add-apt-repository --yes ppa:beineri/opt-qt591-trusty
-    - sudo apt-get update -qq
-
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
+      sudo apt-get update -qq
+      sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
+    else
+      brew update --quiet
+      brew install qt gsl
+      export PATH="/usr/local/opt/qt/bin:$PATH"      
+    fi
 install:
-    - sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
-    - source /opt/qt59/bin/qt59-env.sh
-    - cd $TRAVIS_BUILD_DIR/..
-    - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
-    - cd qwt
-    - qmake
-    - make -j2
-    - QWT_VERSION=`sed -rn 's/^#define QWT_VERSION_STR.*"([0-9]+.[0-9]+.[0-9]+)"/\1/p' src/qwt_global.h`
-    - QWT_PATH=/usr/local/qwt-$QWT_VERSION-svn
-    - sudo make install
-
+  - source /opt/qt510/bin/qt510-env.sh
+  - # Install QWT
+  - cd $TRAVIS_BUILD_DIR/..
+  - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - cd qwt
+  - QWT_ROOT_DIR=`pwd`
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+  - qmake
+  - make -j$(nproc)
+  - # Install GSL 
+  - GSL_ROOT_DIR=/opt/gsl
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone https://github.com/ampl/gsl.git
+  - cd gsl
+  - mkdir build && cd build
+  - cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
+  - cmake --build . --target install
+  - cd $GSL_ROOT_DIR
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 script:
-    - cd $TRAVIS_BUILD_DIR
-    - mkdir build
-    - cd build
-    - source /opt/qt59/bin/qt59-env.sh
-    # Add paths for libraries
-    - export LD_LIBRARY_PATH="$QWT_PATH/lib:$LD_LIBRARY_PATH"
-    - export LIBRARY_PATH="$QWT_PATH/lib"
-    - export CPLUS_INCLUDE_PATH="$QWT_PATH/include"
-    - qmake ..
-    - make -j2 release
-    - ./release/strata -b ../example/*.strata
-    - ./release/strata -b ../example/*.json
-    - cd ..
-    - bash -ex scripts/appimage.sh
+  - cd $TRAVIS_BUILD_DIR
+  - mkdir build
+  - cd build
+  - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+  - cmake --build . --target install
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+      chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+      # ls -lh
+      # ldd dist/usr/bin/strata
+      ARCH=x86_64 ./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations
+      # find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+    fi
+after_success:
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      ls -lh
+      VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
+      GITHASH=$(git rev-parse --short HEAD)
+      APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
+      mv Strata-x86_64.AppImage $APPIMAGE
+      curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
+    fi
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: Z2q1ECai8J5HcnofI8v/BkI0BVPrMzibyXw9gM6+xa2kUG14yTQCnO845HN+PkSbTcMbmmILxrssytlLoibQDFad6pbJKGRKxOrI9TSqnfl79ZzX/Q9Nbq3yvpksG4lWF2XHJvN74N+yVxkw2JsFdu8ikJEv0qR242uWY5/GodNMl/w0ck+aOwtGWNmyKA86opkg9p4kA3ZxzhzGyc9jKNdob/z/gG0SHKMp4j58xxRSC1ZohI8CssVOVZpyduGJuCLxHekd/0T1VXQGGhIWKnM72GYz1BjCus47I4S2Ss4xUWL2tDHdK2lfbZLeybeVFM8cQX17gmRZeyCikl8d0BlROGGu6Hb5TbLyok4j0QC1HRq9JVNHgv+OzahqLdoKYWeCcHewOZyQQ/0RErrQzDUw9SIbdf6RMC+9WXx7eVgv8PPsqNNgkRkQIldcbN6uB2wU58x1vx3VaU22eXolDNjKbhrYGi1k8CDjnFNg8P7G4B1jOWAFUMfs3CYfj9Hmf7UUA0HJV2KyVtsNilRV10Qz8DGmIc/umXITQS3UB0klEzfzS16QWRRMKXmTCD0JLpRukkXjcKpBxgIj6JcRxGzDlMd3qYFyM2VTXfWMS4UK5eEr+x2j8Z660ErSycNUIW3TblABhbOoFHsyjbvEVojhSGExzD6l1rSspvmL60A=
+  file: $APPIMAGE
+  on:
+    os: linux
+    repo: arkottke/strata
+    tags: true

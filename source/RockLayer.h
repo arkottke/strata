@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ class RockLayer : public VelocityLayer
     friend QDataStream & operator>> (QDataStream & in, RockLayer* rl);
 
 public:
-    RockLayer(QObject * parent = 0);
+    RockLayer(QObject *parent = nullptr);
 
     double untWt() const;
     double density() const;
@@ -69,12 +69,12 @@ signals:
 
 private:
     //! Unit weight of the rock
-    double m_untWt;
+    double _untWt;
 
     //! Damping of the rock -- randomized
-    double m_damping;
+    double _damping;
 
     //! Damping of the rock -- average
-    double m_avgDamping;
+    double _avgDamping;
 };
 #endif

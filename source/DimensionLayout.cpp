@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,107 +29,107 @@ DimensionLayout::DimensionLayout(QWidget *parent) :
     QFormLayout(parent)
 {
     // Minimum
-    m_minSpinBox = new QDoubleSpinBox;
-    m_minSpinBox->setDecimals(3);
-    m_minSpinBox->setSingleStep(0.01);
-    connect(m_minSpinBox, SIGNAL(valueChanged(double)),
+    _minSpinBox = new QDoubleSpinBox;
+    _minSpinBox->setDecimals(3);
+    _minSpinBox->setSingleStep(0.01);
+    connect(_minSpinBox, SIGNAL(valueChanged(double)),
             this, SLOT(updateMaxMin(double)));
 
-    addRow(tr("Minimum:"), m_minSpinBox);
+    addRow(tr("Minimum:"), _minSpinBox);
 
     // Maximum
-    m_maxSpinBox = new QDoubleSpinBox;
-    m_maxSpinBox->setMaximum(300.);
-    m_maxSpinBox->setDecimals(3);
-    m_maxSpinBox->setSingleStep(1);
-    connect(m_maxSpinBox, SIGNAL(valueChanged(double)),
+    _maxSpinBox = new QDoubleSpinBox;
+    _maxSpinBox->setMaximum(300.);
+    _maxSpinBox->setDecimals(3);
+    _maxSpinBox->setSingleStep(1);
+    connect(_maxSpinBox, SIGNAL(valueChanged(double)),
             this, SLOT(updateMinMax(double)));
 
-    addRow(tr("Maximum:"), m_maxSpinBox);
+    addRow(tr("Maximum:"), _maxSpinBox);
 
     // Point count
-    m_sizeSpinBox = new QSpinBox;
-    m_sizeSpinBox->setRange(16, 16384);
+    _sizeSpinBox = new QSpinBox;
+    _sizeSpinBox->setRange(16, 16384);
 
-    addRow(tr("Point count:"), m_sizeSpinBox);
+    addRow(tr("Point count:"), _sizeSpinBox);
 
     // Spacing
-    m_spacingComboBox = new QComboBox;
-    m_spacingComboBox->addItems(Dimension::spacingList());
+    _spacingComboBox = new QComboBox;
+    _spacingComboBox->addItems(Dimension::spacingList());
 
-    connect(m_spacingComboBox, SIGNAL(currentIndexChanged(int)),
+    connect(_spacingComboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(updateSpacing(int)));
 
-    addRow(tr("Spacing:"), m_spacingComboBox);
+    addRow(tr("Spacing:"), _spacingComboBox);
 }
 
 void DimensionLayout::setModel(Dimension *dimension)
 {
-    m_minSpinBox->setValue(dimension->min());
-    connect(m_minSpinBox, SIGNAL(valueChanged(double)),
+    _minSpinBox->setValue(dimension->min());
+    connect(_minSpinBox, SIGNAL(valueChanged(double)),
             dimension, SLOT(setMin(double)));
 
-    m_maxSpinBox->setValue(dimension->max());
-    connect(m_maxSpinBox, SIGNAL(valueChanged(double)),
+    _maxSpinBox->setValue(dimension->max());
+    connect(_maxSpinBox, SIGNAL(valueChanged(double)),
             dimension, SLOT(setMax(double)));
 
-    m_sizeSpinBox->setValue(dimension->size());
-    connect(m_sizeSpinBox, SIGNAL(valueChanged(int)),
+    _sizeSpinBox->setValue(dimension->size());
+    connect(_sizeSpinBox, SIGNAL(valueChanged(int)),
             dimension, SLOT(setSize(int)));
 
-    m_spacingComboBox->setCurrentIndex(dimension->spacing());
-    connect(m_spacingComboBox, SIGNAL(currentIndexChanged(int)),
+    _spacingComboBox->setCurrentIndex(dimension->spacing());
+    connect(_spacingComboBox, SIGNAL(currentIndexChanged(int)),
             dimension, SLOT(setSpacing(int)));
 }
 
 void DimensionLayout::setSuffix(const QString &suffix)
 {
-    m_minSpinBox->setSuffix(suffix);
-    m_maxSpinBox->setSuffix(suffix);
+    _minSpinBox->setSuffix(suffix);
+    _maxSpinBox->setSuffix(suffix);
 }
 
 void DimensionLayout::setRange(double min, double max)
 {
     // Need to block the signals to prevent the values from getting changed,
     // which causes the min-max and max-min to be updated.
-    m_minSpinBox->blockSignals(true);
-    m_minSpinBox->setMinimum(min);
-    m_minSpinBox->blockSignals(false);
+    _minSpinBox->blockSignals(true);
+    _minSpinBox->setMinimum(min);
+    _minSpinBox->blockSignals(false);
 
-    m_maxSpinBox->blockSignals(true);
-    m_maxSpinBox->setMaximum(max);
-    m_maxSpinBox->blockSignals(false);
+    _maxSpinBox->blockSignals(true);
+    _maxSpinBox->setMaximum(max);
+    _maxSpinBox->blockSignals(false);
 }
 
 void DimensionLayout::setSingleStep(double step)
 {
-    m_minSpinBox->setSingleStep(step);
-    m_maxSpinBox->setSingleStep(step);
+    _minSpinBox->setSingleStep(step);
+    _maxSpinBox->setSingleStep(step);
 }
 
 void DimensionLayout::setReadOnly(bool readOnly)
 {
-    m_minSpinBox->setReadOnly(readOnly);
-    m_maxSpinBox->setReadOnly(readOnly);
-    m_sizeSpinBox->setReadOnly(readOnly);
-    m_spacingComboBox->setDisabled(readOnly);
+    _minSpinBox->setReadOnly(readOnly);
+    _maxSpinBox->setReadOnly(readOnly);
+    _sizeSpinBox->setReadOnly(readOnly);
+    _spacingComboBox->setDisabled(readOnly);
 }
 
 void DimensionLayout::updateMaxMin(double min)
 {
-    m_maxSpinBox->setMinimum(min);
+    _maxSpinBox->setMinimum(min);
 }
 
 void DimensionLayout::updateMinMax(double max)
 {
-    m_minSpinBox->setMaximum(max);
+    _minSpinBox->setMaximum(max);
 }
 
 void DimensionLayout::updateSpacing(int spacing)
 {
     if (Dimension::Log == (Dimension::Spacing)spacing) {
-        m_minSpinBox->setMinimum(0.001);
+        _minSpinBox->setMinimum(0.001);
     } else {
-        m_minSpinBox->setMinimum(0.);
+        _minSpinBox->setMinimum(0.);
     }
 }

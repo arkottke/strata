@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,16 +33,16 @@
 MethodGroupBox::MethodGroupBox(QWidget* parent)
     : QGroupBox(parent)
 {    
-    m_stackedLayout = new QStackedLayout;
+    _stackedLayout = new QStackedLayout;
 
-    m_elcWidget = new EquivalentLinearCalculatorWidget;
-    m_stackedLayout->addWidget(m_elcWidget);
+    _elcWidget = new EquivalentLinearCalculatorWidget;
+    _stackedLayout->addWidget(_elcWidget);
 
-    m_fdcWidget = new FrequencyDependentCalculatorWidget;
-    m_stackedLayout->addWidget(m_fdcWidget);
+    _fdcWidget = new FrequencyDependentCalculatorWidget;
+    _stackedLayout->addWidget(_fdcWidget);
 
     setTitle("Calculation Parameters");
-    setLayout(m_stackedLayout);    
+    setLayout(_stackedLayout);    
 }
 
 void MethodGroupBox::setCalculator(AbstractCalculator* ac)
@@ -52,16 +52,16 @@ void MethodGroupBox::setCalculator(AbstractCalculator* ac)
     setDisabled(className == "LinearElasticCalculator");
 
     if (className == "EquivalentLinearCalculator") {
-        m_elcWidget->setCalculator(qobject_cast<EquivalentLinearCalculator*>(ac));
-        m_stackedLayout->setCurrentIndex(0);
+        _elcWidget->setCalculator(qobject_cast<EquivalentLinearCalculator*>(ac));
+        _stackedLayout->setCurrentIndex(0);
     } else if (className == "FrequencyDependentCalculator") {
-        m_fdcWidget->setCalculator(qobject_cast<FrequencyDependentCalculator*>(ac));
-        m_stackedLayout->setCurrentIndex(1);
+        _fdcWidget->setCalculator(qobject_cast<FrequencyDependentCalculator*>(ac));
+        _stackedLayout->setCurrentIndex(1);
     }
 }
 
 void MethodGroupBox::setReadOnly(bool readOnly)
 {
-    m_elcWidget->setReadOnly(readOnly);
-    m_fdcWidget->setReadOnly(readOnly);
+    _elcWidget->setReadOnly(readOnly);
+    _fdcWidget->setReadOnly(readOnly);
 }

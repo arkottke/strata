@@ -15,25 +15,29 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SERIALIZER_H_
-#define SERIALIZER_H_
+#ifndef SERIALIZE_H_
+#define SERIALIZE_H_
 
 #include <QList>
 #include <QVector>
 #include <QVariant>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
 
-class Serializer
-{
-    public:
-        Serializer();
-       
-        static QList<QVariant> toVariantList(const QList<double> & list); 
-        static QList<QVariant> toVariantList(const QVector<double> & vector); 
+namespace Serialize {
+    QJsonArray toJsonArray(const QVector<double> &vector);
 
-        static QList<double> fromVariantList(const QList<QVariant> & list);
+    void toDoubleVector(const QJsonValue &object, QVector<double> &vector);
+
+    QList<QVariant> toVariantList(const QList<double> &list);
+
+    QList<QVariant> toVariantList(const QVector<double> &vector);
+
+    QList<double> fromVariantList(const QList<QVariant> &list);
 };
 #endif

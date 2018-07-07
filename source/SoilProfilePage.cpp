@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -58,37 +58,37 @@ SoilProfilePage::SoilProfilePage(QWidget * parent, Qt::WindowFlags f)
 
 void SoilProfilePage::setModel(SiteResponseModel *model)
 {
-    m_soilProfileTableGroup->setModel(model->siteProfile());
-    m_soilTypeDelegate->setCatalog(model->siteProfile()->soilTypeCatalog());
+    _soilProfileTableGroup->setModel(model->siteProfile());
+    _soilTypeDelegate->setCatalog(model->siteProfile()->soilTypeCatalog());
 
-    m_velocityVariation = model->siteProfile()->profileRandomizer()->velocityVariation();
+    _velocityVariation = model->siteProfile()->profileRandomizer()->velocityVariation();
     updateHiddenColumns();
-    connect(m_velocityVariation, SIGNAL(enabledChanged(bool)),
+    connect(_velocityVariation, SIGNAL(enabledChanged(bool)),
             this, SLOT(updateHiddenColumns()));
 
     ProfileRandomizer* pr = model->siteProfile()->profileRandomizer();
 
-    m_profileVariationGroupBox->setVisible(pr->enabled());
+    _profileVariationGroupBox->setVisible(pr->enabled());
     connect(pr, SIGNAL(enabledChanged(bool)),
-            m_profileVariationGroupBox, SLOT(setVisible(bool)));
+            _profileVariationGroupBox, SLOT(setVisible(bool)));
 
-    m_isVelocityVariedCheckBox->setChecked(pr->velocityVariation()->enabled());
-    connect(m_isVelocityVariedCheckBox, SIGNAL(toggled(bool)),
+    _isVelocityVariedCheckBox->setChecked(pr->velocityVariation()->enabled());
+    connect(_isVelocityVariedCheckBox, SIGNAL(toggled(bool)),
             pr->velocityVariation(), SLOT(setEnabled(bool)));
     connect(pr->velocityVariation(), SIGNAL(enabledChanged(bool)),
-            m_isVelocityVariedCheckBox, SLOT(setChecked(bool)));
+            _isVelocityVariedCheckBox, SLOT(setChecked(bool)));
 
-    m_isLayeringVariedCheckBox->setChecked(pr->layerThicknessVariation()->enabled());
-    connect(m_isLayeringVariedCheckBox, SIGNAL(toggled(bool)),
+    _isLayeringVariedCheckBox->setChecked(pr->layerThicknessVariation()->enabled());
+    connect(_isLayeringVariedCheckBox, SIGNAL(toggled(bool)),
             pr->layerThicknessVariation(), SLOT(setEnabled(bool)));
     connect(pr->layerThicknessVariation(), SIGNAL(enabledChanged(bool)),
-            m_isLayeringVariedCheckBox, SLOT(setChecked(bool)));
+            _isLayeringVariedCheckBox, SLOT(setChecked(bool)));
 
-    m_isBedrockDepthVariedCheckBox->setChecked(pr->bedrockDepthVariation()->enabled());
-    connect(m_isBedrockDepthVariedCheckBox, SIGNAL(toggled(bool)),
+    _isBedrockDepthVariedCheckBox->setChecked(pr->bedrockDepthVariation()->enabled());
+    connect(_isBedrockDepthVariedCheckBox, SIGNAL(toggled(bool)),
             pr->bedrockDepthVariation(), SLOT(setEnabled(bool)));
     connect(pr->bedrockDepthVariation(), SIGNAL(enabledChanged(bool)),
-            m_isBedrockDepthVariedCheckBox, SLOT(setChecked(bool)));
+            _isBedrockDepthVariedCheckBox, SLOT(setChecked(bool)));
 
     // Velocity Variation
     VelocityVariation* vv =
@@ -98,230 +98,230 @@ void SoilProfilePage::setModel(SiteResponseModel *model)
     connect(vv, SIGNAL(enabledChanged(bool)),
             this, SLOT(setVelocityItemEnabled(bool)));
 
-    m_velocityVariationFrame->setEnabled(vv->enabled());
+    _velocityVariationFrame->setEnabled(vv->enabled());
     connect(vv, SIGNAL(enabledChanged(bool)),
-            m_velocityVariationFrame, SLOT(setEnabled(bool)));
+            _velocityVariationFrame, SLOT(setEnabled(bool)));
 
-    m_layerSpecificCheckBox->setChecked(vv->stdevIsLayerSpecific());
-    connect(m_layerSpecificCheckBox, SIGNAL(toggled(bool)),
+    _layerSpecificCheckBox->setChecked(vv->stdevIsLayerSpecific());
+    connect(_layerSpecificCheckBox, SIGNAL(toggled(bool)),
             vv, SLOT(setStdevIsLayerSpecific(bool)));
     connect(vv, SIGNAL(stdevIsLayerSpecificChanged(bool)),
-            m_layerSpecificCheckBox, SLOT(setChecked(bool)));
+            _layerSpecificCheckBox, SLOT(setChecked(bool)));
     connect(vv, SIGNAL(stdevIsLayerSpecificChanged(bool)),
             this, SLOT(updateHiddenColumns()));
 
-    m_stdevModelComboBox->setCurrentIndex(vv->stdevModel());
-    connect(m_stdevModelComboBox, SIGNAL(currentIndexChanged(int)),
+    _stdevModelComboBox->setCurrentIndex(vv->stdevModel());
+    connect(_stdevModelComboBox, SIGNAL(currentIndexChanged(int)),
              vv, SLOT(setStdevModel(int)));
 
-    m_stdevModelComboBox->setDisabled(vv->stdevIsLayerSpecific());
+    _stdevModelComboBox->setDisabled(vv->stdevIsLayerSpecific());
     connect(vv, SIGNAL(stdevIsLayerSpecificChanged(bool)),
-            m_stdevModelComboBox, SLOT(setDisabled(bool)));
+            _stdevModelComboBox, SLOT(setDisabled(bool)));
 
-    m_stdevSpinBox->setValue(vv->stdev());
-    connect(m_stdevSpinBox, SIGNAL(valueChanged(double)),
+    _stdevSpinBox->setValue(vv->stdev());
+    connect(_stdevSpinBox, SIGNAL(valueChanged(double)),
             vv, SLOT(setStdev(double)));
     connect(vv, SIGNAL(stdevChanged(double)),
-            m_stdevSpinBox, SLOT(setValue(double)));
+            _stdevSpinBox, SLOT(setValue(double)));
 
-    m_stdevSpinBox->setEnabled(vv->stdevCustomEnabled());
+    _stdevSpinBox->setEnabled(vv->stdevCustomEnabled());
     connect(vv, SIGNAL(stdevCustomEnabledChanged(bool)),
-            m_stdevSpinBox, SLOT(setEnabled(bool)));
+            _stdevSpinBox, SLOT(setEnabled(bool)));
 
-    m_correlModelComboBox->setCurrentIndex(vv->stdevModel());
-    connect(m_correlModelComboBox, SIGNAL(currentIndexChanged(int)),
+    _correlModelComboBox->setCurrentIndex(vv->stdevModel());
+    connect(_correlModelComboBox, SIGNAL(currentIndexChanged(int)),
              vv, SLOT(setCorrelModel(int)));
 
-    m_correlInitialSpinBox->setValue(vv->correlInitial());
-    connect(m_correlInitialSpinBox, SIGNAL(valueChanged(double)),
+    _correlInitialSpinBox->setValue(vv->correlInitial());
+    connect(_correlInitialSpinBox, SIGNAL(valueChanged(double)),
             vv, SLOT(setCorrelInitial(double)));
     connect(vv, SIGNAL(correlInitialChanged(double)),
-            m_correlInitialSpinBox, SLOT(setValue(double)));
+            _correlInitialSpinBox, SLOT(setValue(double)));
 
-    m_correlFinalSpinBox->setValue(vv->correlFinal());
-    connect(m_correlFinalSpinBox, SIGNAL(valueChanged(double)),
+    _correlFinalSpinBox->setValue(vv->correlFinal());
+    connect(_correlFinalSpinBox, SIGNAL(valueChanged(double)),
             vv, SLOT(setCorrelFinal(double)));
     connect(vv, SIGNAL(correlFinalChanged(double)),
-            m_correlFinalSpinBox, SLOT(setValue(double)));
+            _correlFinalSpinBox, SLOT(setValue(double)));
 
-    m_correlDeltaSpinBox->setValue(vv->correlDelta());
-    connect(m_correlDeltaSpinBox, SIGNAL(valueChanged(double)),
+    _correlDeltaSpinBox->setValue(vv->correlDelta());
+    connect(_correlDeltaSpinBox, SIGNAL(valueChanged(double)),
             vv, SLOT(setCorrelDelta(double)));
     connect(vv, SIGNAL(correlDeltaChanged(double)),
-            m_correlDeltaSpinBox, SLOT(setValue(double)));
+            _correlDeltaSpinBox, SLOT(setValue(double)));
 
-    m_correlInterceptSpinBox->setValue(vv->correlIntercept());
-    connect(m_correlInterceptSpinBox, SIGNAL(valueChanged(double)),
+    _correlInterceptSpinBox->setValue(vv->correlIntercept());
+    connect(_correlInterceptSpinBox, SIGNAL(valueChanged(double)),
             vv, SLOT(setCorrelIntercept(double)));
     connect(vv, SIGNAL(correlInterceptChanged(double)),
-            m_correlInterceptSpinBox, SLOT(setValue(double)));
+            _correlInterceptSpinBox, SLOT(setValue(double)));
 
-    m_correlExponentSpinBox->setValue(vv->correlExponent());
-    connect(m_correlExponentSpinBox, SIGNAL(valueChanged(double)),
+    _correlExponentSpinBox->setValue(vv->correlExponent());
+    connect(_correlExponentSpinBox, SIGNAL(valueChanged(double)),
             vv, SLOT(setCorrelExponent(double)));
     connect(vv, SIGNAL(correlExponentChanged(double)),
-            m_correlExponentSpinBox, SLOT(setValue(double)));
+            _correlExponentSpinBox, SLOT(setValue(double)));
 
-    m_correlGroupBox->setEnabled(vv->correlCustomEnabled());
+    _correlGroupBox->setEnabled(vv->correlCustomEnabled());
     connect(vv, SIGNAL(correlCustomEnabledChanged(bool)),
-            m_correlGroupBox, SLOT(setEnabled(bool)));
+            _correlGroupBox, SLOT(setEnabled(bool)));
 
     // Layering variation
     LayerThicknessVariation* ltv =
             model->siteProfile()->profileRandomizer()->layerThicknessVariation();
 
-    m_layerVariationFrame->setEnabled(ltv->enabled());
+    _layerVariationFrame->setEnabled(ltv->enabled());
     connect(ltv, SIGNAL(enabledChanged(bool)),
             this, SLOT(setLayeringItemEnabled(bool)));
     connect(ltv, SIGNAL(enabledChanged(bool)),
-            m_layerVariationFrame, SLOT(setEnabled(bool)));
+            _layerVariationFrame, SLOT(setEnabled(bool)));
 
-    m_layeringModelComboBox->setCurrentIndex(ltv->model());
-    connect(m_layeringModelComboBox, SIGNAL(currentIndexChanged(int)),
+    _layeringModelComboBox->setCurrentIndex(ltv->model());
+    connect(_layeringModelComboBox, SIGNAL(currentIndexChanged(int)),
             ltv, SLOT(setModel(int)));
 
-    m_layeringCoeffSpinBox->setValue(ltv->coeff());
-    connect(m_layeringCoeffSpinBox, SIGNAL(valueChanged(double)),
+    _layeringCoeffSpinBox->setValue(ltv->coeff());
+    connect(_layeringCoeffSpinBox, SIGNAL(valueChanged(double)),
             ltv, SLOT(setCoeff(double)));
     connect(ltv, SIGNAL(coeffChanged(double)),
-            m_layeringCoeffSpinBox, SLOT(setValue(double)));
+            _layeringCoeffSpinBox, SLOT(setValue(double)));
 
-    m_layeringCoeffSpinBox->setEnabled(ltv->customEnabled());
+    _layeringCoeffSpinBox->setEnabled(ltv->customEnabled());
     connect(ltv, SIGNAL(customEnabledChanged(bool)),
-            m_layeringCoeffSpinBox, SLOT(setEnabled(bool)));
+            _layeringCoeffSpinBox, SLOT(setEnabled(bool)));
 
-    m_layeringInitialSpinBox->setValue(ltv->initial());
-    connect(m_layeringInitialSpinBox, SIGNAL(valueChanged(double)),
+    _layeringInitialSpinBox->setValue(ltv->initial());
+    connect(_layeringInitialSpinBox, SIGNAL(valueChanged(double)),
             ltv, SLOT(setInitial(double)));
     connect(ltv, SIGNAL(initialChanged(double)),
-            m_layeringInitialSpinBox, SLOT(setValue(double)));
+            _layeringInitialSpinBox, SLOT(setValue(double)));
 
-    m_layeringInitialSpinBox->setEnabled(ltv->customEnabled());
+    _layeringInitialSpinBox->setEnabled(ltv->customEnabled());
     connect(ltv, SIGNAL(customEnabledChanged(bool)),
-            m_layeringInitialSpinBox, SLOT(setEnabled(bool)));
+            _layeringInitialSpinBox, SLOT(setEnabled(bool)));
 
-    m_layeringExponentSpinBox->setValue(ltv->exponent());
-    connect(m_layeringExponentSpinBox, SIGNAL(valueChanged(double)),
+    _layeringExponentSpinBox->setValue(ltv->exponent());
+    connect(_layeringExponentSpinBox, SIGNAL(valueChanged(double)),
             ltv, SLOT(setExponent(double)));
     connect(ltv, SIGNAL(exponentChanged(double)),
-            m_layeringExponentSpinBox, SLOT(setValue(double)));
+            _layeringExponentSpinBox, SLOT(setValue(double)));
 
-    m_layeringExponentSpinBox->setEnabled(ltv->customEnabled());
+    _layeringExponentSpinBox->setEnabled(ltv->customEnabled());
     connect(ltv, SIGNAL(customEnabledChanged(bool)),
-            m_layeringExponentSpinBox, SLOT(setEnabled(bool)));
+            _layeringExponentSpinBox, SLOT(setEnabled(bool)));
 
     // Bedrock depth variation
     BedrockDepthVariation* bdv =
             model->siteProfile()->profileRandomizer()->bedrockDepthVariation();
 
-    m_bedrockDepthFrame->setEnabled(bdv->enabled());
+    _bedrockDepthFrame->setEnabled(bdv->enabled());
     connect(bdv, SIGNAL(enabledChanged(bool)),
             this, SLOT(setBedrockDepthItemEnabled(bool)));
 
-    m_bedrockDepthFrame->setEnabled(bdv->enabled());
+    _bedrockDepthFrame->setEnabled(bdv->enabled());
     connect(bdv, SIGNAL(enabledChanged(bool)),
-            m_bedrockDepthFrame, SLOT(setEnabled(bool)));
+            _bedrockDepthFrame, SLOT(setEnabled(bool)));
 
-    m_bedrockModelComboBox->setCurrentIndex(bdv->type());
-    connect(m_bedrockModelComboBox, SIGNAL(currentIndexChanged(int)),
+    _bedrockModelComboBox->setCurrentIndex(bdv->type());
+    connect(_bedrockModelComboBox, SIGNAL(currentIndexChanged(int)),
             bdv, SLOT(setType(int)));
 
-    m_bedrockStdevSpinBox->setValue(bdv->stdev());
-    connect(m_bedrockStdevSpinBox, SIGNAL(valueChanged(double)),
+    _bedrockStdevSpinBox->setValue(bdv->stdev());
+    connect(_bedrockStdevSpinBox, SIGNAL(valueChanged(double)),
             bdv, SLOT(setStdev(double)));
     connect(bdv, SIGNAL(stdevChanged(double)),
-            m_bedrockStdevSpinBox, SLOT(setValue(double)));
+            _bedrockStdevSpinBox, SLOT(setValue(double)));
 
-    m_bedrockStdevSpinBox->setEnabled(bdv->stdevRequired());
+    _bedrockStdevSpinBox->setEnabled(bdv->stdevRequired());
     connect(bdv, SIGNAL(stdevRequiredChanged(bool)),
-            m_bedrockStdevSpinBox, SLOT(setEnabled(bool)));
+            _bedrockStdevSpinBox, SLOT(setEnabled(bool)));
 
     // Minimum
-    m_bedrockDepthMinCheckBox->setChecked(bdv->hasMin());
-    connect(m_bedrockDepthMinCheckBox, SIGNAL(toggled(bool)),
+    _bedrockDepthMinCheckBox->setChecked(bdv->hasMin());
+    connect(_bedrockDepthMinCheckBox, SIGNAL(toggled(bool)),
             bdv, SLOT(setHasMin(bool)));
     connect(bdv, SIGNAL(requiresLimits(bool)), 
-            m_bedrockDepthMinCheckBox, SLOT(setChecked(bool)));
+            _bedrockDepthMinCheckBox, SLOT(setChecked(bool)));
     connect(bdv, SIGNAL(requiresLimits(bool)), 
-            m_bedrockDepthMinCheckBox, SLOT(setDisabled(bool)));
+            _bedrockDepthMinCheckBox, SLOT(setDisabled(bool)));
 
-    m_bedrockDepthMinSpinBox->setRange( 0, bdv->max());
-    m_bedrockDepthMinSpinBox->setEnabled(bdv->hasMin());
+    _bedrockDepthMinSpinBox->setRange( 0, bdv->max());
+    _bedrockDepthMinSpinBox->setEnabled(bdv->hasMin());
     connect(bdv, SIGNAL(hasMinChanged(bool)),
-            m_bedrockDepthMinSpinBox, SLOT(setEnabled(bool)));
+            _bedrockDepthMinSpinBox, SLOT(setEnabled(bool)));
 
-    m_bedrockDepthMinSpinBox->setValue(bdv->min());
-    connect(m_bedrockDepthMinSpinBox, SIGNAL(valueChanged(double)),
+    _bedrockDepthMinSpinBox->setValue(bdv->min());
+    connect(_bedrockDepthMinSpinBox, SIGNAL(valueChanged(double)),
             bdv, SLOT(setMin(double)));
-    connect(m_bedrockDepthMinSpinBox, SIGNAL(valueChanged(double)),
+    connect(_bedrockDepthMinSpinBox, SIGNAL(valueChanged(double)),
             this, SLOT(setBedrockDepthMin(double)));
 
     // Maximum
-    m_bedrockDepthMaxCheckBox->setChecked(bdv->hasMax());
+    _bedrockDepthMaxCheckBox->setChecked(bdv->hasMax());
 
-    connect(m_bedrockDepthMaxCheckBox, SIGNAL(toggled(bool)),
+    connect(_bedrockDepthMaxCheckBox, SIGNAL(toggled(bool)),
             bdv, SLOT(setHasMax(bool)));
     connect(bdv, SIGNAL(hasMaxChanged(bool)),
-            m_bedrockDepthMaxCheckBox, SLOT(setChecked(bool)));
+            _bedrockDepthMaxCheckBox, SLOT(setChecked(bool)));
     connect(bdv, SIGNAL(requiresLimits(bool)), 
-            m_bedrockDepthMaxCheckBox, SLOT(setChecked(bool)));
+            _bedrockDepthMaxCheckBox, SLOT(setChecked(bool)));
     connect(bdv, SIGNAL(requiresLimits(bool)), 
-            m_bedrockDepthMaxCheckBox, SLOT(setDisabled(bool)));
+            _bedrockDepthMaxCheckBox, SLOT(setDisabled(bool)));
 
-    m_bedrockDepthMaxSpinBox->setRange( bdv->min(), 10000);
-    m_bedrockDepthMaxSpinBox->setEnabled(bdv->hasMax());
+    _bedrockDepthMaxSpinBox->setRange( bdv->min(), 10000);
+    _bedrockDepthMaxSpinBox->setEnabled(bdv->hasMax());
     connect(bdv, SIGNAL(hasMaxChanged(bool)),
-            m_bedrockDepthMaxSpinBox, SLOT(setEnabled(bool)));
+            _bedrockDepthMaxSpinBox, SLOT(setEnabled(bool)));
 
-    m_bedrockDepthMaxSpinBox->setValue(bdv->max());
-    connect(m_bedrockDepthMaxSpinBox, SIGNAL(valueChanged(double)),
+    _bedrockDepthMaxSpinBox->setValue(bdv->max());
+    connect(_bedrockDepthMaxSpinBox, SIGNAL(valueChanged(double)),
             bdv, SLOT(setMax(double)));
-    connect(m_bedrockDepthMaxSpinBox, SIGNAL(valueChanged(double)),
+    connect(_bedrockDepthMaxSpinBox, SIGNAL(valueChanged(double)),
             this, SLOT(setBedrockDepthMax(double)));
 }
 
 void SoilProfilePage::setReadOnly(bool readOnly)
 {
-    m_soilProfileTableGroup->setReadOnly(readOnly);
+    _soilProfileTableGroup->setReadOnly(readOnly);
 
-    m_isVelocityVariedCheckBox->setDisabled(readOnly);
-    m_isLayeringVariedCheckBox->setDisabled(readOnly);
-    m_isBedrockDepthVariedCheckBox->setDisabled(readOnly);
+    _isVelocityVariedCheckBox->setDisabled(readOnly);
+    _isLayeringVariedCheckBox->setDisabled(readOnly);
+    _isBedrockDepthVariedCheckBox->setDisabled(readOnly);
 
-    m_layerSpecificCheckBox->setDisabled(readOnly);
-    m_distributionComboBox->setDisabled(readOnly);
-    m_stdevModelComboBox->setDisabled(readOnly);
-    m_stdevSpinBox->setReadOnly(readOnly);
-    m_correlModelComboBox->setDisabled(readOnly);
+    _layerSpecificCheckBox->setDisabled(readOnly);
+    _distributionComboBox->setDisabled(readOnly);
+    _stdevModelComboBox->setDisabled(readOnly);
+    _stdevSpinBox->setReadOnly(readOnly);
+    _correlModelComboBox->setDisabled(readOnly);
 
-    m_correlInitialSpinBox->setReadOnly(readOnly);
-    m_correlFinalSpinBox->setReadOnly(readOnly);
-    m_correlDeltaSpinBox->setReadOnly(readOnly);
-    m_correlInterceptSpinBox->setReadOnly(readOnly);
-    m_correlExponentSpinBox->setReadOnly(readOnly);
+    _correlInitialSpinBox->setReadOnly(readOnly);
+    _correlFinalSpinBox->setReadOnly(readOnly);
+    _correlDeltaSpinBox->setReadOnly(readOnly);
+    _correlInterceptSpinBox->setReadOnly(readOnly);
+    _correlExponentSpinBox->setReadOnly(readOnly);
 
-    m_layeringModelComboBox->setDisabled(readOnly);
-    m_layeringCoeffSpinBox->setReadOnly(readOnly);
-    m_layeringInitialSpinBox->setReadOnly(readOnly);
-    m_layeringExponentSpinBox->setReadOnly(readOnly);
+    _layeringModelComboBox->setDisabled(readOnly);
+    _layeringCoeffSpinBox->setReadOnly(readOnly);
+    _layeringInitialSpinBox->setReadOnly(readOnly);
+    _layeringExponentSpinBox->setReadOnly(readOnly);
 
-    m_bedrockModelComboBox->setDisabled(readOnly);
-    m_bedrockStdevSpinBox->setReadOnly(readOnly);
-    m_bedrockDepthMinCheckBox->setDisabled(readOnly);
-    m_bedrockDepthMinSpinBox->setReadOnly(readOnly);
-    m_bedrockDepthMaxCheckBox->setDisabled(readOnly);
-    m_bedrockDepthMaxSpinBox->setReadOnly(readOnly);
+    _bedrockModelComboBox->setDisabled(readOnly);
+    _bedrockStdevSpinBox->setReadOnly(readOnly);
+    _bedrockDepthMinCheckBox->setDisabled(readOnly);
+    _bedrockDepthMinSpinBox->setReadOnly(readOnly);
+    _bedrockDepthMaxCheckBox->setDisabled(readOnly);
+    _bedrockDepthMaxSpinBox->setReadOnly(readOnly);
 }
 
 QGroupBox* SoilProfilePage::createTableGroupBox()
 {
     // Create the TableGroupBox
-    m_soilProfileTableGroup = new TableGroupBox(tr("Site Profile"));
+    _soilProfileTableGroup = new TableGroupBox(tr("Site Profile"));
 
-    m_soilTypeDelegate = new SoilTypeDelegate;
-    m_soilProfileTableGroup->setItemDelegateForColumn(2, m_soilTypeDelegate);
+    _soilTypeDelegate = new SoilTypeDelegate;
+    _soilProfileTableGroup->setItemDelegateForColumn(2, _soilTypeDelegate);
 
-    return m_soilProfileTableGroup;
+    return _soilProfileTableGroup;
 }
 
 QGroupBox* SoilProfilePage::createProfileRandomizerGroupBox()
@@ -333,34 +333,34 @@ QGroupBox* SoilProfilePage::createProfileRandomizerGroupBox()
 
     // Check Boxes controlling what options are enabled
     // Shear-wave velocity variation
-    m_isVelocityVariedCheckBox = new QCheckBox(tr("Vary the shear-wave velocity of the layers"));
-    layout->addWidget(m_isVelocityVariedCheckBox);
+    _isVelocityVariedCheckBox = new QCheckBox(tr("Vary the shear-wave velocity of the layers"));
+    layout->addWidget(_isVelocityVariedCheckBox);
 
     // Layer thickness variation
-    m_isLayeringVariedCheckBox = new QCheckBox(tr("Vary the layer thickness"));
-    layout->addWidget(m_isLayeringVariedCheckBox);
+    _isLayeringVariedCheckBox = new QCheckBox(tr("Vary the layer thickness"));
+    layout->addWidget(_isLayeringVariedCheckBox);
 
     // Depth to bedrock variation
-    m_isBedrockDepthVariedCheckBox = new QCheckBox(tr("Vary the depth to bedrock"));
-    layout->addWidget(m_isBedrockDepthVariedCheckBox);
+    _isBedrockDepthVariedCheckBox = new QCheckBox(tr("Vary the depth to bedrock"));
+    layout->addWidget(_isBedrockDepthVariedCheckBox);
 
     //
     // Toolbox contains options
     //
-    m_parameterToolBox = new QToolBox;
+    _parameterToolBox = new QToolBox;
 
-    m_parameterToolBox->addItem(createVelocityFrame(), tr("Velocity Variation Parameters"));
-    m_parameterToolBox->addItem(createLayeringFrame(), tr("Layer Thickness Variation Parameters"));
-    m_parameterToolBox->addItem(createBedrockDepthFrame(), tr("Bedrock Depth Variation Parameters"));
+    _parameterToolBox->addItem(createVelocityFrame(), tr("Velocity Variation Parameters"));
+    _parameterToolBox->addItem(createLayeringFrame(), tr("Layer Thickness Variation Parameters"));
+    _parameterToolBox->addItem(createBedrockDepthFrame(), tr("Bedrock Depth Variation Parameters"));
 
-    layout->addWidget(m_parameterToolBox);
+    layout->addWidget(_parameterToolBox);
     layout->addStretch(1);
     
     // Create the group box
-    m_profileVariationGroupBox= new QGroupBox(tr("Variation of the Site Profile"));
-    m_profileVariationGroupBox->setLayout(layout);
+    _profileVariationGroupBox= new QGroupBox(tr("Variation of the Site Profile"));
+    _profileVariationGroupBox->setLayout(layout);
 
-    return m_profileVariationGroupBox;
+    return _profileVariationGroupBox;
 }
 
 QFrame* SoilProfilePage::createVelocityFrame()
@@ -368,29 +368,29 @@ QFrame* SoilProfilePage::createVelocityFrame()
     QFormLayout* layout = new QFormLayout;
 
     // Layer specific standard deviation
-    m_layerSpecificCheckBox = new QCheckBox(tr("Layer specifc standard deviation"));
-    layout->addRow(m_layerSpecificCheckBox);
+    _layerSpecificCheckBox = new QCheckBox(tr("Layer specifc standard deviation"));
+    layout->addRow(_layerSpecificCheckBox);
 
     // Distribution  -- fixed at log normal at the moment
-    m_distributionComboBox = new QComboBox;
-    m_distributionComboBox->addItem(tr("Log Normal"));
-    layout->addRow(tr("Distribution:"), m_distributionComboBox);
+    _distributionComboBox = new QComboBox;
+    _distributionComboBox->addItem(tr("Log Normal"));
+    layout->addRow(tr("Distribution:"), _distributionComboBox);
 
     // Standard deviation
-    m_stdevModelComboBox = new QComboBox;
-    m_stdevModelComboBox->addItems(VelocityVariation::modelList());
-    layout->addRow(tr("Standard deviation:"), m_stdevModelComboBox);
+    _stdevModelComboBox = new QComboBox;
+    _stdevModelComboBox->addItems(VelocityVariation::modelList());
+    layout->addRow(tr("Standard deviation:"), _stdevModelComboBox);
 
-    m_stdevSpinBox = new QDoubleSpinBox;
-    m_stdevSpinBox->setDecimals(3);
-    m_stdevSpinBox->setRange( 0.0, 1.0);
-    m_stdevSpinBox->setSingleStep(0.01);
-    layout->addRow("", m_stdevSpinBox);
+    _stdevSpinBox = new QDoubleSpinBox;
+    _stdevSpinBox->setDecimals(3);
+    _stdevSpinBox->setRange( 0.0, 1.0);
+    _stdevSpinBox->setSingleStep(0.01);
+    layout->addRow("", _stdevSpinBox);
 
     // Correlation
-    m_correlModelComboBox = new QComboBox;
-    m_correlModelComboBox->addItems(VelocityVariation::modelList());
-    layout->addRow(tr("Correlation model:"), m_correlModelComboBox);
+    _correlModelComboBox = new QComboBox;
+    _correlModelComboBox->addItems(VelocityVariation::modelList());
+    layout->addRow(tr("Correlation model:"), _correlModelComboBox);
 
     /*
      * Correlation group box
@@ -398,61 +398,61 @@ QFrame* SoilProfilePage::createVelocityFrame()
     QFormLayout* correlLayout = new QFormLayout;
 
     // Initial correlation
-    m_correlInitialSpinBox = new QDoubleSpinBox;
-    m_correlInitialSpinBox->setRange(-1, 1);
-    m_correlInitialSpinBox->setDecimals(3);
-    m_correlInitialSpinBox->setSingleStep(0.1);
+    _correlInitialSpinBox = new QDoubleSpinBox;
+    _correlInitialSpinBox->setRange(-1, 1);
+    _correlInitialSpinBox->setDecimals(3);
+    _correlInitialSpinBox->setSingleStep(0.1);
 
     correlLayout->addRow(tr("Correl. coeff. at surface (%1_0):").arg(QChar(0x03C1)),
-                         m_correlInitialSpinBox);
+                         _correlInitialSpinBox);
 
     // Final correlation
-    m_correlFinalSpinBox = new QDoubleSpinBox;
-    m_correlFinalSpinBox->setRange(-1, 1);
-    m_correlFinalSpinBox->setDecimals(3);
-    m_correlFinalSpinBox->setSingleStep(0.1);
+    _correlFinalSpinBox = new QDoubleSpinBox;
+    _correlFinalSpinBox->setRange(-1, 1);
+    _correlFinalSpinBox->setDecimals(3);
+    _correlFinalSpinBox->setSingleStep(0.1);
 
     correlLayout->addRow(tr("Correl. coeff. at 200 m (%1_200):").arg(QChar(0x03C1)),
-                         m_correlFinalSpinBox);
+                         _correlFinalSpinBox);
 
     // Change in correlation with depth
-    m_correlDeltaSpinBox = new QDoubleSpinBox;
-    m_correlDeltaSpinBox->setRange(0, 10);
-    m_correlDeltaSpinBox->setDecimals(3);
-    m_correlDeltaSpinBox->setSingleStep(1);
+    _correlDeltaSpinBox = new QDoubleSpinBox;
+    _correlDeltaSpinBox->setRange(0, 10);
+    _correlDeltaSpinBox->setDecimals(3);
+    _correlDeltaSpinBox->setSingleStep(1);
 
     correlLayout->addRow(tr("Change in correl. with depth (%1):").arg(QChar(0x0394)),
-                         m_correlDeltaSpinBox);
+                         _correlDeltaSpinBox);
 
     // Initial depth 
-    m_correlInterceptSpinBox = new QDoubleSpinBox;
-    m_correlInterceptSpinBox->setRange(0, 100);
-    m_correlInterceptSpinBox->setDecimals(2);
-    m_correlInterceptSpinBox->setSingleStep(1);
-    m_correlInterceptSpinBox->setSuffix(" m");
+    _correlInterceptSpinBox = new QDoubleSpinBox;
+    _correlInterceptSpinBox->setRange(0, 100);
+    _correlInterceptSpinBox->setDecimals(2);
+    _correlInterceptSpinBox->setSingleStep(1);
+    _correlInterceptSpinBox->setSuffix(" m");
 
-    correlLayout->addRow(tr("Depth intercept (d_0):"), m_correlInterceptSpinBox);
+    correlLayout->addRow(tr("Depth intercept (d_0):"), _correlInterceptSpinBox);
 
     // Exponent
-    m_correlExponentSpinBox = new QDoubleSpinBox;
-    m_correlExponentSpinBox->setRange(0, 1);
-    m_correlExponentSpinBox->setDecimals(4);
-    m_correlExponentSpinBox->setSingleStep(0.01);
+    _correlExponentSpinBox = new QDoubleSpinBox;
+    _correlExponentSpinBox->setRange(0, 1);
+    _correlExponentSpinBox->setDecimals(4);
+    _correlExponentSpinBox->setSingleStep(0.01);
 
-    correlLayout->addRow(tr("Exponent (b):"), m_correlExponentSpinBox);
+    correlLayout->addRow(tr("Exponent (b):"), _correlExponentSpinBox);
 
     correlLayout->addRow(new QLabel(tr("Correlation applied in <b>meters<b>")));
 
-    m_correlGroupBox = new QGroupBox(tr("Correlation Parameters"));
-    m_correlGroupBox->setLayout(correlLayout);
+    _correlGroupBox = new QGroupBox(tr("Correlation Parameters"));
+    _correlGroupBox->setLayout(correlLayout);
 
     // Add the correlation group box to the layout
-    layout->addRow(m_correlGroupBox);
+    layout->addRow(_correlGroupBox);
 
-    m_velocityVariationFrame = new QFrame;
-    m_velocityVariationFrame->setLayout(layout);
+    _velocityVariationFrame = new QFrame;
+    _velocityVariationFrame->setLayout(layout);
 
-    return m_velocityVariationFrame;
+    return _velocityVariationFrame;
 } 
 
 QFrame* SoilProfilePage::createLayeringFrame()
@@ -460,46 +460,46 @@ QFrame* SoilProfilePage::createLayeringFrame()
     QFormLayout* layout = new QFormLayout;
 
     // Model cofficients
-    m_layeringModelComboBox = new QComboBox;
-    m_layeringModelComboBox->addItems(LayerThicknessVariation::modelList());
+    _layeringModelComboBox = new QComboBox;
+    _layeringModelComboBox->addItems(LayerThicknessVariation::modelList());
 
-    layout->addRow(tr("Parameters:"), m_layeringModelComboBox);
+    layout->addRow(tr("Parameters:"), _layeringModelComboBox);
 
     layout->addRow(new QLabel(
             tr("Layer rate model: %1(d) = <b><i>a</i></b> (d + <b><i>b</i></b>)<sup><b><i>c</i></b></sup>")
             .arg(QChar(0x03BB))));
 
     // Coefficient line
-    m_layeringCoeffSpinBox = new QDoubleSpinBox;
-    m_layeringCoeffSpinBox->setRange( 0, 100);
-    m_layeringCoeffSpinBox->setDecimals(3);
-    m_layeringCoeffSpinBox->setSingleStep(0.01);
+    _layeringCoeffSpinBox = new QDoubleSpinBox;
+    _layeringCoeffSpinBox->setRange( 0, 100);
+    _layeringCoeffSpinBox->setDecimals(3);
+    _layeringCoeffSpinBox->setSingleStep(0.01);
 
-    layout->addRow(tr("Coefficient (<b><i>a</i></b>):"), m_layeringCoeffSpinBox);
+    layout->addRow(tr("Coefficient (<b><i>a</i></b>):"), _layeringCoeffSpinBox);
 
     // Initial line
-    m_layeringInitialSpinBox = new QDoubleSpinBox;
-    m_layeringInitialSpinBox->setRange( 0, 100 );
-    m_layeringInitialSpinBox->setDecimals(3);
-    m_layeringInitialSpinBox->setSingleStep(0.01);
+    _layeringInitialSpinBox = new QDoubleSpinBox;
+    _layeringInitialSpinBox->setRange( 0, 100 );
+    _layeringInitialSpinBox->setDecimals(3);
+    _layeringInitialSpinBox->setSingleStep(0.01);
 
-    layout->addRow(tr("Initial (<b><i>b</b></i>):"), m_layeringInitialSpinBox);
+    layout->addRow(tr("Initial (<b><i>b</b></i>):"), _layeringInitialSpinBox);
 
     // Exponent line
-    m_layeringExponentSpinBox = new QDoubleSpinBox;
-    m_layeringExponentSpinBox->setRange(-5, 0);
-    m_layeringExponentSpinBox->setDecimals(3);
-    m_layeringExponentSpinBox->setSingleStep(0.01);
+    _layeringExponentSpinBox = new QDoubleSpinBox;
+    _layeringExponentSpinBox->setRange(-5, 0);
+    _layeringExponentSpinBox->setDecimals(3);
+    _layeringExponentSpinBox->setSingleStep(0.01);
 
-    layout->addRow(tr("Exponent (<b><i>c</b></i>):"), m_layeringExponentSpinBox);
+    layout->addRow(tr("Exponent (<b><i>c</b></i>):"), _layeringExponentSpinBox);
 
     layout->addRow(new QLabel(tr("Correlation applied in <b>meters<b>")));
 
     // Create the frame and set the layout
-    m_layerVariationFrame = new QFrame;
-    m_layerVariationFrame->setLayout(layout);
+    _layerVariationFrame = new QFrame;
+    _layerVariationFrame->setLayout(layout);
 
-    return m_layerVariationFrame;
+    return _layerVariationFrame;
 }
 
 QFrame* SoilProfilePage::createBedrockDepthFrame()
@@ -507,47 +507,47 @@ QFrame* SoilProfilePage::createBedrockDepthFrame()
     QFormLayout* layout = new QFormLayout;
 
     // Distribution
-    m_bedrockModelComboBox = new QComboBox;
-    m_bedrockModelComboBox->addItems(AbstractDistribution::typeList());
+    _bedrockModelComboBox = new QComboBox;
+    _bedrockModelComboBox->addItems(AbstractDistribution::typeList());
 
-    layout->addRow(tr("Distribution:"), m_bedrockModelComboBox);
+    layout->addRow(tr("Distribution:"), _bedrockModelComboBox);
 
     // Standard deviation
-    m_bedrockStdevSpinBox = new QDoubleSpinBox;
-    m_bedrockStdevSpinBox->setRange( 0, 500 );
-    m_bedrockStdevSpinBox->setSingleStep(0.1);
-    m_bedrockStdevSpinBox->setDecimals(3);
+    _bedrockStdevSpinBox = new QDoubleSpinBox;
+    _bedrockStdevSpinBox->setRange( 0, 500 );
+    _bedrockStdevSpinBox->setSingleStep(0.1);
+    _bedrockStdevSpinBox->setDecimals(3);
 
-    layout->addRow(tr("Standard deviation:"), m_bedrockStdevSpinBox);
+    layout->addRow(tr("Standard deviation:"), _bedrockStdevSpinBox);
     
     // Minimum
-    m_bedrockDepthMinCheckBox = new QCheckBox(tr("Minimum depth to bedrock:"));
-    m_bedrockDepthMinSpinBox = new QDoubleSpinBox;
-    layout->addRow(m_bedrockDepthMinCheckBox, m_bedrockDepthMinSpinBox);
+    _bedrockDepthMinCheckBox = new QCheckBox(tr("Minimum depth to bedrock:"));
+    _bedrockDepthMinSpinBox = new QDoubleSpinBox;
+    layout->addRow(_bedrockDepthMinCheckBox, _bedrockDepthMinSpinBox);
 
     // Maximum
-    m_bedrockDepthMaxCheckBox = new QCheckBox(tr("Maximum depth to bedrock:"));
-    m_bedrockDepthMaxSpinBox = new QDoubleSpinBox;
-    layout->addRow(m_bedrockDepthMaxCheckBox, m_bedrockDepthMaxSpinBox);
+    _bedrockDepthMaxCheckBox = new QCheckBox(tr("Maximum depth to bedrock:"));
+    _bedrockDepthMaxSpinBox = new QDoubleSpinBox;
+    layout->addRow(_bedrockDepthMaxCheckBox, _bedrockDepthMaxSpinBox);
 
     // Create the frame and set the layout
-    m_bedrockDepthFrame = new QFrame;
-    m_bedrockDepthFrame->setLayout(layout);
+    _bedrockDepthFrame = new QFrame;
+    _bedrockDepthFrame->setLayout(layout);
 
-    return m_bedrockDepthFrame;
+    return _bedrockDepthFrame;
 }
 
 void SoilProfilePage::setVelocityItemEnabled(bool enabled)
 {
-    m_parameterToolBox->setItemEnabled(VelocityIndex, enabled);
+    _parameterToolBox->setItemEnabled(VelocityIndex, enabled);
 
     if (enabled) {
-        m_parameterToolBox->setCurrentIndex(VelocityIndex);
+        _parameterToolBox->setCurrentIndex(VelocityIndex);
     } else {
         // Select another enabled item
-        for (int i = 0; i < m_parameterToolBox->count(); ++i) {
-            if (m_parameterToolBox->isItemEnabled(i)) {
-                m_parameterToolBox->setCurrentIndex(i);
+        for (int i = 0; i < _parameterToolBox->count(); ++i) {
+            if (_parameterToolBox->isItemEnabled(i)) {
+                _parameterToolBox->setCurrentIndex(i);
             }
         }
     }
@@ -555,15 +555,15 @@ void SoilProfilePage::setVelocityItemEnabled(bool enabled)
 
 void SoilProfilePage::setLayeringItemEnabled(bool enabled)
 {
-    m_parameterToolBox->setItemEnabled(LayeringIndex, enabled);
+    _parameterToolBox->setItemEnabled(LayeringIndex, enabled);
 
     if (enabled) {
-        m_parameterToolBox->setCurrentIndex(LayeringIndex);
+        _parameterToolBox->setCurrentIndex(LayeringIndex);
     } else {
         // Select another enabled item
-        for (int i = 0; i < m_parameterToolBox->count(); ++i) {
-            if (m_parameterToolBox->isItemEnabled(i)) {
-                m_parameterToolBox->setCurrentIndex(i);
+        for (int i = 0; i < _parameterToolBox->count(); ++i) {
+            if (_parameterToolBox->isItemEnabled(i)) {
+                _parameterToolBox->setCurrentIndex(i);
             }
         }
     }
@@ -571,15 +571,15 @@ void SoilProfilePage::setLayeringItemEnabled(bool enabled)
 
 void SoilProfilePage::setBedrockDepthItemEnabled(bool enabled)
 {
-    m_parameterToolBox->setItemEnabled(BedrockDepthIndex, enabled);
+    _parameterToolBox->setItemEnabled(BedrockDepthIndex, enabled);
 
     if (enabled) {
-        m_parameterToolBox->setCurrentIndex(BedrockDepthIndex);
+        _parameterToolBox->setCurrentIndex(BedrockDepthIndex);
     } else {
         // Select another enabled item
-        for (int i = 0; i < m_parameterToolBox->count(); ++i) {
-            if (m_parameterToolBox->isItemEnabled(i)) {
-                m_parameterToolBox->setCurrentIndex(i);
+        for (int i = 0; i < _parameterToolBox->count(); ++i) {
+            if (_parameterToolBox->isItemEnabled(i)) {
+                _parameterToolBox->setCurrentIndex(i);
             }
         }
     }
@@ -587,11 +587,11 @@ void SoilProfilePage::setBedrockDepthItemEnabled(bool enabled)
 
 void SoilProfilePage::updateUnits()
 {
-    m_bedrockDepthMinSpinBox->setSuffix(" " + Units::instance()->length());
-    m_bedrockDepthMaxSpinBox->setSuffix(" " + Units::instance()->length());
+    _bedrockDepthMinSpinBox->setSuffix(" " + Units::instance()->length());
+    _bedrockDepthMaxSpinBox->setSuffix(" " + Units::instance()->length());
 
     foreach (QComboBox* comboBox,
-             QList<QComboBox*>() << m_stdevModelComboBox << m_correlModelComboBox) {
+             QList<QComboBox*>() << _stdevModelComboBox << _correlModelComboBox) {
         int index = comboBox->currentIndex();
 
         comboBox->blockSignals(true);
@@ -605,23 +605,23 @@ void SoilProfilePage::updateUnits()
 void SoilProfilePage::updateHiddenColumns()
 {
     // Adjust all columns
-    bool enabled = m_velocityVariation->enabled();
+    bool enabled = _velocityVariation->enabled();
     for (int i = 4; i < 8; ++i)
-        m_soilProfileTableGroup->setColumnHidden(i, !enabled);
+        _soilProfileTableGroup->setColumnHidden(i, !enabled);
     // Standard deviation column
     if (enabled) {
-        m_soilProfileTableGroup->setColumnHidden(
+        _soilProfileTableGroup->setColumnHidden(
                 SoilProfile::StdevColumn,
-                !m_velocityVariation->stdevIsLayerSpecific());
+                !_velocityVariation->stdevIsLayerSpecific());
     }
 }
 
 void SoilProfilePage::setBedrockDepthMin(double min)
 {
-    m_bedrockDepthMaxSpinBox->setMinimum(min);
+    _bedrockDepthMaxSpinBox->setMinimum(min);
 }
 
 void SoilProfilePage::setBedrockDepthMax(double max)
 {
-    m_bedrockDepthMinSpinBox->setMaximum(max);
+    _bedrockDepthMinSpinBox->setMaximum(max);
 }

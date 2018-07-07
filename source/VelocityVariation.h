@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -116,39 +116,39 @@ protected slots:
 
 protected:
     //! If the variation is enabled
-    bool m_enabled;
+    bool _enabled;
 
     //! Model for the standard deviation
-    Model m_stdevModel;
+    Model _stdevModel;
 
     //! Allows the standard deviation to be defined at the layer
-    bool m_stdevIsLayerSpecific;
+    bool _stdevIsLayerSpecific;
 
     //! Standard deviation of the entire site
-    double m_stdev;
+    double _stdev;
 
     //! Model for the correlation
-    Model m_correlModel;
+    Model _correlModel;
 
     //! Initial correlation (depth of 0 m)
-    double m_correlInitial;
+    double _correlInitial;
 
     //! Final correlation  (depth of 200 m)
-    double m_correlFinal;
+    double _correlFinal;
 
     //! Change in correlation with depth
-    double m_correlDelta;
+    double _correlDelta;
 
     //! Depth intercept
-    double m_correlIntercept;
+    double _correlIntercept;
 
     //! Exponent of the correlation model
-    double m_correlExponent;
+    double _correlExponent;
 
     //! Random number generator
-    gsl_rng* m_rng;
+    gsl_rng* _rng;
 
     //! Profile randomizer
-    ProfileRandomizer* m_profileRandomizer;
+    ProfileRandomizer* _profileRandomizer;
 };
 #endif // VELOCITYVARIATION_H

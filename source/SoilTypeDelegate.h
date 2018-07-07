@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@ class SoilTypeDelegate : public QItemDelegate
 {
     Q_OBJECT
 public:
-    explicit SoilTypeDelegate(QObject *parent = 0);
+    explicit SoilTypeDelegate(QObject *parent = nullptr);
 
     QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     void setEditorData(QWidget *editor, const QModelIndex &index) const;    
@@ -39,6 +39,6 @@ public:
     void setCatalog(SoilTypeCatalog *catalog);
 
 protected:
-    SoilTypeCatalog* m_catalog;
+    SoilTypeCatalog* _catalog;
 };
 #endif // SOIL_TYPE_DELEGATE_H

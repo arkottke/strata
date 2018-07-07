@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@ class OnlyIncreasingDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit OnlyIncreasingDelegate(QObject *parent = 0);
+    explicit OnlyIncreasingDelegate(QObject *parent = nullptr);
 
     virtual QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 

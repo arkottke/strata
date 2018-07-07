@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ class MotionLibrary : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, MotionLibrary* ml);
 
 public:
-    explicit MotionLibrary(QObject *parent = 0);
+    explicit MotionLibrary(QObject *parent = nullptr);
 
     //! Table columns
     enum Column {
@@ -107,13 +107,13 @@ protected slots:
 
 protected:    
     //! Approach used to characterize input motions
-    Approach m_approach;
+    Approach _approach;
 
     //! If the motion data should be saved within the file -- only important for time series
-    bool m_saveData;
+    bool _saveData;
 
     //! List of motions
-    QList<AbstractMotion*> m_motions;
+    QList<AbstractMotion*> _motions;
 
 };
 

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,15 +27,15 @@
 DampingFactory::DampingFactory(QObject *parent)
     : AbstractNonlinearPropertyFactory(parent)
 {
-    m_type = NonlinearProperty::Damping;
-    m_models
-            << new CustomNonlinearProperty(m_type, false)
+    _type = NonlinearProperty::Damping;
+    _models
+            << new CustomNonlinearProperty(_type, false)
 
-            << new DarendeliNonlinearProperty(m_type)
+            << new DarendeliNonlinearProperty(_type)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=10",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -46,7 +46,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=30",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -57,7 +57,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=50",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -68,7 +68,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=70",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -79,7 +79,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 0-20 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -90,7 +90,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 20-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -101,7 +101,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 50-120 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -112,7 +112,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 120-250 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -123,7 +123,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 250-500 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -134,7 +134,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 500-1000 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -145,7 +145,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 0-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -154,7 +154,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 50-100 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -163,7 +163,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 100-250 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -172,7 +172,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 250-500 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -181,7 +181,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), >500 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -190,7 +190,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), 0-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -199,7 +199,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), 50-150 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -208,7 +208,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), 150-300 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -217,7 +217,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), >300 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -226,7 +226,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Idriss (1990), Sand",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -235,7 +235,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Idriss (1990), Clay",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -244,7 +244,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Imperial Valley Soils, 0-300 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 0.950 << 0.950 << 0.950 << 0.950 << 1.220 << 2.030 <<
@@ -252,7 +252,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Imperial Valley Soils, >300 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 0.540 << 0.540 << 0.540 << 0.540 << 0.540 << 0.950 <<
@@ -260,7 +260,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Peninsular Range, Cohesionless 0-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 1.060 << 1.060 << 1.210 << 1.660 << 2.880 << 5.600 <<
@@ -268,7 +268,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Peninsular Range, Cohesionless 50-500 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 0.600 << 0.600 << 0.600 << 0.910 << 1.210 << 2.580 <<
@@ -276,7 +276,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Seed & Idriss, Sand Lower",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 0.50 << 0.60 << 0.80 << 1.40 << 2.80 << 5.30 << 10.00 <<
@@ -284,7 +284,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Seed & Idriss, Sand Mean",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 0.57 << 0.86 << 1.70 << 3.10 << 5.50 << 9.50 << 15.50 <<
@@ -292,7 +292,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 0",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 3.00 << 5.40 << 9.80 << 15.00 <<
@@ -300,7 +300,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 15",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 2.60 << 4.50 << 7.50 << 11.60 <<
@@ -308,7 +308,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 30",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 2.10 << 3.80 << 5.90 << 8.80 <<
@@ -316,7 +316,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 50",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 1.80 << 2.90 << 4.30 << 6.20 <<
@@ -324,7 +324,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 100",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 1.50 << 2.00 << 2.90 << 4.10 <<
@@ -332,7 +332,7 @@ DampingFactory::DampingFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 200",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.10 << 1.30 << 1.60 << 2.10 << 3.00 <<

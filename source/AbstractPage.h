@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@ class AbstractPage : public QWidget
 {
 Q_OBJECT
 public:
-    explicit AbstractPage(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit AbstractPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     virtual void setModel(SiteResponseModel* model) = 0;
 

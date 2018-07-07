@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,16 +33,16 @@ class EquivalentLinearCalculatorWidget : public QWidget
 {
 Q_OBJECT
 public:
-    explicit EquivalentLinearCalculatorWidget(QWidget *parent = 0);
+    explicit EquivalentLinearCalculatorWidget(QWidget *parent = nullptr);
 
 public slots:
     void setCalculator(EquivalentLinearCalculator* elc);
     void setReadOnly(bool readOnly);
 
 protected:
-    QDoubleSpinBox* m_strainRatioSpinBox;
-    QDoubleSpinBox* m_errorToleranceSpinBox;
-    QSpinBox* m_maxIterationsSpinBox;
+    QDoubleSpinBox* _strainRatioSpinBox;
+    QDoubleSpinBox* _errorToleranceSpinBox;
+    QSpinBox* _maxIterationsSpinBox;
 };
 
 #endif // EQUIVALENT_LINEAR_CALCULATOR_WIDGET_H

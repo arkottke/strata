@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ class SoilTypeCatalog : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, SoilTypeCatalog* stc);
 
 public:
-    SoilTypeCatalog(QObject *parent = 0);
+    SoilTypeCatalog(QObject *parent = nullptr);
 
     enum Columns {
         NameColumn,
@@ -84,9 +84,9 @@ protected slots:
     void updateUnits();
 
 protected:
-    QList<SoilType*> m_soilTypes;
+    QList<SoilType*> _soilTypes;
 
-    NonlinearPropertyCatalog* m_nlCatalog;
+    NonlinearPropertyCatalog* _nlCatalog;
 };
 
 #endif // SOIL_TYPE_CATALOG_H

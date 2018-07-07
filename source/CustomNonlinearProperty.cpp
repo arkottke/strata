@@ -15,27 +15,27 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "CustomNonlinearProperty.h"
 
 CustomNonlinearProperty::CustomNonlinearProperty(Type type, bool retain, QObject *parent)
-    : NonlinearProperty(parent), m_retain(retain)
+    : NonlinearProperty(parent), _retain(retain)
 {
-    m_name = "Custom";
-    m_type = type;
+    _name = "Custom";
+    _type = type;
 }
 
 void CustomNonlinearProperty::setName(const QString &name)
 {
-    m_name = name;
+    _name = name;
 }
 
 bool CustomNonlinearProperty::retain() const
 {
-    return m_retain;
+    return _retain;
 }
 
 bool CustomNonlinearProperty::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -50,12 +50,12 @@ bool CustomNonlinearProperty::setData(const QModelIndex &index, const QVariant &
     if (b) {
         switch (index.column()) {
         case StrainColumn:
-            m_strain[index.row()] = d;
+            _strain[index.row()] = d;
             break;
         case PropertyColumn:
-            m_average[index.row()] = d;
-            m_varied[index.row()] = d;
-            gsl_interp_accel_reset(m_acc);
+            _average[index.row()] = d;
+            _varied[index.row()] = d;
+            gsl_interp_accel_reset(_acc);
             break;
         }
         dataChanged(index, index);
@@ -77,9 +77,9 @@ bool CustomNonlinearProperty::insertRows(int row, int count, const QModelIndex &
 
     emit beginInsertRows(parent, row, row+count-1);
 
-    m_strain.insert(row, count, 0);
-    m_average.insert(row, count, 0);
-    m_varied.insert(row, count, 0);
+    _strain.insert(row, count, 0);
+    _average.insert(row, count, 0);
+    _varied.insert(row, count, 0);
 
     emit endInsertRows();
     return true;
@@ -92,9 +92,9 @@ bool CustomNonlinearProperty::removeRows(int row, int count, const QModelIndex &
 
     emit beginRemoveRows(parent, row, row+count-1);
 
-    m_strain.remove(row, count);
-    m_average.remove(row, count);
-    m_varied.remove(row, count);
+    _strain.remove(row, count);
+    _average.remove(row, count);
+    _varied.remove(row, count);
 
     emit endRemoveRows();
     return true;

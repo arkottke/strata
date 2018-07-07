@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +58,7 @@ void MaxVelProfileOutput::extract(AbstractCalculator* const calculator,
     // Outcrop for the first layer. Within for subsequent.
     AbstractMotion::Type type = AbstractMotion::Outcrop;
 
-    foreach (double depth, this->ref()) {
+    for (const double &depth : this->ref()) {
         data << motion->maxVel(calculator->calcAccelTf(
                                 site->inputLocation(), motion->type(),
                                 site->depthToLocation(depth), type));

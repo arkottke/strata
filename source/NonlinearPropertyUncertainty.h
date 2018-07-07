@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010-2016 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,8 @@ class NonlinearPropertyUncertainty : public QObject
     friend QDataStream & operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu);
 
 public:
-    explicit NonlinearPropertyUncertainty(double lnStdev, double min, double max, QObject *parent = 0);
+    explicit NonlinearPropertyUncertainty(double lnStdev, double min, double max,
+                                          QObject *parent = nullptr);
 
     double min() const;
     double max() const;
@@ -67,13 +68,13 @@ protected:
     double limit(double value) const;
 
     //! Minimum value
-    double m_min;
+    double _min;
 
     //! Maximum value
-    double m_max;
+    double _max;
 
     //! Logarithmic standard deviation for the SPID model
-    double m_lnStdev;
+    double _lnStdev;
 };
 
 #endif // NONLINEAR_PROPERTY_UNCERTAINTY_H

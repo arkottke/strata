@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2014 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ class MyRandomNumGenerator : public QObject
     friend QDataStream & operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator);
 
 public:
-    MyRandomNumGenerator(QObject* parent = 0);
+    MyRandomNumGenerator(QObject *parent = nullptr);
     ~MyRandomNumGenerator();
     
     bool seedSpecified() const;
@@ -63,9 +63,9 @@ signals:
     void wasModified();
 
 protected:
-    bool m_seedSpecified;
-    quint32 m_seed;
+    bool _seedSpecified;
+    quint32 _seed;
 
-    gsl_rng* m_gsl_rng;
+    gsl_rng* _gsl_rng;
 };
 #endif

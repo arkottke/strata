@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@ TextLog::TextLog(QObject * parent) :
         QObject(parent)
 
 {
-    m_level = Low;
+    _level = Low;
 }
 
 QStringList TextLog::levelList()
@@ -45,26 +45,26 @@ QStringList TextLog::levelList()
 
 void TextLog::append(const QString & text)
 {
-    m_text << text;
+    _text << text;
     emit textChanged(text); 
     emit wasModified();
 }
 
 void TextLog::clear()
 {
-    m_text.clear();
+    _text.clear();
     emit textCleared();
 }
 
 TextLog::Level TextLog::level() const
 {
-    return m_level;
+    return _level;
 }
 
 void TextLog::setLevel( TextLog::Level level )
 {
-    if (m_level != level) {
-        m_level = level;
+    if (_level != level) {
+        _level = level;
 
         emit wasModified();
     }
@@ -77,7 +77,7 @@ void TextLog::setLevel(int level)
 
 const QStringList& TextLog::text() const
 {
-    return m_text;
+    return _text;
 }
 
 TextLog & operator<<( TextLog & log, const QString & string )
@@ -88,20 +88,20 @@ TextLog & operator<<( TextLog & log, const QString & string )
 
 void TextLog::fromJson(const QJsonObject &json)
 {
-    m_level = (TextLog::Level) json["level"].toInt();
+    _level = (TextLog::Level) json["level"].toInt();
 
-    m_text.clear();
-    foreach (const QJsonValue &v, json["text"].toArray())
-        m_text << v.toString();
+    _text.clear();
+    for (const QJsonValue &v : json["text"].toArray())
+        _text << v.toString();
 }
 
 QJsonObject TextLog::toJson() const
 {
     QJsonObject json;
-    json["level"] = (int) m_level;
+    json["level"] = (int) _level;
 
     QJsonArray text;
-    foreach (const QString &l, m_text)
+    for (const QString &l : _text)
         text << QJsonValue(l);
     json["text"] = text;
     return json;
@@ -112,7 +112,7 @@ QDataStream & operator<< (QDataStream & out, const TextLog* tl)
 {
     out << (quint8)1;
 
-    out << (int)tl->m_level << tl->m_text;
+    out << (int)tl->_level << tl->_text;
 
     return out;
 }
@@ -124,9 +124,9 @@ QDataStream & operator>> (QDataStream & in, TextLog* tl)
 
     int level;
 
-    in >> level >> tl->m_text;
+    in >> level >> tl->_text;
 
-    tl->m_level = (TextLog::Level)level;
+    tl->_level = (TextLog::Level)level;
 
     return in;
 }

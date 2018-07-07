@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@ class DimensionLayout : public QFormLayout
 {
     Q_OBJECT
 public:
-    explicit DimensionLayout(QWidget *parent = 0);
+    explicit DimensionLayout(QWidget *parent = nullptr);
 
     void setModel(Dimension* dimension);
     void setSuffix(const QString &suffix);
@@ -50,10 +50,10 @@ protected slots:
     void updateSpacing(int spacing);
 
 protected:
-    QDoubleSpinBox* m_minSpinBox;
-    QDoubleSpinBox* m_maxSpinBox;
-    QSpinBox* m_sizeSpinBox;
-    QComboBox* m_spacingComboBox;
+    QDoubleSpinBox* _minSpinBox;
+    QDoubleSpinBox* _maxSpinBox;
+    QSpinBox* _sizeSpinBox;
+    QComboBox* _spacingComboBox;
 };
 
 #endif // DIMENSION_FRAME_H

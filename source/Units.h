@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -102,10 +102,10 @@ signals:
     void systemChanged(int system);
 
 protected:
-    Units(QObject* parent = 0);
+    explicit Units(QObject *parent = nullptr);
 
-    static Units* m_instance;
+    static Units* _instance;
 
-    System m_system;
+    System _system;
 };
 #endif

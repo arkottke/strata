@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ class CrustalModel : public MyAbstractTableModel
     friend QDataStream & operator>> (QDataStream & in, CrustalModel* cm);
 
 public:
-    CrustalModel(QObject *parent=0);
+    explicit CrustalModel(QObject *parent = 0);
 
     enum Columns {
         ThicknessColumn,
@@ -45,8 +45,9 @@ public:
     };
 
     //!@{ Methods for QAbstractTableModel
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent) const;
+
+    virtual int columnCount(const QModelIndex &parent) const;
 
     virtual QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
@@ -66,6 +67,9 @@ public:
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
 
+signals:
+    void wasModified();
+
 private:
     /*! Compute the average value of a property to a max depth.
      * \param thickness vector of the layer thicknesses
@@ -73,16 +77,17 @@ private:
      * \param maxDepth depth to which the average is computed
      * \return average value
      */
-    static double averageValue(const QVector<double> & thickness, const QVector<double> & property, const double maxDepth );
+    static double averageValue(const QVector<double> &thickness, const QVector<double> &property,
+                               double maxDepth);
 
     //! Thickness of the crustal layers
-    QVector<double> m_thickness;
+    QVector<double> _thickness;
 
     //! Shear-wave velocity of the crustal layers in km/sec
-    QVector<double> m_velocity;
+    QVector<double> _velocity;
 
     //! Density of the crustal layers in grams/cm^3
-    QVector<double> m_density;
+    QVector<double> _density;
 };
 
 #endif // CRUSTALMODEL_H

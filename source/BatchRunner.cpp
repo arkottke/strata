@@ -6,39 +6,40 @@
 #include <QtDebug>
 #include <QTextDocument>
 
-BatchRunner::BatchRunner(QStringList fileNames):
-    m_fileNames(fileNames), m_begin(0), m_end(100)
+BatchRunner::BatchRunner(const QStringList &fileNames) :
+    _fileNames(fileNames), _begin(0), _end(100)
 {
     startNext();
 }
 
 void BatchRunner::startNext()
 {
-    if (!m_fileNames.size())
+    if (!_fileNames.isEmpty()) {
         exit(0);
+    }
 
-    const QString fileName = m_fileNames.takeFirst();
+    const QString fileName = _fileNames.takeFirst();
     qInfo().noquote() << "[BATCH] Opening:" << fileName;
-    m_model = new SiteResponseModel;
+    _model = new SiteResponseModel;
 
     if (fileName.endsWith(".strata")) {
-        m_model->loadBinary(fileName);
+        _model->loadBinary(fileName);
     } else {
-        m_model->loadJson(fileName);
+        _model->loadJson(fileName);
     }
     // Clean the run
-    m_model->clearResults();
+    _model->clearResults();
 
     // Need to call save after task is done, order not handled correctly....
-    connect(m_model->outputCatalog()->log(), SIGNAL(textChanged(QString)),
+    connect(_model->outputCatalog()->log(), SIGNAL(textChanged(QString)),
             this, SLOT(updateLog(QString)));
-    connect(m_model, SIGNAL(progressRangeChanged(int,int)),
+    connect(_model, SIGNAL(progressRangeChanged(int,int)),
             this, SLOT(rangeChanged(int,int)));
-    connect(m_model, SIGNAL(progressChanged(int)),
+    connect(_model, SIGNAL(progressChanged(int)),
             this, SLOT(updateEtc(int)));
-    connect(m_model, SIGNAL(finished()), this, SLOT(finalize()));
+    connect(_model, SIGNAL(finished()), this, SLOT(finalize()));
 
-    m_model->start();
+    _model->start();
 }
 
 void BatchRunner::updateLog(QString line)
@@ -53,40 +54,40 @@ void BatchRunner::updateLog(QString line)
 
 void BatchRunner::updateEtc(int value)
 {
-    if (value == m_begin) {
-        m_timer.restart();
-    } else if (value == m_end) {
+    if (value == _begin) {
+        _timer.restart();
+    } else if (value == _end) {
         return;
     }
 
     // Compute the average time per step of the progress bar
-    double avgRate = double(m_timer.elapsed()) / double(value - m_begin);
+    double avgRate = double(_timer.elapsed()) / double(value - _begin);
 
     // The estimated time of completion is computed by multiplying the average rate by the number of remaining increments
-    QTime eta = QTime::currentTime().addMSecs(int(avgRate * (m_end-value)));
+    QTime eta = QTime::currentTime().addMSecs(int(avgRate * (_end-value)));
 
     qInfo().noquote() << "[BATCH] ETC:" << eta.toString(Qt::LocalDate)
-                      << "(" << value + 1 << "of" << m_end << ")";
+                      << "(" << value + 1 << "of" << _end << ")";
 }
 
 void BatchRunner::rangeChanged(int begin, int end)
 {
-    m_begin = begin;
-    m_end = end;
+    _begin = begin;
+    _end = end;
 }
 
 void BatchRunner::finalize()
 {
-    const QString fileName = m_model->fileName();
+    const QString fileName = _model->fileName();
 
     qInfo().noquote() << "[BATCH] Saving results to:" << fileName;
     if (fileName.endsWith(".strata")) {
-        m_model->saveBinary();
+        _model->saveBinary();
     } else {
-        m_model->saveJson();
+        _model->saveJson();
     }
     qInfo().noquote() << "[BATCH] Completed processing:" << fileName;
 
-    m_model->deleteLater();
+    _model->deleteLater();
     startNext();
 }

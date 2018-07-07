@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,11 +28,11 @@
 ModulusFactory::ModulusFactory(QObject *parent)
     : AbstractNonlinearPropertyFactory(parent)
 {
-    m_type = NonlinearProperty::ModulusReduction;
-    m_models
-            << new CustomNonlinearProperty(m_type, false)
+    _type = NonlinearProperty::ModulusReduction;
+    _models
+            << new CustomNonlinearProperty(_type, false)
 
-            << new DarendeliNonlinearProperty(m_type)
+            << new DarendeliNonlinearProperty(_type)
 
             << new NonlinearProperty(
                     "EPRI (93) PI=10",
@@ -47,7 +47,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=30",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -58,7 +58,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=50",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -69,7 +69,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), PI=70",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -80,7 +80,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 0-20 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -91,7 +91,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 20-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -102,7 +102,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 50-120 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -113,7 +113,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 120-250 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -124,7 +124,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 250-500 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -135,7 +135,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "EPRI (93), 500-1000 ft",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.000e-04 << 1.778e-04 << 3.162e-04 << 5.623e-04 <<
                     1.000e-03 << 1.778e-03 << 3.162e-03 << 5.623e-03 << 1.000e-02 << 1.778e-02 <<
                     3.162e-02 << 5.623e-02 << 1.000e-01 << 1.778e-01 << 3.162e-01 << 5.623e-01 <<
@@ -146,7 +146,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 0-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -155,7 +155,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 50-100 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -164,7 +164,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 100-250 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -173,7 +173,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), 250-500 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -182,7 +182,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GEI (83), >500 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -191,7 +191,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), 0-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -200,7 +200,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), 50-150 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -209,7 +209,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "GeoMatrix (1990), >150 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -218,7 +218,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Idriss (1990), Clay",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -227,7 +227,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Idriss (1990), Sand",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00 << 3.162e+00 <<
                     1.000e+01,
@@ -236,7 +236,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Imperial Valley Soils, 0-300 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 1.000 << 1.000 << 1.000 << 1.000 << 0.973 << 0.904 <<
@@ -244,7 +244,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Imperial Valley Soils, >300 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 1.000 << 1.000 << 1.000 << 1.000 << 0.986 << 0.952 <<
@@ -252,7 +252,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Iwasaki, 0.25 atm",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 0.98 << 0.93 << 0.85 << 0.72 << 0.49 << 0.23 <<
@@ -260,7 +260,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Iwasaki, 1.0 atm",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 0.97 << 0.92 << 0.83 << 0.65 << 0.39 <<
@@ -268,7 +268,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Peninsular Range, Cohesionless 0-50 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 1.000 << 1.000 << 1.000 << 0.963 << 0.868 << 0.677 <<
@@ -276,7 +276,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Peninsular Range, Cohesionless 50-500 ft",
-                    m_type,
+                    _type,
                     QVector<double>()  << 1.000e-04 << 3.162e-04 << 1.000e-03 << 3.162e-03 <<
                     1.000e-02 << 3.162e-02 << 1.000e-01 << 3.162e-01 << 1.000e+00,
                     QVector<double>()  << 1.000 << 1.000 << 1.000 << 0.985 << 0.941 << 0.846 <<
@@ -284,7 +284,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Seed & Idriss, Sand Mean",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 0.99 << 0.96 << 0.88 << 0.74 << 0.52 << 0.29 <<
@@ -292,7 +292,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Seed & Idriss, Sand Upper",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 0.99 << 0.94 << 0.84 << 0.65 << 0.36 <<
@@ -300,7 +300,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 0",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 0.96 << 0.88 << 0.70 << 0.47 << 0.26 <<
@@ -308,7 +308,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 15",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 0.99 << 0.94 << 0.81 << 0.64 << 0.41 <<
@@ -316,7 +316,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 30",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 0.98 << 0.90 << 0.75 << 0.53 <<
@@ -324,7 +324,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 50",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 <<1.00 << 1.00 << 1.00 << 0.95 << 0.84 << 0.67 <<
@@ -332,7 +332,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 100",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 1.00 << 0.98 << 0.92 << 0.81 <<
@@ -340,7 +340,7 @@ ModulusFactory::ModulusFactory(QObject *parent)
 
             << new NonlinearProperty(
                     "Vucetic & Dobry, PI = 200",
-                    m_type,
+                    _type,
                     QVector<double>() << 1.00e-04 << 3.16e-04 << 1.00e-03 << 3.16e-03 << 1.00e-02
                     << 3.16e-02 << 1.00e-01 << 3.16e-01 << 1.00e+00,
                     QVector<double>() << 1.00 << 1.00 << 1.00 << 1.00 << 1.00 << 0.96 << 0.89 <<

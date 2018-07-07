@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2010 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,13 +39,13 @@ bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
 
     // Complex shear modulus for all layers.
     // The shear modulus is constant over the frequency range.
-    for (int i = 0; i < m_nsl; ++i)
-        m_shearMod[i].fill(calcCompShearMod(m_site->shearMod(i), m_site->damping(i) / 100.));
+    for (int i = 0; i < _nsl; ++i)
+        _shearMod[i].fill(calcCompShearMod(_site->shearMod(i), _site->damping(i) / 100.));
 
     // Compute the bedrock properties -- these do not change during the process.
     // The shear modulus is constant over the frequency range.
-    m_shearMod[m_nsl].fill(calcCompShearMod(
-            m_site->bedrock()->shearMod(), m_site->bedrock()->damping() / 100.));
+    _shearMod[_nsl].fill(calcCompShearMod(
+            _site->bedrock()->shearMod(), _site->bedrock()->damping() / 100.));
 
     // Compute upgoing and downgoing waves
     bool success = calcWaves();
@@ -54,13 +54,13 @@ bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
         QVector<std::complex<double> > strainTf;
 
         // Compute the maximum strain predicted in the layers
-        for (int i = 0; i < m_nsl; ++i) {
-            strainTf = calcStrainTf(m_site->inputLocation(), m_motion->type(),
-                                    Location(i, m_site->subLayers().at(i).thickness() / 2));
+        for (int i = 0; i < _nsl; ++i) {
+            strainTf = calcStrainTf(_site->inputLocation(), _motion->type(),
+                                    Location(i, _site->subLayers().at(i).thickness() / 2));
             // Compute maximum shear strain in percent
-            const double strainMax = 100 * m_motion->calcMaxStrain(strainTf);
+            const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
-            m_site->subLayers()[i].setStrain(strainMax, strainMax, false);
+            _site->subLayers()[i].setStrain(strainMax, strainMax, false);
         }
     }
 

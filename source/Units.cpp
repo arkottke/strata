@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,22 +25,22 @@
 #include <QDataStream>
 #include <QDebug>
 
-Units * Units::m_instance = 0;
+Units *Units::_instance = nullptr;
 
 Units::Units( QObject * parent )
     : QObject(parent)
 {
-    m_system = Metric;
+    _system = Metric;
     reset();
 }
 
 Units * Units::instance()
 {
-    if ( m_instance == 0 ) {
-        m_instance = new Units;
+    if (_instance == nullptr) {
+        _instance = new Units;
     }
 
-    return m_instance;
+    return _instance;
 }
 
 QStringList Units::systemList()
@@ -55,15 +55,15 @@ void Units::reset()
 
 Units::System Units::system() const
 {
-    return m_system;
+    return _system;
 }
 
 void Units::setSystem(System system)
 {
-    if (m_system != system) {
-        m_system = system;
+    if (_system != system) {
+        _system = system;
 
-        emit systemChanged((int)m_system);
+        emit systemChanged((int)_system);
     }
 }
 
@@ -74,7 +74,7 @@ void Units::setSystem(int system)
 
 double Units::gravity() const
 {
-    switch (m_system) {
+    switch (_system) {
     case Metric:
         return 9.80665;
     case English:
@@ -86,7 +86,7 @@ double Units::gravity() const
 
 double Units::waterUntWt() const
 {
-    switch (m_system) {
+    switch (_system) {
     case Metric:
         return gravity();
     case English:
@@ -98,7 +98,7 @@ double Units::waterUntWt() const
 
 double Units::toAtm() const
 {
-    switch (m_system) {
+    switch (_system) {
     case Metric:
         return 9.868233e-3;
     case English:
@@ -110,7 +110,7 @@ double Units::toAtm() const
 
 double Units::toMeters() const
 {
-    switch (m_system){
+    switch (_system){
         case Metric:
             return 1.0;
         case English:
@@ -124,10 +124,10 @@ double Units::tsConv() const
 {
     double conv = 0;
 
-    if ( m_system == Metric )
+    if ( _system == Metric )
         // Convert gravity from meters into centimeters
         conv = gravity() * 100;
-    else if ( m_system == English )
+    else if ( _system == English )
         // Convert gravity from feet into inches
         conv = gravity() * 12;
 
@@ -136,9 +136,9 @@ double Units::tsConv() const
 
 QString Units::length() const
 {
-    if ( m_system == Metric )
+    if ( _system == Metric )
         return "m";
-    else if ( m_system == English )
+    else if ( _system == English )
         return "ft";
 
     return "";
@@ -163,9 +163,9 @@ QString Units::velTs() const
 {
     QString label = "";
 
-    if ( m_system == Metric )
+    if ( _system == Metric )
         label = "cm/s";
-    else if ( m_system == English )
+    else if ( _system == English )
         label = "in/s";
 
     return label;
@@ -175,9 +175,9 @@ QString Units::dispTs() const
 {
     QString label = "";
 
-    if ( m_system == Metric )
+    if ( _system == Metric )
         label = "cm";
-    else if ( m_system == English )
+    else if ( _system == English )
         label = "in";
 
     return label;
@@ -190,9 +190,9 @@ QString Units::vel() const
 
 QString Units::wt() const
 {
-    if ( m_system == Metric ) {
+    if ( _system == Metric ) {
         return "kN";
-    } else if ( m_system == English ) {
+    } else if ( _system == English ) {
         return "lb";
     }
 
@@ -213,7 +213,7 @@ QDataStream & operator<< (QDataStream & out, const Units* units)
 {
     out << (quint8)1;
 
-    out << (int)units->m_system;
+    out << (int)units->_system;
 
     return out;
 }

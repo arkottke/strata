@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,12 +32,12 @@ class ConfiningStressDialog : public QDialog
     Q_OBJECT
 
     public:
-        ConfiningStressDialog( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    ConfiningStressDialog(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     protected slots:
         void updateLabels();
 
     protected:
-        QDoubleSpinBox * m_waterDepthSpinBox;
+        QDoubleSpinBox * _waterDepthSpinBox;
 };
 #endif

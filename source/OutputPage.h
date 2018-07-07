@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ class OutputPage : public AbstractPage
     Q_OBJECT
 
 public:
-    OutputPage(QWidget* parent = 0, Qt::WindowFlags f = 0 );
+    explicit OutputPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 
     void setModel(SiteResponseModel* model);
 
@@ -55,23 +55,23 @@ protected slots:
     void setApproach(int approach);
 
 private:
-    QTabWidget* m_tabWidget;
+    QTabWidget* _tabWidget;
 
-    QTableView* m_profilesTableView;
-    OutputTableFrame* m_timeSeriesTableFrame;
-    OutputTableFrame* m_spectraTableFrame;
-    OutputTableFrame* m_ratiosTableFrame;
-    QTableView* m_soilTypesTableView;
+    QTableView* _profilesTableView;
+    OutputTableFrame* _timeSeriesTableFrame;
+    OutputTableFrame* _spectraTableFrame;
+    OutputTableFrame* _ratiosTableFrame;
+    QTableView* _soilTypesTableView;
 
-    QGroupBox* m_respSpecGroupBox;
-    DimensionLayout* m_periodLayout;
-    QDoubleSpinBox* m_dampingSpinBox;
+    QGroupBox* _respSpecGroupBox;
+    DimensionLayout* _periodLayout;
+    QDoubleSpinBox* _dampingSpinBox;
 
-    QGroupBox* m_freqGroupBox;
-    DimensionLayout* m_frequencyLayout;
+    QGroupBox* _freqGroupBox;
+    DimensionLayout* _frequencyLayout;
 
-    QGroupBox* m_logGroupBox;
-    QComboBox* m_logLevelComboBox;
+    QGroupBox* _logGroupBox;
+    QComboBox* _logLevelComboBox;
 
     //! Create the response spectrum group box
     QGroupBox* createRespSpecGroupBox();
@@ -82,6 +82,6 @@ private:
     //! Create the output group box
     QGroupBox* createLogGroupBox();
 
-    SiteResponseModel* m_model;
+    SiteResponseModel* _model;
 };
 #endif

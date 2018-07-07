@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
 // 
-// Copyright 2007 Albert Kottke
+// Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ class RvtMotion : public AbstractRvtMotion
 
 public:
     //! Constructor
-    RvtMotion(QObject * parent = 0);
+    explicit RvtMotion(QObject *parent = nullptr);
 
     //!{@ Method for editing the model with a QTableView
     virtual Qt::ItemFlags flags( const QModelIndex & index) const;
@@ -64,7 +64,7 @@ public slots:
 
 protected:
     //! Vector of frequency values
-    QVector<double> m_freq;
+    QVector<double> _freq;
 };
 
 bool logLogInterp( const QVector<double> & x, const QVector<double> & y,
