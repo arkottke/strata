@@ -88,7 +88,7 @@ double NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::
     double varied = 0;
     if (model == NonlinearPropertyRandomizer::SPID) {
         // SPID
-        varied = limit(exp(rand * m_lnStdev) * average);
+        varied = limit(exp(rand * _lnStdev) * average);
     } else {
         // Darendeli
         const double stdev = exp(-5) + exp(-0.25) * sqrt(average);
