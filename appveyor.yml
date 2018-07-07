@@ -36,7 +36,7 @@ build_script:
     - CD C:\projects\strata
     - MKDIR build
     - CD build
-    - cmake .. -DGSL_ROOT_DIR=%GSL_ROOT_DIR% -DQWT_ROOT_DIR=%QWT_ROOT_DIR% -G "%CMAKE_GENERATOR%" -DMSVC_RUNTIME_DYNAMIC:BOOL=ON 
+    - cmake .. -DGSL_ROOT_DIR=%GSL_ROOT_DIR% -DQWT_ROOT_DIR=%QWT_ROOT_DIR% -G "%CMAKE_GENERATOR%"
     - cmake --build . --target install
     - cmake --build . --target package
     - cmake --build . --target archive
