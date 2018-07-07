@@ -12,17 +12,17 @@ matrix:
 before_install:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo add-apt-repository --yes ppa:beineri/opt-qt593-trusty
+      sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
       sudo apt-get update -qq
-      sudo apt-get install -qq libgsl0-dev qt59base qt59tools qt59svg
+      sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
     else
       brew update --quiet
       brew install qt gsl
       export PATH="/usr/local/opt/qt/bin:$PATH"      
     fi
 install:
-  - source /opt/qt59/bin/qt59-env.sh
-  - # Instal QWT
+  - source /opt/qt510/bin/qt510-env.sh
+  - # Install QWT
   - cd $TRAVIS_BUILD_DIR/..
   - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
   - cd qwt
@@ -30,11 +30,19 @@ install:
   - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
   - qmake
   - make -j$(nproc)
+  - # Install GSL 
+  - GSL_ROOT_DIR=/opt/gsl
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone git://git.savannah.gnu.org/gsl.git gsl
+  - cd gsl
+  - ./autogen.sh && ./configure --prefix=$GSL_ROOT_DIR && make && make install
+  - cd $GSL_ROOT_DIR
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build
   - cd build
-  - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+  - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
   - echo $PROJECT_VERSION
   - make -j$(nproc)
   - make install
