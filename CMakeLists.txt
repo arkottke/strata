@@ -73,7 +73,7 @@ if(MSVC)
 else()
     # Add optimization for GCC
     # SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
-    # set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
 

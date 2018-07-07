@@ -88,7 +88,7 @@ double NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::
     double varied = 0;
     if (model == NonlinearPropertyRandomizer::SPID) {
         // SPID
-        varied = exp(rand * _lnStdev) * average;
+        varied = limit(exp(rand * m_lnStdev) * average);
     } else {
         // Darendeli
         const double stdev = exp(-5) + exp(-0.25) * sqrt(average);
@@ -165,7 +165,6 @@ QJsonObject NonlinearPropertyUncertainty::toJson() const
     json["lnStdev"] = _lnStdev;
     return json;
 }
-
 
 QDataStream& operator<< (QDataStream & out, const NonlinearPropertyUncertainty* npu)
 {

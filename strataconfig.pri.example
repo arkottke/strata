@@ -1,4 +1,0 @@
-# Modify the INCLUDEPATH to include qwt headers
-INCLUDEPATH += /mingw64/include/qwt
-# Provide a path for linking the libraries
-# LIBS += -L/mingw64/bin
