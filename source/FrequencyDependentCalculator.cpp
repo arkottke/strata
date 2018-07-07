@@ -125,7 +125,6 @@ bool FrequencyDependentCalculator::updateSubLayer(
         for (int i = 0; i < n; ++i) {
             gsl_matrix_set(model, i, 0, -freq.at(i + offset) / freqAvg);
             gsl_matrix_set(model, i, 1, -log(freq.at(i + offset) / freqAvg));
-
             gsl_vector_set(data, i, log(strainFas.at(i + offset) / strainAvg));
         }
 
