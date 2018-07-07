@@ -33,9 +33,11 @@ install:
   - # Install GSL 
   - GSL_ROOT_DIR=/opt/gsl
   - cd $TRAVIS_BUILD_DIR/..
-  - git clone git://git.savannah.gnu.org/gsl.git gsl
+  - git clone https://github.com/ampl/gsl.git
   - cd gsl
-  - ./autogen.sh && ./configure --prefix=$GSL_ROOT_DIR && make && make install
+  - mkdir build && cd build
+  - cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
+  - cmake --build . --target install
   - cd $GSL_ROOT_DIR
   - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 script:
@@ -49,9 +51,10 @@ script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-      chmod a+x linuxdeployqt*.AppImage
+      chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+      ls -lh
       ldd dist/usr/bin/strata
-      "./linuxdeployqt-*.AppImage dist/strata.desktop -appimage -no-translations"
+      "./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations"
       find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
     fi
 after_success:
