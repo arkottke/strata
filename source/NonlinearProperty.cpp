@@ -36,7 +36,7 @@
 NonlinearProperty::NonlinearProperty(QObject *parent)
     : QAbstractTableModel(parent)
 {
-    _interp = 0;
+    _interp = nullptr;
     _acc = gsl_interp_accel_alloc();
 }
 
@@ -46,7 +46,7 @@ NonlinearProperty::NonlinearProperty(
             : QAbstractTableModel(parent), _name(name), _type(type), _strain(strain),
                                          _average(property), _varied(property)
 {
-    _interp = 0;
+    _interp = nullptr;
     _acc = gsl_interp_accel_alloc();
 }
 
@@ -56,7 +56,7 @@ NonlinearProperty::~NonlinearProperty()
 
     if (_interp) {
         gsl_interp_free(_interp);
-        _interp = 0;
+        _interp = nullptr;
     }
 }
 
@@ -221,15 +221,15 @@ void NonlinearProperty::setVaried(const QVector<double> &varied)
     }
 
     // Compute log strains
-    m_lnStrain.clear();
-    for (double s : m_strain) {
-        m_lnStrain << log(s);
+    _lnStrain.clear();
+    for (double s : _strain) {
+        _lnStrain << log(s);
     }
 
     // Free the interpolator and reset the pointer to zero
     if (_interp) {
         gsl_interp_free(_interp);
-        _interp = 0;
+        _interp = nullptr;
     }
 }
 
