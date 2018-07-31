@@ -51,8 +51,11 @@ SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject * parent)
     setMagnitude(_magnitude);
     setDistance(_distance);
     setDepth(8.);
+    setIsCustomized(false);
 
     _name = tr("Source Theory RVT Motion (M $mag @ $dist km)");
+
+    calculate();
 }
 
 SourceTheoryRvtMotion::~SourceTheoryRvtMotion()
