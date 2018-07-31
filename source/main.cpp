@@ -117,7 +117,6 @@ int main(int argc, char* argv[])
 
         if (args.isEmpty()) {
             qFatal("At least one file must be specified.");
-            return 1;
         }
         BatchRunner *br = new BatchRunner(args);
         Q_UNUSED(br);

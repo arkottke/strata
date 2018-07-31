@@ -14,7 +14,7 @@ BatchRunner::BatchRunner(const QStringList &fileNames) :
 
 void BatchRunner::startNext()
 {
-    if (!_fileNames.isEmpty()) {
+    if (_fileNames.isEmpty()) {
         exit(0);
     }
 
