@@ -47,7 +47,7 @@ FrequencyDependentCalculatorWidget::FrequencyDependentCalculatorWidget(QWidget *
     layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
 
     // Use smooth Strain FAS shape
-    _useSmoothStrainCheckBox = new QCheckBox(tr("Use smooth strain spectrum"));
+    _useSmoothStrainCheckBox = new QCheckBox(tr("Use Kausel & Assimaki spectral shape"));
     layout->addRow(_useSmoothStrainCheckBox);
 
     setLayout(layout);
