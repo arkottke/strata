@@ -85442,6 +85442,7 @@
                 "freq": 1,
                 "isVaried": true,
                 "meanStress": 0.36,
+                "minDamping": 0.5,
                 "modulusModel": {
                     "average": [
                         0.9937048394720966,
@@ -85549,6 +85550,7 @@
                 "freq": 1,
                 "isVaried": true,
                 "meanStress": 2.2,
+                "minDamping": 0.5,
                 "modulusModel": {
                     "average": [
                         0.9964634209915895,
@@ -85656,6 +85658,7 @@
                 "freq": 1,
                 "isVaried": true,
                 "meanStress": 5.6,
+                "minDamping": 0.5,
                 "modulusModel": {
                     "average": [
                         0.997375176760163,
@@ -85763,6 +85766,7 @@
                 "freq": 1,
                 "isVaried": true,
                 "meanStress": 7.7,
+                "minDamping": 0.5,
                 "modulusModel": {
                     "average": [
                         0.9976289453922599,
