@@ -21,9 +21,9 @@ before_install:
       export PATH="/usr/local/opt/qt/bin:$PATH"      
     fi
 install:
-  - source contrib/travis-install.sh
+  - source $TRAVIS_BUILD_DIR/contrib/travis-install.sh
 script:
-  - source contrib/travis-build.sh
+  - source $TRAVIS_BUILD_DIR/contrib/travis-build.sh
 after_success:
   - cd source
   - find ../../example -name "example-*" -exec ./strata -b {} \;
@@ -37,4 +37,4 @@ deploy:
     os: linux
     repo: arkottke/strata
     tags: true
-  script: source contrib/travis-deploy.sh
+  script: source $TRAVIS_BUILD_DIR/contrib/travis-deploy.sh
