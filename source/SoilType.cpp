@@ -41,6 +41,7 @@ SoilType::SoilType(QObject *parent)
 { 
     _untWt = -1;
     _damping = 5.;
+    _minDamping = 0.5;
 
     _isVaried = true;
     _saveData = false;
@@ -63,7 +64,7 @@ double SoilType::untWt() const
 
 void SoilType::setUntWt(double untWt)
 {
-    if ( _untWt != untWt ) {
+    if (fabs(_untWt - untWt) > 1E-4) {
         _untWt = untWt;
 
         emit wasModified();
@@ -82,10 +83,22 @@ double SoilType::damping() const
 
 void SoilType::setDamping(double damping)
 {
-    if ( _damping != damping ) {
+    if (fabs(_damping - damping) > 1E-4) {
         _damping = damping;
-
         emit wasModified();        
+    }
+}
+
+double SoilType::minDamping() const
+{
+    return _minDamping;
+}
+
+void SoilType::setMinDamping(double minDamping)
+{
+    if (fabs(_minDamping - minDamping) > 1E-4) {
+        _minDamping = minDamping;
+        emit wasModified();
     }
 }
 
@@ -195,7 +208,7 @@ double SoilType::meanStress() const
 
 void SoilType::setMeanStress(double meanStress)
 {
-    if ( _meanStress != meanStress ) {
+    if (fabs(_meanStress - meanStress) > 1E-4) {
         _meanStress = meanStress;
         computeDarendeliCurves();
         emit wasModified();
@@ -209,7 +222,7 @@ double SoilType::pi() const
 }
 void SoilType::setPi(double pi)
 {
-    if (_pi != pi) {
+    if (fabs(_pi - pi) > 1E-4) {
         _pi = pi;
 
         computeDarendeliCurves();
@@ -224,7 +237,7 @@ double SoilType::ocr() const
 
 void SoilType::setOcr(double ocr)
 {
-    if ( _ocr != ocr ) {
+    if (fabs(_ocr - ocr) > 1E-4) {
         _ocr = ocr;
         computeDarendeliCurves();
         emit wasModified();
@@ -239,7 +252,7 @@ double SoilType::freq() const
 
 void SoilType::setFreq(double freq)
 {
-    if ( _freq != freq ) {
+    if (fabs(_freq - freq) > 1E-4) {
     	_freq = freq;
         computeDarendeliCurves();
         emit wasModified();
@@ -253,7 +266,7 @@ int SoilType::nCycles() const
 
 void SoilType::setNCycles(int nCycles)
 {
-    if ( _nCycles != nCycles ) {
+    if (_nCycles != nCycles) {
         _nCycles = nCycles;
         computeDarendeliCurves();
         emit wasModified();
@@ -332,7 +345,7 @@ void SoilType::fromJson(const QJsonObject &json)
     _pi = json["pi"].toDouble();
     _ocr = json["ocr"].toDouble();
     _freq = json["freq"].toDouble();
-    _nCycles = json["nCycles"].toDouble();
+    _nCycles = json["nCycles"].toInt();
 
     QString modulusType = json["modulusType"].toString();
     NonlinearProperty *mnp = deriveModel(NonlinearProperty::ModulusReduction, modulusType);
@@ -345,6 +358,10 @@ void SoilType::fromJson(const QJsonObject &json)
     Q_ASSERT(dnp);
     dnp->fromJson(json["dampingModel"].toObject());
     setDampingModel(dnp);
+
+    if (json.contains("minDamping")) {
+        _minDamping = json["minDamping"].toDouble();
+    }
 }
 
 QJsonObject SoilType::toJson() const
@@ -368,12 +385,14 @@ QJsonObject SoilType::toJson() const
     json["dampingType"] = _dampingModel->metaObject()->className();
     json["dampingModel"] = _dampingModel->toJson();
 
+    json["minDamping"] = _minDamping;
+
     return json;
 }
 
 QDataStream & operator<< (QDataStream & out, const SoilType* st)
 {
-    out << (quint8)1;
+    out << static_cast<quint8>(2);
 
     out << st->_untWt
             << st->_damping
@@ -388,6 +407,9 @@ QDataStream & operator<< (QDataStream & out, const SoilType* st)
             << st->_nCycles
             << QString(st->_modulusModel->metaObject()->className()) << st->_modulusModel
             << QString(st->_dampingModel->metaObject()->className()) << st->_dampingModel;
+
+    // Added in version 2
+    out << st->_minDamping;
 
     return out;
 }
@@ -426,6 +448,11 @@ QDataStream & operator>> (QDataStream & in, SoilType* st)
         } else {
             st->setDampingModel(np);
         }
+    }
+
+
+    if (ver > 1) {
+        in >> st->_minDamping;
     }
 
     return in;
