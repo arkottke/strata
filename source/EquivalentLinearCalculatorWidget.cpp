@@ -42,7 +42,7 @@ EquivalentLinearCalculatorWidget::EquivalentLinearCalculatorWidget(QWidget *pare
     // Max Iterations row
     _maxIterationsSpinBox = new QSpinBox;
     _maxIterationsSpinBox->setMinimum(2);
-    _maxIterationsSpinBox->setMaximum(30);
+    _maxIterationsSpinBox->setMaximum(60);
 
     layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
 
