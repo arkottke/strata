@@ -53,7 +53,7 @@ steps:
 
     $> sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
     $> sudo apt-get update -qq
-    $> sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
+    $> sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg cmake
 
 If Qwt 6.1 is not available in the package manager. Qwt can be built using the
 following commands:
