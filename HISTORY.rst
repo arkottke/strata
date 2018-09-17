@@ -1,3 +1,8 @@
+v0.6.0 (dev)
+------------
+- Updated peak factors
+- Changed UI for motion specification
+
 v0.5.10 (2018-06-25)
 --------------------
 - Changed from cubic spline to log-linear interpolation of nonlinear curves.
