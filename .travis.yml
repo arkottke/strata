@@ -1,77 +1,69 @@
 language: cpp
 branches:
   except:
-    - "/^appveyor.*$/"
+  - "/^appveyor.*$/"
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      sudo: required
-      #     - os: osx
-      #       osx_image: xcode9.2
+  - os: linux
+    dist: trusty
+    sudo: required
 before_install:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
-      sudo apt-get update -qq
-      sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
-    else
-      brew update --quiet
-      brew install qt gsl
-      export PATH="/usr/local/opt/qt/bin:$PATH"      
-    fi
+- "if [ \"$TRAVIS_OS_NAME\" == \"linux\" ]; then\n  sudo add-apt-repository --yes
+  ppa:beineri/opt-qt-5.10.1-trusty\n  sudo apt-get update -qq\n  sudo apt-get install
+  -qq libgsl0-dev qt510base qt510tools qt510svg\nelse\n  brew update --quiet\n  brew
+  install qt gsl\n  export PATH=\"/usr/local/opt/qt/bin:$PATH\"      \nfi\n"
 install:
-  - source /opt/qt510/bin/qt510-env.sh
-  - # Install QWT
-  - cd $TRAVIS_BUILD_DIR/..
-  - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
-  - cd qwt
-  - QWT_ROOT_DIR=`pwd`
-  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
-  - qmake
-  - make -j$(nproc)
-  - # Install GSL 
-  - GSL_ROOT_DIR=/opt/gsl
-  - cd $TRAVIS_BUILD_DIR/..
-  - git clone https://github.com/ampl/gsl.git
-  - cd gsl
-  - mkdir build && cd build
-  - cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
-  - cmake --build . --target install
-  - cd $GSL_ROOT_DIR
-  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+- source /opt/qt510/bin/qt510-env.sh
+- 
+- cd $TRAVIS_BUILD_DIR/..
+- svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+- cd qwt
+- QWT_ROOT_DIR=`pwd`
+- LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+- qmake
+- make -j$(nproc)
+- 
+- GSL_ROOT_DIR=/opt/gsl
+- cd $TRAVIS_BUILD_DIR/..
+- git clone https://github.com/ampl/gsl.git
+- cd gsl
+- mkdir build && cd build
+- cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release"
+  -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
+- cmake --build . --target install
+- cd $GSL_ROOT_DIR
+- LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - mkdir build
-  - cd build
-  - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
-  - cmake --build . --target install
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-      chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-      # ls -lh
-      # ldd dist/usr/bin/strata
-      ARCH=x86_64 ./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations
-      # find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
-    fi
+- cd $TRAVIS_BUILD_DIR
+- mkdir build
+- cd build
+- cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release
+  -DCMAKE_INSTALL_PREFIX:STRING=dist
+- cmake --build . --target install
+- |
+  if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+    chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+    # ls -lh
+    # ldd dist/usr/bin/strata
+    ARCH=x86_64 ./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations
+    # find ./dist -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+  fi
 after_success:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      ls -lh
-      VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
-      GITHASH=$(git rev-parse --short HEAD)
-      APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
-      mv Strata-x86_64.AppImage $APPIMAGE
-      curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
-    fi
+- |
+  if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    ls -lh
+    VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
+    GITHASH=$(git rev-parse --short HEAD)
+    APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
+    mv Strata-x86_64.AppImage $APPIMAGE
+    curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
+  fi
 deploy:
-  skip_cleanup: true
   provider: releases
+  skip_cleanup: true
   api_key:
-    secure: Z2q1ECai8J5HcnofI8v/BkI0BVPrMzibyXw9gM6+xa2kUG14yTQCnO845HN+PkSbTcMbmmILxrssytlLoibQDFad6pbJKGRKxOrI9TSqnfl79ZzX/Q9Nbq3yvpksG4lWF2XHJvN74N+yVxkw2JsFdu8ikJEv0qR242uWY5/GodNMl/w0ck+aOwtGWNmyKA86opkg9p4kA3ZxzhzGyc9jKNdob/z/gG0SHKMp4j58xxRSC1ZohI8CssVOVZpyduGJuCLxHekd/0T1VXQGGhIWKnM72GYz1BjCus47I4S2Ss4xUWL2tDHdK2lfbZLeybeVFM8cQX17gmRZeyCikl8d0BlROGGu6Hb5TbLyok4j0QC1HRq9JVNHgv+OzahqLdoKYWeCcHewOZyQQ/0RErrQzDUw9SIbdf6RMC+9WXx7eVgv8PPsqNNgkRkQIldcbN6uB2wU58x1vx3VaU22eXolDNjKbhrYGi1k8CDjnFNg8P7G4B1jOWAFUMfs3CYfj9Hmf7UUA0HJV2KyVtsNilRV10Qz8DGmIc/umXITQS3UB0klEzfzS16QWRRMKXmTCD0JLpRukkXjcKpBxgIj6JcRxGzDlMd3qYFyM2VTXfWMS4UK5eEr+x2j8Z660ErSycNUIW3TblABhbOoFHsyjbvEVojhSGExzD6l1rSspvmL60A=
-  file: $APPIMAGE
+    secure: MTTLCPZqrh35PgB7AMwcGP3Ats31Uih9U88hdbxl4LWgo/vWetRm5TV0kO6zMPbih6aN4sOk6W+y20VR5Qbq45bjhd9PeROIoGWUcICwkE0wMaK/ROzInACR4JURuD0FXTgj3y7IRUrvDP2JcpcN/MBX8iFhsUkZTH5o1KolLM+wLZbCn0DWT3oPwfR6fu4aKnG/4HzEiyomdlrFLxiDhjB3eQrAEV1SLFgueB3/M2tJHF0MzZtJZfIxx1inli00ZW0FZ+nfpBr1+nCLQfjtI/evjZTgpiuuY4hpS3fH9Lwogc1RD+BnZetvOJjOfqg3Englx1odasOT0WFOgXpobC289+2dgKDfq0engTs0Fq7xXZNQyJh8WSiKbt8j4yhr8Yb57ORbLPYjaJnd0Mu8h5XOIPrzq712vFxkJZLfjv7ZU+EPiDde/dUBw/jWyeMYciJk3WVD06pq2C2VIlXEE0CcisJPyNoD9o02LjmMSJ4eGB0v3BdBjg43bLfdtBKiwzFDN8WMN6jb6sYWzXTqhVA63GwVjOLz+qJM5/92gpQB2Aaewk7Q7cHmSUhthtMP0tAeDABh0F+W1ICk8Qom1uo1RwE/el1LMY9/jAk3FIfoMZp6aHQAQFb6/7eGxXSALip3S1xg4e/FRe2gNx0juRObsirjqusF5S9IJczaJ4Q=
+  file: "$APPIMAGE"
   on:
-    os: linux
     repo: arkottke/strata
-    tags: true
