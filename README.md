@@ -3,6 +3,8 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/arkottke/strata.svg?branch=master)](https://travis-ci.org/arkottke/strata)
 [![Build status](https://ci.appveyor.com/api/projects/status/cpgr2vsh1re8c35x/branch/master?svg=true)](https://ci.appveyor.com/project/arkottke/strata/branch/master)
+[![DOI](https://zenodo.org/badge/49243972.svg)](https://zenodo.org/badge/latestdoi/49243972)
+
 
 Equivalent linear site response with random vibration theory, site property
 randomization, and a graphical user interface.
