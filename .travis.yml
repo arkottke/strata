@@ -29,7 +29,7 @@ script:
   - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
   - cmake --build . --target install
 after_success:
-  - source $TRAVIS_BUILD_DIR/contrib/make-appimage.sh
+  - ./$TRAVIS_BUILD_DIR/contrib/travis-make-appimage.sh
 deploy:
   provider: releases
   skip_cleanup: true
