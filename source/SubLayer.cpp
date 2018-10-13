@@ -174,8 +174,8 @@ void SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperti
         _shearVel = sqrt(_shearMod / _soilLayer->density());
 
         // Compute the error between old and new values of the damping and shear modulus
-        _shearModError = 100 * fabs(_shearMod - _oldShearMod) / _shearMod;
-        _dampingError  = 100 * fabs(_damping - _oldDamping) / _damping;
+        _shearModError = 100 * abs(_shearMod - _oldShearMod) / _shearMod;
+        _dampingError  = 100 * abs(_damping - _oldDamping) / _damping;
     } else {
         _shearModError = 0;
         _dampingError = 0;

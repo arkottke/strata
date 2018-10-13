@@ -50,7 +50,7 @@ double Dimension::min() const
 
 void Dimension::setMin(double min)
 {
-    if (fabs(_min - min) > DBL_EPSILON ) {
+    if (abs(_min - min) > DBL_EPSILON ) {
         _min = min;
 
         emit wasModified();
@@ -65,7 +65,7 @@ double Dimension::max() const
 
 void Dimension::setMax(double max)
 {
-    if (fabs(_max - max) > DBL_EPSILON ) {
+    if (abs(_max - max) > DBL_EPSILON ) {
         _max = max;
 
         emit wasModified();
@@ -104,7 +104,7 @@ void Dimension::setSpacing(Dimension::Spacing spacing)
         _spacing = spacing;
 
 
-        if (_spacing == Log && fabs(_min) < DBL_EPSILON)
+        if (_spacing == Log && abs(_min) < DBL_EPSILON)
             setMin(0.01);
 
         emit spacingChanged(_spacing);

@@ -191,17 +191,19 @@ void SourceTheoryRvtMotion::setIsCustomized(bool b) {
 
 void SourceTheoryRvtMotion::setMagnitude(double magnitude)
 {
-    AbstractRvtMotion::setMagnitude(magnitude);
-    // Compute seismic moment based on the moment magnitude
-    _seismicMoment = pow(10, 1.5 * (_magnitude + 10.7));
-    calcCornerFreq();
+    if (abs(magnitude - _magnitude) > DBL_EPSILON) {
+        AbstractRvtMotion::setMagnitude(magnitude);
+        init();
+    }
 }
 
 
 void SourceTheoryRvtMotion::setDistance(double distance)
 {
-    AbstractRvtMotion::setDistance(distance);
-    calcHypoDistance();
+    if (abs(distance - _distance) > DBL_EPSILON) {
+        AbstractRvtMotion::setDistance(distance);
+        init();
+    }
 }
 
 double SourceTheoryRvtMotion::depth() const
@@ -211,9 +213,10 @@ double SourceTheoryRvtMotion::depth() const
 
 void SourceTheoryRvtMotion::setDepth(double depth)
 {
-    _depth = depth;
-
-    calcHypoDistance();
+    if (abs(depth - _depth) > DBL_EPSILON) {
+        _depth = depth;
+        init();
+    }
 }
 
 double SourceTheoryRvtMotion::stressDrop() const
@@ -223,11 +226,10 @@ double SourceTheoryRvtMotion::stressDrop() const
 
 void SourceTheoryRvtMotion::setStressDrop(double stressDrop)
 {
-    if (_stressDrop != stressDrop) {
+    if (abs(_stressDrop - stressDrop) > DBL_EPSILON) {
         _stressDrop = stressDrop;
-
         emit stressDropChanged(stressDrop);
-        calcCornerFreq();
+        init();
     }
 }
 
@@ -238,9 +240,8 @@ double SourceTheoryRvtMotion::geoAtten() const
 
 void SourceTheoryRvtMotion::setGeoAtten(double geoAtten)
 {
-    if (_geoAtten != geoAtten) {
+    if (abs(_geoAtten - geoAtten) > DBL_EPSILON) {
         _geoAtten = geoAtten;
-
         emit geoAttenChanged(geoAtten);
     }
 }
@@ -252,9 +253,8 @@ double SourceTheoryRvtMotion::pathAttenCoeff() const
 
 void SourceTheoryRvtMotion::setPathAttenCoeff(double pathAttenCoeff)
 {
-    if (_pathAttenCoeff != pathAttenCoeff) {
+    if (abs(_pathAttenCoeff - pathAttenCoeff) > DBL_EPSILON) {
         _pathAttenCoeff = pathAttenCoeff;
-
         emit pathAttenCoeffChanged(pathAttenCoeff);
     }
 }
@@ -266,9 +266,8 @@ double SourceTheoryRvtMotion::pathAttenPower() const
 
 void SourceTheoryRvtMotion::setPathAttenPower(double pathAttenPower)
 {
-    if (_pathAttenPower != pathAttenPower) {
+    if (abs(_pathAttenPower - pathAttenPower) > DBL_EPSILON) {
         _pathAttenPower = pathAttenPower;
-
         emit pathAttenPowerChanged(pathAttenPower);
     }
 }
@@ -280,11 +279,10 @@ double SourceTheoryRvtMotion::shearVelocity() const
 
 void SourceTheoryRvtMotion::setShearVelocity(double shearVelocity)
 {
-    if (_shearVelocity != shearVelocity) {
+    if (abs(_shearVelocity - shearVelocity) > DBL_EPSILON) {
         _shearVelocity = shearVelocity;
-
         emit shearVelocityChanged(shearVelocity);
-        calcCornerFreq();
+        init();
     }
 }
 
@@ -295,9 +293,8 @@ double SourceTheoryRvtMotion::density() const
 
 void SourceTheoryRvtMotion::setDensity(double density)
 {
-    if (_density != density) {
+    if (abs(_density - density) > DBL_EPSILON) {
         _density = density;
-
         emit densityChanged(density);
     }
 }
@@ -314,9 +311,8 @@ double SourceTheoryRvtMotion::duration() const
 
 void SourceTheoryRvtMotion::setSiteAtten(double siteAtten)
 {
-    if (_siteAtten != siteAtten) {
+    if (abs(_siteAtten - siteAtten) > DBL_EPSILON) {
         _siteAtten = siteAtten;
-
         emit siteAttenChanged(siteAtten);
     }
 }
@@ -331,36 +327,19 @@ PathDurationModel* SourceTheoryRvtMotion::pathDuration()
     return _pathDuration;
 }
 
-void SourceTheoryRvtMotion::calcHypoDistance()
+void SourceTheoryRvtMotion::init()
 {
-    if (_depth > 0 && _distance > 0) {
-        _hypoDistance = sqrt(_depth * _depth + _distance * _distance);
+    _seismicMoment = pow(10, 1.5 * (_magnitude + 10.7));
+    _cornerFreq = 4.9e6 * _shearVelocity * pow(_stressDrop/_seismicMoment, 1./3.);
 
-        calcDuration();
-        calcGeoAtten();
-    }
-}
+    _hypoDistance = sqrt(_depth * _depth + _distance * _distance);
+    calcGeoAtten();
 
-void SourceTheoryRvtMotion::calcCornerFreq()
-{
-    if (_shearVelocity > 0 && _stressDrop > 0 && _seismicMoment > 0) {
-        _cornerFreq = 4.9e6 * _shearVelocity * pow(_stressDrop/_seismicMoment, 1./3.);
+    double sourceDur = 1 / _cornerFreq;
+    double pathDur = _pathDuration->duration(_hypoDistance);
 
-        calcDuration();
-    }
-}
-
-void SourceTheoryRvtMotion::calcDuration()
-{
-    if (_cornerFreq > 0) {
-        // Compute source component
-        double sourceDur = 1 / _cornerFreq;
-        // Path duration
-        double pathDur = _pathDuration->duration(_hypoDistance);
-
-        _duration = sourceDur + pathDur;
-        emit durationChanged(_duration);
-    }
+    _duration = sourceDur + pathDur;
+    emit durationChanged(_duration);
 }
 
 void SourceTheoryRvtMotion::calcGeoAtten()
@@ -396,6 +375,7 @@ void SourceTheoryRvtMotion::calcGeoAtten()
 
 void SourceTheoryRvtMotion::calculate()
 {
+    init();
     // Conversion factor to convert from dyne-cm into gravity-sec
     const double conv = 1e-20 / 981;
 
@@ -472,7 +452,7 @@ QJsonObject SourceTheoryRvtMotion::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm)
 {
-    out << (quint8)3;
+    out << static_cast<quint8>(3);
     out << qobject_cast<const AbstractRvtMotion*>(strm);
     // Properties of SourceTheoryRvtMotion
     out << strm->_depth << strm->_freq;

@@ -197,7 +197,7 @@ double TimeSeriesMotion::timeStep() const
 
 void TimeSeriesMotion::setTimeStep(double timeStep)
 {
-    if (fabs(_timeStep - timeStep) > DBL_EPSILON) {
+    if (abs(_timeStep - timeStep) > DBL_EPSILON) {
         _timeStep = timeStep;
 
         emit timeStepChanged(_timeStep);
@@ -213,7 +213,7 @@ double TimeSeriesMotion::scale() const
 
 void TimeSeriesMotion::setScale(double scale)
 {
-    if (fabs(_scale - scale) > DBL_EPSILON) {
+    if (abs(_scale - scale) > DBL_EPSILON) {
         // Compute the ratio and apply this to the acceleration
         const double ratio = scale / _scale;
 
@@ -628,7 +628,7 @@ void TimeSeriesMotion::calculate()
     // QVector<double> test;
     // ifft(_fourierAcc, test);
     // for (int i = 0; i < test.size(); ++i)
-    //     Q_ASSERT(fabs(test.at(i) - accel.at(i)) < 1E-5);
+    //     Q_ASSERT(abs(test.at(i) - accel.at(i)) < 1E-5);
 
     // Compute FAS of the velocity time series
     fft(integrate(accel), _fourierVel);
@@ -719,11 +719,11 @@ void TimeSeriesMotion::setIsLoaded(bool isLoaded)
 double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
 {
     //  Assume the first value is the largest
-    double max = fabs(v.at(0));
+    double max = abs(v.at(0));
     // Check the remaining values
     for (const double &d : v)
-        if (fabs(d) > max)
-            max = fabs(d);
+        if (abs(d) > max)
+            max = abs(d);
 
     // Return the maximum
     return max;

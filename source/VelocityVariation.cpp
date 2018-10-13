@@ -174,7 +174,7 @@ double VelocityVariation::stdev() const
 
 void VelocityVariation::setStdev(double stdev)
 {
-    if (fabs(_stdev - stdev) > DBL_EPSILON) {
+    if (abs(_stdev - stdev) > DBL_EPSILON) {
         _stdev = stdev;
 
         emit stdevChanged(_stdev);
@@ -276,7 +276,7 @@ double VelocityVariation::correlInitial() const
 
 void VelocityVariation::setCorrelInitial(double correlInitial)
 {
-    if (fabs(_correlInitial - correlInitial) > DBL_EPSILON) {
+    if (abs(_correlInitial - correlInitial) > DBL_EPSILON) {
         _correlInitial = correlInitial;
 
         emit correlInitialChanged(_correlInitial);
@@ -291,7 +291,7 @@ double VelocityVariation::correlFinal() const
 
 void VelocityVariation::setCorrelFinal(double correlFinal)
 {
-    if (fabs(_correlFinal - correlFinal) > DBL_EPSILON) {
+    if (abs(_correlFinal - correlFinal) > DBL_EPSILON) {
         _correlFinal = correlFinal;
 
         emit correlFinalChanged(_correlFinal);
@@ -306,7 +306,7 @@ double VelocityVariation::correlDelta() const
 
 void VelocityVariation::setCorrelDelta(double correlDelta)
 {
-    if (fabs(_correlDelta - correlDelta) > DBL_EPSILON) {
+    if (abs(_correlDelta - correlDelta) > DBL_EPSILON) {
         _correlDelta = correlDelta;
 
         emit correlDeltaChanged(_correlDelta);
@@ -321,7 +321,7 @@ double VelocityVariation::correlIntercept() const
 
 void VelocityVariation::setCorrelIntercept(double correlIntercept)
 {
-    if (fabs(_correlIntercept - correlIntercept) > DBL_EPSILON) {
+    if (abs(_correlIntercept - correlIntercept) > DBL_EPSILON) {
         _correlIntercept = correlIntercept;
 
         emit correlInterceptChanged(_correlIntercept);
@@ -336,7 +336,7 @@ double VelocityVariation::correlExponent() const
 
 void VelocityVariation::setCorrelExponent(double correlExponent)
 {
-    if (fabs(_correlExponent - correlExponent) > DBL_EPSILON) {
+    if (abs(_correlExponent - correlExponent) > DBL_EPSILON) {
         _correlExponent = correlExponent;
 
         emit correlExponentChanged(_correlExponent);

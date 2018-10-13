@@ -233,6 +233,7 @@ QWidget* AbstractRvtMotionDialog::createFSPlotWidget()
     auto picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
                                QwtPlotPicker::CrossRubberBand,
                                QwtPlotPicker::ActiveOnly, _fsPlot->canvas());
+    picker->setStateMachine(new QwtPickerDragPointMachine());
 
     _fsPlot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
     QFont font = QApplication::font();

@@ -119,7 +119,7 @@ double NonlinearPropertyUncertainty::lnStdev() const
 
 void NonlinearPropertyUncertainty::setMin(double min)
 {
-    if (fabs(_min - min) > DBL_EPSILON) {
+    if (abs(_min - min) > DBL_EPSILON) {
         _min = min;
         emit minChanged(_min);
         emit wasModified();
@@ -128,7 +128,7 @@ void NonlinearPropertyUncertainty::setMin(double min)
 
 void NonlinearPropertyUncertainty::setMax(double max)
 {
-    if (fabs(_max - max) > DBL_EPSILON) {
+    if (abs(_max - max) > DBL_EPSILON) {
         _max = max;
         emit maxChanged(_max);
         emit wasModified();
@@ -143,7 +143,7 @@ void NonlinearPropertyUncertainty::setRange(double min, double max)
 
 void NonlinearPropertyUncertainty::setLnStdev(double lnStdev)
 {
-    if (fabs(_lnStdev - lnStdev) > DBL_EPSILON) {
+    if (abs(_lnStdev - lnStdev) > DBL_EPSILON) {
         _lnStdev = lnStdev;
         emit maxChanged(lnStdev);
         emit wasModified();

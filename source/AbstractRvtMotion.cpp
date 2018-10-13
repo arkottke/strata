@@ -28,6 +28,7 @@
 #include "SourceTheoryRvtMotion.h"
 #include "Units.h"
 #include "WangRathjePeakCalculator.h"
+#include "BooreThompsonPeakCalculator.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -37,14 +38,15 @@
 
 AbstractRvtMotion::AbstractRvtMotion(QObject * parent) 
     : AbstractMotion(parent),
-    _duration(0),
-    _magnitude(6),
-    _distance(20),
-    _okToContinue(false),
-    _peakCalculator(nullptr),
-    _region(AbstractRvtMotion::Unknown)
-{
+      _duration(0),
+      _peakCalculator(nullptr),
+      _region(AbstractRvtMotion::Unknown),
+      _magnitude(6),
+      _distance(20),
+      _okToContinue(false)
+{    
     _peakCalculator = new WangRathjePeakCalculator;
+//    _peakCalculator = new VanmarckePeakCalculator;
     setRegion(WUS);
 }
 
@@ -79,10 +81,10 @@ QVariant AbstractRvtMotion::data(const QModelIndex & index, int role) const
 
     if ( role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()) {
-            case FrequencyColumn:
-                return QString::number(freq().at(index.row()), 'e', 2);
-            case AmplitudeColumn:
-                return QString::number(_fourierAcc.at(index.row()), 'e', 2);
+        case FrequencyColumn:
+            return QString::number(freq().at(index.row()), 'e', 2);
+        case AmplitudeColumn:
+            return QString::number(_fourierAcc.at(index.row()), 'e', 2);
         }
     }
 
@@ -96,15 +98,15 @@ QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation,
     }
 
     switch (orientation) {
-        case Qt::Horizontal:
-            switch (section) {
-                case FrequencyColumn:
-                    return tr("Frequency (Hz)");
-                case AmplitudeColumn:
-                    return tr("Amplitude (g-s)");
-            }
-        case Qt::Vertical:
-            return section + 1;
+    case Qt::Horizontal:
+        switch (section) {
+        case FrequencyColumn:
+            return tr("Frequency (Hz)");
+        case AmplitudeColumn:
+            return tr("Amplitude (g-s)");
+        }
+    case Qt::Vertical:
+        return section + 1;
     }
 
     return QVariant();
@@ -119,20 +121,20 @@ void AbstractRvtMotion::setRegion(AbstractRvtMotion::Region region) {
     if (region != _region) {
         _region = region;
         updatePeakCalculatorScenario();
-        emit regionChanged((int)region);
+        emit regionChanged(static_cast<int>(region));
         emit wasModified();
     }
 }
 
 void AbstractRvtMotion::setRegion(int region) {
-    setRegion((Region)region);
+    setRegion(static_cast<Region>(region));
 
 }
 
 double AbstractRvtMotion::magnitude() const {return _magnitude;}
 
 void AbstractRvtMotion::setMagnitude(double magnitude) {
-    if (fabs(_magnitude - magnitude) > 1E-4) {
+    if (abs(_magnitude - magnitude) > 1E-4) {
         _magnitude = magnitude;
         updatePeakCalculatorScenario();
         emit magnitudeChanged(magnitude);
@@ -179,7 +181,7 @@ QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, doub
         }
 
         sa << _peakCalculator->calcPeak(
-                _duration, freq(), fourierAcc, (1 / oscPeriod), damping, accelTf);
+                  _duration, freq(), fourierAcc, (1 / oscPeriod), damping, accelTf);
     }
 
     return sa;
@@ -247,8 +249,8 @@ QString AbstractRvtMotion::name() const
 {
     return QString(_name)
             .replace("$mag",
-                         QString::number(_magnitude, 'f', 1),
-                         Qt::CaseSensitive)
+                     QString::number(_magnitude, 'f', 1),
+                     Qt::CaseSensitive)
             .replace("$dist",
                      QString::number(_distance, 'f', 1),
                      Qt::CaseSensitive);
@@ -282,7 +284,7 @@ bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
         return false;
     }
 
-    _duration = extractColumn(stream.readLine(), 1).toFloat(&ok);
+    _duration = extractColumn(stream.readLine(), 1).toDouble(&ok);
     if (!ok) {
         qWarning() << "Unable to parse duration!";
         return false;
@@ -299,23 +301,23 @@ void AbstractRvtMotion::calculate()
 
     // Compute the response spectra
     _respSpec->setSa(computeSa(
-            _respSpec->period(), _respSpec->damping()));
+                         _respSpec->period(), _respSpec->damping()));
 }
 
 double AbstractRvtMotion::calcMax(const QVector<double> &fourierAmps) const
 {
     return _peakCalculator->calcPeak(
-            _duration,
-            freq(),
-            fourierAmps
-    );
+                _duration,
+                freq(),
+                fourierAmps
+                );
 }
 
 void AbstractRvtMotion::updatePeakCalculatorScenario() {
     if (BooreThompsonPeakCalculator *btpc =
             dynamic_cast<BooreThompsonPeakCalculator*>(_peakCalculator)) {
-        if (fabs(_magnitude - btpc->mag()) > 0.01 ||
-            fabs(_distance - btpc->dist()) > 0.01 ||
+        if (abs(_magnitude - btpc->mag()) > 0.01 ||
+                abs(_distance - btpc->dist()) > 0.01 ||
                 _region != btpc->region()) {
             btpc->setScenario(_magnitude, _distance, _region);
         }
@@ -356,7 +358,7 @@ QJsonObject AbstractRvtMotion::toJson() const
     QJsonObject json = AbstractMotion::toJson();
     json["duration"] = _duration;
     json["name"] = _name;
-    json["region"] = (int)_region;
+    json["region"] = static_cast<int>(_region);
     json["magnitude"] = _magnitude;
     json["distance"] = _distance;
     json["fourierAcc"] = Serialize::toJsonArray(_fourierAcc);
@@ -366,14 +368,14 @@ QJsonObject AbstractRvtMotion::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
 {
-    out << (quint8)3;
+    out << static_cast<quint8>(3);
 
     out << qobject_cast<const AbstractMotion*>(arm);
 
     out << arm->_fourierAcc
         << arm->_duration
         << arm->_name
-        << (int)arm->_region
+        << static_cast<int>(arm->_region)
         << arm->_magnitude
         << arm->_distance;
 
@@ -393,14 +395,15 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
         Q_UNUSED(i);
     }
     in >> arm->_fourierAcc
-       >> arm->_duration
-       >> arm->_name;
+            >> arm->_duration
+            >> arm->_name;
 
     if (ver > 1) {
         int region;
         in >> region
-            >> arm->_magnitude
-            >> arm->_distance;
+                >> arm->_magnitude
+                >> arm->_distance;
+        // Update the model
         arm->setRegion(region);
     }
     arm->endResetModel();
@@ -412,7 +415,7 @@ double AbstractRvtMotion::distance() const {
 }
 
 void AbstractRvtMotion::setDistance(double distance) {
-    if (fabs(_distance - distance) > 1E-4) {
+    if (abs(_distance - distance) > 1E-4) {
         _distance = distance;
         updatePeakCalculatorScenario();
         emit distanceChanged(distance);
@@ -427,7 +430,7 @@ AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double sca
 
     if (!data.open(QFile::ReadOnly)) {
         qWarning() << "Unable to open:" << fileName;
-        return 0;
+        return nullptr;
     }
 
     QTextStream in(&data);
@@ -445,12 +448,12 @@ AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double sca
         rvtMotion = new SourceTheoryRvtMotion;
     } else {
         qWarning() << "Unrecogized className:" << className;
-        return 0;
+        return nullptr;
     }
 
     if (rvtMotion->loadFromTextStream(in, scale)) {
         return rvtMotion;
     } else {
-        return 0;
+        return nullptr;
     }
 }

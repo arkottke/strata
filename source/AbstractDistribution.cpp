@@ -88,7 +88,7 @@ double AbstractDistribution::avg() const
 
 void AbstractDistribution::setAvg(double avg)
 {
-    if (fabs(_avg - avg) > DBL_EPSILON) {
+    if (abs(_avg - avg) > DBL_EPSILON) {
         _avg = avg;
         _varied = avg;
 
@@ -104,7 +104,7 @@ double AbstractDistribution::stdev() const
 
 void AbstractDistribution::setStdev(double stdev)
 {
-    if (fabs(_stdev - stdev) > DBL_EPSILON) {
+    if (abs(_stdev - stdev) > DBL_EPSILON) {
         _stdev = stdev;
 
         emit stdevChanged(_stdev);
@@ -134,7 +134,7 @@ double AbstractDistribution::min() const
 
 void AbstractDistribution::setMin(double min)
 {
-    if (fabs(_min - min) > DBL_EPSILON) {
+    if (abs(_min - min) > DBL_EPSILON) {
         _min = min;
 
         emit minChanged(_min);
@@ -164,7 +164,7 @@ double AbstractDistribution::max() const
 
 void AbstractDistribution::setMax(double max)
 {
-    if (fabs(_max - max) > DBL_EPSILON) {
+    if (abs(_max - max) > DBL_EPSILON) {
         _max = max;
 
         emit maxChanged(_max);

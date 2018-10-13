@@ -129,7 +129,7 @@ bool logLogInterp( const QVector<double> & x, const QVector<double> & y,
     {
         for ( int j = 0; j < logX.size()-1; ++j )
         {
-            if ( fabs(logXi.at(i)-logX.at(j)) < 0.000001 ) {
+            if ( abs(logXi.at(i)-logX.at(j)) < 0.000001 ) {
                 // XI and X are the same value
                 logYi[i] = logY.at(j);
                 // Exit out of the loop

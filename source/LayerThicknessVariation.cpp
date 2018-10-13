@@ -115,7 +115,7 @@ double LayerThicknessVariation::coeff() const
 
 void LayerThicknessVariation::setCoeff(double coeff)
 {
-    if (fabs(_coeff - coeff) > DBL_EPSILON) {
+    if (abs(_coeff - coeff) > DBL_EPSILON) {
         _coeff = coeff;
 
         emit coeffChanged(_coeff);
@@ -130,7 +130,7 @@ double LayerThicknessVariation::initial() const
 
 void LayerThicknessVariation::setInitial(double initial)
 {
-    if (fabs(_initial - initial) > DBL_EPSILON) {
+    if (abs(_initial - initial) > DBL_EPSILON) {
         _initial = initial;
 
         emit initialChanged(_initial);
@@ -145,7 +145,7 @@ double LayerThicknessVariation::exponent() const
 
 void LayerThicknessVariation::setExponent(double exponent)
 {
-    if (fabs(_exponent - exponent) > DBL_EPSILON) {
+    if (abs(_exponent - exponent) > DBL_EPSILON) {
         _exponent = exponent;
 
         emit exponentChanged(_exponent);
