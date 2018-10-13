@@ -393,7 +393,8 @@ void SoilTypePage::selectIndex(const QModelIndex &current, const QModelIndex &pr
         if (np)
             setCurrentNonlinearProperty(np);        
 
-        _soilPropsGroupBox->setEnabled(st->requiresSoilProperties());
+        _soilPropsGroupBox->setEnabled(
+                    st->requiresSoilProperties() && _nonlinearPropsRequired);
 
         if (st->requiresSoilProperties()) {
             // Clear the connections
@@ -442,6 +443,8 @@ void SoilTypePage::updateDampingRequired(bool b)
 
 void SoilTypePage::updateNonlinearPropertiesRequired(bool b)
 {
+    _nonlinearPropsRequired = b;
+
     _soilTypeTableBox->setColumnHidden(
             SoilTypeCatalog::ModulusModelColumn, !b);
     _soilTypeTableBox->setColumnHidden(

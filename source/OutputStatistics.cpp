@@ -69,7 +69,7 @@ void OutputStatistics::calculate()
             // Compute the standard deviation. The absolute value is used to deal
             // with rounding errors. At times the difference with go negative when
             // all of the values are the same number.
-            _stdev << ((count > 2) ? sqrt(fabs(sqrSum - (sum * sum) / count) / (count-1)) : 0);
+            _stdev << ((count > 2) ? sqrt(abs(sqrSum - (sum * sum) / count) / (count-1)) : 0);
         } else {
             // No more data stop
             break;

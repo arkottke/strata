@@ -296,7 +296,7 @@ void CompatibleRvtMotion::calculate()
                              _targetRespSpec->sa().at(i);
 
             // Save the maximum error
-            if (fabs(maxError) < fabs(e)) {
+            if (abs(maxError) < abs(e)) {
                 maxError = e;
             }
 
@@ -309,7 +309,7 @@ void CompatibleRvtMotion::calculate()
         ++count;
 
         // Stop if the RMSE is below the specified RMSE
-        if (rmse < minRmse || fabs(oldRmse - rmse) < minRmseChange) {
+        if (rmse < minRmse || abs(oldRmse - rmse) < minRmseChange) {
             break;
         }
         // Allow the user to cancel the operation

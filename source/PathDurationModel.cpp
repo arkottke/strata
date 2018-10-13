@@ -37,10 +37,10 @@ void PathDurationModel::setRegion(AbstractRvtMotion::Region region)
 {
     beginResetModel();
     // WUS and CEUS amplification from Campbell (2003)
-    if (region == AbstractRvtMotion::CEUS) {
+    if (region == AbstractRvtMotion::WUS) {
         _distance = {0};
         _rate = {0.05};
-    } else if (region == AbstractRvtMotion::WUS) {
+    } else if (region == AbstractRvtMotion::CEUS) {
         _distance = {0., 10., 70., 130.};
         _rate = {0., 0.16, -0.03, 0.04};
     }
@@ -50,7 +50,7 @@ void PathDurationModel::setRegion(AbstractRvtMotion::Region region)
 
 void PathDurationModel::setRegion(int region)
 {
-    setRegion((AbstractRvtMotion::Region)region);
+    setRegion(static_cast<AbstractRvtMotion::Region>(region));
 }
 
 QStringList PathDurationModel::sourceList() {
@@ -65,7 +65,7 @@ void PathDurationModel::setSource(Source source) {
 }
 
 void PathDurationModel::setSource(int source) {
-    setSource((Source)source);
+    setSource(static_cast<Source>(source));
 }
 
 PathDurationModel::Source PathDurationModel::source() const {
@@ -223,8 +223,7 @@ QJsonObject PathDurationModel::toJson() const
 
 QDataStream& operator<< (QDataStream & out, const PathDurationModel* pdm)
 {
-    out << (quint8)1;
-
+    out << static_cast<quint8>(1);
     out << pdm->_distance << pdm->_rate;
 
     return out;

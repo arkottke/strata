@@ -58,7 +58,6 @@ after_success:
     APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
     mv Strata-x86_64.AppImage $APPIMAGE
     curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
-  fi
 deploy:
   provider: releases
   skip_cleanup: true
@@ -67,3 +66,8 @@ deploy:
   file: "$APPIMAGE"
   on:
     repo: arkottke/strata
+<<<<<<< HEAD
+=======
+    tags: true
+  script: source $TRAVIS_BUILD_DIR/contrib/travis-deploy.sh
+>>>>>>> dev

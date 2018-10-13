@@ -10,6 +10,7 @@
 class AbstractPeakCalculator {
 public:
     explicit AbstractPeakCalculator();
+    virtual ~AbstractPeakCalculator();
 
     double calcPeak(
             double duration,

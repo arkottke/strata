@@ -64,12 +64,12 @@ BooreThompsonPeakCalculator::BooreThompsonPeakCalculator() {
 
         // Extract the values into double arrays
         double *mags = new double[_nmags];
-        for (int i = 0; i < _nmags; ++i) {
+        for (size_t i = 0; i < _nmags; ++i) {
             mags[i] = paramMap["M"].at(i);
         }
 
         double *lnDists = new double[_ndists];
-        for (int i = 0; i < _ndists; ++i) {
+        for (size_t i = 0; i < _ndists; ++i) {
             lnDists[i] = log(paramMap["R"].at(i * _nmags));
         }
 
@@ -81,8 +81,8 @@ BooreThompsonPeakCalculator::BooreThompsonPeakCalculator() {
             const QVector<double> &values = paramMap[key];
             double *c = new double[_nmags * _ndists];
 
-            for (int i=0; i < _nmags; ++i) {
-                for (int j=0; j < _ndists; ++j) {
+            for (size_t i=0; i < _nmags; ++i) {
+                for (size_t j=0; j < _ndists; ++j) {
                     gsl_spline2d_set(_interp, c, i, j, values.at(i + j * _nmags));
                 }
             }

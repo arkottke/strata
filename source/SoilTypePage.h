@@ -103,5 +103,8 @@ private:
 
     //! If the widget is in read-only mode
     bool _readOnly;
+
+    //! If nonlinear properties are required by the model.
+    bool _nonlinearPropsRequired;
 };
 #endif

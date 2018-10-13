@@ -73,8 +73,8 @@ protected:
     gsl_interp_accel *_magAcc;
     gsl_interp_accel *_lnDistAcc;
 
-    int _nmags;
-    int _ndists;
+    size_t _nmags;
+    size_t _ndists;
 
     // Model coefficients
     QMap<QString, BooreThompsonParams> _params;

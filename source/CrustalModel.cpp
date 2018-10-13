@@ -208,7 +208,7 @@ QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
             depth_f[i] = 1. / (4 * freq.at(i) * avgSlow.at(i));
             const double oldValue = avgSlow.at(i);
             avgSlow[i] = averageValue(_thickness, slowness, depth_f.at(i));
-            error = fabs((oldValue - avgSlow.at(i)) / avgSlow.at(i));
+            error = abs((oldValue - avgSlow.at(i)) / avgSlow.at(i));
         } while (error > 0.005 && count < 10);
     }
 

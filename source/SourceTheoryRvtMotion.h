@@ -103,14 +103,8 @@ public slots:
     virtual void calculate();
 
 private:
-    //! Calculate the hypocentral distance
-    void calcHypoDistance();
-
-    //! Calculate the corner frequency
-    void calcCornerFreq();
-
-    //! Calculate the duration
-    void calcDuration();
+    //! Initialize parameters of the model
+    void init();
 
     //! Calculate the geometric attenuation
     void calcGeoAtten();

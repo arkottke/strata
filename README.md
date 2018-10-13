@@ -19,6 +19,7 @@ page](https://github.com/arkottke/strata/releases).
 Compiling Strata from the source code requires the following dependencies prior
 to building:
 
+-   [CMake](https://cmake.org) (version 3.2 or later)
 -   [Qt](http://doc.qt.io/) (version 5.5 or later)
 -   GNU Scientific Library ([GSL](http://www.gnu.org/software/gsl/))
 -   [Qwt](http://qwt.sourceforge.net/) (version 6.1 or later)
@@ -45,13 +46,12 @@ be added by providing paths to the GSL and Qwt root directories such as:
 where the variables `$QWT_ROOT_DIR` and `$GSL_ROOT_DIR` correspond to the root
 directories of Qwt and GSL, respectively.
 
-
 ### Building on Linux
 
 Depending the distribution, the Qt binaries may or may not be in the package
 manager. On Ubuntu Trusty, Qt 5.6 is available from
-[ppa:beineri/opt-qt562-trusty] [1], which can be installed with the following
-steps:
+[ppa:beineri/opt-qt-5.10.1-trusty] [1], which can be installed with the
+following steps:
 
     $> sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
     $> sudo apt-get update -qq
@@ -68,6 +68,13 @@ following commands:
     $> make -j2
     $> sudo make install
 
+Here is an example of passing adding paths for Qwt headers and shared
+libraries, and GSL to CMake:
+
+    $> QWT_ROOT_DIR=/usr/qwt-6.1.3/lib
+    $> GSL_ROOT_DIR=/usr/include/gsl
+    $> cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release
+
 ### Building on Windows
 
 Building on Windows is greatly simplified by using
@@ -76,6 +83,7 @@ dependencies can be installed with the following commands:
 
     $> pacman -Sy
     $> pacman -S \
+        cmake \
         mingw-w64-i686-qt5 \
         mingw-w64-x86_64-qwt-qt5 \
         mingw-w64-x86_64-gsl \

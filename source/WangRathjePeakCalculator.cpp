@@ -41,7 +41,7 @@ double WangRathjePeakCalculator::calcDurationRms(
     // Make sure there are some values greater than 1
     if (validTransFunc) {
         for (std::complex<double> stf : siteTransFunc) {
-            if (fabs(abs(stf) - 1.) > 1E-1) {
+            if (abs(abs(stf) - 1.) > 1E-1) {
                 validTransFunc = true;
                 break;
             }

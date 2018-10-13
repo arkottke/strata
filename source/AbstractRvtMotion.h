@@ -160,9 +160,6 @@ protected:
     //! Duration of the ground motion at the rock
     double _duration;
 
-    //! If the current calculation should continue
-    bool _okToContinue;
-
     //! Name of the motion
     QString _name;
 
@@ -172,6 +169,9 @@ protected:
     Region _region;
     double _magnitude;
     double _distance;
+
+    //! If the current calculation should continue
+    bool _okToContinue;
 };
 
 AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double scale = 1.);

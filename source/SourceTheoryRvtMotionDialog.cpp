@@ -46,13 +46,18 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(
 QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
 {
     auto strm = qobject_cast<SourceTheoryRvtMotion*>(_motion);
-
     auto layout = AbstractRvtMotionDialog::createParametersLayout();
+
+    const bool isCustomized = strm->isCustomized();
 
     // Customize
     auto checkbox = new QCheckBox(tr("Customize source parameters"));
-    checkbox->setChecked(strm->isCustomized());
+    checkbox->setChecked(isCustomized);
+    checkbox->setDisabled(_readOnly);
+
     connect(checkbox, SIGNAL(clicked(bool)), strm, SLOT(setIsCustomized(bool)));
+
+    layout->addRow(checkbox);
 
     // Depth
     auto doubleSpinBox = new QDoubleSpinBox;
@@ -63,8 +68,11 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->depth());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setDepth(double)));
+    connect(strm, SIGNAL(isCustomizedChanged(bool)),
+            doubleSpinBox, SLOT(setEnabled(bool)));
 
     layout->addRow(tr("Depth:"), doubleSpinBox);
 
@@ -77,6 +85,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->stressDrop());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setStressDrop(double)));
     connect(strm, SIGNAL(stressDropChanged(double)),
@@ -95,6 +104,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->geoAtten());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setGeoAtten(double)));
     connect(strm, SIGNAL(geoAttenChanged(double)),
@@ -114,6 +124,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->pathAttenCoeff());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setPathAttenCoeff(double)));
     connect(strm, SIGNAL(pathAttenCoeffChanged(double)),
@@ -133,6 +144,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->pathAttenPower());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setPathAttenPower(double)));
     connect(strm, SIGNAL(pathAttenPowerChanged(double)),
@@ -153,6 +165,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->shearVelocity());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setShearVelocity(double)));
     connect(strm, SIGNAL(shearVelocityChanged(double)),
@@ -171,6 +184,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->density());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setDensity(double)));
     connect(strm, SIGNAL(densityChanged(double)),
@@ -189,6 +203,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->siteAtten());
+    doubleSpinBox->setEnabled(isCustomized);
     connect(doubleSpinBox, SIGNAL(valueChanged(double)),
             strm, SLOT(setSiteAtten(double)));
     connect(strm, SIGNAL(siteAttenChanged(double)),
@@ -205,9 +220,9 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setSuffix(" sec");
     doubleSpinBox->setReadOnly(true);
     doubleSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    doubleSpinBox->setValue(strm->duration());
     doubleSpinBox->setReadOnly(_readOnly);
 
+    doubleSpinBox->setValue(strm->duration());
     connect(strm, SIGNAL(durationChanged(double)),
             doubleSpinBox, SLOT(setValue(double)));
 
@@ -216,24 +231,28 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     // Path duration model
     auto comboBox = new QComboBox;
     comboBox->addItems(PathDurationModel::sourceList());
-    comboBox->setDisabled(_readOnly);
+    comboBox->setDisabled(_readOnly | !isCustomized);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(updatePathDurSource(int)));
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             strm->pathDuration(), SLOT(setSource(int)));
+    connect(strm, SIGNAL(isCustomizedChanged(bool)),
+            comboBox, SLOT(setEnabled(bool)));
 
     layout->addRow(tr("Path duration model:"), comboBox);
 
     // Crustal amp model
     comboBox = new QComboBox;
     comboBox->addItems(CrustalAmplification::sourceList());
-    comboBox->setDisabled(_readOnly);
+    comboBox->setDisabled(_readOnly | !isCustomized);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(updateCrustalAmpSource(int)));
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             strm->crustalAmp(), SLOT(setSource(int)));
+    connect(strm, SIGNAL(isCustomizedChanged(bool)),
+            comboBox, SLOT(setEnabled(bool)));
 
     layout->addRow(tr("Crustal amplification model:"), comboBox);
 
@@ -279,8 +298,8 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     frame->setLayout(vboxLayout);
     _crustModelIndex = _paramsTabWidget->addTab(frame, tr("Crustal Model."));
 
-    updatePathDurSource((int)strm->pathDuration()->source());
-    updateCrustalAmpSource((int)strm->crustalAmp()->source());
+    updatePathDurSource(static_cast<int>(strm->pathDuration()->source()));
+    updateCrustalAmpSource(static_cast<int>(strm->crustalAmp()->source()));
 
     // Wrap the tab widget in a form layout to return the expected item
     auto formLayout = new QFormLayout;
@@ -290,22 +309,26 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
 
 void SourceTheoryRvtMotionDialog::updatePathDurSource(int source)
 {
+    PathDurationModel::Source s = static_cast<PathDurationModel::Source>(source);
+
     _pathDurTableGroupBox->setReadOnly(
-                _readOnly || (source == (int)PathDurationModel::Default));
+                _readOnly || (s == PathDurationModel::Default));
 }
 
 void SourceTheoryRvtMotionDialog::updateCrustalAmpSource(int source)
 {
+    CrustalAmplification::Source s = static_cast<CrustalAmplification::Source>(source);
+
     _crustalAmpGroupBox->setReadOnly(
                 _readOnly
-                || (source == (int)CrustalAmplification::Default)
-                || (source == (int)CrustalAmplification::Calculated));
+                || (s == CrustalAmplification::Default)
+                || (s == CrustalAmplification::Calculated));
     _crustalModelGroupBox->setReadOnly(
                 _readOnly
-                || (source == (int)CrustalAmplification::Default)
-                || (source == (int)CrustalAmplification::Specified));
+                || (s == CrustalAmplification::Default)
+                || (s == CrustalAmplification::Specified));
 
     _paramsTabWidget->setTabEnabled(
                 _crustModelIndex,
-                source == (int)CrustalAmplification::Calculated);
+                s == CrustalAmplification::Calculated);
 }

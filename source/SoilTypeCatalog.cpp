@@ -66,9 +66,9 @@ QString SoilTypeCatalog::toHtml() const
 
 int SoilTypeCatalog::rowCount(const QModelIndex &parent) const
 {
-   Q_UNUSED(parent);
+    Q_UNUSED(parent);
 
-   return _soilTypes.size();
+    return _soilTypes.size();
 }
 
 int SoilTypeCatalog::columnCount(const QModelIndex &parent) const
@@ -83,26 +83,30 @@ QVariant SoilTypeCatalog::data(const QModelIndex &index, int role) const
     if (index.parent()!=QModelIndex())
         return QVariant();
 
+    auto st = _soilTypes.at(index.row());
+
     if (role==Qt::DisplayRole || role==Qt::EditRole || role==Qt::UserRole) {
         switch (index.column()) {
         case NameColumn:
-            return _soilTypes.at(index.row())->name();
+            return st->name();
         case UnitWeightColumn:
-            return QString::number(_soilTypes.at(index.row())->untWt(), 'f', 2);
+            return QString::number(st->untWt(), 'f', 2);
         case DampingColumn:
-            return QString::number(_soilTypes.at(index.row())->damping(), 'f', 2);
+            return QString::number(st->damping(), 'f', 2);
         case ModulusModelColumn:
-            return _soilTypes.at(index.row())->modulusModel()->name();
+            return st->modulusModel()->name();
         case DampingModelColumn:
-            return _soilTypes.at(index.row())->dampingModel()->name();
+            return st->dampingModel()->name();
+        case MinDampingColumn:
+            return st->minDamping();
         case NotesColumn:
-            return _soilTypes.at(index.row())->notes();
+            return st->notes();
         case IsVariedColumn:
         default:
             return QVariant();
         }
     } else if (index.column() == IsVariedColumn && role == Qt::CheckStateRole) {
-        return _soilTypes.at(index.row())->isVaried() ? Qt::Checked : Qt::Unchecked;
+        return st->isVaried() ? Qt::Checked : Qt::Unchecked;
     }
 
     return MyAbstractTableModel::data(index, role);
@@ -113,58 +117,72 @@ bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, i
     if(index.parent()!=QModelIndex() || _readOnly)
         return false;
 
+    auto st = _soilTypes.at(index.row());
+
     if (role == Qt::EditRole) {
         switch (index.column()) {
         case NameColumn:
-            _soilTypes.at(index.row())->setName(value.toString());
+            st->setName(value.toString());
             break;
         case UnitWeightColumn:
-            {
-                bool success;
-                double d = value.toDouble(&success);
+        {
+            bool success;
+            double d = value.toDouble(&success);
 
-                if (success) {
-                    _soilTypes.at(index.row())->setUntWt(d);
-                    break;
-                } else {
-                    return false;
-                }
+            if (success) {
+                st->setUntWt(d);
+                break;
+            } else {
+                return false;
             }
+        }
         case DampingColumn:
-            {
-                bool success;
-                double d = value.toDouble(&success);
+        {
+            bool success;
+            double d = value.toDouble(&success);
 
-                if (success) {
-                    _soilTypes.at(index.row())->setDamping(d);
-                    break;
-                } else {
-                    return false;
-                }
+            if (success) {
+                st->setDamping(d);
+                break;
+            } else {
+                return false;
             }
+        }
         case ModulusModelColumn:
             if (NonlinearProperty* np = _nlCatalog->modulusFactory()->duplicateAt(value)) {
-                _soilTypes.at(index.row())->setModulusModel(np);
+                st->setModulusModel(np);
                 break;
             } else {
                 return false;
             }
         case DampingModelColumn:
             if (NonlinearProperty* np = _nlCatalog->dampingFactory()->duplicateAt(value)) {
-                _soilTypes.at(index.row())->setDampingModel(np);
+                st->setDampingModel(np);
                 break;
             } else {
                 return false;
             }
+        case MinDampingColumn:
+        {
+            bool success;
+            double d = value.toDouble(&success);
+
+            if (success) {
+                st->setMinDamping(d);
+                break;
+            } else {
+                return false;
+            }
+        }
         case NotesColumn:
-            _soilTypes.at(index.row())->setNotes(value.toString());
+            st->setNotes(value.toString());
             break;
         case IsVariedColumn:
         default:
             return false;
         }
     } else if (index.column() == IsVariedColumn && role == Qt::CheckStateRole) {
-        _soilTypes.at(index.row())->setIsVaried(value.toBool());
+        st->setIsVaried(value.toBool());
     } else {
         return false;
     }
@@ -191,6 +209,8 @@ QVariant SoilTypeCatalog::headerData(int section, Qt::Orientation orientation, i
             return tr("G/G_max Model");
         case DampingModelColumn:
             return tr("Damping Model");
+        case MinDampingColumn:
+            return tr("Min. Damping (%)");
         case NotesColumn:
             return tr("Notes");
         case IsVariedColumn:
@@ -198,9 +218,10 @@ QVariant SoilTypeCatalog::headerData(int section, Qt::Orientation orientation, i
         }
     case Qt::Vertical:
         return section+1;
-                default:
-        return QVariant();
     }
+
+    // Shouldn't get here
+    return QVariant();
 }
 
 Qt::ItemFlags SoilTypeCatalog::flags(const QModelIndex &index ) const
@@ -284,7 +305,7 @@ SoilType* SoilTypeCatalog::soilTypeOf(QVariant value)
     if (0 <= i && i < rowCount()) {
         return _soilTypes.at(i);
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
@@ -324,7 +345,7 @@ QJsonArray SoilTypeCatalog::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc)
 {
-    out << (quint8)1;
+    out << static_cast<quint8>(1);
 
     out << stc->_soilTypes.size();
 
