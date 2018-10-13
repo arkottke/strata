@@ -3,10 +3,14 @@ cmake-build-debug/
 build*/
 release*/
 
+# IDEA configuration
+.idea/
+
 # Make, qmake, and CMake files
 *Makefile*
 object_script*
 strata.pro.user
+CMakeLists.txt.*
 
 # Ignore vim files
 tags
