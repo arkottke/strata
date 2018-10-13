@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -ev
+
 source /opt/qt510/bin/qt510-env.sh
 # Install QWT
 cd $TRAVIS_BUILD_DIR/..
