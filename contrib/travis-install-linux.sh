@@ -21,3 +21,4 @@ cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUIL
 cmake --build . --target install
 cd $GSL_ROOT_DIR
 LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+

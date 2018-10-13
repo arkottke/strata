@@ -19,12 +19,8 @@ before_install:
       export PATH="/usr/local/opt/qt/bin:$PATH"
     fi
 install:
-  - echo $TRAVIS_BUILD_DIR
-  - ls $TRAVIS_BUILD_DIR
-  - ls $TRAVIS_BUILD_DIR/contrib
-  - if [ "$TRAVIS_OS_NAME" == "linux"]; then 
-      . ./$TRAVIS_BUILD_DIR/contrib/travis-install-linux.sh
-    fi
+  - ./$TRAVIS_BUILD_DIR/contrib/travis-install-linux.sh
+  - echo $QWT_ROOT_DIR
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build
