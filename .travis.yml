@@ -19,9 +19,25 @@ before_install:
       export PATH="/usr/local/opt/qt/bin:$PATH"
     fi
 install:
-  - ls -lh $TRAVIS_BUILD_DIR/contrib
-  - ./$TRAVIS_BUILD_DIR/contrib/travis-install-linux.sh
-  - echo $QWT_ROOT_DIR
+  - source /opt/qt510/bin/qt510-env.sh
+  - # Install QWT
+  - cd $TRAVIS_BUILD_DIR/..
+  - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - cd qwt
+  - QWT_ROOT_DIR=`pwd`
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+  - qmake
+  - make -j$(nproc)
+  - # Install GSL 
+  - GSL_ROOT_DIR=/opt/gsl
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone https://github.com/ampl/gsl.git
+  - cd gsl
+  - mkdir build && cd build
+  - cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
+  - cmake --build . --target install
+  - cd $GSL_ROOT_DIR
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build
@@ -29,7 +45,16 @@ script:
   - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
   - cmake --build . --target install
 after_success:
-  - ./$TRAVIS_BUILD_DIR/contrib/travis-make-appimage.sh
+  - # Create the AppImage
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - ARCH=x86_64 ./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations
+  - # Rename and upload the AppImage
+  - VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
+  - GITHASH=$(git rev-parse --short HEAD)
+  - APPIMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
+  - mv Strata-x86_64.AppImage $APPIMAGE
+  - curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
 deploy:
   provider: releases
   skip_cleanup: true
