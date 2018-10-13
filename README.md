@@ -56,7 +56,7 @@ If Qwt 6.1 is not available in the package manager. Qwt can be built using the
 following commands:
 
     $> source /opt/qt10/bin/qt10-env.sh
-    $> cd \$HOME/..
+    $> cd $HOME/..
     $> svn checkout <svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1> qwt
     $> cd qwt
     $> qmake
