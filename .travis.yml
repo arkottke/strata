@@ -8,7 +8,8 @@ matrix:
     dist: trusty
     sudo: required
 before_install:
-- if [ $TRAVIS_OS_NAME == "linux" ]; then
+- |
+  if [ $TRAVIS_OS_NAME == "linux" ]; then
     sudo add-apt-repository --yes
     ppa:beineri/opt-qt-5.10.1-trusty
     sudo apt-get update -qq
@@ -34,8 +35,7 @@ install:
 - git clone https://github.com/ampl/gsl.git
 - cd gsl
 - mkdir build && cd build
-- cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release"
-  -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
+- cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
 - cmake --build . --target install
 - cd $GSL_ROOT_DIR
 - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
@@ -46,7 +46,8 @@ script:
 - cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release
   -DCMAKE_INSTALL_PREFIX:STRING=dist
 - cmake --build . --target install
-- if [ $TRAVIS_OS_NAME == "linux" ]; then
+- |
+  if [ $TRAVIS_OS_NAME == "linux" ]; then
     wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
     chmod a+x linuxdeployqt-continuous-x86_64.AppImage
     # ls -lh
