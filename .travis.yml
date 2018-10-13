@@ -23,7 +23,7 @@ install:
   - ls $TRAVIS_BUILD_DIR
   - ls $TRAVIS_BUILD_DIR/contrib
   - if [ "$TRAVIS_OS_NAME" == "linux"]; then 
-      source $TRAVIS_BUILD_DIR/contrib/travis-install-linux.sh
+      . ./$TRAVIS_BUILD_DIR/contrib/travis-install-linux.sh
     fi
 script:
   - cd $TRAVIS_BUILD_DIR
