@@ -21,6 +21,7 @@
 
 #include "MainWindow.h"
 
+#include "defines.h"
 #include "ComputePage.h"
 #include "ConfigurePlotDialog.h"
 #include "ConfiningStressDialog.h"
@@ -466,12 +467,18 @@ void MainWindow::about()
                        tr("<p><b>Strata</b> was written by Albert Kottke working with Professor"
                           " Ellen Rathje at The University of Texas at Austin.</p>"
                           "<p>For comments and suggestions contact Albert at "
-                          "<a href=\"mailto:albert.kottke@gmail.com\">albert.kottke@gmail.com</a></p>"
-                          "<p>Version: %1</p>"
+                          "<a href=\"mailto:albert.kottke@gmail.com\">"
+                          "albert.kottke@gmail.com</a></p>"
+                          "<p>Version: %1 - %2</p>"
 #ifdef ADVANCED_FEATURES
                           "<p>Compiled with advanced options</p>"
 #endif
-                          ).arg(QCoreApplication::applicationVersion()));
+                          "<p>Website: <a href=\"https://github.com/arkottke/strata\">"
+                          "https://github.com/arkottke/strata</a></p>"
+                          )
+                       .arg(QCoreApplication::applicationVersion())
+                       .arg(PROJECT_GITHASH)
+                       );
 }
 
 void MainWindow::closeEvent(QCloseEvent * event)
