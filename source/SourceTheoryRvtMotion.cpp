@@ -375,6 +375,7 @@ void SourceTheoryRvtMotion::calcGeoAtten()
 
 void SourceTheoryRvtMotion::calculate()
 {
+    // Make sure all of the parameters are up-to-date
     init();
     // Conversion factor to convert from dyne-cm into gravity-sec
     const double conv = 1e-20 / 981;
