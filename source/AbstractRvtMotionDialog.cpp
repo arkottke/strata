@@ -49,7 +49,7 @@
 
 AbstractRvtMotionDialog::AbstractRvtMotionDialog(
         AbstractRvtMotion *motion, bool readOnly, QWidget *parent) :
-    QDialog(parent), _motion(motion), _readOnly(readOnly)
+    QDialog(parent), _readOnly(readOnly), _motion(motion)
 {}
 
 void AbstractRvtMotionDialog::init()
@@ -112,6 +112,8 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout()
     // Region
     auto comboBox = new QComboBox;
     comboBox->addItems(AbstractRvtMotion::regionList());
+    comboBox->setCurrentIndex(
+                static_cast<int>(_motion->region()));
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
             _motion, SLOT(setRegion(int)));
 
