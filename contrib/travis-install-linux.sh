@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -ev
-
 # Install Qt 5.10
 sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
 sudo apt-get update -qq
