@@ -2,6 +2,11 @@
 
 set -ev
 
+# Install Qt 5.10
+sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
+sudo apt-get update -qq
+sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
+
 source /opt/qt510/bin/qt510-env.sh
 # Install QWT
 cd $TRAVIS_BUILD_DIR/..

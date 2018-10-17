@@ -1,49 +1,29 @@
 language: cpp
 branches:
   except:
-  - "/^appveyor.*$/"
+  - /^appveyor.*$/
 matrix:
   include:
-  - os: linux
-    dist: trusty
-    sudo: required
-  - os: osx
-    osx_image: xcode10
+    - name: "Linux"
+      os: linux
+      dist: trusty
+      sudo: required
+    - name: "OSX"
+      os: osx
+      osx_image: xcode10
+addons:
+  homebrew:
+    packages:
+    - qt
+    - gsl
+    - qwt
 before_install:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
-      sudo apt-get update -qq
-      sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
-    else
-      brew update --quiet
-      brew install qt gsl qwt
-      export PATH="/usr/local/opt/qt/bin:$PATH"
-    fi
 install:
   - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      source /opt/qt510/bin/qt510-env.sh
-      # Install QWT
-      cd $TRAVIS_BUILD_DIR/..
-      svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
-      cd qwt
-      QWT_ROOT_DIR=`pwd`
-      LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
-      qmake
-      make -j$(nproc)
-      # Install GSL 
-      GSL_ROOT_DIR=/opt/gsl
-      cd $TRAVIS_BUILD_DIR/..
-      git clone https://github.com/ampl/gsl.git
-      cd gsl
-      mkdir build && cd build
-      cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
-      cmake --build . --target install
-      cd $GSL_ROOT_DIR
-      LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
+      source contrib/travis-install-linux.sh
     else
-
+      source contrib/travis-install-osx.sh 
     fi
 script:
   - cd $TRAVIS_BUILD_DIR
@@ -70,7 +50,7 @@ after_success:
       mv Strata-x86_64.AppImage $APPIMAGE
       curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
     else
-    
+      ls
     fi
 deploy:
   provider: releases
