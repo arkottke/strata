@@ -295,6 +295,10 @@ bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
 
 void AbstractRvtMotion::calculate()
 {
+    if (auto btpc = dynamic_cast<BooreThompsonPeakCalculator*>(_peakCalculator)) {
+        btpc->setScenario(_magnitude, _distance, _region);
+    }
+
     // Compute the PGA and PGV
     setPga(max());
     setPgv(maxVel());
