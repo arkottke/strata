@@ -30,23 +30,6 @@
 #include <QVector>
 
 #include <gsl/gsl_interp2d.h>
-#include <gsl/gsl_spline2d.h>
-
-struct BooreThompsonParams {
-    double* mags;
-    double* lnDists;
-    QMap<QString, double*> coeffs;
-};
-
-struct BooreThompsonCoeffs {
-    double c1;
-    double c2;
-    double c3;
-    double c4;
-    double c5;
-    double c6;
-    double c7;
-};
 
 class BooreThompsonPeakCalculator : public VanmarckePeakCalculator {
 public:
@@ -66,21 +49,21 @@ protected:
             double oscDamping,
             const QVector<std::complex<double> > &siteTransFunc);
 
-    double interpCoeff(double mag, double lnDist, BooreThompsonParams &params, const QString &key);
+    double interpCoeff(double mag, double lnDist, QMap<QString, QVector<double> > &data, const QString &key);
 
     // Interpolation and dimensions
-    gsl_spline2d *_interp;
+    gsl_interp2d *_interp;
     gsl_interp_accel *_magAcc;
     gsl_interp_accel *_lnDistAcc;
 
-    size_t _nmags;
-    size_t _ndists;
+    int _nmags;
+    int _ndists;
 
     // Model coefficients
-    QMap<QString, BooreThompsonParams> _params;
+    QMap<QString, QMap<QString, QVector<double> > > _tabularData;
     
     // Selected model coefficients
-    BooreThompsonCoeffs _interped;
+    QMap<QString, double> _interped;
 
     // Scenario parameters
     double _mag;

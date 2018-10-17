@@ -38,7 +38,9 @@ BooreThompsonPeakCalculator::BooreThompsonPeakCalculator() {
     _nmags = 13;
     _ndists = 15;
 
-    _interp = gsl_spline2d_alloc(gsl_interp2d_bilinear, _nmags, _ndists);
+    const int total = _nmags * _ndists;
+
+    _interp = gsl_interp2d_alloc(gsl_interp2d_bilinear, _nmags, _ndists);
     _magAcc = gsl_interp_accel_alloc();
     _lnDistAcc = gsl_interp_accel_alloc();
 
@@ -62,43 +64,31 @@ BooreThompsonPeakCalculator::BooreThompsonPeakCalculator() {
             Serialize::toDoubleVector(json[key], paramMap[key]);
         }
 
-        // Extract the values into double arrays
-        double *mags = new double[_nmags];
-        for (size_t i = 0; i < _nmags; ++i) {
-            mags[i] = paramMap["M"].at(i);
+        auto data = QMap<QString, QVector<double> >();
+        auto mag = QVector<double>(_nmags);
+        for (int i = 0; i < _nmags; ++i) {
+            mag[i] = paramMap["M"].at(i);
         }
+        data["mag"] = mag;
 
-        double *lnDists = new double[_ndists];
-        for (size_t i = 0; i < _ndists; ++i) {
-            lnDists[i] = log(paramMap["R"].at(i * _nmags));
+        // Pre-compute log distances
+        auto lnDist = QVector<double>(_ndists);
+        for (int i = 0; i < _ndists; ++i) {
+            lnDist[i] = log(paramMap["R"].at(i * _nmags));
         }
+        data["lnDist"] = lnDist;
 
-        QMap<QString, double*> coeffs;
-        for (const QString &key : paramMap.keys()) {
-            if (!key.startsWith("c")) {
-                continue;
-            }
-            const QVector<double> &values = paramMap[key];
-            double *c = new double[_nmags * _ndists];
-
-            for (size_t i=0; i < _nmags; ++i) {
-                for (size_t j=0; j < _ndists; ++j) {
-                    gsl_spline2d_set(_interp, c, i, j, values.at(i + j * _nmags));
-                }
-            }
-            coeffs[key] = c;
+        for (const QString &key : {"c1", "c2", "c3", "c4", "c5", "c6", "c7"}) {
+           data[key] = paramMap[key];
         }
-
-        _params[region] = BooreThompsonParams{mags, lnDists, coeffs};
+        _tabularData[region] = data;
     }
 }
 
 BooreThompsonPeakCalculator::~BooreThompsonPeakCalculator() {
-    gsl_spline2d_free(_interp);
+    gsl_interp2d_free(_interp);
     gsl_interp_accel_free(_magAcc);
     gsl_interp_accel_free(_lnDistAcc);
-
-    // FIXME delete params
 }
 
 double BooreThompsonPeakCalculator::mag() const{
@@ -113,50 +103,48 @@ AbstractRvtMotion::Region BooreThompsonPeakCalculator::region() const {
     return _region;
 }
 
-double BooreThompsonPeakCalculator::interpCoeff(double mag, double lnDist, BooreThompsonParams &params, const QString &key) {
+double BooreThompsonPeakCalculator::interpCoeff(double mag, double lnDist, QMap<QString, QVector<double> > &data, const QString &key) {
 
-    gsl_spline2d_init(
-        _interp, params.mags, params.lnDists, params.coeffs[key], _nmags, _ndists);
+    gsl_interp2d_init(
+        _interp, data["mag"].data(), data["lnDist"].data(), data[key].data(), _nmags, _ndists);
 
-    return gsl_spline2d_eval(
-                _interp, mag, lnDist, _magAcc, _lnDistAcc);
+    return gsl_interp2d_eval(
+                _interp,
+                data["mag"].data(), data["lnDist"].data(), data[key].data(),
+                mag, lnDist, _magAcc, _lnDistAcc);
 }
-
 
 void BooreThompsonPeakCalculator::setScenario(double mag, double dist, AbstractRvtMotion::Region region)
 {
     Q_ASSERT(region != AbstractRvtMotion::Unknown);
+    
+    _mag = mag;
+    _dist = dist;
+    _region = region;
 
     QString regionStr = region == AbstractRvtMotion::CEUS ? "cena" : "wna";
-    BooreThompsonParams &p = _params[regionStr];
+    auto data = _tabularData[regionStr];
 
     double lnDist = log(dist);
 
     // Clip to the provided values
-    mag = std::max(p.mags[0], std::min(mag, p.mags[_nmags - 1]));
-    lnDist = std::max(p.lnDists[0], std::min(lnDist, p.lnDists[_ndists - 1]));
+    mag = std::max(data["mag"].first(), std::min(mag, data["mag"].last()));
+    lnDist = std::max(data["lnDist"].first(), std::min(lnDist, data["lnDist"].last()));
 
-    _interped = BooreThompsonCoeffs{
-            interpCoeff(mag, lnDist, p, "c1"),
-            interpCoeff(mag, lnDist, p, "c2"),
-            interpCoeff(mag, lnDist, p, "c3"),
-            interpCoeff(mag, lnDist, p, "c4"),
-            interpCoeff(mag, lnDist, p, "c5"),
-            interpCoeff(mag, lnDist, p, "c6"),
-            interpCoeff(mag, lnDist, p, "c7")
-    };
+    for (const QString &key : {"c1", "c2", "c3", "c4", "c5", "c6", "c7"}) {
+        _interped[key] = interpCoeff(mag, lnDist, data, key);
+    }
 }
 
 double BooreThompsonPeakCalculator::calcDurationRms(double duration, double oscFreq, double oscDamping, const QVector<std::complex<double> > &siteTransFunc)
 {
     Q_UNUSED(siteTransFunc);
-
     if (oscFreq > 0 && oscDamping > 0) {
         double foo = 1 / (oscFreq * duration);
-        double durRatio = ((_interped.c1 + _interped.c2 *
-                            (1 - pow(foo, _interped.c3)) / (1 + pow(foo, _interped.c3))) *
-                           (1 + _interped.c4 / (2 * M_PI * oscDamping) *
-                            pow(foo / (1 + _interped.c5 * pow(foo, _interped.c6)), _interped.c7)));
+        double durRatio = ((_interped["c1"] + _interped["c2"] *
+                            (1 - pow(foo, _interped["c3"])) / (1 + pow(foo, _interped["c3"]))) *
+                           (1 + _interped["c4"] / (2 * M_PI * oscDamping / 100) *
+                            pow(foo / (1 + _interped["c5"] * pow(foo, _interped["c6"])), _interped["c7"])));
         duration *= durRatio;
     }
     return duration;
