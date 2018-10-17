@@ -19,22 +19,10 @@ double WangRathjePeakCalculator::calcDurationRms(
         double oscFreq,
         double oscDamping,
         const QVector<std::complex<double> > &siteTransFunc)
-{
+{    
+    // Compute the Boore & Thompson (2015) correction for oscillator response
     double durationRms = BooreThompsonPeakCalculator::calcDurationRms(
                 duration, oscFreq, oscDamping, siteTransFunc);
-
-    // Modify the duration for the oscillator response
-    if (0.1 <= oscFreq) {
-        double fLim = 5.274 * std::pow(duration, -0.640);
-        if (oscFreq < fLim) {
-            double dur0 = 31.858 * std::pow(duration, -0.849);
-            double durMin = 1.009 * duration / (3.583 + duration);
-            double b = 1 / (dur0 - durMin);
-            double a = (1 / (dur0 - 1) - b) * (fLim - 0.1);
-            double ratio = (dur0 - (oscFreq - 0.1) / (a + b * (oscFreq - 0.1)));
-            durationRms *= ratio;
-        }
-    }
 
     bool validTransFunc = false;
     validTransFunc &= siteTransFunc.size() == _freqs.size();
