@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef DIMENSION_LAYOUT_H
-#define DIMENSION_FRAME_H
+#define DIMENSION_LAYOUT_H
 
 #include <QFormLayout>
 
@@ -56,4 +56,4 @@ protected:
     QComboBox* _spacingComboBox;
 };
 
-#endif // DIMENSION_FRAME_H
+#endif // DIMENSION_LAYOUT_H
