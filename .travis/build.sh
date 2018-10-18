@@ -2,6 +2,10 @@
 
 echo $QWT_ROOT_DIR $GSL_ROOT_DIR
 
+ls $QWT_ROOT_DIR
+
+find $QWT_ROOT_DIR -iname "*qwt_plot.h"
+
 mkdir build
 cd build
 
