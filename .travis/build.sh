@@ -1,6 +1,5 @@
 #!/bin/sh
 
-cd $TRAVIS_BUILD_DIR
 mkdir build
 cd build
 
@@ -17,3 +16,6 @@ else
 fi
 
 cmake --build . --target install
+
+# Return the build dir
+cd $TRAVIS_BUILD_DIR

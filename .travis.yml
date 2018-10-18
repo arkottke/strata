@@ -28,7 +28,7 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: MTTLCPZqrh35PgB7AMwcGP3Ats31Uih9U88hdbxl4LWgo/vWetRm5TV0kO6zMPbih6aN4sOk6W+y20VR5Qbq45bjhd9PeROIoGWUcICwkE0wMaK/ROzInACR4JURuD0FXTgj3y7IRUrvDP2JcpcN/MBX8iFhsUkZTH5o1KolLM+wLZbCn0DWT3oPwfR6fu4aKnG/4HzEiyomdlrFLxiDhjB3eQrAEV1SLFgueB3/M2tJHF0MzZtJZfIxx1inli00ZW0FZ+nfpBr1+nCLQfjtI/evjZTgpiuuY4hpS3fH9Lwogc1RD+BnZetvOJjOfqg3Englx1odasOT0WFOgXpobC289+2dgKDfq0engTs0Fq7xXZNQyJh8WSiKbt8j4yhr8Yb57ORbLPYjaJnd0Mu8h5XOIPrzq712vFxkJZLfjv7ZU+EPiDde/dUBw/jWyeMYciJk3WVD06pq2C2VIlXEE0CcisJPyNoD9o02LjmMSJ4eGB0v3BdBjg43bLfdtBKiwzFDN8WMN6jb6sYWzXTqhVA63GwVjOLz+qJM5/92gpQB2Aaewk7Q7cHmSUhthtMP0tAeDABh0F+W1ICk8Qom1uo1RwE/el1LMY9/jAk3FIfoMZp6aHQAQFb6/7eGxXSALip3S1xg4e/FRe2gNx0juRObsirjqusF5S9IJczaJ4Q=
-  file: "$IMAGE"
+  file: "build/$IMAGE"
   on:
     repo: arkottke/strata
     tags: true

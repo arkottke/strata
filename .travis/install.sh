@@ -26,8 +26,8 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     cd $GSL_ROOT_DIR
     LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 else
-    QWT_ROOT_DIR=`brew --prefix qwt`
-    GSL_ROOT_DIR=`brew --prefix qwt`
+    QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.3_4"
+    GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.5"
     echo $QWT_ROOT_DIR $GSL_ROOT_DIR
     export PATH="/usr/local/opt/qt/bin:$PATH"
 fi

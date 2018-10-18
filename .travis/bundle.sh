@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd build
+
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
     # Create the AppImage
     wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
@@ -9,8 +11,11 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
     GITHASH=$(git rev-parse --short HEAD)
     IMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
-    mv Strata-x86_64.AppImage $APPIMAGE
-    curl --upload-file $APPIMAGE https://transfer.sh/$APPIMAGE
+    mv Strata-x86_64.AppImage $IMAGE
+    curl --upload-file $IMAGE https://transfer.sh/$IMAGE
 else
     ls
 fi
+
+# Return the build dir
+cd $TRAVIS_BUILD_DIR
