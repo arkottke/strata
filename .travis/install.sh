@@ -28,7 +28,6 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
 else
     QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.3_4"
     GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.5"
-    echo $QWT_ROOT_DIR $GSL_ROOT_DIR
     export PATH="/usr/local/opt/qt/bin:$PATH"
 fi
 

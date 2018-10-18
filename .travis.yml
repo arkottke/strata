@@ -4,10 +4,10 @@ branches:
   - /^appveyor.*$/
 matrix:
   include:
-    - name: "Linux"
-      os: linux
-      dist: trusty
-      sudo: required
+    # - name: "Linux"
+    #   os: linux
+    #   dist: trusty
+    #   sudo: required
     - name: "OSX"
       os: osx
       osx_image: xcode10
