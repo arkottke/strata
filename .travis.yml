@@ -18,11 +18,11 @@ addons:
     - gsl
     - qwt
 install:
-  - ./.travis/install.sh
+  - source .travis/install.sh
 script:
-  - ./.travis/build.sh
+  - source .travis/build.sh
 after_success:
-  - ./.travis/bundle.sh
+  - source .travis/bundle.sh
 deploy:
   provider: releases
   skip_cleanup: true
