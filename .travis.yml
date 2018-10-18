@@ -17,32 +17,12 @@ addons:
     - qt
     - gsl
     - qwt
-before_install:
 install:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
-      source contrib/travis-install-linux.sh
-    else
-      source contrib/travis-install-osx.sh 
-    fi
+  - ./.travis/install.sh
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - mkdir build
-  - cd build
-  - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
-    else
-      cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
-    fi
-  - cmake --build . --target install
+  - ./.travis/build.sh
 after_success:
-  - | 
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
-      source contrib/travis-bundle-linux.sh
-    else
-      source contrib/travis-bundle-osx.sh
-    fi
+  - ./.travis/bundle.sh
 deploy:
   provider: releases
   skip_cleanup: true
