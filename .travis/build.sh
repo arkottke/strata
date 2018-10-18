@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo $QWT_ROOT_DIR $GSL_ROOT_DIR
+
 mkdir build
 cd build
 

@@ -26,9 +26,9 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     cd $GSL_ROOT_DIR
     LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 else
+    export PATH="/usr/local/opt/qt/bin:$PATH"
     QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.3_4"
     GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.5"
-    export PATH="/usr/local/opt/qt/bin:$PATH"
 fi
 
 # Return the build dir
