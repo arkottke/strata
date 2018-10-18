@@ -28,7 +28,7 @@ addons:
 install:
   - source .travis/install.sh
 script:
-  - source .travis/build.sh
+  - ./travis/build.sh
 after_success:
   - source .travis/bundle.sh
 deploy:

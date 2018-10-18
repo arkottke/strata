@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# Exit script if you try to use an uninitialized variable.
+set -o nounset
+# Exit script if a statement returns a non-true return value.
+set -o errexit
+# Use the error status of the first failure, rather than that of the last item in a pipeline.
+set -o pipefail
+
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
     # Install Qt 5.10
     # sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
