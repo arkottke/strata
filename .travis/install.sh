@@ -2,9 +2,9 @@
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
     # Install Qt 5.10
-    sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
-    sudo apt-get update -qq
-    sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
+    # sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
+    # sudo apt-get update -qq
+    # sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
 
     source /opt/qt510/bin/qt510-env.sh
     # Install QWT
@@ -27,8 +27,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 else
     export PATH="/usr/local/opt/qt/bin:$PATH"
-    QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.3_4/lib/qwt.framework"
-    # QWT_INCLUDE_DIR="/usr/local/Cellar/qwt/6.1.3_4/lib/qwt.framework/Versions/6/Headers"
+    QWT_INCLUDE_DIR="/usr/local/Cellar/qwt/6.1.3_4/lib/qwt.framework/Versions/6/Headers"
     GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.5"
 fi
 
