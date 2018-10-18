@@ -7,6 +7,8 @@ set -o errexit
 # Use the error status of the first failure, rather than that of the last item in a pipeline.
 set -o pipefail
 
+LD_LIBRARY_PATH=""
+
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then 
     # Install Qt 5.10
     # sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
