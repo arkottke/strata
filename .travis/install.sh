@@ -26,5 +26,11 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     cd $GSL_ROOT_DIR
     LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 else
+    QWT_ROOT_DIR=`brew --prefix qwt`
+    GSL_ROOT_DIR=`brew --prefix qwt`
+    echo $QWT_ROOT_DIR $GSL_ROOT_DIR
     export PATH="/usr/local/opt/qt/bin:$PATH"
 fi
+
+# Return the build dir
+cd $TRAVIS_BUILD_DIR
