@@ -41,7 +41,8 @@ if (WIN32)
     endif ()
 endif ()
 
-add_executable(${CMAKE_PROJECT_NAME} WIN32
+add_executable(${CMAKE_PROJECT_NAME}
+    ${OS_BUNDLE}
     ${UI_HEADERS}
     ${CODE_FILES}
     ${RESOURCE_FILES}
@@ -92,4 +93,6 @@ elseif (WIN32)
         DESTINATION .
         COMPONENT example
         )
+elseif (APPLE)
+
 endif ()
