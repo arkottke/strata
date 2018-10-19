@@ -33,9 +33,9 @@ install:
     - contrib\install_appveyor_dependencies.bat
 
 build_script:
-    - CD C:\projects\strata
-    - MKDIR build
-    - CD build
+    - cd C:\projects\strata
+    - mkdir build
+    - cd build
     - cmake .. -DGSL_ROOT_DIR=%GSL_ROOT_DIR% -DQWT_ROOT_DIR=%QWT_ROOT_DIR% -G "%CMAKE_GENERATOR%"
     - cmake --build . --target install
     - cmake --build . --target package
@@ -56,7 +56,6 @@ deploy:
     draft: true
     prerelease: false
     on:
-        # branch: /v\d+\.\d+\.\d+/       # Match against the version tag
         branch: master
         appveyor_repo_tag: true        # deploy on tag push only
 
