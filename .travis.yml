@@ -8,9 +8,6 @@ matrix:
       os: linux
       dist: trusty
       sudo: required
-    - name: "OSX"
-      os: osx
-      osx_image: xcode10
 addons:
   apt:
     sources:
