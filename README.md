@@ -86,6 +86,31 @@ dependencies can be installed with the following commands:
 
 Using a MinGW-w64 shell, execute the commands listed in [Building](#building).
 
+## Building on OS X
+
+Prior to building on OS X, install [homebrew](https://brew.sh/). Next install the dependencies:
+
+    $> brew install qt gsl qwt cmake
+
+Then compile:
+
+    $> git clone https://github.com/arkottke/strata.git
+    $> cd strata
+    $> mkdir build
+    $> cd build
+    $> QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.3_4"
+    $> QWT_INCLUDE_DIR="/usr/local/Cellar/qwt/6.1.3_4/lib/qwt.framework/Versions/6/Headers"
+    $> GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.5"
+    $> cmake .. \
+        -DQWT_ROOT_DIR=$QWT_ROOT_DIR \
+        -DQWT_INCLUDE_DIR=$QWT_INCLUDE_DIR \
+        -DGSL_ROOT_DIR=$GSL_ROOT_DIR \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX:STRING=dist
+    $> cmake --build . --target install
+
+If you find a cleaner way to specific the library paths, please let me know.
+
 ## Testing
 
 Examples for testing are located in the example/ directory.

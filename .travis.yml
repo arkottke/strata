@@ -20,23 +20,53 @@ addons:
       - qt510base 
       - qt510tools 
       - qt510svg
-  homebrew:
-    packages:
-      - qt
-      - gsl
-      - qwt
 install:
-  - source .travis/install.sh
+  - source /opt/qt510/bin/qt510-env.sh
+  - # Install QWT
+  - cd $TRAVIS_BUILD_DIR/..
+  - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - cd qwt
+  - QWT_ROOT_DIR=`pwd`
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+  - qmake
+  - make -j$(nproc)
+  - # Install GSL 
+  - GSL_ROOT_DIR=/opt/gsl
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone https://github.com/ampl/gsl.git
+  - cd gsl
+  - mkdir build && cd build
+  - cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
+  - cmake --build . --target install
+  - cd $GSL_ROOT_DIR
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 script:
-  - ./travis/build.sh
+  - cd $TRAVIS_BUILD_DIR
+  - mkdir build
+  - cd build
+  - cmake .. \
+    -DQWT_ROOT_DIR=$QWT_ROOT_DIR \
+    -DGSL_ROOT_DIR=$GSL_ROOT_DIR \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX:STRING=dist
+  - cmake --build . --target install
 after_success:
-  - source .travis/bundle.sh
+  - # Create the AppImage
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - ARCH=x86_64 ./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations
+  - # Rename and upload the AppImage
+  - VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
+  - GITHASH=$(git rev-parse --short HEAD)
+  - IMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
+  - mv Strata-x86_64.AppImage $IMAGE
+  - curl --upload-file $IMAGE https://transfer.sh/$IMAGE
 deploy:
   provider: releases
   skip_cleanup: true
   api_key:
     secure: MTTLCPZqrh35PgB7AMwcGP3Ats31Uih9U88hdbxl4LWgo/vWetRm5TV0kO6zMPbih6aN4sOk6W+y20VR5Qbq45bjhd9PeROIoGWUcICwkE0wMaK/ROzInACR4JURuD0FXTgj3y7IRUrvDP2JcpcN/MBX8iFhsUkZTH5o1KolLM+wLZbCn0DWT3oPwfR6fu4aKnG/4HzEiyomdlrFLxiDhjB3eQrAEV1SLFgueB3/M2tJHF0MzZtJZfIxx1inli00ZW0FZ+nfpBr1+nCLQfjtI/evjZTgpiuuY4hpS3fH9Lwogc1RD+BnZetvOJjOfqg3Englx1odasOT0WFOgXpobC289+2dgKDfq0engTs0Fq7xXZNQyJh8WSiKbt8j4yhr8Yb57ORbLPYjaJnd0Mu8h5XOIPrzq712vFxkJZLfjv7ZU+EPiDde/dUBw/jWyeMYciJk3WVD06pq2C2VIlXEE0CcisJPyNoD9o02LjmMSJ4eGB0v3BdBjg43bLfdtBKiwzFDN8WMN6jb6sYWzXTqhVA63GwVjOLz+qJM5/92gpQB2Aaewk7Q7cHmSUhthtMP0tAeDABh0F+W1ICk8Qom1uo1RwE/el1LMY9/jAk3FIfoMZp6aHQAQFb6/7eGxXSALip3S1xg4e/FRe2gNx0juRObsirjqusF5S9IJczaJ4Q=
-  file: "build/$IMAGE"
+  file: "$IMAGE"
   on:
     repo: arkottke/strata
     tags: true
