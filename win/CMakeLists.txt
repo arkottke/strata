@@ -14,28 +14,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
-# Ensure that WiX is in the path
-find_path(WIX_PATH candle.exe)
-if (NOT WIX_PATH)
-    message(WARNING "Unable to find WiX in the PATH. The WiX installer will be disabled.")
-endif()
-
 # Ensure that 7z is in the path
 find_path(7Z_PATH 7z.exe)
 if (NOT 7Z_PATH)
     message(WARNING "Unable to find 7z in the PATH. The zip archive will be disabled.")
-endif()
-
-# Configure the installer scripts
-if (WIX_PATH)
-    if ($ENV{PLATFORM} MATCHES "[xX]64") 
-        set(PROGRAM_FILES_FOLDER "ProgramFiles64Folder" CACHE STRING "Use C:/Program Files on Windows 64-bit")
-    else()
-        set(PROGRAM_FILES_FOLDER "ProgramFilesFolder" CACHE STRING "Use C:/Program Files (x86) on Windows 64-bit")
-    endif()
-    configure_file(installer.cmake.wxs installer.wxs @ONLY)
-else()
-    configure_file(installer.cmake.nsi ${CMAKE_BINARY_DIR}/installer.nsi @ONLY)
 endif()
 
 # Paths to Qt DLLs
