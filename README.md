@@ -16,13 +16,14 @@ page](https://github.com/arkottke/strata/releases).
 
 ## Citation
 
-When citing Strata refer to either the technical manual:
+When citing Strata, refer to either the technical manual:
 
 > Kottke, Albert R., and Ellen M. Rathje. "Technical manual for Strata."
 > (2009). Report No.: 2008/10. Pacific Earthquake Engineering Research Center,
 > University of California, Berekeley.
 
-or the [DOI](https://zenodo.org/badge/latestdoi/49243972) of the release.
+or the [DOI](https://zenodo.org/badge/latestdoi/49243972) of the release and
+this website.
 
 ## Building
 
