@@ -1,3 +1,9 @@
+
+v0.6.2 (2018-10-26)
+-------------------
+- Fixed #11: Bug in auto-discretization.
+- Re-created examples.
+
 v0.6.1 (2018-10-20)
 -------------------
 - Fixed bug in WT18 peak factor calculation
