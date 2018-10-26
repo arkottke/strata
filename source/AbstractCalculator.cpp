@@ -87,6 +87,10 @@ void AbstractCalculator::init(AbstractMotion* motion, SoilProfile* site)
     bool siteChanged = false;
     if (_site != site) {
         _site = site;
+        siteChanged = true;
+    }
+
+    if (_nsl != _site->subLayerCount()) {
         _nsl = _site->subLayerCount();
         siteChanged = true;
     }

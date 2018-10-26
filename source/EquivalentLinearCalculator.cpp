@@ -54,7 +54,7 @@ double EquivalentLinearCalculator::strainRatio() const
 
 void EquivalentLinearCalculator::setStrainRatio(double strainRatio)
 {
-    if (_strainRatio != strainRatio) {
+    if (abs(_strainRatio - strainRatio) > 1E-2) {
         _strainRatio = strainRatio;
 
         emit strainRatioChanged(_strainRatio);
@@ -88,9 +88,9 @@ void EquivalentLinearCalculator::estimateInitialStrains()
     // Estimate the intial strain from the ratio of peak ground velocity of the
     //  motion and the shear-wave velocity of the layer.
     double estimatedStrain = 0;
-    for (int i = 0; i < _nsl; ++i) {
-        estimatedStrain = _motion->pgv() / _site->subLayers().at(i).shearVel();
-        _site->subLayers()[i].setInitialStrain(estimatedStrain);
+    for (SubLayer &sl : _site->subLayers()) {
+        estimatedStrain = _motion->pgv() / sl.shearVel();
+        sl.setInitialStrain(estimatedStrain);
     }
 
     // Compute the complex shear modulus and complex shear-wave velocity for
