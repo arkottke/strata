@@ -51,7 +51,6 @@ double WangRathjePeakCalculator::calcDurationRms(
             }
         }
     }
-    qDebug() << validTransFunc;
 
     // Modify the duration for the soil response
     if (validTransFunc) {
@@ -123,7 +122,6 @@ double WangRathjePeakCalculator::calcDurationRms(
             );
         }
         const double durOscSoil = durOscRock + incr;
-        qDebug() << oscFreq << durationRms << durationRms * (durOscSoil/ durOscRock);
         durationRms *= (durOscSoil / durOscRock);
     }
     return durationRms;
