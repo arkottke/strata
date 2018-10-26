@@ -43,9 +43,9 @@ script:
   - cd build
   - cmake ..  -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
   - cmake --build . --target install
-after_success:
   - # Run all of the examples
-  - find $TRAVIS_BUILD_DIR/example -name "example-*" -exec ./dist/strata -b {} \;
+  - find $TRAVIS_BUILD_DIR/example -name "example-*" -exec ./dist/usr/bin/strata -b {} \;
+after_success:
   - # Create the AppImage
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
