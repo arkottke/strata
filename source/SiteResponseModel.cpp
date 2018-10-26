@@ -437,10 +437,10 @@ void SiteResponseModel::run() {
 
     int count = 0;
     for (int i = 0; i < siteCount; ++i) {
-        bool siteOkay = true;
         // Break if not okay to continue
-        if (!_okToContinue)
+        if (!_okToContinue) {
             break;
+        }
 
         _outputCatalog->log()->append(
                 QString(tr("[%1 of %2] Generating site and soil properties"))
@@ -476,11 +476,12 @@ void SiteResponseModel::run() {
                 _outputCatalog->log()->append(tr("\tWave propagation error -- removing site."));
                 // Error in the calculation -- need to remove the site
                 _outputCatalog->removeLastSite();
-
-                if (siteOkay) {
+                
+                if (siteCount == 1) {
+                    _okToContinue = false;
+                } else {
                     // Reset site count and try once again
                     --i;
-                    siteOkay = false;
                 }
                 break;
             }
