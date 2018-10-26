@@ -437,14 +437,15 @@ void SiteResponseModel::run() {
 
     int count = 0;
     for (int i = 0; i < siteCount; ++i) {
+        bool siteOkay = true;
         // Break if not okay to continue
         if (!_okToContinue)
             break;
 
-        _outputCatalog->log()->append((
-                                              QString(tr(
-                                                      "[%1 of %2] Generating site and soil properties")).arg(
-                                                      i + 1).arg(siteCount)));
+        _outputCatalog->log()->append(
+                QString(tr("[%1 of %2] Generating site and soil properties"))
+                .arg(i + 1)
+                .arg(siteCount));
 
         // Create the sublayers -- this randomizes the properties
         _siteProfile->createSubLayers(_outputCatalog->log());
@@ -475,14 +476,19 @@ void SiteResponseModel::run() {
                 _outputCatalog->log()->append(tr("\tWave propagation error -- removing site."));
                 // Error in the calculation -- need to remove the site
                 _outputCatalog->removeLastSite();
-                // Reset site count
-                --i;
+
+                if (siteOkay) {
+                    // Reset site count and try once again
+                    --i;
+                    siteOkay = false;
+                }
                 break;
             }
 
-            if (!_okToContinue)
+            if (!_okToContinue) {
                 // Break if not okay to continue
                 break;
+            }
 
             // Generate the output
             _outputCatalog->saveResults(j - motionCountOffset, _calculator);
