@@ -28,7 +28,19 @@
 #include <QDebug>
 
 SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject * parent)
-        : AbstractRvtMotion(parent)
+    : AbstractRvtMotion(parent),
+      _isCustomized(false),
+      _seismicMoment(0),
+      _depth(0),
+      _hypoDistance(0),
+      _cornerFreq(0),
+      _stressDrop(0),
+      _geoAtten(0),
+      _pathAttenCoeff(0),
+      _pathAttenPower(0),
+      _shearVelocity(0),
+      _density(0),
+      _siteAtten(0)
 {
     _freq = new Dimension(this);
     _freq->setMin(0.05);
@@ -88,24 +100,24 @@ void SourceTheoryRvtMotion::setRegion(AbstractRvtMotion::Region region)
     _pathDuration->setRegion(_region);
 
     switch (_region) {
-        case AbstractRvtMotion::WUS:
-            setStressDrop(100);
-            setPathAttenCoeff(180);
-            setPathAttenPower(0.45);
-            setShearVelocity(3.5);
-            setDensity(2.8);
-            setSiteAtten(0.04);
-            break;
-        case AbstractRvtMotion::CEUS:
-            setStressDrop(150);
-            setPathAttenCoeff(680);
-            setPathAttenPower(0.36);
-            setShearVelocity(3.6);
-            setDensity(2.8);
-            setSiteAtten(0.006);
-            break;
-        default:
-            break;
+    case AbstractRvtMotion::WUS:
+        setStressDrop(100);
+        setPathAttenCoeff(180);
+        setPathAttenPower(0.45);
+        setShearVelocity(3.5);
+        setDensity(2.8);
+        setSiteAtten(0.04);
+        break;
+    case AbstractRvtMotion::CEUS:
+        setStressDrop(150);
+        setPathAttenCoeff(680);
+        setPathAttenPower(0.36);
+        setShearVelocity(3.6);
+        setDensity(2.8);
+        setSiteAtten(0.006);
+        break;
+    default:
+        break;
     }
 
     // Geometric attenuation may have changed
@@ -348,24 +360,24 @@ void SourceTheoryRvtMotion::calcGeoAtten()
         // Determine the geometric attenuation based on a piecewise linear
         // calculation
         switch (_region) {
-            case AbstractRvtMotion::WUS:
-                if (_hypoDistance < 40.) {
-                    _geoAtten = 1. / _hypoDistance;
-                } else {
-                    _geoAtten = 1./40. * sqrt(40./_hypoDistance);
-                }
-                break;
-            case AbstractRvtMotion::CEUS:
-                if (_hypoDistance < 70.) {
-                    _geoAtten = 1. / _hypoDistance;
-                } else if (_hypoDistance < 130.) {
-                    _geoAtten = 1. / 70.;
-                } else {
-                    _geoAtten = 1./70. * sqrt(130./_hypoDistance);
-                }
-                break;
-            default:
-                break;
+        case AbstractRvtMotion::WUS:
+            if (_hypoDistance < 40.) {
+                _geoAtten = 1. / _hypoDistance;
+            } else {
+                _geoAtten = 1./40. * sqrt(40./_hypoDistance);
+            }
+            break;
+        case AbstractRvtMotion::CEUS:
+            if (_hypoDistance < 70.) {
+                _geoAtten = 1. / _hypoDistance;
+            } else if (_hypoDistance < 130.) {
+                _geoAtten = 1. / 70.;
+            } else {
+                _geoAtten = 1./70. * sqrt(130./_hypoDistance);
+            }
+            break;
+        default:
+            break;
         }
 
         emit geoAttenChanged(_geoAtten);
@@ -390,7 +402,7 @@ void SourceTheoryRvtMotion::calculate()
         // Path component
         const double pathAtten = _pathAttenCoeff * pow(freqAt(i), _pathAttenPower);
         const double pathComp = _geoAtten *
-                                exp((-M_PI * freqAt(i) * _hypoDistance) / (pathAtten * _shearVelocity));
+                exp((-M_PI * freqAt(i) * _hypoDistance) / (pathAtten * _shearVelocity));
 
         // Site component
         const double siteAmp = _crustalAmp->interpAmpAt(freqAt(i));
@@ -482,7 +494,7 @@ QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm)
     double depth;
 
     in >> depth
-       >> strm->_freq;
+            >> strm->_freq;
 
     strm->setDepth(depth);
 
@@ -497,15 +509,15 @@ QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm)
         double siteAtten;
 
         in >> stressDrop
-           >> geoAtten
-           >> pathDurCoeff
-           >> pathAttenCoeff
-           >> pathAttenPower
-           >> shearVelocity
-           >> density
-           >> siteAtten
-           >> strm->_crustalAmp
-           >> strm->_pathDuration;
+                >> geoAtten
+                >> pathDurCoeff
+                >> pathAttenCoeff
+                >> pathAttenPower
+                >> shearVelocity
+                >> density
+                >> siteAtten
+                >> strm->_crustalAmp
+                >> strm->_pathDuration;
 
         // FIXME: Move to one function
         // Use set methods to calculate dependent parameters
