@@ -129,7 +129,7 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
 #if QWT_VERSION < 0x060100
             _plot->axisScaleDiv( QwtPlot::xBottom )
 #else
-            &(_plot->axisScaleDiv( QwtPlot::yLeft ))
+            &(_plot->axisScaleDiv( QwtPlot::xBottom ))
 #endif
             );
 
