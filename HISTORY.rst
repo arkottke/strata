@@ -1,3 +1,8 @@
+v0.6.3 (2018-11-01)
+-------------------
+- Fixed initialize of variables in SourceTheoryRvtMotion
+- Fixed bug in ConfigurePlotDialog
+
 v0.6.2 (2018-10-26)
 -------------------
 - Fixed #11: Bug in auto-discretization.

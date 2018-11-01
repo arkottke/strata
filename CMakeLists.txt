@@ -35,7 +35,7 @@ execute_process(
     COMMAND git rev-parse --short HEAD 
     OUTPUT_VARIABLE PROJECT_GITHASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(PROJECT_VERSION "0.6.2")
+set(PROJECT_VERSION "0.6.3")
 
 # Global CMake options
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
