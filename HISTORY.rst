@@ -1,7 +1,19 @@
-v0.6.0 (dev)
-------------
-- Updated peak factors
-- Changed UI for motion specification
+
+v0.6.2 (2018-10-26)
+-------------------
+- Fixed #11: Bug in auto-discretization.
+- Re-created examples.
+
+v0.6.1 (2018-10-20)
+-------------------
+- Fixed bug in WT18 peak factor calculation
+
+v0.6.0 (2018-10-20)
+-------------------
+- Change peak factor model to Wang & Rathje (2018), which based on Vanmarcke
+  (1976) with Boore and Thompson (2015) RMS duration modification
+- Changed to CMake build system
+- Unified GUI for RVT input motion specification
 
 v0.5.10 (2018-06-25)
 --------------------

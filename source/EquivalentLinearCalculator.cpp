@@ -68,8 +68,9 @@ bool EquivalentLinearCalculator::updateSubLayer(
 {
     const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
-    if (strainMax <= 0)
+    if (strainMax <= 0) {
         return false;
+    }
 
     _site->subLayers()[index].setStrain(_strainRatio * strainMax, strainMax);
 
