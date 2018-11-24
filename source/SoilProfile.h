@@ -104,6 +104,7 @@ public:
     QStringList soilLayerNameList() const;
 
     int profileCount() const;
+    bool onlyConverged() const;
 
     ProfileRandomizer* profileRandomizer();
     NonlinearPropertyRandomizer* nonlinearPropertyRandomizer();
@@ -175,6 +176,7 @@ public:
 public slots:
     void setMaxFreq(double maxFreq);
     void setProfileCount(int count);
+    void setOnlyConverged(bool onlyConverged);
     void setIsVaried(bool isVaried);
     void setInputDepth(double depth);
     void setWaveFraction(double waveFraction);
@@ -187,6 +189,7 @@ public slots:
 signals:
     void maxFreqChanged(double maxFreq);
     void profileCountChanged(int profileCount);
+    void onlyConvergedChanged(double onlyConverged);
     void isVariedChanged(bool isVaried);
     void inputDepthChanged(double depth);
     void waveFractionChanged(double waveFraction);
@@ -265,6 +268,9 @@ private:
 
     //! Method used to find representative soillayer
     LayerSelectionMethod _layerSelectionMethod;
+
+    //! Maximum tolerable error in randomization
+    bool _onlyConverged;
 
     //! Random number generator
     gsl_rng* _rng;

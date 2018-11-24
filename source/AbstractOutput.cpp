@@ -37,7 +37,11 @@
 #include <qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
-    : QAbstractTableModel(catalog), _catalog(catalog), _statistics(0), _interp(0), _offset(0)
+    : QAbstractTableModel(catalog),
+      _catalog(catalog),
+      _statistics(nullptr),
+      _interp(nullptr),
+      _offset(0)
 {
     _exportEnabled = false;
     _motionIndex = 0;

@@ -32,6 +32,9 @@ public:
     explicit LinearElasticCalculator(QObject *parent = nullptr);
 
     virtual bool run(AbstractMotion* motion, SoilProfile* site);
+
+    //! Always converges
+    virtual bool converged() const {return true;}
 };
 
 #endif // LINEAR_ELASTIC_CALCULATOR_H

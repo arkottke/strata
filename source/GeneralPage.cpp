@@ -134,6 +134,9 @@ QGroupBox* GeneralPage::createVariationGroupBox()
 
     layout->addRow(tr("Number of realizations:"), _countSpinBox);
 
+    _onlyConvergedCheckBox = new QCheckBox(tr("Only use profiles that converge"));
+    layout->addRow(_onlyConvergedCheckBox);
+
     // Checkboxes for variation
     _nlPropertiesAreVariedCheckBox = new QCheckBox(tr("Vary the nonlinear properties"));
     layout->addRow(_nlPropertiesAreVariedCheckBox);
@@ -244,6 +247,11 @@ void GeneralPage::setModel(SiteResponseModel *model)
     connect(_countSpinBox, SIGNAL(valueChanged(int)),
             model->siteProfile(), SLOT(setProfileCount(int)));
 
+    _onlyConvergedCheckBox->setChecked(
+                model->siteProfile()->onlyConverged());
+    connect(_onlyConvergedCheckBox, SIGNAL(toggled(bool)),
+            model->siteProfile(), SLOT(setOnlyConverged(bool)));
+
     _nlPropertiesAreVariedCheckBox->setChecked(
             model->siteProfile()->nonlinearPropertyRandomizer()->enabled());
     connect(_nlPropertiesAreVariedCheckBox, SIGNAL(toggled(bool)),
@@ -258,7 +266,8 @@ void GeneralPage::setModel(SiteResponseModel *model)
     connect(_specifiedSeedCheckBox, SIGNAL(toggled(bool)),
             model->randNumGen(), SLOT(setSeedSpecified(bool)));
 
-    _seedSpinBox->setValue(model->randNumGen()->seed());
+    _seedSpinBox->setValue(
+                static_cast<int>(model->randNumGen()->seed()));
     connect(_seedSpinBox, SIGNAL(valueChanged(int)),
             model->randNumGen(), SLOT(setSeed(int)));
     connect(model->randNumGen(), SIGNAL(seedChanged(int)),
@@ -294,6 +303,7 @@ void GeneralPage::setReadOnly(bool readOnly)
     _propertiesAreVariedCheckBox->setDisabled(readOnly);
 
     _countSpinBox->setReadOnly(readOnly);
+    _onlyConvergedCheckBox->setDisabled(readOnly);
     _nlPropertiesAreVariedCheckBox->setDisabled(readOnly);
     _siteIsVariedCheckBox->setDisabled(readOnly);
     _specifiedSeedCheckBox->setDisabled(readOnly);

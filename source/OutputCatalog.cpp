@@ -484,7 +484,6 @@ void OutputCatalog::setReadOnly(bool readOnly)
         catalog->setReadOnly(readOnly);
 }
 
-
 void OutputCatalog::saveResults(int motion, AbstractCalculator* const calculator)
 {
     // Need to populate the depth vector based on the depth to the last

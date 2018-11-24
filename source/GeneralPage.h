@@ -68,6 +68,7 @@ protected:
 
   QGroupBox *_variationGroupBox;
   QSpinBox *_countSpinBox;
+  QCheckBox *_onlyConvergedCheckBox;
   QCheckBox *_nlPropertiesAreVariedCheckBox;
   QCheckBox *_siteIsVariedCheckBox;
   QCheckBox *_specifiedSeedCheckBox;

@@ -48,6 +48,7 @@
 #include <QVariant>
 
 #include <cmath>
+#include <cfloat>
 
 SoilProfile::SoilProfile(SiteResponseModel * parent)
     : MyAbstractTableModel(parent), _siteResponseModel(parent)
@@ -77,6 +78,7 @@ SoilProfile::SoilProfile(SiteResponseModel * parent)
 
     _isVaried = false;
     _profileCount = 100;
+    _onlyConverged = true;
     _inputDepth = -1;
     _maxFreq = 20;
     _waveFraction = 0.20;
@@ -278,8 +280,6 @@ QVariant SoilProfile::headerData(int section, Qt::Orientation orientation, int r
         }
     case Qt::Vertical:
         return section+1;
-    default:
-        return QVariant();
     }
 }
 
@@ -290,11 +290,12 @@ Qt::ItemFlags SoilProfile::flags(const QModelIndex &index ) const
     switch (index.column()) {
     case ThicknessColumn:
     case SoilTypeColumn:
-        if (index.row() == (rowCount() - 1))
+        if (index.row() == (rowCount() - 1)) {
             // Rock layer
             break;
+        }
     case VelocityColumn:
-    case StdevColumn:   
+    case StdevColumn:
         flags |= Qt::ItemIsEditable;
         break;
     case MinColumn:
@@ -365,6 +366,20 @@ void SoilProfile::setProfileCount(int count)
     }
 }
 
+bool SoilProfile::onlyConverged() const
+{
+    return _onlyConverged;
+}
+
+void SoilProfile::setOnlyConverged(bool onlyConverged)
+{
+    if ( _onlyConverged != onlyConverged ) {
+        _onlyConverged = onlyConverged;
+        emit onlyConvergedChanged(_onlyConverged);
+        emit wasModified();
+    }
+}
+
 bool SoilProfile::isVaried() const
 {
     return _isVaried;
@@ -402,7 +417,7 @@ double SoilProfile::inputDepth() const
 
 void SoilProfile::setInputDepth(double depth)
 {
-    if ( _inputDepth != depth ) {
+    if ( abs(_inputDepth - depth) > DBL_EPSILON ) {
         _inputDepth = depth;
 
         emit wasModified();
@@ -460,7 +475,7 @@ double SoilProfile::waterTableDepth() const
 
 void SoilProfile::setWaterTableDepth(double waterTableDepth)
 {
-    if (_waterTableDepth != waterTableDepth) {
+    if (abs(_waterTableDepth - waterTableDepth) > DBL_EPSILON) {
         _waterTableDepth = waterTableDepth;
 
         emit wasModified();
@@ -475,7 +490,7 @@ double SoilProfile::maxFreq() const
 
 void SoilProfile::setMaxFreq(double maxFreq)
 {
-    if ( _maxFreq != maxFreq ) {
+    if (abs(_maxFreq - maxFreq) > DBL_EPSILON) {
         _maxFreq = maxFreq;
 
         emit wasModified();
@@ -490,7 +505,7 @@ double SoilProfile::waveFraction() const
 
 void SoilProfile::setWaveFraction(double waveFraction)
 {
-    if ( _waveFraction != waveFraction ) {
+    if (abs(_waveFraction - waveFraction) > DBL_EPSILON) {
         _waveFraction = waveFraction;
 
         emit wasModified();
@@ -1106,7 +1121,7 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
     if (_layerSelectionMethod == MaximumTravelTime) {
         // The representative layer is the layer with the most travel time
         // through it
-        SoilLayer* selectedLayer = 0;
+        SoilLayer* selectedLayer = nullptr;
 
         double longestTime = 0;
 
@@ -1150,8 +1165,8 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
         Q_ASSERT(selectedLayer);
         return new SoilLayer(selectedLayer);                
     } else if (_layerSelectionMethod == MidDepth) {
-        const float midDepth = (top + base) / 2.0;
-        SoilLayer * newLayer = 0;
+        const double midDepth = (top + base) / 2.0;
+        SoilLayer * newLayer = nullptr;
 
         // Try each of the layers
         for (SoilLayer *sl : _soilLayers) {
@@ -1166,7 +1181,7 @@ SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
         return newLayer;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void SoilProfile::updateUnits()
@@ -1188,6 +1203,7 @@ void SoilProfile::fromJson(const QJsonObject &json)
     _inputDepth = json["inputDepth"].toDouble();
     _isVaried = json["isVaried"].toBool();
     _profileCount = json["profileCount"].toInt();
+    _onlyConverged = json["onlyConverged"].toBool();
     _maxFreq = json["maxFreq"].toDouble();
     _waveFraction = json["waveFraction"].toDouble();
     _disableAutoDiscretization = json["disableAutoDiscretization"].toBool();
@@ -1203,14 +1219,14 @@ void SoilProfile::fromJson(const QJsonObject &json)
     while (_soilLayers.size())
         _soilLayers.takeLast()->deleteLater();
 
-    for (const QJsonValue &jv : json["soilLayers"].toArray()) {
+    for (const QJsonValue jv : json["soilLayers"].toArray()) {
         QJsonObject sljo = jv.toObject();
 
         SoilLayer * sl = new SoilLayer(this);
         sl->fromJson(sljo);
 
         const int row = sljo["soilType"].toInt();
-        sl->setSoilType(row < 0 ? 0 : _soilTypeCatalog->soilType(row));
+        sl->setSoilType(row < 0 ? nullptr : _soilTypeCatalog->soilType(row));
 
         _soilLayers << sl;
     }
@@ -1225,6 +1241,7 @@ QJsonObject SoilProfile::toJson() const
     json["inputDepth"] = _inputDepth;
     json["isVaried"] = _isVaried;
     json["profileCount"] = _profileCount;
+    json["onlyConverged"] = _onlyConverged;
     json["maxFreq"] = _maxFreq;
     json["waveFraction"] = _waveFraction;
     json["disableAutoDiscretization"] = _disableAutoDiscretization;
@@ -1249,7 +1266,7 @@ QJsonObject SoilProfile::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
 {
-    out << (quint8)3;
+    out << static_cast<quint8>(4);
 
     // Save soil types
     out << sp->_soilTypeCatalog;
@@ -1276,7 +1293,8 @@ QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
             << sp->_maxFreq
             << sp->_waveFraction
             << sp->_disableAutoDiscretization
-            << sp->_waterTableDepth;
+            << sp->_waterTableDepth
+            << sp->_onlyConverged;
 
     return out;
 }
@@ -1301,7 +1319,7 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
         in >> sl >> row;
         // If no soil type is defined for the soil layer set it the pointer to be zero
         sl->setSoilType(
-                row < 0 ? 0 : sp->_soilTypeCatalog->soilType(row));
+                row < 0 ? nullptr : sp->_soilTypeCatalog->soilType(row));
 
         sp->_soilLayers << sl;
     }
@@ -1326,6 +1344,11 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
     if (ver > 2) {
         // Added water table depth in version 3
         in >> sp->_waterTableDepth;
+    }
+
+    if (ver > 3) {
+        // Added maximum tolerable error in version 4
+        in >> sp->_onlyConverged;
     }
 
     return in;

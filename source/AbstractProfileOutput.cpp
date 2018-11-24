@@ -31,6 +31,8 @@
 #include "SubLayer.h"
 #include "Units.h"
 
+#include <cmath>
+
 #include <QDebug>
 
 #include <qwt_scale_engine.h>
@@ -126,7 +128,8 @@ void AbstractProfileOutput::extrap(const QVector<double> & ref, QVector<double> 
     const double slope = (data.at(n) - data.at(n-1)) /
                    (ref.at(n) - ref.at(n-1));
 
-    data << data.last() + slope * layerThickness / 2.;
+    // Limit the extrapolation by the minimum double value (greater than 0.)
+    data << std::max(DBL_MIN, data.last() + slope * layerThickness / 2.);
 }
 
 void AbstractProfileOutput::fromJson(const QJsonObject &json)

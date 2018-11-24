@@ -212,7 +212,7 @@ void ResultsPage::selectedDataChanged(const QModelIndex &current, const QModelIn
 void ResultsPage::setSelectedOutput(int index)
 {
     if (_selectedOutput)
-        disconnect(_selectedOutput, 0, this, 0);
+        disconnect(_selectedOutput, nullptr, this, nullptr);
 
     _selectedOutput = _outputCatalog->setSelectedOutput(index);
 
@@ -238,7 +238,7 @@ void ResultsPage::setSelectedOutput(int index)
     _outputTableView->resizeRowsToContents();
 
     // Need to remove the previous connections because otherwise it signals multiple times
-    disconnect(_outputTableView->selectionModel(), 0, this, 0);
+    disconnect(_outputTableView->selectionModel(), nullptr, this, nullptr);
     connect(_outputTableView->selectionModel(), SIGNAL(currentColumnChanged(QModelIndex,QModelIndex)),
                this, SLOT(selectedDataChanged(QModelIndex,QModelIndex)));
 
@@ -399,7 +399,7 @@ QGroupBox* ResultsPage::createOutputGroup()
     layout->addWidget(_recomputePushButton, 2, 3);
 
     // Create the group box
-    QGroupBox* groupBox = new QGroupBox(tr("Data Selection"));
+    auto *groupBox = new QGroupBox(tr("Data Selection"));
     groupBox->setLayout(layout);
 
     return groupBox;

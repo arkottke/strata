@@ -58,6 +58,9 @@ public:
     //! Perform the site response calculation
     virtual bool run(AbstractMotion* motion, SoilProfile* site) = 0;
 
+    //! If the analysis converged
+    virtual bool converged() const = 0;
+
     //! Compute the peak ground acceleration at the surface
     double surfacePGA() const;
 

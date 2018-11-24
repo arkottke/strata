@@ -47,7 +47,7 @@
 #include <QDebug>
 
 SiteResponseModel::SiteResponseModel(QObject *parent)
-        : QThread(parent), _calculator(0) {
+        : QThread(parent), _calculator(nullptr) {
     _modified = false;
     _hasResults = false;
     _method = EquivalentLinear;
@@ -152,7 +152,7 @@ void SiteResponseModel::setMethod(Method method) {
 }
 
 void SiteResponseModel::setMethod(int method) {
-    setMethod((Method) method);
+    setMethod(static_cast<Method>(method));
 }
 
 bool SiteResponseModel::dampingRequired() const {
@@ -306,7 +306,6 @@ bool SiteResponseModel::loadJson(const QString &fileName) {
             qobject_cast<FrequencyDependentCalculator *>(_calculator)->fromJson(cjo);
             break;
         case SiteResponseModel::LinearElastic:
-        default:
             break;
     }
 
@@ -335,8 +334,7 @@ bool SiteResponseModel::saveBinary() {
     outStream.setVersion(QDataStream::Qt_4_0);
 
     // Write a header with a "magic number" and a version
-    outStream << (quint32) 0xA1B2;
-
+    outStream << static_cast<quint32>(0xA1B2);
     outStream << this;
 
     setModified(false);
@@ -347,9 +345,9 @@ bool SiteResponseModel::saveJson() {
     QJsonObject json;
 
     json["notes"] = _notes->toPlainText();
-    json["method"] = (int) _method;
+    json["method"] = static_cast<int>(_method);
     json["hasResults"] = _hasResults;
-    json["system"] = (int) Units::instance()->system();
+    json["system"] = static_cast<int>(Units::instance()->system());
 
     json["randNumGen"] = _randNumGen->toJson();
     json["siteProfile"] = _siteProfile->toJson();
@@ -365,7 +363,6 @@ bool SiteResponseModel::saveJson() {
                     _calculator)->toJson();
             break;
         case SiteResponseModel::LinearElastic:
-        default:
             break;
     }
 
@@ -453,6 +450,7 @@ void SiteResponseModel::run() {
         // FIXME -- check the site profile to ensure that the waves can be
         // computed for the intial coniditions
         int motionCountOffset = 0;
+        bool profileResultsSaved = false;
         for (int j = 0; j < _motionLibrary->rowCount(); ++j) {
             if (!_motionLibrary->motionAt(j)->enabled()) {
                 // Skip the disabled motion
@@ -460,9 +458,10 @@ void SiteResponseModel::run() {
                 continue;
             }
 
-            if (!_okToContinue)
+            if (!_okToContinue) {
                 // Break if not okay to continue
                 break;
+            }
 
             // Output status
             _outputCatalog->log()->append(
@@ -472,18 +471,20 @@ void SiteResponseModel::run() {
                             .arg(_motionLibrary->motionAt(j)->name()));
 
             // Compute the site response
-            if (!_calculator->run(_motionLibrary->motionAt(j), _siteProfile) && _okToContinue) {
-                _outputCatalog->log()->append(tr("\tWave propagation error -- removing site."));
-                // Error in the calculation -- need to remove the site
-                _outputCatalog->removeLastSite();
-                
-                if (siteCount == 1) {
-                    _okToContinue = false;
-                } else {
+            bool calcOk = _calculator->run(_motionLibrary->motionAt(j), _siteProfile);
+
+            if ( siteCount > 1) {
+                if (!calcOk || (_siteProfile->onlyConverged() && !_calculator->converged())) {
+                    calcOk = false;
+                    // Error in the calculation -- need to remove the site
+                    _outputCatalog->log()->append(tr("\tWave propagation error -- removing site."));
+                    // Remove the results if they were saved
+                    if (profileResultsSaved) _outputCatalog->removeLastSite();
                     // Reset site count and try once again
                     --i;
+                    // Stop iterating over motions
+                    break;
                 }
-                break;
             }
 
             if (!_okToContinue) {
@@ -491,13 +492,14 @@ void SiteResponseModel::run() {
                 break;
             }
 
-            // Generate the output
-            _outputCatalog->saveResults(j - motionCountOffset, _calculator);
-
-            // Increment the progress bar
-            ++count;
-            emit progressChanged(count);
-
+            if (calcOk) {
+                // Generate the output
+                _outputCatalog->saveResults(j - motionCountOffset, _calculator);
+                profileResultsSaved = true;
+                // Increment the progress bar
+                ++count;
+                emit progressChanged(count);
+            }
             // Reset the sublayers
             _siteProfile->resetSubLayers();
         }
@@ -654,7 +656,7 @@ QString SiteResponseModel::toHtml() {
 }
 
 QDataStream &operator<<(QDataStream &out, const SiteResponseModel *srm) {
-    out << (quint8) 2;
+    out << static_cast<quint8>(2);
 
     out << Units::instance()
         << srm->_notes->toPlainText()
@@ -673,7 +675,6 @@ QDataStream &operator<<(QDataStream &out, const SiteResponseModel *srm) {
             out << qobject_cast<FrequencyDependentCalculator *>(srm->_calculator);
             break;
         case SiteResponseModel::LinearElastic:
-        default:
             break;
     }
 
@@ -718,7 +719,6 @@ QDataStream &operator>>(QDataStream &in, SiteResponseModel *srm) {
             in >> qobject_cast<FrequencyDependentCalculator *>(srm->_calculator);
             break;
         case SiteResponseModel::LinearElastic:
-        default:
             break;
     }
 

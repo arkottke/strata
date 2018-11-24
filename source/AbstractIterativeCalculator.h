@@ -42,7 +42,7 @@ public:
 
     int maxIterations() const;
     double errorTolerance() const;
-    bool converged() const;
+    virtual bool converged() const;
 
     void fromJson(const QJsonObject &json);
     QJsonObject toJson() const;
