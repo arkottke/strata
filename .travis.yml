@@ -54,7 +54,7 @@ after_success:
   - VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
   - GITHASH=$(git rev-parse --short HEAD)
   - IMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
-  - mv Strata-x86_64.AppImage $IMAGE
+  - mv Strata-*.AppImage $IMAGE
   - curl --upload-file $IMAGE https://transfer.sh/$IMAGE
 deploy:
   provider: releases
