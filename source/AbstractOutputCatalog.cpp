@@ -29,7 +29,9 @@
 #include <QStringList>
 
 AbstractOutputCatalog::AbstractOutputCatalog(OutputCatalog *outputCatalog) :
-    MyAbstractTableModel(outputCatalog), _outputCatalog(outputCatalog)
+    MyAbstractTableModel(outputCatalog), 
+    _outputCatalog(outputCatalog),
+    _approach(MotionLibrary::TimeSeries)
 {
 }
 

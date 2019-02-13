@@ -26,7 +26,9 @@
 #include <QDebug>
 
 MyRandomNumGenerator::MyRandomNumGenerator(QObject * parent)
-    : QObject(parent)
+    : QObject(parent),
+    _seedSpecified(false),
+    _seed(0)
 {
     _gsl_rng = gsl_rng_alloc(gsl_rng_mt19937);
     _seedSpecified = false;

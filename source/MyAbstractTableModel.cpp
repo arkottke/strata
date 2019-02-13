@@ -25,9 +25,9 @@
 #include <QBrush>
 
 MyAbstractTableModel::MyAbstractTableModel(QObject * parent)
-    : QAbstractTableModel(parent)
+    : QAbstractTableModel(parent),
+    _readOnly(false)
 {
-    _readOnly = false;
 }
 
 QVariant MyAbstractTableModel::data(const QModelIndex & index, int role) const

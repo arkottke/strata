@@ -33,18 +33,22 @@
 #include <cmath>
 
 VelocityVariation::VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
-    _rng(rng), _profileRandomizer(profileRandomizer)
+    _enabled(false),
+    _stdevModel(Custom),
+    _stdevIsLayerSpecific(false),
+    _stdev(0),
+    _correlModel(Custom),
+    _rng(rng), 
+    _correlInitial(0),
+    _correlFinal(0),
+    _correlDelta(0),
+    _correlIntercept(0),
+    _correlExponent(0),
+    _profileRandomizer(profileRandomizer)
 {
     connect(_profileRandomizer, SIGNAL(enabledChanged(bool)),
             this, SLOT(updateEnabled()));
-
-    _enabled = false;
-    _stdevIsLayerSpecific = false;
-
-    _stdevModel = Custom;
     setStdevModel(USGS_C);
-
-    _correlModel = Custom;
     setCorrelModel(USGS_C);
 }
 

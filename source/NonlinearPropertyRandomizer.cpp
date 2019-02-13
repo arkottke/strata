@@ -37,7 +37,13 @@
 #include <cmath>
 
 NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfile* siteProfile)
-    : QObject(siteProfile), _rng(rng), _siteProfile(siteProfile)
+    : QObject(siteProfile), 
+    _enabled(false),
+    _model(Darendeli),
+    _bedrockIsEnabled(false),
+    _correl(-0.50),
+    _rng(rng), 
+    _siteProfile(siteProfile)
 {
     connect(_siteProfile, SIGNAL(isVariedChanged(bool)),
             this, SLOT(updateEnabled()));
@@ -46,11 +52,6 @@ NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfi
 
     _modulusUncert = new NonlinearPropertyUncertainty(0.15, 0.001, 1.);
     _dampingUncert = new NonlinearPropertyUncertainty(0.30, 0.001, 20);
-
-    _enabled = false;
-    _bedrockIsEnabled = false;
-    _correl = -0.50;
-    setModel(Darendeli);
 }
 
 NonlinearPropertyRandomizer::~NonlinearPropertyRandomizer()
@@ -108,7 +109,6 @@ void NonlinearPropertyRandomizer::setBedrockIsEnabled(bool enabled)
 {
     if ( _bedrockIsEnabled != enabled ) {
         _bedrockIsEnabled = enabled;
-
         emit bedrockIsEnabledChanged(bedrockIsEnabled());
         emit wasModified();
     }

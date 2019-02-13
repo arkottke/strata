@@ -32,13 +32,15 @@
 #include <cmath>
 
 LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
-    _rng(rng), _profileRandomizer(profileRandomizer)
+    _enabled(false),
+    _model(Custom),
+    _coeff(0),
+    _initial(0),
+    _exponent(0),
+    _rng(rng), 
+    _profileRandomizer(profileRandomizer)
 {
-    connect(_profileRandomizer, SIGNAL(enabledChanged(bool)),
-            this, SLOT(updateEnabled()));
-
-    _enabled = false;
-    _model = Custom;
+    connect(_profileRandomizer, SIGNAL(enabledChanged(bool)), this, SLOT(updateEnabled()));
     setModel(Default);
 }
 

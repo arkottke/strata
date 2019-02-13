@@ -53,7 +53,6 @@ signals:
 
 protected:
     OutputCatalog* _outputCatalog;
-
     MotionLibrary::Approach _approach;
 };
 
