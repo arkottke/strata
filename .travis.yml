@@ -55,7 +55,7 @@ after_success:
   - GITHASH=$(git rev-parse --short HEAD)
   - IMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
   - mv Strata-*.AppImage $IMAGE
-  - curl --upload-file $IMAGE https://transfer.sh/$IMAGE
+  - curl -F "file=@$IMAGE" https://file.io
 deploy:
   provider: releases
   skip_cleanup: true
