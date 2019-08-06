@@ -1,3 +1,7 @@
+v0.6.4 (2019-08-06)
+-------------------
+- Fixed manual included in installers
+
 v0.6.3 (2018-11-01)
 -------------------
 - Fixed initialize of variables in SourceTheoryRvtMotion
