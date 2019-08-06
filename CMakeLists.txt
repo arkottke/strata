@@ -47,6 +47,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 #  - frequency-dependent moduli
 option(ADVANCED_FEATURES "Compile with advanced features" ON)
 
+
+if(APPLE AND EXISTS /usr/local/opt/qt5)
+	# Homebrew installs Qt5 (up to at least 5.9.1) in
+	# /usr/local/opt/qt5, ensure it can be found by CMake since
+	# it is not in the default /usr/local prefix.
+	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+endif()
+
 # Configure libraries
 find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Widgets REQUIRED)
