@@ -175,6 +175,7 @@ bool FrequencyDependentCalculator::updateSubLayer(
 void FrequencyDependentCalculator::estimateInitialStrains()
 {
     auto *calc = new EquivalentLinearCalculator();
+    calc->setMaxIterations(_maxIterations);
     calc->setTextLog(_textLog);
     calc->run(_motion, _site);
 
