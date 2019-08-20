@@ -311,9 +311,6 @@ void AbstractRvtMotionDialog::calculate()
     _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
 
     _dataTabWidget->setCurrentIndex(0);
-    // FIXME 
-    // _targetSaCurve->setSamples(_motion->targetRespSpec()->period(),
-    //                           _motion->targetRespSpec()->sa());
 }
 
 void AbstractRvtMotionDialog::tryAccept()
