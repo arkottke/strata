@@ -141,7 +141,10 @@ void CompatibleRvtMotionDialog::addRespSpecCurves()
     auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
 
     _targetSaCurve = new QwtPlotCurve(tr("Target"));
-    _targetSaCurve->setPen(Qt::red, 1., Qt::DashLine);
+    _targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
+    _targetSaCurve->setSymbol(new QwtSymbol(
+                QwtSymbol::Ellipse, QBrush(Qt::transparent), QPen(Qt::red, 1.5), QSize(8, 8)));
+
     _targetSaCurve->setSamples(crm->targetRespSpec()->period(), crm->targetRespSpec()->sa());
     _targetSaCurve->attach(_rsPlot);
 

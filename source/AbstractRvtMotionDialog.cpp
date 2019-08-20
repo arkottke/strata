@@ -215,7 +215,7 @@ QWidget* AbstractRvtMotionDialog::createRSPlotWidget()
     _rsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
     _saCurve = new QwtPlotCurve(tr("Calculated"));
-    _saCurve->setPen(QPen(Qt::blue));
+    _saCurve->setPen(QPen(Qt::blue, 2));
     _saCurve->setSamples(_motion->respSpec()->period(),
                        _motion->respSpec()->sa());
     _saCurve->attach(_rsPlot);
@@ -260,7 +260,7 @@ QWidget* AbstractRvtMotionDialog::createFSPlotWidget()
     _fsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
     _faCurve = new QwtPlotCurve;
-    _faCurve->setPen(QPen(Qt::blue));
+    _faCurve->setPen(QPen(Qt::blue, 2));
     _faCurve->setSamples(_motion->freq(),_motion->fourierAcc());
     _faCurve->attach(_fsPlot);
 
