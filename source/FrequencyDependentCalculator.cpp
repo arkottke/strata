@@ -33,7 +33,7 @@
 FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     : AbstractIterativeCalculator(parent)
 {
-    _useSmoothSpectrum = true;
+    _useSmoothSpectrum = false;
     reset();
 }
 
