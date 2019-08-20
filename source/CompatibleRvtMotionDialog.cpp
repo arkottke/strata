@@ -117,7 +117,8 @@ QTabWidget* CompatibleRvtMotionDialog::createTabWidget()
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(tableGroupBox);
 
-    tabWidget->addTab(scrollArea, "Target RS");
+    tabWidget->insertTab(0, scrollArea, "Target RS");
+    tabWidget->setCurrentIndex(0);
 
     return tabWidget;
 }
