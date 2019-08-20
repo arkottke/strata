@@ -214,17 +214,24 @@ QWidget* AbstractRvtMotionDialog::createRSPlotWidget()
     text.setText(tr("Spectral Accel. (g)"));
     _rsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
-    _saCurve = new QwtPlotCurve;
+    _saCurve = new QwtPlotCurve(tr("Calculated"));
     _saCurve->setPen(QPen(Qt::blue));
     _saCurve->setSamples(_motion->respSpec()->period(),
                        _motion->respSpec()->sa());
     _saCurve->attach(_rsPlot);
+
+    addRespSpecCurves();
 
     auto *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(_rsPlot);
 
     return scrollArea;
+}
+
+void AbstractRvtMotionDialog::addRespSpecCurves()
+{
+    // Do nothing.
 }
 
 QWidget* AbstractRvtMotionDialog::createFSPlotWidget()

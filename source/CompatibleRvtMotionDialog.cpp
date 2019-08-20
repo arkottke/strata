@@ -43,6 +43,7 @@
 #include <QVBoxLayout>
 
 #include <qwt_picker_machine.h>
+#include <qwt_legend.h>
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
 #include <qwt_scale_engine.h>
@@ -102,6 +103,18 @@ QFormLayout* CompatibleRvtMotionDialog::createParametersLayout()
     return layout;
 }
 
+void CompatibleRvtMotionDialog::calculate()
+{
+    AbstractRvtMotionDialog::calculate();
+
+    auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
+    _targetSaCurve->setSamples(
+            crm->targetRespSpec()->period(),
+            crm->targetRespSpec()->sa());
+
+    _dataTabWidget->setCurrentIndex(1);
+}
+
 QTabWidget* CompatibleRvtMotionDialog::createTabWidget()
 {
     auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
@@ -123,3 +136,16 @@ QTabWidget* CompatibleRvtMotionDialog::createTabWidget()
     return tabWidget;
 }
 
+void CompatibleRvtMotionDialog::addRespSpecCurves()
+{
+    auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
+
+    _targetSaCurve = new QwtPlotCurve(tr("Target"));
+    _targetSaCurve->setPen(Qt::red, 1., Qt::DashLine);
+    _targetSaCurve->setSamples(crm->targetRespSpec()->period(), crm->targetRespSpec()->sa());
+    _targetSaCurve->attach(_rsPlot);
+
+    auto *legend = new QwtLegend;
+    legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    _rsPlot->insertLegend(legend, QwtPlot::BottomLegend);
+}
