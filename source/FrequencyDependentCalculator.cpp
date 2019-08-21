@@ -24,6 +24,7 @@
 #include "EquivalentLinearCalculator.h"
 #include "SoilProfile.h"
 #include "SubLayer.h"
+#include "TextLog.h"
 #include "Units.h"
 
 #include <cmath>
@@ -33,6 +34,7 @@
 FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     : AbstractIterativeCalculator(parent)
 {
+    _name = "EQL-FDM";
     _useSmoothSpectrum = false;
     reset();
 }
@@ -171,9 +173,12 @@ bool FrequencyDependentCalculator::updateSubLayer(
     return true;
 }
 
-
 void FrequencyDependentCalculator::estimateInitialStrains()
 {
+    if ( _textLog->level() > TextLog::Low ) {
+        _textLog->append(tr("\t\tEstimating strains using EQL method"));
+    }
+
     auto *calc = new EquivalentLinearCalculator();
     calc->setMaxIterations(_maxIterations);
     calc->setTextLog(_textLog);

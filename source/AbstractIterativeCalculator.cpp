@@ -28,7 +28,7 @@
 
 AbstractIterativeCalculator::AbstractIterativeCalculator(QObject *parent)
     : AbstractCalculator(parent), _maxIterations(0), _errorTolerance(0),
-    _converged(false)
+    _converged(false), _name("Calculator")
 {
     _maxIterations = 10;
     _errorTolerance = 2.;
@@ -47,6 +47,11 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
             _site->bedrock()->shearMod(), _site->bedrock()->damping() / 100.));
 
     estimateInitialStrains();
+
+    if ( _textLog->level() > TextLog::Low ) {
+        _textLog->append(
+                tr("\t\tComputing wave propgation using %1 method").arg(_name));
+    }
 
     // Initialize the loop control variables
     int iter = 0;
@@ -83,9 +88,10 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
 
         // Print information regarding the iteration
         if ( _textLog->level() > TextLog::Low ) {
-            _textLog->append(QString(QObject::tr("\t\t\tIteration: %1 Maximum Error: %2 %"))
-                                     .arg(iter + 1)
-                                     .arg(maxError, 0, 'f', 2));
+            _textLog->append(
+                    tr("\t\t\tIteration: %1 Maximum Error: %2 %")
+                    .arg(iter + 1)
+                    .arg(maxError, 0, 'f', 2));
         }
         if ( _textLog->level() > TextLog::Medium ) {
             _textLog->append("\t\t" + _site->subLayerTable());
@@ -96,10 +102,10 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     } while((maxError > _errorTolerance)  && (iter < _maxIterations));
 
     if ((iter == _maxIterations ) && ( maxError > _errorTolerance ) ) {
-        _textLog->append(QString(QObject::tr("\t\t\t!! -- Maximum number of iterations reached (%1). Maximum Error: %2 %"))
-                          .arg(iter)
-                          .arg(maxError, 0, 'f', 2));
-
+        _textLog->append(
+                tr("\t\t\t!! -- Maximum number of iterations reached (%1). Maximum Error: %2 %")
+                .arg(iter)
+                .arg(maxError, 0, 'f', 2));
         _converged = false;
     } else {
         _converged = true;

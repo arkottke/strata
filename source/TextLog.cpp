@@ -27,19 +27,14 @@
 #include <QJsonValue>
 
 TextLog::TextLog(QObject * parent) :
-        QObject(parent)
+        QObject(parent), _level(TextLog::Medium)
 
 {
-    _level = Low;
 }
 
 QStringList TextLog::levelList()
 {
-    QStringList list;
-    list << tr("Low")
-            << tr("Medium")
-            << tr("High");
-
+    QStringList list = {tr("Low"), tr("Medium"), tr("High")};
     return list;
 }
 

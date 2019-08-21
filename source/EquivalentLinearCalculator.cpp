@@ -23,11 +23,13 @@
 
 #include "SoilProfile.h"
 #include "SubLayer.h"
+#include "TextLog.h"
 #include "Units.h"
 
 EquivalentLinearCalculator::EquivalentLinearCalculator(QObject *parent)
     : AbstractIterativeCalculator(parent)
 {
+    _name = "EQL";
     _strainRatio = 0.65;
 }
 
@@ -86,6 +88,11 @@ bool EquivalentLinearCalculator::updateSubLayer(
 
 void EquivalentLinearCalculator::estimateInitialStrains()
 {
+    if ( _textLog->level() > TextLog::Low ) {
+        _textLog->append(
+                tr("\t\tEstimating strains using PGV and shear velocity."));
+    }
+
     // Estimate the intial strain from the ratio of peak ground velocity of the
     //  motion and the shear-wave velocity of the layer.
     double estimatedStrain = 0;
