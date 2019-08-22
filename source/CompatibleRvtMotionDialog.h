@@ -34,9 +34,13 @@ public:
     explicit CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly,
                                        QWidget *parent = nullptr);
 
+protected slots:
+    void calculate();
+
 protected:
     virtual QFormLayout* createParametersLayout();
     virtual QTabWidget* createTabWidget();
+    virtual void addRespSpecCurves();
 
     MyTableView *_targetSaTableView;
     QwtPlotCurve *_targetSaCurve;

@@ -39,7 +39,7 @@ public:
     explicit AbstractRvtMotionDialog(
             AbstractRvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
 
-private slots:
+protected slots:
     void calculate();
     void tryAccept();
 
@@ -51,6 +51,8 @@ protected:
     virtual QTabWidget* createTabWidget();
     virtual QWidget* createRSPlotWidget();
     virtual QWidget* createFSPlotWidget();
+
+    virtual void addRespSpecCurves();
 
     bool _readOnly;
 

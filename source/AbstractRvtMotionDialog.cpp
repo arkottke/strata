@@ -214,17 +214,24 @@ QWidget* AbstractRvtMotionDialog::createRSPlotWidget()
     text.setText(tr("Spectral Accel. (g)"));
     _rsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
-    _saCurve = new QwtPlotCurve;
-    _saCurve->setPen(QPen(Qt::blue));
+    _saCurve = new QwtPlotCurve(tr("Calculated"));
+    _saCurve->setPen(QPen(Qt::blue, 2));
     _saCurve->setSamples(_motion->respSpec()->period(),
                        _motion->respSpec()->sa());
     _saCurve->attach(_rsPlot);
+
+    addRespSpecCurves();
 
     auto *scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(_rsPlot);
 
     return scrollArea;
+}
+
+void AbstractRvtMotionDialog::addRespSpecCurves()
+{
+    // Do nothing.
 }
 
 QWidget* AbstractRvtMotionDialog::createFSPlotWidget()
@@ -253,7 +260,7 @@ QWidget* AbstractRvtMotionDialog::createFSPlotWidget()
     _fsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
     _faCurve = new QwtPlotCurve;
-    _faCurve->setPen(QPen(Qt::blue));
+    _faCurve->setPen(QPen(Qt::blue, 2));
     _faCurve->setSamples(_motion->freq(),_motion->fourierAcc());
     _faCurve->attach(_fsPlot);
 
@@ -304,9 +311,6 @@ void AbstractRvtMotionDialog::calculate()
     _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
 
     _dataTabWidget->setCurrentIndex(0);
-    // FIXME 
-    // _targetSaCurve->setSamples(_motion->targetRespSpec()->period(),
-    //                           _motion->targetRespSpec()->sa());
 }
 
 void AbstractRvtMotionDialog::tryAccept()

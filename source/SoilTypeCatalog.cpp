@@ -97,7 +97,7 @@ QVariant SoilTypeCatalog::data(const QModelIndex &index, int role) const
             return st->modulusModel()->name();
         case DampingModelColumn:
             return st->dampingModel()->name();
-        case MinDampingColumn:
+        case DampLimitColumn:
             return st->minDamping();
         case NotesColumn:
             return st->notes();
@@ -162,7 +162,7 @@ bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, i
             } else {
                 return false;
             }
-        case MinDampingColumn:
+        case DampLimitColumn:
         {
             bool success;
             double d = value.toDouble(&success);
@@ -209,8 +209,8 @@ QVariant SoilTypeCatalog::headerData(int section, Qt::Orientation orientation, i
             return tr("G/G_max Model");
         case DampingModelColumn:
             return tr("Damping Model");
-        case MinDampingColumn:
-            return tr("Min. Damping (%)");
+        case DampLimitColumn:
+            return tr("Damp. Limit (%)");
         case NotesColumn:
             return tr("Notes");
         case IsVariedColumn:

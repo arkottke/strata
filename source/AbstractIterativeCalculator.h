@@ -79,6 +79,9 @@ protected:
 
     //! If the error tolerance was achieved
     bool _converged;
+    
+    //! Name of calcuation stage
+    QString _name;
 };
 
 #endif // ABSTRACT_ITERATIVE_CALCULATOR_H

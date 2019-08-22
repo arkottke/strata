@@ -124,15 +124,15 @@ of the upward ($-z$) and downward ($+z$) waves, respectively
 equation (\ref{eq:complexWaveNo}) is related to the shear modulus ($G$), damping
 ratio ($D$), and mass density ($\rho$) of the soil using:
 \begin{equation}
-    k^* = \frac{\omega}{v_s^*} \\
+    k^* = \frac{\omega}{v_s^*} %
     \label{eq:complexWaveNo}
 \end{equation}
 \begin{equation}
-    v_s^* = \sqrt{ \frac{G^*}{\rho} } \\
+    v_s^* = \sqrt{ \frac{G^*}{\rho} } %
 \end{equation}
 \begin{equation}
     G^* = G \left( 1 - 2D^2 + \imath 2 D \sqrt{ 1 - D^2 }\right) 
-    \simeq G ( 1 + \imath 2 D ) \\
+    \simeq G ( 1 + \imath 2 D ) %
     \label{eq:complexShear}
 \end{equation}
 $G^*$ and $v_s^*$ are called the complex shear modulus\index{shear
@@ -253,7 +253,7 @@ frequencies are the higher vibrational modes of the site.  The first natural
 frequency of a site is inversely related to the site period, where the site
 period is defined as \citep{kramer:96}:
 \begin{equation}
-    T_s = \frac{4\cdot h_{soil}}{\overline{v}_s}\\ 
+    T_s = \frac{4\cdot h_{soil}}{\overline{v}_s} %
     \label{eq:sitePeriod}
 \end{equation}
 In equation (\ref{eq:sitePeriod}), $h_{soil}$ is the total height of the soil
@@ -518,7 +518,7 @@ curve.  The integration can be approximated by:
 where:
 \begin{equation}
     D_{masing,a=1}(\%) = \frac{100}{\pi} \left\{ 4 \left[ \frac{\gamma - \gamma_r\ln\left( \frac{\gamma +
-    \gamma_r}{\gamma_r} \right)}{\frac{\gamma^2}{\gamma+\gamma_r}} \right] - 2 \right\} \\
+    \gamma_r}{\gamma_r} \right)}{\frac{\gamma^2}{\gamma+\gamma_r}} \right] - 2 \right\} %
 \end{equation}
 \begin{equation}
     \begin{array}{rcl}
@@ -685,9 +685,8 @@ The peak factor ($PF$) represents the ratio of the maximum value of the signal (
 $rms$ value ($x_{rms}$), such that if $x_{rms}$ and $PF$ are known, then $x_{max}$ can be computed
 using:
 \begin{equation}
-    x_{max} = PF \cdot x_{rms}
-    \label{eq:rvt:max}
-    \index{random vibration theory!peak factor}
+    x_{max} = PF \cdot x_{rms} %
+    \label{eq:rvt:max} %
 \end{equation}
 \citet{cartwright:56} studied the statistics of ocean wave amplitudes, and considered the
 probability distribution of the maxima of a signal to develop expressions for the $PF$ in terms of
@@ -1248,7 +1247,7 @@ associated thicknesses with Equation~\ref{eq:exponential:inv}, a layering profil
 
 \begin{figure}[tb]
     \begin{center}
-        \includegraphics{figures/rand/poisson-homo}
+        \includegraphics{figures/rand/poisson-homo.pdf}
     \end{center}
     \caption{A layering profile consisting of 8 layers modeled by a homogeneous Poisson process with a rate of 1.}
     \label{fig:rand:poisson:homo}
@@ -1321,7 +1320,7 @@ The resulting depth profile is shown in Figure~\ref{fig:rand:poisson:nonHomo}.
 
 \begin{figure}[p]
     \begin{center}
-        \includegraphics{figures/rand/poisson-warping}
+        \includegraphics{figures/rand/poisson-warping.pdf}
     \end{center}
     \caption{Transformation between a homogeneous Poisson process with rate 1 to the \citet{toro:95}
     non-homogeneous Poisson process.}
@@ -1329,7 +1328,7 @@ The resulting depth profile is shown in Figure~\ref{fig:rand:poisson:nonHomo}.
 \end{figure}
 \begin{figure}[p]
     \begin{center}
-        \includegraphics{figures/rand/poisson-nonHomo}
+        \includegraphics{figures/rand/poisson-nonHomo.pdf}
     \end{center}
     \caption{A layering simulated with the non-homogeneous Poisson process defined by
     \citet{toro:95}.}
@@ -1371,7 +1370,7 @@ where $\varepsilon_1$ is an independent normal random variable with zero mean an
 deviation.  The standard normal variables of the other layers in the profile are calculated by a
 recursive formula, defined as:
 \begin{equation}
-    Z_i = \rho \cdot Z_{i-1} + \varepsilon_i \cdot \sqrt{1 - \rho^2} \\
+    Z_i = \rho \cdot Z_{i-1} + \varepsilon_i \cdot \sqrt{1 - \rho^2} 
 \end{equation}
 where $Z_{i-1}$ is the standard normal variable of the previous layer, $\varepsilon_i$ is a new
 normal random variable with zero mean and unit standard deviation, and $\rho$ is the inter-layer
@@ -1882,7 +1881,7 @@ meters was computed as 273 m/s which classifies the site as a USGS site class C.
 
 \begin{figure}[tbp]
     \begin{center}
-        \includegraphics{figures/strata/sylmar-vs-profile}
+        \includegraphics{figures/strata/sylmar-vs-profile.pdf}
     \end{center}
     \caption{The shear-wave velocity profile of the Sylmar County Hospital Parking Lot
     site~\citep{chang:96}.}
@@ -1960,7 +1959,7 @@ shear-wave velocity variation.
 
 \begin{figure}[h]
     \begin{center}
-        \includegraphics{figures/strata/example-2-generalSettings}
+        \includegraphics{figures/strata/example-2-generalSettings.png}
     \end{center}
     \caption{Settings to enable RVT site response and variation of the shear-wave velocity.}
     \label{fig:strata:example:2:generalSettings}

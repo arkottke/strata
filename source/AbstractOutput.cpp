@@ -37,11 +37,15 @@
 #include <qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
+<<<<<<< HEAD
     : QAbstractTableModel(catalog),
       _catalog(catalog),
       _statistics(nullptr),
       _interp(nullptr),
       _offset(0)
+=======
+    : QAbstractTableModel(catalog), _catalog(catalog), _statistics(nullptr), _interp(nullptr), _offset(0)
+>>>>>>> master
 {
     _exportEnabled = false;
     _motionIndex = 0;
@@ -52,12 +56,19 @@ int AbstractOutput::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    if (needsTime()) {
-        return ref(_motionIndex).size();
+    int count;
+    if (_data.size() == 0) {
+        // Empty data
+        count = 0;
     } else {
-        return _maxSize - _offset;
+        if (needsTime()) {
+            count = ref(_motionIndex).size();
+        } else {
+            count = _maxSize - _offset;
+        }
     }
-}
+    return count;
+ }
 
 int AbstractOutput::columnCount(const QModelIndex & parent) const
 {
@@ -504,7 +515,7 @@ QJsonObject AbstractOutput::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)
 {
-    out << (quint8)1;
+    out << static_cast<quint8>(1);
 
     out << ao->_exportEnabled << ao->_data;
 

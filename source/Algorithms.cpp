@@ -39,10 +39,10 @@ QVector<double> interp( const QVector<double> & x, const QVector<double> & y, co
     gsl_interp * interpolator = gsl_interp_alloc(gsl_interp_linear, x.size());
     gsl_interp_init( interpolator, x.data(), y.data(), x.size() );
     gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
-
-    for ( int i = 0; i < xi.size(); ++i ) {
-        // Interpolate
-        yi[i] = gsl_interp_eval( interpolator, x.data(), y.data(), xi.at(i), accelerator);
+    
+    for (int i = 0; i < xi.size(); ++i) {
+        gsl_interp_eval_e(
+                interpolator, x.data(), y.data(), xi.at(i), accelerator, &yi[i]);
     }
 
     // Clean up the interpolating objects

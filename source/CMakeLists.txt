@@ -67,7 +67,7 @@ if (UNIX)
         )
     # Manual and example
     install(FILES
-        ${CMAKE_SOURCE_DIR}/manual/manual-201310.pdf
+        ${CMAKE_SOURCE_DIR}/manual/manual.pdf
         DESTINATION share/${CMAKE_PROJECT_NAME}/doc
         COMPONENT manual
         RENAME manual.pdf
@@ -83,7 +83,7 @@ elseif (WIN32)
         )
     # Manual and example
     install(FILES
-        ${CMAKE_SOURCE_DIR}/manual/manual-201310.pdf
+        ${CMAKE_SOURCE_DIR}/manual/manual.pdf
         DESTINATION doc
         COMPONENT manual
         RENAME manual.pdf

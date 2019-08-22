@@ -35,7 +35,7 @@ execute_process(
     COMMAND git rev-parse --short HEAD 
     OUTPUT_VARIABLE PROJECT_GITHASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(PROJECT_VERSION "0.6.3")
+set(PROJECT_VERSION "0.6.4")
 
 # Global CMake options
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -46,6 +46,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # Enable advanced features like:
 #  - frequency-dependent moduli
 option(ADVANCED_FEATURES "Compile with advanced features" ON)
+
+
+if(APPLE AND EXISTS /usr/local/opt/qt5)
+	# Homebrew installs Qt5 (up to at least 5.9.1) in
+	# /usr/local/opt/qt5, ensure it can be found by CMake since
+	# it is not in the default /usr/local prefix.
+	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+endif()
 
 # Configure libraries
 find_package(Qt5PrintSupport REQUIRED)
