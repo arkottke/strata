@@ -48,12 +48,19 @@ int AbstractOutput::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent);
 
-    if (needsTime()) {
-        return ref(_motionIndex).size();
+    int count;
+    if (_data.size() == 0) {
+        // Empty data
+        count = 0;
     } else {
-        return _maxSize - _offset;
+        if (needsTime()) {
+            count = ref(_motionIndex).size();
+        } else {
+            count = _maxSize - _offset;
+        }
     }
-}
+    return count;
+ }
 
 int AbstractOutput::columnCount(const QModelIndex & parent) const
 {
