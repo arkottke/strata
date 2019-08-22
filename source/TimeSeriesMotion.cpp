@@ -333,7 +333,6 @@ QVector<double> TimeSeriesMotion::timeSeries(
 {
     // Compute the time series
     QVector<double> ts = calcTimeSeries(_fourierAcc, tf);
-
     // Remove the zero padded values from the time series
     ts.resize(_pointCount);
 
@@ -821,6 +820,8 @@ double TimeSeriesMotion::calcMaxStrain(const QVector<std::complex<double> >& tf)
 QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<double> >& tf, const bool baseLineCorrect) const
 {
     QVector<double> strain = calcTimeSeries(_fourierVel, tf);
+    // Remove the zero padded values from the time series
+    strain.resize(_pointCount);
 
     // Use a simple subtraction of the average to correct the record.
     if (baseLineCorrect) {

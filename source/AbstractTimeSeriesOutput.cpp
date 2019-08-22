@@ -95,7 +95,6 @@ const QString AbstractTimeSeriesOutput::xLabel() const
 
 const QVector<double>& AbstractTimeSeriesOutput::ref(int motion) const
 {
-
     return _catalog->time(motion);
 }
 
@@ -106,7 +105,7 @@ const QString AbstractTimeSeriesOutput::suffix() const
 
 int AbstractTimeSeriesOutput::fieldWidth() const
 {
-    return (int)ceil(log10(motionCount()+1));
+    return static_cast<int>(ceil(log10(motionCount() + 1)));
 }
 
 void AbstractTimeSeriesOutput::fromJson(const QJsonObject &json)
@@ -125,8 +124,7 @@ QJsonObject AbstractTimeSeriesOutput::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso)
 {
-    out << (quint8)2;
-
+    out << static_cast<quint8>(2);
     out << atso->_baselineCorrect << qobject_cast<const AbstractLocationOutput*>(atso);
 
     return out;

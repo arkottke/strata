@@ -60,7 +60,7 @@ void StrainTimeSeriesOutput::extract(AbstractCalculator* const calculator,
     data = tsm->strainTimeSeries(calculator->calcStrainTf(
             calculator->site()->inputLocation(), calculator->motion()->type(),
             calculator->site()->depthToLocation(_depth)), _baselineCorrect);
-    
+
     // Convert to percent
     for (int i = 0; i < data.size(); ++i)
         data[i] *= 100;

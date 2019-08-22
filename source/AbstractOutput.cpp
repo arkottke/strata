@@ -37,15 +37,12 @@
 #include <qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
-<<<<<<< HEAD
     : QAbstractTableModel(catalog),
       _catalog(catalog),
       _statistics(nullptr),
       _interp(nullptr),
       _offset(0)
-=======
-    : QAbstractTableModel(catalog), _catalog(catalog), _statistics(nullptr), _interp(nullptr), _offset(0)
->>>>>>> master
+
 {
     _exportEnabled = false;
     _motionIndex = 0;
@@ -214,7 +211,6 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
             const int n = _data.at(i).at(j).size();
 
             QwtPlotCurve* curve = new QwtPlotCurve;
-
             curve->setSamples(
                     x.data() + _offset,
                     y.data() + _offset,

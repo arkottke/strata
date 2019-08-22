@@ -54,11 +54,11 @@ void VelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* motion = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
-    data = motion->timeSeries(TimeSeriesMotion::Velocity,
+    data = tsm->timeSeries(TimeSeriesMotion::Velocity,
                               calculator->calcAccelTf(
-                                      calculator->site()->inputLocation(), motion->type(),
+                                      calculator->site()->inputLocation(), tsm->type(),
                                       calculator->site()->depthToLocation(_depth), _type),
                               _baselineCorrect);
 }
