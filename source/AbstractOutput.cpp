@@ -37,7 +37,7 @@
 #include <qwt_scale_engine.h>
 
 AbstractOutput::AbstractOutput(OutputCatalog* catalog)
-    : QAbstractTableModel(catalog), _catalog(catalog), _statistics(0), _interp(0), _offset(0)
+    : QAbstractTableModel(catalog), _catalog(catalog), _statistics(nullptr), _interp(nullptr), _offset(0)
 {
     _exportEnabled = false;
     _motionIndex = 0;
@@ -507,7 +507,7 @@ QJsonObject AbstractOutput::toJson() const
 
 QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)
 {
-    out << (quint8)1;
+    out << static_cast<quint8>(1);
 
     out << ao->_exportEnabled << ao->_data;
 
