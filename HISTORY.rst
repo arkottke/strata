@@ -1,3 +1,12 @@
+v0.7.0 (2019-10-16)
+-------------------
+- Added: Instructions for command line operation to manual
+- Improved: plots of the CompatibleRvtMotion dialog
+- Improved: log messages
+- Fixed: Crash on clearing of output
+- Fixed: Issue with inconsistent time series length
+- Fixed: Logic of smooth spectrum in FrequencyDependentCalculator
+
 v0.6.4 (2019-08-06)
 -------------------
 - Fixed manual included in installers
