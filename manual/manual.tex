@@ -1843,6 +1843,32 @@ The current plot can be printed by selecting \texttt{Print\dots} or \texttt{Prin
 the \texttt{File} menu.  The current plot can also be copied by right clicking on the plot and
 selecting \texttt{Copy}.
 
+\subsection{Command-line Operation}
+
+Strata can be run from the command line, which allows for processing multiple files
+sequentially. This functionality permits the input files to be created or modified using another
+program, and then the site response to be computed in Strata. 
+
+
+The following steps are recommended for running Strata from the command-line:
+
+\begin{enumerate}
+    \item Run Strata and create a model as you would typically with all of the features that you are
+        going to need.  While it is possible to create an input file from stratch, it is useful to
+        have Strata create the skeleton.
+    \item Save the model as a JSON file. This is just a text file that uses the JSON format, which
+        is supported by lots of different languages (Matlab and R incldued).
+    \item Use the JSON file as a template for the other profiles that you are going to consider.
+    \item From a terminal run \texttt{strata -b <filename>.json}. Note that Strata has to be in the
+        PATH for this to work nicely.  The PATH variable tells an operating system where to look for
+        executables. This allows running programs that aren't present locally. It can be helpful to
+        add location of the Strata executable (i.e., strata.exe on Windows) to the PATH, if Strata
+        is not in the PATH the full path to Strata must be provided on the call. 
+\end{enumerate}
+The results from the output are saved to the same file that was passed to Strata and old results are
+silently replaced. Note that multiple file names can be provided in the call to Strata.
+Additionally, Strata can be started from your favorite programming language.
+
 \section{Examples}
 The following examples give a basic introduction to using Strata to perform equivalent linear site
 response analysis.  The examples files are found within the \texttt{examples} folder in the
@@ -1990,3 +2016,5 @@ to the calculation.
 \printindex
 
 \end{document}
+
+% vim: tw=100
