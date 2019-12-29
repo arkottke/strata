@@ -128,7 +128,7 @@ double TimeSeriesMotion::freqNyquist() const
 
 QStringList TimeSeriesMotion::inputUnitsList()
 {
-    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2");
+    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2")<< tr("m/sec^2");
 }
 
 TimeSeriesMotion::InputUnits TimeSeriesMotion::inputUnits() const
