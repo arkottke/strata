@@ -170,6 +170,8 @@ double TimeSeriesMotion::unitConversionFactor() const
         return 1. / (100. * 9.80665);
     case InchesPerSecondSquared:
         return 1. / (12. * 32.174);
+    case MetersPerSecondSquared:        // Add m/sec^2 for Rexel import
+        return 1. / (1. * 9.80665);
     default:
         return 1.;
     }
