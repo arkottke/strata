@@ -128,7 +128,7 @@ double TimeSeriesMotion::freqNyquist() const
 
 QStringList TimeSeriesMotion::inputUnitsList()
 {
-    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2");
+    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2") << tr("m/sec^2");
 }
 
 TimeSeriesMotion::InputUnits TimeSeriesMotion::inputUnits() const
@@ -170,6 +170,8 @@ double TimeSeriesMotion::unitConversionFactor() const
         return 1. / (100. * 9.80665);
     case InchesPerSecondSquared:
         return 1. / (12. * 32.174);
+    case MetersPerSecondSquared:        // Add m/sec^2 for Rexel import
+        return 1. / (1. * 9.80665);
     default:
         return 1.;
     }
@@ -481,6 +483,17 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             }
         } else {
             // Unknown file format can't process with default settings
+                
+                // add for  file text - Usual parameters for app Rexel
+            if (ext == "TXT") {
+            // Set format
+            setFormat(Columns);
+            setStartLine(1);
+            setStopLine(0);
+            setScale(scale);
+            setInputUnits(MetersPerSecondSquared);
+                }
+            // but again false
             return false;
         }
     } else {
