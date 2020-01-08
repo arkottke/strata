@@ -483,6 +483,17 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             }
         } else {
             // Unknown file format can't process with default settings
+                
+                // add for  file text - Usual parameters for app Rexel
+            if (ext == "TXT") {
+            // Set format
+            setFormat(Columns);
+            setStartLine(1);
+            setStopLine(0);
+            setScale(scale);
+            setInputUnits(MetersPerSecondSquared);
+                }
+            // but again false
             return false;
         }
     } else {
