@@ -1,3 +1,7 @@
+v0.7.1 (unrelreased)
+--------------------
+- Minor fixes in manual from Subrat Subedi
+
 v0.7.0 (2019-10-16)
 -------------------
 - Added: Instructions for command line operation to manual
