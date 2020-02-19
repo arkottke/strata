@@ -122,6 +122,10 @@ Then compile:
         -DCMAKE_INSTALL_PREFIX:STRING=dist
     $> cmake --build . --target install
 
+After building, the executable can be run by issuing the following command from the `build` directory:
+
+    $> ./dist/usr/bin/strata
+
 Right now (12/15/2019) on macOS Mojave homebrew installs qwt version 6.1.4 and gls version 2.6, so change the relative lines
 
     $> QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.4"
@@ -129,7 +133,6 @@ Right now (12/15/2019) on macOS Mojave homebrew installs qwt version 6.1.4 and g
     $> GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.6"
     
 or in case of error control the version in the directory: /usr/local/Cellar/
-
 
 If you find a cleaner way to specific the library paths, please let me know.
 
