@@ -20,11 +20,13 @@ IF EXIST gsl (
     git pull
 ) ELSE (
     git clone https://github.com/ampl/gsl.git
-    git submodule init && git submodule update
+    sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+    git submodule update --init --recursive
     CD gsl
 )
 
 cmake ^
+ -DARCH=64^
  -DGSL_DISABLE_WARNINGS:BOOL=ON^
  -DBUILD_SHARED_LIBS:BOOL=ON^
  -DMSVC_RUNTIME_DYNAMIC:BOOL=ON^
