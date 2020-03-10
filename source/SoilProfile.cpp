@@ -281,6 +281,8 @@ QVariant SoilProfile::headerData(int section, Qt::Orientation orientation, int r
     case Qt::Vertical:
         return section+1;
     }
+
+    return QVariant();
 }
 
 Qt::ItemFlags SoilProfile::flags(const QModelIndex &index ) const

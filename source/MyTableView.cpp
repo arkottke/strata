@@ -43,7 +43,7 @@ void MyTableView::copy()
     QModelIndexList selectedIndexes = selectionModel()->selectedIndexes();
 
     // Sort the indexes
-    qSort( selectedIndexes.begin(), selectedIndexes.end());
+    std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
     for ( int i = 0; i < selectedIndexes.size(); ++i) {
         // Add the data in the cell

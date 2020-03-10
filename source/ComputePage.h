@@ -29,7 +29,7 @@
 #include <QLineEdit>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QTime>
+#include <QElapsedTimer>
 
 class SiteResponseModel;
 
@@ -66,7 +66,7 @@ protected:
     QPushButton * _computeButton;
     QPushButton * _cancelButton;
 
-    QTime _timer;
+    QElapsedTimer _timer;
 
     SiteResponseModel* _model;
 };

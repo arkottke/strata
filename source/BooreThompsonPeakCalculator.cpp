@@ -23,6 +23,7 @@
 #include "BooreThompsonPeakCalculator.h"
 #include "Serialize.h"
 
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>

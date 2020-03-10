@@ -32,6 +32,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QFile>
 
 #include <qwt_scale_engine.h>
 #include <qwt_text.h>

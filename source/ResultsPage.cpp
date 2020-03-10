@@ -139,8 +139,7 @@ void ResultsPage::copyPlot()
    
     // Set the clilpboard image
     QClipboard * clipboard = QApplication::clipboard();
-    clipboard->setPixmap(QPixmap::grabWidget(_plot));
-    
+    clipboard->setPixmap(_plot->grab());
     colorCurve(_selectedRow);
 }
 

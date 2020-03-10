@@ -38,6 +38,7 @@
 #include "Units.h"
 
 #include <QApplication>
+#include <QFile>
 #include <QJsonDocument>
 #include <QMetaProperty>
 #include <QTimer>
