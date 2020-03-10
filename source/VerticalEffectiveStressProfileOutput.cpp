@@ -33,17 +33,17 @@ VerticalEffectiveStressProfileOutput::VerticalEffectiveStressProfileOutput(Outpu
     _offset = 1;
 }
 
-QString VerticalEffectiveStressProfileOutput::name() const
+auto VerticalEffectiveStressProfileOutput::name() const -> QString
 {
     return tr("Vertical Effective Stress Profile");
 }
 
-QString VerticalEffectiveStressProfileOutput::shortName() const
+auto VerticalEffectiveStressProfileOutput::shortName() const -> QString
 {
     return tr("vEffectiveStress");
 }
 
-const QString VerticalEffectiveStressProfileOutput::xLabel() const
+auto VerticalEffectiveStressProfileOutput::xLabel() const -> const QString
 {
     return tr("Vertical Effective Stress (%1)").arg(Units::instance()->stress());
 }

@@ -96,13 +96,13 @@ void OutputExportDialog::exportData()
 
 void OutputExportDialog::createDialog()
 {
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
     layout->setColumnStretch( 1, 1);
 
     QSettings settings;
 
     // Path selection
-    QPushButton * selectDirPushButton = new QPushButton(tr("Select directory..."), this);
+    auto * selectDirPushButton = new QPushButton(tr("Select directory..."), this);
     selectDirPushButton->setAutoDefault(false);
     connect( selectDirPushButton, SIGNAL(clicked()), this, SLOT(selectDirectory()));
 
@@ -129,7 +129,7 @@ void OutputExportDialog::createDialog()
     for (int i = 0; i < _model->outputs().size(); ++i) {
         AbstractOutput* ao = _model->outputs().at(i);
 
-        QTableWidgetItem* item = new QTableWidgetItem(ao->fullName());
+        auto* item = new QTableWidgetItem(ao->fullName());
 
         item->setCheckState(ao->exportEnabled() ?
                             Qt::Checked : Qt::Unchecked);
@@ -146,7 +146,7 @@ void OutputExportDialog::createDialog()
     layout->addWidget(_tableWidget, 2, 0, 1, 2);
 
     // Button box
-    QDialogButtonBox * buttonBox = new QDialogButtonBox( 
+    auto * buttonBox = new QDialogButtonBox( 
             QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(exportData()));

@@ -33,17 +33,17 @@ DispTimeSeriesOutput::DispTimeSeriesOutput(OutputCatalog* catalog)
 
 }
 
-QString DispTimeSeriesOutput::name() const
+auto DispTimeSeriesOutput::name() const -> QString
 {
     return tr("Displacement Time Series");
 }
 
-QString DispTimeSeriesOutput::shortName() const
+auto DispTimeSeriesOutput::shortName() const -> QString
 {
     return tr("dispTs");
 }
 
-const QString DispTimeSeriesOutput::yLabel() const
+auto DispTimeSeriesOutput::yLabel() const -> const QString
 {
     return tr("Displacement (%1)").arg(Units::instance()->dispTs());
 }
@@ -54,7 +54,7 @@ void DispTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
     data = tsm->timeSeries(TimeSeriesMotion::Displacement,
                               calculator->calcAccelTf(

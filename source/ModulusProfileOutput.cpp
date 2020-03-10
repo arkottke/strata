@@ -31,17 +31,17 @@ ModulusProfileOutput::ModulusProfileOutput(OutputCatalog* catalog)
 
 }
 
-QString ModulusProfileOutput::name() const
+auto ModulusProfileOutput::name() const -> QString
 {
     return tr("Shear-Modulus Profile");
 }
 
-QString ModulusProfileOutput::shortName() const
+auto ModulusProfileOutput::shortName() const -> QString
 {
     return tr("modulus");
 }
 
-const QString ModulusProfileOutput::xLabel() const
+auto ModulusProfileOutput::xLabel() const -> const QString
 {
     return tr("Shear modulus (%1)").arg(Units::instance()->stress());
 }

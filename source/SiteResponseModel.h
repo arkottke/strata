@@ -41,8 +41,8 @@ class SiteResponseModel : public QThread
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SiteResponseModel* srm);
-    friend QDataStream & operator>> (QDataStream & in, SiteResponseModel* srm);
+    friend auto operator<< (QDataStream & out, const SiteResponseModel* srm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SiteResponseModel* srm) -> QDataStream &;
 
 public:
     explicit SiteResponseModel(QObject *parent = nullptr);
@@ -54,42 +54,42 @@ public:
         FrequencyDependent //!< Equivalent-linear with frequency dependent properties
     };
 
-    static QStringList methodList();
+    static auto methodList() -> QStringList;
 
-    QString fileName() const;
-    QTextDocument* notes() const;
+    auto fileName() const -> QString;
+    auto notes() const -> QTextDocument*;
 
-    Method method() const;
+    auto method() const -> Method;
     void setMethod(Method method);
 
-    bool saveAbstractMotionData() const;
+    auto saveAbstractMotionData() const -> bool;
 
-    SoilProfile* siteProfile();
-    MotionLibrary* motionLibrary();
-    AbstractCalculator* calculator();
-    OutputCatalog* outputCatalog();
-    MyRandomNumGenerator* randNumGen();
+    auto siteProfile() -> SoilProfile*;
+    auto motionLibrary() -> MotionLibrary*;
+    auto calculator() -> AbstractCalculator*;
+    auto outputCatalog() -> OutputCatalog*;
+    auto randNumGen() -> MyRandomNumGenerator*;
 
-    bool modified() const;
+    auto modified() const -> bool;
 
-    bool dampingRequired() const;
-    bool nonlinearPropertiesRequired() const;
+    auto dampingRequired() const -> bool;
+    auto nonlinearPropertiesRequired() const -> bool;
 
     //! Load the model from a binary file
-    bool loadBinary(const QString & fileName);
+    auto loadBinary(const QString & fileName) -> bool;
     //! Load the model from a JSON file
-    bool loadJson(const QString & fileName);
+    auto loadJson(const QString & fileName) -> bool;
 
     //! Save the model to a file
-    bool saveBinary();
+    auto saveBinary() -> bool;
     //! Save the model in a JSON readable format
-    bool saveJson();
+    auto saveJson() -> bool;
 
     //! If the model has results from an analysis
-    bool hasResults() const;
+    auto hasResults() const -> bool;
 
     //! Create a html document containing the information of the model
-    QString toHtml();
+    auto toHtml() -> QString;
 
 public slots:       
     void setFileName(const QString &fileName);

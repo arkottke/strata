@@ -32,12 +32,12 @@ public:
     CustomNonlinearProperty(Type type, bool retain = false, QObject *parent = nullptr);
 
     void setName( const QString &name);
-    bool retain() const;
+    auto retain() const -> bool;
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) -> bool;
+    auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
+    auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+    auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
 
 protected:
     //! If the curve should be saved to disk in the catalog

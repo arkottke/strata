@@ -59,10 +59,10 @@ public slots:
 
 private:
     //! Create the frame for defining the parameters of the motion
-    QFrame* createInputFrame(bool readOnly);
+    auto createInputFrame(bool readOnly) -> QFrame*;
 
     //! Create the frame of plots of the data
-    QTabWidget* createPlotsFrame();
+    auto createPlotsFrame() -> QTabWidget*;
 
     //! Read the motion data from the file and update the text edit
     void loadPreview(const QString &fileName);
@@ -71,7 +71,7 @@ private:
     void plot();
 
     //! Try to apply the settings to the motion
-    bool tryApply();
+    auto tryApply() -> bool;
 
     TimeSeriesMotion * _motion;
 

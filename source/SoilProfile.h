@@ -46,8 +46,8 @@ class SoilProfile : public MyAbstractTableModel
 {
     Q_OBJECT 
 
-    friend QDataStream & operator<< (QDataStream & out, const SoilProfile* siteProfile);
-    friend QDataStream & operator>> (QDataStream & in, SoilProfile* siteProfile);
+    friend auto operator<< (QDataStream & out, const SoilProfile* siteProfile) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SoilProfile* siteProfile) -> QDataStream &;
 
 public:
     explicit SoilProfile(SiteResponseModel *parent = nullptr);
@@ -72,50 +72,50 @@ public:
     };
 
     //!@{
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+    auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
+    auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) -> bool;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    Qt::ItemFlags flags(const QModelIndex &index ) const;
+    auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
+    auto flags(const QModelIndex &index ) const -> Qt::ItemFlags;
 
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+    auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
     //!@}
 
-    QList<SoilLayer*> & soilLayers();
-    QList<SubLayer> & subLayers();
-    RockLayer * bedrock();
+    auto soilLayers() -> QList<SoilLayer*> &;
+    auto subLayers() -> QList<SubLayer> &;
+    auto bedrock() -> RockLayer *;
 
-    bool isVaried() const;
+    auto isVaried() const -> bool;
 
-    double inputDepth() const;
+    auto inputDepth() const -> double;
 
-    const Location & inputLocation() const;
+    auto inputLocation() const -> const Location &;
 
     /*! Compute the layer index associated with a depth.
          * \param depth depth in the site profile
          * \return Location corresponding to the depth.
          */
-    const Location depthToLocation(double depth) const;
+    auto depthToLocation(double depth) const -> const Location;
 
-    QStringList soilLayerNameList() const;
+    auto soilLayerNameList() const -> QStringList;
 
-    int profileCount() const;
-    bool onlyConverged() const;
+    auto profileCount() const -> int;
+    auto onlyConverged() const -> bool;
 
-    ProfileRandomizer* profileRandomizer();
-    NonlinearPropertyRandomizer* nonlinearPropertyRandomizer();
+    auto profileRandomizer() -> ProfileRandomizer*;
+    auto nonlinearPropertyRandomizer() -> NonlinearPropertyRandomizer*;
 
-    SoilTypeCatalog* soilTypeCatalog();
+    auto soilTypeCatalog() -> SoilTypeCatalog*;
 
-    double waterTableDepth() const;
+    auto waterTableDepth() const -> double;
 
-    double maxFreq() const;
-    double waveFraction() const;
-    bool disableAutoDiscretization() const;
+    auto maxFreq() const -> double;
+    auto waveFraction() const -> double;
+    auto disableAutoDiscretization() const -> bool;
 
     /*! Insert a new soil type and listen to its wasModified() signal.
          * @param row location of new SoilType
@@ -128,29 +128,29 @@ public:
     //! Reset the properties of the SubLayers to their initial properties
     void resetSubLayers();
 
-    int subLayerCount() const;
+    auto subLayerCount() const -> int;
 
     /*! @name Convience accessors
          * The following accessors allow for the SubLayers and Bedrock to be
          * accessed using the same functions.
          */
     //@{
-    double untWt( int layer ) const;
-    double density( int layer ) const;
-    double shearVel( int layer ) const;
-    double shearMod( int layer) const;
-    double damping( int layer ) const;
+    auto untWt( int layer ) const -> double;
+    auto density( int layer ) const -> double;
+    auto shearVel( int layer ) const -> double;
+    auto shearMod( int layer) const -> double;
+    auto damping( int layer ) const -> double;
     //@}
 
     //! Return the shear-wave velocity of the sublayers and bedrock
-    QVector<double> depthProfile() const;
-    QVector<double> depthToMidProfile() const;
-    QVector<double> initialVelocityProfile() const;
-    QVector<double> finalVelocityProfile() const;
-    QVector<double> modulusProfile() const;
-    QVector<double> dampingProfile() const;
-    QVector<double> vTotalStressProfile() const;
-    QVector<double> vEffectiveStressProfile() const;
+    auto depthProfile() const -> QVector<double>;
+    auto depthToMidProfile() const -> QVector<double>;
+    auto initialVelocityProfile() const -> QVector<double>;
+    auto finalVelocityProfile() const -> QVector<double>;
+    auto modulusProfile() const -> QVector<double>;
+    auto dampingProfile() const -> QVector<double>;
+    auto vTotalStressProfile() const -> QVector<double>;
+    auto vEffectiveStressProfile() const -> QVector<double>;
 
     /*! Profile of the stress reduction coefficient (r_d).
          * The stress reduction coefficient relates the maximum shear stress of
@@ -158,20 +158,20 @@ public:
          * \param pga peak ground acceleration in g
          * \return a list of cofficients at the top of each layer.
          */
-    QVector<double> stressReducCoeffProfile(double pga) const;
-    QVector<double> maxShearStrainProfile() const;
-    QVector<double> shearStressProfile() const;
-    QVector<double> stressRatioProfile() const;
-    QVector<double> maxErrorProfile() const;
+    auto stressReducCoeffProfile(double pga) const -> QVector<double>;
+    auto maxShearStrainProfile() const -> QVector<double>;
+    auto shearStressProfile() const -> QVector<double>;
+    auto stressRatioProfile() const -> QVector<double>;
+    auto maxErrorProfile() const -> QVector<double>;
 
     //! Create a table of the sublayers
-    QString subLayerTable() const;
+    auto subLayerTable() const -> QString;
 
     //! Create a html document containing the information of the model
-    QString toHtml() const;
+    auto toHtml() const -> QString;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setMaxFreq(double maxFreq);
@@ -208,12 +208,12 @@ protected slots:
 
 private:
     //! Return the layer with the longest travel time between the two depths
-    SoilLayer* createRepresentativeSoilLayer( double top, double base);
+    auto createRepresentativeSoilLayer( double top, double base) -> SoilLayer*;
 
     /*! Return the velocity layer at a given index.
      * Combines both the soil layers and rock layer
      */
-    VelocityLayer* velocityLayer(int index) const;
+    auto velocityLayer(int index) const -> VelocityLayer*;
 
     /*
          * A site profile consists of a hierarchy of three different layers

@@ -39,7 +39,7 @@ SoilTypeCatalog::SoilTypeCatalog(QObject *parent)
             this, SLOT(updateUnits()));
 }
 
-QString SoilTypeCatalog::toHtml() const
+auto SoilTypeCatalog::toHtml() const -> QString
 {
     QString html = "<a name=\"soil-types\">Soil Types</a>";
 
@@ -64,21 +64,21 @@ QString SoilTypeCatalog::toHtml() const
     return html;
 }
 
-int SoilTypeCatalog::rowCount(const QModelIndex &parent) const
+auto SoilTypeCatalog::rowCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _soilTypes.size();
 }
 
-int SoilTypeCatalog::columnCount(const QModelIndex &parent) const
+auto SoilTypeCatalog::columnCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 7;
 }
 
-QVariant SoilTypeCatalog::data(const QModelIndex &index, int role) const
+auto SoilTypeCatalog::data(const QModelIndex &index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -112,7 +112,7 @@ QVariant SoilTypeCatalog::data(const QModelIndex &index, int role) const
     return MyAbstractTableModel::data(index, role);
 }
 
-bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, int role)
+auto SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, int role) -> bool
 {
     if(index.parent()!=QModelIndex() || _readOnly)
         return false;
@@ -191,7 +191,7 @@ bool SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value, i
     return true;
 }
 
-QVariant SoilTypeCatalog::headerData(int section, Qt::Orientation orientation, int role) const
+auto SoilTypeCatalog::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -224,7 +224,7 @@ QVariant SoilTypeCatalog::headerData(int section, Qt::Orientation orientation, i
     return QVariant();
 }
 
-Qt::ItemFlags SoilTypeCatalog::flags(const QModelIndex &index ) const
+auto SoilTypeCatalog::flags(const QModelIndex &index ) const -> Qt::ItemFlags
 {
     if (index.column() == IsVariedColumn) {
         return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
@@ -233,7 +233,7 @@ Qt::ItemFlags SoilTypeCatalog::flags(const QModelIndex &index ) const
     }
 }
 
-bool SoilTypeCatalog::insertRows(int row, int count, const QModelIndex &parent)
+auto SoilTypeCatalog::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -249,7 +249,7 @@ bool SoilTypeCatalog::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-bool SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent)
+auto SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -266,12 +266,12 @@ bool SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-SoilType* SoilTypeCatalog::soilType(int row)
+auto SoilTypeCatalog::soilType(int row) -> SoilType*
 {
     return _soilTypes.at(row);
 }
 
-int SoilTypeCatalog::rowOf(SoilType* st) const
+auto SoilTypeCatalog::rowOf(SoilType* st) const -> int
 {
     if (_soilTypes.contains(st)) {
         return _soilTypes.indexOf(st);
@@ -280,7 +280,7 @@ int SoilTypeCatalog::rowOf(SoilType* st) const
     }
 }
 
-SoilType* SoilTypeCatalog::soilTypeOf(QVariant value)
+auto SoilTypeCatalog::soilTypeOf(QVariant value) -> SoilType*
 {
     int i = -1;
     if (value.type() == QVariant::Int) {
@@ -309,7 +309,7 @@ SoilType* SoilTypeCatalog::soilTypeOf(QVariant value)
     }
 }
 
-NonlinearPropertyCatalog* SoilTypeCatalog::nlCatalog()
+auto SoilTypeCatalog::nlCatalog() -> NonlinearPropertyCatalog*
 {
     return _nlCatalog;
 }
@@ -326,7 +326,7 @@ void SoilTypeCatalog::fromJson(const QJsonArray &json)
         _soilTypes.takeLast()->deleteLater();
 
     foreach (const QJsonValue &v, json) {
-        SoilType *st = new SoilType(this);
+        auto *st = new SoilType(this);
         st->fromJson(v.toObject());
         _soilTypes << st;
     }
@@ -334,7 +334,7 @@ void SoilTypeCatalog::fromJson(const QJsonArray &json)
     endResetModel();
 }
 
-QJsonArray SoilTypeCatalog::toJson() const
+auto SoilTypeCatalog::toJson() const -> QJsonArray
 {
     QJsonArray json;
     foreach (const SoilType *st, _soilTypes)
@@ -343,7 +343,7 @@ QJsonArray SoilTypeCatalog::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc)
+auto operator<< (QDataStream & out, const SoilTypeCatalog* stc) -> QDataStream &
 {
     out << static_cast<quint8>(1);
 
@@ -355,7 +355,7 @@ QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SoilTypeCatalog* stc)
+auto operator>> (QDataStream & in, SoilTypeCatalog* stc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -366,7 +366,7 @@ QDataStream & operator>> (QDataStream & in, SoilTypeCatalog* stc)
     in >> size;
 
     while (stc->_soilTypes.size() < size) {
-        SoilType* st = new SoilType(stc);
+        auto* st = new SoilType(stc);
         in >> st;
         stc->_soilTypes << st;
     }

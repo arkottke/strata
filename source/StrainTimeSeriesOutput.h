@@ -32,10 +32,10 @@ class StrainTimeSeriesOutput : public AbstractTimeSeriesOutput
 public:
     explicit StrainTimeSeriesOutput(OutputCatalog* catalog);
 
-    virtual QString name() const;
+    virtual auto name() const -> QString;
 protected:
-    virtual QString shortName() const;
-    virtual const QString yLabel() const;
+    virtual auto shortName() const -> QString;
+    virtual auto yLabel() const -> const QString;
 
     void extract(AbstractCalculator* const calculator,
                  QVector<double> & ref, QVector<double> & data) const;

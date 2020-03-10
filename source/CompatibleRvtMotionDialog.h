@@ -38,8 +38,8 @@ protected slots:
     void calculate();
 
 protected:
-    virtual QFormLayout* createParametersLayout();
-    virtual QTabWidget* createTabWidget();
+    virtual auto createParametersLayout() -> QFormLayout*;
+    virtual auto createTabWidget() -> QTabWidget*;
     virtual void addRespSpecCurves();
 
     MyTableView *_targetSaTableView;

@@ -34,8 +34,8 @@ class AbstractProfileOutput : public AbstractOutput
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractProfileOutput* ao);
-    friend QDataStream & operator>> (QDataStream & in, AbstractProfileOutput* ao);
+    friend auto operator<< (QDataStream & out, const AbstractProfileOutput* ao) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractProfileOutput* ao) -> QDataStream &;
 
 public:
     enum CurveType{
@@ -45,23 +45,23 @@ public:
 
     explicit AbstractProfileOutput(OutputCatalog* catalog, bool interpolated = true);
 
-    virtual QString fullName() const;
-    virtual bool needsDepth() const;
+    virtual auto fullName() const -> QString;
+    virtual auto needsDepth() const -> bool;
 
-    bool enabled() const;
+    auto enabled() const -> bool;
     void setEnabled(bool enabled);
 
-    virtual AbstractOutput::CurveType curveType() const;
+    virtual auto curveType() const -> AbstractOutput::CurveType;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 protected:
-    QString fileName(int motion = 0) const;
-    virtual QwtScaleEngine* xScaleEngine() const;
-    virtual QwtScaleEngine* yScaleEngine() const;
-    virtual const QString yLabel() const;
-    virtual const QVector<double>& ref(int motion = 0) const;
+    auto fileName(int motion = 0) const -> QString;
+    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+    virtual auto yScaleEngine() const -> QwtScaleEngine*;
+    virtual auto yLabel() const -> const QString;
+    virtual auto ref(int motion = 0) const -> const QVector<double>&;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

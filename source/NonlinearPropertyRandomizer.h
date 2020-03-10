@@ -40,8 +40,8 @@ class NonlinearPropertyRandomizer : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npr);
-    friend QDataStream & operator>> (QDataStream & in, NonlinearPropertyRandomizer* npr);
+    friend auto operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npr) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, NonlinearPropertyRandomizer* npr) -> QDataStream &;
 
 public:
     NonlinearPropertyRandomizer(gsl_rng* rng, SoilProfile* siteProfile);
@@ -53,20 +53,20 @@ public:
         Darendeli //!< Defined by Stokoe and Darendeli
     };
 
-    static QStringList modelList();
+    static auto modelList() -> QStringList;
 
-    bool enabled() const;
+    auto enabled() const -> bool;
 
-    Model model() const;
+    auto model() const -> Model;
     void setModel(Model model);
 
-    bool customEnabled() const;
+    auto customEnabled() const -> bool;
 
-    bool bedrockIsEnabled() const;
-    double correl() const;
+    auto bedrockIsEnabled() const -> bool;
+    auto correl() const -> double;
 
-    NonlinearPropertyUncertainty* dampingUncert();
-    NonlinearPropertyUncertainty* modulusUncert();
+    auto dampingUncert() -> NonlinearPropertyUncertainty*;
+    auto modulusUncert() -> NonlinearPropertyUncertainty*;
 
     //! Vary the properties of a given layer
     void vary(SoilType* soilType);
@@ -75,7 +75,7 @@ public:
     void vary(RockLayer* bedrock);
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setEnabled(bool enabled);

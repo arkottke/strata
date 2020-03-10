@@ -76,17 +76,17 @@ SourceTheoryRvtMotion::~SourceTheoryRvtMotion()
     _pathDuration->deleteLater();
 }
 
-const QVector<double> & SourceTheoryRvtMotion::freq() const
+auto SourceTheoryRvtMotion::freq() const -> const QVector<double> &
 {
     return _freq->data();
 }
 
-Dimension*  SourceTheoryRvtMotion::freqDimension()
+auto  SourceTheoryRvtMotion::freqDimension() -> Dimension*
 {
     return _freq;
 }
 
-QString SourceTheoryRvtMotion::toHtml() const
+auto SourceTheoryRvtMotion::toHtml() const -> QString
 {
     //FIXME
     return QString();
@@ -191,7 +191,7 @@ void SourceTheoryRvtMotion::setRegion(AbstractRvtMotion::Region region)
 //    return html;
 //}
 
-bool SourceTheoryRvtMotion::isCustomized() const {return _isCustomized;}
+auto SourceTheoryRvtMotion::isCustomized() const -> bool {return _isCustomized;}
 
 void SourceTheoryRvtMotion::setIsCustomized(bool b) {
     if (_isCustomized != b) {
@@ -218,7 +218,7 @@ void SourceTheoryRvtMotion::setDistance(double distance)
     }
 }
 
-double SourceTheoryRvtMotion::depth() const
+auto SourceTheoryRvtMotion::depth() const -> double
 {
     return _depth;
 }
@@ -231,7 +231,7 @@ void SourceTheoryRvtMotion::setDepth(double depth)
     }
 }
 
-double SourceTheoryRvtMotion::stressDrop() const
+auto SourceTheoryRvtMotion::stressDrop() const -> double
 {
     return _stressDrop;
 }
@@ -245,7 +245,7 @@ void SourceTheoryRvtMotion::setStressDrop(double stressDrop)
     }
 }
 
-double SourceTheoryRvtMotion::geoAtten() const
+auto SourceTheoryRvtMotion::geoAtten() const -> double
 {
     return _geoAtten;
 }
@@ -258,7 +258,7 @@ void SourceTheoryRvtMotion::setGeoAtten(double geoAtten)
     }
 }
 
-double SourceTheoryRvtMotion::pathAttenCoeff() const
+auto SourceTheoryRvtMotion::pathAttenCoeff() const -> double
 {
     return _pathAttenCoeff;
 }
@@ -271,7 +271,7 @@ void SourceTheoryRvtMotion::setPathAttenCoeff(double pathAttenCoeff)
     }
 }
 
-double SourceTheoryRvtMotion::pathAttenPower() const
+auto SourceTheoryRvtMotion::pathAttenPower() const -> double
 {
     return _pathAttenPower;
 }
@@ -284,7 +284,7 @@ void SourceTheoryRvtMotion::setPathAttenPower(double pathAttenPower)
     }
 }
 
-double SourceTheoryRvtMotion::shearVelocity() const
+auto SourceTheoryRvtMotion::shearVelocity() const -> double
 {
     return _shearVelocity;
 }
@@ -298,7 +298,7 @@ void SourceTheoryRvtMotion::setShearVelocity(double shearVelocity)
     }
 }
 
-double SourceTheoryRvtMotion::density() const
+auto SourceTheoryRvtMotion::density() const -> double
 {
     return _density;
 }
@@ -311,12 +311,12 @@ void SourceTheoryRvtMotion::setDensity(double density)
     }
 }
 
-double SourceTheoryRvtMotion::siteAtten() const
+auto SourceTheoryRvtMotion::siteAtten() const -> double
 {
     return _siteAtten;
 }
 
-double SourceTheoryRvtMotion::duration() const
+auto SourceTheoryRvtMotion::duration() const -> double
 {
     return _duration;
 }
@@ -329,12 +329,12 @@ void SourceTheoryRvtMotion::setSiteAtten(double siteAtten)
     }
 }
 
-CrustalAmplification* SourceTheoryRvtMotion::crustalAmp()
+auto SourceTheoryRvtMotion::crustalAmp() -> CrustalAmplification*
 {
     return _crustalAmp;
 }
 
-PathDurationModel* SourceTheoryRvtMotion::pathDuration()
+auto SourceTheoryRvtMotion::pathDuration() -> PathDurationModel*
 {
     return _pathDuration;
 }
@@ -441,7 +441,7 @@ void SourceTheoryRvtMotion::fromJson(const QJsonObject &json)
     calculate();
 }
 
-QJsonObject SourceTheoryRvtMotion::toJson() const
+auto SourceTheoryRvtMotion::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractRvtMotion::toJson();
     json["depth"] = _depth;
@@ -463,7 +463,7 @@ QJsonObject SourceTheoryRvtMotion::toJson() const
 
 
 
-QDataStream & operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm)
+auto operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm) -> QDataStream &
 {
     out << static_cast<quint8>(3);
     out << qobject_cast<const AbstractRvtMotion*>(strm);
@@ -483,7 +483,7 @@ QDataStream & operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm)
+auto operator>> (QDataStream & in, SourceTheoryRvtMotion* strm) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

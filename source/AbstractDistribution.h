@@ -32,8 +32,8 @@ class AbstractDistribution : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractDistribution* d);
-    friend QDataStream & operator>> (QDataStream & in, AbstractDistribution* d);
+    friend auto operator<< (QDataStream & out, const AbstractDistribution* d) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractDistribution* d) -> QDataStream &;
 
 public:
     explicit AbstractDistribution(QObject *parent = nullptr);
@@ -44,28 +44,28 @@ public:
         LogNormal //!< Log-Normal distribution
     };
 
-    static QStringList typeList();
+    static auto typeList() -> QStringList;
 
-    Type type() const;
+    auto type() const -> Type;
     void setType(Type type);
 
     //! Set the varied to the average
     void reset();
 
-    double avg() const;
-    double stdev() const;
-    bool hasMin() const;
-    double min() const;
-    bool hasMax() const;
-    double max() const;
+    auto avg() const -> double;
+    auto stdev() const -> double;
+    auto hasMin() const -> bool;
+    auto min() const -> double;
+    auto hasMax() const -> bool;
+    auto max() const -> double;
 
-    bool stdevRequired();
+    auto stdevRequired() -> bool;
 
     //! Set the varied value after applying limits
     void setVaried(double varied);
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setType(int type);

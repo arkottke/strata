@@ -36,28 +36,28 @@ class RvtMotion : public AbstractRvtMotion
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const RvtMotion * rm);
-    friend QDataStream & operator>> (QDataStream & in, RvtMotion * rm);
+    friend auto operator<< (QDataStream & out, const RvtMotion * rm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, RvtMotion * rm) -> QDataStream &;
 
 public:
     //! Constructor
     explicit RvtMotion(QObject *parent = nullptr);
 
     //!{@ Method for editing the model with a QTableView
-    virtual Qt::ItemFlags flags( const QModelIndex & index) const;
+    virtual auto flags( const QModelIndex & index) const -> Qt::ItemFlags;
 
-    virtual bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    virtual auto setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
 
-    virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    virtual auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
     //!}@
 
-    virtual const QVector<double> & freq() const;
-    virtual QString toHtml() const;
-    virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
+    virtual auto freq() const -> const QVector<double> &;
+    virtual auto toHtml() const -> QString;
+    virtual auto loadFromTextStream(QTextStream &stream, double scale = 1.) -> bool;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setDuration(double d);
@@ -67,6 +67,6 @@ protected:
     QVector<double> _freq;
 };
 
-bool logLogInterp( const QVector<double> & x, const QVector<double> & y,
-        const QVector<double> & xi, QVector<double> & yi);
+auto logLogInterp( const QVector<double> & x, const QVector<double> & y,
+        const QVector<double> & xi, QVector<double> & yi) -> bool;
 #endif

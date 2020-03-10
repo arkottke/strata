@@ -30,7 +30,7 @@ class OnlyIncreasingDelegate : public QStyledItemDelegate
 public:
     explicit OnlyIncreasingDelegate(QObject *parent = nullptr);
 
-    virtual QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    virtual auto createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const -> QWidget*;
 
 signals:
 

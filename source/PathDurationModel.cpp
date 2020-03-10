@@ -53,7 +53,7 @@ void PathDurationModel::setRegion(int region)
     setRegion(static_cast<AbstractRvtMotion::Region>(region));
 }
 
-QStringList PathDurationModel::sourceList() {
+auto PathDurationModel::sourceList() -> QStringList {
     return {tr("Default"), tr("Specified")};
 }
 
@@ -68,25 +68,25 @@ void PathDurationModel::setSource(int source) {
     setSource(static_cast<Source>(source));
 }
 
-PathDurationModel::Source PathDurationModel::source() const {
+auto PathDurationModel::source() const -> PathDurationModel::Source {
     return _source;
 }
 
-int PathDurationModel::rowCount(const QModelIndex & parent) const
+auto PathDurationModel::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _distance.size();
 }
 
-int PathDurationModel::columnCount(const QModelIndex & parent) const
+auto PathDurationModel::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 2;
 }
 
-QVariant PathDurationModel::headerData( int section, Qt::Orientation orientation, int role) const
+auto PathDurationModel::headerData( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole) {
         return QVariant();
@@ -109,7 +109,7 @@ QVariant PathDurationModel::headerData( int section, Qt::Orientation orientation
     return QVariant();
 }
 
-QVariant PathDurationModel::data(const QModelIndex & index, int role) const
+auto PathDurationModel::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex()) {
         return QVariant();
@@ -128,7 +128,7 @@ QVariant PathDurationModel::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-bool PathDurationModel::setData( const QModelIndex & index, const QVariant & value, int role)
+auto PathDurationModel::setData( const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if(index.parent() != QModelIndex() && role != Qt::EditRole) {
         return false;
@@ -154,12 +154,12 @@ bool PathDurationModel::setData( const QModelIndex & index, const QVariant & val
     }
 }
 
-Qt::ItemFlags PathDurationModel::flags( const QModelIndex & index) const
+auto PathDurationModel::flags( const QModelIndex & index) const -> Qt::ItemFlags
 {
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
-bool PathDurationModel::insertRows(int row, int count, const QModelIndex &parent)
+auto PathDurationModel::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     emit beginInsertRows( parent, row, row+count-1 );
 
@@ -172,7 +172,7 @@ bool PathDurationModel::insertRows(int row, int count, const QModelIndex &parent
     return true;
 }
 
-bool PathDurationModel::removeRows(int row, int count, const QModelIndex &parent)
+auto PathDurationModel::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     emit beginRemoveRows(parent, row, row+count-1 );
 
@@ -185,7 +185,7 @@ bool PathDurationModel::removeRows(int row, int count, const QModelIndex &parent
     return true;
 }
 
-double PathDurationModel::duration(double distance) const {
+auto PathDurationModel::duration(double distance) const -> double {
     double dur = 0;
     double incrDist;
     int i = 0; 
@@ -211,7 +211,7 @@ void PathDurationModel::fromJson(const QJsonObject &json)
     endResetModel();
 }
 
-QJsonObject PathDurationModel::toJson() const
+auto PathDurationModel::toJson() const -> QJsonObject
 {
     QJsonObject json;
 
@@ -221,7 +221,7 @@ QJsonObject PathDurationModel::toJson() const
     return json;
 }
 
-QDataStream& operator<< (QDataStream & out, const PathDurationModel* pdm)
+auto operator<< (QDataStream & out, const PathDurationModel* pdm) -> QDataStream&
 {
     out << static_cast<quint8>(1);
     out << pdm->_distance << pdm->_rate;
@@ -229,7 +229,7 @@ QDataStream& operator<< (QDataStream & out, const PathDurationModel* pdm)
     return out;
 }
 
-QDataStream& operator>> (QDataStream & in, PathDurationModel* pdm)
+auto operator>> (QDataStream & in, PathDurationModel* pdm) -> QDataStream&
 {
     quint8 ver;
     in >> ver;

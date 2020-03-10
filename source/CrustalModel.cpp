@@ -34,21 +34,21 @@ CrustalModel::CrustalModel(QObject *parent) :
 
 }
 
-int CrustalModel::rowCount(const QModelIndex & parent) const
+auto CrustalModel::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _thickness.size();
 }
 
-int CrustalModel::columnCount(const QModelIndex & parent) const
+auto CrustalModel::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 3;
 }
 
-QVariant CrustalModel::headerData( int section, Qt::Orientation orientation, int role) const
+auto CrustalModel::headerData( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole) {
         return QVariant();
@@ -73,7 +73,7 @@ QVariant CrustalModel::headerData( int section, Qt::Orientation orientation, int
     return QVariant();
 }
 
-QVariant CrustalModel::data(const QModelIndex & index, int role) const
+auto CrustalModel::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex()) {
         return QVariant();
@@ -94,7 +94,7 @@ QVariant CrustalModel::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-bool CrustalModel::setData( const QModelIndex & index, const QVariant & value, int role)
+auto CrustalModel::setData( const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if(index.parent() != QModelIndex() && role != Qt::EditRole) {
         return false;
@@ -123,12 +123,12 @@ bool CrustalModel::setData( const QModelIndex & index, const QVariant & value, i
     }
 }
 
-Qt::ItemFlags CrustalModel::flags( const QModelIndex & index) const
+auto CrustalModel::flags( const QModelIndex & index) const -> Qt::ItemFlags
 {
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
-bool CrustalModel::insertRows(int row, int count, const QModelIndex &parent)
+auto CrustalModel::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     emit beginInsertRows( parent, row, row+count-1 );
 
@@ -142,7 +142,7 @@ bool CrustalModel::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-bool CrustalModel::removeRows(int row, int count, const QModelIndex &parent)
+auto CrustalModel::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     emit beginRemoveRows(parent, row, row+count-1 );
 
@@ -158,8 +158,8 @@ bool CrustalModel::removeRows(int row, int count, const QModelIndex &parent)
 
 
 // Compute the average value of a property over a given depth range.
-double CrustalModel::averageValue(const QVector<double> & thickness,
-                                  const QVector<double> & property, const double maxDepth)
+auto CrustalModel::averageValue(const QVector<double> & thickness,
+                                  const QVector<double> & property, const double maxDepth) -> double
 {
     // Depth to the base of the current layer
     double depth = 0;
@@ -184,7 +184,7 @@ double CrustalModel::averageValue(const QVector<double> & thickness,
     return sum / maxDepth;
 }
 
-QVector<double> CrustalModel::calculate(const QVector<double> &freq) const
+auto CrustalModel::calculate(const QVector<double> &freq) const -> QVector<double>
 {
     QVector<double> amp(freq.size());
     // Slowness (inverse of the crustal velocity
@@ -230,7 +230,7 @@ void CrustalModel::fromJson(const QJsonObject &json)
     endResetModel();
 }
 
-QJsonObject CrustalModel::toJson() const
+auto CrustalModel::toJson() const -> QJsonObject
 {
     QJsonObject json;
 
@@ -241,7 +241,7 @@ QJsonObject CrustalModel::toJson() const
     return json;
 }
 
-QDataStream& operator<< (QDataStream & out, const CrustalModel* cm)
+auto operator<< (QDataStream & out, const CrustalModel* cm) -> QDataStream&
 {
     out << (quint8)1;
 
@@ -250,7 +250,7 @@ QDataStream& operator<< (QDataStream & out, const CrustalModel* cm)
     return out;
 }
 
-QDataStream& operator>> (QDataStream & in, CrustalModel* cm)
+auto operator>> (QDataStream & in, CrustalModel* cm) -> QDataStream&
 {
     quint8 ver;
     in >> ver;

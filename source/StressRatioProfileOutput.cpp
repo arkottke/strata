@@ -34,17 +34,17 @@ StressRatioProfileOutput::StressRatioProfileOutput(OutputCatalog* catalog)
     _offset = 1;
 }
 
-QString StressRatioProfileOutput::name() const
+auto StressRatioProfileOutput::name() const -> QString
 {
     return tr("Stress Ratio Profile");
 }
 
-QString StressRatioProfileOutput::shortName() const
+auto StressRatioProfileOutput::shortName() const -> QString
 {
     return tr("stressRatio");
 }
 
-const QString StressRatioProfileOutput::xLabel() const
+auto StressRatioProfileOutput::xLabel() const -> const QString
 {
     return tr("Stress Ratio, %1_max / %2_v").arg(QChar(0x03C4)).arg(QChar(0x03C3));
 }

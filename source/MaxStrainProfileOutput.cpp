@@ -33,17 +33,17 @@ MaxStrainProfileOutput::MaxStrainProfileOutput(OutputCatalog* catalog)
     _offset = 1;
 }
 
-QString MaxStrainProfileOutput::name() const
+auto MaxStrainProfileOutput::name() const -> QString
 {
     return tr("Maximum Shear-Strain Profile");
 }
 
-QString MaxStrainProfileOutput::shortName() const
+auto MaxStrainProfileOutput::shortName() const -> QString
 {
     return tr("strain");
 }
 
-const QString MaxStrainProfileOutput::xLabel() const
+auto MaxStrainProfileOutput::xLabel() const -> const QString
 {
     return tr("Maximum Shear Strain (%)");
 }

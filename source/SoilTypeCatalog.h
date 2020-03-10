@@ -34,8 +34,8 @@ class SoilTypeCatalog : public MyAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SoilTypeCatalog* stc);
-    friend QDataStream & operator>> (QDataStream & in, SoilTypeCatalog* stc);
+    friend auto operator<< (QDataStream & out, const SoilTypeCatalog* stc) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SoilTypeCatalog* stc) -> QDataStream &;
 
 public:
     SoilTypeCatalog(QObject *parent = nullptr);
@@ -51,31 +51,31 @@ public:
         IsVariedColumn
     };
 
-    QString toHtml() const;
+    auto toHtml() const -> QString;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+    auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
+    auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) -> bool;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    Qt::ItemFlags flags(const QModelIndex &index ) const;
+    auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
+    auto flags(const QModelIndex &index ) const -> Qt::ItemFlags;
 
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+    auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
 
-    SoilType* soilType(int row);
-    int rowOf(SoilType* st) const;
+    auto soilType(int row) -> SoilType*;
+    auto rowOf(SoilType* st) const -> int;
 
     //! Determine the appropriate SoilType based on a QVariant
-    SoilType* soilTypeOf(QVariant value);
+    auto soilTypeOf(QVariant value) -> SoilType*;
 
     //! Catalog of nonlinear models
-    NonlinearPropertyCatalog* nlCatalog();
+    auto nlCatalog() -> NonlinearPropertyCatalog*;
 
     void fromJson(const QJsonArray &json);
-    QJsonArray toJson() const;
+    auto toJson() const -> QJsonArray;
 
 signals:
     void soilTypeAdded(SoilType* soilType);

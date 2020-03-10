@@ -61,12 +61,12 @@ NonlinearPropertyRandomizer::~NonlinearPropertyRandomizer()
 }
 
 
-QStringList NonlinearPropertyRandomizer::modelList()
+auto NonlinearPropertyRandomizer::modelList() -> QStringList
 {
     return QStringList() << tr("SPID") << tr("Darendeli");
 }
 
-bool NonlinearPropertyRandomizer::enabled() const
+auto NonlinearPropertyRandomizer::enabled() const -> bool
 {
     return _siteProfile->isVaried() && _enabled;
 }
@@ -81,7 +81,7 @@ void NonlinearPropertyRandomizer::setEnabled(bool enabled)
     }
 }
 
-NonlinearPropertyRandomizer::Model NonlinearPropertyRandomizer::model() const
+auto NonlinearPropertyRandomizer::model() const -> NonlinearPropertyRandomizer::Model
 {
     return _model;
 }
@@ -100,7 +100,7 @@ void NonlinearPropertyRandomizer::setModel(Model model)
     }
 }
     
-bool NonlinearPropertyRandomizer::bedrockIsEnabled() const
+auto NonlinearPropertyRandomizer::bedrockIsEnabled() const -> bool
 {
     return _siteProfile->isVaried() && _bedrockIsEnabled;
 }
@@ -114,7 +114,7 @@ void NonlinearPropertyRandomizer::setBedrockIsEnabled(bool enabled)
     }
 }
 
-double NonlinearPropertyRandomizer::correl() const
+auto NonlinearPropertyRandomizer::correl() const -> double
 {
     return _correl;
 }
@@ -128,12 +128,12 @@ void NonlinearPropertyRandomizer::setCorrel(double correl)
     _correl = correl;
 }
 
-NonlinearPropertyUncertainty* NonlinearPropertyRandomizer::dampingUncert()
+auto NonlinearPropertyRandomizer::dampingUncert() -> NonlinearPropertyUncertainty*
 {
     return _dampingUncert;
 }
 
-NonlinearPropertyUncertainty* NonlinearPropertyRandomizer::modulusUncert()
+auto NonlinearPropertyRandomizer::modulusUncert() -> NonlinearPropertyUncertainty*
 {
     return _modulusUncert;
 }
@@ -179,7 +179,7 @@ void NonlinearPropertyRandomizer::fromJson(const QJsonObject &json)
     setModel(_model);
 }
 
-QJsonObject NonlinearPropertyRandomizer::toJson() const
+auto NonlinearPropertyRandomizer::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["enabled"] = _enabled;
@@ -191,7 +191,7 @@ QJsonObject NonlinearPropertyRandomizer::toJson() const
     return json;
 }
 
-QDataStream& operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npv)
+auto operator<< (QDataStream & out, const NonlinearPropertyRandomizer* npv) -> QDataStream&
 {
     out << (quint8)2;
 
@@ -205,7 +205,7 @@ QDataStream& operator<< (QDataStream & out, const NonlinearPropertyRandomizer* n
     return out;
 }
 
-QDataStream& operator>> (QDataStream & in, NonlinearPropertyRandomizer* npv)
+auto operator>> (QDataStream & in, NonlinearPropertyRandomizer* npv) -> QDataStream&
 {
     quint8 ver;
     in >> ver;

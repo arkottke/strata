@@ -54,7 +54,7 @@
 TimeSeriesMotionDialog::TimeSeriesMotionDialog(TimeSeriesMotion * motion,  bool readOnly, QWidget *parent, Qt::WindowFlags f)
         : QDialog(parent, f), _motion(motion)
 {
-    QVBoxLayout *layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
 
     _tabWidget = new QTabWidget;
 
@@ -233,13 +233,13 @@ void TimeSeriesMotionDialog::apply()
     updateTextEdit();
 }
 
-QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
+auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame*
 {
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
     layout->setColumnStretch( 8, 1 );
 
     // Create the file row
-    QPushButton * pushButton = new QPushButton(tr("&File..."));
+    auto * pushButton = new QPushButton(tr("&File..."));
     pushButton->setWhatsThis(tr("Opens a dialog to select the file."));
     pushButton->setDisabled(readOnly);
     connect(pushButton, SIGNAL(clicked()),
@@ -430,20 +430,20 @@ QFrame* TimeSeriesMotionDialog::createInputFrame(bool readOnly)
     layout->addWidget(_textEdit, 5, 0, 1, 9);
 
 
-    QFrame *frame = new QFrame;
+    auto *frame = new QFrame;
     frame->setLayout(layout);
 
     return frame;
 }
 
-QTabWidget* TimeSeriesMotionDialog::createPlotsFrame()
+auto TimeSeriesMotionDialog::createPlotsFrame() -> QTabWidget*
 {
-    QTabWidget *tabWidget = new QTabWidget;
+    auto *tabWidget = new QTabWidget;
 
     // Acceleration time series
-    QwtPlot *plot = new QwtPlot;
+    auto *plot = new QwtPlot;
     plot->setAutoReplot(true);
-    QwtPlotPicker *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
+    auto *picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
                                               QwtPicker::CrossRubberBand,
                                               QwtPicker::ActiveOnly, plot->canvas());
     picker->setStateMachine(new QwtPickerDragPointMachine());
@@ -558,7 +558,7 @@ void TimeSeriesMotionDialog::plot()
             _motion->freq().size() - 1);
 }
 
-bool TimeSeriesMotionDialog::tryApply()
+auto TimeSeriesMotionDialog::tryApply() -> bool
 {
     bool success = true;
 

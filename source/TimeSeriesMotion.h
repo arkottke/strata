@@ -33,8 +33,8 @@ class TimeSeriesMotion : public AbstractMotion
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm);
-    friend QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm);
+    friend auto operator<< (QDataStream & out, const TimeSeriesMotion* tsm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, TimeSeriesMotion* tsm) -> QDataStream &;
 
 public:
     TimeSeriesMotion(QObject *parent = nullptr);
@@ -63,62 +63,62 @@ public:
         InchesPerSecondSquared //!< Inches per second squared
     };
 
-    static QStringList formatList();
+    static auto formatList() -> QStringList;
 
-    virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    virtual auto max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
+    virtual auto maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
+    virtual auto maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
 
-    QVector<double> computeSa(const QVector<double> & period, double damping,
-                               const QVector<std::complex<double> > & accelTf = QVector<std::complex<double> >() );
+    auto computeSa(const QVector<double> & period, double damping,
+                               const QVector<std::complex<double> > & accelTf = QVector<std::complex<double> >() ) -> QVector<double>;
 
-    virtual const QVector<double> absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    virtual const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;    
-    virtual double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    virtual auto absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double>;
+    virtual auto absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double>;    
+    virtual auto calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
 
-    QString fileName() const;
+    auto fileName() const -> QString;
 
-    static QStringList inputUnitsList();
-    InputUnits inputUnits() const;
+    static auto inputUnitsList() -> QStringList;
+    auto inputUnits() const -> InputUnits;
     void setInputUnits(InputUnits inputUnits);
 
     //! Time step of the motion
-    double timeStep() const;
+    auto timeStep() const -> double;
 
-    virtual const QVector<double> & freq() const;
+    virtual auto freq() const -> const QVector<double> &;
 
-    virtual double freqMax() const;
+    virtual auto freqMax() const -> double;
 
     //! Nyquist frequency -- maximum frequency defined by rawTimeStep
-    double freqNyquist() const;
+    auto freqNyquist() const -> double;
 
     //! Point count of the untruncated time series
-    int pointCount() const;
-    double scale() const;
+    auto pointCount() const -> int;
+    auto scale() const -> double;
 
-    Format format() const;
+    auto format() const -> Format;
     void setFormat(Format format);
 
-    int dataColumn() const;
-    int startLine() const;
-    int stopLine() const;
+    auto dataColumn() const -> int;
+    auto startLine() const -> int;
+    auto stopLine() const -> int;
 
-    QVector<double> time() const;
-    const QVector<double> & accel() const;
+    auto time() const -> QVector<double>;
+    auto accel() const -> const QVector<double> &;
 
     //! Compute time series for a given transfer function
-    QVector<double> timeSeries(MotionType type = Acceleration, const QVector<std::complex<double> > & tf = QVector<std::complex<double> >(), const bool baselineCorrect = false) const;
+    auto timeSeries(MotionType type = Acceleration, const QVector<std::complex<double> > & tf = QVector<std::complex<double> >(), const bool baselineCorrect = false) const -> QVector<double>;
 
     //! Compute a strain time series based on the velocity Fourier amplitude spectrum
-    QVector<double> strainTimeSeries(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), const bool baseLineCorrect = false) const;
+    auto strainTimeSeries(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >(), const bool baseLineCorrect = false) const -> QVector<double>;
 
     //! Compute the Arias Intensity of the time series for a given transfer function
-    QVector<double> ariasIntensity(const QVector<std::complex<double> > & tf = QVector<std::complex<double> >()) const;
+    auto ariasIntensity(const QVector<std::complex<double> > & tf = QVector<std::complex<double> >()) const -> QVector<double>;
 
-    virtual QString name() const;
+    virtual auto name() const -> QString;
 
     //! Create a html document containing the information of the model
-    QString toHtml() const;
+    auto toHtml() const -> QString;
 
     /*! Load the time series information from a file
       * \param fileName pathname of the file to load
@@ -126,22 +126,22 @@ public:
       * \param scale factor to apply to the motion
       * \return if the motion was successfully loaded.
       */
-    bool load(const QString &fileName, bool defaults = true, double scale = 1.0);
+    auto load(const QString &fileName, bool defaults = true, double scale = 1.0) -> bool;
 
     //!@{ Methods for viewing the Fourier amplitude spectrum of the motion
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
     //!@}
 
     void setSaveData(bool b);
-    bool saveData() const;
-    bool isLoaded() const;
+    auto saveData() const -> bool;
+    auto isLoaded() const -> bool;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void fileNameChanged(QString fileName);
@@ -177,21 +177,21 @@ protected:
     void processFile(std::ifstream*);
 
     //! Find the maximum absolute value of a vector
-    double findMaxAbs( const QVector<double> & vector ) const;
+    auto findMaxAbs( const QVector<double> & vector ) const -> double;
 
     /*! Compute the integral of the time series using the trapezoid rule.
      * \param in time series to be integrated
      */
-    QVector<double> integrate(const QVector<double> & in) const;
+    auto integrate(const QVector<double> & in) const -> QVector<double>;
 
     /*! Fit a polynomial to the time series using least squares regression.
          * \param term number of terms in the polynomial (order + 1)
          * \param series the time series
          */
-    const QVector<double> baselineFit( const int term, const QVector<double> & series ) const;
+    auto baselineFit( const int term, const QVector<double> & series ) const -> const QVector<double>;
 
     //! Apply the transfer function to the Fourier amplitude and compute the absolute value
-    QVector<double> absFourier(const QVector< std::complex<double> >& fa, const QVector<std::complex<double> >& tf) const;
+    auto absFourier(const QVector< std::complex<double> >& fa, const QVector<std::complex<double> >& tf) const -> QVector<double>;
 
     //! Compute the Fast Fourier Transform from real to complex using the FFTW
     void fft( const QVector<double>& in, QVector< std::complex<double> >& out) const;
@@ -200,10 +200,10 @@ protected:
     void ifft(const QVector< std::complex<double> >& in, QVector<double>& out ) const;
 
     //! Compute the time series by applying a transfer function to a specified Fourier amplitude spectrum
-    QVector<double> calcTimeSeries(QVector<std::complex<double> > fa, const QVector<std::complex<double> > & tf) const;
+    auto calcTimeSeries(QVector<std::complex<double> > fa, const QVector<std::complex<double> > & tf) const -> QVector<double>;
 
     //! The conversion factor for the input motion
-    double unitConversionFactor() const;
+    auto unitConversionFactor() const -> double;
 
     //! Columns for the data view
     enum Column {

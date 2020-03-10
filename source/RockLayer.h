@@ -34,29 +34,29 @@ class RockLayer : public VelocityLayer
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const RockLayer* rl);
-    friend QDataStream & operator>> (QDataStream & in, RockLayer* rl);
+    friend auto operator<< (QDataStream & out, const RockLayer* rl) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, RockLayer* rl) -> QDataStream &;
 
 public:
     RockLayer(QObject *parent = nullptr);
 
-    double untWt() const;
-    double density() const;
+    auto untWt() const -> double;
+    auto density() const -> double;
 
     //! Randomized damping and strain dependent damping
-    double damping() const;
+    auto damping() const -> double;
 
     //! Set the varied damping and strain dependent damping
     void setDamping(double damping);
 
     //! Set the average damping only
-    double avgDamping() const;
+    auto avgDamping() const -> double;
 
     //! A description of the layer for tables
-    QString toString() const;
+    auto toString() const -> QString;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setUntWt(double untWt);

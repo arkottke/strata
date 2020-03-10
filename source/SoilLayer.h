@@ -37,8 +37,8 @@ class SoilLayer : public VelocityLayer
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SoilLayer* sl);
-    friend QDataStream & operator>> (QDataStream & in, SoilLayer* sl);
+    friend auto operator<< (QDataStream & out, const SoilLayer* sl) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SoilLayer* sl) -> QDataStream &;
     friend class SoilProfile;
 
 public:
@@ -46,20 +46,20 @@ public:
 
     explicit SoilLayer(const SoilLayer *soilLayer);
 
-    SoilType* soilType() const;
+    auto soilType() const -> SoilType*;
     void setSoilType(SoilType* soilType);
 
-    double thickness() const;
+    auto thickness() const -> double;
 
-    double depthToBase() const;
+    auto depthToBase() const -> double;
 
-    QString toString() const;
+    auto toString() const -> QString;
 
-    double untWt() const;
-    double density() const;
+    auto untWt() const -> double;
+    auto density() const -> double;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 protected:
     void setThickness(double thickness);

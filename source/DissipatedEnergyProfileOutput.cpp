@@ -36,27 +36,27 @@ DissipatedEnergyProfileOutput::DissipatedEnergyProfileOutput(OutputCatalog* cata
     _offset = 1;
 }
 
-QString DissipatedEnergyProfileOutput::name() const
+auto DissipatedEnergyProfileOutput::name() const -> QString
 {
     return tr("Dissipated Energy Profile");
 }
 
-QString DissipatedEnergyProfileOutput::shortName() const
+auto DissipatedEnergyProfileOutput::shortName() const -> QString
 {
     return tr("dissipatedEnergy");
 }
 
-const QString DissipatedEnergyProfileOutput::xLabel() const
+auto DissipatedEnergyProfileOutput::xLabel() const -> const QString
 {
     return tr("Dissipated Energy (?)");
 }
 
-QwtScaleEngine* DissipatedEnergyProfileOutput::xScaleEngine() const
+auto DissipatedEnergyProfileOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return new QwtLinearScaleEngine;
 }
 
-bool DissipatedEnergyProfileOutput::timeSeriesOnly() const
+auto DissipatedEnergyProfileOutput::timeSeriesOnly() const -> bool
 {
     return true;
 }

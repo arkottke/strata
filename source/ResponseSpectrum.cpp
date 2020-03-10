@@ -35,7 +35,7 @@ ResponseSpectrum::ResponseSpectrum(QObject * parent)
     connect(this, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SIGNAL(wasModified()));
 }
 
-bool ResponseSpectrum::modified() const
+auto ResponseSpectrum::modified() const -> bool
 {
     return _modified;
 }
@@ -46,7 +46,7 @@ void ResponseSpectrum::setModified(bool modified)
     emit wasModified();
 }
 
-double ResponseSpectrum::damping() const
+auto ResponseSpectrum::damping() const -> double
 {
     return _damping;
 }
@@ -60,7 +60,7 @@ void ResponseSpectrum::setDamping(double damping)
     _damping = damping;   
 }
 
-const QVector<double> & ResponseSpectrum::period() const
+auto ResponseSpectrum::period() const -> const QVector<double> &
 {
     return _period;
 }
@@ -73,7 +73,7 @@ void ResponseSpectrum::setPeriod(const QVector<double> & period)
     endResetModel();
 }
 
-const QVector<double> & ResponseSpectrum::sa() const
+auto ResponseSpectrum::sa() const -> const QVector<double> &
 {
     return _sa;
 }
@@ -96,21 +96,21 @@ void ResponseSpectrum::scaleBy(double scale)
     emit wasModified();
 }
 
-int ResponseSpectrum::rowCount(const QModelIndex &parent) const
+auto ResponseSpectrum::rowCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return qMin(_period.size(), _sa.size());
 }
 
-int ResponseSpectrum::columnCount(const QModelIndex &parent) const
+auto ResponseSpectrum::columnCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 2;
 }
 
-QVariant ResponseSpectrum::headerData( int section, Qt::Orientation orientation, int role ) const
+auto ResponseSpectrum::headerData( int section, Qt::Orientation orientation, int role ) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -130,7 +130,7 @@ QVariant ResponseSpectrum::headerData( int section, Qt::Orientation orientation,
     }
 }
 
-QVariant ResponseSpectrum::data ( const QModelIndex &index, int role ) const
+auto ResponseSpectrum::data ( const QModelIndex &index, int role ) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -149,7 +149,7 @@ QVariant ResponseSpectrum::data ( const QModelIndex &index, int role ) const
     return QVariant();
 }
 
-bool ResponseSpectrum::setData( const QModelIndex &index, const QVariant &value, int role )
+auto ResponseSpectrum::setData( const QModelIndex &index, const QVariant &value, int role ) -> bool
 {
     if(index.parent()!=QModelIndex())
         return false;
@@ -175,12 +175,12 @@ bool ResponseSpectrum::setData( const QModelIndex &index, const QVariant &value,
     return true;
 }
 
-Qt::ItemFlags ResponseSpectrum::flags ( const QModelIndex &index ) const
+auto ResponseSpectrum::flags ( const QModelIndex &index ) const -> Qt::ItemFlags
 {
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
-bool ResponseSpectrum::insertRows ( int row, int count, const QModelIndex &parent )
+auto ResponseSpectrum::insertRows ( int row, int count, const QModelIndex &parent ) -> bool
 {
     emit beginInsertRows( parent, row, row+count-1 );
 
@@ -194,7 +194,7 @@ bool ResponseSpectrum::insertRows ( int row, int count, const QModelIndex &paren
     return true;
 }
 
-bool ResponseSpectrum::removeRows ( int row, int count, const QModelIndex &parent )
+auto ResponseSpectrum::removeRows ( int row, int count, const QModelIndex &parent ) -> bool
 {
     emit beginRemoveRows( parent, row, row+count-1);
 
@@ -216,7 +216,7 @@ void ResponseSpectrum::fromJson(const QJsonObject &json)
     Serialize::toDoubleVector(json["sa"], _sa);
 }
 
-QJsonObject ResponseSpectrum::toJson() const
+auto ResponseSpectrum::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["modified"] = _modified;
@@ -228,7 +228,7 @@ QJsonObject ResponseSpectrum::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs)
+auto operator<< (QDataStream & out, const ResponseSpectrum* rs) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -240,7 +240,7 @@ QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, ResponseSpectrum* rs)
+auto operator>> (QDataStream & in, ResponseSpectrum* rs) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

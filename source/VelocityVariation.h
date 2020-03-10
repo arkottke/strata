@@ -40,8 +40,8 @@ class VelocityVariation : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const VelocityVariation* vv);
-    friend QDataStream & operator>> (QDataStream & in, VelocityVariation* vv);
+    friend auto operator<< (QDataStream & out, const VelocityVariation* vv) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, VelocityVariation* vv) -> QDataStream &;
 
 public:
     explicit VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer);
@@ -57,31 +57,31 @@ public:
         USGS_C,
         USGS_D };
 
-    static QStringList modelList();
+    static auto modelList() -> QStringList;
 
     //! Vary the shear-wave velocity of the layers
     void vary(QList<SoilLayer*>& soilLayers, RockLayer* bedrock) const;
 
-    bool enabled() const;
+    auto enabled() const -> bool;
 
-    bool isBedrockDepthVaried() const;
-    Model stdevModel() const;
-    bool stdevCustomEnabled() const;
+    auto isBedrockDepthVaried() const -> bool;
+    auto stdevModel() const -> Model;
+    auto stdevCustomEnabled() const -> bool;
     void setStdevModel(Model model);
-    bool stdevIsLayerSpecific() const;
-    double stdev() const;
+    auto stdevIsLayerSpecific() const -> bool;
+    auto stdev() const -> double;
 
-    Model correlModel() const;
+    auto correlModel() const -> Model;
     void setCorrelModel(Model model);
-    bool correlCustomEnabled() const;
-    double correlInitial() const;
-    double correlFinal() const;
-    double correlDelta() const;
-    double correlIntercept() const;
-    double correlExponent() const;
+    auto correlCustomEnabled() const -> bool;
+    auto correlInitial() const -> double;
+    auto correlFinal() const -> double;
+    auto correlDelta() const -> double;
+    auto correlIntercept() const -> double;
+    auto correlExponent() const -> double;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void enabledChanged(bool enabled);

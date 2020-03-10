@@ -67,7 +67,7 @@ ProfileRandomizer::~ProfileRandomizer()
     _velocityVariation->deleteLater();
 }
 
-bool ProfileRandomizer::enabled() const
+auto ProfileRandomizer::enabled() const -> bool
 {
     return _siteProfile->isVaried() && _enabled;
 }
@@ -87,17 +87,17 @@ void ProfileRandomizer::updateEnabled()
     emit enabledChanged(enabled());
 }
 
-BedrockDepthVariation* ProfileRandomizer::bedrockDepthVariation()
+auto ProfileRandomizer::bedrockDepthVariation() -> BedrockDepthVariation*
 {
     return _bedrockDepthVariation;
 }
 
-LayerThicknessVariation* ProfileRandomizer::layerThicknessVariation()
+auto ProfileRandomizer::layerThicknessVariation() -> LayerThicknessVariation*
 {
     return _layerThicknessVariation;
 }
 
-VelocityVariation* ProfileRandomizer::velocityVariation()
+auto ProfileRandomizer::velocityVariation() -> VelocityVariation*
 {
     return _velocityVariation;
 }
@@ -112,7 +112,7 @@ void ProfileRandomizer::fromJson(const QJsonObject &json)
     setEnabled(enabled);
 }
 
-QJsonObject ProfileRandomizer::toJson() const
+auto ProfileRandomizer::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["enabled"] = _enabled;
@@ -123,7 +123,7 @@ QJsonObject ProfileRandomizer::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pv)
+auto operator<< (QDataStream & out, const ProfileRandomizer* pv) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -135,7 +135,7 @@ QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pv)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, ProfileRandomizer* pv)
+auto operator>> (QDataStream & in, ProfileRandomizer* pv) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

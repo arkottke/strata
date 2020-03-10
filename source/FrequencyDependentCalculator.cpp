@@ -39,7 +39,7 @@ FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     reset();
 }
 
-bool FrequencyDependentCalculator::useSmoothSpectrum() {
+auto FrequencyDependentCalculator::useSmoothSpectrum() -> bool {
     return _useSmoothSpectrum;
 }
 
@@ -51,7 +51,7 @@ void FrequencyDependentCalculator::setUseSmoothSpectrum(bool b) {
     }
 }
 
-QString FrequencyDependentCalculator::toHtml() const
+auto FrequencyDependentCalculator::toHtml() const -> QString
 {
     return tr(
             "<li>Frequency Dependent Equivalent Linear Parameters"
@@ -65,9 +65,9 @@ QString FrequencyDependentCalculator::toHtml() const
             .arg(_maxIterations);
 }
 
-bool FrequencyDependentCalculator::updateSubLayer(
+auto FrequencyDependentCalculator::updateSubLayer(
         int index,
-        const QVector<std::complex<double> > &strainTf)
+        const QVector<std::complex<double> > &strainTf) -> bool
 {
     const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
@@ -203,13 +203,13 @@ void FrequencyDependentCalculator::fromJson(const QJsonObject &json)
     AbstractIterativeCalculator::fromJson(json);
 }
 
-QJsonObject FrequencyDependentCalculator::toJson() const
+auto FrequencyDependentCalculator::toJson() const -> QJsonObject
 {
     return AbstractIterativeCalculator::toJson();
 }
 
-QDataStream & operator<<(QDataStream & out,
-                                 const FrequencyDependentCalculator* fdc)
+auto operator<<(QDataStream & out,
+                                 const FrequencyDependentCalculator* fdc) -> QDataStream &
 {
     out << (quint8)2;
 
@@ -219,8 +219,8 @@ QDataStream & operator<<(QDataStream & out,
     return out;
 }
 
-QDataStream & operator>>(QDataStream & in,
-                                 FrequencyDependentCalculator* fdc)
+auto operator>>(QDataStream & in,
+                                 FrequencyDependentCalculator* fdc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

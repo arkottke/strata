@@ -89,10 +89,10 @@ class ResultsPage : public AbstractPage
 
     private:
         //! Create the table goup box
-        QGroupBox* createOutputGroup();
+        auto createOutputGroup() -> QGroupBox*;
 
         //! Create the plot
-        QTabWidget* createDataTabWidget();
+        auto createDataTabWidget() -> QTabWidget*;
         
         //! Create context menu for the chart
         void createContextMenu();

@@ -31,20 +31,20 @@ DepthComboBoxDelegate::DepthComboBoxDelegate( QObject * parent )
 {
 }
 
-QWidget * DepthComboBoxDelegate::createEditor( QWidget * parent, const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/ ) const
+auto DepthComboBoxDelegate::createEditor( QWidget * parent, const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/ ) const -> QWidget *
 {
     return new DepthComboBox(parent);
 }
 
 void DepthComboBoxDelegate::setEditorData( QWidget * editor, const QModelIndex & index ) const
 {
-    DepthComboBox * comboBox = static_cast<DepthComboBox*>(editor);
+    auto * comboBox = static_cast<DepthComboBox*>(editor);
     // Retrieve the map containing the list of soil names and the selected index    
     comboBox->setDepth(index.model()->data(index, Qt::EditRole).toDouble());
 }
 
 void DepthComboBoxDelegate::setModelData( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const
 {
-    DepthComboBox * depthBox = static_cast<DepthComboBox*>(editor);
+    auto * depthBox = static_cast<DepthComboBox*>(editor);
     model->setData(index, depthBox->depth());
 }

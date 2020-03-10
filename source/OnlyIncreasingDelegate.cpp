@@ -31,10 +31,10 @@ OnlyIncreasingDelegate::OnlyIncreasingDelegate(QObject *parent) :
 {
 }
 
-QWidget* OnlyIncreasingDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const
+auto OnlyIncreasingDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const -> QWidget*
 {
     QWidget* editor = QStyledItemDelegate::createEditor(parent, option, index);
-    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(editor);
+    auto* lineEdit = qobject_cast<QLineEdit*>(editor);
     if (lineEdit) {
         double min = 0;
         double max = 20;
@@ -49,7 +49,7 @@ QWidget* OnlyIncreasingDelegate::createEditor(QWidget * parent, const QStyleOpti
             max = next.data(Qt::UserRole).toDouble() - DBL_EPSILON;
         }
 
-        QDoubleValidator* validator = new QDoubleValidator(min, max, 5);
+        auto* validator = new QDoubleValidator(min, max, 5);
         lineEdit->setValidator(validator);
     }
 

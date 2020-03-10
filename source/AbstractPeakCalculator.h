@@ -33,31 +33,31 @@ public:
     explicit AbstractPeakCalculator();
     virtual ~AbstractPeakCalculator();
 
-    double calcPeak(
+    auto calcPeak(
             double duration,
             const QVector<double> &freqs,
             const QVector<double> &fourierAmps,
             double oscFreq = 0,
             double oscDamping = 0,
-            const QVector<std::complex<double> > &siteTransFunc = QVector<std::complex<double> >());
+            const QVector<std::complex<double> > &siteTransFunc = QVector<std::complex<double> >()) -> double;
 
-    virtual double calcDurationRms(
+    virtual auto calcDurationRms(
             double duration,
             double oscFreq,
             double oscDamping,
-            const QVector<std::complex<double> > &siteTransFunc);
+            const QVector<std::complex<double> > &siteTransFunc) -> double;
 
 protected:
-    virtual double calcPeakFactor(double duration, double oscFreq, double oscDamping) = 0;
+    virtual auto calcPeakFactor(double duration, double oscFreq, double oscDamping) -> double = 0;
 
 
     void initCache(const QVector<double> &freqs,
                    const QVector<double> &fourierAmps);
     void clearCache();
 
-    double getMoment(int power);
+    auto getMoment(int power) -> double;
 
-    double limitZeroCrossings(double) const;
+    auto limitZeroCrossings(double) const -> double;
 
     QString _name;
 

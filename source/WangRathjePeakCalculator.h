@@ -39,11 +39,11 @@ class WangRathjePeakCalculator : public BooreThompsonPeakCalculator {
 public:
     WangRathjePeakCalculator();
 
-    virtual double calcDurationRms(
+    virtual auto calcDurationRms(
             double duration,
             double oscFreq,
             double oscDamping,
-            const QVector<std::complex<double> > &siteTransFunc);
+            const QVector<std::complex<double> > &siteTransFunc) -> double;
 protected:
 
     QList<WangRathjeCoef> _coefs;

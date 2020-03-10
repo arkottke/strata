@@ -57,7 +57,7 @@ SoilType::SoilType(QObject *parent)
     _nCycles = 10;
 }
 
-double SoilType::untWt() const
+auto SoilType::untWt() const -> double
 {
     return _untWt;
 }
@@ -71,12 +71,12 @@ void SoilType::setUntWt(double untWt)
     }
 }
 
-double SoilType::density() const
+auto SoilType::density() const -> double
 {
     return _untWt / Units::instance()->gravity();
 }
 
-double SoilType::damping() const
+auto SoilType::damping() const -> double
 {
     return _damping;
 }
@@ -89,7 +89,7 @@ void SoilType::setDamping(double damping)
     }
 }
 
-double SoilType::minDamping() const
+auto SoilType::minDamping() const -> double
 {
     return _minDamping;
 }
@@ -102,7 +102,7 @@ void SoilType::setMinDamping(double minDamping)
     }
 }
 
-const QString & SoilType::name() const
+auto SoilType::name() const -> const QString &
 {
     return _name;
 }
@@ -113,7 +113,7 @@ void SoilType::setName(const QString & name)
     emit nameChanged(_name);
 }
 
-const QString & SoilType::notes() const
+auto SoilType::notes() const -> const QString &
 {
     return _notes;
 }
@@ -127,7 +127,7 @@ void SoilType::setNotes(const QString & notes)
     }
 }
 
-bool SoilType::isVaried() const
+auto SoilType::isVaried() const -> bool
 {
     return _isVaried;
 }
@@ -150,12 +150,12 @@ void SoilType::setSaveData(bool saveData)
     }
 }
 
-bool SoilType::saveData() const
+auto SoilType::saveData() const -> bool
 {
     return _saveData;
 }
 
-NonlinearProperty* SoilType::modulusModel()
+auto SoilType::modulusModel() -> NonlinearProperty*
 {
     return _modulusModel;
 }
@@ -168,14 +168,14 @@ void SoilType::setModulusModel(NonlinearProperty * model)
     _modulusModel = model;
     _modulusModel->setParent(this);
 
-    if (DarendeliNonlinearProperty *dnp = qobject_cast<DarendeliNonlinearProperty*>(_modulusModel))
+    if (auto *dnp = qobject_cast<DarendeliNonlinearProperty*>(_modulusModel))
         dnp->calculate(this);
 
     emit modulusModelChanged(_modulusModel);
     emit wasModified();
 }
 
-NonlinearProperty* SoilType::dampingModel()
+auto SoilType::dampingModel() -> NonlinearProperty*
 {
     return _dampingModel;
 }
@@ -188,20 +188,20 @@ void SoilType::setDampingModel(NonlinearProperty * model)
     _dampingModel = model;
     _dampingModel->setParent(this);
 
-    if (DarendeliNonlinearProperty *dnp = qobject_cast<DarendeliNonlinearProperty*>(_dampingModel))
+    if (auto *dnp = qobject_cast<DarendeliNonlinearProperty*>(_dampingModel))
         dnp->calculate(this);
 
     emit dampingModelChanged(_dampingModel);
     emit wasModified();
 }
 
-bool SoilType::requiresSoilProperties() const
+auto SoilType::requiresSoilProperties() const -> bool
 {
     return (qobject_cast<DarendeliNonlinearProperty*>(_modulusModel)
             || qobject_cast<DarendeliNonlinearProperty*>(_dampingModel));
 }
 
-double SoilType::meanStress() const
+auto SoilType::meanStress() const -> double
 {
     return _meanStress;
 }
@@ -216,7 +216,7 @@ void SoilType::setMeanStress(double meanStress)
 
 }
 
-double SoilType::pi() const
+auto SoilType::pi() const -> double
 {
     return _pi;
 }
@@ -230,7 +230,7 @@ void SoilType::setPi(double pi)
     }
 }
 
-double SoilType::ocr() const
+auto SoilType::ocr() const -> double
 {
     return _ocr;
 }
@@ -245,7 +245,7 @@ void SoilType::setOcr(double ocr)
 
 }
 
-double SoilType::freq() const
+auto SoilType::freq() const -> double
 {
     return _freq;
 }
@@ -259,7 +259,7 @@ void SoilType::setFreq(double freq)
     }
 }
 
-int SoilType::nCycles() const
+auto SoilType::nCycles() const -> int
 {
     return _nCycles;
 }
@@ -288,7 +288,7 @@ void SoilType::computeDarendeliCurves()
         dnp->calculate(this);
 }
 
-QString SoilType::toHtml() const
+auto SoilType::toHtml() const -> QString
 {
     // Requires that the HTML header is already established.
     QString html = tr("<a name=\"%1\">%1</a>"
@@ -364,7 +364,7 @@ void SoilType::fromJson(const QJsonObject &json)
     }
 }
 
-QJsonObject SoilType::toJson() const
+auto SoilType::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["untWt"] = _untWt;
@@ -390,7 +390,7 @@ QJsonObject SoilType::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const SoilType* st)
+auto operator<< (QDataStream & out, const SoilType* st) -> QDataStream &
 {
     out << static_cast<quint8>(2);
 
@@ -414,7 +414,7 @@ QDataStream & operator<< (QDataStream & out, const SoilType* st)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SoilType* st)
+auto operator>> (QDataStream & in, SoilType* st) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -458,7 +458,7 @@ QDataStream & operator>> (QDataStream & in, SoilType* st)
     return in;
 }
 
-NonlinearProperty * SoilType::deriveModel(NonlinearProperty::Type type, QString className)
+auto SoilType::deriveModel(NonlinearProperty::Type type, QString className) -> NonlinearProperty *
 {
     NonlinearProperty *np = nullptr;
     if (className == "CustomNonlinearProperty") {

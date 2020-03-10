@@ -32,13 +32,13 @@ Q_OBJECT
 public:
     explicit AriasIntensityProfileOutput(OutputCatalog* catalog);
 
-    virtual QString name() const;
+    virtual auto name() const -> QString;
 protected:
-    virtual QString shortName() const;
-    virtual QwtScaleEngine* xScaleEngine() const;
-    virtual const QString xLabel() const;
+    virtual auto shortName() const -> QString;
+    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+    virtual auto xLabel() const -> const QString;
 
-    virtual bool timeSeriesOnly() const;
+    virtual auto timeSeriesOnly() const -> bool;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

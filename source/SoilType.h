@@ -37,58 +37,58 @@ class SoilType : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SoilType* soilType);
-    friend QDataStream & operator>> (QDataStream & in, SoilType* soilType);
+    friend auto operator<< (QDataStream & out, const SoilType* soilType) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SoilType* soilType) -> QDataStream &;
 
 public:
     explicit SoilType(QObject *parent = nullptr);
 
-    double untWt() const;
+    auto untWt() const -> double;
     void setUntWt(double untWt);
 
-    double density() const;
+    auto density() const -> double;
 
-    double damping() const;
+    auto damping() const -> double;
     void setDamping(double damping);
 
-    double minDamping() const;
+    auto minDamping() const -> double;
     void setMinDamping(double minDamping);
 
     void setName(const QString & name);
-    const QString & name() const;
+    auto name() const -> const QString &;
 
     void setNotes(const QString & notes);
-    const QString & notes() const;
+    auto notes() const -> const QString &;
 
     void setIsVaried(bool isVaried);
-    bool isVaried() const;
+    auto isVaried() const -> bool;
 
     void setSaveData(bool saveData);
-    bool saveData() const;
+    auto saveData() const -> bool;
 
-    NonlinearProperty* modulusModel();
+    auto modulusModel() -> NonlinearProperty*;
     void setModulusModel(NonlinearProperty * model);
 
-    NonlinearProperty* dampingModel();
+    auto dampingModel() -> NonlinearProperty*;
     void setDampingModel(NonlinearProperty * model);
 
     //! If the soil properties are required
-    bool requiresSoilProperties() const;
+    auto requiresSoilProperties() const -> bool;
 
-    double meanStress() const;
-    double pi() const;
-    double ocr() const;
-    double freq() const;
-    int nCycles() const;
+    auto meanStress() const -> double;
+    auto pi() const -> double;
+    auto ocr() const -> double;
+    auto freq() const -> double;
+    auto nCycles() const -> int;
 
     //! Create a html document containing the information of the model
-    QString toHtml() const;
+    auto toHtml() const -> QString;
 
     //! Compute the shear modulus-reduction and damping curves
     void computeDarendeliCurves();
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setPi(double pi);
@@ -151,6 +151,6 @@ private:
     //! Damping
     NonlinearProperty* _dampingModel;
 
-    NonlinearProperty* deriveModel(NonlinearProperty::Type type, QString className);
+    auto deriveModel(NonlinearProperty::Type type, QString className) -> NonlinearProperty*;
 };
 #endif

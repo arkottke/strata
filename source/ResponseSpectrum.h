@@ -35,20 +35,20 @@ class ResponseSpectrum : public MyAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const ResponseSpectrum* rs);
-    friend QDataStream & operator>> (QDataStream & in, ResponseSpectrum* rs);
+    friend auto operator<< (QDataStream & out, const ResponseSpectrum* rs) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, ResponseSpectrum* rs) -> QDataStream &;
 
 public:
     ResponseSpectrum(QObject *parent = nullptr);
 
-    bool modified() const;
+    auto modified() const -> bool;
 
-    double damping() const;
+    auto damping() const -> double;
 
-    const QVector<double> & period() const;
+    auto period() const -> const QVector<double> &;
     void setPeriod(const QVector<double> & period);
 
-    const QVector<double> & sa() const;
+    auto sa() const -> const QVector<double> &;
     void setSa(const QVector<double> & sa);
 
     //! Scale the response spectrum by a factor
@@ -56,20 +56,20 @@ public:
 
     void fromMap( const QMap<QString, QVariant> & map);
 
-    int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
-    int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    auto rowCount ( const QModelIndex &parent = QModelIndex() ) const -> int;
+    auto columnCount ( const QModelIndex &parent = QModelIndex() ) const -> int;
 
-    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
-    bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
+    auto data ( const QModelIndex &index, int role = Qt::DisplayRole ) const -> QVariant;
+    auto setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole ) -> bool;
 
-    QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
-    Qt::ItemFlags flags ( const QModelIndex &index ) const;
+    auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
+    auto flags ( const QModelIndex &index ) const -> Qt::ItemFlags;
 
-    bool insertRows( int row, int count, const QModelIndex &parent = QModelIndex() );
-    bool removeRows( int row, int count, const QModelIndex &parent = QModelIndex() );
+    auto insertRows( int row, int count, const QModelIndex &parent = QModelIndex() ) -> bool;
+    auto removeRows( int row, int count, const QModelIndex &parent = QModelIndex() ) -> bool;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void wasModified();

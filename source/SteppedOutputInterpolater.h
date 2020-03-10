@@ -29,7 +29,7 @@ class SteppedOutputInterpolater : public AbstractOutputInterpolater
 public:
     SteppedOutputInterpolater();
 
-    QVector<double> calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi);
+    auto calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>;
 };
 
 #endif // STEPPED_OUTPUT_INTERPOLATER_H

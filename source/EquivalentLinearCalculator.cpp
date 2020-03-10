@@ -33,7 +33,7 @@ EquivalentLinearCalculator::EquivalentLinearCalculator(QObject *parent)
     _strainRatio = 0.65;
 }
 
-QString EquivalentLinearCalculator::toHtml() const
+auto EquivalentLinearCalculator::toHtml() const -> QString
 {
     return tr(
             "<li>Equivalent Linear Parameters"
@@ -49,7 +49,7 @@ QString EquivalentLinearCalculator::toHtml() const
             .arg(_maxIterations);
 }
 
-double EquivalentLinearCalculator::strainRatio() const
+auto EquivalentLinearCalculator::strainRatio() const -> double
 {
     return _strainRatio;
 }
@@ -64,9 +64,9 @@ void EquivalentLinearCalculator::setStrainRatio(double strainRatio)
     }
 }
 
-bool EquivalentLinearCalculator::updateSubLayer(
+auto EquivalentLinearCalculator::updateSubLayer(
         int index,
-        const QVector<std::complex<double> > &strainTf)
+        const QVector<std::complex<double> > &strainTf) -> bool
 {
     const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
@@ -115,15 +115,15 @@ void EquivalentLinearCalculator::fromJson(const QJsonObject &json)
     _strainRatio = json["strainRatio"].toDouble();
 }
 
-QJsonObject EquivalentLinearCalculator::toJson() const
+auto EquivalentLinearCalculator::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractIterativeCalculator ::toJson();
     json["strainRatio"] = _strainRatio;
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out,
-                                 const EquivalentLinearCalculator* elc)
+auto operator<< (QDataStream & out,
+                                 const EquivalentLinearCalculator* elc) -> QDataStream &
 {
     out << (quint8)1;
     out << qobject_cast<const AbstractIterativeCalculator*>(elc)
@@ -132,8 +132,8 @@ QDataStream & operator<< (QDataStream & out,
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in,
-                                 EquivalentLinearCalculator* elc)
+auto operator>> (QDataStream & in,
+                                 EquivalentLinearCalculator* elc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

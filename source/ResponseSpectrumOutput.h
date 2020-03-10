@@ -32,15 +32,15 @@ Q_OBJECT
 public:
     explicit ResponseSpectrumOutput(OutputCatalog* catalog);
 
-    virtual bool needsPeriod() const;
-    virtual QString name() const;
+    virtual auto needsPeriod() const -> bool;
+    virtual auto name() const -> QString;
 protected:
-    virtual QString shortName() const;
-    virtual QwtScaleEngine* xScaleEngine() const;
-    virtual QwtScaleEngine* yScaleEngine() const;
-    virtual const QString xLabel() const;
-    virtual const QString yLabel() const;
-    virtual const QVector<double>& ref(int motion = 0) const;
+    virtual auto shortName() const -> QString;
+    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+    virtual auto yScaleEngine() const -> QwtScaleEngine*;
+    virtual auto xLabel() const -> const QString;
+    virtual auto yLabel() const -> const QString;
+    virtual auto ref(int motion = 0) const -> const QVector<double>&;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

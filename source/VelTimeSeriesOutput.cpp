@@ -33,17 +33,17 @@ VelTimeSeriesOutput::VelTimeSeriesOutput(OutputCatalog* catalog)
 
 }
 
-QString VelTimeSeriesOutput::name() const
+auto VelTimeSeriesOutput::name() const -> QString
 {
     return tr("Velocity Time Series");
 }
 
-QString VelTimeSeriesOutput::shortName() const
+auto VelTimeSeriesOutput::shortName() const -> QString
 {
     return tr("velTs");
 }
 
-const QString VelTimeSeriesOutput::yLabel() const
+auto VelTimeSeriesOutput::yLabel() const -> const QString
 {
     return tr("Velocity (%1)").arg(Units::instance()->velTs());
 }
@@ -54,7 +54,7 @@ void VelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
     data = tsm->timeSeries(TimeSeriesMotion::Velocity,
                               calculator->calcAccelTf(

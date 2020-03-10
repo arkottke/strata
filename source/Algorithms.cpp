@@ -30,7 +30,7 @@
 #include <gsl/gsl_math.h>
 
 
-QVector<double> interp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi )
+auto interp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi ) -> QVector<double>
 {
     Q_ASSERT_X( x.size() == y.size(), "Algorithms::interp", "input x and y vectors must be same size" );
 
@@ -52,7 +52,7 @@ QVector<double> interp( const QVector<double> & x, const QVector<double> & y, co
     return yi;
 }
 
-QVector<double> logLoginterp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi )
+auto logLoginterp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi ) -> QVector<double>
 {
     QVector<double> logX(x.size());
     QVector<double> logY(x.size());
@@ -78,7 +78,7 @@ QVector<double> logLoginterp( const QVector<double> & x, const QVector<double> &
     return yi;
 }
 
-QString boolToString(bool b)
+auto boolToString(bool b) -> QString
 {
     QString str;
 
@@ -90,7 +90,7 @@ QString boolToString(bool b)
     return str;
 }
 
-QString locationToString(double loc)
+auto locationToString(double loc) -> QString
 {
     if (loc < 0) {
         return QObject::tr("Bedrock");

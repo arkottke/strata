@@ -44,10 +44,10 @@ public:
     explicit AbstractCalculator(QObject *parent = nullptr);
 
     //! Produce an HTML table summarizing the calculator
-    virtual QString toHtml() const;
+    virtual auto toHtml() const -> QString;
 
-    SoilProfile* site() const;
-    AbstractMotion* motion() const;
+    auto site() const -> SoilProfile*;
+    auto motion() const -> AbstractMotion*;
 
     //! Set text log to record calculation steps
     void setTextLog(TextLog* const textLog);
@@ -56,13 +56,13 @@ public:
     virtual void reset();
 
     //! Perform the site response calculation
-    virtual bool run(AbstractMotion* motion, SoilProfile* site) = 0;
+    virtual auto run(AbstractMotion* motion, SoilProfile* site) -> bool = 0;
 
     //! If the analysis converged
-    virtual bool converged() const = 0;
+    virtual auto converged() const -> bool = 0;
 
     //! Compute the peak ground acceleration at the surface
-    double surfacePGA() const;
+    auto surfacePGA() const -> double;
 
     /*! Compute the acceleration transfer functions for a specific layer.
      *
@@ -72,9 +72,9 @@ public:
      * \param outputType type of output
      * \return the transfer function
      */
-    const QVector<std::complex<double> > calcAccelTf(
+    auto calcAccelTf(
             const Location & inLocation, const AbstractMotion::Type inputType,
-            const Location & outLocation, const AbstractMotion::Type outputType ) const;
+            const Location & outLocation, const AbstractMotion::Type outputType ) const -> const QVector<std::complex<double> >;
 
     /*! Compute the velocity to strain transfer function.
      *
@@ -83,8 +83,8 @@ public:
      * \param outLocation location of the desired transfer fucntion
      * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
      */
-    QVector<std::complex<double> > calcStrainTf(
-            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const;
+    auto calcStrainTf(
+            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >;
 
     /*! Compute the velocity to visco-elastic stress transfer function.
      *
@@ -93,8 +93,8 @@ public:
      * \param outLocation location of the desired transfer fucntion
      * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
      */
-    QVector<std::complex<double> > calcStressTf(
-            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const;
+    auto calcStressTf(
+            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >;
 signals:
     void wasModified();
 
@@ -106,19 +106,19 @@ protected:
     void init(AbstractMotion* motion, SoilProfile* site);
 
     //! Compute the complex shear modulus
-    std::complex<double> calcCompShearMod(const double shearMod, const double damping ) const;
+    static auto calcCompShearMod(const double shearMod, const double damping ) -> std::complex<double> ;
 
     /*! Compute the up-going and down-going waves
      * \return if the calculation is successful
      */
-    bool calcWaves();
+    auto calcWaves() -> bool;
 
     /*! Return the combined waves for a given set of conditions
      * \param freqIdx index of the frequency
      * \param location the location in the site profile
      * \param type type of motion
      */
-    const std::complex<double> waves(const int freqIdx, const Location & location, const AbstractMotion::Type type) const;
+    auto waves(const int freqIdx, const Location & location, const AbstractMotion::Type type) const -> const std::complex<double>;
 
     //! Site profile
     SoilProfile* _site;

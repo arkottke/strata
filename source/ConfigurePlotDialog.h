@@ -49,12 +49,12 @@ class AxisOptions : public QGroupBox
          */
         void setDefaults( const QwtScaleEngine * scaleEngine, bool autoScale, const QwtScaleDiv * scaleDiv );
 
-        bool linearSpacing() const;
+        auto linearSpacing() const -> bool;
 
-        bool autoScale() const;
+        auto autoScale() const -> bool;
 
-        double min() const;
-        double max() const;
+        auto min() const -> double;
+        auto max() const -> double;
 
     private:
         QComboBox * _spacingComboBox;

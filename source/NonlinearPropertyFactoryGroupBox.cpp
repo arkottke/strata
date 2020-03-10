@@ -30,10 +30,10 @@ NonlinearPropertyFactoryGroupBox::NonlinearPropertyFactoryGroupBox(
         AbstractNonlinearPropertyFactory *model, const QString & title, QWidget *parent)
     : QGroupBox(title, parent), _model(model)
 {
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
 
     // Add push button
-    QPushButton *pushButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
+    auto *pushButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
     connect(pushButton, SIGNAL(clicked()),
              this, SLOT(addRow()));
     layout->addWidget(pushButton, 0, 0);

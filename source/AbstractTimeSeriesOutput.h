@@ -33,20 +33,20 @@ class AbstractTimeSeriesOutput : public AbstractLocationOutput
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso);
-    friend QDataStream & operator>> (QDataStream & in, AbstractTimeSeriesOutput* atso);
+    friend auto operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractTimeSeriesOutput* atso) -> QDataStream &;
 
 public:
     explicit AbstractTimeSeriesOutput(OutputCatalog* catalog);
 
-    virtual QString fullName() const;
+    virtual auto fullName() const -> QString;
 
-    virtual bool needsTime() const;
+    virtual auto needsTime() const -> bool;
 
-    bool baselineCorrect() const;
+    auto baselineCorrect() const -> bool;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setBaselineCorrect(bool baseLineCorrect);
@@ -55,15 +55,15 @@ signals:
     void baselineCorrectChanged(int baseLineCorrect);
 
 protected:
-    virtual QString fileName(int motion = 0) const;
-    virtual QwtScaleEngine* xScaleEngine() const;
-    virtual QwtScaleEngine* yScaleEngine() const;
-    virtual const QString xLabel() const;
-    virtual const QVector<double>& ref(int motion) const;
-    virtual const QString suffix() const;
+    virtual auto fileName(int motion = 0) const -> QString;
+    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+    virtual auto yScaleEngine() const -> QwtScaleEngine*;
+    virtual auto xLabel() const -> const QString;
+    virtual auto ref(int motion) const -> const QVector<double>&;
+    virtual auto suffix() const -> const QString;
 
     //! Field width of the motion index
-    int fieldWidth() const;
+    auto fieldWidth() const -> int;
 
     //! If the time series is baseline corrected
     bool _baselineCorrect;

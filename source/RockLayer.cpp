@@ -31,7 +31,7 @@ RockLayer::RockLayer(QObject * parent)
     setAvgDamping(1.0);
 }
 
-double RockLayer::untWt() const
+auto RockLayer::untWt() const -> double
 {
     return _untWt;
 }
@@ -44,17 +44,17 @@ void RockLayer::setUntWt(double untWt)
     emit untWtChanged(_untWt);
 }
 
-double RockLayer::density() const
+auto RockLayer::density() const -> double
 {
     return _untWt / Units::instance()->gravity();
 }
 
-QString RockLayer::toString() const
+auto RockLayer::toString() const -> QString
 {
     return QString("Bedrock");
 }
 
-double RockLayer::damping() const
+auto RockLayer::damping() const -> double
 {
     return _damping;
 }
@@ -64,7 +64,7 @@ void RockLayer::setDamping(double damping)
     _damping = damping;
 }
 
-double RockLayer::avgDamping() const
+auto RockLayer::avgDamping() const -> double
 {
     return _avgDamping;
 }
@@ -87,7 +87,7 @@ void RockLayer::fromJson(const QJsonObject &json)
     setAvgDamping(avgDamping);
 }
 
-QJsonObject RockLayer::toJson() const
+auto RockLayer::toJson() const -> QJsonObject
 {
     QJsonObject json = VelocityLayer::toJson();
     json["untWt"] = _untWt;
@@ -96,7 +96,7 @@ QJsonObject RockLayer::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const RockLayer* rl)
+auto operator<< (QDataStream & out, const RockLayer* rl) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -106,7 +106,7 @@ QDataStream & operator<< (QDataStream & out, const RockLayer* rl)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, RockLayer* rl)
+auto operator>> (QDataStream & in, RockLayer* rl) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

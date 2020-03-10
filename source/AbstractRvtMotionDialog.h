@@ -47,10 +47,10 @@ protected slots:
 
 protected:
     void init();
-    virtual QFormLayout* createParametersLayout();
-    virtual QTabWidget* createTabWidget();
-    virtual QWidget* createRSPlotWidget();
-    virtual QWidget* createFSPlotWidget();
+    virtual auto createParametersLayout() -> QFormLayout*;
+    virtual auto createTabWidget() -> QTabWidget*;
+    virtual auto createRSPlotWidget() -> QWidget*;
+    virtual auto createFSPlotWidget() -> QWidget*;
 
     virtual void addRespSpecCurves();
 

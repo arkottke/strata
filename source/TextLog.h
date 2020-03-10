@@ -35,8 +35,8 @@ class TextLog : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const TextLog* tl);
-    friend QDataStream & operator>> (QDataStream & in, TextLog* tl);
+    friend auto operator<< (QDataStream & out, const TextLog* tl) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, TextLog* tl) -> QDataStream &;
 
     public:
     explicit TextLog(QObject *parent = nullptr);
@@ -48,7 +48,7 @@ class TextLog : public QObject
             High //!< Results for each iteration of the calculation
         };
         
-        static QStringList levelList();
+        static auto levelList() -> QStringList;
 
         //! Append text to the log
         void append(const QString & text);
@@ -56,13 +56,13 @@ class TextLog : public QObject
         //! Clear the log
         void clear();
 
-        Level level() const;
+        auto level() const -> Level;
         void setLevel(Level level);
 
-        const QStringList& text() const;
+        auto text() const -> const QStringList&;
 
         void fromJson(const QJsonObject &json);
-        QJsonObject toJson() const;
+        auto toJson() const -> QJsonObject;
 
 
     public slots:
@@ -82,6 +82,6 @@ class TextLog : public QObject
         QStringList _text;
 };
         
-TextLog & operator<< ( TextLog & log, const QString & string );
+auto operator<< ( TextLog & log, const QString & string ) -> TextLog &;
 
 #endif

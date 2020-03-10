@@ -35,19 +35,19 @@ void SoilTypeDelegate::setCatalog(SoilTypeCatalog *catalog)
     _catalog = catalog;
 }
 
-QWidget* SoilTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                const QModelIndex & index) const
+auto SoilTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                const QModelIndex & index) const -> QWidget*
 {
     Q_UNUSED(option);
     Q_UNUSED(index);
 
-    QComboBox *editor = new QComboBox(parent);
+    auto *editor = new QComboBox(parent);
     return editor;
 }
 
 void SoilTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & index) const
 {
-    QComboBox * comboBox = static_cast<QComboBox*>(editor);
+    auto * comboBox = static_cast<QComboBox*>(editor);
 
     comboBox->setModel(_catalog);
     comboBox->setCurrentIndex(
@@ -57,6 +57,6 @@ void SoilTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & index)
 void SoilTypeDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex &index) const
 {
-    QComboBox * comboBox = static_cast<QComboBox*>(editor);
+    auto * comboBox = static_cast<QComboBox*>(editor);
     model->setData(index, comboBox->currentIndex());
 }

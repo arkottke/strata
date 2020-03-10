@@ -43,7 +43,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(
     init();
 }
 
-QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
+auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout*
 {
     auto strm = qobject_cast<SourceTheoryRvtMotion*>(_motion);
     auto layout = AbstractRvtMotionDialog::createParametersLayout();
@@ -309,7 +309,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
 
 void SourceTheoryRvtMotionDialog::updatePathDurSource(int source)
 {
-    PathDurationModel::Source s = static_cast<PathDurationModel::Source>(source);
+    auto s = static_cast<PathDurationModel::Source>(source);
 
     _pathDurTableGroupBox->setReadOnly(
                 _readOnly || (s == PathDurationModel::Default));
@@ -317,7 +317,7 @@ void SourceTheoryRvtMotionDialog::updatePathDurSource(int source)
 
 void SourceTheoryRvtMotionDialog::updateCrustalAmpSource(int source)
 {
-    CrustalAmplification::Source s = static_cast<CrustalAmplification::Source>(source);
+    auto s = static_cast<CrustalAmplification::Source>(source);
 
     _crustalAmpGroupBox->setReadOnly(
                 _readOnly

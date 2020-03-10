@@ -37,8 +37,8 @@ class Dimension : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const Dimension* d);
-    friend QDataStream & operator>> (QDataStream & in, Dimension* d);
+    friend auto operator<< (QDataStream & out, const Dimension* d) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, Dimension* d) -> QDataStream &;
 
 public:
     explicit Dimension(QObject *parent = nullptr);
@@ -48,29 +48,29 @@ public:
         Log, //!< Equally spaced in log space
     };
 
-    static QStringList spacingList();
+    static auto spacingList() -> QStringList;
 
-    double min() const;
-    double max() const;
-    int size() const;
-    double at(int i) const;
+    auto min() const -> double;
+    auto max() const -> double;
+    auto size() const -> int;
+    auto at(int i) const -> double;
 
     void setSpacing(Spacing spacing);
-    Spacing spacing() const;
+    auto spacing() const -> Spacing;
 
-    QVector<double> & data();
+    auto data() -> QVector<double> &;
 
     //! If the dimension is populated with values
-    bool ready() const;
+    auto ready() const -> bool;
 
     //! Calculate the values in the vector
     void init();
 
-    static QVector<double> linSpace( double min, double max, int size );
-    static QVector<double> logSpace( double min, double max, int size );
+    static auto linSpace( double min, double max, int size ) -> QVector<double>;
+    static auto logSpace( double min, double max, int size ) -> QVector<double>;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setMin(double min);

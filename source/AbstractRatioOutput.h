@@ -34,24 +34,24 @@ class AbstractRatioOutput : public AbstractOutput
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractRatioOutput* aro);
-    friend QDataStream & operator>> (QDataStream & in, AbstractRatioOutput* aro);
+    friend auto operator<< (QDataStream & out, const AbstractRatioOutput* aro) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractRatioOutput* aro) -> QDataStream &;
 
 public:
     explicit AbstractRatioOutput(OutputCatalog* catalog);
 
-    virtual QString fullName() const;
+    virtual auto fullName() const -> QString;
 
-    double inDepth() const;
-    AbstractMotion::Type inType() const;
+    auto inDepth() const -> double;
+    auto inType() const -> AbstractMotion::Type;
     void setInType(AbstractMotion::Type inType);
 
-    double outDepth() const;
-    AbstractMotion::Type outType() const;
+    auto outDepth() const -> double;
+    auto outType() const -> AbstractMotion::Type;
     void setOutType(AbstractMotion::Type outType);
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setInDepth(double inDepth);
@@ -68,8 +68,8 @@ signals:
     void outTypeChanged(int outType);
 
 protected:
-    virtual QString fileName(int motion = 0) const;
-    virtual const QString prefix() const;
+    virtual auto fileName(int motion = 0) const -> QString;
+    virtual auto prefix() const -> const QString;
 
     //! Input depth
     double  _inDepth;

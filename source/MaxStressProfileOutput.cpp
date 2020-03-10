@@ -33,17 +33,17 @@ MaxStressProfileOutput::MaxStressProfileOutput(OutputCatalog* catalog)
     _offset = 1;
 }
 
-QString MaxStressProfileOutput::name() const
+auto MaxStressProfileOutput::name() const -> QString
 {
     return tr("Maximum Shear-Stress Profile");
 }
 
-QString MaxStressProfileOutput::shortName() const
+auto MaxStressProfileOutput::shortName() const -> QString
 {
     return tr("stress");
 }
 
-const QString MaxStressProfileOutput::xLabel() const
+auto MaxStressProfileOutput::xLabel() const -> const QString
 {
     return tr("Maximum Shear Stress (%1)").arg(Units::instance()->stress());
 }

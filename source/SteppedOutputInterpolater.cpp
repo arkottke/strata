@@ -27,8 +27,8 @@ SteppedOutputInterpolater::SteppedOutputInterpolater()
 {
 }
 
-QVector<double> SteppedOutputInterpolater::calculate(
-        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi)
+auto SteppedOutputInterpolater::calculate(
+        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>
 {
     // x is at the base of the layer
     Q_ASSERT(x.size() <= y.size());

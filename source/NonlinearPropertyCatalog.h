@@ -34,11 +34,11 @@ public:
     NonlinearPropertyCatalog();
     ~NonlinearPropertyCatalog();
 
-    ModulusFactory* modulusFactory();
-    DampingFactory* dampingFactory();
+    auto modulusFactory() -> ModulusFactory*;
+    auto dampingFactory() -> DampingFactory*;
 
     //! Save the defined curves
-    bool save() const;
+    auto save() const -> bool;
 
 protected:
     ModulusFactory *_modulusFactory;

@@ -28,21 +28,21 @@ SoilTypeOutputTableModel::SoilTypeOutputTableModel( QList<SoilType*> & soilTypes
 {
 }
 
-int SoilTypeOutputTableModel::rowCount(const QModelIndex & parent) const
+auto SoilTypeOutputTableModel::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _soilTypes.size();
 }
 
-int SoilTypeOutputTableModel::columnCount(const QModelIndex & parent) const
+auto SoilTypeOutputTableModel::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 1;
 }
 
-QVariant SoilTypeOutputTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+auto SoilTypeOutputTableModel::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -61,7 +61,7 @@ QVariant SoilTypeOutputTableModel::headerData(int section, Qt::Orientation orien
     }
 }
 
-QVariant SoilTypeOutputTableModel::data(const QModelIndex &index, int role) const
+auto SoilTypeOutputTableModel::data(const QModelIndex &index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -99,7 +99,7 @@ QVariant SoilTypeOutputTableModel::data(const QModelIndex &index, int role) cons
     return QVariant();
 }
 
-bool SoilTypeOutputTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+auto SoilTypeOutputTableModel::setData(const QModelIndex &index, const QVariant &value, int role) -> bool
 {
     if ( index.column() == 0 && role == Qt::CheckStateRole ) {
         _soilTypes[index.row()]->setSaveData(value.toBool());
@@ -110,7 +110,7 @@ bool SoilTypeOutputTableModel::setData(const QModelIndex &index, const QVariant 
     }
 }
 
-Qt::ItemFlags SoilTypeOutputTableModel::flags(const QModelIndex &index) const
+auto SoilTypeOutputTableModel::flags(const QModelIndex &index) const -> Qt::ItemFlags
 {
     return Qt::ItemIsUserCheckable | QAbstractTableModel::flags(index);
 }

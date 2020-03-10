@@ -38,7 +38,7 @@ NonlinearPropertyOutput::NonlinearPropertyOutput(
 }
 
 
-QString NonlinearPropertyOutput::name() const
+auto NonlinearPropertyOutput::name() const -> QString
 {
     switch (_nonlinearProperty->type()) {
     case NonlinearProperty::Damping:
@@ -50,14 +50,14 @@ QString NonlinearPropertyOutput::name() const
     }
 }
 
-QString NonlinearPropertyOutput::fullName() const
+auto NonlinearPropertyOutput::fullName() const -> QString
 {
     return tr("Nonlinear Curve -- %1 -- %2")
             .arg(prefix())
             .arg(name());
 }
 
-QString NonlinearPropertyOutput::shortName() const
+auto NonlinearPropertyOutput::shortName() const -> QString
 {
     switch (_nonlinearProperty->type()) {
     case NonlinearProperty::Damping:
@@ -69,19 +69,19 @@ QString NonlinearPropertyOutput::shortName() const
     }
 }
 
-bool NonlinearPropertyOutput::motionIndependent() const
+auto NonlinearPropertyOutput::motionIndependent() const -> bool
 {
     return true;
 }
 
-QString NonlinearPropertyOutput::fileName(int motion) const
+auto NonlinearPropertyOutput::fileName(int motion) const -> QString
 {
     Q_UNUSED(motion);
 
     return "nlCurve-" + prefix() + "-" + shortName();
 }
 
-const QString& NonlinearPropertyOutput::soilName() const
+auto NonlinearPropertyOutput::soilName() const -> const QString&
 {
     return _soilName;
 }
@@ -101,22 +101,22 @@ void NonlinearPropertyOutput::setSoilName(const QString &soilName)
     }
 }
 
-QwtScaleEngine* NonlinearPropertyOutput::xScaleEngine() const
+auto NonlinearPropertyOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* NonlinearPropertyOutput::yScaleEngine() const
+auto NonlinearPropertyOutput::yScaleEngine() const -> QwtScaleEngine*
 {
     return new QwtLinearScaleEngine;
 }
 
-const QString NonlinearPropertyOutput::xLabel() const
+auto NonlinearPropertyOutput::xLabel() const -> const QString
 {
     return tr("Strain (%)");
 }
 
-const QString NonlinearPropertyOutput::yLabel() const
+auto NonlinearPropertyOutput::yLabel() const -> const QString
 {
     switch (_nonlinearProperty->type()) {
     case NonlinearProperty::Damping:
@@ -128,17 +128,17 @@ const QString NonlinearPropertyOutput::yLabel() const
     }
 }
 
-const QString NonlinearPropertyOutput::prefix() const
+auto NonlinearPropertyOutput::prefix() const -> const QString
 {
     return _soilName;
 }
 
-const QString NonlinearPropertyOutput::suffix() const
+auto NonlinearPropertyOutput::suffix() const -> const QString
 {
     return "";
 }
 
-const QVector<double>& NonlinearPropertyOutput::ref(int motion) const
+auto NonlinearPropertyOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
 

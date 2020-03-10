@@ -26,7 +26,7 @@ Location::Location( int layer, double depth)
 {
 }
 
-int Location::layer() const
+auto Location::layer() const -> int
 {
     return _layer;
 }
@@ -36,7 +36,7 @@ void Location::setLayer(int layer)
     _layer = layer;
 }
 
-double Location::depth() const
+auto Location::depth() const -> double
 {
     return _depth;
 }

@@ -30,7 +30,7 @@ Distribution::Distribution(gsl_rng * rng, QObject * parent)
 {
 }
 
-double Distribution::rand()
+auto Distribution::rand() -> double
 {
     double value = 0;
 

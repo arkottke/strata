@@ -38,45 +38,45 @@ StrainTransferFunctionOutput::StrainTransferFunctionOutput(OutputCatalog* catalo
     _interp = new LinearOutputInterpolater;
 }
 
-bool StrainTransferFunctionOutput::needsFreq() const
+auto StrainTransferFunctionOutput::needsFreq() const -> bool
 {
     return true;
 }
 
-QString StrainTransferFunctionOutput::name() const
+auto StrainTransferFunctionOutput::name() const -> QString
 {
     return tr("Strain Transfer Function");
 }
 
-QString StrainTransferFunctionOutput::shortName() const
+auto StrainTransferFunctionOutput::shortName() const -> QString
 {
     return tr("strainTf");
 }
 
 
-QwtScaleEngine* StrainTransferFunctionOutput::xScaleEngine() const
+auto StrainTransferFunctionOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* StrainTransferFunctionOutput::yScaleEngine() const
+auto StrainTransferFunctionOutput::yScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-const QString StrainTransferFunctionOutput::xLabel() const
+auto StrainTransferFunctionOutput::xLabel() const -> const QString
 {
     return tr("Frequency (Hz");
 }
 
-const QString StrainTransferFunctionOutput::yLabel() const
+auto StrainTransferFunctionOutput::yLabel() const -> const QString
 {
     return tr("FAS (strain) at %1 / FAS (accel) at %2")
             .arg(locationToString(_outDepth))
             .arg(locationToString(_inDepth));
 }
 
-const QVector<double>& StrainTransferFunctionOutput::ref(int motion) const
+auto StrainTransferFunctionOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
 

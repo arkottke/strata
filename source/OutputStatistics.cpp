@@ -123,12 +123,12 @@ void OutputStatistics::plot(QwtPlot* const qwtPlot) const
     }
 }
 
-bool OutputStatistics::hasEnoughData() const
+auto OutputStatistics::hasEnoughData() const -> bool
 {
     return (_output->motionCount() * _output->siteCount()) > 1;
 }
 
-OutputStatistics::Distribution OutputStatistics::distribution() const
+auto OutputStatistics::distribution() const -> OutputStatistics::Distribution
 {
     return _distribution;
 }
@@ -148,7 +148,7 @@ void OutputStatistics::setDistribution(int distribution)
     setDistribution((Distribution)distribution);
 }
 
-QString OutputStatistics::averageLabel() const
+auto OutputStatistics::averageLabel() const -> QString
 {
     switch (_distribution) {
     case Normal:
@@ -160,7 +160,7 @@ QString OutputStatistics::averageLabel() const
     return "";
 }
 
-QString OutputStatistics::stdevLabel() const
+auto OutputStatistics::stdevLabel() const -> QString
 {
     switch (_distribution) {
     case Normal:
@@ -172,12 +172,12 @@ QString OutputStatistics::stdevLabel() const
     return "";
 }
 
-const QVector<double>& OutputStatistics::average() const
+auto OutputStatistics::average() const -> const QVector<double>&
 {
     return _average;
 }
 
-const QVector<double>& OutputStatistics::stdev() const
+auto OutputStatistics::stdev() const -> const QVector<double>&
 {
     return _stdev;
 }
@@ -190,7 +190,7 @@ void OutputStatistics::clear()
     _minusStd.clear();
 }
 
-QwtPlotCurve* OutputStatistics::plotCurve(QwtPlot* const plot, const QVector<double> &vec, Qt::PenStyle penStyle) const
+auto OutputStatistics::plotCurve(QwtPlot* const plot, const QVector<double> &vec, Qt::PenStyle penStyle) const -> QwtPlotCurve*
 {
     // Figure out what x and y are based on curveType
     const double* x = _output->curveType() == AbstractOutput::Yfx ?
@@ -200,7 +200,7 @@ QwtPlotCurve* OutputStatistics::plotCurve(QwtPlot* const plot, const QVector<dou
                       vec.data() : _output->ref().data();
 
     // Create the curve
-    QwtPlotCurve *qpc = new QwtPlotCurve;
+    auto *qpc = new QwtPlotCurve;
 
     qpc->setSamples(x + _output->offset(), y + _output->offset(),
                  vec.size() - _output->offset());

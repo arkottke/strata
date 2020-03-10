@@ -133,7 +133,7 @@ void OutputPage::setApproach(int approach)
         _tabWidget->setCurrentIndex(0);
 }
 
-QGroupBox* OutputPage::createRespSpecGroupBox()
+auto OutputPage::createRespSpecGroupBox() -> QGroupBox*
 {
     // Damping
     _dampingSpinBox = new QDoubleSpinBox;
@@ -154,7 +154,7 @@ QGroupBox* OutputPage::createRespSpecGroupBox()
     return _respSpecGroupBox;
 }
 
-QGroupBox* OutputPage::createFreqGroupBox()
+auto OutputPage::createFreqGroupBox() -> QGroupBox*
 {
     _frequencyLayout = new DimensionLayout(this);
     _frequencyLayout->setRange(0.001, 1000);
@@ -166,7 +166,7 @@ QGroupBox* OutputPage::createFreqGroupBox()
     return _freqGroupBox;
 }
 
-QGroupBox* OutputPage::createLogGroupBox()
+auto OutputPage::createLogGroupBox() -> QGroupBox*
 {
     auto *layout = new QFormLayout;
 

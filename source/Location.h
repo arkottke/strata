@@ -27,11 +27,11 @@ class Location
     public:
     explicit Location(int layer = 0, double depth = 0);
 
-        int layer() const;
+        auto layer() const -> int;
 
     void setLayer(int layer);
 
-        double depth() const;
+        auto depth() const -> double;
 
     void setDepth(double depth);
 

@@ -60,17 +60,17 @@ NonlinearProperty::~NonlinearProperty()
     }
 }
 
-NonlinearProperty::Type NonlinearProperty::type() const
+auto NonlinearProperty::type() const -> NonlinearProperty::Type
 {
     return _type;
 }
 
-const QString & NonlinearProperty::name() const
+auto NonlinearProperty::name() const -> const QString &
 {
     return _name;
 }
 
-double NonlinearProperty::interp(const double strain)
+auto NonlinearProperty::interp(const double strain) -> double
 {
     double d;
     if (strain < _strain.first()) {
@@ -89,7 +89,7 @@ double NonlinearProperty::interp(const double strain)
     return d;
 }
 
-QString NonlinearProperty::toHtml() const
+auto NonlinearProperty::toHtml() const -> QString
 {  
     QString html = tr(
             "<h4>%1</h4>"
@@ -123,21 +123,21 @@ QString NonlinearProperty::toHtml() const
     return html;
 }
 
-int NonlinearProperty::rowCount(const QModelIndex &parent) const
+auto NonlinearProperty::rowCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _strain.size();
 }
 
-int NonlinearProperty::columnCount(const QModelIndex &parent) const
+auto NonlinearProperty::columnCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 2;
 }
 
-QVariant NonlinearProperty::data(const QModelIndex &index, int role) const
+auto NonlinearProperty::data(const QModelIndex &index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -161,7 +161,7 @@ QVariant NonlinearProperty::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QVariant NonlinearProperty::headerData(int section, Qt::Orientation orientation, int role) const
+auto NonlinearProperty::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -187,17 +187,17 @@ QVariant NonlinearProperty::headerData(int section, Qt::Orientation orientation,
 }
 
 
-const QVector<double> & NonlinearProperty::strain() const
+auto NonlinearProperty::strain() const -> const QVector<double> &
 {
     return _strain;
 }
 
-const QVector<double> & NonlinearProperty::average() const
+auto NonlinearProperty::average() const -> const QVector<double> &
 {
     return _average;
 }
 
-const QVector<double> & NonlinearProperty::varied() const
+auto NonlinearProperty::varied() const -> const QVector<double> &
 {    
     return _varied;
 }
@@ -244,7 +244,7 @@ void NonlinearProperty::initialize()
     }
 }
 
-NonlinearProperty *NonlinearProperty::duplicate() const
+auto NonlinearProperty::duplicate() const -> NonlinearProperty *
 {
     return new NonlinearProperty(_name, _type, _strain, _average);
 }
@@ -263,7 +263,7 @@ void NonlinearProperty::fromJson(const QJsonObject &json)
     endResetModel();
 }
 
-QJsonObject NonlinearProperty::toJson() const
+auto NonlinearProperty::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["name"] = _name;
@@ -274,7 +274,7 @@ QJsonObject NonlinearProperty::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np)
+auto operator<< (QDataStream & out, const NonlinearProperty* np) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -286,7 +286,7 @@ QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, NonlinearProperty* np)
+auto operator>> (QDataStream & in, NonlinearProperty* np) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

@@ -351,7 +351,7 @@ void ResultsPage::recomputeStats()
 
 }
 
-QGroupBox* ResultsPage::createOutputGroup()
+auto ResultsPage::createOutputGroup() -> QGroupBox*
 {
     auto *layout = new QGridLayout;
     layout->setColumnStretch(2,1);
@@ -404,7 +404,7 @@ QGroupBox* ResultsPage::createOutputGroup()
     return groupBox;
 }
 
-QTabWidget* ResultsPage::createDataTabWidget()
+auto ResultsPage::createDataTabWidget() -> QTabWidget*
 {
     auto *tabWidget = new QTabWidget;
 

@@ -33,17 +33,17 @@ VerticalTotalStressProfileOutput::VerticalTotalStressProfileOutput(OutputCatalog
     _offset = 1;
 }
 
-QString VerticalTotalStressProfileOutput::name() const
+auto VerticalTotalStressProfileOutput::name() const -> QString
 {
     return tr("Vertical Total Stress Profile");
 }
 
-QString VerticalTotalStressProfileOutput::shortName() const
+auto VerticalTotalStressProfileOutput::shortName() const -> QString
 {
     return tr("vTotalStress");
 }
 
-const QString VerticalTotalStressProfileOutput::xLabel() const
+auto VerticalTotalStressProfileOutput::xLabel() const -> const QString
 {
     return tr("Vertical Total Stress (%1)").arg(Units::instance()->stress());
 }

@@ -45,27 +45,27 @@ SoilTypeOutput::SoilTypeOutput(SoilType* soilType, OutputCatalog* catalog) :
             _damping, SLOT(setNonlinearProperty(NonlinearProperty*)));
 }
 
-SoilType* SoilTypeOutput::soilType() const
+auto SoilTypeOutput::soilType() const -> SoilType*
 {
     return _soilType;
 }
 
-QString SoilTypeOutput::name() const
+auto SoilTypeOutput::name() const -> QString
 {
     return _soilType->name();
 }
 
-NonlinearPropertyOutput* SoilTypeOutput::modulus()
+auto SoilTypeOutput::modulus() -> NonlinearPropertyOutput*
 {
     return _modulus;
 }
 
-NonlinearPropertyOutput* SoilTypeOutput::damping()
+auto SoilTypeOutput::damping() -> NonlinearPropertyOutput*
 {
     return _damping;
 }
 
-bool SoilTypeOutput::enabled() const
+auto SoilTypeOutput::enabled() const -> bool
 {
     return _enabled;
 }
@@ -83,7 +83,7 @@ void SoilTypeOutput::fromJson(const QJsonObject &json)
     _damping->fromJson(json["damping"].toObject());
 }
 
-QJsonObject SoilTypeOutput::toJson() const
+auto SoilTypeOutput::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["enabled"] = _enabled;
@@ -93,7 +93,7 @@ QJsonObject SoilTypeOutput::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto)
+auto operator<< (QDataStream & out, const SoilTypeOutput* sto) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -104,7 +104,7 @@ QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SoilTypeOutput* sto)
+auto operator>> (QDataStream & in, SoilTypeOutput* sto) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

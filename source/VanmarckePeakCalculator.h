@@ -33,7 +33,7 @@ public:
 
 
 protected:
-    double calcPeakFactor(double duration, double oscFreq, double oscDamping);
+    auto calcPeakFactor(double duration, double oscFreq, double oscDamping) -> double;
 
     gsl_integration_workspace *_workspace;
 };

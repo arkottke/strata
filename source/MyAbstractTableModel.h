@@ -31,8 +31,8 @@ class MyAbstractTableModel : public QAbstractTableModel
 public:
     MyAbstractTableModel(QObject *parent = nullptr);
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    bool readOnly() const;
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    auto readOnly() const -> bool;
 
 public slots:
     virtual void setReadOnly(bool readOnly);

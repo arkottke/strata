@@ -33,34 +33,34 @@ class RatiosOutputCatalog : public AbstractMutableOutputCatalog
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc);
-    friend QDataStream & operator>> (QDataStream & in, RatiosOutputCatalog* roc);
+    friend auto operator<< (QDataStream & out, const RatiosOutputCatalog* roc) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, RatiosOutputCatalog* roc) -> QDataStream &;
 
 public:
     RatiosOutputCatalog(OutputCatalog *outputCatalog);
 
-    bool needsInputConditions() const;
-    bool needsOutputConditions() const;
+    auto needsInputConditions() const -> bool;
+    auto needsOutputConditions() const -> bool;
 
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
 
-    virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
-    virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
+    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
 
-    virtual Qt::ItemFlags flags(const QModelIndex & index) const;
+    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
 
     virtual void addRow(const QString &name);
-    virtual QList<AbstractOutput*> outputs() const;
+    virtual auto outputs() const -> QList<AbstractOutput*>;
 
     void fromJson(const QJsonArray &json);
-    QJsonArray toJson() const;
+    auto toJson() const -> QJsonArray;
 
 protected:
-    AbstractRatioOutput* factory(const QString & className, OutputCatalog * parent) const;
+    auto factory(const QString & className, OutputCatalog * parent) const -> AbstractRatioOutput*;
 
     enum Columns {
         NameColumn,

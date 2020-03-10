@@ -45,16 +45,16 @@ public:
     void plot(QwtPlot* qwtPlot) const;
 
     //! If the output has enough data to compute statistics
-    bool hasEnoughData() const;
+    auto hasEnoughData() const -> bool;
 
-    Distribution distribution() const;
+    auto distribution() const -> Distribution;
     void setDistribution(Distribution distribution);
 
-    QString averageLabel() const;
-    QString stdevLabel() const;
+    auto averageLabel() const -> QString;
+    auto stdevLabel() const -> QString;
 
-    const QVector<double>& average() const;
-    const QVector<double>& stdev() const;
+    auto average() const -> const QVector<double>&;
+    auto stdev() const -> const QVector<double>&;
 
 public slots:
     void setDistribution(int distribution);
@@ -67,7 +67,7 @@ protected slots:
     void clear();
 
 protected:
-    QwtPlotCurve* plotCurve(QwtPlot* const plot, const QVector<double> & data, Qt::PenStyle penStyle) const;
+    auto plotCurve(QwtPlot* const plot, const QVector<double> & data, Qt::PenStyle penStyle) const -> QwtPlotCurve*;
 
     //! Parent AbstractOutput
     AbstractOutput* _output;

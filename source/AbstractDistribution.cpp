@@ -39,7 +39,7 @@ AbstractDistribution::AbstractDistribution( QObject * parent)
     _max = 0;
 }
 
-QStringList AbstractDistribution::typeList()
+auto AbstractDistribution::typeList() -> QStringList
 {
     QStringList list;
 
@@ -48,7 +48,7 @@ QStringList AbstractDistribution::typeList()
     return list;
 }
 
-AbstractDistribution::Type AbstractDistribution::type() const
+auto AbstractDistribution::type() const -> AbstractDistribution::Type
 {
     return _type;
 }
@@ -76,12 +76,12 @@ void AbstractDistribution::reset()
     _varied = _avg;
 }
 
-bool AbstractDistribution::stdevRequired()
+auto AbstractDistribution::stdevRequired() -> bool
 {
     return _type != Uniform;
 }
 
-double AbstractDistribution::avg() const
+auto AbstractDistribution::avg() const -> double
 {
     return _avg;
 }
@@ -97,7 +97,7 @@ void AbstractDistribution::setAvg(double avg)
     }
 }
 
-double AbstractDistribution::stdev() const
+auto AbstractDistribution::stdev() const -> double
 {
     return _stdev;
 }
@@ -112,7 +112,7 @@ void AbstractDistribution::setStdev(double stdev)
     }
 }
 
-bool AbstractDistribution::hasMin() const
+auto AbstractDistribution::hasMin() const -> bool
 {
     return _hasMin;
 }
@@ -127,7 +127,7 @@ void AbstractDistribution::setHasMin(bool hasMin)
     }
 }
 
-double AbstractDistribution::min() const
+auto AbstractDistribution::min() const -> double
 {
     return _min;
 }
@@ -142,7 +142,7 @@ void AbstractDistribution::setMin(double min)
     }
 }
 
-bool AbstractDistribution::hasMax() const
+auto AbstractDistribution::hasMax() const -> bool
 {
     return _hasMax;
 }
@@ -157,7 +157,7 @@ void AbstractDistribution::setHasMax(bool hasMax)
     }
 }
 
-double AbstractDistribution::max() const
+auto AbstractDistribution::max() const -> double
 {
     return _max;
 }
@@ -194,7 +194,7 @@ void AbstractDistribution::fromJson(const QJsonObject &json)
     _hasMin = json["hasMin"].toBool();
 }
 
-QJsonObject AbstractDistribution::toJson() const
+auto AbstractDistribution::toJson() const -> QJsonObject
 {
     QJsonObject json;
 
@@ -209,7 +209,7 @@ QJsonObject AbstractDistribution::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const AbstractDistribution* ad)
+auto operator<< (QDataStream & out, const AbstractDistribution* ad) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -224,7 +224,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractDistribution* ad)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractDistribution* ad)
+auto operator>> (QDataStream & in, AbstractDistribution* ad) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

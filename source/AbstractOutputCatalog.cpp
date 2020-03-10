@@ -52,7 +52,7 @@ void AbstractOutputCatalog::setApproach(int approach)
     endResetModel();
 }
 
-QVariant AbstractOutputCatalog::data(const QModelIndex & index, int role ) const
+auto AbstractOutputCatalog::data(const QModelIndex & index, int role ) const -> QVariant
 {
     return MyAbstractTableModel::data(index, role);
 }

@@ -60,7 +60,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     }
 }
 
-QCoreApplication* createApplication(int &argc, char *argv[])
+auto createApplication(int &argc, char *argv[]) -> QCoreApplication*
 {
     QStringList coreArgs{"-v", "--version", "-b", "--batch"};
 
@@ -73,7 +73,7 @@ QCoreApplication* createApplication(int &argc, char *argv[])
     return new QApplication(argc, argv);
 }
 
-int main(int argc, char* argv[])
+auto main(int argc, char* argv[]) -> int
 {
     QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
 
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
         if (args.isEmpty()) {
             qFatal("At least one file must be specified.");
         }
-        BatchRunner *br = new BatchRunner(args);
+        auto *br = new BatchRunner(args);
         Q_UNUSED(br);
     }
 

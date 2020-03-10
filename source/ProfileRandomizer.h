@@ -50,21 +50,21 @@ class ProfileRandomizer : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const ProfileRandomizer* pr);
-    friend QDataStream & operator>> (QDataStream & in, ProfileRandomizer* pr);
+    friend auto operator<< (QDataStream & out, const ProfileRandomizer* pr) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, ProfileRandomizer* pr) -> QDataStream &;
 
 public:
     ProfileRandomizer(gsl_rng * rng, SoilProfile* siteProfile);
     ~ProfileRandomizer();
 
-    bool enabled() const;
+    auto enabled() const -> bool;
 
-    BedrockDepthVariation* bedrockDepthVariation();
-    LayerThicknessVariation* layerThicknessVariation();
-    VelocityVariation* velocityVariation();
+    auto bedrockDepthVariation() -> BedrockDepthVariation*;
+    auto layerThicknessVariation() -> LayerThicknessVariation*;
+    auto velocityVariation() -> VelocityVariation*;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void enabledChanged(bool enabled);

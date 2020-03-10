@@ -38,14 +38,14 @@ AbstractNonlinearPropertyFactory::~AbstractNonlinearPropertyFactory()
 {
 }
 
-int AbstractNonlinearPropertyFactory::rowCount(const QModelIndex &parent) const
+auto AbstractNonlinearPropertyFactory::rowCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _models.size();
 }
 
-QVariant AbstractNonlinearPropertyFactory::data(const QModelIndex &index, int role) const
+auto AbstractNonlinearPropertyFactory::data(const QModelIndex &index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -61,12 +61,12 @@ QVariant AbstractNonlinearPropertyFactory::data(const QModelIndex &index, int ro
     return QVariant();
 }
 
-bool AbstractNonlinearPropertyFactory::setData(const QModelIndex &index, const QVariant &value, int role)
+auto AbstractNonlinearPropertyFactory::setData(const QModelIndex &index, const QVariant &value, int role) -> bool
 {
     if(index.parent() != QModelIndex() && role != Qt::EditRole)
         return false;
 
-    CustomNonlinearProperty *cnp = qobject_cast<CustomNonlinearProperty*>(_models.at(index.row()));
+    auto *cnp = qobject_cast<CustomNonlinearProperty*>(_models.at(index.row()));
 
     if (cnp) {
         cnp->setName(value.toString());
@@ -77,7 +77,7 @@ bool AbstractNonlinearPropertyFactory::setData(const QModelIndex &index, const Q
     }
 }
 
-Qt::ItemFlags AbstractNonlinearPropertyFactory::flags(const QModelIndex &index) const
+auto AbstractNonlinearPropertyFactory::flags(const QModelIndex &index) const -> Qt::ItemFlags
 {
     if (index.row() < 2 || !qobject_cast<const CustomNonlinearProperty*>(_models.at(index.row()))) {
         return QAbstractItemModel::flags(index);
@@ -86,7 +86,7 @@ Qt::ItemFlags AbstractNonlinearPropertyFactory::flags(const QModelIndex &index) 
     }
 }
 
-QVariant AbstractNonlinearPropertyFactory::headerData(int section, Qt::Orientation orientation, int role) const
+auto AbstractNonlinearPropertyFactory::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -101,7 +101,7 @@ QVariant AbstractNonlinearPropertyFactory::headerData(int section, Qt::Orientati
     return QVariant();
 }
 
-bool AbstractNonlinearPropertyFactory::insertRows(int row, int count, const QModelIndex &parent)
+auto AbstractNonlinearPropertyFactory::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -115,7 +115,7 @@ bool AbstractNonlinearPropertyFactory::insertRows(int row, int count, const QMod
     return true;
 }
 
-bool AbstractNonlinearPropertyFactory::removeRows(int row, int count, const QModelIndex &parent)
+auto AbstractNonlinearPropertyFactory::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -133,12 +133,12 @@ bool AbstractNonlinearPropertyFactory::removeRows(int row, int count, const QMod
 }
 
 
-NonlinearProperty* AbstractNonlinearPropertyFactory::modelAt(int row) const
+auto AbstractNonlinearPropertyFactory::modelAt(int row) const -> NonlinearProperty*
 {
     return _models.at(row);
 }
 
-NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(int row) const
+auto AbstractNonlinearPropertyFactory::duplicateAt(int row) const -> NonlinearProperty*
 {
     if (row == 0) {
         return new CustomNonlinearProperty(_type, false);
@@ -149,7 +149,7 @@ NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(int row) const
     }
 }
 
-NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(QVariant value) const
+auto AbstractNonlinearPropertyFactory::duplicateAt(QVariant value) const -> NonlinearProperty*
 {
     int i = -1;
     if (value.type() == QVariant::Int) {
@@ -181,13 +181,13 @@ NonlinearProperty* AbstractNonlinearPropertyFactory::duplicateAt(QVariant value)
 void AbstractNonlinearPropertyFactory::fromJson(const QJsonObject &json)
 {
     for (const QJsonValue &v : json["models"].toArray()) {
-        CustomNonlinearProperty * np = new CustomNonlinearProperty(_type, true);
+        auto * np = new CustomNonlinearProperty(_type, true);
         np->fromJson(v.toObject());
         _models << np;
     }
 }
 
-QJsonObject AbstractNonlinearPropertyFactory::toJson() const
+auto AbstractNonlinearPropertyFactory::toJson() const -> QJsonObject
 {
     QJsonArray models;
     for (auto *np : _models) {
@@ -203,14 +203,14 @@ QJsonObject AbstractNonlinearPropertyFactory::toJson() const
 }
 
 
-QDataStream & operator<<(QDataStream & out, const AbstractNonlinearPropertyFactory & anpf)
+auto operator<<(QDataStream & out, const AbstractNonlinearPropertyFactory & anpf) -> QDataStream &
 {
     out << (quint8)1;
 
     // Create a list of models that need to be saved
     QList<NonlinearProperty*>models;
     for (auto *np : anpf._models) {
-        const CustomNonlinearProperty *cnp = qobject_cast<const CustomNonlinearProperty*>(np);
+        const auto *cnp = qobject_cast<const CustomNonlinearProperty*>(np);
 
         if (cnp && cnp->retain()) {
             models << np;
@@ -223,7 +223,7 @@ QDataStream & operator<<(QDataStream & out, const AbstractNonlinearPropertyFacto
     return out;
 }
 
-QDataStream & operator>>(QDataStream & in, AbstractNonlinearPropertyFactory & anpf)
+auto operator>>(QDataStream & in, AbstractNonlinearPropertyFactory & anpf) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -232,7 +232,7 @@ QDataStream & operator>>(QDataStream & in, AbstractNonlinearPropertyFactory & an
     in >> size;
 
     for (int i = 0; i < size; ++i) {
-        CustomNonlinearProperty* cnp = new CustomNonlinearProperty(anpf._type, true);
+        auto* cnp = new CustomNonlinearProperty(anpf._type, true);
         in >> cnp;
         anpf._models << cnp;
     }

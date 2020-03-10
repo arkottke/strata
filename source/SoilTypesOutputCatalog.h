@@ -35,27 +35,27 @@ class SoilTypesOutputCatalog : public AbstractOutputCatalog
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc);
-    friend QDataStream & operator>> (QDataStream & in, SoilTypesOutputCatalog* stoc);
+    friend auto operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SoilTypesOutputCatalog* stoc) -> QDataStream &;
 
 public:
     explicit SoilTypesOutputCatalog(OutputCatalog *outputCatalog);
 
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
 
-    virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
 
-    virtual Qt::ItemFlags flags(const QModelIndex & index) const;
+    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
 
     void setSoilTypeCatalog(SoilTypeCatalog* soilTypeCatalog);
-    virtual QList<AbstractOutput*> outputs() const;
+    virtual auto outputs() const -> QList<AbstractOutput*>;
 
     void fromJson(const QJsonArray &json);
-    QJsonArray toJson() const;
+    auto toJson() const -> QJsonArray;
 
 protected slots:
     void addOutput(SoilType* soilType);

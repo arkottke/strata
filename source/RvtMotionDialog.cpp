@@ -50,7 +50,7 @@ RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *pare
     init();
 }
 
-QFormLayout* RvtMotionDialog::createParametersLayout()
+auto RvtMotionDialog::createParametersLayout() -> QFormLayout*
 {
     auto layout = AbstractRvtMotionDialog::createParametersLayout();
 
@@ -71,7 +71,7 @@ QFormLayout* RvtMotionDialog::createParametersLayout()
     return layout;
 }
 
-QTabWidget* RvtMotionDialog::createTabWidget()
+auto RvtMotionDialog::createTabWidget() -> QTabWidget*
 {
     auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
     tabWidget->setCurrentIndex(3);

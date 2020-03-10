@@ -34,22 +34,22 @@ class MyRandomNumGenerator : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator);
-    friend QDataStream & operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator);
+    friend auto operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator) -> QDataStream &;
 
 public:
     MyRandomNumGenerator(QObject *parent = nullptr);
     ~MyRandomNumGenerator();
     
-    bool seedSpecified() const;
+    auto seedSpecified() const -> bool;
 
-    quint32 seed() const;
+    auto seed() const -> quint32;
     void setSeed(quint32 seed);
 
-    gsl_rng* gsl_pointer();
+    auto gsl_pointer() -> gsl_rng*;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setSeedSpecified(bool seedSpecified);

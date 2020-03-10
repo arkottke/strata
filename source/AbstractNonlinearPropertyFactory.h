@@ -33,36 +33,36 @@ class AbstractNonlinearPropertyFactory : public QAbstractListModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractNonlinearPropertyFactory & anpf);
-    friend QDataStream & operator>> (QDataStream & in, AbstractNonlinearPropertyFactory & anpf);
+    friend auto operator<< (QDataStream & out, const AbstractNonlinearPropertyFactory & anpf) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractNonlinearPropertyFactory & anpf) -> QDataStream &;
 
 public:
 
     AbstractNonlinearPropertyFactory(QObject *parent = nullptr);
     ~AbstractNonlinearPropertyFactory();
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
+    auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) -> bool;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
+    auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
 
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+    auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
 
     //! Return the model at the specified row
-    NonlinearProperty* modelAt(int row) const;
+    auto modelAt(int row) const -> NonlinearProperty*;
 
     //! Return a duplicate of the model at the specified row
-    NonlinearProperty* duplicateAt(int row) const;
+    auto duplicateAt(int row) const -> NonlinearProperty*;
 
     //! Tries the QVariant as an integer and a QString to match a possible model
-    NonlinearProperty* duplicateAt(QVariant value) const;
+    auto duplicateAt(QVariant value) const -> NonlinearProperty*;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 protected:
     //! Type of models the factor produces

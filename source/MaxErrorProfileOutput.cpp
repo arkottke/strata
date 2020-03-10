@@ -34,22 +34,22 @@ MaxErrorProfileOutput::MaxErrorProfileOutput(OutputCatalog* catalog)
     _statistics = 0;
 }
 
-QString MaxErrorProfileOutput::name() const
+auto MaxErrorProfileOutput::name() const -> QString
 {
     return tr("Maximum Error Profile");
 }
 
-QString MaxErrorProfileOutput::shortName() const
+auto MaxErrorProfileOutput::shortName() const -> QString
 {
     return tr("dispTs");
 }
 
-const QString MaxErrorProfileOutput::xLabel() const
+auto MaxErrorProfileOutput::xLabel() const -> const QString
 {
     return tr("Maximum Error (%)");
 }
 
-QwtScaleEngine* MaxErrorProfileOutput::xScaleEngine() const
+auto MaxErrorProfileOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return new QwtLinearScaleEngine;
 }

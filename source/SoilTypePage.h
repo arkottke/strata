@@ -68,12 +68,12 @@ protected slots:
 
 private:
     // Functions to set up the various group boxes
-    QGroupBox* createLayersGroupBox();
-    QGroupBox* createBedrockGroupBox();
-    QGroupBox* createWaterTableDepthGroupBox();
-    QGroupBox* createVariationGroupBox();
-    QGroupBox* createSoilPropsGroupBox();
-    QGroupBox* createNlPropTableBox();
+    auto createLayersGroupBox() -> QGroupBox*;
+    auto createBedrockGroupBox() -> QGroupBox*;
+    auto createWaterTableDepthGroupBox() -> QGroupBox*;
+    auto createVariationGroupBox() -> QGroupBox*;
+    auto createSoilPropsGroupBox() -> QGroupBox*;
+    auto createNlPropTableBox() -> QGroupBox*;
 
     TableGroupBox* _soilTypeTableBox;     
     NonlinearPropertyDelegate* _modulusDelegate;

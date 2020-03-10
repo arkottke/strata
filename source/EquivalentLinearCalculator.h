@@ -31,19 +31,19 @@ class EquivalentLinearCalculator : public AbstractIterativeCalculator
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out,
-                                     const EquivalentLinearCalculator* elc);
-    friend QDataStream & operator>> (QDataStream & in,
-                                     EquivalentLinearCalculator* elc);
+    friend auto operator<< (QDataStream & out,
+                                     const EquivalentLinearCalculator* elc) -> QDataStream &;
+    friend auto operator>> (QDataStream & in,
+                                     EquivalentLinearCalculator* elc) -> QDataStream &;
 
 public:
     EquivalentLinearCalculator(QObject *parent = nullptr);
 
-    virtual QString toHtml() const;
-    double strainRatio() const;
+    virtual auto toHtml() const -> QString;
+    auto strainRatio() const -> double;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void strainRatioChanged(double strainRatio);
@@ -52,7 +52,7 @@ public slots:
     void setStrainRatio(double strainRatio);
 
 protected:
-    virtual bool updateSubLayer(int index, const QVector<std::complex<double> > &strainTf);
+    virtual auto updateSubLayer(int index, const QVector<std::complex<double> > &strainTf) -> bool;
 
     virtual void estimateInitialStrains();
 

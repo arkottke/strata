@@ -65,19 +65,19 @@ protected slots:
 
 private:
     //! Create the table group box
-    QGroupBox* createTableGroupBox();
+    auto createTableGroupBox() -> QGroupBox*;
 
     //! Create the profile variation group box
-    QGroupBox* createProfileRandomizerGroupBox();
+    auto createProfileRandomizerGroupBox() -> QGroupBox*;
 
     //! Create the velocity variation group box
-    QFrame* createVelocityFrame();
+    auto createVelocityFrame() -> QFrame*;
 
     //! Create the layering group box
-    QFrame* createLayeringFrame();
+    auto createLayeringFrame() -> QFrame*;
 
     //! Create the bedrock depth variation group box
-    QFrame* createBedrockDepthFrame();
+    auto createBedrockDepthFrame() -> QFrame*;
 
     QToolBox* _parameterToolBox;
 

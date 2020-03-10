@@ -102,7 +102,7 @@ void MotionPage::setApproach(int i)
             i == MotionLibrary::RandomVibrationTheory);
 }
 
-QGroupBox* MotionPage::createInputLocationGroupBox()
+auto MotionPage::createInputLocationGroupBox() -> QGroupBox*
 {
     auto *layout = new QHBoxLayout;
 
@@ -118,7 +118,7 @@ QGroupBox* MotionPage::createInputLocationGroupBox()
     return _inputLocationGroupBox;
 }
 
-QGroupBox* MotionPage::createMotionsTableGroupBox()
+auto MotionPage::createMotionsTableGroupBox() -> QGroupBox*
 {
     auto *layout = new QVBoxLayout;
     // Create the buttons
@@ -383,13 +383,13 @@ void MotionPage::edit()
 
     QDialog *dialog = nullptr;
 
-    if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(motion)) {
+    if (auto* tsm = qobject_cast<TimeSeriesMotion*>(motion)) {
         dialog = new TimeSeriesMotionDialog(tsm, _readOnly, this);
-    } else if (RvtMotion* rm = qobject_cast<RvtMotion*>(motion)) {
+    } else if (auto* rm = qobject_cast<RvtMotion*>(motion)) {
         dialog = new RvtMotionDialog(rm, _readOnly, this);
-    } else if (CompatibleRvtMotion* crm = qobject_cast<CompatibleRvtMotion*>(motion)) {
+    } else if (auto* crm = qobject_cast<CompatibleRvtMotion*>(motion)) {
         dialog = new CompatibleRvtMotionDialog(crm, _readOnly, this);
-    } else if (SourceTheoryRvtMotion* _motion = qobject_cast<SourceTheoryRvtMotion*>(motion)) {
+    } else if (auto* _motion = qobject_cast<SourceTheoryRvtMotion*>(motion)) {
         dialog = new SourceTheoryRvtMotionDialog(_motion, _readOnly, this);
     }
 

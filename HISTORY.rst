@@ -1,3 +1,11 @@
+History
+=======
+
+v0.7.1 (2020-03-10)
+-------------------
+- Fixed: Qt depreciations 
+
+
 v0.7.0 (2019-10-16)
 -------------------
 - Added: Instructions for command line operation to manual

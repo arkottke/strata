@@ -49,7 +49,7 @@ AbstractOutput::AbstractOutput(OutputCatalog* catalog)
     _maxSize = 0;
 }
 
-int AbstractOutput::rowCount(const QModelIndex & parent) const
+auto AbstractOutput::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
@@ -67,7 +67,7 @@ int AbstractOutput::rowCount(const QModelIndex & parent) const
     return count;
  }
 
-int AbstractOutput::columnCount(const QModelIndex & parent) const
+auto AbstractOutput::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
@@ -80,7 +80,7 @@ int AbstractOutput::columnCount(const QModelIndex & parent) const
     return count;
 }
 
-QVariant AbstractOutput::data(const QModelIndex & index, int role) const
+auto AbstractOutput::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -108,7 +108,7 @@ QVariant AbstractOutput::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-QVariant AbstractOutput::headerData(int section, Qt::Orientation orientation, int role) const
+auto AbstractOutput::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -210,7 +210,7 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
 
             const int n = _data.at(i).at(j).size();
 
-            QwtPlotCurve* curve = new QwtPlotCurve;
+            auto* curve = new QwtPlotCurve;
             curve->setSamples(
                     x.data() + _offset,
                     y.data() + _offset,
@@ -288,12 +288,12 @@ void AbstractOutput::intToSiteMotion(int i, int* site, int* motion) const
     *motion = intToMotion(i);
 }
 
-int AbstractOutput::intToSite(int i) const
+auto AbstractOutput::intToSite(int i) const -> int
 {
     return i / motionCount();
 }
 
-int AbstractOutput::intToMotion(int i) const
+auto AbstractOutput::intToMotion(int i) const -> int
 {
     return i % motionCount();
 }
@@ -307,12 +307,12 @@ void AbstractOutput::clear()
     emit endResetModel();
 }
 
-bool AbstractOutput::seriesEnabled(int site, int motion)
+auto AbstractOutput::seriesEnabled(int site, int motion) -> bool
 {
     return _catalog->enabledAt(site, motion);
 }
 
-bool AbstractOutput::exportEnabled() const
+auto AbstractOutput::exportEnabled() const -> bool
 {
     return _exportEnabled;
 }
@@ -327,7 +327,7 @@ void AbstractOutput::setExportEnabled(bool exportEnabled)
     }
 }
 
-int AbstractOutput::motionIndex() const
+auto AbstractOutput::motionIndex() const -> int
 {
     return _motionIndex;
 }
@@ -342,27 +342,27 @@ void AbstractOutput::setMotionIndex(int motionIndex)
     endResetModel();
 }
 
-bool AbstractOutput::needsDepth() const
+auto AbstractOutput::needsDepth() const -> bool
 {
     return false;
 }
 
-bool AbstractOutput::needsFreq() const
+auto AbstractOutput::needsFreq() const -> bool
 {
     return false;
 }
 
-bool AbstractOutput::needsPeriod() const
+auto AbstractOutput::needsPeriod() const -> bool
 {
     return false;
 }
 
-bool AbstractOutput::needsTime() const
+auto AbstractOutput::needsTime() const -> bool
 {
     return false;
 }
 
-bool AbstractOutput::timeSeriesOnly() const
+auto AbstractOutput::timeSeriesOnly() const -> bool
 {
     return false;
 }
@@ -385,22 +385,22 @@ void AbstractOutput::labelAxes(QwtPlot* const qwtPlot) const
     qwtPlot->setAxisTitle(QwtPlot::yLeft, text);
 }
 
-AbstractOutput::CurveType AbstractOutput::curveType() const
+auto AbstractOutput::curveType() const -> AbstractOutput::CurveType
 {
     return Yfx;
 }
 
-int AbstractOutput::zOrder()
+auto AbstractOutput::zOrder() -> int
 {
     return 20;
 }
 
-int AbstractOutput::offset() const
+auto AbstractOutput::offset() const -> int
 {
     return _offset;
 }
 
-const QVector<double>& AbstractOutput::data(int site, int motion) const
+auto AbstractOutput::data(int site, int motion) const -> const QVector<double>&
 {
     Q_ASSERT(site < _data.size());
     Q_ASSERT(motion < _data.at(site).size());
@@ -408,22 +408,22 @@ const QVector<double>& AbstractOutput::data(int site, int motion) const
     return _data.at(site).at(motion);
 }
 
-bool AbstractOutput::siteIndependent() const
+auto AbstractOutput::siteIndependent() const -> bool
 {
     return false;
 }
 
-bool AbstractOutput::motionIndependent() const
+auto AbstractOutput::motionIndependent() const -> bool
 {
     return false;
 }
 
-int AbstractOutput::siteCount() const
+auto AbstractOutput::siteCount() const -> int
 {
     return siteIndependent() ? 1 : _catalog->siteCount();
 }
 
-int AbstractOutput::motionCount() const
+auto AbstractOutput::motionCount() const -> int
 {
     return motionIndependent() ? 1 : _catalog->motionCount();
 }
@@ -446,12 +446,12 @@ void AbstractOutput::columnToSiteMotion(const int column, int *site, int *motion
     }
 }
 
-const QString AbstractOutput::prefix() const
+auto AbstractOutput::prefix() const -> const QString
 {
     return "";
 }
 
-const QString AbstractOutput::suffix() const
+auto AbstractOutput::suffix() const -> const QString
 {
     return "";
 }
@@ -484,7 +484,7 @@ void AbstractOutput::fromJson(const QJsonObject &json)
     }
 }
 
-QJsonObject AbstractOutput::toJson() const
+auto AbstractOutput::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["className"] = metaObject()->className();
@@ -509,7 +509,7 @@ QJsonObject AbstractOutput::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)
+auto operator<< (QDataStream & out, const AbstractOutput* ao) -> QDataStream &
 {
     out << static_cast<quint8>(1);
 
@@ -518,7 +518,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractOutput* ao)
+auto operator>> (QDataStream & in, AbstractOutput* ao) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

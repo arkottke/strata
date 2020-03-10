@@ -57,7 +57,7 @@ TableGroupBox::TableGroupBox(const QString & title, QWidget * parent)
     _table->setSelectionMode(QAbstractItemView::ContiguousSelection);
 
     // Create the layout of the group box
-    QVBoxLayout * layout = new QVBoxLayout;
+    auto * layout = new QVBoxLayout;
     layout->addItem(_buttonRow);
     layout->addWidget(_table);
 
@@ -86,7 +86,7 @@ void TableGroupBox::setColumnHidden(int column, bool hide)
     _table->setColumnHidden(column, hide);
 }
 
-bool TableGroupBox::lastRowFixed() const
+auto TableGroupBox::lastRowFixed() const -> bool
 {
     return _lastRowFixed;
 }
@@ -104,7 +104,7 @@ void TableGroupBox::addButton(QPushButton * pushButton )
     _buttonRow->addWidget(pushButton);
 }
 
-MyTableView* TableGroupBox::table()
+auto TableGroupBox::table() -> MyTableView*
 {
     return _table;
 }

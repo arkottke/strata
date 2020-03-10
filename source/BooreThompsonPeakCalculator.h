@@ -38,18 +38,18 @@ public:
     
     void setScenario(double mag, double dist, AbstractRvtMotion::Region region);
 
-    double mag() const;
-    double dist() const;
-    AbstractRvtMotion::Region region() const;
+    auto mag() const -> double;
+    auto dist() const -> double;
+    auto region() const -> AbstractRvtMotion::Region;
 
 protected:
-    virtual double calcDurationRms(
+    virtual auto calcDurationRms(
             double duration,
             double oscFreq,
             double oscDamping,
-            const QVector<std::complex<double> > &siteTransFunc);
+            const QVector<std::complex<double> > &siteTransFunc) -> double;
 
-    double interpCoeff(double mag, double lnDist, QMap<QString, QVector<double> > &data, const QString &key);
+    auto interpCoeff(double mag, double lnDist, QMap<QString, QVector<double> > &data, const QString &key) -> double;
 
     // Interpolation and dimensions
     gsl_interp2d *_interp;

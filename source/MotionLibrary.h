@@ -32,8 +32,8 @@ class MotionLibrary : public MyAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml);
-    friend QDataStream & operator>> (QDataStream & in, MotionLibrary* ml);
+    friend auto operator<< (QDataStream & out, const MotionLibrary* ml) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, MotionLibrary* ml) -> QDataStream &;
 
 public:
     explicit MotionLibrary(QObject *parent = nullptr);
@@ -54,43 +54,43 @@ public:
         RandomVibrationTheory //!< Use random vibration theory
     };
 
-    static QStringList approachList();
+    static auto approachList() -> QStringList;
 
-    QString toHtml() const;
+    auto toHtml() const -> QString;
 
     //!@{ Methods modifying the library
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
 
-    virtual Qt::ItemFlags flags(const QModelIndex & index) const;
+    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
 
-    virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
 
-    virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
     //!@}
 
-    bool saveData() const;
+    auto saveData() const -> bool;
 
     //! Number of enabled motions
-    int motionCount() const;
+    auto motionCount() const -> int;
 
     //! Add a motion to the model
     void addMotion(AbstractMotion *motion);
 
     //! Return the motion at the index
-    AbstractMotion* motionAt(int row);
+    auto motionAt(int row) -> AbstractMotion*;
 
     //! Update the data along a row
     void updateRow(int row);
 
-    Approach approach() const;
+    auto approach() const -> Approach;
     void setApproach(Approach approach);
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:    
     void wasModified();

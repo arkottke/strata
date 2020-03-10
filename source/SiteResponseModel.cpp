@@ -99,7 +99,7 @@ SiteResponseModel::SiteResponseModel(QObject *parent)
     Units::instance()->reset();
 }
 
-QStringList SiteResponseModel::methodList() {
+auto SiteResponseModel::methodList() -> QStringList {
     QStringList list;
 
     list << tr("Linear Elastic")
@@ -112,7 +112,7 @@ QStringList SiteResponseModel::methodList() {
     return list;
 }
 
-QString SiteResponseModel::fileName() const {
+auto SiteResponseModel::fileName() const -> QString {
     return _fileName;
 }
 
@@ -125,7 +125,7 @@ void SiteResponseModel::setFileName(const QString &fileName) {
     }
 }
 
-SiteResponseModel::Method SiteResponseModel::method() const {
+auto SiteResponseModel::method() const -> SiteResponseModel::Method {
     return _method;
 }
 
@@ -156,16 +156,16 @@ void SiteResponseModel::setMethod(int method) {
     setMethod(static_cast<Method>(method));
 }
 
-bool SiteResponseModel::dampingRequired() const {
+auto SiteResponseModel::dampingRequired() const -> bool {
     return _method == LinearElastic;
 }
 
-bool SiteResponseModel::nonlinearPropertiesRequired() const {
+auto SiteResponseModel::nonlinearPropertiesRequired() const -> bool {
     return (_method == EquivalentLinear
             || _method == FrequencyDependent);
 }
 
-bool SiteResponseModel::modified() const {
+auto SiteResponseModel::modified() const -> bool {
     return _modified;
 }
 
@@ -181,7 +181,7 @@ void SiteResponseModel::setModified(bool modified) {
     //    }
 }
 
-QTextDocument *SiteResponseModel::notes() const {
+auto SiteResponseModel::notes() const -> QTextDocument * {
     return _notes;
 }
 
@@ -199,23 +199,23 @@ void SiteResponseModel::setIsLoaded(bool isLoaded) {
     _isLoaded = isLoaded;
 }
 
-SoilProfile *SiteResponseModel::siteProfile() {
+auto SiteResponseModel::siteProfile() -> SoilProfile * {
     return _siteProfile;
 }
 
-MotionLibrary *SiteResponseModel::motionLibrary() {
+auto SiteResponseModel::motionLibrary() -> MotionLibrary * {
     return _motionLibrary;
 }
 
-AbstractCalculator *SiteResponseModel::calculator() {
+auto SiteResponseModel::calculator() -> AbstractCalculator * {
     return _calculator;
 }
 
-OutputCatalog *SiteResponseModel::outputCatalog() {
+auto SiteResponseModel::outputCatalog() -> OutputCatalog * {
     return _outputCatalog;
 }
 
-MyRandomNumGenerator *SiteResponseModel::randNumGen() {
+auto SiteResponseModel::randNumGen() -> MyRandomNumGenerator * {
     return _randNumGen;
 }
 
@@ -234,7 +234,7 @@ void SiteResponseModel::setCalculator(AbstractCalculator *calculator) {
     }
 }
 
-bool SiteResponseModel::loadBinary(const QString &fileName) {
+auto SiteResponseModel::loadBinary(const QString &fileName) -> bool {
     setModified(false);
     _isLoaded = false;
 
@@ -271,7 +271,7 @@ bool SiteResponseModel::loadBinary(const QString &fileName) {
     return true;
 }
 
-bool SiteResponseModel::loadJson(const QString &fileName) {
+auto SiteResponseModel::loadJson(const QString &fileName) -> bool {
     setModified(false);
     _isLoaded = false;
 
@@ -323,7 +323,7 @@ bool SiteResponseModel::loadJson(const QString &fileName) {
     return true;
 }
 
-bool SiteResponseModel::saveBinary() {
+auto SiteResponseModel::saveBinary() -> bool {
     QFile file(_fileName);
     // If the file can't be opened halt
     if (!file.open(QIODevice::WriteOnly)) {
@@ -342,7 +342,7 @@ bool SiteResponseModel::saveBinary() {
     return true;
 }
 
-bool SiteResponseModel::saveJson() {
+auto SiteResponseModel::saveJson() -> bool {
     QJsonObject json;
 
     json["notes"] = _notes->toPlainText();
@@ -380,7 +380,7 @@ bool SiteResponseModel::saveJson() {
     return true;
 }
 
-bool SiteResponseModel::hasResults() const {
+auto SiteResponseModel::hasResults() const -> bool {
     return _hasResults;
 }
 
@@ -517,7 +517,7 @@ void SiteResponseModel::run() {
     }
 }
 
-QString SiteResponseModel::toHtml() {
+auto SiteResponseModel::toHtml() -> QString {
     QString html;
 
     // Define the html header
@@ -656,7 +656,7 @@ QString SiteResponseModel::toHtml() {
     return html;
 }
 
-QDataStream &operator<<(QDataStream &out, const SiteResponseModel *srm) {
+auto operator<<(QDataStream &out, const SiteResponseModel *srm) -> QDataStream & {
     out << static_cast<quint8>(2);
 
     out << Units::instance()
@@ -682,7 +682,7 @@ QDataStream &operator<<(QDataStream &out, const SiteResponseModel *srm) {
     return out;
 }
 
-QDataStream &operator>>(QDataStream &in, SiteResponseModel *srm) {
+auto operator>>(QDataStream &in, SiteResponseModel *srm) -> QDataStream & {
     quint8 ver;
     in >> ver;
 

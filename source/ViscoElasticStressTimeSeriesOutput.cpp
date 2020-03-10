@@ -32,17 +32,17 @@ ViscoElasticStressTimeSeriesOutput::ViscoElasticStressTimeSeriesOutput(OutputCat
     _type = AbstractMotion::Within;
 }
 
-QString ViscoElasticStressTimeSeriesOutput::name() const
+auto ViscoElasticStressTimeSeriesOutput::name() const -> QString
 {
     return tr("Visco-Elastic Shear-Stress Time Series");
 }
 
-QString ViscoElasticStressTimeSeriesOutput::shortName() const
+auto ViscoElasticStressTimeSeriesOutput::shortName() const -> QString
 {
     return tr("viscElasticStressTs");
 }
 
-const QString ViscoElasticStressTimeSeriesOutput::yLabel() const
+auto ViscoElasticStressTimeSeriesOutput::yLabel() const -> const QString
 {
     return tr("Visco-Elastic Shear Stress, %1 (%2)")
             .arg(QChar(0x03C4))
@@ -55,7 +55,7 @@ void ViscoElasticStressTimeSeriesOutput::extract(AbstractCalculator* const calcu
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
     Q_ASSERT(tsm);
 

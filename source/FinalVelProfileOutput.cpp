@@ -32,17 +32,17 @@ FinalVelProfileOutput::FinalVelProfileOutput(OutputCatalog* catalog)
 
 }
 
-QString FinalVelProfileOutput::name() const
+auto FinalVelProfileOutput::name() const -> QString
 {
     return tr("Final Shear-Wave Velocity Profile");
 }
 
-QString FinalVelProfileOutput::shortName() const
+auto FinalVelProfileOutput::shortName() const -> QString
 {
     return tr("finalVs");
 }
 
-const QString FinalVelProfileOutput::xLabel() const
+auto FinalVelProfileOutput::xLabel() const -> const QString
 {
     return tr("Final Shear-Wave Velocity (%1)").arg(Units::instance()->vel());
 }

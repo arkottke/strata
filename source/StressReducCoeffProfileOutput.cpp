@@ -33,18 +33,18 @@ StressReducCoeffProfileOutput::StressReducCoeffProfileOutput(OutputCatalog* cata
 
 }
 
-QString StressReducCoeffProfileOutput::name() const
+auto StressReducCoeffProfileOutput::name() const -> QString
 {
 
     return tr("Stress Reduction Coefficient (r_d) Profile");
 }
 
-QString StressReducCoeffProfileOutput::shortName() const
+auto StressReducCoeffProfileOutput::shortName() const -> QString
 {
     return tr("stressReducCoeff");
 }
 
-const QString StressReducCoeffProfileOutput::xLabel() const
+auto StressReducCoeffProfileOutput::xLabel() const -> const QString
 {
     return tr("Stress Reduction Coefficient (r_d)");
 }

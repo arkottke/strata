@@ -50,7 +50,7 @@ CrustalAmplification::~CrustalAmplification()
     _crustalModel->deleteLater();
 }
 
-QStringList CrustalAmplification::sourceList() {
+auto CrustalAmplification::sourceList() -> QStringList {
     return {tr("Default"), tr("Specified"), tr("Calculated")};
 }
 
@@ -91,25 +91,25 @@ void CrustalAmplification::setSource(int source) {
     setSource((Source)source);
 }
 
-CrustalAmplification::Source CrustalAmplification::source() const {
+auto CrustalAmplification::source() const -> CrustalAmplification::Source {
     return _source;
 }
 
-int CrustalAmplification::rowCount(const QModelIndex & parent) const
+auto CrustalAmplification::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _freq.size();
 }
 
-int CrustalAmplification::columnCount(const QModelIndex & parent) const
+auto CrustalAmplification::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 2;
 }
 
-QVariant CrustalAmplification::headerData( int section, Qt::Orientation orientation, int role) const
+auto CrustalAmplification::headerData( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole) {
         return QVariant();
@@ -132,7 +132,7 @@ QVariant CrustalAmplification::headerData( int section, Qt::Orientation orientat
     return QVariant();
 }
 
-QVariant CrustalAmplification::data(const QModelIndex & index, int role) const
+auto CrustalAmplification::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex()) {
         return QVariant();
@@ -151,7 +151,7 @@ QVariant CrustalAmplification::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-bool CrustalAmplification::setData( const QModelIndex & index, const QVariant & value, int role)
+auto CrustalAmplification::setData( const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if(index.parent() != QModelIndex() && role != Qt::EditRole) {
         return false;
@@ -176,7 +176,7 @@ bool CrustalAmplification::setData( const QModelIndex & index, const QVariant & 
     }
 }
 
-Qt::ItemFlags CrustalAmplification::flags( const QModelIndex & index) const
+auto CrustalAmplification::flags( const QModelIndex & index) const -> Qt::ItemFlags
 {
     if (_source == Specified) {
         return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
@@ -185,7 +185,7 @@ Qt::ItemFlags CrustalAmplification::flags( const QModelIndex & index) const
     }
 }
 
-bool CrustalAmplification::insertRows(int row, int count, const QModelIndex &parent)
+auto CrustalAmplification::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     emit beginInsertRows(parent, row, row+count-1);
 
@@ -200,7 +200,7 @@ bool CrustalAmplification::insertRows(int row, int count, const QModelIndex &par
     return true;
 }
 
-bool CrustalAmplification::removeRows(int row, int count, const QModelIndex &parent)
+auto CrustalAmplification::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     emit beginRemoveRows(parent, row, row+count-1 );
 
@@ -215,12 +215,12 @@ bool CrustalAmplification::removeRows(int row, int count, const QModelIndex &par
     return true;
 }
 
-CrustalModel* CrustalAmplification::crustalModel()
+auto CrustalAmplification::crustalModel() -> CrustalModel*
 {
     return _crustalModel;
 }
 
-double CrustalAmplification::interpAmpAt(double freq)
+auto CrustalAmplification::interpAmpAt(double freq) -> double
 {
     if (!_interpolator) {
         // Make sure the interpolator has been intialized
@@ -280,7 +280,7 @@ void CrustalAmplification::fromJson(const QJsonObject &json)
     }
 }
 
-QJsonObject CrustalAmplification::toJson() const
+auto CrustalAmplification::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["source"] = (int)_source;
@@ -298,7 +298,7 @@ QJsonObject CrustalAmplification::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const CrustalAmplification* ca)
+auto operator<< (QDataStream & out, const CrustalAmplification* ca) -> QDataStream &
 {
     out << (quint8)1;
     out << (int)ca->_source;
@@ -316,7 +316,7 @@ QDataStream & operator<< (QDataStream & out, const CrustalAmplification* ca)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, CrustalAmplification* ca)
+auto operator>> (QDataStream & in, CrustalAmplification* ca) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

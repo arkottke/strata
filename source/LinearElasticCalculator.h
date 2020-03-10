@@ -31,10 +31,10 @@ class LinearElasticCalculator : public AbstractCalculator
 public:
     explicit LinearElasticCalculator(QObject *parent = nullptr);
 
-    virtual bool run(AbstractMotion* motion, SoilProfile* site);
+    virtual auto run(AbstractMotion* motion, SoilProfile* site) -> bool;
 
     //! Always converges
-    virtual bool converged() const {return true;}
+    virtual auto converged() const -> bool {return true;}
 };
 
 #endif // LINEAR_ELASTIC_CALCULATOR_H

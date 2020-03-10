@@ -33,13 +33,13 @@ public:
     explicit AbstractMutableOutputCatalog(OutputCatalog *outputCatalog);
 
     //! If the OutputCatalog needs input information
-    virtual bool needsInputConditions() const;
+    virtual auto needsInputConditions() const -> bool;
 
     //! If the OutputCatalog needs output information
-    virtual bool needsOutputConditions() const;
+    virtual auto needsOutputConditions() const -> bool;
 
     virtual void addRow(const QString &name) = 0;
-    virtual QStringList names() const;
+    virtual auto names() const -> QStringList;
 
 protected:
     //! Relationship between human readable and QMetaObject classnames
