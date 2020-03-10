@@ -20,6 +20,7 @@ IF EXIST gsl (
     git pull
 ) ELSE (
     git clone https://github.com/ampl/gsl.git
+    git submodule init && git submodule update
     CD gsl
 )
 

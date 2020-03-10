@@ -32,6 +32,7 @@ install:
   - cd $TRAVIS_BUILD_DIR/..
   - git clone https://github.com/ampl/gsl.git
   - cd gsl
+  - git submodule init && git submodule update
   - mkdir build && cd build
   - cmake .. -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX:STRING=$GSL_ROOT_DIR
   - cmake --build . --target install
