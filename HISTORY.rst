@@ -3,6 +3,7 @@ History
 
 v0.7.1 (2020-03-10)
 -------------------
+- Improved: Modernized source code with clang-tidy
 - Fixed: Qt depreciations 
 
 
