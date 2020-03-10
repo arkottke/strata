@@ -6,7 +6,7 @@ matrix:
   include:
     - name: "Linux"
       os: linux
-      dist: trusty
+      dist: bionic
       sudo: required
 addons:
   apt:
