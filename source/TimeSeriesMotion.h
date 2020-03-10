@@ -60,7 +60,8 @@ public:
     enum InputUnits {
         Gravity, //!< Gravity -- no unit conversion required
         CentimetersPerSecondSquared, //!< Centimenters per second squared
-        InchesPerSecondSquared //!< Inches per second squared
+        InchesPerSecondSquared, //!< Inches per second squared
+        MetersPerSecondSquared //!< Menters per second squared
     };
 
     static auto formatList() -> QStringList;

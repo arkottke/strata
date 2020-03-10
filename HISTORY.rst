@@ -1,11 +1,12 @@
+<<<<<<< HEAD
 History
 =======
 
-v0.7.1 (2020-03-10)
+v0.7.1 (unrelreased)
 -------------------
 - Improved: Modernized source code with clang-tidy
 - Fixed: Qt depreciations 
-
+- Minor fixes in manual from Subrat Subedi
 
 v0.7.0 (2019-10-16)
 -------------------
