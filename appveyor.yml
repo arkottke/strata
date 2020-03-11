@@ -10,16 +10,16 @@ init:
 clone_depth: 1
 
 # https://www.appveyor.com/docs/build-environment/#build-worker-images
-image: Visual Studio 2015
+image: Visual Studio 2019
 
 environment:
   fast_finish: true
   matrix:
         - PLATFORM: x86
-          QT5: C:\Qt\5.11\msvc2015
+          QT5: C:\Qt\5.14\msvc2017
           CMAKE_GENERATOR: "NMake Makefiles"
         - PLATFORM: x64
-          QT5: C:\Qt\5.11\msvc2015_64
+          QT5: C:\Qt\5.14\msvc2017_64
           CMAKE_GENERATOR: "NMake Makefiles"
 
 configuration: Release
