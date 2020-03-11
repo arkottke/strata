@@ -10,16 +10,28 @@ matrix:
       sudo: required
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:beineri/opt-qt-5.12.0-bionic'
     packages:
-      - libqwt-qt5-dev
-      - libgsl-dev
-      - qt5-default
-      - qt5-qmake
+      - libgsl-dev 
+      - qt512base 
+      - qt512tools 
+      - qt512svg
+install:
+  - source /opt/qt512/bin/qt512-env.sh
+  - # Install QWT
+  - cd $TRAVIS_BUILD_DIR/..
+  - svn checkout svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
+  - cd qwt
+  - QWT_ROOT_DIR=`pwd`
+  - LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
+  - qmake
+  - make -j$(nproc)
 script:
   - cd $TRAVIS_BUILD_DIR
   - mkdir build
   - cd build
-  - cmake ..  -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+  - cmake ..  -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
   - cmake --build . --target install
   - # Run all of the examples
   - find $TRAVIS_BUILD_DIR/example -name "example-*" -exec ./dist/usr/bin/strata -b {} \;
