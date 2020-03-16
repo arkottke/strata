@@ -5,8 +5,6 @@ branches:
         - /^travis.*$/
 
 init:
-    # Enable RDP debugging
-    - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     - git config --global core.autocrlf input
 
 clone_depth: 1
@@ -42,11 +40,6 @@ build_script:
     - cmake --build . --target install
     - cmake --build . --target package
     - cmake --build . --target archive
-
-# Enable RDP debugging
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 
 artifacts:
     - path: build\Strata-*.zip
