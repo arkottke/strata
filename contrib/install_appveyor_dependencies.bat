@@ -1,4 +1,4 @@
-@ECHO OFF
+@ECHO ON
 
 REM Set up the CPP environment
 REM https://www.appveyor.com/docs/lang/cpp/
@@ -19,9 +19,11 @@ IF EXIST gsl (
     git pull
 ) ELSE (
     git clone https://github.com/ampl/gsl.git
-    git submodule update --init --recursive
     CD gsl
 )
+
+REM Update submodules
+git submodule update --init --recursive
 
 cmake ^
  -DARCH=64^
@@ -31,6 +33,7 @@ cmake ^
  -DCMAKE_BUILD_TYPE="Release"^
  -G "%CMAKE_GENERATOR%"^
  .
+
 cmake --build . --target install
 
 IF %PLATFORM%==x86 (
