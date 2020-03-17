@@ -2,10 +2,11 @@
 History
 =======
 
-v0.7.1 (unrelreased)
+v0.8.0 (2020-03-17)
 -------------------
 - Improved: Modernized source code with clang-tidy
 - Fixed: Qt depreciations 
+- Fixed: Plotting of profiles
 - Minor fixes in manual from Subrat Subedi
 
 v0.7.0 (2019-10-16)
