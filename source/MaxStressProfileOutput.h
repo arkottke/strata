@@ -33,6 +33,7 @@ public:
     explicit MaxStressProfileOutput(OutputCatalog* catalog);
 
     virtual auto name() const -> QString;
+
 protected:
     virtual auto shortName() const -> QString;
     virtual auto xLabel() const -> const QString;

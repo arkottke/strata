@@ -339,7 +339,7 @@ auto OutputCatalog::siteEnabled(int row) const -> bool
 
     const int site = _selectedOutput->intToSite(row);
 
-    if (site >= _enabled.size())
+    if (site < 0 || _enabled.size() < site)
         return false;
 
     for (int i = 0; i < _motionCount; ++i) {

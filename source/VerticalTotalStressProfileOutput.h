@@ -35,7 +35,9 @@ public:
     virtual auto name() const -> QString;
 protected:
     virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+    virtual auto xLabel() const -> const QString;    
+    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

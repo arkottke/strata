@@ -193,17 +193,13 @@ void OutputStatistics::clear()
 auto OutputStatistics::plotCurve(QwtPlot* const plot, const QVector<double> &vec, Qt::PenStyle penStyle) const -> QwtPlotCurve*
 {
     // Figure out what x and y are based on curveType
-    const double* x = _output->curveType() == AbstractOutput::Yfx ?
-                      _output->ref().data() : vec.data();
-
-    const double* y = _output->curveType() == AbstractOutput::Yfx ?
-                      vec.data() : _output->ref().data();
+    const QVector<double> & x = _output->curveType() == AbstractOutput::Yfx ? _output->ref() : vec;
+    const QVector<double> & y = _output->curveType() == AbstractOutput::Yfx ? vec : _output->ref();
 
     // Create the curve
     auto *qpc = new QwtPlotCurve;
+    _output->setCurveSamples(qpc, x, y);
 
-    qpc->setSamples(x + _output->offset(), y + _output->offset(),
-                 vec.size() - _output->offset());
     qpc->setPen(QPen(QBrush(Qt::blue), 2, penStyle));
     qpc->setZ(AbstractOutput::zOrder() + 1);    
     qpc->setRenderHint(QwtPlotItem::RenderAntialiased);

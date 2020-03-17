@@ -26,11 +26,12 @@
 #include "SubLayer.h"
 #include "Units.h"
 
+#include <qwt_scale_engine.h>
+
 VerticalEffectiveStressProfileOutput::VerticalEffectiveStressProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-    // Skip the zero at the surface
-    _offset = 1;
+    _offset_bot = 1;
 }
 
 auto VerticalEffectiveStressProfileOutput::name() const -> QString
@@ -48,6 +49,11 @@ auto VerticalEffectiveStressProfileOutput::xLabel() const -> const QString
     return tr("Vertical Effective Stress (%1)").arg(Units::instance()->stress());
 }
 
+auto VerticalEffectiveStressProfileOutput::xScaleEngine() const -> QwtScaleEngine*
+{
+    auto *scaleEngine = new QwtLinearScaleEngine;
+    return scaleEngine;
+}
 
 void VerticalEffectiveStressProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const

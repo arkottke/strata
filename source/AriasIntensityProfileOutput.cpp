@@ -33,7 +33,6 @@
 AriasIntensityProfileOutput::AriasIntensityProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
 {
-    _offset = 1;
 }
 
 auto AriasIntensityProfileOutput::name() const -> QString

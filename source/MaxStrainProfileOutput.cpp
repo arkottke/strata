@@ -30,7 +30,8 @@
 MaxStrainProfileOutput::MaxStrainProfileOutput(OutputCatalog* catalog)
         : AbstractProfileOutput(catalog)
 {
-    _offset = 1;
+    _offset_bot = 1;
+    _offset_top = 1;
 }
 
 auto MaxStrainProfileOutput::name() const -> QString

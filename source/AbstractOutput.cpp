@@ -41,8 +41,8 @@ AbstractOutput::AbstractOutput(OutputCatalog* catalog)
       _catalog(catalog),
       _statistics(nullptr),
       _interp(nullptr),
-      _offset(0)
-
+      _offset_top(0),
+      _offset_bot(0)
 {
     _exportEnabled = false;
     _motionIndex = 0;
@@ -61,7 +61,7 @@ auto AbstractOutput::rowCount(const QModelIndex & parent) const -> int
         if (needsTime()) {
             count = ref(_motionIndex).size();
         } else {
-            count = _maxSize - _offset;
+            count = _maxSize;
         }
     }
     return count;
@@ -147,7 +147,7 @@ auto AbstractOutput::headerData(int section, Qt::Orientation orientation, int ro
             }
         }
     case Qt::Vertical:
-        return section+1;
+        return section + 1;
     }
 
     return QVariant();
@@ -199,22 +199,19 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
     labelAxes(qwtPlot);
 
     // Create the curves
+    int n;
+    int offset;
     for (int i = 0; i < siteCount(); ++i) {
         for (int j = 0; j < motionCount(); ++j) {
-
             const QVector<double> & x = (curveType() == Yfx) ?
                                         ref(j) : _data.at(i).at(j);
 
             const QVector<double> & y = (curveType() == Yfx) ?
                                         _data.at(i).at(j) : ref(j);
 
-            const int n = _data.at(i).at(j).size();
+            auto* curve = new QwtPlotCurve;         
+            setCurveSamples(curve, x, y);
 
-            auto* curve = new QwtPlotCurve;
-            curve->setSamples(
-                    x.data() + _offset,
-                    y.data() + _offset,
-                    n - _offset);
             curve->setPen(QPen(Qt::darkGray));
             curve->setZ(zOrder());
 
@@ -390,14 +387,16 @@ auto AbstractOutput::curveType() const -> AbstractOutput::CurveType
     return Yfx;
 }
 
+void AbstractOutput::setCurveSamples(QwtPlotCurve *curve, const QVector<double> &x, const QVector<double> &y) const
+{
+    int n = std::min(x.size(), y.size());
+    n -= (_offset_top + _offset_bot);
+    curve->setSamples(x.data() + _offset_top, y.data() + _offset_top, n);
+}
+
 auto AbstractOutput::zOrder() -> int
 {
     return 20;
-}
-
-auto AbstractOutput::offset() const -> int
-{
-    return _offset;
 }
 
 auto AbstractOutput::data(int site, int motion) const -> const QVector<double>&

@@ -33,7 +33,7 @@
 DissipatedEnergyProfileOutput::DissipatedEnergyProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
 {
-    _offset = 1;
+    // _offset_top = true;
 }
 
 auto DissipatedEnergyProfileOutput::name() const -> QString

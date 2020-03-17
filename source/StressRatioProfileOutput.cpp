@@ -31,7 +31,8 @@
 StressRatioProfileOutput::StressRatioProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-    _offset = 1;
+    _offset_bot = 1;
+    _offset_top = 1;
 }
 
 auto StressRatioProfileOutput::name() const -> QString

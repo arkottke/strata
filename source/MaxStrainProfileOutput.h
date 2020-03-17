@@ -31,7 +31,6 @@ class MaxStrainProfileOutput : public AbstractProfileOutput
     Q_OBJECT
 public:
     explicit MaxStrainProfileOutput(OutputCatalog* catalog);
-
     virtual auto name() const -> QString;
 protected:
     virtual auto shortName() const -> QString;

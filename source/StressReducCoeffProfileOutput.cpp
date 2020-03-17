@@ -30,7 +30,7 @@
 StressReducCoeffProfileOutput::StressReducCoeffProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-
+    _offset_bot = 1;
 }
 
 auto StressReducCoeffProfileOutput::name() const -> QString

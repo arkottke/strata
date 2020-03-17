@@ -137,11 +137,11 @@ public:
     //! Type of Curve
     virtual auto curveType() const -> AbstractOutput::CurveType;
 
+    //! Add data to a curve
+    void setCurveSamples(QwtPlotCurve *curve, const QVector<double> & x, const QVector<double> & y) const;
+
     //! Z order for a data curve
     static auto zOrder() -> int;
-
-    //! Offset for plotting the curves
-    auto offset() const -> int;
 
     void fromJson(const QJsonObject &json);
     auto toJson() const -> QJsonObject;
@@ -205,17 +205,17 @@ protected:
     //! Interpolater used to interpolate the output
     AbstractOutputInterpolater* _interp;
 
-    /*! Initial offset of the data for plotting
-     * For some output the first data value is ignore because it is zero and
-     * causes problems when plotting on a log-log scale.
-     */
-    int _offset;
-
     //! Which motion should be displayed by the table -- only important for output that needs time
     int _motionIndex;
 
     //! Size of the longest output
     int _maxSize;
+
+    //! Visible window for plotting from the top of the profile
+    bool _offset_top;
+
+    //! Visible window for plotting from the bottom of the profile
+    bool _offset_bot;
 };
 
 #endif // ABSTRACT_OUTPUT_H
