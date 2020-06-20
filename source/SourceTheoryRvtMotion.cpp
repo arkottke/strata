@@ -423,6 +423,7 @@ void SourceTheoryRvtMotion::fromJson(const QJsonObject &json)
 {
     AbstractRvtMotion::fromJson(json);
 
+    _isCustomized = json["isCustomized"].toBool();
     if (_isCustomized) {
         setDepth(json["depth"].toDouble());
         setStressDrop(json["stressDrop"].toDouble());
@@ -435,9 +436,12 @@ void SourceTheoryRvtMotion::fromJson(const QJsonObject &json)
 
         _crustalAmp->fromJson(json["crustalAmp"].toObject());
         _pathDuration->fromJson(json["pathDuration"].toObject());
-    } else {
-        setRegion(_region);
     }
+
+    setRegion(_region);
+    setMagnitude(_magnitude);
+    setDistance(_distance);
+
     calculate();
 }
 
@@ -446,6 +450,7 @@ auto SourceTheoryRvtMotion::toJson() const -> QJsonObject
     QJsonObject json = AbstractRvtMotion::toJson();
     json["depth"] = _depth;
     json["freq"] = _freq->toJson();
+    json["isCustomized"] = _isCustomized;
 
     if (_isCustomized) {
         json["stresDrop"] = _stressDrop;
@@ -465,10 +470,10 @@ auto SourceTheoryRvtMotion::toJson() const -> QJsonObject
 
 auto operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm) -> QDataStream &
 {
-    out << static_cast<quint8>(3);
+    out << static_cast<quint8>(4);
     out << qobject_cast<const AbstractRvtMotion*>(strm);
     // Properties of SourceTheoryRvtMotion
-    out << strm->_depth << strm->_freq;
+    out << strm->_depth << strm->_freq << strm->_isCustomized;
     if (strm->_isCustomized) {
         out << strm->_stressDrop
             << strm->_geoAtten
@@ -480,6 +485,7 @@ auto operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm) -> QDataS
             << strm->_crustalAmp
             << strm->_pathDuration;
     }
+
     return out;
 }
 
@@ -493,10 +499,11 @@ auto operator>> (QDataStream & in, SourceTheoryRvtMotion* strm) -> QDataStream &
     // Properties of SourceTheoryRvtMotion
     double depth;
 
-    in >> depth
-            >> strm->_freq;
-
+    in >> depth >> strm->_freq;
     strm->setDepth(depth);
+
+    if (ver > 3)
+        in >> strm->_isCustomized;
 
     if (strm->_isCustomized) {
         double stressDrop;
