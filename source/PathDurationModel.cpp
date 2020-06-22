@@ -35,6 +35,9 @@ PathDurationModel::PathDurationModel(QObject *parent) :
 
 void PathDurationModel::setRegion(AbstractRvtMotion::Region region)
 {
+    if (_source != Default)
+        return;
+
     beginResetModel();
     // WUS and CEUS amplification from Campbell (2003)
     if (region == AbstractRvtMotion::WUS) {
@@ -206,6 +209,7 @@ auto PathDurationModel::duration(double distance) const -> double {
 void PathDurationModel::fromJson(const QJsonObject &json)
 {
     beginResetModel();
+    setSource(json["source"].toInt(0));
     Serialize::toDoubleVector(json["distance"], _distance);
     Serialize::toDoubleVector(json["rate"], _rate);
     endResetModel();
@@ -214,7 +218,8 @@ void PathDurationModel::fromJson(const QJsonObject &json)
 auto PathDurationModel::toJson() const -> QJsonObject
 {
     QJsonObject json;
-
+    
+    json["source"] = static_cast<int>(_source);
     json["distance"] = Serialize::toJsonArray(_distance);
     json["rate"] = Serialize::toJsonArray(_rate);
 
@@ -223,8 +228,8 @@ auto PathDurationModel::toJson() const -> QJsonObject
 
 auto operator<< (QDataStream & out, const PathDurationModel* pdm) -> QDataStream&
 {
-    out << static_cast<quint8>(1);
-    out << pdm->_distance << pdm->_rate;
+    out << static_cast<quint8>(2);
+    out << (int)pdm->_source << pdm->_distance << pdm->_rate;
 
     return out;
 }
@@ -235,6 +240,12 @@ auto operator>> (QDataStream & in, PathDurationModel* pdm) -> QDataStream&
     in >> ver;
 
     pdm->beginResetModel();
+
+    if (ver > 1){
+        int source;
+        in >> source;
+        pdm->setSource(source);
+    }
 
     in >> pdm->_distance >> pdm->_rate;
 

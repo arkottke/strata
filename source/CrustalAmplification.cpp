@@ -56,6 +56,9 @@ auto CrustalAmplification::sourceList() -> QStringList {
 
 void CrustalAmplification::setRegion(AbstractRvtMotion::Region region)
 {     
+    if (_source != Default)
+        return;
+
     beginResetModel();
     // WUS and CEUS amplification from Campbell (2003)
     if (region == AbstractRvtMotion::CEUS) {

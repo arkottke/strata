@@ -231,6 +231,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout*
     // Path duration model
     auto comboBox = new QComboBox;
     comboBox->addItems(PathDurationModel::sourceList());
+    comboBox->setCurrentIndex(strm->pathDuration()->source());
     comboBox->setDisabled(_readOnly | !isCustomized);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
@@ -245,6 +246,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout*
     // Crustal amp model
     comboBox = new QComboBox;
     comboBox->addItems(CrustalAmplification::sourceList());
+    comboBox->setCurrentIndex(strm->crustalAmp()->source());
     comboBox->setDisabled(_readOnly | !isCustomized);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),

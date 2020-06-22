@@ -341,6 +341,8 @@ auto SourceTheoryRvtMotion::pathDuration() -> PathDurationModel*
 
 void SourceTheoryRvtMotion::init()
 {
+    setRegion(_region);
+
     _seismicMoment = pow(10, 1.5 * (_magnitude + 10.7));
     _cornerFreq = 4.9e6 * _shearVelocity * pow(_stressDrop/_seismicMoment, 1./3.);
 
@@ -425,22 +427,18 @@ void SourceTheoryRvtMotion::fromJson(const QJsonObject &json)
 
     _isCustomized = json["isCustomized"].toBool();
     if (_isCustomized) {
-        setDepth(json["depth"].toDouble());
-        setStressDrop(json["stressDrop"].toDouble());
-        setGeoAtten(json["geoAtten"].toDouble());
-        setPathAttenCoeff(json["pathAttenCoeff"].toDouble());
-        setPathAttenPower(json["pathAttenPower"].toDouble());
-        setShearVelocity(json["shearVelocity"].toDouble());
-        setDensity(json["density"].toDouble());
-        setSiteAtten(json["siteAtten"].toDouble());
+        _depth = json["depth"].toDouble();
+        _stressDrop = json["stressDrop"].toDouble();
+        _geoAtten = json["geoAtten"].toDouble();
+        _pathAttenCoeff = json["pathAttenCoeff"].toDouble();
+        _pathAttenPower = json["pathAttenPower"].toDouble();
+        _shearVelocity = json["shearVelocity"].toDouble();
+        _density = json["density"].toDouble();
+        _siteAtten = json["siteAtten"].toDouble();
 
         _crustalAmp->fromJson(json["crustalAmp"].toObject());
         _pathDuration->fromJson(json["pathDuration"].toObject());
     }
-
-    setRegion(_region);
-    setMagnitude(_magnitude);
-    setDistance(_distance);
 
     calculate();
 }
@@ -506,42 +504,17 @@ auto operator>> (QDataStream & in, SourceTheoryRvtMotion* strm) -> QDataStream &
         in >> strm->_isCustomized;
 
     if (strm->_isCustomized) {
-        double stressDrop;
-        double geoAtten;
-        double pathDurCoeff;
-        double pathAttenCoeff;
-        double pathAttenPower;
-        double shearVelocity;
-        double density;
-        double siteAtten;
-
-        in >> stressDrop
-                >> geoAtten
-                >> pathDurCoeff
-                >> pathAttenCoeff
-                >> pathAttenPower
-                >> shearVelocity
-                >> density
-                >> siteAtten
+        in >> strm->_stressDrop
+                >> strm->_geoAtten
+                >> strm->_pathAttenCoeff
+                >> strm->_pathAttenPower
+                >> strm->_shearVelocity
+                >> strm->_density
+                >> strm->_siteAtten
                 >> strm->_crustalAmp
                 >> strm->_pathDuration;
-
-        // FIXME: Move to one function
-        // Use set methods to calculate dependent parameters
-        strm->setStressDrop(stressDrop);
-        strm->setGeoAtten(geoAtten);
-        strm->setPathAttenCoeff(pathAttenCoeff);
-        strm->setPathAttenPower(pathAttenPower);
-        strm->setShearVelocity(shearVelocity);
-        strm->setDensity(density);
-        strm->setSiteAtten(siteAtten);
     }
-
-    strm->setRegion(strm->_region);
-    strm->setMagnitude(strm->_magnitude);
-    strm->setDistance(strm->_distance);
     // Compute the FAS
     strm->calculate();
     return in;
-
 }

@@ -233,7 +233,6 @@ void CrustalModel::fromJson(const QJsonObject &json)
 auto CrustalModel::toJson() const -> QJsonObject
 {
     QJsonObject json;
-
     json["thickness"] = Serialize::toJsonArray(_thickness);
     json["velocity"] = Serialize::toJsonArray(_velocity);
     json["density"] = Serialize::toJsonArray(_density);
