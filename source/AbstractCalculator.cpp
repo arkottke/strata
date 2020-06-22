@@ -187,8 +187,8 @@ auto AbstractCalculator::calcStrainTf(
     To solve this problem, strain is computed from the velocity FAS.  The associated
     transfer function to compute the strain is then defined as:
 
-    Strain(angFreq, z=h_m/2)   -i [ A_m exp(i k*_m h_m / 2) - B_m exp(-i k*_m h_m / 2)]
-    ------------------------ = ------------------------------------------------------------
+    Strain(angFreq, z=h_m/2)   [ A_m exp(i k*_m h_m / 2) - B_m exp(-i k*_m h_m / 2)]
+    ------------------------ = -----------------------------------------------------
          vel_n(angFreq)                       v*_s (2 * A_n)
 
     */
@@ -207,7 +207,7 @@ auto AbstractCalculator::calcStrainTf(
 
         // Compute the numerator cannot be computed using waves since it is
         // A-B. The numerator includes gravity to correct for the Vs scaling.
-        numer = std::complex<double>(gravity, -1.0 ) *
+        numer = std::complex<double>(gravity, 0) *
                 (_waveA.at(outLocation.layer()).at(i) * exp(cTerm) -
                  _waveB.at(outLocation.layer()).at(i) * exp(-cTerm));
 
