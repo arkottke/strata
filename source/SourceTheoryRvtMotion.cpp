@@ -341,13 +341,15 @@ auto SourceTheoryRvtMotion::pathDuration() -> PathDurationModel*
 
 void SourceTheoryRvtMotion::init()
 {
-    setRegion(_region);
-
     _seismicMoment = pow(10, 1.5 * (_magnitude + 10.7));
     _cornerFreq = 4.9e6 * _shearVelocity * pow(_stressDrop/_seismicMoment, 1./3.);
 
     _hypoDistance = sqrt(_depth * _depth + _distance * _distance);
-    calcGeoAtten();
+
+    if (!_isCustomized) {
+        // Compute default value
+        calcGeoAtten();
+    }
 
     double sourceDur = 1 / _cornerFreq;
     double pathDur = _pathDuration->duration(_hypoDistance);

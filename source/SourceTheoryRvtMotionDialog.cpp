@@ -98,7 +98,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout*
 
     // Geometric attenuation
     doubleSpinBox = new QDoubleSpinBox;
-    doubleSpinBox->setRange(0, 1);
+    doubleSpinBox->setRange(0.001, 1);
     doubleSpinBox->setDecimals(4);
     doubleSpinBox->setSingleStep(0.01);
     doubleSpinBox->setReadOnly(_readOnly);
@@ -220,7 +220,6 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout*
     doubleSpinBox->setSuffix(" sec");
     doubleSpinBox->setReadOnly(true);
     doubleSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->duration());
     connect(strm, SIGNAL(durationChanged(double)),
