@@ -405,8 +405,7 @@ void MotionPage::edit()
 
 void MotionPage::updateButtons()
 {
-    bool enabled = !_tableView->selectionModel()->selectedRows().isEmpty();
-
-    _removeButton->setEnabled(enabled);
-    _editButton->setEnabled(enabled);
+    auto rows = _tableView->selectionModel()->selectedRows();
+    _removeButton->setEnabled(rows.length() > 0);
+    _editButton->setEnabled(rows.length() == 1);
 }
