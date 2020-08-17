@@ -357,16 +357,19 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
     double stdev = 0;
 
     const double toMeters = Units::instance()->toMeters();
+    double prevDepthToMid = 0;
+    double thickness = 0;
 
     for (int i = 0; i < soilLayers.size(); ++i) {
         stdev = _stdevIsLayerSpecific ? soilLayers.at(i)->stdev() : _stdev;
+
+        // Depth at the middle of the layer
+        double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
 
         if (i == 0) {
             // First layer is not correlated
             randVar = gsl_ran_gaussian(_rng, stdev);
         } else {
-            // Depth at the middle of the layer
-            double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
 
             // If the English units are used convert the depthToMid to meters
             depthToMid *= toMeters;
@@ -377,8 +380,8 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
                                                         / (200 + _correlInitial), _correlExponent)
                                                             : _correlFinal;
             // Thickness dependent correlation. Again convert to meters
-            const double tCorrel = _correlInitial * exp( -toMeters *
-                    soilLayers.at(i)->thickness() / _correlDelta );
+            thickness = depthToMid - prevDepthToMid;
+            const double tCorrel = _correlInitial * exp( -toMeters * thickness / _correlDelta );
 
             // Combine the correlations
             double correl = (1 - dCorrel) * tCorrel + dCorrel;
@@ -399,6 +402,7 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
 
         // Save the previous random variable
         prevRandVar = randVar;
+        prevDepthToMid = depthToMid;
     }
 
     // Randomize the bedrock layer
