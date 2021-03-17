@@ -163,6 +163,12 @@ void CompatibleRvtMotion::calculate()
         }
     }
 
+    for (auto &period : _targetRespSpec->period()) {
+        if (period <= 0) {
+            qCritical("Target periods must be greater than zero");
+        }
+    }
+
     //
     // Estimate the FAS using the methodology proposed by Vanmarcke
     //
