@@ -44,10 +44,13 @@ NonlinearProperty::NonlinearProperty(
         const QString &name, Type type, const QVector<double> &strain,
         const QVector<double> &property, QObject *parent)
             : QAbstractTableModel(parent), _name(name), _type(type), _strain(strain),
-                                         _average(property), _varied(property)
+                                         _average(property)
 {
     _interp = nullptr;
     _acc = gsl_interp_accel_alloc();
+
+    // Set the *varied* property, and calculate the lnStrain values
+    setVaried(property);
 }
 
 NonlinearProperty::~NonlinearProperty()
@@ -83,7 +86,7 @@ auto NonlinearProperty::interp(const double strain) -> double
     } else {
         if (!_interp)
             initialize();
-        d = gsl_interp_eval(_interp, _strain.data(), _varied.data(), strain, _acc);
+        d = gsl_interp_eval(_interp, _lnStrain.data(), _varied.data(), log(strain), _acc);
     }
 
     return d;
@@ -235,11 +238,11 @@ void NonlinearProperty::setVaried(const QVector<double> &varied)
 
 void NonlinearProperty::initialize()
 {
-    if (_strain.size() > 2) {
+    if (_lnStrain.size() > 2) {
         if (_interp)
             gsl_interp_free(_interp);
-        _interp = gsl_interp_alloc(gsl_interp_linear, _strain.size());
-        gsl_interp_init(_interp, _strain.data(), _varied.data(), _strain.size());
+        _interp = gsl_interp_alloc(gsl_interp_linear, _lnStrain.size());
+        gsl_interp_init(_interp, _lnStrain.data(), _varied.data(), _lnStrain.size());
         gsl_interp_accel_reset(_acc);
     }
 }
