@@ -1,61 +1,61 @@
 version: '{build}'
 
 branches:
-    except:
-        - /^travis.*$/
+  except:
+    - /^travis.*$/
 
 init:
-    - git config --global core.autocrlf input
+  - git config --global core.autocrlf input
 
 clone_depth: 1
 
-# https://www.appveyor.com/docs/build-environment/#build-worker-images
+  # https://www.appveyor.com/docs/build-environment/#build-worker-images
 image: Visual Studio 2017
 
 environment:
   fast_finish: true
   matrix:
-        - PLATFORM: x86
-          QT5: C:\Qt\latest\msvc2017
-          CMAKE_GENERATOR: "NMake Makefiles"
-        - PLATFORM: x64
-          QT5: C:\Qt\latest\msvc2017_64
-          CMAKE_GENERATOR: "NMake Makefiles"
+    - PLATFORM: x86
+      QT5: C:\Qt\latest\msvc2017
+      CMAKE_GENERATOR: "NMake Makefiles"
+    - PLATFORM: x64
+      QT5: C:\Qt\latest\msvc2017_64
+      CMAKE_GENERATOR: "NMake Makefiles"
 
 configuration: Release
-    
-# Configure git linebreaks
+
+  # Configure git linebreaks
 cache:
-    - c:\projects\gsl -> appveyor.yml
-    - c:\projects\qwt -> appveyor.yml
-  
+  - c:\projects\gsl -> appveyor.yml
+  - c:\projects\qwt -> appveyor.yml
+
 install:
-    - contrib\install_appveyor_dependencies.bat
+  - contrib\install_appveyor_dependencies.bat
 
 build_script:
-    - cd C:\projects\strata
-    - mkdir build
-    - cd build
-    - cmake .. -DGSL_ROOT_DIR=%GSL_ROOT_DIR% -DQWT_ROOT_DIR=%QWT_ROOT_DIR% -G "%CMAKE_GENERATOR%"
-    - cmake --build . --target install
-    - cmake --build . --target package
-    - cmake --build . --target archive
+  - cd C:\projects\strata
+  - mkdir build
+  - cd build
+  - cmake .. -DGSL_ROOT_DIR=%GSL_ROOT_DIR% -DQWT_ROOT_DIR=%QWT_ROOT_DIR% -G "%CMAKE_GENERATOR%"
+  - cmake --build . --target install
+  - cmake --build . --target package
+  - cmake --build . --target archive
 
 artifacts:
-    - path: build\Strata-*.zip
-      name: Zip Archive
+  - path: build\Strata-*.zip
+    name: Zip Archive
 
-    - path: build\Strata-*.exe
-      name: Installer
+  - path: build\Strata-*.exe
+    name: Installer
 
 deploy:
-    description: 'Release description'
-    provider: GitHub
-    auth_token:
-        secure: e/Uc+Q6xQyd6u9tBsvh6UlYfmmJgSL/cmoq6dhS5NHkgQAvETilqfDsO2euzazfp
+  description: 'Release description'
+  provider: GitHub
+  auth_token:
+    secure: /L7DNiUQ+uGPaKX0UDtaTiA1nNLNSj8dv9uGkvf66qi7L+w8MQvxxXvMUzQItdBT
     draft: true
     prerelease: false
     on:
-        branch: master
-        appveyor_repo_tag: true        # deploy on tag push only
+      branch: master
+      appveyor_repo_tag: true        # deploy on tag push only
 
