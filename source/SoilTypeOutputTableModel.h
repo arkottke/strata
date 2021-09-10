@@ -34,14 +34,14 @@ class SoilTypeOutputTableModel : public QAbstractTableModel
 public:
     SoilTypeOutputTableModel(QList<SoilType *> &soilTypes, QObject *parent = nullptr);
 
-    int rowCount ( const QModelIndex &parent = QModelIndex() ) const;
-    int columnCount ( const QModelIndex &parent = QModelIndex() ) const;
+    auto rowCount ( const QModelIndex &parent = QModelIndex() ) const -> int;
+    auto columnCount ( const QModelIndex &parent = QModelIndex() ) const -> int;
 
-    QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
-    bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole );
+    auto data ( const QModelIndex &index, int role = Qt::DisplayRole ) const -> QVariant;
+    auto setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole ) -> bool;
 
-    QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
-    Qt::ItemFlags flags ( const QModelIndex &index ) const;
+    auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
+    auto flags ( const QModelIndex &index ) const -> Qt::ItemFlags;
 
 private:
     QList<SoilType*> & _soilTypes;

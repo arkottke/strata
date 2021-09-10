@@ -30,7 +30,7 @@ public:
     AbstractOutputInterpolater();
     virtual ~AbstractOutputInterpolater();
 
-    virtual QVector<double> calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) = 0;
+    virtual auto calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double> = 0;
 };
 
 #endif // ABSTRACT_OUTPUT_INTERPOLATER_H

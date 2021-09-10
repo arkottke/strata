@@ -36,30 +36,30 @@ class CompatibleRvtMotion : public AbstractRvtMotion
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const CompatibleRvtMotion* crm);
-    friend QDataStream & operator>> (QDataStream & in, CompatibleRvtMotion* crm);
+    friend auto operator<< (QDataStream & out, const CompatibleRvtMotion* crm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, CompatibleRvtMotion* crm) -> QDataStream &;
 
 public:
     CompatibleRvtMotion(QObject *parent = nullptr);
     virtual ~CompatibleRvtMotion();
 
-    virtual const QVector<double> & freq() const;
-    Dimension* freqDimension();
+    virtual auto freq() const -> const QVector<double> &;
+    auto freqDimension() -> Dimension*;
 
     //! Target response spectrum
-    ResponseSpectrum * targetRespSpec();
+    auto targetRespSpec() -> ResponseSpectrum *;
 
     //! Limit the FAS to be seismologically plausible
-    bool limitFas() const;
+    auto limitFas() const -> bool;
 
     //! Create a html document containing the information of the model
-    virtual QString toHtml() const;
+    virtual auto toHtml() const -> QString;
 
     //! Load the motion from a TextStream
-    virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
+    virtual auto loadFromTextStream(QTextStream &stream, double scale = 1.) -> bool;
 
     virtual void fromJson(const QJsonObject &json);
-    virtual QJsonObject toJson() const;
+    virtual auto toJson() const -> QJsonObject;
 
 public slots:
     void setDuration(double duration);
@@ -75,7 +75,7 @@ private:
     /*! Compute the FAS based on the Vanmarcke 1976 inversion technique.
      * \return Fourier amplitude spectrum spaced at the same periods as the target response spectrum
      */
-    QVector<double> vanmarckeInversion() const;
+    auto vanmarckeInversion() const -> QVector<double>;
 
     //! If the FAS should be corrected to better fit theory
     bool _limitFas;

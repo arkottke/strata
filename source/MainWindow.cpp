@@ -174,7 +174,7 @@ void MainWindow::createPages()
     _pages << new OutputPage;
     _tabWidget->addTab(_pages.last(), tr("Output Specification"));
 
-    ComputePage* cp = new ComputePage;
+    auto* cp = new ComputePage;
     connect(cp, SIGNAL(saveRequested()),
             this, SLOT(save()));
     _pages << cp;
@@ -321,7 +321,7 @@ void MainWindow::open(QString fileName)
     setModel(srm);
 }
 
-bool MainWindow::save()
+auto MainWindow::save() -> bool
 {
     // If no file name is selected run saveAs
     if (_model->fileName().isEmpty())
@@ -342,7 +342,7 @@ bool MainWindow::save()
     return true;
 }
 
-bool MainWindow::saveAs()
+auto MainWindow::saveAs() -> bool
 {
     // Prompt for a fileName
     QString fileName = QFileDialog::getSaveFileName(
@@ -542,7 +542,7 @@ void MainWindow::tabChanged(int tab)
 
         auto *layout = new QVBoxLayout;
 
-        QLabel* label = new QLabel(tr(
+        auto* label = new QLabel(tr(
                 "Strata input fields are locked in a read-only state. "
                 "To edit the fields you must unlock the input by clicking "
                 "on the lock button in the upper left portion of the window. "
@@ -551,10 +551,10 @@ void MainWindow::tabChanged(int tab)
         label->setWordWrap(true);
         layout->addWidget(label);
 
-        QCheckBox * checkBox = new QCheckBox(tr("Stop reminding me."));
+        auto * checkBox = new QCheckBox(tr("Stop reminding me."));
         layout->addWidget( checkBox );
 
-        QDialogButtonBox * buttons = new QDialogButtonBox(QDialogButtonBox::Ok);
+        auto * buttons = new QDialogButtonBox(QDialogButtonBox::Ok);
         layout->addWidget(buttons);
 
         QDialog dialog(this);
@@ -608,7 +608,7 @@ void MainWindow::updateWindowTitle(const QString &fileName)
     setWindowTitle(tr("%1[*] - %2").arg(fileName.isEmpty() ? "untitled.strata" : fileName).arg("Strata"));
 }
 
-bool MainWindow::okToClose()
+auto MainWindow::okToClose() -> bool
 {
     // Prompt that the input has been modified
     if (_model && _model->modified()) {

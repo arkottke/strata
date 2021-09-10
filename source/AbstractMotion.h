@@ -37,8 +37,8 @@ class AbstractMotion : public MyAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractMotion* m);
-    friend QDataStream & operator>> (QDataStream & in, AbstractMotion* m);
+    friend auto operator<< (QDataStream & out, const AbstractMotion* m) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractMotion* m) -> QDataStream &;
 
 public:
     AbstractMotion(QObject *parent = nullptr);
@@ -51,32 +51,32 @@ public:
         IncomingOnly //!< AbstractMotion contains only the incoming wave
     };
 
-    static QStringList typeList();
-    static Type variantToType(QVariant variant, bool* ok);
+    static auto typeList() -> QStringList;
+    static auto variantToType(QVariant variant, bool* ok) -> Type;
 
-    bool modified() const;
+    auto modified() const -> bool;
 
-    Type type() const;
+    auto type() const -> Type;
     void setType(Type type);
 
-    bool enabled() const;
+    auto enabled() const -> bool;
     void setEnabled(bool enabled);
 
     //! A reference to the response spectrum
-    ResponseSpectrum* respSpec();
+    auto respSpec() -> ResponseSpectrum*;
 
     //! A reference to the frequency
-    virtual const QVector<double> & freq() const = 0;
+    virtual auto freq() const -> const QVector<double> & = 0;
 
     //! Minimum useable frequency
-    double freqMin() const;
+    auto freqMin() const -> double;
 
     //! Maximum useable frequency
-    virtual double freqMax() const = 0;
+    virtual auto freqMax() const -> double = 0;
 
-    int freqCount() const;
-    double freqAt(int i) const;
-    double angFreqAt(int i) const;
+    auto freqCount() const -> int;
+    auto freqAt(int i) const -> double;
+    auto angFreqAt(int i) const -> double;
 
     //! Compute the acceleration response spectrum
     /*!
@@ -85,45 +85,45 @@ public:
          * \param accelTf input acceleration transfer function
          * \return response spectrum
          */
-    virtual QVector<double> computeSa(const QVector<double>& period, double damping,
-                                      const QVector<std::complex<double> >& accelTf = QVector<std::complex<double> >()) = 0;
+    virtual auto computeSa(const QVector<double>& period, double damping,
+                                      const QVector<std::complex<double> >& accelTf = QVector<std::complex<double> >()) -> QVector<double> = 0;
 
     /*! Maximum response of a time series.
      *
      * \param tf transfer function to be applied to the acceleration FAS motion
      * \return maximum value
      */
-    virtual double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+    virtual auto max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double = 0;
 
     //! Maximum response of the velocity time series.
-    virtual double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+    virtual auto maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double = 0;
 
     //! Maximum response of the displacement time series.
-    virtual double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+    virtual auto maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double = 0;
 
     //! Calculate the strain for the transfer function and the velocity FAS
-    virtual double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+    virtual auto calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double = 0;
 
     //! A suitable name for the motion
-    virtual QString name() const = 0;
+    virtual auto name() const -> QString = 0;
 
     //! A description of the motion
-    QString description() const;
+    auto description() const -> QString;
 
-    double pga() const;
-    double pgv() const;
+    auto pga() const -> double;
+    auto pgv() const -> double;
 
     //! Create a html document containing the information of the model
-    virtual QString toHtml() const = 0;
+    virtual auto toHtml() const -> QString = 0;
 
     //! The absolute value of the acceleration Fourier amplitude spectrum with the applied transfer function
-    virtual const QVector<double> absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+    virtual auto absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double> = 0;
 
     //! The absolute value of the velocity Fourier amplitude spectrum with the applied transfer function
-    virtual const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const = 0;
+    virtual auto absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double> = 0;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setModified(bool modified = true);
@@ -149,7 +149,7 @@ protected:
          * \param period natural periods of the oscillator
          * \param damping damping of the oscillator in percent
          */
-    QVector<std::complex<double> > calcSdofTf(const double period, double damping) const;
+    auto calcSdofTf(const double period, double damping) const -> QVector<std::complex<double> >;
 
     //! Set the PGA and signal that it has been changed
     void setPga(double pga);

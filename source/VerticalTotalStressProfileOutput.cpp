@@ -26,28 +26,34 @@
 #include "SubLayer.h"
 #include "Units.h"
 
+#include <qwt_scale_engine.h>
+
 VerticalTotalStressProfileOutput::VerticalTotalStressProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog)
 {
-    // Skip the zero at the surface
-    _offset = 1;
+    _offset_bot = 1;
 }
 
-QString VerticalTotalStressProfileOutput::name() const
+auto VerticalTotalStressProfileOutput::name() const -> QString
 {
     return tr("Vertical Total Stress Profile");
 }
 
-QString VerticalTotalStressProfileOutput::shortName() const
+auto VerticalTotalStressProfileOutput::shortName() const -> QString
 {
     return tr("vTotalStress");
 }
 
-const QString VerticalTotalStressProfileOutput::xLabel() const
+auto VerticalTotalStressProfileOutput::xLabel() const -> const QString
 {
     return tr("Vertical Total Stress (%1)").arg(Units::instance()->stress());
 }
 
+auto VerticalTotalStressProfileOutput::xScaleEngine() const -> QwtScaleEngine*
+{
+    auto *scaleEngine = new QwtLinearScaleEngine;
+    return scaleEngine;
+}
 
 void VerticalTotalStressProfileOutput::extract(AbstractCalculator* const calculator,
                          QVector<double> & ref, QVector<double> & data) const

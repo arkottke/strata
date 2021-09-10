@@ -33,7 +33,7 @@
 AxisOptions::AxisOptions( const QString & title, QWidget * parent )
     : QGroupBox( title, parent )
 {
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
 
     // Spacing combo box
     layout->addWidget( new QLabel(tr("Spacing:")), 0, 0);
@@ -93,7 +93,7 @@ void AxisOptions::setDefaults( const QwtScaleEngine * scaleEngine, bool autoScal
 #endif
 }
 
-bool AxisOptions::linearSpacing() const
+auto AxisOptions::linearSpacing() const -> bool
 {
     if ( _spacingComboBox->currentIndex() == 0 )
         return true;
@@ -101,17 +101,17 @@ bool AxisOptions::linearSpacing() const
         return false;
 }
 
-bool AxisOptions::autoScale() const
+auto AxisOptions::autoScale() const -> bool
 {
     return _autoCheckBox->isChecked();
 }
 
-double AxisOptions::min() const
+auto AxisOptions::min() const -> double
 {
     return _minLineEdit->text().toDouble();
 }
 
-double AxisOptions::max() const
+auto AxisOptions::max() const -> double
 {
     return _maxLineEdit->text().toDouble();
 }
@@ -120,7 +120,7 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
     : QDialog(parent), _plot(plot)
 {
     // Create the dialog
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
 
     _xAxisOptions = new AxisOptions(tr("X Axis") );
     _xAxisOptions->setDefaults( 
@@ -150,7 +150,7 @@ ConfigurePlotDialog::ConfigurePlotDialog( QwtPlot * plot, QWidget * parent)
     layout->addWidget( _yAxisOptions, 1, 0 );
     
     // Add the buttons
-    QDialogButtonBox * buttonBox = new QDialogButtonBox( 
+    auto * buttonBox = new QDialogButtonBox( 
             QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     connect( buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));

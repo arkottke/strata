@@ -43,14 +43,14 @@ MotionLibrary::MotionLibrary(QObject *parent)
             this, SLOT(updateUnits()));
 }
 
-QStringList MotionLibrary::approachList()
+auto MotionLibrary::approachList() -> QStringList
 {
     return QStringList()
             << tr("Time Series")
             << tr("Random Vibration Theory");
 }
 
-QString MotionLibrary::toHtml() const
+auto MotionLibrary::toHtml() const -> QString
 {
     QString html = "<table border=\"1\"><tr>";
 
@@ -94,24 +94,24 @@ void MotionLibrary::setSaveData(bool b)
     }
 }
 
-bool MotionLibrary::saveData() const
+auto MotionLibrary::saveData() const -> bool
 {
     return _saveData;
 }
 
-int MotionLibrary::rowCount(const QModelIndex & parent) const
+auto MotionLibrary::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
     return _motions.size();
 }
 
-int MotionLibrary::columnCount(const QModelIndex & parent) const
+auto MotionLibrary::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
     return 6;
 }
 
-QVariant MotionLibrary::data(const QModelIndex & index, int role) const
+auto MotionLibrary::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -135,7 +135,7 @@ QVariant MotionLibrary::data(const QModelIndex & index, int role) const
             return QString::number(_motions.at(index.row())->pgv(), 'f', 2);
         case ScaleColumn:
             {
-                TimeSeriesMotion *motion = dynamic_cast<TimeSeriesMotion*>(_motions.at(index.row()));
+                auto *motion = dynamic_cast<TimeSeriesMotion*>(_motions.at(index.row()));
 
                 if (motion) {
                     return QString::number(motion->scale(), 'f', 2);
@@ -154,7 +154,7 @@ QVariant MotionLibrary::data(const QModelIndex & index, int role) const
     return MyAbstractTableModel::data(index, role);
 }
 
-QVariant MotionLibrary::headerData(int section, Qt::Orientation orientation, int role) const
+auto MotionLibrary::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -182,7 +182,7 @@ QVariant MotionLibrary::headerData(int section, Qt::Orientation orientation, int
     return QVariant();
 }
 
-Qt::ItemFlags MotionLibrary::flags(const QModelIndex & index) const
+auto MotionLibrary::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
@@ -206,7 +206,7 @@ Qt::ItemFlags MotionLibrary::flags(const QModelIndex & index) const
     return flags;
 }
 
-bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, int role)
+auto MotionLibrary::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent()!=QModelIndex() || _readOnly)
         return false;
@@ -232,7 +232,7 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
             }
         case ScaleColumn:
             {
-                TimeSeriesMotion * tsMotion = qobject_cast<TimeSeriesMotion*>(_motions[index.row()]);
+                auto * tsMotion = qobject_cast<TimeSeriesMotion*>(_motions[index.row()]);
 
                 bool ok;
                 const double d = value.toDouble(&ok);
@@ -258,7 +258,7 @@ bool MotionLibrary::setData(const QModelIndex & index, const QVariant & value, i
     return false;
 }
 
-bool MotionLibrary::removeRows(int row, int count, const QModelIndex &parent)
+auto MotionLibrary::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -272,7 +272,7 @@ bool MotionLibrary::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-int MotionLibrary::motionCount() const
+auto MotionLibrary::motionCount() const -> int
 {
     int count = 0;
 
@@ -289,7 +289,7 @@ void MotionLibrary::addMotion(AbstractMotion *motion)
     int row = rowCount();
     motion->setParent(this);
 
-    if (TimeSeriesMotion* tsm = qobject_cast<TimeSeriesMotion*>(motion))
+    if (auto* tsm = qobject_cast<TimeSeriesMotion*>(motion))
         tsm->setSaveData(_saveData);
 
     emit beginInsertRows(QModelIndex(), row, row);
@@ -298,7 +298,7 @@ void MotionLibrary::addMotion(AbstractMotion *motion)
     emit endInsertRows();
 }
 
-AbstractMotion* MotionLibrary::motionAt(int row)
+auto MotionLibrary::motionAt(int row) -> AbstractMotion*
 {
     return _motions.at(row);
 }
@@ -308,7 +308,7 @@ void MotionLibrary::updateRow(int row)
     emit dataChanged(index(row, 0), index(row, columnCount()));
 }
 
-MotionLibrary::Approach MotionLibrary::approach() const
+auto MotionLibrary::approach() const -> MotionLibrary::Approach
 {
     return _approach;
 }
@@ -360,20 +360,20 @@ void MotionLibrary::fromJson(const QJsonObject &json)
         QString className = mjo["className"].toString();
 
         if (className == "TimeSeriesMotion") {
-            TimeSeriesMotion *m = new TimeSeriesMotion(this);
+            auto *m = new TimeSeriesMotion(this);
             qobject_cast<TimeSeriesMotion*>(m)->fromJson(mjo);
             qobject_cast<TimeSeriesMotion*>(m)->setSaveData(_saveData);
             _motions << m;
         } else if (className == "RvtMotion") {
-            RvtMotion *m = new RvtMotion(this);
+            auto *m = new RvtMotion(this);
             qobject_cast<RvtMotion*>(m)->fromJson(mjo);
             _motions << m;
         } else if (className == "CompatibleRvtMotion") {
-            CompatibleRvtMotion *m = new CompatibleRvtMotion(this);
+            auto *m = new CompatibleRvtMotion(this);
             qobject_cast<CompatibleRvtMotion*>(m)->fromJson(mjo);
             _motions << m;
         } else if (className == "SourceTheoryRvtMotion") {
-            SourceTheoryRvtMotion *m = new SourceTheoryRvtMotion(this);
+            auto *m = new SourceTheoryRvtMotion(this);
             qobject_cast<SourceTheoryRvtMotion*>(m)->fromJson(mjo);
             _motions << m;
         } else {
@@ -412,7 +412,7 @@ void MotionLibrary::fromJson(const QJsonObject &json)
 //}
 
 
-QJsonObject MotionLibrary::toJson() const
+auto MotionLibrary::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["approach"] = (int) _approach;
@@ -441,7 +441,7 @@ QJsonObject MotionLibrary::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml)
+auto operator<< (QDataStream & out, const MotionLibrary* ml) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -465,7 +465,7 @@ QDataStream & operator<< (QDataStream & out, const MotionLibrary* ml)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, MotionLibrary* ml)
+auto operator>> (QDataStream & in, MotionLibrary* ml) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -486,7 +486,7 @@ QDataStream & operator>> (QDataStream & in, MotionLibrary* ml)
         in >> className;
 
         if (className == "TimeSeriesMotion") {
-            TimeSeriesMotion *m = new TimeSeriesMotion(ml);
+            auto *m = new TimeSeriesMotion(ml);
             m->setSaveData(ml->_saveData);
             in >> m;
 
@@ -498,15 +498,15 @@ QDataStream & operator>> (QDataStream & in, MotionLibrary* ml)
                 --size;
             }
         } else if (className == "RvtMotion") {
-            RvtMotion *m = new RvtMotion(ml);
+            auto *m = new RvtMotion(ml);
             in >> m;
             ml->_motions << m;
         } else if (className == "CompatibleRvtMotion") {
-            CompatibleRvtMotion *m = new CompatibleRvtMotion(ml);
+            auto *m = new CompatibleRvtMotion(ml);
             in >> m;
             ml->_motions << m;
         } else if (className == "SourceTheoryRvtMotion") {
-            SourceTheoryRvtMotion *m = new SourceTheoryRvtMotion(ml);
+            auto *m = new SourceTheoryRvtMotion(ml);
             in >> m;
             ml->_motions << m;
         }

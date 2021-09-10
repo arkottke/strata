@@ -28,6 +28,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDebug>
+#include <QTime>
 
 ComputePage::ComputePage(QWidget * parent, Qt::WindowFlags f )
         : AbstractPage(parent, f), _model(nullptr) {
@@ -64,7 +65,7 @@ ComputePage::ComputePage(QWidget * parent, Qt::WindowFlags f )
     // Text area
     _logView = new QTextEdit;
     _logView->setReadOnly(true);
-    _logView->setTabStopWidth(20);
+    _logView->setTabStopDistance(20);
 
     layout->addWidget( _logView, 1, 0, 1, 5);
 

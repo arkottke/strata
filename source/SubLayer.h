@@ -43,39 +43,39 @@ public:
     void reset();
 
     //! Name of the SoilType associated with the subLayer
-    QString soilTypeName() const;
+    auto soilTypeName() const -> QString;
 
     //! Unit weight of the layer
-    double untWt() const;
+    auto untWt() const -> double;
 
     //! Density of the layer
-    double density() const;
+    auto density() const -> double;
 
-    double vTotalStress(double layerFraction=0.5) const;
-    double vEffectiveStress(double layerFraction=0.5) const;
+    auto vTotalStress(double layerFraction=0.5) const -> double;
+    auto vEffectiveStress(double layerFraction=0.5) const -> double;
 
-    double thickness() const;
+    auto thickness() const -> double;
     void setThickness(double thickness);
 
     void setDepth(double depthToTop);
 
     //! Depth to the top of the layer
-    double depth() const;
+    auto depth() const -> double;
 
     //! Depth to the middle of the layer
-    double depthToMid() const;
+    auto depthToMid() const -> double;
 
     //! Depth to the base of the layer
-    double depthToBase() const;
+    auto depthToBase() const -> double;
 
-    SoilLayer* soilLayer();
+    auto soilLayer() -> SoilLayer*;
     void setSoilLayer(SoilLayer* soilLayer);
 
-    double effStrain() const;
-    double maxStrain() const;
+    auto effStrain() const -> double;
+    auto maxStrain() const -> double;
 
     //! The ratio of max shear stress to vertical total stress
-    double stressRatio() const;
+    auto stressRatio() const -> double;
 
     //! Interpolation using the curves
     void interp(double strain, double* modulus, double* damping) const;
@@ -91,43 +91,43 @@ public:
     void setStrain(double effStrain, double maxStrain, bool updateProperties=true);
 
     //! The shear-wave velocity -- corrected for strain
-    double shearVel() const;
+    auto shearVel() const -> double;
 
     //! The shear modulus -- corrected for strain
-    double shearMod() const;
+    auto shearMod() const -> double;
 
     //! The shear modulus of the previous iteration
-    double oldShearMod() const;
+    auto oldShearMod() const -> double;
 
     //! The error of the shear modulus
-    double shearModError() const;
+    auto shearModError() const -> double;
 
     //! Normalized shear modulus -- corrected for strain
-    double normShearMod() const;
+    auto normShearMod() const -> double;
 
     //! Shear stres in the layer
-    double shearStress() const;
+    auto shearStress() const -> double;
 
     //! The shear-wave velocity -- NOT corrected for strain
-    double initialShearVel() const;
+    auto initialShearVel() const -> double;
 
     //! The shear modulus -- NOT corrected for strain
-    double initialShearMod() const;
+    auto initialShearMod() const -> double;
 
     //! The damping -- corrected for strain
-    double damping() const;
+    auto damping() const -> double;
 
     //! The damping of the previous iteration
-    double oldDamping() const;
+    auto oldDamping() const -> double;
 
     //! The error in the damping
-    double dampingError() const;
+    auto dampingError() const -> double;
 
     //! Maximum error of the shear modulus and damping
-    double error() const;
+    auto error() const -> double;
 
     //! Print out the properties of the current iteration
-    QString printProperties() const;
+    auto printProperties() const -> QString;
 
 private:
     //! Thickness of the layer

@@ -52,7 +52,7 @@ SoilTypePage::SoilTypePage(QWidget * parent, Qt::WindowFlags f )
     : AbstractPage(parent, f)
 {
     // Set the layout
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
     
     layout->addWidget(createLayersGroupBox(), 0, 0, 2, 2);
     layout->addWidget(createBedrockGroupBox(), 2, 0);
@@ -173,9 +173,9 @@ void SoilTypePage::setReadOnly(bool readOnly)
     _nCyclesSpinBox->setReadOnly(readOnly);
 }
 
-QGroupBox* SoilTypePage::createWaterTableDepthGroupBox()
+auto SoilTypePage::createWaterTableDepthGroupBox() -> QGroupBox*
 {
-    QHBoxLayout * layout = new QHBoxLayout;
+    auto * layout = new QHBoxLayout;
 
     // Unit weight
     _waterTableDepthSpinBox = new QDoubleSpinBox;
@@ -186,13 +186,13 @@ QGroupBox* SoilTypePage::createWaterTableDepthGroupBox()
     layout->addWidget(_waterTableDepthSpinBox);
 
     // Create the group box
-    QGroupBox* groupBox = new QGroupBox(tr("Water Table Depth"));
+    auto* groupBox = new QGroupBox(tr("Water Table Depth"));
     groupBox->setLayout(layout);
 
     return groupBox;
 }
 
-QGroupBox* SoilTypePage::createLayersGroupBox()
+auto SoilTypePage::createLayersGroupBox() -> QGroupBox*
 {
     _soilTypeTableBox = new TableGroupBox(tr("Soil Types"), this);
     _modulusDelegate = new NonlinearPropertyDelegate;
@@ -204,9 +204,9 @@ QGroupBox* SoilTypePage::createLayersGroupBox()
     return _soilTypeTableBox;
 }
 
-QGroupBox* SoilTypePage::createBedrockGroupBox()
+auto SoilTypePage::createBedrockGroupBox() -> QGroupBox*
 {  
-    QHBoxLayout * layout = new QHBoxLayout;
+    auto * layout = new QHBoxLayout;
 
     // Unit weight
     _bedrockUntWtSpinBox = new QDoubleSpinBox;
@@ -234,15 +234,15 @@ QGroupBox* SoilTypePage::createBedrockGroupBox()
     layout->addStretch(1);
 
     // Create the group box
-    QGroupBox* groupBox = new QGroupBox(tr("Bedrock Layer"));
+    auto* groupBox = new QGroupBox(tr("Bedrock Layer"));
     groupBox->setLayout(layout);
 
     return groupBox;
 }
 
-QGroupBox* SoilTypePage::createVariationGroupBox()
+auto SoilTypePage::createVariationGroupBox() -> QGroupBox*
 {
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
     layout->setColumnStretch(6, 1);
 
     // Model for the standard deviation
@@ -250,7 +250,7 @@ QGroupBox* SoilTypePage::createVariationGroupBox()
     _nprModelComboBox->addItems(NonlinearPropertyRandomizer::modelList());
 
     // Link for help on standard deviation models
-    QLabel* label = new QLabel(tr("Standard deviation model:"));
+    auto* label = new QLabel(tr("Standard deviation model:"));
     layout->addWidget(label, 0, 0, 1, 2);
     layout->addWidget(_nprModelComboBox, 0, 2);
 
@@ -285,9 +285,9 @@ QGroupBox* SoilTypePage::createVariationGroupBox()
     return _randomizerGroupBox;
 }
 
-QGroupBox* SoilTypePage::createSoilPropsGroupBox()
+auto SoilTypePage::createSoilPropsGroupBox() -> QGroupBox*
 {
-    QFormLayout* layout = new QFormLayout;
+    auto* layout = new QFormLayout;
     
     // Stress line
     _stressSpinBox = new QDoubleSpinBox;
@@ -340,7 +340,7 @@ QGroupBox* SoilTypePage::createSoilPropsGroupBox()
     return _soilPropsGroupBox;
 }
 
-QGroupBox* SoilTypePage::createNlPropTableBox()
+auto SoilTypePage::createNlPropTableBox() -> QGroupBox*
 {
     _nlPropTableBox = new TableGroupBox(tr("Nonlinear Property"));
     _nlPropTableBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);

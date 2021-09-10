@@ -50,10 +50,10 @@ public slots:
 
 protected:
     //@{ Construct the various group boxes
-    QGroupBox* createProjectGroupBox();
-    QGroupBox* createAnalysisGroupBox();
-    QGroupBox* createVariationGroupBox();
-    QGroupBox* createDiscretizationGroupBox();
+    auto createProjectGroupBox() -> QGroupBox*;
+    auto createAnalysisGroupBox() -> QGroupBox*;
+    auto createVariationGroupBox() -> QGroupBox*;
+    auto createDiscretizationGroupBox() -> QGroupBox*;
     //@}
 
   QLineEdit *_titleLineEdit;

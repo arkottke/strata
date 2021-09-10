@@ -139,8 +139,7 @@ void ResultsPage::copyPlot()
    
     // Set the clilpboard image
     QClipboard * clipboard = QApplication::clipboard();
-    clipboard->setPixmap(QPixmap::grabWidget(_plot));
-    
+    clipboard->setPixmap(_plot->grab());
     colorCurve(_selectedRow);
 }
 
@@ -352,7 +351,7 @@ void ResultsPage::recomputeStats()
 
 }
 
-QGroupBox* ResultsPage::createOutputGroup()
+auto ResultsPage::createOutputGroup() -> QGroupBox*
 {
     auto *layout = new QGridLayout;
     layout->setColumnStretch(2,1);
@@ -405,7 +404,7 @@ QGroupBox* ResultsPage::createOutputGroup()
     return groupBox;
 }
 
-QTabWidget* ResultsPage::createDataTabWidget()
+auto ResultsPage::createDataTabWidget() -> QTabWidget*
 {
     auto *tabWidget = new QTabWidget;
 

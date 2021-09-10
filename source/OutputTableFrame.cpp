@@ -38,7 +38,7 @@
 OutputTableFrame::OutputTableFrame(QWidget *parent) :
     QFrame(parent)
 {
-    QGridLayout* layout = new QGridLayout;
+    auto* layout = new QGridLayout;
     layout->setColumnStretch(2, 1);
     // Create the buttons
     _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));

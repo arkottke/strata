@@ -47,8 +47,8 @@ class OutputCatalog : public QAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc);
-    friend QDataStream & operator>> (QDataStream & in, OutputCatalog* oc);
+    friend auto operator<< (QDataStream & out, const OutputCatalog* oc) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, OutputCatalog* oc) -> QDataStream &;
 
 public:
     explicit OutputCatalog(QObject *parent = nullptr);
@@ -59,59 +59,59 @@ public:
         MotionColumn
     };
 
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
 
-    virtual QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual auto headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual Qt::ItemFlags flags(const QModelIndex & index) const;
+    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
 
-    ProfilesOutputCatalog* profilesCatalog();
-    RatiosOutputCatalog* ratiosCatalog();
-    SoilTypesOutputCatalog* soilTypesCatalog();
-    SpectraOutputCatalog* spectraCatalog();
-    TimeSeriesOutputCatalog* timeSeriesCatalog();
+    auto profilesCatalog() -> ProfilesOutputCatalog*;
+    auto ratiosCatalog() -> RatiosOutputCatalog*;
+    auto soilTypesCatalog() -> SoilTypesOutputCatalog*;
+    auto spectraCatalog() -> SpectraOutputCatalog*;
+    auto timeSeriesCatalog() -> TimeSeriesOutputCatalog*;
 
-    TextLog* log();
+    auto log() -> TextLog*;
 
-    const QVector<double>& depth() const;
-    const QVector<double>& time(int motion) const;
+    auto depth() const -> const QVector<double>&;
+    auto time(int motion) const -> const QVector<double>&;
 
-    Dimension* frequency();
-    Dimension* period();
+    auto frequency() -> Dimension*;
+    auto period() -> Dimension*;
 
-    double damping() const;
+    auto damping() const -> double;
 
-    int motionCount() const;
-    int siteCount() const;
+    auto motionCount() const -> int;
+    auto siteCount() const -> int;
 
-    const QString & title() const;
-    const QString & filePrefix() const;
+    auto title() const -> const QString &;
+    auto filePrefix() const -> const QString &;
 
-    AbstractOutput* setSelectedOutput(int index);
+    auto setSelectedOutput(int index) -> AbstractOutput*;
 
-    bool enabledAt(int site, int motion) const;
-    bool enabledAt(int row) const;
+    auto enabledAt(int site, int motion) const -> bool;
+    auto enabledAt(int row) const -> bool;
 
-    bool siteEnabled(int row) const;
+    auto siteEnabled(int row) const -> bool;
     void setSiteEnabled(int row, bool enabled);
 
-    bool motionEnabled(int row) const;
+    auto motionEnabled(int row) const -> bool;
     void setMotionEnabled(int row, bool enabled);
 
-    int siteNumberAt(int row) const;
-    const QString motionNameAt(int row) const;
+    auto siteNumberAt(int row) const -> int;
+    auto motionNameAt(int row) const -> const QString;
 
-    bool timesAreNeeded() const;
-    bool periodIsNeeded() const;
-    bool frequencyIsNeeded() const;
+    auto timesAreNeeded() const -> bool;
+    auto periodIsNeeded() const -> bool;
+    auto frequencyIsNeeded() const -> bool;
 
-    QStringList outputNames() const;
+    auto outputNames() const -> QStringList;
 
-    const QList<AbstractOutput*> & outputs() const;
+    auto outputs() const -> const QList<AbstractOutput*> &;
 
     /*! Prepare the OutputCatalog to save data
      */
@@ -141,7 +141,7 @@ public:
     void computeStats();
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void timesAreNeededChanged(bool timesAreNeeded);

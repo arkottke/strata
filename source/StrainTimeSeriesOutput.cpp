@@ -32,17 +32,17 @@ StrainTimeSeriesOutput::StrainTimeSeriesOutput(OutputCatalog* catalog)
     _type = AbstractMotion::Within;
 }
 
-QString StrainTimeSeriesOutput::name() const
+auto StrainTimeSeriesOutput::name() const -> QString
 {
     return tr("Shear-Strain Time Series");
 }
 
-QString StrainTimeSeriesOutput::shortName() const
+auto StrainTimeSeriesOutput::shortName() const -> QString
 {
     return tr("strainTs");
 }
 
-const QString StrainTimeSeriesOutput::yLabel() const
+auto StrainTimeSeriesOutput::yLabel() const -> const QString
 {
     return tr("Shear Strain, %1 (%)")
             .arg(QChar(0x03B3));
@@ -53,7 +53,7 @@ void StrainTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
     Q_ASSERT(tsm);
 

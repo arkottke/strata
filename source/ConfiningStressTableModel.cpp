@@ -35,17 +35,17 @@ ConfiningStressTableModel::ConfiningStressTableModel(QObject * parent)
              this, SLOT(updateHeader()));
 }
 
-int ConfiningStressTableModel::rowCount ( const QModelIndex& /* index */ ) const
+auto ConfiningStressTableModel::rowCount ( const QModelIndex& /* index */ ) const -> int
 {
     return _layers.size();
 }
 
-int ConfiningStressTableModel::columnCount ( const QModelIndex& /* parent */ ) const
+auto ConfiningStressTableModel::columnCount ( const QModelIndex& /* parent */ ) const -> int
 {
     return 4;
 }
 
-QVariant ConfiningStressTableModel::headerData( int section, Qt::Orientation orientation, int role ) const
+auto ConfiningStressTableModel::headerData( int section, Qt::Orientation orientation, int role ) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -77,7 +77,7 @@ QVariant ConfiningStressTableModel::headerData( int section, Qt::Orientation ori
 
 }
 
-QVariant ConfiningStressTableModel::data ( const QModelIndex &index, int role ) const
+auto ConfiningStressTableModel::data ( const QModelIndex &index, int role ) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -102,7 +102,7 @@ QVariant ConfiningStressTableModel::data ( const QModelIndex &index, int role ) 
     return MyAbstractTableModel::data(index, role);
 }
 
-bool ConfiningStressTableModel::setData( const QModelIndex &index, const QVariant &value, int role )
+auto ConfiningStressTableModel::setData( const QModelIndex &index, const QVariant &value, int role ) -> bool
 {
     if(index.parent()!=QModelIndex())
         return false;
@@ -133,7 +133,7 @@ bool ConfiningStressTableModel::setData( const QModelIndex &index, const QVarian
     return true;
 }
 
-Qt::ItemFlags ConfiningStressTableModel::flags ( const QModelIndex &index ) const
+auto ConfiningStressTableModel::flags ( const QModelIndex &index ) const -> Qt::ItemFlags
 {
     if (index.column() == 3) {
         // Mean effective stress column -- not editable
@@ -143,7 +143,7 @@ Qt::ItemFlags ConfiningStressTableModel::flags ( const QModelIndex &index ) cons
     }
 }
 
-bool ConfiningStressTableModel::insertRows ( int row, int count, const QModelIndex &parent )
+auto ConfiningStressTableModel::insertRows ( int row, int count, const QModelIndex &parent ) -> bool
 {
     emit beginInsertRows( parent, row, row+count-1 );
 
@@ -160,7 +160,7 @@ bool ConfiningStressTableModel::insertRows ( int row, int count, const QModelInd
     return true;
 }
 
-bool ConfiningStressTableModel::removeRows ( int row, int count, const QModelIndex &parent )
+auto ConfiningStressTableModel::removeRows ( int row, int count, const QModelIndex &parent ) -> bool
 {
     emit beginRemoveRows( parent, row, row+count-1);
 
@@ -172,7 +172,7 @@ bool ConfiningStressTableModel::removeRows ( int row, int count, const QModelInd
     return true;
 }
 
-double ConfiningStressTableModel::waterTableDepth()
+auto ConfiningStressTableModel::waterTableDepth() -> double
 {
     return _waterTableDepth;
 }

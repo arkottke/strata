@@ -85,7 +85,7 @@ void AbstractRvtMotionDialog::init()
     addAction(EditActions::instance()->pasteAction());
 }
 
-QFormLayout* AbstractRvtMotionDialog::createParametersLayout()
+auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout*
 {
     auto layout = new QFormLayout;
     
@@ -160,7 +160,7 @@ QFormLayout* AbstractRvtMotionDialog::createParametersLayout()
     return layout;
 }
 
-QTabWidget* AbstractRvtMotionDialog::createTabWidget()
+auto AbstractRvtMotionDialog::createTabWidget() -> QTabWidget*
 {
     _dataTabWidget = new QTabWidget;
     _dataTabWidget->addTab(createRSPlotWidget(), tr("RS Plot"));
@@ -188,7 +188,7 @@ QTabWidget* AbstractRvtMotionDialog::createTabWidget()
     return _dataTabWidget;
 }
 
-QWidget* AbstractRvtMotionDialog::createRSPlotWidget()
+auto AbstractRvtMotionDialog::createRSPlotWidget() -> QWidget*
 {
     // Response spectrum plot
     _rsPlot = new QwtPlot;
@@ -234,7 +234,7 @@ void AbstractRvtMotionDialog::addRespSpecCurves()
     // Do nothing.
 }
 
-QWidget* AbstractRvtMotionDialog::createFSPlotWidget()
+auto AbstractRvtMotionDialog::createFSPlotWidget() -> QWidget*
 {
     // Fourier amplitude spectrum plot
     _fsPlot = new QwtPlot;
@@ -289,7 +289,7 @@ void AbstractRvtMotionDialog::openFrequencyDialog()
     layout->setModel(freq);
     layout->setSuffix(" Hz");
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+    auto* buttonBox = new QDialogButtonBox(
             QDialogButtonBox::Ok, Qt::Horizontal);
     connect(buttonBox, SIGNAL(accepted()),
             &dialog, SLOT(accept()));

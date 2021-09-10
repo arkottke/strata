@@ -34,7 +34,7 @@ Units::Units( QObject * parent )
     reset();
 }
 
-Units * Units::instance()
+auto Units::instance() -> Units *
 {
     if (_instance == nullptr) {
         _instance = new Units;
@@ -43,7 +43,7 @@ Units * Units::instance()
     return _instance;
 }
 
-QStringList Units::systemList()
+auto Units::systemList() -> QStringList
 {
     return QStringList() << tr("Metric") << tr("English");
 }
@@ -53,7 +53,7 @@ void Units::reset()
     setSystem(Metric);
 }
 
-Units::System Units::system() const
+auto Units::system() const -> Units::System
 {
     return _system;
 }
@@ -72,7 +72,7 @@ void Units::setSystem(int system)
     setSystem((System)system);
 }
 
-double Units::gravity() const
+auto Units::gravity() const -> double
 {
     switch (_system) {
     case Metric:
@@ -84,7 +84,7 @@ double Units::gravity() const
     }
 }
 
-double Units::waterUntWt() const
+auto Units::waterUntWt() const -> double
 {
     switch (_system) {
     case Metric:
@@ -96,7 +96,7 @@ double Units::waterUntWt() const
     }
 }
 
-double Units::toAtm() const
+auto Units::toAtm() const -> double
 {
     switch (_system) {
     case Metric:
@@ -108,7 +108,7 @@ double Units::toAtm() const
     }
 }
 
-double Units::toMeters() const
+auto Units::toMeters() const -> double
 {
     switch (_system){
         case Metric:
@@ -120,7 +120,7 @@ double Units::toMeters() const
     }
 }
 
-double Units::tsConv() const
+auto Units::tsConv() const -> double
 {
     double conv = 0;
 
@@ -134,7 +134,7 @@ double Units::tsConv() const
     return conv;
 }
 
-QString Units::length() const
+auto Units::length() const -> QString
 {
     if ( _system == Metric )
         return "m";
@@ -144,22 +144,22 @@ QString Units::length() const
     return "";
 }
 
-QString Units::area() const
+auto Units::area() const -> QString
 {
     return QString("%1%2").arg(length()).arg(QChar(0x00B2));
 }
 
-QString Units::vol() const
+auto Units::vol() const -> QString
 {
     return QString("%1%2").arg(length()).arg(QChar(0x00B3));
 }
 
-QString Units::accel() const
+auto Units::accel() const -> QString
 {
     return "g";
 }
 
-QString Units::velTs() const
+auto Units::velTs() const -> QString
 {
     QString label = "";
 
@@ -171,7 +171,7 @@ QString Units::velTs() const
     return label;
 }
 
-QString Units::dispTs() const
+auto Units::dispTs() const -> QString
 {
     QString label = "";
 
@@ -183,12 +183,12 @@ QString Units::dispTs() const
     return label;
 }
 
-QString Units::vel() const
+auto Units::vel() const -> QString
 {
     return QString("%1/s").arg(length());
 }
 
-QString Units::wt() const
+auto Units::wt() const -> QString
 {
     if ( _system == Metric ) {
         return "kN";
@@ -199,17 +199,17 @@ QString Units::wt() const
     return "";
 }
 
-QString Units::untWt() const
+auto Units::untWt() const -> QString
 {
     return QString("%1/%2").arg(wt()).arg(vol());
 }
 
-QString Units::stress() const
+auto Units::stress() const -> QString
 {
     return QString("%1/%2").arg(wt()).arg(area());
 }
 
-QDataStream & operator<< (QDataStream & out, const Units* units)
+auto operator<< (QDataStream & out, const Units* units) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -218,7 +218,7 @@ QDataStream & operator<< (QDataStream & out, const Units* units)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, Units* units)
+auto operator>> (QDataStream & in, Units* units) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

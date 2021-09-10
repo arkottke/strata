@@ -44,43 +44,43 @@ FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog* catalog)
             this, SIGNAL(wasModified()));
 }
 
-bool FourierSpectrumOutput::needsFreq() const
+auto FourierSpectrumOutput::needsFreq() const -> bool
 {
     return true;
 }
 
-QString FourierSpectrumOutput::name() const
+auto FourierSpectrumOutput::name() const -> QString
 {
     return tr("Fourier Amplitude Spectrum");
 }
 
-QString FourierSpectrumOutput::shortName() const
+auto FourierSpectrumOutput::shortName() const -> QString
 {
     return tr("fas");
 }
 
-QwtScaleEngine* FourierSpectrumOutput::xScaleEngine() const
+auto FourierSpectrumOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* FourierSpectrumOutput::yScaleEngine() const
+auto FourierSpectrumOutput::yScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-const QString FourierSpectrumOutput::xLabel() const
+auto FourierSpectrumOutput::xLabel() const -> const QString
 {
     return tr("Frequency (Hz)");
 }
 
-const QString FourierSpectrumOutput::yLabel() const
+auto FourierSpectrumOutput::yLabel() const -> const QString
 {
     // FIXME should scale to cm/s or in/s
     return tr("|FAS| (%1/s)").arg(Units::instance()->accel());
 }
 
-const QVector<double>& FourierSpectrumOutput::ref(int motion) const
+auto FourierSpectrumOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
 

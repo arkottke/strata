@@ -32,6 +32,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QFile>
 
 #include <qwt_scale_engine.h>
 #include <qwt_text.h>
@@ -55,25 +56,25 @@ AbstractRvtMotion::~AbstractRvtMotion()
     delete _peakCalculator;
 }
 
-QStringList AbstractRvtMotion::regionList()
+auto AbstractRvtMotion::regionList() -> QStringList
 {
     return {tr("Western NA"), tr("Eastern NA")}; //, tr("Unknown")};
 }
 
-int AbstractRvtMotion::rowCount(const QModelIndex & parent) const
+auto AbstractRvtMotion::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return qMin(freq().size(), _fourierAcc.size());
 }
 
-int AbstractRvtMotion::columnCount(const QModelIndex & parent) const
+auto AbstractRvtMotion::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent)
     return 2;
 }
 
-QVariant AbstractRvtMotion::data(const QModelIndex & index, int role) const
+auto AbstractRvtMotion::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex()) {
         return QVariant();
@@ -91,7 +92,7 @@ QVariant AbstractRvtMotion::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation, int role) const
+auto AbstractRvtMotion::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole) {
         return QVariant();
@@ -112,7 +113,7 @@ QVariant AbstractRvtMotion::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-AbstractRvtMotion::Region AbstractRvtMotion::region() const
+auto AbstractRvtMotion::region() const -> AbstractRvtMotion::Region
 {
     return _region;
 }
@@ -131,7 +132,7 @@ void AbstractRvtMotion::setRegion(int region) {
 
 }
 
-double AbstractRvtMotion::magnitude() const {return _magnitude;}
+auto AbstractRvtMotion::magnitude() const -> double {return _magnitude;}
 
 void AbstractRvtMotion::setMagnitude(double magnitude) {
     if (abs(_magnitude - magnitude) > 1E-4) {
@@ -142,28 +143,28 @@ void AbstractRvtMotion::setMagnitude(double magnitude) {
     }
 }
 
-const QVector<double> & AbstractRvtMotion::fourierAcc() const
+auto AbstractRvtMotion::fourierAcc() const -> const QVector<double> &
 {
     return _fourierAcc;
 }
 
-double AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const
+auto AbstractRvtMotion::max(const QVector<std::complex<double> >& tf ) const -> double
 {
     return calcMax(absFourierAcc(tf));
 }
 
-double AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf) const
+auto AbstractRvtMotion::maxVel(const QVector<std::complex<double> >& tf) const -> double
 {
     return Units::instance()->tsConv() * calcMax(absFourierVel(tf));
 }
 
-double AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf) const
+auto AbstractRvtMotion::maxDisp(const QVector<std::complex<double> >& tf) const -> double
 {
     return Units::instance()->tsConv() * calcMax(absFourierDisp(tf));
 }
 
-QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, double damping,
-                                             const QVector<std::complex<double> >& accelTf )
+auto AbstractRvtMotion::computeSa(const QVector<double> &period, double damping,
+                                             const QVector<std::complex<double> >& accelTf ) -> QVector<double>
 {
     // Compute the response at each period
     updatePeakCalculatorScenario();
@@ -187,7 +188,7 @@ QVector<double> AbstractRvtMotion::computeSa(const QVector<double> &period, doub
     return sa;
 }
 
-const QVector<double> AbstractRvtMotion::absFourierAcc(const QVector<std::complex<double> >& tf) const
+auto AbstractRvtMotion::absFourierAcc(const QVector<std::complex<double> >& tf) const -> const QVector<double>
 {
     QVector<double> absFas(_fourierAcc.size());
 
@@ -202,7 +203,7 @@ const QVector<double> AbstractRvtMotion::absFourierAcc(const QVector<std::comple
     return absFas;
 }
 
-const QVector<double> AbstractRvtMotion::absFourierVel(const QVector<std::complex<double> >& tf) const
+auto AbstractRvtMotion::absFourierVel(const QVector<std::complex<double> >& tf) const -> const QVector<double>
 {
     QVector<double> fa = absFourierAcc(tf);
 
@@ -213,7 +214,7 @@ const QVector<double> AbstractRvtMotion::absFourierVel(const QVector<std::comple
     return fa;
 }
 
-const QVector<double> AbstractRvtMotion::absFourierDisp(const QVector<std::complex<double> >& tf) const
+auto AbstractRvtMotion::absFourierDisp(const QVector<std::complex<double> >& tf) const -> const QVector<double>
 {
     QVector<double> fa = absFourierAcc(tf);
 
@@ -224,28 +225,28 @@ const QVector<double> AbstractRvtMotion::absFourierDisp(const QVector<std::compl
     return fa;
 }
 
-double AbstractRvtMotion::calcMaxStrain(const QVector<std::complex<double> >& tf) const
+auto AbstractRvtMotion::calcMaxStrain(const QVector<std::complex<double> >& tf) const -> double
 {
     // Remove the scale factor from the maximum velocity
     return maxVel(tf) / Units::instance()->tsConv();
 }
 
-double AbstractRvtMotion::freqMax() const
+auto AbstractRvtMotion::freqMax() const -> double
 {
     return freq().last();
 }
 
-double AbstractRvtMotion::duration() const
+auto AbstractRvtMotion::duration() const -> double
 {
     return _duration;
 }
 
-const QString& AbstractRvtMotion::nameTemplate() const
+auto AbstractRvtMotion::nameTemplate() const -> const QString&
 {
     return _name;
 }
 
-QString AbstractRvtMotion::name() const
+auto AbstractRvtMotion::name() const -> QString
 {
     return QString(_name)
             .replace("$mag",
@@ -271,7 +272,7 @@ void AbstractRvtMotion::stop()
     _okToContinue = false;
 }
 
-bool AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
+auto AbstractRvtMotion::loadFromTextStream(QTextStream &stream, double scale) -> bool
 {
     Q_UNUSED(scale);
     _name = extractColumn(stream.readLine(), 1);
@@ -308,7 +309,7 @@ void AbstractRvtMotion::calculate()
                          _respSpec->period(), _respSpec->damping()));
 }
 
-double AbstractRvtMotion::calcMax(const QVector<double> &fourierAmps) const
+auto AbstractRvtMotion::calcMax(const QVector<double> &fourierAmps) const -> double
 {
     return _peakCalculator->calcPeak(
                 _duration,
@@ -318,7 +319,7 @@ double AbstractRvtMotion::calcMax(const QVector<double> &fourierAmps) const
 }
 
 void AbstractRvtMotion::updatePeakCalculatorScenario() {
-    if (BooreThompsonPeakCalculator *btpc =
+    if (auto *btpc =
             dynamic_cast<BooreThompsonPeakCalculator*>(_peakCalculator)) {
         if (abs(_magnitude - btpc->mag()) > 0.01 ||
                 abs(_distance - btpc->dist()) > 0.01 ||
@@ -328,7 +329,7 @@ void AbstractRvtMotion::updatePeakCalculatorScenario() {
     }
 }
 
-QString AbstractRvtMotion::extractColumn(const QString &line, int column)
+auto AbstractRvtMotion::extractColumn(const QString &line, int column) -> QString
 {
     QStringList parts = line.split(",");
 
@@ -357,7 +358,7 @@ void AbstractRvtMotion::fromJson(const QJsonObject &json)
     endResetModel();
 }
 
-QJsonObject AbstractRvtMotion::toJson() const
+auto AbstractRvtMotion::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractMotion::toJson();
     json["duration"] = _duration;
@@ -370,7 +371,7 @@ QJsonObject AbstractRvtMotion::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
+auto operator<< (QDataStream & out, const AbstractRvtMotion* arm) -> QDataStream &
 {
     out << static_cast<quint8>(3);
 
@@ -386,7 +387,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
+auto operator>> (QDataStream & in, AbstractRvtMotion* arm) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -414,7 +415,7 @@ QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm)
     return in;
 }
 
-double AbstractRvtMotion::distance() const {
+auto AbstractRvtMotion::distance() const -> double {
     return _distance;
 }
 
@@ -428,7 +429,7 @@ void AbstractRvtMotion::setDistance(double distance) {
 }
 
 // FIXME: Might be out of date.
-AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double scale)
+auto loadRvtMotionFromTextFile(const QString &fileName, double scale) -> AbstractRvtMotion*
 {
     QFile data(fileName);
 

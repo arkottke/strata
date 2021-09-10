@@ -32,7 +32,7 @@ BedrockDepthVariation::BedrockDepthVariation(gsl_rng* rng, ProfileRandomizer* pr
     _enabled = false;
 }
 
-bool BedrockDepthVariation::enabled() const
+auto BedrockDepthVariation::enabled() const -> bool
 {
     return _profileRandomizer->enabled() && _enabled;
 }
@@ -59,7 +59,7 @@ void BedrockDepthVariation::fromJson(const QJsonObject &json)
     setEnabled(enabled);
 }
 
-QJsonObject BedrockDepthVariation::toJson() const
+auto BedrockDepthVariation::toJson() const -> QJsonObject
 {
     QJsonObject json = Distribution::toJson();
     json["enabled"] = _enabled;
@@ -67,7 +67,7 @@ QJsonObject BedrockDepthVariation::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
+auto operator<< (QDataStream & out, const BedrockDepthVariation* bdv) -> QDataStream &
 
 {
     out << (quint8)1;
@@ -77,7 +77,7 @@ QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, BedrockDepthVariation* bdv)
+auto operator>> (QDataStream & in, BedrockDepthVariation* bdv) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

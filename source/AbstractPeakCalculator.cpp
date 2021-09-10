@@ -36,7 +36,7 @@ AbstractPeakCalculator::~AbstractPeakCalculator()
 
 }
 
-double AbstractPeakCalculator::limitZeroCrossings(double num) const {
+auto AbstractPeakCalculator::limitZeroCrossings(double num) const -> double {
     return std::max(num, 1.33);
 }
 
@@ -56,13 +56,13 @@ void AbstractPeakCalculator::clearCache() {
     _momentCache.clear();
 }
 
-double
+auto
 AbstractPeakCalculator::calcPeak(double duration,
                                  const QVector<double> &freqs,
                                  const QVector<double> &fourierAmps,
                                  double oscFreq,
                                  double oscDamping,
-                                 const QVector<std::complex<double> > &siteTransFunc) {
+                                 const QVector<std::complex<double> > &siteTransFunc) -> double {
     initCache(freqs, fourierAmps);
     double peakFactor = calcPeakFactor(duration, oscFreq, oscDamping);
     double durationRms = calcDurationRms(duration, oscFreq, oscDamping, siteTransFunc);    
@@ -71,7 +71,7 @@ AbstractPeakCalculator::calcPeak(double duration,
     return peakFactor * respRms;
 }
 
-double AbstractPeakCalculator::getMoment(int power) {
+auto AbstractPeakCalculator::getMoment(int power) -> double {
     double moment = 0;
     if (_momentCache.contains(power)) {
         moment = _momentCache[power];
@@ -97,10 +97,10 @@ double AbstractPeakCalculator::getMoment(int power) {
     return moment;
 }
 
-double AbstractPeakCalculator::calcDurationRms(double duration,
+auto AbstractPeakCalculator::calcDurationRms(double duration,
                                                double oscFreq,
                                                double oscDamping,
-                                               const QVector<std::complex<double> > &siteTransFunc) {
+                                               const QVector<std::complex<double> > &siteTransFunc) -> double {
     Q_UNUSED(oscFreq);
     Q_UNUSED(oscDamping);
     Q_UNUSED(siteTransFunc);

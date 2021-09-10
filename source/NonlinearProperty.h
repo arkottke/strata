@@ -38,8 +38,8 @@ class NonlinearProperty : public QAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const NonlinearProperty* np);
-    friend QDataStream & operator>> (QDataStream & in, NonlinearProperty* np);
+    friend auto operator<< (QDataStream & out, const NonlinearProperty* np) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, NonlinearProperty* np) -> QDataStream &;
 
 public:
 
@@ -60,31 +60,31 @@ public:
                       QObject *parent = nullptr);
     ~NonlinearProperty();
 
-    Type type() const;
-    const QString & name() const;
+    auto type() const -> Type;
+    auto name() const -> const QString &;
 
     //! Linear interpolation of the prop for a given strain
-    double interp(const double strain);
+    auto interp(const double strain) -> double;
 
     //! Create a html document containing the information of the model
-    QString toHtml() const;
+    auto toHtml() const -> QString;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+    auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int;
+    auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
+    auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
 
-    const QVector<double> & strain() const;
-    const QVector<double> & average() const;
+    auto strain() const -> const QVector<double> &;
+    auto average() const -> const QVector<double> &;
 
-    const QVector<double> & varied() const;
+    auto varied() const -> const QVector<double> &;
     void setVaried(const QVector<double> &varied);
 
     //! Return a duplicate of the NonlinearProperty
-    NonlinearProperty *duplicate() const;
+    auto duplicate() const -> NonlinearProperty *;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 protected:    
     //! Initialize the interpolation routine. Called on the first interpolation

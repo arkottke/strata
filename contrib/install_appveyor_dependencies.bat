@@ -23,6 +23,9 @@ IF EXIST gsl (
     CD gsl
 )
 
+REM Update submodules
+git submodule update --init --recursive
+
 cmake ^
  -DGSL_DISABLE_WARNINGS:BOOL=ON^
  -DBUILD_SHARED_LIBS:BOOL=ON^

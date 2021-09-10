@@ -35,7 +35,7 @@ AbstractIterativeCalculator::AbstractIterativeCalculator(QObject *parent)
     _converged = false;
 }
 
-bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
+auto AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site) -> bool
 {
     init(motion, site);
     _okToContinue = true;
@@ -114,7 +114,7 @@ bool AbstractIterativeCalculator::run(AbstractMotion* motion, SoilProfile* site)
     return true;
 }
 
-int AbstractIterativeCalculator::maxIterations() const
+auto AbstractIterativeCalculator::maxIterations() const -> int
 {
     return _maxIterations;
 }
@@ -129,7 +129,7 @@ void AbstractIterativeCalculator::setMaxIterations(int maxIterations)
     }
 }
 
-double AbstractIterativeCalculator::errorTolerance() const
+auto AbstractIterativeCalculator::errorTolerance() const -> double
 {
     return _errorTolerance;
 }
@@ -144,17 +144,17 @@ void AbstractIterativeCalculator::setErrorTolerance(double errorTolerance)
     }
 }
 
-bool AbstractIterativeCalculator::converged() const
+auto AbstractIterativeCalculator::converged() const -> bool
 {
     return _converged;
 }
 
-double AbstractIterativeCalculator::relError(double value, double reference)
+auto AbstractIterativeCalculator::relError(double value, double reference) -> double
 {
     return 100. * (value - reference) / reference;
 }
 
-double AbstractIterativeCalculator::maxError(const QVector<double> &maxStrain)
+auto AbstractIterativeCalculator::maxError(const QVector<double> &maxStrain) -> double
 {
     Q_ASSERT(_prevMaxStrain.size() == maxStrain.size());
     double max = relError(maxStrain.first(), _prevMaxStrain.first());
@@ -178,7 +178,7 @@ void AbstractIterativeCalculator::fromJson(const QJsonObject &json)
     _errorTolerance = json["errorTolerance"].toDouble();
 }
 
-QJsonObject AbstractIterativeCalculator::toJson() const
+auto AbstractIterativeCalculator::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["maxIterations"] = _maxIterations;
@@ -187,7 +187,7 @@ QJsonObject AbstractIterativeCalculator::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const AbstractIterativeCalculator* aic)
+auto operator<< (QDataStream & out, const AbstractIterativeCalculator* aic) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -197,7 +197,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractIterativeCalculator* 
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractIterativeCalculator* aic)
+auto operator>> (QDataStream & in, AbstractIterativeCalculator* aic) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

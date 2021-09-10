@@ -30,14 +30,14 @@
 #include <QJsonValue>
 
 namespace Serialize {
-    QJsonArray toJsonArray(const QVector<double> &vector);
+    auto toJsonArray(const QVector<double> &vector) -> QJsonArray;
 
     void toDoubleVector(const QJsonValue &object, QVector<double> &vector);
 
-    QList<QVariant> toVariantList(const QList<double> &list);
+    auto toVariantList(const QList<double> &list) -> QList<QVariant>;
 
-    QList<QVariant> toVariantList(const QVector<double> &vector);
+    auto toVariantList(const QVector<double> &vector) -> QList<QVariant>;
 
-    QList<double> fromVariantList(const QList<QVariant> &list);
+    auto fromVariantList(const QList<QVariant> &list) -> QList<double>;
 };
 #endif

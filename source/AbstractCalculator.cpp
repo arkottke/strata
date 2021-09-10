@@ -31,15 +31,15 @@
 AbstractCalculator::AbstractCalculator(QObject *parent) :
         QObject(parent)
 {  
-    _site = 0;
-    _motion = 0;
+    _site = nullptr;
+    _motion = nullptr;
     _nsl = 0;
     _nf = 0;
     _okToContinue = false;
-    _textLog = 0;
+    _textLog = nullptr;
 }
 
-QString AbstractCalculator::toHtml() const
+auto AbstractCalculator::toHtml() const -> QString
 {
     return "";
 }
@@ -49,12 +49,12 @@ void AbstractCalculator::reset()
     // Do nothing!
 }
 
-SoilProfile* AbstractCalculator::site() const
+auto AbstractCalculator::site() const -> SoilProfile*
 {
     return _site;
 }
 
-AbstractMotion* AbstractCalculator::motion() const
+auto AbstractCalculator::motion() const -> AbstractMotion*
 {
     return _motion;
 }
@@ -69,7 +69,7 @@ void AbstractCalculator::setTextLog( TextLog * textLog )
     _textLog = textLog;
 }
 
-double AbstractCalculator::surfacePGA() const
+auto AbstractCalculator::surfacePGA() const -> double
 {
     // Compute the acceleration at the top of the surface
     return _motion->max(calcAccelTf(_site->inputLocation(), _motion->type(), Location(0, 0), AbstractMotion::Outcrop));
@@ -111,7 +111,7 @@ void AbstractCalculator::init(AbstractMotion* motion, SoilProfile* site)
     }
 }
 
-std::complex<double> AbstractCalculator::calcCompShearMod(const double shearMod, const double damping) const
+auto AbstractCalculator::calcCompShearMod(const double shearMod, const double damping) -> std::complex<double> 
 {
     // This is the complex shear-modulus used in SHAKE91.  The DeepSoil manual
     // states that this shear modulus results in frequency dependent dependent
@@ -122,7 +122,7 @@ std::complex<double> AbstractCalculator::calcCompShearMod(const double shearMod,
     return shearMod * std::complex<double>( 1.0 - damping * damping, 2 * damping);
 }
 
-bool AbstractCalculator::calcWaves()
+auto AbstractCalculator::calcWaves() -> bool
 {
     std::complex<double> cImped;
     std::complex<double> cTerm;
@@ -170,8 +170,8 @@ bool AbstractCalculator::calcWaves()
     return true;
 }
 
-QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
-        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const
+auto AbstractCalculator::calcStrainTf(
+        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >
 {
 
     /* The strain transfer function from the acceleration at layer n (outcrop)
@@ -187,8 +187,8 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
     To solve this problem, strain is computed from the velocity FAS.  The associated
     transfer function to compute the strain is then defined as:
 
-    Strain(angFreq, z=h_m/2)   -i [ A_m exp(i k*_m h_m / 2) - B_m exp(-i k*_m h_m / 2)]
-    ------------------------ = ------------------------------------------------------------
+    Strain(angFreq, z=h_m/2)   [ A_m exp(i k*_m h_m / 2) - B_m exp(-i k*_m h_m / 2)]
+    ------------------------ = -----------------------------------------------------
          vel_n(angFreq)                       v*_s (2 * A_n)
 
     */
@@ -207,7 +207,7 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
 
         // Compute the numerator cannot be computed using waves since it is
         // A-B. The numerator includes gravity to correct for the Vs scaling.
-        numer = std::complex<double>(gravity, -1.0 ) *
+        numer = std::complex<double>(gravity, 0) *
                 (_waveA.at(outLocation.layer()).at(i) * exp(cTerm) -
                  _waveB.at(outLocation.layer()).at(i) * exp(-cTerm));
 
@@ -220,8 +220,8 @@ QVector<std::complex<double> > AbstractCalculator::calcStrainTf(
     return tf;
 }
 
-QVector<std::complex<double> > AbstractCalculator::calcStressTf(
-        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const
+auto AbstractCalculator::calcStressTf(
+        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >
 {
     QVector<std::complex<double> > tf = calcStrainTf(inLocation, inputType, outLocation);
     const int l = outLocation.layer();
@@ -233,9 +233,9 @@ QVector<std::complex<double> > AbstractCalculator::calcStressTf(
     return tf;
 }
 
-const QVector<std::complex<double> > AbstractCalculator::calcAccelTf(
+auto AbstractCalculator::calcAccelTf(
         const Location & inLocation, const AbstractMotion::Type inputType,
-        const Location & outLocation, const AbstractMotion::Type outputType ) const
+        const Location & outLocation, const AbstractMotion::Type outputType ) const -> const QVector<std::complex<double> >
 {
     QVector<std::complex<double> > tf(_nf);
     std::complex<double> value;
@@ -248,8 +248,8 @@ const QVector<std::complex<double> > AbstractCalculator::calcAccelTf(
     return tf;
 }
 
-const std::complex<double> AbstractCalculator::waves(const int freqIdx,
-                                                     const Location & location, const AbstractMotion::Type type ) const
+auto AbstractCalculator::waves(const int freqIdx,
+                                                     const Location & location, const AbstractMotion::Type type ) const -> const std::complex<double>
 {
     std::complex<double> cTerm = std::complex<double>(0., 1.) *
                                  _waveNum.at(location.layer()).at(freqIdx) * location.depth();

@@ -40,42 +40,42 @@ ResponseSpectrumOutput::ResponseSpectrumOutput(OutputCatalog* catalog)
             this, SIGNAL(wasModified()));
 }
 
-bool ResponseSpectrumOutput::needsPeriod() const
+auto ResponseSpectrumOutput::needsPeriod() const -> bool
 {
     return true;
 }
 
-QString ResponseSpectrumOutput::name() const
+auto ResponseSpectrumOutput::name() const -> QString
 {
     return tr("Acceleration Response Spectrum");
 }
 
-QString ResponseSpectrumOutput::shortName() const
+auto ResponseSpectrumOutput::shortName() const -> QString
 {
     return tr("respSpec");
 }
 
-QwtScaleEngine* ResponseSpectrumOutput::xScaleEngine() const
+auto ResponseSpectrumOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* ResponseSpectrumOutput::yScaleEngine() const
+auto ResponseSpectrumOutput::yScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-const QString ResponseSpectrumOutput::xLabel() const
+auto ResponseSpectrumOutput::xLabel() const -> const QString
 {
     return tr("Period (s)");
 }
 
-const QString ResponseSpectrumOutput::yLabel() const
+auto ResponseSpectrumOutput::yLabel() const -> const QString
 {
     return tr("Spectral Accel. (g)");
 }
 
-const QVector<double>& ResponseSpectrumOutput::ref(int motion) const
+auto ResponseSpectrumOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
 

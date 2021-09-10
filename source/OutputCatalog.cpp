@@ -101,7 +101,7 @@ OutputCatalog::OutputCatalog(QObject *parent) :
 
 }
 
-int OutputCatalog::rowCount(const QModelIndex & parent) const
+auto OutputCatalog::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
@@ -112,14 +112,14 @@ int OutputCatalog::rowCount(const QModelIndex & parent) const
     }
 }
 
-int OutputCatalog::columnCount(const QModelIndex & parent) const
+auto OutputCatalog::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 3;
 }
 
-QVariant OutputCatalog::data(const QModelIndex & index, int role) const
+auto OutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -147,7 +147,7 @@ QVariant OutputCatalog::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-bool OutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
+auto OutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent()!=QModelIndex())
         return false;
@@ -179,7 +179,7 @@ bool OutputCatalog::setData(const QModelIndex & index, const QVariant & value, i
     return true;
 }
 
-QVariant OutputCatalog::headerData(int section, Qt::Orientation orientation, int role) const
+auto OutputCatalog::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if(role != Qt::DisplayRole)
         return QVariant();
@@ -201,7 +201,7 @@ QVariant OutputCatalog::headerData(int section, Qt::Orientation orientation, int
     return QVariant();
 }
 
-Qt::ItemFlags OutputCatalog::flags(const QModelIndex & index) const
+auto OutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
@@ -212,32 +212,32 @@ Qt::ItemFlags OutputCatalog::flags(const QModelIndex & index) const
     return flags;
 }
 
-ProfilesOutputCatalog* OutputCatalog::profilesCatalog()
+auto OutputCatalog::profilesCatalog() -> ProfilesOutputCatalog*
 {
     return _profilesOutputCatalog;
 }
 
-RatiosOutputCatalog* OutputCatalog::ratiosCatalog()
+auto OutputCatalog::ratiosCatalog() -> RatiosOutputCatalog*
 {
     return _ratiosOutputCatalog;
 }
 
-SoilTypesOutputCatalog* OutputCatalog::soilTypesCatalog()
+auto OutputCatalog::soilTypesCatalog() -> SoilTypesOutputCatalog*
 {
     return _soilTypesOutputCatalog;
 }
 
-SpectraOutputCatalog* OutputCatalog::spectraCatalog()
+auto OutputCatalog::spectraCatalog() -> SpectraOutputCatalog*
 {
     return _spectraOutputCatalog;
 }
 
-TimeSeriesOutputCatalog* OutputCatalog::timeSeriesCatalog()
+auto OutputCatalog::timeSeriesCatalog() -> TimeSeriesOutputCatalog*
 {
     return _timeSeriesOutputCatalog;
 }
 
-const QString& OutputCatalog::title() const
+auto OutputCatalog::title() const -> const QString&
 {
     return _title;
 }
@@ -249,7 +249,7 @@ void OutputCatalog::setTitle(const QString &title)
     emit wasModified();
 }
 
-const QString& OutputCatalog::filePrefix() const
+auto OutputCatalog::filePrefix() const -> const QString&
 {
     return _filePrefix;
 }
@@ -261,7 +261,7 @@ void OutputCatalog::setFilePrefix(const QString &prefix)
     emit wasModified();
 }
 
-AbstractOutput* OutputCatalog::setSelectedOutput(int index)
+auto OutputCatalog::setSelectedOutput(int index) -> AbstractOutput*
 {
     Q_ASSERT(index >= 0 && index < _outputs.size());
     beginResetModel();
@@ -270,32 +270,32 @@ AbstractOutput* OutputCatalog::setSelectedOutput(int index)
     return _selectedOutput;
 }
 
-TextLog* OutputCatalog::log()
+auto OutputCatalog::log() -> TextLog*
 {
     return _log;
 }
 
-const QVector<double>& OutputCatalog::depth() const
+auto OutputCatalog::depth() const -> const QVector<double>&
 {
     return _depth;
 }
 
-const QVector<double>& OutputCatalog::time(int motion) const
+auto OutputCatalog::time(int motion) const -> const QVector<double>&
 {
     return _time.at(motion);
 }
 
-Dimension* OutputCatalog::frequency()
+auto OutputCatalog::frequency() -> Dimension*
 {
     return _frequency;
 }
 
-Dimension* OutputCatalog::period()
+auto OutputCatalog::period() -> Dimension*
 {
     return _period;
 }
 
-double OutputCatalog::damping() const
+auto OutputCatalog::damping() const -> double
 {
     return _damping;
 }
@@ -307,22 +307,22 @@ void OutputCatalog::setDamping(double damping)
     emit wasModified();
 }
 
-int OutputCatalog::motionCount() const
+auto OutputCatalog::motionCount() const -> int
 {
     return _motionCount;
 }
 
-int OutputCatalog::siteCount() const
+auto OutputCatalog::siteCount() const -> int
 {
     return _siteCount;
 }
 
-bool OutputCatalog::enabledAt(int site, int motion) const
+auto OutputCatalog::enabledAt(int site, int motion) const -> bool
 {
     return _enabled.at(site).at(motion);
 }
 
-bool OutputCatalog::enabledAt(int row) const
+auto OutputCatalog::enabledAt(int row) const -> bool
 {
     Q_ASSERT(_selectedOutput);
 
@@ -333,13 +333,13 @@ bool OutputCatalog::enabledAt(int row) const
     return _enabled.at(site).at(motion);
 }
 
-bool OutputCatalog::siteEnabled(int row) const
+auto OutputCatalog::siteEnabled(int row) const -> bool
 {
     Q_ASSERT(_selectedOutput);
 
     const int site = _selectedOutput->intToSite(row);
 
-    if (site >= _enabled.size())
+    if (site < 0 || _enabled.size() < site)
         return false;
 
     for (int i = 0; i < _motionCount; ++i) {
@@ -363,7 +363,7 @@ void OutputCatalog::setSiteEnabled(int row, bool enabled)
     emit wasModified();
 }
 
-bool OutputCatalog::motionEnabled(int row) const
+auto OutputCatalog::motionEnabled(int row) const -> bool
 {
     Q_ASSERT(_selectedOutput);
 
@@ -390,14 +390,14 @@ void OutputCatalog::setMotionEnabled(int row, bool enabled)
     emit wasModified();
 }
 
-int OutputCatalog::siteNumberAt(int row) const
+auto OutputCatalog::siteNumberAt(int row) const -> int
 {
     Q_ASSERT(_selectedOutput);
 
     return _selectedOutput->intToSite(row);
 }
 
-const QString OutputCatalog::motionNameAt(int row) const
+auto OutputCatalog::motionNameAt(int row) const -> const QString
 {
     Q_ASSERT(_selectedOutput);
 
@@ -502,7 +502,7 @@ void OutputCatalog::removeLastSite()
         output->removeLastSite();
 }
 
-bool OutputCatalog::timesAreNeeded() const
+auto OutputCatalog::timesAreNeeded() const -> bool
 {
     return _timesAreNeeded;
 }
@@ -514,7 +514,7 @@ void OutputCatalog::setTimesAreNeeded(bool timesAreNeeded)
     emit timesAreNeededChanged(_timesAreNeeded);
 }
 
-bool OutputCatalog::periodIsNeeded() const
+auto OutputCatalog::periodIsNeeded() const -> bool
 {
     return _periodIsNeeded;
 }
@@ -526,7 +526,7 @@ void OutputCatalog::setPeriodIsNeeded(bool periodIsNeeded)
     emit periodIsNeededChanged(_periodIsNeeded);
 }
 
-bool OutputCatalog::frequencyIsNeeded() const
+auto OutputCatalog::frequencyIsNeeded() const -> bool
 {
     return _frequencyIsNeeded;
 }
@@ -538,7 +538,7 @@ void OutputCatalog::setFrequencyIsNeeded(bool frequencyIsNeeded)
     emit frequencyIsNeededChanged(_frequencyIsNeeded);
 }
 
-QStringList OutputCatalog::outputNames() const
+auto OutputCatalog::outputNames() const -> QStringList
 {
     QStringList list;
 
@@ -548,7 +548,7 @@ QStringList OutputCatalog::outputNames() const
     return list;
 }
 
-const QList<AbstractOutput*> & OutputCatalog::outputs() const
+auto OutputCatalog::outputs() const -> const QList<AbstractOutput*> &
 {
     return _outputs;
 }
@@ -630,7 +630,7 @@ void OutputCatalog::fromJson(const QJsonObject &json)
     endResetModel();
 }
 
-QJsonObject OutputCatalog::toJson() const
+auto OutputCatalog::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["title"] = _title;
@@ -664,7 +664,7 @@ QJsonObject OutputCatalog::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)
+auto operator<< (QDataStream & out, const OutputCatalog* oc) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -688,7 +688,7 @@ QDataStream & operator<< (QDataStream & out, const OutputCatalog* oc)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, OutputCatalog* oc)
+auto operator>> (QDataStream & in, OutputCatalog* oc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

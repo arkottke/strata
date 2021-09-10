@@ -31,17 +31,17 @@ MaxVelProfileOutput::MaxVelProfileOutput(OutputCatalog* catalog)
 
 }
 
-QString MaxVelProfileOutput::name() const
+auto MaxVelProfileOutput::name() const -> QString
 {
     return tr("Peak Ground Velocity Profile");
 }
 
-QString MaxVelProfileOutput::shortName() const
+auto MaxVelProfileOutput::shortName() const -> QString
 {
     return tr("pgv");
 }
 
-const QString MaxVelProfileOutput::xLabel() const
+auto MaxVelProfileOutput::xLabel() const -> const QString
 {
     return tr("Maximum Velocity (%1)").arg(Units::instance()->velTs());
 }

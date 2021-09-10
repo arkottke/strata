@@ -39,7 +39,7 @@ VelocityLayer::~VelocityLayer()
 {
 }
 
-double VelocityLayer::depth() const
+auto VelocityLayer::depth() const -> double
 {
     return _depth;
 }
@@ -48,17 +48,17 @@ void VelocityLayer::setDepth(double depth)
     _depth = depth;
 }
 
-double VelocityLayer::shearVel() const
+auto VelocityLayer::shearVel() const -> double
 {
     return _varied;
 }
 
-double VelocityLayer::shearMod() const
+auto VelocityLayer::shearMod() const -> double
 {
     return density() * shearVel() * shearVel();
 }
 
-bool VelocityLayer::isVaried() const
+auto VelocityLayer::isVaried() const -> bool
 {
     return _isVaried;
 }
@@ -68,7 +68,7 @@ void VelocityLayer::setIsVaried(bool isVaried)
     _isVaried = isVaried;
 }
 
-QString VelocityLayer::toString() const
+auto VelocityLayer::toString() const -> QString
 {
     return QString("%1").arg(_avg);
 }
@@ -100,7 +100,7 @@ void VelocityLayer::fromJson(const QJsonObject &json)
     _depth = json["depth"].toDouble();
 }
 
-QJsonObject VelocityLayer::toJson() const
+auto VelocityLayer::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractDistribution::toJson();
     json["isVaried"] = _isVaried;
@@ -108,7 +108,7 @@ QJsonObject VelocityLayer::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl)
+auto operator<< (QDataStream & out, const VelocityLayer* vl) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -119,7 +119,7 @@ QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, VelocityLayer* vl)
+auto operator>> (QDataStream & in, VelocityLayer* vl) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

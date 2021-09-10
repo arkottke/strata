@@ -41,7 +41,7 @@ DepthComboBox::DepthComboBox( QWidget * parent)
     connect( this, SIGNAL(editTextChanged(QString)), SLOT(toDouble(QString)));
 }
 
-double DepthComboBox::depth() const
+auto DepthComboBox::depth() const -> double
 {
     if (currentIndex() == 0 )
         // Depth specified

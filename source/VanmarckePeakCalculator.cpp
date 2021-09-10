@@ -37,8 +37,8 @@ struct ccdfParams {
     double bandwidthEff;
 };
 
-double calcCCDF(double x, void *params) {
-    struct ccdfParams *p = static_cast<struct ccdfParams *>(params);
+auto calcCCDF(double x, void *params) -> double {
+    auto *p = static_cast<struct ccdfParams *>(params);
     return (1 -
             (1 - exp(-(x * x) / 2)) *
             exp(-1 * p->zeroCrossings *
@@ -46,7 +46,7 @@ double calcCCDF(double x, void *params) {
                 (exp((x * x) / 2) - 1)));
 }
 
-double VanmarckePeakCalculator::calcPeakFactor(double duration, double oscFreq, double oscDamping) {
+auto VanmarckePeakCalculator::calcPeakFactor(double duration, double oscFreq, double oscDamping) -> double {
     Q_UNUSED(oscFreq);
     Q_UNUSED(oscDamping);
 

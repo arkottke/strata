@@ -40,17 +40,17 @@ MyRandomNumGenerator::~MyRandomNumGenerator()
     gsl_rng_free(_gsl_rng);
 }
 
-bool MyRandomNumGenerator::seedSpecified() const
+auto MyRandomNumGenerator::seedSpecified() const -> bool
 {
     return _seedSpecified;
 }
 
-quint32 MyRandomNumGenerator::seed() const
+auto MyRandomNumGenerator::seed() const -> quint32
 {
     return _seed;
 }
 
-gsl_rng * MyRandomNumGenerator::gsl_pointer()
+auto MyRandomNumGenerator::gsl_pointer() -> gsl_rng *
 {
     return _gsl_rng;
 }
@@ -93,7 +93,7 @@ void MyRandomNumGenerator::fromJson(const QJsonObject &json)
     _seed = (quint32)json["seed"].toInt();
 }
 
-QJsonObject MyRandomNumGenerator::toJson() const
+auto MyRandomNumGenerator::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["seedSpecified"] = _seedSpecified;
@@ -102,7 +102,7 @@ QJsonObject MyRandomNumGenerator::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator)
+auto operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator) -> QDataStream &
 {
     out << (quint8)1;
     
@@ -112,7 +112,7 @@ QDataStream & operator<< (QDataStream & out, const MyRandomNumGenerator* myGener
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator)
+auto operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator) -> QDataStream &
 {
     quint8 version;
     in >> version;

@@ -43,7 +43,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(
     init();
 }
 
-QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
+auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout*
 {
     auto strm = qobject_cast<SourceTheoryRvtMotion*>(_motion);
     auto layout = AbstractRvtMotionDialog::createParametersLayout();
@@ -98,7 +98,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
 
     // Geometric attenuation
     doubleSpinBox = new QDoubleSpinBox;
-    doubleSpinBox->setRange(0, 1);
+    doubleSpinBox->setRange(0.001, 1);
     doubleSpinBox->setDecimals(4);
     doubleSpinBox->setSingleStep(0.01);
     doubleSpinBox->setReadOnly(_readOnly);
@@ -220,7 +220,6 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     doubleSpinBox->setSuffix(" sec");
     doubleSpinBox->setReadOnly(true);
     doubleSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    doubleSpinBox->setReadOnly(_readOnly);
 
     doubleSpinBox->setValue(strm->duration());
     connect(strm, SIGNAL(durationChanged(double)),
@@ -231,6 +230,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     // Path duration model
     auto comboBox = new QComboBox;
     comboBox->addItems(PathDurationModel::sourceList());
+    comboBox->setCurrentIndex(strm->pathDuration()->source());
     comboBox->setDisabled(_readOnly | !isCustomized);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
@@ -245,6 +245,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
     // Crustal amp model
     comboBox = new QComboBox;
     comboBox->addItems(CrustalAmplification::sourceList());
+    comboBox->setCurrentIndex(strm->crustalAmp()->source());
     comboBox->setDisabled(_readOnly | !isCustomized);
 
     connect(comboBox, SIGNAL(currentIndexChanged(int)),
@@ -309,7 +310,7 @@ QFormLayout* SourceTheoryRvtMotionDialog::createParametersLayout()
 
 void SourceTheoryRvtMotionDialog::updatePathDurSource(int source)
 {
-    PathDurationModel::Source s = static_cast<PathDurationModel::Source>(source);
+    auto s = static_cast<PathDurationModel::Source>(source);
 
     _pathDurTableGroupBox->setReadOnly(
                 _readOnly || (s == PathDurationModel::Default));
@@ -317,7 +318,7 @@ void SourceTheoryRvtMotionDialog::updatePathDurSource(int source)
 
 void SourceTheoryRvtMotionDialog::updateCrustalAmpSource(int source)
 {
-    CrustalAmplification::Source s = static_cast<CrustalAmplification::Source>(source);
+    auto s = static_cast<CrustalAmplification::Source>(source);
 
     _crustalAmpGroupBox->setReadOnly(
                 _readOnly

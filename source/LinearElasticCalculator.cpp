@@ -33,7 +33,7 @@ LinearElasticCalculator::LinearElasticCalculator(QObject *parent)
 {
 }
 
-bool LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
+auto LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site) -> bool
 {
     init(motion, site);
 

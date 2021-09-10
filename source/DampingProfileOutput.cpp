@@ -33,17 +33,17 @@ DampingProfileOutput::DampingProfileOutput(OutputCatalog* catalog)
 
 }
 
-QString DampingProfileOutput::name() const
+auto DampingProfileOutput::name() const -> QString
 {
     return tr("Damping Ratio");
 }
 
-QString DampingProfileOutput::shortName() const
+auto DampingProfileOutput::shortName() const -> QString
 {
     return "damping";
 }
 
-const QString DampingProfileOutput::xLabel() const
+auto DampingProfileOutput::xLabel() const -> const QString
 {
     return tr("Damping (%)");
 }

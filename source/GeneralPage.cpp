@@ -54,7 +54,7 @@ GeneralPage::GeneralPage(QWidget * parent, Qt::WindowFlags f )
     setLayout(layout);
 }
 
-QGroupBox* GeneralPage::createProjectGroupBox()
+auto GeneralPage::createProjectGroupBox() -> QGroupBox*
 {
     auto *layout = new QGridLayout;
     layout->setRowStretch(2, 1);
@@ -92,13 +92,13 @@ QGroupBox* GeneralPage::createProjectGroupBox()
     layout->addWidget(_saveMotionDataCheckBox, 5, 1, 1, 2);
 
     // Create the group box and add the layout
-    QGroupBox* groupBox = new QGroupBox(tr("Project"));
+    auto* groupBox = new QGroupBox(tr("Project"));
     groupBox->setLayout(layout);
 
     return groupBox;
 }
 
-QGroupBox*  GeneralPage::createAnalysisGroupBox()
+auto  GeneralPage::createAnalysisGroupBox() -> QGroupBox*
 {
     auto layout = new QFormLayout;
 
@@ -117,13 +117,13 @@ QGroupBox*  GeneralPage::createAnalysisGroupBox()
     layout->addRow(_propertiesAreVariedCheckBox);
 
     // Create the group box and add the layout
-    QGroupBox* groupBox = new QGroupBox(tr("Type of Analysis"));
+    auto* groupBox = new QGroupBox(tr("Type of Analysis"));
     groupBox->setLayout(layout);
 
     return groupBox;
 }
 
-QGroupBox* GeneralPage::createVariationGroupBox()
+auto GeneralPage::createVariationGroupBox() -> QGroupBox*
 {
     const int indent = 20;
     auto * layout = new QFormLayout;
@@ -141,7 +141,7 @@ QGroupBox* GeneralPage::createVariationGroupBox()
     _nlPropertiesAreVariedCheckBox = new QCheckBox(tr("Vary the nonlinear properties"));
     layout->addRow(_nlPropertiesAreVariedCheckBox);
 
-    QLabel* label = new QLabel(tr(
+    auto* label = new QLabel(tr(
             "-- shear-modulus reduction curve\n"
                     "-- damping ratio curve\n"
                     "-- damping of the bedrock"));
@@ -175,7 +175,7 @@ QGroupBox* GeneralPage::createVariationGroupBox()
     return _variationGroupBox;
 }
 
-QGroupBox* GeneralPage::createDiscretizationGroupBox()
+auto GeneralPage::createDiscretizationGroupBox() -> QGroupBox*
 {
     auto *layout = new QFormLayout;
 
@@ -200,7 +200,7 @@ QGroupBox* GeneralPage::createDiscretizationGroupBox()
     layout->addRow(_disableDiscretzationCheckBox);
 
     // Group box 
-    QGroupBox* groupBox = new QGroupBox(tr("Layer Discretization"));
+    auto* groupBox = new QGroupBox(tr("Layer Discretization"));
     groupBox->setLayout(layout);
 
     return groupBox;

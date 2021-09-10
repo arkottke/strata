@@ -55,22 +55,22 @@ CompatibleRvtMotion::~CompatibleRvtMotion()
     _targetRespSpec->deleteLater();
 }
 
-const QVector<double> & CompatibleRvtMotion::freq() const
+auto CompatibleRvtMotion::freq() const -> const QVector<double> &
 {
     return _freq->data();
 }
 
-Dimension*  CompatibleRvtMotion::freqDimension()
+auto  CompatibleRvtMotion::freqDimension() -> Dimension*
 {
     return _freq;
 }
 
-ResponseSpectrum * CompatibleRvtMotion::targetRespSpec()
+auto CompatibleRvtMotion::targetRespSpec() -> ResponseSpectrum *
 {
     return _targetRespSpec;
 }
 
-bool CompatibleRvtMotion::limitFas() const
+auto CompatibleRvtMotion::limitFas() const -> bool
 {
     return _limitFas;
 }
@@ -94,14 +94,14 @@ void CompatibleRvtMotion::setDuration(double duration)
     _duration = duration;
 }
 
-QString CompatibleRvtMotion::toHtml() const
+auto CompatibleRvtMotion::toHtml() const -> QString
 {
     //FIXME
 
     return QString();
 }
 
-bool CompatibleRvtMotion::loadFromTextStream(QTextStream &stream, double scale)
+auto CompatibleRvtMotion::loadFromTextStream(QTextStream &stream, double scale) -> bool
 {
     if (!AbstractRvtMotion::loadFromTextStream(stream, scale))
         return false;
@@ -160,6 +160,12 @@ void CompatibleRvtMotion::calculate()
         if( _targetRespSpec->period().at(i) > _targetRespSpec->period().at(i+1) ) {
             qCritical("The given period must be increasing");
             return;
+        }
+    }
+
+    for (auto &period : _targetRespSpec->period()) {
+        if (period <= 0) {
+            qCritical("Target periods must be greater than zero");
         }
     }
 
@@ -336,7 +342,7 @@ void CompatibleRvtMotion::calculate()
     AbstractRvtMotion::calculate();
 }
 
-QVector<double> CompatibleRvtMotion::vanmarckeInversion() const
+auto CompatibleRvtMotion::vanmarckeInversion() const -> QVector<double>
 {
     if (_targetRespSpec->sa().size() < 10) {
         // Loglog interpolate prior to performing the inversion
@@ -405,7 +411,7 @@ void CompatibleRvtMotion::fromJson(const QJsonObject &json)
     calculate();
 }
 
-QJsonObject CompatibleRvtMotion::toJson() const
+auto CompatibleRvtMotion::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractRvtMotion::toJson();
     json["freq"] = _freq->toJson();
@@ -414,7 +420,7 @@ QJsonObject CompatibleRvtMotion::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const CompatibleRvtMotion* crm)
+auto operator<< (QDataStream & out, const CompatibleRvtMotion* crm) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -424,7 +430,7 @@ QDataStream & operator<< (QDataStream & out, const CompatibleRvtMotion* crm)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, CompatibleRvtMotion* crm)
+auto operator>> (QDataStream & in, CompatibleRvtMotion* crm) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

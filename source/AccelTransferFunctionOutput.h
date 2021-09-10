@@ -33,17 +33,17 @@ Q_OBJECT
 public:
     explicit AccelTransferFunctionOutput(OutputCatalog* catalog);
 
-    QString name() const;
-    bool needsFreq() const;
+    auto name() const -> QString;
+    auto needsFreq() const -> bool;
 
 protected:
-    QString shortName() const;
+    auto shortName() const -> QString;
 
-    QwtScaleEngine* xScaleEngine() const;
-    QwtScaleEngine* yScaleEngine() const;
-    const QString xLabel() const;
-    const QString yLabel() const;
-    const QVector<double>& ref(int motion = 0) const;
+    auto xScaleEngine() const -> QwtScaleEngine*;
+    auto yScaleEngine() const -> QwtScaleEngine*;
+    auto xLabel() const -> const QString;
+    auto yLabel() const -> const QString;
+    auto ref(int motion = 0) const -> const QVector<double>&;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

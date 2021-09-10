@@ -95,21 +95,21 @@ SoilProfile::~SoilProfile()
     delete _soilTypeCatalog;
 }
 
-int SoilProfile::rowCount(const QModelIndex &parent) const
+auto SoilProfile::rowCount(const QModelIndex &parent) const -> int
 {
    Q_UNUSED(parent);
 
    return _soilLayers.size() + 1;
 }
 
-int SoilProfile::columnCount(const QModelIndex &parent) const
+auto SoilProfile::columnCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 8;
 }
 
-QVariant SoilProfile::data(const QModelIndex &index, int role) const
+auto SoilProfile::data(const QModelIndex &index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -165,7 +165,7 @@ QVariant SoilProfile::data(const QModelIndex &index, int role) const
     return MyAbstractTableModel::data(index, role);
 }
 
-bool SoilProfile::setData(const QModelIndex &index, const QVariant &value, int role)
+auto SoilProfile::setData(const QModelIndex &index, const QVariant &value, int role) -> bool
 {
     if(index.parent()!=QModelIndex() || _readOnly)
         return false;
@@ -253,7 +253,7 @@ bool SoilProfile::setData(const QModelIndex &index, const QVariant &value, int r
     return true;
 }
 
-QVariant SoilProfile::headerData(int section, Qt::Orientation orientation, int role) const
+auto SoilProfile::headerData(int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -281,9 +281,11 @@ QVariant SoilProfile::headerData(int section, Qt::Orientation orientation, int r
     case Qt::Vertical:
         return section+1;
     }
+
+    return QVariant();
 }
 
-Qt::ItemFlags SoilProfile::flags(const QModelIndex &index ) const
+auto SoilProfile::flags(const QModelIndex &index ) const -> Qt::ItemFlags
 {
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
@@ -316,7 +318,7 @@ Qt::ItemFlags SoilProfile::flags(const QModelIndex &index ) const
     return flags;
 }
 
-bool SoilProfile::insertRows(int row, int count, const QModelIndex &parent)
+auto SoilProfile::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -330,7 +332,7 @@ bool SoilProfile::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-bool SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
+auto SoilProfile::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -351,7 +353,7 @@ bool SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-int SoilProfile::profileCount() const
+auto SoilProfile::profileCount() const -> int
 {
     return _profileCount;
 }
@@ -366,7 +368,7 @@ void SoilProfile::setProfileCount(int count)
     }
 }
 
-bool SoilProfile::onlyConverged() const
+auto SoilProfile::onlyConverged() const -> bool
 {
     return _onlyConverged;
 }
@@ -380,7 +382,7 @@ void SoilProfile::setOnlyConverged(bool onlyConverged)
     }
 }
 
-bool SoilProfile::isVaried() const
+auto SoilProfile::isVaried() const -> bool
 {
     return _isVaried;
 }
@@ -395,22 +397,22 @@ void SoilProfile::setIsVaried(bool isVaried)
     }
 }
 
-QList<SoilLayer*> & SoilProfile::soilLayers()
+auto SoilProfile::soilLayers() -> QList<SoilLayer*> &
 {
     return _soilLayers;
 }
 
-QList<SubLayer> & SoilProfile::subLayers()
+auto SoilProfile::subLayers() -> QList<SubLayer> &
 {
     return _subLayers;
 }
 
-RockLayer* SoilProfile::bedrock()
+auto SoilProfile::bedrock() -> RockLayer*
 {
     return _bedrock;
 }
 
-double SoilProfile::inputDepth() const
+auto SoilProfile::inputDepth() const -> double
 {
     return _inputDepth;
 }
@@ -425,12 +427,12 @@ void SoilProfile::setInputDepth(double depth)
     }
 }
 
-const Location & SoilProfile::inputLocation() const
+auto SoilProfile::inputLocation() const -> const Location &
 {
     return _inputLocation;
 }
 
-const Location SoilProfile::depthToLocation(const double depth) const
+auto SoilProfile::depthToLocation(const double depth) const -> const Location
 {
     int index = 0;
     double interDepth = 0;
@@ -453,22 +455,22 @@ const Location SoilProfile::depthToLocation(const double depth) const
     return Location(index, interDepth);
 }
 
-ProfileRandomizer* SoilProfile::profileRandomizer()
+auto SoilProfile::profileRandomizer() -> ProfileRandomizer*
 {
     return _profileRandomizer;
 }
 
-NonlinearPropertyRandomizer* SoilProfile::nonlinearPropertyRandomizer()
+auto SoilProfile::nonlinearPropertyRandomizer() -> NonlinearPropertyRandomizer*
 {
     return _nonlinearPropertyRandomizer;
 }
 
-SoilTypeCatalog* SoilProfile::soilTypeCatalog()
+auto SoilProfile::soilTypeCatalog() -> SoilTypeCatalog*
 {
     return _soilTypeCatalog;
 }
 
-double SoilProfile::waterTableDepth() const
+auto SoilProfile::waterTableDepth() const -> double
 {
     return _waterTableDepth;
 }
@@ -483,7 +485,7 @@ void SoilProfile::setWaterTableDepth(double waterTableDepth)
     }
 }
 
-double SoilProfile::maxFreq() const
+auto SoilProfile::maxFreq() const -> double
 {
     return _maxFreq;
 }
@@ -498,7 +500,7 @@ void SoilProfile::setMaxFreq(double maxFreq)
     }
 }
 
-double SoilProfile::waveFraction() const
+auto SoilProfile::waveFraction() const -> double
 {
     return _waveFraction;
 }
@@ -513,7 +515,7 @@ void SoilProfile::setWaveFraction(double waveFraction)
     }
 }
 
-bool SoilProfile::disableAutoDiscretization() const
+auto SoilProfile::disableAutoDiscretization() const -> bool
 {
     return _disableAutoDiscretization;
 }
@@ -528,7 +530,7 @@ void SoilProfile::setDisableAutoDiscretization(bool disableAutoDiscretization)
     }
 }
 
-QStringList SoilProfile::soilLayerNameList() const
+auto SoilProfile::soilLayerNameList() const -> QStringList
 {
     QStringList list;
 
@@ -720,12 +722,12 @@ void SoilProfile::resetSubLayers()
         sl.reset();
 }
 
-int SoilProfile::subLayerCount() const
+auto SoilProfile::subLayerCount() const -> int
 {
     return _subLayers.size();
 }
 
-double SoilProfile::untWt( int layer ) const
+auto SoilProfile::untWt( int layer ) const -> double
 {
     if ( layer < _subLayers.size() ) {
         return _subLayers.at(layer).untWt();
@@ -734,7 +736,7 @@ double SoilProfile::untWt( int layer ) const
     }
 }
 
-double SoilProfile::density( int layer ) const
+auto SoilProfile::density( int layer ) const -> double
 {
     if ( layer < _subLayers.size() ) {
         return _subLayers.at(layer).density();
@@ -743,7 +745,7 @@ double SoilProfile::density( int layer ) const
     }
 }
 
-double SoilProfile::shearVel( int layer ) const
+auto SoilProfile::shearVel( int layer ) const -> double
 {
     if ( layer < _subLayers.size() ) {
         return _subLayers.at(layer).shearVel();
@@ -752,7 +754,7 @@ double SoilProfile::shearVel( int layer ) const
     }
 }
 
-double SoilProfile::shearMod(int layer) const
+auto SoilProfile::shearMod(int layer) const -> double
 {
     if ( layer < _subLayers.size() ) {
         return _subLayers.at(layer).shearMod();
@@ -761,7 +763,7 @@ double SoilProfile::shearMod(int layer) const
     }
 }
 
-double SoilProfile::damping( int layer ) const
+auto SoilProfile::damping( int layer ) const -> double
 {
     if ( layer < _subLayers.size() ) {
         return _subLayers.at(layer).damping();
@@ -770,7 +772,7 @@ double SoilProfile::damping( int layer ) const
     }
 }
 
-QVector<double> SoilProfile::depthProfile() const
+auto SoilProfile::depthProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -782,7 +784,7 @@ QVector<double> SoilProfile::depthProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::depthToMidProfile() const
+auto SoilProfile::depthToMidProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -792,7 +794,7 @@ QVector<double> SoilProfile::depthToMidProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::initialVelocityProfile() const
+auto SoilProfile::initialVelocityProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -804,7 +806,7 @@ QVector<double> SoilProfile::initialVelocityProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::finalVelocityProfile() const
+auto SoilProfile::finalVelocityProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -816,7 +818,7 @@ QVector<double> SoilProfile::finalVelocityProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::modulusProfile() const
+auto SoilProfile::modulusProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -828,7 +830,7 @@ QVector<double> SoilProfile::modulusProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::dampingProfile() const
+auto SoilProfile::dampingProfile() const -> QVector<double>
 {
     QVector<double> profile;
     for (const SubLayer &sl : _subLayers)
@@ -839,7 +841,7 @@ QVector<double> SoilProfile::dampingProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::vTotalStressProfile() const
+auto SoilProfile::vTotalStressProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -852,7 +854,7 @@ QVector<double> SoilProfile::vTotalStressProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::vEffectiveStressProfile() const
+auto SoilProfile::vEffectiveStressProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -865,7 +867,7 @@ QVector<double> SoilProfile::vEffectiveStressProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::maxErrorProfile() const
+auto SoilProfile::maxErrorProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -875,7 +877,7 @@ QVector<double> SoilProfile::maxErrorProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::stressReducCoeffProfile(const double pga) const
+auto SoilProfile::stressReducCoeffProfile(const double pga) const -> QVector<double>
 {
     // The stress reduction cofficient is used to compare the maximum shear
     // stress of the soil to the maximum shear stress of a rigid block for a
@@ -907,7 +909,7 @@ QVector<double> SoilProfile::stressReducCoeffProfile(const double pga) const
     return profile;
 }
 
-QVector<double> SoilProfile::maxShearStrainProfile() const
+auto SoilProfile::maxShearStrainProfile() const -> QVector<double>
 {
     QVector<double> profile;
     
@@ -917,7 +919,7 @@ QVector<double> SoilProfile::maxShearStrainProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::shearStressProfile() const
+auto SoilProfile::shearStressProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -927,7 +929,7 @@ QVector<double> SoilProfile::shearStressProfile() const
     return profile;
 }
 
-QVector<double> SoilProfile::stressRatioProfile() const
+auto SoilProfile::stressRatioProfile() const -> QVector<double>
 {
     QVector<double> profile;
 
@@ -937,7 +939,7 @@ QVector<double> SoilProfile::stressRatioProfile() const
     return profile;
 }
 
-QString SoilProfile::subLayerTable() const
+auto SoilProfile::subLayerTable() const -> QString
 {
     QString html;
     
@@ -1004,7 +1006,7 @@ QString SoilProfile::subLayerTable() const
     return html;
 }
 
-QString SoilProfile::toHtml() const
+auto SoilProfile::toHtml() const -> QString
 {
     // Requires that the HTML header is already established.
 
@@ -1116,7 +1118,7 @@ void SoilProfile::updateDepths()
     }
 }
 
-SoilLayer* SoilProfile::createRepresentativeSoilLayer(double top, double base)
+auto SoilProfile::createRepresentativeSoilLayer(double top, double base) -> SoilLayer*
 {
     if (_layerSelectionMethod == MaximumTravelTime) {
         // The representative layer is the layer with the most travel time
@@ -1189,7 +1191,7 @@ void SoilProfile::updateUnits()
     emit headerDataChanged(Qt::Horizontal, DepthColumn, MaxColumn);
 }
 
-VelocityLayer * SoilProfile::velocityLayer(int index) const
+auto SoilProfile::velocityLayer(int index) const -> VelocityLayer *
 {
     if (index < _soilLayers.size()) {
         return _soilLayers.at(index);
@@ -1222,7 +1224,7 @@ void SoilProfile::fromJson(const QJsonObject &json)
     for (const QJsonValue jv : json["soilLayers"].toArray()) {
         QJsonObject sljo = jv.toObject();
 
-        SoilLayer * sl = new SoilLayer(this);
+        auto * sl = new SoilLayer(this);
         sl->fromJson(sljo);
 
         const int row = sljo["soilType"].toInt();
@@ -1235,7 +1237,7 @@ void SoilProfile::fromJson(const QJsonObject &json)
     endResetModel();
 }
 
-QJsonObject SoilProfile::toJson() const
+auto SoilProfile::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["inputDepth"] = _inputDepth;
@@ -1264,7 +1266,7 @@ QJsonObject SoilProfile::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
+auto operator<< (QDataStream & out, const SoilProfile* sp) -> QDataStream &
 {
     out << static_cast<quint8>(4);
 
@@ -1299,7 +1301,7 @@ QDataStream & operator<< (QDataStream & out, const SoilProfile* sp)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
+auto operator>> (QDataStream & in, SoilProfile* sp) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -1314,7 +1316,7 @@ QDataStream & operator>> (QDataStream & in, SoilProfile* sp)
     in >> count;
     while (sp->_soilLayers.size() < count) {
         int row;
-        SoilLayer* sl = new SoilLayer(sp);
+        auto* sl = new SoilLayer(sp);
 
         in >> sl >> row;
         // If no soil type is defined for the soil layer set it the pointer to be zero

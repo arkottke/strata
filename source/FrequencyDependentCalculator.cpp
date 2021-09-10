@@ -39,7 +39,7 @@ FrequencyDependentCalculator::FrequencyDependentCalculator(QObject* parent)
     reset();
 }
 
-bool FrequencyDependentCalculator::useSmoothSpectrum() {
+auto FrequencyDependentCalculator::useSmoothSpectrum() -> bool {
     return _useSmoothSpectrum;
 }
 
@@ -51,7 +51,7 @@ void FrequencyDependentCalculator::setUseSmoothSpectrum(bool b) {
     }
 }
 
-QString FrequencyDependentCalculator::toHtml() const
+auto FrequencyDependentCalculator::toHtml() const -> QString
 {
     return tr(
             "<li>Frequency Dependent Equivalent Linear Parameters"
@@ -65,9 +65,9 @@ QString FrequencyDependentCalculator::toHtml() const
             .arg(_maxIterations);
 }
 
-bool FrequencyDependentCalculator::updateSubLayer(
+auto FrequencyDependentCalculator::updateSubLayer(
         int index,
-        const QVector<std::complex<double> > &strainTf)
+        const QVector<std::complex<double> > &strainTf) -> bool
 {
     const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
@@ -76,35 +76,7 @@ bool FrequencyDependentCalculator::updateSubLayer(
     }
 
     const QVector<double> strainFas = _motion->absFourierVel(strainTf);
-
     const QVector<double> &freq = _motion->freq();
-
-    // Compute the mean frequency and mean strain parameters defined by Kausel and Assimaki (2002)
-    double numer = 0;
-    double denom = 0;
-    double dFreq;
-
-    for (int i = 1; i < freq.size(); ++i) {
-        dFreq = freq.at(i) - freq.at(i-1);
-        numer += dFreq * (freq.at(i-1) * strainFas.at(i-1)
-                          + freq.at(i) * strainFas.at(i)) / 2.;
-        denom += dFreq * (strainFas.at(i-1) + strainFas.at(i)) / 2.;
-    }
-
-    const double freqAvg = numer / denom;
-
-    double sum = 0;
-    int offset = 1;
-
-    while (freq.at(offset) < freqAvg) {
-        dFreq = freq.at(offset) - freq.at(offset-1);
-        sum += dFreq * (strainFas.at(offset-1) + strainFas.at(offset)) / 2.;
-        ++offset;
-
-        Q_ASSERT(offset < freq.size());
-    }
-
-    const double strainAvg = sum / freqAvg;
 
     // Update the sublayer with the representative strain -- FIXME strainAvg doesn't appear to be representative
     _site->subLayers()[index].setStrain(strainMax, strainMax);
@@ -115,6 +87,33 @@ bool FrequencyDependentCalculator::updateSubLayer(
     const SubLayer &sl = _site->subLayers().at(index);
 
     if (_useSmoothSpectrum) {
+        // Compute the mean frequency and mean strain parameters defined by Kausel and Assimaki (2002)
+        double numer = 0;
+        double denom = 0;
+        double dFreq;
+
+        for (int i = 1; i < freq.size(); ++i) {
+            dFreq = freq.at(i) - freq.at(i-1);
+            numer += dFreq * (freq.at(i-1) * strainFas.at(i-1)
+                              + freq.at(i) * strainFas.at(i)) / 2.;
+            denom += dFreq * (strainFas.at(i-1) + strainFas.at(i)) / 2.;
+        }
+
+        const double freqAvg = numer / denom;
+
+        double sum = 0;
+        int offset = 1;
+
+        while (freq.at(offset) < freqAvg) {
+            dFreq = freq.at(offset) - freq.at(offset-1);
+            sum += dFreq * (strainFas.at(offset-1) + strainFas.at(offset)) / 2.;
+            ++offset;
+
+            Q_ASSERT(offset < freq.size());
+        }
+
+        const double strainAvg = sum / freqAvg;
+
         // Calculate model parameter using a least squares fit
         const int n = _nf - offset;
         double chisq;
@@ -204,13 +203,13 @@ void FrequencyDependentCalculator::fromJson(const QJsonObject &json)
     AbstractIterativeCalculator::fromJson(json);
 }
 
-QJsonObject FrequencyDependentCalculator::toJson() const
+auto FrequencyDependentCalculator::toJson() const -> QJsonObject
 {
     return AbstractIterativeCalculator::toJson();
 }
 
-QDataStream & operator<<(QDataStream & out,
-                                 const FrequencyDependentCalculator* fdc)
+auto operator<<(QDataStream & out,
+                                 const FrequencyDependentCalculator* fdc) -> QDataStream &
 {
     out << (quint8)2;
 
@@ -220,8 +219,8 @@ QDataStream & operator<<(QDataStream & out,
     return out;
 }
 
-QDataStream & operator>>(QDataStream & in,
-                                 FrequencyDependentCalculator* fdc)
+auto operator>>(QDataStream & in,
+                                 FrequencyDependentCalculator* fdc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

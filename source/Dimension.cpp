@@ -38,12 +38,12 @@ Dimension::Dimension(QObject * parent)
             this, SLOT(clear()));
 }
 
-QStringList Dimension::spacingList()
+auto Dimension::spacingList() -> QStringList
 {
     return QStringList() << tr("Linear") << tr("Log");
 }
 
-double Dimension::min() const
+auto Dimension::min() const -> double
 {
     return _min;
 }
@@ -58,7 +58,7 @@ void Dimension::setMin(double min)
     }
 }
 
-double Dimension::max() const
+auto Dimension::max() const -> double
 {
     return _max;
 }
@@ -73,12 +73,12 @@ void Dimension::setMax(double max)
     }
 }
 
-int Dimension::size() const
+auto Dimension::size() const -> int
 {
     return _size;
 }
 
-double Dimension::at(int i) const
+auto Dimension::at(int i) const -> double
 {
     return _data.at(i);
 }
@@ -93,7 +93,7 @@ void Dimension::setSize(int size)
     }
 }
 
-Dimension::Spacing Dimension::spacing() const
+auto Dimension::spacing() const -> Dimension::Spacing
 {
     return _spacing;
 }
@@ -117,7 +117,7 @@ void Dimension::setSpacing(int spacing)
     setSpacing((Spacing)spacing);
 }
 
-QVector<double> & Dimension::data()
+auto Dimension::data() -> QVector<double> &
 {
     if (_data.isEmpty())
         init();
@@ -133,7 +133,7 @@ void Dimension::init()
         _data = logSpace(_min, _max, _size);
 }
 
-QVector<double> Dimension::linSpace( double min, double max, int size )
+auto Dimension::linSpace( double min, double max, int size ) -> QVector<double>
 {
     QVector<double> vec(size);
 
@@ -146,7 +146,7 @@ QVector<double> Dimension::linSpace( double min, double max, int size )
     return vec;
 }
 
-QVector<double> Dimension::logSpace( double min, double max, int size )
+auto Dimension::logSpace( double min, double max, int size ) -> QVector<double>
 {
     QVector<double> vec(size);
 
@@ -176,7 +176,7 @@ void Dimension::fromJson(const QJsonObject &json)
     init();
 }
 
-QJsonObject Dimension::toJson() const
+auto Dimension::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["min"] = _min;
@@ -186,7 +186,7 @@ QJsonObject Dimension::toJson() const
     return json;
 }
 
-QDataStream & operator<<(QDataStream & out, const Dimension* d)
+auto operator<<(QDataStream & out, const Dimension* d) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -195,7 +195,7 @@ QDataStream & operator<<(QDataStream & out, const Dimension* d)
     return out;
 }
 
-QDataStream & operator>>(QDataStream & in, Dimension* d)
+auto operator>>(QDataStream & in, Dimension* d) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

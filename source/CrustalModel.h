@@ -32,8 +32,8 @@ class CrustalModel : public MyAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const CrustalModel* cm);
-    friend QDataStream & operator>> (QDataStream & in, CrustalModel* cm);
+    friend auto operator<< (QDataStream & out, const CrustalModel* cm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, CrustalModel* cm) -> QDataStream &;
 
 public:
     explicit CrustalModel(QObject *parent = 0);
@@ -45,27 +45,27 @@ public:
     };
 
     //!@{ Methods for QAbstractTableModel
-    virtual int rowCount(const QModelIndex &parent) const;
+    virtual auto rowCount(const QModelIndex &parent) const -> int;
 
-    virtual int columnCount(const QModelIndex &parent) const;
+    virtual auto columnCount(const QModelIndex &parent) const -> int;
 
-    virtual QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual auto headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual bool setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
 
-    virtual Qt::ItemFlags flags( const QModelIndex & index) const;
+    virtual auto flags( const QModelIndex & index) const -> Qt::ItemFlags;
 
-    virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    virtual auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
     //!@}
 
     /*! Compute the crustal amplification
      */
-    QVector<double> calculate(const QVector<double> &freq) const;
+    auto calculate(const QVector<double> &freq) const -> QVector<double>;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void wasModified();
@@ -77,8 +77,8 @@ private:
      * \param maxDepth depth to which the average is computed
      * \return average value
      */
-    static double averageValue(const QVector<double> &thickness, const QVector<double> &property,
-                               double maxDepth);
+    static auto averageValue(const QVector<double> &thickness, const QVector<double> &property,
+                               double maxDepth) -> double;
 
     //! Thickness of the crustal layers
     QVector<double> _thickness;

@@ -38,7 +38,7 @@ protected slots:
     void updateCrustalAmpSource(int source);
 
 protected:
-    virtual QFormLayout* createParametersLayout();
+    virtual auto createParametersLayout() -> QFormLayout*;
 
     int _crustModelIndex;
 

@@ -34,7 +34,7 @@ public:
     explicit Distribution(gsl_rng *rng, QObject *parent = nullptr);
 
     //! Return a random variable from the distribution
-    double rand();
+    auto rand() -> double;
 
 protected:
     //! The random number generator of the distribution

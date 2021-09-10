@@ -36,11 +36,11 @@ class NonlinearPropertyOutput : public AbstractOutput
 public:
     NonlinearPropertyOutput(NonlinearProperty* nonlinearProperty, OutputCatalog* catalog);
 
-    const QString& soilName() const;
-    virtual QString name() const;
-    virtual QString fullName() const;
+    auto soilName() const -> const QString&;
+    virtual auto name() const -> QString;
+    virtual auto fullName() const -> QString;
 
-    virtual bool motionIndependent() const;
+    virtual auto motionIndependent() const -> bool;
 
 public slots:
     void setNonlinearProperty(NonlinearProperty* nonlinearProperty);
@@ -50,16 +50,16 @@ signals:
     void soilNameChanged(const QString& soilName);
 
 protected:
-    virtual QString fileName(int motion = 0) const;
-    virtual QString shortName() const;
+    virtual auto fileName(int motion = 0) const -> QString;
+    virtual auto shortName() const -> QString;
 
-    virtual QwtScaleEngine* xScaleEngine() const;
-    virtual QwtScaleEngine* yScaleEngine() const;
-    virtual const QString xLabel() const;
-    virtual const QString yLabel() const;
-    virtual const QVector<double>& ref(int motion = 0) const;
-    virtual const QString prefix() const;
-    virtual const QString suffix() const;
+    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+    virtual auto yScaleEngine() const -> QwtScaleEngine*;
+    virtual auto xLabel() const -> const QString;
+    virtual auto yLabel() const -> const QString;
+    virtual auto ref(int motion = 0) const -> const QVector<double>&;
+    virtual auto prefix() const -> const QString;
+    virtual auto suffix() const -> const QString;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

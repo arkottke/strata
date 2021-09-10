@@ -30,16 +30,16 @@ MotionTypeDelegate::MotionTypeDelegate(QObject *parent) :
 {
 }
 
-QWidget* MotionTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/,
-                                          const QModelIndex & /*index*/) const
+auto MotionTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/,
+                                          const QModelIndex & /*index*/) const -> QWidget*
 {
-    QComboBox *editor = new QComboBox(parent);
+    auto *editor = new QComboBox(parent);
     return editor;
 }
 
 void MotionTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & index) const
 {
-    QComboBox * comboBox = static_cast<QComboBox*>(editor);
+    auto * comboBox = static_cast<QComboBox*>(editor);
     comboBox->addItems(AbstractMotion::typeList());
     comboBox->setCurrentIndex(index.model()->data(index, Qt::EditRole).toInt());
 }
@@ -47,7 +47,7 @@ void MotionTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & inde
 void MotionTypeDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                       const QModelIndex &index) const
 {
-    QComboBox * comboBox = static_cast<QComboBox*>(editor);
+    auto * comboBox = static_cast<QComboBox*>(editor);
     model->setData(index, comboBox->currentIndex());
     return;
 }

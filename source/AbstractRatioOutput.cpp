@@ -40,19 +40,19 @@ AbstractRatioOutput::AbstractRatioOutput(OutputCatalog* catalog)
             this, SIGNAL(wasModified()));
 }
 
-QString AbstractRatioOutput::fullName() const
+auto AbstractRatioOutput::fullName() const -> QString
 {
     return tr("Ratio -- %1 -- %2")
             .arg(prefix())
             .arg(name());
 }
 
-double AbstractRatioOutput::inDepth() const
+auto AbstractRatioOutput::inDepth() const -> double
 {
     return _inDepth;
 }
 
-AbstractMotion::Type AbstractRatioOutput::inType() const
+auto AbstractRatioOutput::inType() const -> AbstractMotion::Type
 {
     return _inType;
 }
@@ -67,12 +67,12 @@ void AbstractRatioOutput::setInType(AbstractMotion::Type inType)
     }
 }
 
-double AbstractRatioOutput::outDepth() const
+auto AbstractRatioOutput::outDepth() const -> double
 {
     return _outDepth;
 }
 
-AbstractMotion::Type AbstractRatioOutput::outType() const
+auto AbstractRatioOutput::outType() const -> AbstractMotion::Type
 {
     return _outType;
 }
@@ -117,14 +117,14 @@ void AbstractRatioOutput::setOutType(int outType)
     setOutType((AbstractMotion::Type)outType);
 }
 
-QString AbstractRatioOutput::fileName(int motion) const
+auto AbstractRatioOutput::fileName(int motion) const -> QString
 {
     Q_UNUSED(motion);
 
     return prefix() + '-' + shortName();
 }
 
-const QString AbstractRatioOutput::prefix() const
+auto AbstractRatioOutput::prefix() const -> const QString
 {
     return QString("%1 (%2) from %3 (%4)")
             .arg(locationToString(_outDepth))
@@ -142,7 +142,7 @@ void AbstractRatioOutput::fromJson(const QJsonObject &json)
     _inDepth = json["inDepth"].toDouble();
 }
 
-QJsonObject AbstractRatioOutput::toJson() const
+auto AbstractRatioOutput::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractOutput::toJson();
     json["outType"] = (int) _outType;
@@ -153,7 +153,7 @@ QJsonObject AbstractRatioOutput::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const AbstractRatioOutput* aro)
+auto operator<< (QDataStream & out, const AbstractRatioOutput* aro) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -166,7 +166,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractRatioOutput* aro)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractRatioOutput* aro)
+auto operator>> (QDataStream & in, AbstractRatioOutput* aro) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

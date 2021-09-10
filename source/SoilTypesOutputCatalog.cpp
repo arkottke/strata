@@ -35,21 +35,21 @@ SoilTypesOutputCatalog::SoilTypesOutputCatalog(OutputCatalog *outputCatalog) :
 {
 }
 
-int SoilTypesOutputCatalog::rowCount(const QModelIndex & parent) const
+auto SoilTypesOutputCatalog::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _outputs.size();
 }
 
-int SoilTypesOutputCatalog::columnCount(const QModelIndex & parent) const
+auto SoilTypesOutputCatalog::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 1;
 }
 
-QVariant SoilTypesOutputCatalog::data(const QModelIndex & index, int role) const
+auto SoilTypesOutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent() != QModelIndex())
         return QVariant();
@@ -64,7 +64,7 @@ QVariant SoilTypesOutputCatalog::data(const QModelIndex & index, int role) const
     return AbstractOutputCatalog::data(index, role);
 }
 
-QVariant SoilTypesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const
+auto SoilTypesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -79,7 +79,7 @@ QVariant SoilTypesOutputCatalog::headerData ( int section, Qt::Orientation orien
     return QVariant();
 }
 
-bool SoilTypesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
+auto SoilTypesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent() != QModelIndex() || _readOnly)
         return false;
@@ -96,7 +96,7 @@ bool SoilTypesOutputCatalog::setData(const QModelIndex & index, const QVariant &
 }
 
 
-Qt::ItemFlags SoilTypesOutputCatalog::flags(const QModelIndex & index) const
+auto SoilTypesOutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Q_UNUSED(index);
 
@@ -140,7 +140,7 @@ void SoilTypesOutputCatalog::removeOutput(SoilType *soilType)
     }
 }
 
-QList<AbstractOutput*> SoilTypesOutputCatalog::outputs() const
+auto SoilTypesOutputCatalog::outputs() const -> QList<AbstractOutput*>
 {
     QList<AbstractOutput*> list;
 
@@ -164,7 +164,7 @@ void SoilTypesOutputCatalog::fromJson(const QJsonArray &array)
     foreach(const QJsonValue &v, array) {
         const QJsonObject &json = v.toObject();
         int row = json["row"].toInt();
-        SoilTypeOutput * sto = new SoilTypeOutput(_soilTypeCatalog->soilType(row), _outputCatalog);
+        auto * sto = new SoilTypeOutput(_soilTypeCatalog->soilType(row), _outputCatalog);
         sto->fromJson(json);
         _outputs << sto;
     }
@@ -172,7 +172,7 @@ void SoilTypesOutputCatalog::fromJson(const QJsonArray &array)
     endResetModel();
 }
 
-QJsonArray SoilTypesOutputCatalog::toJson() const
+auto SoilTypesOutputCatalog::toJson() const -> QJsonArray
 {
     QJsonArray array;
     foreach (const SoilTypeOutput *sto, _outputs) {
@@ -183,7 +183,7 @@ QJsonArray SoilTypesOutputCatalog::toJson() const
     return array;
 }
 
-QDataStream & operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc)
+auto operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -197,7 +197,7 @@ QDataStream & operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SoilTypesOutputCatalog* stoc)
+auto operator>> (QDataStream & in, SoilTypesOutputCatalog* stoc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

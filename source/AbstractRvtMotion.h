@@ -39,8 +39,8 @@ class AbstractRvtMotion : public AbstractMotion
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractRvtMotion* arm);
-    friend QDataStream & operator>> (QDataStream & in, AbstractRvtMotion* arm);
+    friend auto operator<< (QDataStream & out, const AbstractRvtMotion* arm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractRvtMotion* arm) -> QDataStream &;
 
 public:
     AbstractRvtMotion(QObject *parent = nullptr);
@@ -53,58 +53,58 @@ public:
         Unknown //!< Unknown region
     };
 
-    static QStringList regionList();
+    static auto regionList() -> QStringList;
 
-    Region region() const;
-    double magnitude() const;
-    double distance() const;
+    auto region() const -> Region;
+    auto magnitude() const -> double;
+    auto distance() const -> double;
 
     virtual void setRegion(AbstractRvtMotion::Region region);
 
     //!@{ Methods for viewing the Fourier amplitude spectrum of the motion
-    virtual int rowCount(const QModelIndex& parent) const;
-    virtual int columnCount(const QModelIndex& parent) const;
+    virtual auto rowCount(const QModelIndex& parent) const -> int;
+    virtual auto columnCount(const QModelIndex& parent) const -> int;
 
-    virtual QVariant data(const QModelIndex& index, int role) const;
-    virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+    virtual auto data(const QModelIndex& index, int role) const -> QVariant;
+    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
     //!@}
 
     //! Compute the maximum response of the motion and the applied transfer function
-    double max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    double maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    double maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    double calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    auto max(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
+    auto maxVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
+    auto maxDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
+    auto calcMaxStrain(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> double;
 
     //! Compute the acceleration response spectrum
-    QVector<double> computeSa(const QVector<double>& period, double damping,
-                              const QVector<std::complex<double> >& accelTf = QVector<std::complex<double> >());
+    auto computeSa(const QVector<double>& period, double damping,
+                              const QVector<std::complex<double> >& accelTf = QVector<std::complex<double> >()) -> QVector<double>;
 
-    const QVector<double> absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    const QVector<double> absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
-    const QVector<double> absFourierDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const;
+    auto absFourierAcc(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double>;
+    auto absFourierVel(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double>;
+    auto absFourierDisp(const QVector<std::complex<double> >& tf = QVector<std::complex<double> >()) const -> const QVector<double>;
 
     //! A reference to the Fourier amplitude spectrum
-    const QVector<double> & fourierAcc() const;
+    auto fourierAcc() const -> const QVector<double> &;
 
-    virtual double freqMax() const;
+    virtual auto freqMax() const -> double;
 
     //! Duration of the motion
-    double duration() const;
+    auto duration() const -> double;
 
     //! Suitable name of the motion
-    QString name() const;
+    auto name() const -> QString;
 
     //! Template without the scenario filled in
-    const QString& nameTemplate() const;
+    auto nameTemplate() const -> const QString&;
 
     //! Create a html document containing the information of the model
-    virtual QString toHtml() const = 0;
+    virtual auto toHtml() const -> QString = 0;
 
     //! Load the motion from a TextStream
-    virtual bool loadFromTextStream(QTextStream &stream, double scale = 1.);
+    virtual auto loadFromTextStream(QTextStream &stream, double scale = 1.) -> bool;
 
     virtual void fromJson(const QJsonObject &json);
-    virtual QJsonObject toJson() const;
+    virtual auto toJson() const -> QJsonObject;
 
 public slots:
     //! Stop the current calculation
@@ -146,10 +146,10 @@ protected:
          * \param fas the Fourier Amplitude Spectrum of the motion
          * \return the expected maximum value
          */
-    double calcMax(const QVector<double> & fourierAmps) const;
+    auto calcMax(const QVector<double> & fourierAmps) const -> double;
 
     //! Take a comma separated string, split the columns, and return the specified column
-    static QString extractColumn(const QString &line, int column=1);
+    static auto extractColumn(const QString &line, int column=1) -> QString;
 
     //! Update the scenario of the peak calculator if needed
     void updatePeakCalculatorScenario();
@@ -174,6 +174,6 @@ protected:
     bool _okToContinue;
 };
 
-AbstractRvtMotion* loadRvtMotionFromTextFile(const QString &fileName, double scale = 1.);
+auto loadRvtMotionFromTextFile(const QString &fileName, double scale = 1.) -> AbstractRvtMotion*;
 
 #endif // ABSTRACT_RVT_MOTION_H

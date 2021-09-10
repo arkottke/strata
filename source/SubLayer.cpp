@@ -51,29 +51,29 @@ void SubLayer::reset()
     _oldDamping = -1;
 }
 
-QString SubLayer::soilTypeName() const
+auto SubLayer::soilTypeName() const -> QString
 {
     return const_cast<const SoilLayer*>(_soilLayer)->soilType()->name();
 }
 
-double SubLayer::untWt() const
+auto SubLayer::untWt() const -> double
 {
     return _soilLayer->untWt();
 }
 
-double SubLayer::density() const
+auto SubLayer::density() const -> double
 {
     return _soilLayer->density();
 }
 
-double SubLayer::vTotalStress(double layerFraction) const
+auto SubLayer::vTotalStress(double layerFraction) const -> double
 {
     Q_ASSERT(0 <= layerFraction && layerFraction <=1);
 
     return _vTotalStress + (untWt() * _thickness * (layerFraction - 0.5));
 }
 
-double SubLayer::vEffectiveStress(double layerFraction) const
+auto SubLayer::vEffectiveStress(double layerFraction) const -> double
 {
     const double waterUntWt = Units::instance()->waterUntWt();
     
@@ -83,7 +83,7 @@ double SubLayer::vEffectiveStress(double layerFraction) const
     return vTotalStress(layerFraction)- poreWaterPressure;
 }
 
-double SubLayer::thickness() const
+auto SubLayer::thickness() const -> double
 {
     return _thickness;
 }
@@ -98,22 +98,22 @@ void SubLayer::setDepth(double depthToTop)
     _depth = depthToTop;
 }
 
-double SubLayer::depth() const
+auto SubLayer::depth() const -> double
 {
     return _depth;
 }
 
-double SubLayer::depthToMid() const
+auto SubLayer::depthToMid() const -> double
 {
     return _depth + _thickness / 2;
 }
 
-double SubLayer::depthToBase() const
+auto SubLayer::depthToBase() const -> double
 {
     return _depth + _thickness;
 }
 
-SoilLayer* SubLayer::soilLayer()
+auto SubLayer::soilLayer() -> SoilLayer*
 {
     return _soilLayer;
 }
@@ -123,17 +123,17 @@ void SubLayer::setSoilLayer(SoilLayer* soilLayer)
     _soilLayer = soilLayer;
 }
 
-double SubLayer::effStrain() const
+auto SubLayer::effStrain() const -> double
 {
     return _effStrain;
 }
 
-double SubLayer::maxStrain() const
+auto SubLayer::maxStrain() const -> double
 {
     return _maxStrain;
 }
 
-double SubLayer::stressRatio() const
+auto SubLayer::stressRatio() const -> double
 {
     return shearStress() / vEffectiveStress();
 }
@@ -182,67 +182,67 @@ void SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperti
     }
 }
 
-double SubLayer::shearVel() const
+auto SubLayer::shearVel() const -> double
 {
     return _shearVel;
 }
 
-double SubLayer::shearMod() const
+auto SubLayer::shearMod() const -> double
 {
     return _shearMod;
 }
 
-double SubLayer::oldShearMod() const
+auto SubLayer::oldShearMod() const -> double
 {
     return _oldShearMod;
 }
 
-double SubLayer::shearModError() const
+auto SubLayer::shearModError() const -> double
 {
     return _shearModError;
 }
 
-double SubLayer::normShearMod() const
+auto SubLayer::normShearMod() const -> double
 {
     return _normShearMod;
 }
 
-double SubLayer::shearStress() const
+auto SubLayer::shearStress() const -> double
 {
     return _shearMod * _maxStrain / 100;
 }
 
-double SubLayer::damping() const
+auto SubLayer::damping() const -> double
 {
     return _damping;
 }
 
-double SubLayer::oldDamping() const
+auto SubLayer::oldDamping() const -> double
 {
     return _oldDamping;
 }
 
-double SubLayer::dampingError() const
+auto SubLayer::dampingError() const -> double
 {
     return _dampingError;
 }
 
-double SubLayer::initialShearVel() const
+auto SubLayer::initialShearVel() const -> double
 {
     return _soilLayer->shearVel();
 }
 
-double SubLayer::initialShearMod() const
+auto SubLayer::initialShearMod() const -> double
 {
     return _soilLayer->shearMod();
 }
 
-double SubLayer::error() const
+auto SubLayer::error() const -> double
 {
     return qMax(_shearModError, _dampingError);
 }
 
-QString SubLayer::printProperties() const
+auto SubLayer::printProperties() const -> QString
 {
     return QString("%1 %2 %3 %4 %5 %6 %7 %8 %9 %10")
             .arg(_soilLayer->soilType()->name(), 30)

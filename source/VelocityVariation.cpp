@@ -52,7 +52,7 @@ VelocityVariation::VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRan
     setCorrelModel(USGS_C);
 }
 
-QStringList VelocityVariation::modelList()
+auto VelocityVariation::modelList() -> QStringList
 {
     QStringList list;
 
@@ -79,7 +79,7 @@ QStringList VelocityVariation::modelList()
     return list;
 }
 
-bool VelocityVariation::enabled() const
+auto VelocityVariation::enabled() const -> bool
 {
     return _profileRandomizer->enabled() && _enabled;
 }
@@ -101,12 +101,12 @@ void VelocityVariation::updateEnabled()
     emit stdevIsLayerSpecificChanged(stdevIsLayerSpecific());
 }
 
-VelocityVariation::Model VelocityVariation::stdevModel() const
+auto VelocityVariation::stdevModel() const -> VelocityVariation::Model
 {
     return _stdevModel;
 }
 
-bool VelocityVariation::stdevCustomEnabled() const
+auto VelocityVariation::stdevCustomEnabled() const -> bool
 {
     return _stdevModel == Custom;
 }
@@ -156,7 +156,7 @@ void VelocityVariation::setStdevModel(int model)
     setStdevModel((Model)model);
 }
 
-bool VelocityVariation::stdevIsLayerSpecific() const
+auto VelocityVariation::stdevIsLayerSpecific() const -> bool
 {
     return _stdevIsLayerSpecific;
 }
@@ -171,7 +171,7 @@ void VelocityVariation::setStdevIsLayerSpecific(bool b)
     }
 }
 
-double VelocityVariation::stdev() const
+auto VelocityVariation::stdev() const -> double
 {
     return _stdev;
 }
@@ -186,12 +186,12 @@ void VelocityVariation::setStdev(double stdev)
     }
 }
 
-VelocityVariation::Model VelocityVariation::correlModel() const
+auto VelocityVariation::correlModel() const -> VelocityVariation::Model
 {
     return _correlModel;
 }
 
-bool VelocityVariation::correlCustomEnabled() const
+auto VelocityVariation::correlCustomEnabled() const -> bool
 {
     return _correlModel == Custom;
 }
@@ -273,7 +273,7 @@ void VelocityVariation::setCorrelModel(int model)
     setCorrelModel((Model)model);
 }
 
-double VelocityVariation::correlInitial() const
+auto VelocityVariation::correlInitial() const -> double
 {
     return _correlInitial;
 }
@@ -288,7 +288,7 @@ void VelocityVariation::setCorrelInitial(double correlInitial)
     }
 }
 
-double VelocityVariation::correlFinal() const
+auto VelocityVariation::correlFinal() const -> double
 {
     return _correlFinal;
 }
@@ -303,7 +303,7 @@ void VelocityVariation::setCorrelFinal(double correlFinal)
     }
 }
 
-double VelocityVariation::correlDelta() const
+auto VelocityVariation::correlDelta() const -> double
 {
     return _correlDelta;
 }
@@ -318,7 +318,7 @@ void VelocityVariation::setCorrelDelta(double correlDelta)
     }
 }
 
-double VelocityVariation::correlIntercept() const
+auto VelocityVariation::correlIntercept() const -> double
 {
     return _correlIntercept;
 }
@@ -333,7 +333,7 @@ void VelocityVariation::setCorrelIntercept(double correlIntercept)
     }
 }
 
-double VelocityVariation::correlExponent() const
+auto VelocityVariation::correlExponent() const -> double
 {
     return _correlExponent;
 }
@@ -357,16 +357,19 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
     double stdev = 0;
 
     const double toMeters = Units::instance()->toMeters();
+    double prevDepthToMid = 0;
+    double thickness = 0;
 
     for (int i = 0; i < soilLayers.size(); ++i) {
         stdev = _stdevIsLayerSpecific ? soilLayers.at(i)->stdev() : _stdev;
+
+        // Depth at the middle of the layer
+        double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
 
         if (i == 0) {
             // First layer is not correlated
             randVar = gsl_ran_gaussian(_rng, stdev);
         } else {
-            // Depth at the middle of the layer
-            double depthToMid = soilLayers.at(i)->depth() + soilLayers.at(i)->thickness()/2.;
 
             // If the English units are used convert the depthToMid to meters
             depthToMid *= toMeters;
@@ -377,8 +380,8 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
                                                         / (200 + _correlInitial), _correlExponent)
                                                             : _correlFinal;
             // Thickness dependent correlation. Again convert to meters
-            const double tCorrel = _correlInitial * exp( -toMeters *
-                    soilLayers.at(i)->thickness() / _correlDelta );
+            thickness = depthToMid - prevDepthToMid;
+            const double tCorrel = _correlInitial * exp( -toMeters * thickness / _correlDelta );
 
             // Combine the correlations
             double correl = (1 - dCorrel) * tCorrel + dCorrel;
@@ -399,6 +402,7 @@ void VelocityVariation::vary(QList<SoilLayer*> & soilLayers, RockLayer* bedrock)
 
         // Save the previous random variable
         prevRandVar = randVar;
+        prevDepthToMid = depthToMid;
     }
 
     // Randomize the bedrock layer
@@ -445,7 +449,7 @@ void VelocityVariation::fromJson(const QJsonObject &json)
     }
 }
 
-QJsonObject VelocityVariation::toJson() const
+auto VelocityVariation::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["enabled"] = _enabled;
@@ -468,7 +472,7 @@ QJsonObject VelocityVariation::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const VelocityVariation* vv)
+auto operator<< (QDataStream & out, const VelocityVariation* vv) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -493,7 +497,7 @@ QDataStream & operator<< (QDataStream & out, const VelocityVariation* vv)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, VelocityVariation* vv)
+auto operator>> (QDataStream & in, VelocityVariation* vv) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

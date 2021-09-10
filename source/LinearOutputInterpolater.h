@@ -29,7 +29,7 @@ class LinearOutputInterpolater : public AbstractOutputInterpolater
 public:
     LinearOutputInterpolater();
 
-    QVector<double> calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi);
+    auto calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>;
 };
 
 #endif // LINEAR_OUTPUT_INTERPOLATER_H

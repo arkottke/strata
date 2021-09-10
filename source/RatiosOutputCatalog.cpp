@@ -38,30 +38,30 @@ RatiosOutputCatalog::RatiosOutputCatalog(OutputCatalog *outputCatalog)
     _lookup["Strain Transfer Function"] = "StrainTransferFunctionOutput";
 }
 
-bool RatiosOutputCatalog::needsInputConditions() const
+auto RatiosOutputCatalog::needsInputConditions() const -> bool
 {
     return true;
 }
 
-bool RatiosOutputCatalog::needsOutputConditions() const
+auto RatiosOutputCatalog::needsOutputConditions() const -> bool
 {
     return true;
 }
 
-int RatiosOutputCatalog::rowCount(const QModelIndex & parent) const
+auto RatiosOutputCatalog::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _outputs.size();
 }
 
-int RatiosOutputCatalog::columnCount(const QModelIndex & parent) const
+auto RatiosOutputCatalog::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
     return 5;
 }
 
-QVariant RatiosOutputCatalog::data(const QModelIndex & index, int role) const
+auto RatiosOutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -104,7 +104,7 @@ QVariant RatiosOutputCatalog::data(const QModelIndex & index, int role) const
     return AbstractOutputCatalog::data(index, role);
 }
 
-bool RatiosOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
+auto RatiosOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent() != QModelIndex() || _readOnly)
         return false;
@@ -156,7 +156,7 @@ bool RatiosOutputCatalog::setData(const QModelIndex & index, const QVariant & va
     return true;
 }
 
-QVariant RatiosOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const
+auto RatiosOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if( role != Qt::DisplayRole)
         return QVariant();
@@ -182,7 +182,7 @@ QVariant RatiosOutputCatalog::headerData ( int section, Qt::Orientation orientat
     return QVariant();
 }
 
-Qt::ItemFlags RatiosOutputCatalog::flags(const QModelIndex & index) const
+auto RatiosOutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Q_UNUSED(index);
 
@@ -201,7 +201,7 @@ Qt::ItemFlags RatiosOutputCatalog::flags(const QModelIndex & index) const
     return flags;
 }
 
-bool RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &parent)
+auto RatiosOutputCatalog::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -263,7 +263,7 @@ void RatiosOutputCatalog::addRow(const QString &name)
     }
 }
 
-QList<AbstractOutput*> RatiosOutputCatalog::outputs() const
+auto RatiosOutputCatalog::outputs() const -> QList<AbstractOutput*>
 {
     QList<AbstractOutput*> list;
 
@@ -273,7 +273,7 @@ QList<AbstractOutput*> RatiosOutputCatalog::outputs() const
     return list;
 }
 
-AbstractRatioOutput* RatiosOutputCatalog::factory(const QString & className, OutputCatalog * parent) const
+auto RatiosOutputCatalog::factory(const QString & className, OutputCatalog * parent) const -> AbstractRatioOutput*
 {
     AbstractRatioOutput* aro = 0;
 
@@ -307,7 +307,7 @@ void RatiosOutputCatalog::fromJson(const QJsonArray &json)
     endResetModel();
 }
 
-QJsonArray RatiosOutputCatalog::toJson() const
+auto RatiosOutputCatalog::toJson() const -> QJsonArray
 {
     QJsonArray json;
     for (auto *aro : _outputs) {
@@ -317,7 +317,7 @@ QJsonArray RatiosOutputCatalog::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc)
+auto operator<< (QDataStream & out, const RatiosOutputCatalog* roc) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -329,7 +329,7 @@ QDataStream & operator<< (QDataStream & out, const RatiosOutputCatalog* roc)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, RatiosOutputCatalog* roc)
+auto operator>> (QDataStream & in, RatiosOutputCatalog* roc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

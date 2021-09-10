@@ -21,7 +21,7 @@
 
 #include "MyQwtCompatibility.h"
 
-QwtScaleEngine* logScaleEngine() {
+auto logScaleEngine() -> QwtScaleEngine* {
 #if QWT_VERSION < 0x060100
     return new QwtLog10ScaleEngine;
 #else

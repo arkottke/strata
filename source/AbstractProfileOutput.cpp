@@ -48,12 +48,12 @@ AbstractProfileOutput::AbstractProfileOutput(OutputCatalog* catalog, bool interp
             this, SIGNAL(wasModified()));
 }
 
-QString AbstractProfileOutput::fullName() const
+auto AbstractProfileOutput::fullName() const -> QString
 {
     return "Profile -- " + name();
 }
 
-bool AbstractProfileOutput::enabled() const
+auto AbstractProfileOutput::enabled() const -> bool
 {
     return _enabled;
 }
@@ -64,41 +64,41 @@ void AbstractProfileOutput::setEnabled(bool enabled)
     emit wasModified();
 }
 
-AbstractOutput::CurveType AbstractProfileOutput::curveType() const
+auto AbstractProfileOutput::curveType() const -> AbstractOutput::CurveType
 {
     return AbstractOutput::Xfy;
 }
 
-bool AbstractProfileOutput::needsDepth() const
+auto AbstractProfileOutput::needsDepth() const -> bool
 {
     return true;
 }
-QString AbstractProfileOutput::fileName(int motion) const
+auto AbstractProfileOutput::fileName(int motion) const -> QString
 {
     Q_UNUSED(motion);
 
     return "profile-" + shortName();
 }
 
-QwtScaleEngine* AbstractProfileOutput::xScaleEngine() const
+auto AbstractProfileOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* AbstractProfileOutput::yScaleEngine() const
+auto AbstractProfileOutput::yScaleEngine() const -> QwtScaleEngine*
 {
-    QwtLinearScaleEngine *scaleEngine = new QwtLinearScaleEngine;
+    auto *scaleEngine = new QwtLinearScaleEngine;
     scaleEngine->setAttribute(QwtScaleEngine::Inverted, true);
 
     return scaleEngine;
 }
 
-const QString AbstractProfileOutput::yLabel() const
+auto AbstractProfileOutput::yLabel() const -> const QString
 {
     return tr("Depth (%1)").arg(Units::instance()->length());
 }
 
-const QVector<double>& AbstractProfileOutput::ref(int motion) const
+auto AbstractProfileOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
     return _catalog->depth();
@@ -138,14 +138,14 @@ void AbstractProfileOutput::fromJson(const QJsonObject &json)
     _enabled = json["enabled"].toBool();
 }
 
-QJsonObject AbstractProfileOutput::toJson() const
+auto AbstractProfileOutput::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractOutput::toJson();
     json["enabled"] = _enabled;
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const AbstractProfileOutput* apo)
+auto operator<< (QDataStream & out, const AbstractProfileOutput* apo) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -154,7 +154,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractProfileOutput* apo)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractProfileOutput* apo)
+auto operator>> (QDataStream & in, AbstractProfileOutput* apo) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

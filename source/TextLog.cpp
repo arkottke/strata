@@ -32,7 +32,7 @@ TextLog::TextLog(QObject * parent) :
 {
 }
 
-QStringList TextLog::levelList()
+auto TextLog::levelList() -> QStringList
 {
     QStringList list = {tr("Low"), tr("Medium"), tr("High")};
     return list;
@@ -51,7 +51,7 @@ void TextLog::clear()
     emit textCleared();
 }
 
-TextLog::Level TextLog::level() const
+auto TextLog::level() const -> TextLog::Level
 {
     return _level;
 }
@@ -70,12 +70,12 @@ void TextLog::setLevel(int level)
     setLevel((Level)level);
 }
 
-const QStringList& TextLog::text() const
+auto TextLog::text() const -> const QStringList&
 {
     return _text;
 }
 
-TextLog & operator<<( TextLog & log, const QString & string )
+auto operator<<( TextLog & log, const QString & string ) -> TextLog &
 {
     log.append(string);
     return log;
@@ -90,7 +90,7 @@ void TextLog::fromJson(const QJsonObject &json)
         _text << v.toString();
 }
 
-QJsonObject TextLog::toJson() const
+auto TextLog::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["level"] = (int) _level;
@@ -103,7 +103,7 @@ QJsonObject TextLog::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const TextLog* tl)
+auto operator<< (QDataStream & out, const TextLog* tl) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -112,7 +112,7 @@ QDataStream & operator<< (QDataStream & out, const TextLog* tl)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, TextLog* tl)
+auto operator>> (QDataStream & in, TextLog* tl) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

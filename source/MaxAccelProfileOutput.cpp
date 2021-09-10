@@ -34,17 +34,17 @@ MaxAccelProfileOutput::MaxAccelProfileOutput(OutputCatalog* catalog)
 {
 }
 
-QString MaxAccelProfileOutput::name() const
+auto MaxAccelProfileOutput::name() const -> QString
 {
     return tr("Peak Ground Acceleration Profile");
 }
 
-QString MaxAccelProfileOutput::shortName() const
+auto MaxAccelProfileOutput::shortName() const -> QString
 {
     return tr("pga");
 }
 
-const QString MaxAccelProfileOutput::xLabel() const
+auto MaxAccelProfileOutput::xLabel() const -> const QString
 {
     return tr("Peak Ground Acceleration (%1)").arg(Units::instance()->accel());
 }

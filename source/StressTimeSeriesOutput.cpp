@@ -32,17 +32,17 @@ StressTimeSeriesOutput::StressTimeSeriesOutput(OutputCatalog* catalog)
     _type = AbstractMotion::Within;
 }
 
-QString StressTimeSeriesOutput::name() const
+auto StressTimeSeriesOutput::name() const -> QString
 {
     return tr("Shear-Stress Time Series");
 }
 
-QString StressTimeSeriesOutput::shortName() const
+auto StressTimeSeriesOutput::shortName() const -> QString
 {
     return tr("stressTs");
 }
 
-const QString StressTimeSeriesOutput::yLabel() const
+auto StressTimeSeriesOutput::yLabel() const -> const QString
 {
     return tr("Shear Stress, %1 (%2)")
             .arg(QChar(0x03C4))
@@ -55,7 +55,7 @@ void StressTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
 
     Q_ASSERT(tsm);
 

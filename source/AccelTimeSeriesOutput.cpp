@@ -33,17 +33,17 @@ AccelTimeSeriesOutput::AccelTimeSeriesOutput(OutputCatalog* catalog)
 
 }
 
-QString AccelTimeSeriesOutput::name() const
+auto AccelTimeSeriesOutput::name() const -> QString
 {
     return tr("Acceleration Time Series");
 }
 
-QString AccelTimeSeriesOutput::shortName() const
+auto AccelTimeSeriesOutput::shortName() const -> QString
 {
     return tr("accelTs");
 }
 
-const QString AccelTimeSeriesOutput::yLabel() const
+auto AccelTimeSeriesOutput::yLabel() const -> const QString
 {
     return tr("Acceleration (%1)").arg(Units::instance()->accel());
 }
@@ -53,7 +53,7 @@ void AccelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref);
 
-    const TimeSeriesMotion* motion = qobject_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* motion = qobject_cast<const TimeSeriesMotion*>(calculator->motion());
     Q_ASSERT(motion);
 
     data = motion->timeSeries(TimeSeriesMotion::Acceleration,

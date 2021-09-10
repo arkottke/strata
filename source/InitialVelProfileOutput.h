@@ -32,11 +32,11 @@ Q_OBJECT
 public:
     explicit InitialVelProfileOutput(OutputCatalog* catalog);
 
-    virtual QString name() const;
-    bool motionIndependent() const;
+    virtual auto name() const -> QString;
+    auto motionIndependent() const -> bool;
 protected:
-    virtual QString shortName() const;
-    virtual const QString xLabel() const;
+    virtual auto shortName() const -> QString;
+    virtual auto xLabel() const -> const QString;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

@@ -33,30 +33,29 @@
 AriasIntensityProfileOutput::AriasIntensityProfileOutput(OutputCatalog* catalog)
     : AbstractProfileOutput(catalog, false)
 {
-    _offset = 1;
 }
 
-QString AriasIntensityProfileOutput::name() const
+auto AriasIntensityProfileOutput::name() const -> QString
 {
     return tr("Arias Intensity Profile");
 }
 
-QString AriasIntensityProfileOutput::shortName() const
+auto AriasIntensityProfileOutput::shortName() const -> QString
 {
     return tr("AriasIntensity");
 }
 
-const QString AriasIntensityProfileOutput::xLabel() const
+auto AriasIntensityProfileOutput::xLabel() const -> const QString
 {
     return tr("Arias Intensity (m/sec)");
 }
 
-QwtScaleEngine* AriasIntensityProfileOutput::xScaleEngine() const
+auto AriasIntensityProfileOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return new QwtLinearScaleEngine;
 }
 
-bool AriasIntensityProfileOutput::timeSeriesOnly() const
+auto AriasIntensityProfileOutput::timeSeriesOnly() const -> bool
 {
     return true;
 }
@@ -66,7 +65,7 @@ void AriasIntensityProfileOutput::extract(AbstractCalculator* const calculator,
 {
     Q_UNUSED(ref)
 
-    const TimeSeriesMotion* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
     const SoilProfile* site = calculator->site();
 
     // Outcrop for the first layer. Within for subsequent.

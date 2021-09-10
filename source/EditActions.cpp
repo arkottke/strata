@@ -48,7 +48,7 @@ EditActions::EditActions( QObject * parent ) : QObject(parent)
     connect(_clearAction, SIGNAL(triggered()), SLOT(clear()));
 }
 
-EditActions * EditActions::instance()
+auto EditActions::instance() -> EditActions *
 {
     if (_instance == nullptr) {
         _instance = new EditActions;
@@ -57,22 +57,22 @@ EditActions * EditActions::instance()
     return _instance;
 }
 
-QAction * EditActions::cutAction()
+auto EditActions::cutAction() -> QAction *
 {
     return _cutAction;
 }
 
-QAction * EditActions::copyAction()
+auto EditActions::copyAction() -> QAction *
 {
     return _copyAction;
 }
 
-QAction * EditActions::pasteAction()
+auto EditActions::pasteAction() -> QAction *
 {
     return _pasteAction;
 }
 
-QAction * EditActions::clearAction()
+auto EditActions::clearAction() -> QAction *
 {
     return _clearAction;
 }

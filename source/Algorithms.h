@@ -28,15 +28,15 @@
 //! Various algorithms that are used repeatedly
 
 //! Interpolate in linear space
-QVector<double> interp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi );
+auto interp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi ) -> QVector<double>;
 
 //! Interpolate in log-log space
-QVector<double> logLoginterp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi );
+auto logLoginterp( const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi ) -> QVector<double>;
 
 //! Return the string corresponding to a boolean
-QString boolToString(bool b);
+auto boolToString(bool b) -> QString;
 
 //! Convert the location to a string, -1 converts to Bedrock
-QString locationToString(double loc);
+auto locationToString(double loc) -> QString;
 
 #endif // ALGORITHMS_H_

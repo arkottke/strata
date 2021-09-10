@@ -35,16 +35,16 @@ class BedrockDepthVariation : public Distribution
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const BedrockDepthVariation* bdv);
-    friend QDataStream & operator>> (QDataStream & in, BedrockDepthVariation* bdv);
+    friend auto operator<< (QDataStream & out, const BedrockDepthVariation* bdv) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, BedrockDepthVariation* bdv) -> QDataStream &;
 
 public:
     explicit BedrockDepthVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer);
 
-    bool enabled() const;
+    auto enabled() const -> bool;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void enabledChanged(bool enabled);

@@ -59,7 +59,7 @@ CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(
     init();
 }
 
-QFormLayout* CompatibleRvtMotionDialog::createParametersLayout()
+auto CompatibleRvtMotionDialog::createParametersLayout() -> QFormLayout*
 {
     auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
 
@@ -115,7 +115,7 @@ void CompatibleRvtMotionDialog::calculate()
     _dataTabWidget->setCurrentIndex(1);
 }
 
-QTabWidget* CompatibleRvtMotionDialog::createTabWidget()
+auto CompatibleRvtMotionDialog::createTabWidget() -> QTabWidget*
 {
     auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
     auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);

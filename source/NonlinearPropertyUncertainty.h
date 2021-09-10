@@ -31,25 +31,25 @@ class NonlinearPropertyUncertainty : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const NonlinearPropertyUncertainty* npu);
-    friend QDataStream & operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu);
+    friend auto operator<< (QDataStream & out, const NonlinearPropertyUncertainty* npu) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu) -> QDataStream &;
 
 public:
     explicit NonlinearPropertyUncertainty(double lnStdev, double min, double max,
                                           QObject *parent = nullptr);
 
-    double min() const;
-    double max() const;
-    double lnStdev() const;
+    auto min() const -> double;
+    auto max() const -> double;
+    auto lnStdev() const -> double;
 
     //! Vary the nonlinear parameter
     void vary(NonlinearPropertyRandomizer::Model model, NonlinearProperty* nlProperty, const double rand) const;
 
     //! Vary a damping value
-    double variedDamping(NonlinearPropertyRandomizer::Model model, const double average, const double rand) const;
+    auto variedDamping(NonlinearPropertyRandomizer::Model model, const double average, const double rand) const -> double;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void minChanged(double min);
@@ -65,7 +65,7 @@ public slots:
 
 protected:
     //! Limit the value to the minimum and maximum
-    double limit(double value) const;
+    auto limit(double value) const -> double;
 
     //! Minimum value
     double _min;

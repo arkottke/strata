@@ -31,13 +31,13 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
     auto *layout = new QGridLayout;
     layout->setColumnStretch(3,1);
 
-    QPushButton * backPushButton = new QPushButton(QIcon(":/images/go-previous.svg"), tr("Back"));
+    auto * backPushButton = new QPushButton(QIcon(":/images/go-previous.svg"), tr("Back"));
     layout->addWidget( backPushButton, 0, 0);
     
-    QPushButton * forwardPushButton = new QPushButton(QIcon(":/images/go-next.svg"), tr("Forward"));
+    auto * forwardPushButton = new QPushButton(QIcon(":/images/go-next.svg"), tr("Forward"));
     layout->addWidget( forwardPushButton, 0, 1);
 
-    QPushButton * homePushButton = new QPushButton(QIcon(":/images/go-home.svg"), tr("Home"));
+    auto * homePushButton = new QPushButton(QIcon(":/images/go-home.svg"), tr("Home"));
     layout->addWidget( homePushButton, 0, 2);
 
     _urlLineEdit = new QLineEdit;
@@ -70,7 +70,7 @@ HelpDialog::HelpDialog( QWidget * parent, Qt::WindowFlags f )
     // layout->addLayout( rowLayout, 1, 0, 1, 5);
     layout->addWidget( _textBrowser, 1, 0, 1, 5);
 
-    QPushButton * closePushButton = new QPushButton(tr("Close"));
+    auto * closePushButton = new QPushButton(tr("Close"));
     connect( closePushButton, SIGNAL(clicked()), SLOT(close()));
     layout->addWidget( closePushButton, 2, 4);
 

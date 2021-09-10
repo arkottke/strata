@@ -28,7 +28,7 @@
 EquivalentLinearCalculatorWidget::EquivalentLinearCalculatorWidget(QWidget *parent) :
     QWidget(parent)
 {
-    QFormLayout* layout = new QFormLayout;
+    auto* layout = new QFormLayout;
 
     // Error tolerance row
     _errorToleranceSpinBox = new QDoubleSpinBox;

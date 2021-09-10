@@ -38,44 +38,44 @@ AccelTransferFunctionOutput::AccelTransferFunctionOutput(OutputCatalog* catalog)
     _interp = new LinearOutputInterpolater;
 }
 
-bool AccelTransferFunctionOutput::needsFreq() const
+auto AccelTransferFunctionOutput::needsFreq() const -> bool
 {
     return true;
 }
 
-QString AccelTransferFunctionOutput::name() const
+auto AccelTransferFunctionOutput::name() const -> QString
 {
     return tr("Acceleration Transfer Function");
 }
 
-QString AccelTransferFunctionOutput::shortName() const
+auto AccelTransferFunctionOutput::shortName() const -> QString
 {
     return tr("accelTf");
 }
 
-QwtScaleEngine* AccelTransferFunctionOutput::xScaleEngine() const
+auto AccelTransferFunctionOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* AccelTransferFunctionOutput::yScaleEngine() const
+auto AccelTransferFunctionOutput::yScaleEngine() const -> QwtScaleEngine*
 {
     return new QwtLinearScaleEngine;
 }
 
-const QString AccelTransferFunctionOutput::xLabel() const
+auto AccelTransferFunctionOutput::xLabel() const -> const QString
 {
     return tr("Frequency (Hz)");
 }
 
-const QString AccelTransferFunctionOutput::yLabel() const
+auto AccelTransferFunctionOutput::yLabel() const -> const QString
 {
     return tr("FAS (accel) at %1 / FAS (accel) at %2")
             .arg(locationToString(_outDepth))
             .arg(locationToString(_inDepth));
 }
 
-const QVector<double>& AccelTransferFunctionOutput::ref(int motion) const
+auto AccelTransferFunctionOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
 

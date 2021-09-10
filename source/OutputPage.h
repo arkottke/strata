@@ -74,13 +74,13 @@ private:
     QComboBox* _logLevelComboBox;
 
     //! Create the response spectrum group box
-    QGroupBox* createRespSpecGroupBox();
+    auto createRespSpecGroupBox() -> QGroupBox*;
 
     //! Create the frequency group box
-    QGroupBox* createFreqGroupBox();
+    auto createFreqGroupBox() -> QGroupBox*;
 
     //! Create the output group box
-    QGroupBox* createLogGroupBox();
+    auto createLogGroupBox() -> QGroupBox*;
 
     SiteResponseModel* _model;
 };

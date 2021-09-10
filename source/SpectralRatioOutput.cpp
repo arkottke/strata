@@ -38,47 +38,47 @@ SpectralRatioOutput::SpectralRatioOutput(OutputCatalog* catalog)
 {
 }
 
-bool SpectralRatioOutput::needsPeriod() const
+auto SpectralRatioOutput::needsPeriod() const -> bool
 {
     return true;
 }
 
-QString SpectralRatioOutput::name() const
+auto SpectralRatioOutput::name() const -> QString
 {
     return tr("Spectral Ratio");
 }
 
-QString SpectralRatioOutput::shortName() const
+auto SpectralRatioOutput::shortName() const -> QString
 {
     return tr("specRatio");
 }
 
-QwtScaleEngine* SpectralRatioOutput::xScaleEngine() const
+auto SpectralRatioOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return logScaleEngine();
 }
 
-QwtScaleEngine* SpectralRatioOutput::yScaleEngine() const
+auto SpectralRatioOutput::yScaleEngine() const -> QwtScaleEngine*
 {
-    QwtLinearScaleEngine* scaleEngine = new QwtLinearScaleEngine;
+    auto* scaleEngine = new QwtLinearScaleEngine;
     scaleEngine->setAttribute(QwtScaleEngine::IncludeReference, true);
 
     return scaleEngine;
 }
 
-const QString SpectralRatioOutput::xLabel() const
+auto SpectralRatioOutput::xLabel() const -> const QString
 {
     return tr("Period (s)");
 }
 
-const QString SpectralRatioOutput::yLabel() const
+auto SpectralRatioOutput::yLabel() const -> const QString
 {
     return tr("Sa at %1 / Sa at %2")
             .arg(locationToString(_outDepth))
             .arg(locationToString(_inDepth));
 }
 
-const QVector<double>& SpectralRatioOutput::ref(int motion) const
+auto SpectralRatioOutput::ref(int motion) const -> const QVector<double>&
 {
     Q_UNUSED(motion);
 

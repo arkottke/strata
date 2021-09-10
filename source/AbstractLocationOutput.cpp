@@ -32,19 +32,19 @@ AbstractLocationOutput::AbstractLocationOutput(OutputCatalog* catalog)
     _depth = 0;
 }
 
-bool AbstractLocationOutput::needsOutputConditions() const
+auto AbstractLocationOutput::needsOutputConditions() const -> bool
 {
     return true;
 }
 
-QString AbstractLocationOutput::fullName() const
+auto AbstractLocationOutput::fullName() const -> QString
 {
     return tr("Location -- %1 -- %2")
             .arg(prefix())
             .arg(name());
 }
 
-double AbstractLocationOutput::depth() const
+auto AbstractLocationOutput::depth() const -> double
 {
     return _depth;
 }
@@ -59,7 +59,7 @@ void AbstractLocationOutput::setDepth(double depth)
     }
 }
 
-AbstractMotion::Type AbstractLocationOutput::type() const
+auto AbstractLocationOutput::type() const -> AbstractMotion::Type
 {
     return _type;
 }
@@ -79,14 +79,14 @@ void AbstractLocationOutput::setType(int type)
     setType((AbstractMotion::Type)type);
 }
 
-QString AbstractLocationOutput::fileName(int motion) const
+auto AbstractLocationOutput::fileName(int motion) const -> QString
 {
     Q_UNUSED(motion)
 
     return prefix() + "-" + shortName();
 }
 
-const QString AbstractLocationOutput::prefix() const
+auto AbstractLocationOutput::prefix() const -> const QString
 {
     return QString("%1 (%3)")
             .arg(locationToString(_depth))
@@ -100,7 +100,7 @@ void AbstractLocationOutput::fromJson(const QJsonObject &json)
     _depth = json["depth"].toDouble();
 }
 
-QJsonObject AbstractLocationOutput::toJson() const
+auto AbstractLocationOutput::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractOutput::toJson();
     json["type"] = (int) _type;
@@ -110,7 +110,7 @@ QJsonObject AbstractLocationOutput::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const AbstractLocationOutput* alo)
+auto operator<< (QDataStream & out, const AbstractLocationOutput* alo) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -121,7 +121,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractLocationOutput* alo)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractLocationOutput* alo)
+auto operator>> (QDataStream & in, AbstractLocationOutput* alo) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

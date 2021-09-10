@@ -35,26 +35,26 @@ SpectraOutputCatalog::SpectraOutputCatalog(OutputCatalog *outputCatalog) :
     _lookup["Acceleration Response Spectrum"] = "ResponseSpectrumOutput";
 }
 
-bool SpectraOutputCatalog::needsOutputConditions() const
+auto SpectraOutputCatalog::needsOutputConditions() const -> bool
 {
     return true;
 }
 
-int SpectraOutputCatalog::rowCount(const QModelIndex & parent) const
+auto SpectraOutputCatalog::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _outputs.size();
 }
 
-int SpectraOutputCatalog::columnCount(const QModelIndex & parent) const
+auto SpectraOutputCatalog::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 3;
 }
 
-QVariant SpectraOutputCatalog::data(const QModelIndex & index, int role) const
+auto SpectraOutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -82,7 +82,7 @@ QVariant SpectraOutputCatalog::data(const QModelIndex & index, int role) const
     return AbstractOutputCatalog::data(index, role);
 }
 
-bool SpectraOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
+auto SpectraOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent()!=QModelIndex() || _readOnly)
         return false;
@@ -124,7 +124,7 @@ bool SpectraOutputCatalog::setData(const QModelIndex & index, const QVariant & v
     return true;
 }
 
-QVariant SpectraOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const
+auto SpectraOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -147,7 +147,7 @@ QVariant SpectraOutputCatalog::headerData ( int section, Qt::Orientation orienta
     return QVariant();
 }
 
-Qt::ItemFlags SpectraOutputCatalog::flags(const QModelIndex & index) const
+auto SpectraOutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
@@ -161,7 +161,7 @@ Qt::ItemFlags SpectraOutputCatalog::flags(const QModelIndex & index) const
     return flags;
 }
 
-bool SpectraOutputCatalog::removeRows(int row, int count, const QModelIndex &parent)
+auto SpectraOutputCatalog::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -220,7 +220,7 @@ void SpectraOutputCatalog::addRow(const QString &name)
     }
 }
 
-QList<AbstractOutput*> SpectraOutputCatalog::outputs() const
+auto SpectraOutputCatalog::outputs() const -> QList<AbstractOutput*>
 {
     QList<AbstractOutput*> list;
 
@@ -230,7 +230,7 @@ QList<AbstractOutput*> SpectraOutputCatalog::outputs() const
     return list;
 }
 
-AbstractLocationOutput* SpectraOutputCatalog::factory(const QString & className, OutputCatalog * parent) const
+auto SpectraOutputCatalog::factory(const QString & className, OutputCatalog * parent) const -> AbstractLocationOutput*
 {
     AbstractLocationOutput* alo = 0;
 
@@ -262,7 +262,7 @@ void SpectraOutputCatalog::fromJson(const QJsonArray &array)
     endResetModel();
 }
 
-QJsonArray SpectraOutputCatalog::toJson() const
+auto SpectraOutputCatalog::toJson() const -> QJsonArray
 {
     QJsonArray array;
     foreach (AbstractLocationOutput *alo, _outputs)
@@ -272,7 +272,7 @@ QJsonArray SpectraOutputCatalog::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc)
+auto operator<< (QDataStream & out, const SpectraOutputCatalog* soc) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -284,7 +284,7 @@ QDataStream & operator<< (QDataStream & out, const SpectraOutputCatalog* soc)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, SpectraOutputCatalog* soc)
+auto operator>> (QDataStream & in, SpectraOutputCatalog* soc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

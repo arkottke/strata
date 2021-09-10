@@ -31,7 +31,7 @@ AbstractTimeSeriesOutput::AbstractTimeSeriesOutput(OutputCatalog* catalog)
 {
 }
 
- QString AbstractTimeSeriesOutput::fullName() const
+ auto AbstractTimeSeriesOutput::fullName() const -> QString
  {
      QString s = tr("Time Series -- %1 -- %2")
                  .arg(prefix())
@@ -43,12 +43,12 @@ AbstractTimeSeriesOutput::AbstractTimeSeriesOutput(OutputCatalog* catalog)
      return s;
  }
 
- bool AbstractTimeSeriesOutput::needsTime() const
+ auto AbstractTimeSeriesOutput::needsTime() const -> bool
  {
      return true;
  }
 
-bool AbstractTimeSeriesOutput::baselineCorrect() const
+auto AbstractTimeSeriesOutput::baselineCorrect() const -> bool
 {
     return _baselineCorrect;
 }
@@ -63,7 +63,7 @@ void AbstractTimeSeriesOutput::setBaselineCorrect(bool baseLineCorrect)
     }
 }
 
-QString AbstractTimeSeriesOutput::fileName(int motion) const
+auto AbstractTimeSeriesOutput::fileName(int motion) const -> QString
 {
     QString s = prefix() + "-" + shortName();
 
@@ -75,35 +75,35 @@ QString AbstractTimeSeriesOutput::fileName(int motion) const
     return s;
 }
 
-QwtScaleEngine* AbstractTimeSeriesOutput::xScaleEngine() const
+auto AbstractTimeSeriesOutput::xScaleEngine() const -> QwtScaleEngine*
 {
     return new QwtLinearScaleEngine;
 }
 
-QwtScaleEngine* AbstractTimeSeriesOutput::yScaleEngine() const
+auto AbstractTimeSeriesOutput::yScaleEngine() const -> QwtScaleEngine*
 {
-    QwtLinearScaleEngine* scaleEngine = new QwtLinearScaleEngine;
+    auto* scaleEngine = new QwtLinearScaleEngine;
     scaleEngine->setAttribute(QwtScaleEngine::Symmetric, true);
 
     return scaleEngine;
 }
 
-const QString AbstractTimeSeriesOutput::xLabel() const
+auto AbstractTimeSeriesOutput::xLabel() const -> const QString
 {
     return tr("Time (s)");
 }
 
-const QVector<double>& AbstractTimeSeriesOutput::ref(int motion) const
+auto AbstractTimeSeriesOutput::ref(int motion) const -> const QVector<double>&
 {
     return _catalog->time(motion);
 }
 
-const QString AbstractTimeSeriesOutput::suffix() const
+auto AbstractTimeSeriesOutput::suffix() const -> const QString
 {
     return (_baselineCorrect ? "corrected" : "");
 }
 
-int AbstractTimeSeriesOutput::fieldWidth() const
+auto AbstractTimeSeriesOutput::fieldWidth() const -> int
 {
     return static_cast<int>(ceil(log10(motionCount() + 1)));
 }
@@ -114,7 +114,7 @@ void AbstractTimeSeriesOutput::fromJson(const QJsonObject &json)
     _baselineCorrect = json["baselineCorrect"].toBool();
 }
 
-QJsonObject AbstractTimeSeriesOutput::toJson() const
+auto AbstractTimeSeriesOutput::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractLocationOutput::toJson();
     json["baselineCorrect"] = _baselineCorrect;
@@ -122,7 +122,7 @@ QJsonObject AbstractTimeSeriesOutput::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso)
+auto operator<< (QDataStream & out, const AbstractTimeSeriesOutput* atso) -> QDataStream &
 {
     out << static_cast<quint8>(2);
     out << atso->_baselineCorrect << qobject_cast<const AbstractLocationOutput*>(atso);
@@ -130,7 +130,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractTimeSeriesOutput* ats
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractTimeSeriesOutput* atso)
+auto operator>> (QDataStream & in, AbstractTimeSeriesOutput* atso) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

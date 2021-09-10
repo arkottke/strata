@@ -35,8 +35,8 @@ public:
     explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
 
 protected:
-    virtual QFormLayout* createParametersLayout();
-    virtual QTabWidget* createTabWidget();
+    virtual auto createParametersLayout() -> QFormLayout*;
+    virtual auto createTabWidget() -> QTabWidget*;
 };
 
 #endif // RVT_MOTION_DIALOG_H

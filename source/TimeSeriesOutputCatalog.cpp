@@ -48,25 +48,25 @@ TimeSeriesOutputCatalog::TimeSeriesOutputCatalog(OutputCatalog *outputCatalog) :
 #endif
 }
 
-bool TimeSeriesOutputCatalog::needsOutputConditions() const
+auto TimeSeriesOutputCatalog::needsOutputConditions() const -> bool
 {
     return true;
 }
 
-int TimeSeriesOutputCatalog::rowCount(const QModelIndex & parent) const
+auto TimeSeriesOutputCatalog::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _outputs.size();
 }
 
-int TimeSeriesOutputCatalog::columnCount(const QModelIndex & parent) const
+auto TimeSeriesOutputCatalog::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
     return 4;
 }
 
-QVariant TimeSeriesOutputCatalog::data(const QModelIndex & index, int role) const
+auto TimeSeriesOutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent()!=QModelIndex())
         return QVariant();
@@ -103,7 +103,7 @@ QVariant TimeSeriesOutputCatalog::data(const QModelIndex & index, int role) cons
     return AbstractOutputCatalog::data(index, role);
 }
 
-bool TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
+auto TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent()!=QModelIndex() || _readOnly)
         return false;
@@ -154,7 +154,7 @@ bool TimeSeriesOutputCatalog::setData(const QModelIndex & index, const QVariant 
     return true;
 }
 
-QVariant TimeSeriesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const
+auto TimeSeriesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
         return QVariant();
@@ -178,7 +178,7 @@ QVariant TimeSeriesOutputCatalog::headerData ( int section, Qt::Orientation orie
     return QVariant();
 }
 
-Qt::ItemFlags TimeSeriesOutputCatalog::flags(const QModelIndex & index) const
+auto TimeSeriesOutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
@@ -207,7 +207,7 @@ Qt::ItemFlags TimeSeriesOutputCatalog::flags(const QModelIndex & index) const
     return flags;
 }
 
-bool TimeSeriesOutputCatalog::removeRows(int row, int count, const QModelIndex &parent)
+auto TimeSeriesOutputCatalog::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -240,7 +240,7 @@ void TimeSeriesOutputCatalog::addRow(const QString &name)
     }
 }
 
-QList<AbstractOutput*> TimeSeriesOutputCatalog::outputs() const
+auto TimeSeriesOutputCatalog::outputs() const -> QList<AbstractOutput*>
 {
     QList<AbstractOutput*> list;
 
@@ -250,7 +250,7 @@ QList<AbstractOutput*> TimeSeriesOutputCatalog::outputs() const
     return list;
 }
 
-AbstractTimeSeriesOutput* TimeSeriesOutputCatalog::factory(const QString & className, OutputCatalog * parent) const
+auto TimeSeriesOutputCatalog::factory(const QString & className, OutputCatalog * parent) const -> AbstractTimeSeriesOutput*
 {
     AbstractTimeSeriesOutput* atso = 0;
 
@@ -291,7 +291,7 @@ void TimeSeriesOutputCatalog::fromJson(const QJsonArray &array)
     endResetModel();
 }
 
-QJsonArray TimeSeriesOutputCatalog::toJson() const
+auto TimeSeriesOutputCatalog::toJson() const -> QJsonArray
 {
     QJsonArray array;
     for (auto *atso : _outputs)
@@ -301,7 +301,7 @@ QJsonArray TimeSeriesOutputCatalog::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc)
+auto operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -313,7 +313,7 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesOutputCatalog* tsoc
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, TimeSeriesOutputCatalog* tsoc)
+auto operator>> (QDataStream & in, TimeSeriesOutputCatalog* tsoc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

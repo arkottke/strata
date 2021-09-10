@@ -37,9 +37,9 @@ class AbstractOutputCatalog : public MyAbstractTableModel
 public:
     explicit AbstractOutputCatalog(OutputCatalog *outputCatalog);
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual QList<AbstractOutput*> outputs() const = 0;
+    virtual auto outputs() const -> QList<AbstractOutput*> = 0;
 
 public slots:
     void setApproach(int approach);

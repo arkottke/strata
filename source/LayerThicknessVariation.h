@@ -43,8 +43,8 @@ class LayerThicknessVariation : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv);
-    friend QDataStream & operator>> (QDataStream & in, LayerThicknessVariation* ltv);
+    friend auto operator<< (QDataStream & out, const LayerThicknessVariation* ltv) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, LayerThicknessVariation* ltv) -> QDataStream &;
 
 public:
     explicit LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer);
@@ -54,24 +54,24 @@ public:
         Default //!< Default value
     };
 
-    static QStringList modelList();
+    static auto modelList() -> QStringList;
 
-    bool enabled() const;
-    Model model();
+    auto enabled() const -> bool;
+    auto model() -> Model;
     void setModel(Model model);
 
-    bool customEnabled() const;
+    auto customEnabled() const -> bool;
 
-    double coeff() const;
-    double initial() const;
-    double exponent() const;
+    auto coeff() const -> double;
+    auto initial() const -> double;
+    auto exponent() const -> double;
 
     void reset();
 
-    QList<double> vary(double depthToBedrock) const;
+    auto vary(double depthToBedrock) const -> QList<double>;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void enabledChanged(bool enabled);

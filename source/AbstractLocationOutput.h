@@ -32,21 +32,21 @@ class AbstractLocationOutput : public AbstractOutput
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractLocationOutput* alo);
-    friend QDataStream & operator>> (QDataStream & in, AbstractLocationOutput* alo);
+    friend auto operator<< (QDataStream & out, const AbstractLocationOutput* alo) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractLocationOutput* alo) -> QDataStream &;
 
 public:
     explicit AbstractLocationOutput(OutputCatalog* catalog);
 
-    bool needsOutputConditions() const;
-    virtual QString fullName() const;
+    auto needsOutputConditions() const -> bool;
+    virtual auto fullName() const -> QString;
 
-    double depth() const;
-    AbstractMotion::Type type() const;
+    auto depth() const -> double;
+    auto type() const -> AbstractMotion::Type;
     void setType(AbstractMotion::Type type);
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 public slots:
     void setDepth(double depth);
@@ -57,8 +57,8 @@ signals:
     void typeChanged(int type);
 
 protected:
-    virtual QString fileName(int motion = 0) const;
-    virtual const QString prefix() const;
+    virtual auto fileName(int motion = 0) const -> QString;
+    virtual auto prefix() const -> const QString;
 
     //! Depth of the response
     double  _depth;

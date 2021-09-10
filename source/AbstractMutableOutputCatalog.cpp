@@ -26,17 +26,17 @@ AbstractMutableOutputCatalog::AbstractMutableOutputCatalog(OutputCatalog *output
 {
 }
 
-QStringList AbstractMutableOutputCatalog::names() const
+auto AbstractMutableOutputCatalog::names() const -> QStringList
 {
     return _lookup.keys();
 }
 
-bool AbstractMutableOutputCatalog::needsInputConditions() const
+auto AbstractMutableOutputCatalog::needsInputConditions() const -> bool
 {
     return false;
 }
 
-bool AbstractMutableOutputCatalog::needsOutputConditions() const
+auto AbstractMutableOutputCatalog::needsOutputConditions() const -> bool
 {
     return false;
 }

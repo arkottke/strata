@@ -37,8 +37,8 @@ class SourceTheoryRvtMotion : public AbstractRvtMotion
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm);
-    friend QDataStream & operator>> (QDataStream & in, SourceTheoryRvtMotion* strm);
+    friend auto operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SourceTheoryRvtMotion* strm) -> QDataStream &;
 
 public:
     SourceTheoryRvtMotion(QObject *parent = nullptr);
@@ -46,31 +46,31 @@ public:
 
     virtual void setRegion(AbstractRvtMotion::Region region);
 
-    virtual const QVector<double> & freq() const;
-    Dimension* freqDimension();
+    virtual auto freq() const -> const QVector<double> &;
+    auto freqDimension() -> Dimension*;
 
-    virtual QString toHtml() const;
+    virtual auto toHtml() const -> QString;
 
-    bool isCustomized() const;
-    double depth() const;
-    double hypoDistance() const;
-    double stressDrop() const;
-    double geoAtten() const;
-    double pathAttenCoeff() const;
-    double pathAttenPower() const;
-    double shearVelocity() const;
-    double density() const;
-    double siteAtten() const;
-    double duration() const;
+    auto isCustomized() const -> bool;
+    auto depth() const -> double;
+    auto hypoDistance() const -> double;
+    auto stressDrop() const -> double;
+    auto geoAtten() const -> double;
+    auto pathAttenCoeff() const -> double;
+    auto pathAttenPower() const -> double;
+    auto shearVelocity() const -> double;
+    auto density() const -> double;
+    auto siteAtten() const -> double;
+    auto duration() const -> double;
 
     //! Crustal amplification
-    CrustalAmplification* crustalAmp();
+    auto crustalAmp() -> CrustalAmplification*;
 
     //! Path duration model
-    PathDurationModel* pathDuration();
+    auto pathDuration() -> PathDurationModel*;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void isCustomizedChanged(bool b);

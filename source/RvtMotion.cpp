@@ -31,12 +31,12 @@ RvtMotion::RvtMotion(QObject * parent) : AbstractRvtMotion(parent)
     _name = tr("RVT Motion (M $mag @ $dist km)");
 }
 
-Qt::ItemFlags RvtMotion::flags(const QModelIndex & index) const
+auto RvtMotion::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
-bool RvtMotion::setData( const QModelIndex & index, const QVariant & value, int role)
+auto RvtMotion::setData( const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if(index.parent() != QModelIndex() && role != Qt::EditRole) {
         return false;
@@ -61,7 +61,7 @@ bool RvtMotion::setData( const QModelIndex & index, const QVariant & value, int 
     }
 }
 
-bool RvtMotion::insertRows(int row, int count, const QModelIndex &parent)
+auto RvtMotion::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -76,7 +76,7 @@ bool RvtMotion::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-bool RvtMotion::removeRows(int row, int count, const QModelIndex &parent)
+auto RvtMotion::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -103,8 +103,8 @@ void RvtMotion::setDuration(double d)
  * are beyond the specified x coordinates the then extrapolation is used based
  * on the last two specified points.
  */
-bool logLogInterp( const QVector<double> & x, const QVector<double> & y, 
-        const QVector<double> & xi, QVector<double> & yi)
+auto logLogInterp( const QVector<double> & x, const QVector<double> & y, 
+        const QVector<double> & xi, QVector<double> & yi) -> bool
 {
     // Check the sizes of xi and yi	
     if ( xi.size() != yi.size() )
@@ -216,12 +216,12 @@ void smooth(QVector<double> & data, int window)
     data = smoothData;
 }
 
-const QVector<double> & RvtMotion::freq() const
+auto RvtMotion::freq() const -> const QVector<double> &
 {
     return _freq;
 }
 
-QString RvtMotion::toHtml() const
+auto RvtMotion::toHtml() const -> QString
 {
     QString html;
 // FIXME
@@ -268,7 +268,7 @@ QString RvtMotion::toHtml() const
     return html;
 }
 
-bool RvtMotion::loadFromTextStream(QTextStream &stream, double scale)
+auto RvtMotion::loadFromTextStream(QTextStream &stream, double scale) -> bool
 {
     if (!AbstractRvtMotion::loadFromTextStream(stream, scale))
         return false;
@@ -329,7 +329,7 @@ void RvtMotion::fromJson(const QJsonObject &json)
     calculate();
 }
 
-QJsonObject RvtMotion::toJson() const
+auto RvtMotion::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractRvtMotion::toJson();
 
@@ -341,7 +341,7 @@ QJsonObject RvtMotion::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const RvtMotion* rm)
+auto operator<< (QDataStream & out, const RvtMotion* rm) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -351,7 +351,7 @@ QDataStream & operator<< (QDataStream & out, const RvtMotion* rm)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, RvtMotion* rm)
+auto operator>> (QDataStream & in, RvtMotion* rm) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

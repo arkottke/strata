@@ -31,17 +31,17 @@ MaxDispProfileOutput::MaxDispProfileOutput(OutputCatalog* catalog)
 
 }
 
-QString MaxDispProfileOutput::name() const
+auto MaxDispProfileOutput::name() const -> QString
 {
     return tr("Peak Ground Displacement Profile");
 }
 
-QString MaxDispProfileOutput::shortName() const
+auto MaxDispProfileOutput::shortName() const -> QString
 {
     return tr("pgd");
 }
 
-const QString MaxDispProfileOutput::xLabel() const
+auto MaxDispProfileOutput::xLabel() const -> const QString
 {
     return tr("Maximum Displacement (%1)").arg(Units::instance()->dispTs());
 }

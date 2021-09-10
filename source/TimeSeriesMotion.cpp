@@ -91,13 +91,13 @@ TimeSeriesMotion::~TimeSeriesMotion()
 {
 }
 
-QStringList TimeSeriesMotion::formatList()
+auto TimeSeriesMotion::formatList() -> QStringList
 {
     return QStringList() << tr("Rows") << tr("Columns");
 }
 
 
-QString TimeSeriesMotion::fileName() const
+auto TimeSeriesMotion::fileName() const -> QString
 {
     return _fileName;
 }
@@ -116,22 +116,22 @@ void TimeSeriesMotion::setFileName(QString fileName)
     setIsLoaded(false);
 }
 
-double TimeSeriesMotion::freqMax() const
+auto TimeSeriesMotion::freqMax() const -> double
 {
     return freqNyquist();
 }
 
-double TimeSeriesMotion::freqNyquist() const
+auto TimeSeriesMotion::freqNyquist() const -> double
 {
     return 1. / (2. * _timeStep);
 }
 
-QStringList TimeSeriesMotion::inputUnitsList()
+auto TimeSeriesMotion::inputUnitsList() -> QStringList
 {
-    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2");
+    return QStringList() << tr("Gravity") << tr("cm/sec^2") << tr("in/sec^2") << tr("m/sec^2");
 }
 
-TimeSeriesMotion::InputUnits TimeSeriesMotion::inputUnits() const
+auto TimeSeriesMotion::inputUnits() const -> TimeSeriesMotion::InputUnits
 {
     return _inputUnits;
 }
@@ -163,19 +163,21 @@ void TimeSeriesMotion::setInputUnits(TimeSeriesMotion::InputUnits inputUnits)
     setIsLoaded(false);
 }
 
-double TimeSeriesMotion::unitConversionFactor() const
+auto TimeSeriesMotion::unitConversionFactor() const -> double
 {
     switch (_inputUnits) {
     case CentimetersPerSecondSquared:
         return 1. / (100. * 9.80665);
     case InchesPerSecondSquared:
         return 1. / (12. * 32.174);
+    case MetersPerSecondSquared:        // Add m/sec^2 for Rexel import
+        return 1. / (1. * 9.80665);
     default:
         return 1.;
     }
 }
 
-int TimeSeriesMotion::pointCount() const
+auto TimeSeriesMotion::pointCount() const -> int
 {
     return _pointCount;
 }
@@ -190,7 +192,7 @@ void TimeSeriesMotion::setPointCount(int count)
     }
 }
 
-double TimeSeriesMotion::timeStep() const
+auto TimeSeriesMotion::timeStep() const -> double
 {
     return _timeStep;
 }
@@ -206,7 +208,7 @@ void TimeSeriesMotion::setTimeStep(double timeStep)
     }
 }
 
-double TimeSeriesMotion::scale() const
+auto TimeSeriesMotion::scale() const -> double
 {
     return _scale;
 }
@@ -239,7 +241,7 @@ void TimeSeriesMotion::setScale(double scale)
     }
 }
 
-TimeSeriesMotion::Format TimeSeriesMotion::format() const
+auto TimeSeriesMotion::format() const -> TimeSeriesMotion::Format
 {
     return _format;
 }
@@ -259,7 +261,7 @@ void TimeSeriesMotion::setFormat(int format)
     setFormat((Format)format);
 }
 
-int TimeSeriesMotion::dataColumn() const
+auto TimeSeriesMotion::dataColumn() const -> int
 {
     return _dataColumn;
 }
@@ -274,7 +276,7 @@ void TimeSeriesMotion::setDataColumn(int column)
     }
 }
 
-int TimeSeriesMotion::startLine() const
+auto TimeSeriesMotion::startLine() const -> int
 {
     return _startLine;
 }
@@ -289,7 +291,7 @@ void TimeSeriesMotion::setStartLine(int line)
     }
 }
 
-int TimeSeriesMotion::stopLine() const
+auto TimeSeriesMotion::stopLine() const -> int
 {
     return _stopLine;
 }
@@ -304,12 +306,12 @@ void TimeSeriesMotion::setStopLine(int line)
     }
 }
 
-const QVector<double> & TimeSeriesMotion::freq() const
+auto TimeSeriesMotion::freq() const -> const QVector<double> &
 {
     return _freq;
 }
 
-QVector<double> TimeSeriesMotion::time() const
+auto TimeSeriesMotion::time() const -> QVector<double>
 {    
     // Time step based on the max frequency
     const double dt = timeStep();
@@ -323,13 +325,13 @@ QVector<double> TimeSeriesMotion::time() const
     return v;
 }
 
-const QVector<double> & TimeSeriesMotion::accel() const
+auto TimeSeriesMotion::accel() const -> const QVector<double> &
 {
     return _accel;
 }
 
-QVector<double> TimeSeriesMotion::timeSeries(
-        MotionType type, const QVector<std::complex<double> > & tf, const bool baselineCorrect) const
+auto TimeSeriesMotion::timeSeries(
+        MotionType type, const QVector<std::complex<double> > & tf, const bool baselineCorrect) const -> QVector<double>
 {
     // Compute the time series
     QVector<double> ts = calcTimeSeries(_fourierAcc, tf);
@@ -383,14 +385,14 @@ QVector<double> TimeSeriesMotion::timeSeries(
     return ts;
 }
 
-QString TimeSeriesMotion::name() const
+auto TimeSeriesMotion::name() const -> QString
 {
     QFileInfo fileInfo(_fileName);
     // Return the folder and file name
     return fileInfo.dir().dirName() + QString(QDir::separator()) + fileInfo.fileName();
 }
 
-QString TimeSeriesMotion::toHtml() const
+auto TimeSeriesMotion::toHtml() const -> QString
 {
     QString html;
 
@@ -412,7 +414,7 @@ QString TimeSeriesMotion::toHtml() const
     return html;
 }
 
-bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale)
+auto TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale) -> bool
 {
     _accel.clear();
 
@@ -481,6 +483,17 @@ bool TimeSeriesMotion::load(const QString &fileName, bool defaults, double scale
             }
         } else {
             // Unknown file format can't process with default settings
+                
+                // add for  file text - Usual parameters for app Rexel
+            if (ext == "TXT") {
+            // Set format
+            setFormat(Columns);
+            setStartLine(1);
+            setStopLine(0);
+            setScale(scale);
+            setInputUnits(MetersPerSecondSquared);
+                }
+            // but again false
             return false;
         }
     } else {
@@ -646,19 +659,19 @@ void TimeSeriesMotion::calculate()
     _respSpec->setSa(computeSa(_respSpec->period(), _respSpec->damping()));
 }
 
-int TimeSeriesMotion::rowCount(const QModelIndex & parent) const
+auto TimeSeriesMotion::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
     return _accel.size();
 }
 
-int TimeSeriesMotion::columnCount(const QModelIndex & parent) const
+auto TimeSeriesMotion::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
     return 2;
 }
 
-QVariant TimeSeriesMotion::data(const QModelIndex & index, int role) const
+auto TimeSeriesMotion::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole) {
         return QVariant();
@@ -674,7 +687,7 @@ QVariant TimeSeriesMotion::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-QVariant TimeSeriesMotion::headerData( int section, Qt::Orientation orientation, int role) const
+auto TimeSeriesMotion::headerData( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     if (role != Qt::DisplayRole) {
         return QVariant();
@@ -700,12 +713,12 @@ void TimeSeriesMotion::setSaveData(bool b)
     _saveData = b;
 }
 
-bool TimeSeriesMotion::saveData() const
+auto TimeSeriesMotion::saveData() const -> bool
 {
     return _saveData;
 }
 
-bool TimeSeriesMotion::isLoaded() const
+auto TimeSeriesMotion::isLoaded() const -> bool
 {
     return _isLoaded;
 }
@@ -715,7 +728,7 @@ void TimeSeriesMotion::setIsLoaded(bool isLoaded)
     _isLoaded = isLoaded;
 }
 
-double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
+auto TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const -> double
 {
     //  Assume the first value is the largest
     double max = abs(v.at(0));
@@ -728,23 +741,23 @@ double TimeSeriesMotion::findMaxAbs(const QVector<double> & v) const
     return max;
 }
 
-double TimeSeriesMotion::max(const QVector<std::complex<double> > & tf) const
+auto TimeSeriesMotion::max(const QVector<std::complex<double> > & tf) const -> double
 {
     // Return the maximum value in the time history
     return findMaxAbs(calcTimeSeries(_fourierAcc, tf));
 } 	
 
-double TimeSeriesMotion::maxVel(const QVector<std::complex<double> > &tf) const
+auto TimeSeriesMotion::maxVel(const QVector<std::complex<double> > &tf) const -> double
 {
     return findMaxAbs(timeSeries(Velocity, tf, false));
 }
 
-double TimeSeriesMotion::maxDisp(const QVector<std::complex<double> > &tf) const
+auto TimeSeriesMotion::maxDisp(const QVector<std::complex<double> > &tf) const -> double
 {
     return findMaxAbs(timeSeries(Displacement, tf, false));
 }
 
-QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf )
+auto TimeSeriesMotion::computeSa(const QVector<double> & period, double damping, const QVector<std::complex<double> > & accelTf ) -> QVector<double>
 {
     if (!accelTf.isEmpty())
         Q_ASSERT(accelTf.size() == _freq.size());
@@ -802,22 +815,22 @@ QVector<double> TimeSeriesMotion::computeSa(const QVector<double> & period, doub
     return sa;
 }
 
-const QVector<double> TimeSeriesMotion::absFourierAcc(const QVector<std::complex<double> >& tf) const
+auto TimeSeriesMotion::absFourierAcc(const QVector<std::complex<double> >& tf) const -> const QVector<double>
 {
     return absFourier(_fourierAcc, tf);
 }
 
-const QVector<double> TimeSeriesMotion::absFourierVel(const QVector<std::complex<double> >& tf) const
+auto TimeSeriesMotion::absFourierVel(const QVector<std::complex<double> >& tf) const -> const QVector<double>
 {
     return absFourier(_fourierVel, tf);
 }
 
-double TimeSeriesMotion::calcMaxStrain(const QVector<std::complex<double> >& tf) const
+auto TimeSeriesMotion::calcMaxStrain(const QVector<std::complex<double> >& tf) const -> double
 {
     return findMaxAbs(strainTimeSeries(tf));
 }
 
-QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<double> >& tf, const bool baseLineCorrect) const
+auto TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<double> >& tf, const bool baseLineCorrect) const -> QVector<double>
 {
     QVector<double> strain = calcTimeSeries(_fourierVel, tf);
     // Remove the zero padded values from the time series
@@ -840,7 +853,7 @@ QVector<double> TimeSeriesMotion::strainTimeSeries(const QVector<std::complex<do
     return strain;
 }
 
-QVector<double> TimeSeriesMotion::ariasIntensity(const QVector<std::complex<double> > & tf) const
+auto TimeSeriesMotion::ariasIntensity(const QVector<std::complex<double> > & tf) const -> QVector<double>
 {
     QVector<double> accelTs = calcTimeSeries(_fourierAcc, tf);
 
@@ -864,7 +877,7 @@ QVector<double> TimeSeriesMotion::ariasIntensity(const QVector<std::complex<doub
     return ai;
 }
 
-QVector<double> TimeSeriesMotion::integrate(const QVector<double> & in) const
+auto TimeSeriesMotion::integrate(const QVector<double> & in) const -> QVector<double>
 {
     QVector<double> out(in.size());
     const double dt = timeStep();
@@ -877,7 +890,7 @@ QVector<double> TimeSeriesMotion::integrate(const QVector<double> & in) const
     return out;
 }
 
-const QVector<double> TimeSeriesMotion::baselineFit( const int term, const QVector<double> & series ) const
+auto TimeSeriesMotion::baselineFit( const int term, const QVector<double> & series ) const -> const QVector<double>
 {
     Q_ASSERT(term >= 3);
     // Create the matrix of terms.  The first column is x_i^0 (1), second
@@ -927,7 +940,7 @@ const QVector<double> TimeSeriesMotion::baselineFit( const int term, const QVect
     return coeffs;
 }
 
-QVector<double> TimeSeriesMotion::absFourier(const QVector< std::complex<double> >& fa, const QVector<std::complex<double> >& tf) const
+auto TimeSeriesMotion::absFourier(const QVector< std::complex<double> >& fa, const QVector<std::complex<double> >& tf) const -> QVector<double>
 {
     QVector<double> absFa(fa.size());
     const double dt = timeStep();
@@ -981,7 +994,7 @@ void TimeSeriesMotion::fft( const QVector<double>& in, QVector<std::complex<doub
 */
     // Load the buffer with the initial values
     const int n = in.size();
-    double *d = new double[n];
+    auto *d = new double[n];
     // Load the data
     memcpy(d, in.data(), n * sizeof(double));
 
@@ -1037,7 +1050,7 @@ void TimeSeriesMotion::ifft(const QVector<std::complex<double> >& in, QVector<do
     fftw_free(outArray);
 */
     const int n = 2 * (in.size() - 1);
-    double *d = new double[n];
+    auto *d = new double[n];
 
     d[0] = in.first().real();
     for (int i = 1; i < in.size(); ++i) {
@@ -1065,7 +1078,7 @@ void TimeSeriesMotion::ifft(const QVector<std::complex<double> >& in, QVector<do
     delete [] d;
 }
 
-QVector<double> TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > fa, const QVector<std::complex<double> > & tf) const
+auto TimeSeriesMotion::calcTimeSeries(QVector<std::complex<double> > fa, const QVector<std::complex<double> > & tf) const -> QVector<double>
 {
     // Apply the transfer fucntion
     if (!tf.isEmpty()) {
@@ -1112,7 +1125,7 @@ void TimeSeriesMotion::fromJson(const QJsonObject &json)
     }
 }
 
-QJsonObject TimeSeriesMotion::toJson() const
+auto TimeSeriesMotion::toJson() const -> QJsonObject
 {
     QJsonObject json = AbstractMotion::toJson();
     json["saveData"] = _saveData;
@@ -1133,7 +1146,7 @@ QJsonObject TimeSeriesMotion::toJson() const
 }
 
 
-QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
+auto operator<< (QDataStream & out, const TimeSeriesMotion* tsm) -> QDataStream &
 {
     out << (quint8)3;
 
@@ -1162,7 +1175,7 @@ QDataStream & operator<< (QDataStream & out, const TimeSeriesMotion* tsm)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, TimeSeriesMotion* tsm)
+auto operator>> (QDataStream & in, TimeSeriesMotion* tsm) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

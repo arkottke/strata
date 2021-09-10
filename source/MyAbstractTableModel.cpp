@@ -30,7 +30,7 @@ MyAbstractTableModel::MyAbstractTableModel(QObject * parent)
 {
 }
 
-QVariant MyAbstractTableModel::data(const QModelIndex & index, int role) const
+auto MyAbstractTableModel::data(const QModelIndex & index, int role) const -> QVariant
 {
     // Color the background light gray for cells that are not editable
     if (role==Qt::BackgroundRole &&
@@ -41,7 +41,7 @@ QVariant MyAbstractTableModel::data(const QModelIndex & index, int role) const
     return QVariant();
 }
 
-bool MyAbstractTableModel::readOnly() const
+auto MyAbstractTableModel::readOnly() const -> bool
 {
     return _readOnly;
 }

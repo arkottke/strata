@@ -23,7 +23,7 @@
 #define BATCHRUNNER_H
 
 #include <QtCore>
-#include <QTimer>
+#include <QElapsedTimer>
 #include <QTextStream>
 
 #include "SiteResponseModel.h"
@@ -54,7 +54,7 @@ private:
     int _end;
 
     // timer for updates
-    QTime _timer;
+    QElapsedTimer _timer;
 };
 
 #endif // BATCHRUNNER_H

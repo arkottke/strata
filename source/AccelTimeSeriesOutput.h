@@ -34,10 +34,10 @@ class AccelTimeSeriesOutput : public AbstractTimeSeriesOutput
 public:
     AccelTimeSeriesOutput(OutputCatalog* catalog);
 
-    QString name() const;
+    auto name() const -> QString;
 protected:
-    QString shortName() const;
-    const QString yLabel() const;
+    auto shortName() const -> QString;
+    auto yLabel() const -> const QString;
 
     void extract(AbstractCalculator* const calculator,
                              QVector<double> & ref, QVector<double> & data) const;

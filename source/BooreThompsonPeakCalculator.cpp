@@ -23,6 +23,7 @@
 #include "BooreThompsonPeakCalculator.h"
 #include "Serialize.h"
 
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -91,19 +92,19 @@ BooreThompsonPeakCalculator::~BooreThompsonPeakCalculator() {
     gsl_interp_accel_free(_lnDistAcc);
 }
 
-double BooreThompsonPeakCalculator::mag() const{
+auto BooreThompsonPeakCalculator::mag() const -> double{
     return _mag;
 }
 
-double BooreThompsonPeakCalculator::dist() const{
+auto BooreThompsonPeakCalculator::dist() const -> double{
     return _dist;
 }
 
-AbstractRvtMotion::Region BooreThompsonPeakCalculator::region() const {
+auto BooreThompsonPeakCalculator::region() const -> AbstractRvtMotion::Region {
     return _region;
 }
 
-double BooreThompsonPeakCalculator::interpCoeff(double mag, double lnDist, QMap<QString, QVector<double> > &data, const QString &key) {
+auto BooreThompsonPeakCalculator::interpCoeff(double mag, double lnDist, QMap<QString, QVector<double> > &data, const QString &key) -> double {
 
     gsl_interp2d_init(
         _interp, data["mag"].data(), data["lnDist"].data(), data[key].data(), _nmags, _ndists);
@@ -136,7 +137,7 @@ void BooreThompsonPeakCalculator::setScenario(double mag, double dist, AbstractR
     }
 }
 
-double BooreThompsonPeakCalculator::calcDurationRms(double duration, double oscFreq, double oscDamping, const QVector<std::complex<double> > &siteTransFunc)
+auto BooreThompsonPeakCalculator::calcDurationRms(double duration, double oscFreq, double oscDamping, const QVector<std::complex<double> > &siteTransFunc) -> double
 {
     Q_UNUSED(siteTransFunc);
     if (oscFreq > 0 && oscDamping > 0) {

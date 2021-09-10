@@ -31,11 +31,11 @@ WangRathjePeakCalculator::WangRathjePeakCalculator() {
             << WangRathjeCoef{3,  0.2287, -0.0014,  0.9404, -0.0130, 0.056};
 }
 
-double WangRathjePeakCalculator::calcDurationRms(
+auto WangRathjePeakCalculator::calcDurationRms(
         double duration,
         double oscFreq,
         double oscDamping,
-        const QVector<std::complex<double> > &siteTransFunc)
+        const QVector<std::complex<double> > &siteTransFunc) -> double
 {    
     // Compute the Boore & Thompson (2015) correction for oscillator response
     double durationRms = BooreThompsonPeakCalculator::calcDurationRms(

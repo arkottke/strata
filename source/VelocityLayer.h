@@ -36,34 +36,34 @@ class VelocityLayer : public AbstractDistribution
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const VelocityLayer* vl);
-    friend QDataStream & operator>> (QDataStream & in, VelocityLayer* vl);
+    friend auto operator<< (QDataStream & out, const VelocityLayer* vl) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, VelocityLayer* vl) -> QDataStream &;
 
 public:
     explicit VelocityLayer(QObject *parent = nullptr);
     virtual ~VelocityLayer() = 0;
     
-    double depth() const;
+    auto depth() const -> double;
 
     //! Randomized shear-wave velocity
-    double shearVel() const;
+    auto shearVel() const -> double;
 
     //! Randomized shear modulus
-    double shearMod() const;
+    auto shearMod() const -> double;
 
-    virtual double untWt() const = 0;
-    virtual double density() const = 0;
+    virtual auto untWt() const -> double = 0;
+    virtual auto density() const -> double = 0;
 
-    bool isVaried() const;
+    auto isVaried() const -> bool;
 
     //! A description of the layer for tables
-    virtual QString toString() const = 0;
+    virtual auto toString() const -> QString = 0;
 
     //! Vary the shear-wave velocity
     void vary(double randVar);
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void depthChanged(double depth);

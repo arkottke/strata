@@ -54,7 +54,7 @@ AbstractMotion::~AbstractMotion()
     _respSpec->deleteLater();
 }
 
-QStringList AbstractMotion::typeList()
+auto AbstractMotion::typeList() -> QStringList
 {
 #ifdef ADVANCED_FEATURES
     return QStringList() << tr("Outcrop (2A)")
@@ -66,7 +66,7 @@ QStringList AbstractMotion::typeList()
 #endif
 }
 
-AbstractMotion::Type AbstractMotion::variantToType(QVariant variant, bool* ok)
+auto AbstractMotion::variantToType(QVariant variant, bool* ok) -> AbstractMotion::Type
 {
     *ok = false;
     Type type = Outcrop;
@@ -97,7 +97,7 @@ AbstractMotion::Type AbstractMotion::variantToType(QVariant variant, bool* ok)
     return type;
 }
 
-bool AbstractMotion::modified() const
+auto AbstractMotion::modified() const -> bool
 {
     return _modified;
 }
@@ -110,7 +110,7 @@ void AbstractMotion::setModified(bool modified)
         emit wasModified();
 }
 
-AbstractMotion::Type AbstractMotion::type() const
+auto AbstractMotion::type() const -> AbstractMotion::Type
 { 
     return _type;
 }
@@ -128,7 +128,7 @@ void AbstractMotion::setType(AbstractMotion::Type type)
 }
 
 
-QString AbstractMotion::description() const
+auto AbstractMotion::description() const -> QString
 {
     return _description;
 }
@@ -143,7 +143,7 @@ void AbstractMotion::setDescription(QString s)
     _description = s;
 }
 
-bool AbstractMotion::enabled() const
+auto AbstractMotion::enabled() const -> bool
 {
     return _enabled;
 }
@@ -153,37 +153,37 @@ void AbstractMotion::setEnabled(bool enabled)
     _enabled = enabled;
 }
 
-ResponseSpectrum* AbstractMotion::respSpec()
+auto AbstractMotion::respSpec() -> ResponseSpectrum*
 {
     return _respSpec;
 }
 
-double AbstractMotion::pga() const
+auto AbstractMotion::pga() const -> double
 {
     return _pga;
 }
 
-double AbstractMotion::pgv() const
+auto AbstractMotion::pgv() const -> double
 {
     return _pgv;
 }
 
-double AbstractMotion::freqMin() const
+auto AbstractMotion::freqMin() const -> double
 {
     return freq().first();
 }
 
-int AbstractMotion::freqCount() const
+auto AbstractMotion::freqCount() const -> int
 {
     return freq().size();
 }
 
-double AbstractMotion::angFreqAt( int i ) const
+auto AbstractMotion::angFreqAt( int i ) const -> double
 {
     return 2 * M_PI * freqAt(i);
 }
 
-double AbstractMotion::freqAt( int i ) const
+auto AbstractMotion::freqAt( int i ) const -> double
 {
     return freq().at(i);
 }
@@ -206,7 +206,7 @@ void AbstractMotion::scaleProperties()
     }
 }
 
-QVector<std::complex<double> > AbstractMotion::calcSdofTf(const double period, const double damping) const
+auto AbstractMotion::calcSdofTf(const double period, const double damping) const -> QVector<std::complex<double> >
 {
     QVector<std::complex<double> > tf(freq().size(), std::complex<double>(0., 0.));
 
@@ -247,7 +247,7 @@ void AbstractMotion::fromJson(const QJsonObject &json)
     setType(json["type"].toInt());
 }
 
-QJsonObject AbstractMotion::toJson() const
+auto AbstractMotion::toJson() const -> QJsonObject
 {
     QJsonObject json;
 
@@ -259,7 +259,7 @@ QJsonObject AbstractMotion::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)
+auto operator<< (QDataStream & out, const AbstractMotion* m) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -270,7 +270,7 @@ QDataStream & operator<< (QDataStream & out, const AbstractMotion* m)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, AbstractMotion* m)
+auto operator>> (QDataStream & in, AbstractMotion* m) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

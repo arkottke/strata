@@ -30,11 +30,11 @@ class Units : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const Units* units);
-    friend QDataStream & operator>> (QDataStream & in, Units* units);
+    friend auto operator<< (QDataStream & out, const Units* units) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, Units* units) -> QDataStream &;
 
 public:
-    static Units * instance();
+    static auto instance() -> Units *;
 
     //! System of the units
     enum System {
@@ -42,58 +42,58 @@ public:
         English //!< English system ( ft and pcf )
     };
 
-    static QStringList systemList();
+    static auto systemList() -> QStringList;
 
     //! Reset the object to the default values
     void reset();
 
-    System system() const;
+    auto system() const -> System;
     void setSystem(System system);
 
     //! The gravity in ft/s/s or m/s/s
-    double gravity() const;
+    auto gravity() const -> double;
 
     //! The unit weight of water in lb/ft^3 or kN/m^3
-    double waterUntWt() const;
+    auto waterUntWt() const -> double;
 
     //! Convert to Meters
-    double toMeters() const;
+    auto toMeters() const -> double;
 
     //! Convert from appropriate pressure to atm
-    double toAtm() const;
+    auto toAtm() const -> double;
 
     //! Time series conversion factor
-    double tsConv() const;
+    auto tsConv() const -> double;
 
     //! Length label
-    QString length() const;
+    auto length() const -> QString;
 
     //! Area label
-    QString area() const;
+    auto area() const -> QString;
 
     //! Volume label
-    QString vol() const;
+    auto vol() const -> QString;
 
     //! Displacement time series label -- in or cm
-    QString dispTs() const;
+    auto dispTs() const -> QString;
 
     //! Velocity time series label -- in/s or cm/s
-    QString velTs() const;
+    auto velTs() const -> QString;
 
     //! Acceleration label
-    QString accel() const;
+    auto accel() const -> QString;
 
     //! Velocity label
-    QString vel() const;
+    auto vel() const -> QString;
 
     //! Weight label
-    QString wt() const;
+    auto wt() const -> QString;
 
     //! Unit weight label
-    QString untWt() const;
+    auto untWt() const -> QString;
 
     //! Stress label
-    QString stress() const;
+    auto stress() const -> QString;
 
 public slots:
     void setSystem(int system);

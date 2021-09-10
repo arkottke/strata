@@ -34,21 +34,21 @@ class SoilTypeOutput : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const SoilTypeOutput* sto);
-    friend QDataStream & operator>> (QDataStream & in, SoilTypeOutput* sto);
+    friend auto operator<< (QDataStream & out, const SoilTypeOutput* sto) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, SoilTypeOutput* sto) -> QDataStream &;
 
 public:
     explicit SoilTypeOutput(SoilType* soilType, OutputCatalog* catalog);
 
-    SoilType* soilType() const;
-    QString name() const;
-    NonlinearPropertyOutput* modulus();
-    NonlinearPropertyOutput* damping();
+    auto soilType() const -> SoilType*;
+    auto name() const -> QString;
+    auto modulus() -> NonlinearPropertyOutput*;
+    auto damping() -> NonlinearPropertyOutput*;
 
-    bool enabled() const;
+    auto enabled() const -> bool;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void wasModified();

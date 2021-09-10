@@ -44,7 +44,7 @@ LayerThicknessVariation::LayerThicknessVariation(gsl_rng* rng, ProfileRandomizer
     setModel(Default);
 }
 
-QStringList LayerThicknessVariation::modelList()
+auto LayerThicknessVariation::modelList() -> QStringList
 {
     QStringList list;
 
@@ -54,7 +54,7 @@ QStringList LayerThicknessVariation::modelList()
     return list;
 }
 
-bool LayerThicknessVariation::enabled() const
+auto LayerThicknessVariation::enabled() const -> bool
 {
     return _profileRandomizer->enabled() && _enabled;
 }
@@ -74,7 +74,7 @@ void LayerThicknessVariation::updateEnabled()
     emit enabledChanged(enabled());
 }
 
-LayerThicknessVariation::Model LayerThicknessVariation::model()
+auto LayerThicknessVariation::model() -> LayerThicknessVariation::Model
 {
     return _model;
 }
@@ -105,12 +105,12 @@ void LayerThicknessVariation::setModel(int model)
     setModel((Model)model);
 }
 
-bool LayerThicknessVariation::customEnabled() const
+auto LayerThicknessVariation::customEnabled() const -> bool
 {
     return _model == Custom;
 }
 
-double LayerThicknessVariation::coeff() const
+auto LayerThicknessVariation::coeff() const -> double
 {
     return _coeff;
 }
@@ -125,7 +125,7 @@ void LayerThicknessVariation::setCoeff(double coeff)
     }
 }
 
-double LayerThicknessVariation::initial() const
+auto LayerThicknessVariation::initial() const -> double
 {
     return _initial;
 }
@@ -140,7 +140,7 @@ void LayerThicknessVariation::setInitial(double initial)
     }
 }
 
-double LayerThicknessVariation::exponent() const
+auto LayerThicknessVariation::exponent() const -> double
 {
     return _exponent;
 }
@@ -161,7 +161,7 @@ void LayerThicknessVariation::reset()
     setModel(Default);
 }
 
-QList<double> LayerThicknessVariation::vary(double depthToBedrock) const
+auto LayerThicknessVariation::vary(double depthToBedrock) const -> QList<double>
 {
     // Need to convert the depth to bedrock into meters for the Toro (1997)
     // model.
@@ -226,7 +226,7 @@ void LayerThicknessVariation::fromJson(const QJsonObject &json)
     }
 }
 
-QJsonObject LayerThicknessVariation::toJson() const
+auto LayerThicknessVariation::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["enabled"] = _enabled;
@@ -239,7 +239,7 @@ QJsonObject LayerThicknessVariation::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)
+auto operator<< (QDataStream & out, const LayerThicknessVariation* ltv) -> QDataStream &
 {
     out << (quint8)1;
 
@@ -255,7 +255,7 @@ QDataStream & operator<< (QDataStream & out, const LayerThicknessVariation* ltv)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, LayerThicknessVariation* ltv)
+auto operator>> (QDataStream & in, LayerThicknessVariation* ltv) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

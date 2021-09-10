@@ -47,12 +47,12 @@ class TableGroupBox : public QGroupBox
         void setItemDelegateForColumn(int column, QAbstractItemDelegate* delegate);
         void setColumnHidden(int column, bool hide);
 
-        bool lastRowFixed() const;
+        auto lastRowFixed() const -> bool;
         void setLastRowFixed(bool lastRowFixed);
 
         void addButton( QPushButton * pushButton);
 
-        MyTableView* table();
+        auto table() -> MyTableView*;
 
     public slots:
         void setReadOnly(bool readOnly);

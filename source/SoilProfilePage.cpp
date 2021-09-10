@@ -44,7 +44,7 @@
 SoilProfilePage::SoilProfilePage(QWidget * parent, Qt::WindowFlags f)
     : AbstractPage(parent, f)
 {
-    QHBoxLayout* layout = new QHBoxLayout;
+    auto* layout = new QHBoxLayout;
 
     layout->addWidget(createTableGroupBox(), 1);
     layout->addWidget(createProfileRandomizerGroupBox());
@@ -313,7 +313,7 @@ void SoilProfilePage::setReadOnly(bool readOnly)
     _bedrockDepthMaxSpinBox->setReadOnly(readOnly);
 }
 
-QGroupBox* SoilProfilePage::createTableGroupBox()
+auto SoilProfilePage::createTableGroupBox() -> QGroupBox*
 {
     // Create the TableGroupBox
     _soilProfileTableGroup = new TableGroupBox(tr("Site Profile"));
@@ -324,9 +324,9 @@ QGroupBox* SoilProfilePage::createTableGroupBox()
     return _soilProfileTableGroup;
 }
 
-QGroupBox* SoilProfilePage::createProfileRandomizerGroupBox()
+auto SoilProfilePage::createProfileRandomizerGroupBox() -> QGroupBox*
 {   
-    QVBoxLayout* layout = new QVBoxLayout;
+    auto* layout = new QVBoxLayout;
 
     // Title
     layout->addWidget(new QLabel(tr("<b>Toro (1992) Site Variation Model</b>")));
@@ -363,9 +363,9 @@ QGroupBox* SoilProfilePage::createProfileRandomizerGroupBox()
     return _profileVariationGroupBox;
 }
 
-QFrame* SoilProfilePage::createVelocityFrame()
+auto SoilProfilePage::createVelocityFrame() -> QFrame*
 {
-    QFormLayout* layout = new QFormLayout;
+    auto* layout = new QFormLayout;
 
     // Layer specific standard deviation
     _layerSpecificCheckBox = new QCheckBox(tr("Layer specifc standard deviation"));
@@ -395,7 +395,7 @@ QFrame* SoilProfilePage::createVelocityFrame()
     /*
      * Correlation group box
      */
-    QFormLayout* correlLayout = new QFormLayout;
+    auto* correlLayout = new QFormLayout;
 
     // Initial correlation
     _correlInitialSpinBox = new QDoubleSpinBox;
@@ -455,9 +455,9 @@ QFrame* SoilProfilePage::createVelocityFrame()
     return _velocityVariationFrame;
 } 
 
-QFrame* SoilProfilePage::createLayeringFrame()
+auto SoilProfilePage::createLayeringFrame() -> QFrame*
 {
-    QFormLayout* layout = new QFormLayout;
+    auto* layout = new QFormLayout;
 
     // Model cofficients
     _layeringModelComboBox = new QComboBox;
@@ -502,9 +502,9 @@ QFrame* SoilProfilePage::createLayeringFrame()
     return _layerVariationFrame;
 }
 
-QFrame* SoilProfilePage::createBedrockDepthFrame()
+auto SoilProfilePage::createBedrockDepthFrame() -> QFrame*
 {
-    QFormLayout* layout = new QFormLayout;
+    auto* layout = new QFormLayout;
 
     // Distribution
     _bedrockModelComboBox = new QComboBox;

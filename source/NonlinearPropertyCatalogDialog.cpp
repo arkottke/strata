@@ -38,10 +38,10 @@
 NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(NonlinearPropertyCatalog *catalog, QWidget * parent, Qt::WindowFlags f )
     : QDialog(parent, f)
 {
-    QGridLayout * layout = new QGridLayout;
+    auto * layout = new QGridLayout;
 
     // Shear modulus list
-    NonlinearPropertyFactoryGroupBox *modulus = new NonlinearPropertyFactoryGroupBox(
+    auto *modulus = new NonlinearPropertyFactoryGroupBox(
             catalog->modulusFactory(),
             tr("Shear Modulus Reduction Models"), this);
 
@@ -51,7 +51,7 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(NonlinearProperty
     layout->addWidget(modulus, 0, 0);
 
     // Damping list
-    NonlinearPropertyFactoryGroupBox *damping = new NonlinearPropertyFactoryGroupBox(
+    auto *damping = new NonlinearPropertyFactoryGroupBox(
             catalog->dampingFactory(),
             tr("Damping Models"), this);
 
@@ -74,7 +74,7 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(NonlinearProperty
    layout->addWidget( new QLabel(tr("Gray background indicates immutable model.")), 2, 0 );
 
    // Button box
-   QDialogButtonBox * buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
+   auto * buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 
    layout->addWidget( buttonBox, 2, 1);

@@ -111,7 +111,7 @@ private:
     /*!
      * \return true to continue
      */
-    bool okToClose();
+    auto okToClose() -> bool;
 
     //! Help dialog
     HelpDialog * _helpDialog;

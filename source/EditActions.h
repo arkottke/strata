@@ -32,12 +32,12 @@ class EditActions : public QObject
     Q_OBJECT
 
     public:
-        static EditActions * instance();
+        static auto instance() -> EditActions *;
 
-        QAction * copyAction();
-        QAction * pasteAction();
-        QAction * cutAction();
-        QAction * clearAction();
+        auto copyAction() -> QAction *;
+        auto pasteAction() -> QAction *;
+        auto cutAction() -> QAction *;
+        auto clearAction() -> QAction *;
 
     protected slots:
         void paste();

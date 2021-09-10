@@ -33,12 +33,12 @@ void CustomNonlinearProperty::setName(const QString &name)
     _name = name;
 }
 
-bool CustomNonlinearProperty::retain() const
+auto CustomNonlinearProperty::retain() const -> bool
 {
     return _retain;
 }
 
-bool CustomNonlinearProperty::setData(const QModelIndex &index, const QVariant &value, int role)
+auto CustomNonlinearProperty::setData(const QModelIndex &index, const QVariant &value, int role) -> bool
 {
     if(index.parent() != QModelIndex() && role != Qt::EditRole) {
         return false;
@@ -65,12 +65,12 @@ bool CustomNonlinearProperty::setData(const QModelIndex &index, const QVariant &
     }
 }
 
-Qt::ItemFlags CustomNonlinearProperty::flags(const QModelIndex &index) const
+auto CustomNonlinearProperty::flags(const QModelIndex &index) const -> Qt::ItemFlags
 {
     return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 }
 
-bool CustomNonlinearProperty::insertRows(int row, int count, const QModelIndex &parent)
+auto CustomNonlinearProperty::insertRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -85,7 +85,7 @@ bool CustomNonlinearProperty::insertRows(int row, int count, const QModelIndex &
     return true;
 }
 
-bool CustomNonlinearProperty::removeRows(int row, int count, const QModelIndex &parent)
+auto CustomNonlinearProperty::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;

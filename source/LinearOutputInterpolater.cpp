@@ -31,8 +31,8 @@ LinearOutputInterpolater::LinearOutputInterpolater()
 {
 }
 
-QVector<double> LinearOutputInterpolater::calculate(
-        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi)
+auto LinearOutputInterpolater::calculate(
+        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>
 {
     auto yi = QVector<double>(xi.size());
 

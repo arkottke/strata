@@ -59,10 +59,10 @@ private slots:
 
 private:
     //! Create the group box for defining the input location
-    QGroupBox* createInputLocationGroupBox();
+    auto createInputLocationGroupBox() -> QGroupBox*;
 
     //! Create the group box for editting the input motions
-    QGroupBox* createMotionsTableGroupBox();
+    auto createMotionsTableGroupBox() -> QGroupBox*;
 
     QGroupBox* _inputLocationGroupBox;
     QGroupBox* _motionsTableGroupBox;

@@ -32,22 +32,22 @@ InitialVelProfileOutput::InitialVelProfileOutput(OutputCatalog* catalog)
 
 }
 
-bool InitialVelProfileOutput::motionIndependent() const
+auto InitialVelProfileOutput::motionIndependent() const -> bool
 {
     return true;
 }
 
-QString InitialVelProfileOutput::name() const
+auto InitialVelProfileOutput::name() const -> QString
 {
     return tr("Initial Shear-Wave Velocity Profile");
 }
 
-QString InitialVelProfileOutput::shortName() const
+auto InitialVelProfileOutput::shortName() const -> QString
 {
     return tr("initialVs");
 }
 
-const QString InitialVelProfileOutput::xLabel() const
+auto InitialVelProfileOutput::xLabel() const -> const QString
 {
     return tr("Initial Shear-Wave Velocity (%1)").arg(Units::instance()->vel());
 }

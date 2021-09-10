@@ -51,17 +51,17 @@ NonlinearPropertyCatalog::~NonlinearPropertyCatalog()
     delete _dampingFactory;
 }
 
-ModulusFactory* NonlinearPropertyCatalog::modulusFactory()
+auto NonlinearPropertyCatalog::modulusFactory() -> ModulusFactory*
 {
     return _modulusFactory;
 }
 
-DampingFactory* NonlinearPropertyCatalog::dampingFactory()
+auto NonlinearPropertyCatalog::dampingFactory() -> DampingFactory*
 {
     return _dampingFactory;
 }
 
-bool NonlinearPropertyCatalog::save() const
+auto NonlinearPropertyCatalog::save() const -> bool
 {
     const QString dest = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     QDir dir;

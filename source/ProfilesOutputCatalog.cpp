@@ -67,21 +67,21 @@ ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog) :
         connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
-int ProfilesOutputCatalog::rowCount(const QModelIndex & parent) const
+auto ProfilesOutputCatalog::rowCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return _outputs.size();;
 }
 
-int ProfilesOutputCatalog::columnCount(const QModelIndex & parent) const
+auto ProfilesOutputCatalog::columnCount(const QModelIndex & parent) const -> int
 {
     Q_UNUSED(parent);
 
     return 1;
 }
 
-QVariant ProfilesOutputCatalog::data(const QModelIndex & index, int role) const
+auto ProfilesOutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
 {
     if (index.parent() != QModelIndex())
         return QVariant();
@@ -95,7 +95,7 @@ QVariant ProfilesOutputCatalog::data(const QModelIndex & index, int role) const
     return AbstractOutputCatalog::data(index, role);
 }
 
-bool ProfilesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role)
+auto ProfilesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
 {
     if (index.parent() != QModelIndex() || _readOnly)
         return false;
@@ -111,7 +111,7 @@ bool ProfilesOutputCatalog::setData(const QModelIndex & index, const QVariant & 
     return false;
 }
 
-QVariant ProfilesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const
+auto ProfilesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const -> QVariant
 {
     Q_UNUSED(section);
 
@@ -124,7 +124,7 @@ QVariant ProfilesOutputCatalog::headerData ( int section, Qt::Orientation orient
     return QVariant();
 }
 
-Qt::ItemFlags ProfilesOutputCatalog::flags(const QModelIndex & index) const
+auto ProfilesOutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
 {
     Q_UNUSED(index);
 
@@ -138,7 +138,7 @@ Qt::ItemFlags ProfilesOutputCatalog::flags(const QModelIndex & index) const
     return flags;
 }
 
-bool ProfilesOutputCatalog::removeRows(int row, int count, const QModelIndex &parent)
+auto ProfilesOutputCatalog::removeRows(int row, int count, const QModelIndex &parent) -> bool
 {
     if (!count)
         return false;
@@ -151,7 +151,7 @@ bool ProfilesOutputCatalog::removeRows(int row, int count, const QModelIndex &pa
     return true;
 }
 
-QList<AbstractOutput*> ProfilesOutputCatalog::outputs() const
+auto ProfilesOutputCatalog::outputs() const -> QList<AbstractOutput*>
 {
     QList<AbstractOutput*> list;
 
@@ -180,7 +180,7 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json)
     endResetModel();
 }
 
-QJsonArray ProfilesOutputCatalog::toJson() const
+auto ProfilesOutputCatalog::toJson() const -> QJsonArray
 {
     QJsonArray json;
     for (AbstractProfileOutput *apo : _outputs) {
@@ -190,7 +190,7 @@ QJsonArray ProfilesOutputCatalog::toJson() const
     return json;
 }
 
-QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
+auto operator<< (QDataStream & out, const ProfilesOutputCatalog* poc) -> QDataStream &
 {
     out << (quint8)4;
 
@@ -201,7 +201,7 @@ QDataStream & operator<< (QDataStream & out, const ProfilesOutputCatalog* poc)
     return out;
 }
 
-QDataStream & operator>> (QDataStream & in, ProfilesOutputCatalog* poc)
+auto operator>> (QDataStream & in, ProfilesOutputCatalog* poc) -> QDataStream &
 {
     quint8 ver;
     in >> ver;

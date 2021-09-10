@@ -38,8 +38,8 @@ class AbstractOutput : public QAbstractTableModel
 {
     Q_OBJECT
 
-    friend QDataStream & operator<< (QDataStream & out, const AbstractOutput* ao);
-    friend QDataStream & operator>> (QDataStream & in, AbstractOutput* ao);
+    friend auto operator<< (QDataStream & out, const AbstractOutput* ao) -> QDataStream &;
+    friend auto operator>> (QDataStream & in, AbstractOutput* ao) -> QDataStream &;
 
 public:
     enum CurveType{
@@ -49,11 +49,11 @@ public:
 
     explicit AbstractOutput(OutputCatalog* catalog);
 
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
 
-    virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
 
     //! Add the data to the output
     virtual void addData(int motion, AbstractCalculator* const calculator);
@@ -76,75 +76,75 @@ public:
     virtual void exportData(const QString &path, const QString &separator, const QString &prefix);
 
     //! Short name to identify the output
-    virtual QString name() const = 0;
+    virtual auto name() const -> QString = 0;
 
     //! Fullname that includes the general class of the output
-    virtual QString fullName() const = 0;
+    virtual auto fullName() const -> QString = 0;
 
     //! Remove all saved data
     virtual void clear();
 
     //! If the output is enabled for export to text file
-    bool exportEnabled() const;
+    auto exportEnabled() const -> bool;
 
     //! If the series is enabled and included in the statistics
-    bool seriesEnabled(int site, int motion);
+    auto seriesEnabled(int site, int motion) -> bool;
 
     //! If the Output needs depth for reference
-    virtual bool needsDepth() const;
+    virtual auto needsDepth() const -> bool;
 
     //! If the Output needs frequency for reference
-    virtual bool needsFreq() const;
+    virtual auto needsFreq() const -> bool;
 
     //! If the Output need period and damping for reference
-    virtual bool needsPeriod() const;
+    virtual auto needsPeriod() const -> bool;
 
     //! If the Output needs time for reference
-    virtual bool needsTime() const;
+    virtual auto needsTime() const -> bool;
 
     //! If the Output is only provided for Time Series
-    virtual bool timeSeriesOnly() const;
+    virtual auto timeSeriesOnly() const -> bool;
 
-    int motionIndex() const;
+    auto motionIndex() const -> int;
 
     //! Data for a given motion and site index
-    virtual const QVector<double>& data(int site, int motion) const;
+    virtual auto data(int site, int motion) const -> const QVector<double>&;
 
     //! Reference for a given motion and site index
-    virtual const QVector<double>& ref(int motion = 0) const = 0;
+    virtual auto ref(int motion = 0) const -> const QVector<double>& = 0;
 
     //! Convert between general index and the site and motion
     void intToSiteMotion(int i, int* site, int* motion) const;
 
     //! Convert between a general index and a site index
-    int intToSite(int i) const;
+    auto intToSite(int i) const -> int;
 
     //! Convert between a general index and a motion index
-    int intToMotion(int i) const;
+    auto intToMotion(int i) const -> int;
 
     //! If the output is independent of the site
-    virtual bool siteIndependent() const;
+    virtual auto siteIndependent() const -> bool;
 
     //! If the output is independent of the motion
-    virtual bool motionIndependent() const;
+    virtual auto motionIndependent() const -> bool;
 
     //! Number of known sites
-    int siteCount() const;
+    auto siteCount() const -> int;
 
     //! Number of known motions
-    int motionCount() const;
+    auto motionCount() const -> int;
 
     //! Type of Curve
-    virtual AbstractOutput::CurveType curveType() const;
+    virtual auto curveType() const -> AbstractOutput::CurveType;
+
+    //! Add data to a curve
+    void setCurveSamples(QwtPlotCurve *curve, const QVector<double> & x, const QVector<double> & y) const;
 
     //! Z order for a data curve
-    static int zOrder();
-
-    //! Offset for plotting the curves
-    int offset() const;
+    static auto zOrder() -> int;
 
     void fromJson(const QJsonObject &json);
-    QJsonObject toJson() const;
+    auto toJson() const -> QJsonObject;
 
 signals:
     void exportEnabledChanged(bool exportEnabled);
@@ -157,31 +157,31 @@ public slots:
 
 protected:       
     //! Name suitable for a text file
-    virtual QString fileName(int motion = 0) const = 0;
+    virtual auto fileName(int motion = 0) const -> QString = 0;
 
     //! Abbreviated name suitable for files
-    virtual QString shortName() const = 0;
+    virtual auto shortName() const -> QString = 0;
 
     //! Set the font and labels of the axes
     virtual void labelAxes(QwtPlot* const qwtPlot) const;
 
     //! Reference axis
-    virtual QwtScaleEngine* xScaleEngine() const = 0;
+    virtual auto xScaleEngine() const -> QwtScaleEngine* = 0;
 
     //! Data axis
-    virtual QwtScaleEngine* yScaleEngine() const = 0;
+    virtual auto yScaleEngine() const -> QwtScaleEngine* = 0;
 
     //! Name of the reference label
-    virtual const QString xLabel() const = 0;
+    virtual auto xLabel() const -> const QString = 0;
 
     //! Name of the data label
-    virtual const QString yLabel() const = 0;
+    virtual auto yLabel() const -> const QString = 0;
 
     //! Prefix for the name and fileName
-    virtual const QString prefix() const;
+    virtual auto prefix() const -> const QString;
 
     //! Suffix for the name and fileName
-    virtual const QString suffix() const;
+    virtual auto suffix() const -> const QString;
 
     //! Extract the data from the calculator
     virtual void extract(AbstractCalculator* const calculator,
@@ -205,17 +205,17 @@ protected:
     //! Interpolater used to interpolate the output
     AbstractOutputInterpolater* _interp;
 
-    /*! Initial offset of the data for plotting
-     * For some output the first data value is ignore because it is zero and
-     * causes problems when plotting on a log-log scale.
-     */
-    int _offset;
-
     //! Which motion should be displayed by the table -- only important for output that needs time
     int _motionIndex;
 
     //! Size of the longest output
     int _maxSize;
+
+    //! Visible window for plotting from the top of the profile
+    bool _offset_top;
+
+    //! Visible window for plotting from the bottom of the profile
+    bool _offset_bot;
 };
 
 #endif // ABSTRACT_OUTPUT_H

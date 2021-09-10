@@ -83,7 +83,7 @@ void NonlinearPropertyUncertainty::vary(NonlinearPropertyRandomizer::Model model
     nlProperty->setVaried(varied);
 }
 
-double NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::Model model, const double average, const double rand) const
+auto NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::Model model, const double average, const double rand) const -> double
 {
     double varied = 0;
     if (model == NonlinearPropertyRandomizer::SPID) {
@@ -97,22 +97,22 @@ double NonlinearPropertyUncertainty::variedDamping(NonlinearPropertyRandomizer::
     return varied;
 }
 
-double NonlinearPropertyUncertainty::limit(double value) const
+auto NonlinearPropertyUncertainty::limit(double value) const -> double
 {
     return qBound(_min, value, _max);
 }
 
-double NonlinearPropertyUncertainty::min() const
+auto NonlinearPropertyUncertainty::min() const -> double
 {
     return _min;
 }
 
-double NonlinearPropertyUncertainty::max() const
+auto NonlinearPropertyUncertainty::max() const -> double
 {
     return _max;
 }
 
-double NonlinearPropertyUncertainty::lnStdev() const
+auto NonlinearPropertyUncertainty::lnStdev() const -> double
 {
     return _lnStdev;
 }
@@ -157,7 +157,7 @@ void NonlinearPropertyUncertainty::fromJson(const QJsonObject &json)
     _lnStdev = json["lnStdev"].toDouble();
 }
 
-QJsonObject NonlinearPropertyUncertainty::toJson() const
+auto NonlinearPropertyUncertainty::toJson() const -> QJsonObject
 {
     QJsonObject json;
     json["min"] = _min;
@@ -166,14 +166,14 @@ QJsonObject NonlinearPropertyUncertainty::toJson() const
     return json;
 }
 
-QDataStream& operator<< (QDataStream & out, const NonlinearPropertyUncertainty* npu)
+auto operator<< (QDataStream & out, const NonlinearPropertyUncertainty* npu) -> QDataStream&
 {
     out << (quint8)1;
     out << npu->_min << npu->_max <<  npu->_lnStdev;
     return out;
 }
 
-QDataStream& operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu)
+auto operator>> (QDataStream & in, NonlinearPropertyUncertainty* npu) -> QDataStream&
 {
     quint8 ver;
     in >> ver;
