@@ -1,6 +1,10 @@
-<<<<<<< HEAD
 History
 =======
+
+v0.8.1 (2021-09-10)
+-------------------
+- Fixed: Changed to log-linear interpolatio of nonlinear properties. Previously
+  used cubic spline which causes problems for some models.
 
 v0.8.0 (2020-03-17)
 -------------------
