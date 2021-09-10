@@ -238,7 +238,7 @@ void NonlinearProperty::initialize()
     if (_strain.size() > 2) {
         if (_interp)
             gsl_interp_free(_interp);
-        _interp = gsl_interp_alloc(gsl_interp_cspline, _strain.size());
+        _interp = gsl_interp_alloc(gsl_interp_linear, _strain.size());
         gsl_interp_init(_interp, _strain.data(), _varied.data(), _strain.size());
         gsl_interp_accel_reset(_acc);
     }
