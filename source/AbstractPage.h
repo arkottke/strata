@@ -30,7 +30,7 @@ class AbstractPage : public QWidget
 {
 Q_OBJECT
 public:
-    explicit AbstractPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit AbstractPage(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     virtual void setModel(SiteResponseModel* model) = 0;
 

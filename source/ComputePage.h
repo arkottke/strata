@@ -40,7 +40,7 @@ class ComputePage : public AbstractPage
     Q_OBJECT
 
 public:
-    explicit ComputePage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit ComputePage(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     virtual void setModel(SiteResponseModel* model);
 

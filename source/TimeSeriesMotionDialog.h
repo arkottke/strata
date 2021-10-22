@@ -24,6 +24,7 @@
 
 #include <QComboBox>
 #include <QDialog>
+#include <QFlags>
 #include <QFrame>
 #include <QLineEdit>
 #include <QSpinBox>
@@ -39,7 +40,7 @@ class TimeSeriesMotionDialog : public QDialog
     Q_OBJECT
 
 public:
-    TimeSeriesMotionDialog(TimeSeriesMotion* motion, bool readOnly, QWidget * parent=0, Qt::WindowFlags f = 0);
+    TimeSeriesMotionDialog(TimeSeriesMotion* motion, bool readOnly, QWidget * parent=0, Qt::WindowFlags f = Qt::WindowFlags());
 
 signals:
     void lineCountChanged(int lineCount);

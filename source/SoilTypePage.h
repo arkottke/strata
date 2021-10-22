@@ -47,7 +47,7 @@ class SoilTypePage : public AbstractPage
     Q_OBJECT
 
 public:
-    explicit SoilTypePage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit SoilTypePage(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     void setModel(SiteResponseModel* model);
 

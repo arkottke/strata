@@ -23,7 +23,10 @@
 
 #include "AbstractOutput.h"
 
+#include <QPen>
 #include <QDebug>
+
+#include <cmath>
 
 OutputStatistics::OutputStatistics(AbstractOutput* output)
     : QObject(output), _output(output), _distribution(LogNormal)
@@ -200,7 +203,7 @@ auto OutputStatistics::plotCurve(QwtPlot* const plot, const QVector<double> &vec
     auto *qpc = new QwtPlotCurve;
     _output->setCurveSamples(qpc, x, y);
 
-    qpc->setPen(QPen(QBrush(Qt::blue), 2, penStyle));
+    qpc->setPen(QPen(QBrush(Qt::blue), 2, penStyle, Qt::SquareCap, Qt::BevelJoin));
     qpc->setZ(AbstractOutput::zOrder() + 1);    
     qpc->setRenderHint(QwtPlotItem::RenderAntialiased);
 

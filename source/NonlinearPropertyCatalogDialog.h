@@ -39,7 +39,7 @@ class NonlinearPropertyCatalogDialog : public QDialog
 
 public:
     NonlinearPropertyCatalogDialog(NonlinearPropertyCatalog *const catalog,
-                                   QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+                                   QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
 protected slots:
     void setDataModel(NonlinearProperty *np, bool readOnly);

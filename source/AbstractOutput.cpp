@@ -32,6 +32,7 @@
 #include <QDir>
 #include <QFont>
 #include <QJsonArray>
+#include <QPen>
 
 #include <qwt_text.h>
 #include <qwt_scale_engine.h>
@@ -246,8 +247,8 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
         QTextStream out(&file);
 
         // Header data
-        out << "# Strata Output: " << name() << endl;
-        out << "# Project:" << _catalog->title() << endl;
+        out << "# Strata Output: " << name() << Qt::endl;
+        out << "# Project:" << _catalog->title() << Qt::endl;
 
         // Column names
         out << "# ";        
@@ -255,7 +256,7 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
         for (int i = 0; i < colCount; ++i)
             out << headerData(i, Qt::Horizontal, Qt::DisplayRole).toString() << separator;
 
-        out << endl;
+        out << Qt::endl;
 
         // Data
         for (int r = 0; r < rowCount(); ++r) {
@@ -266,7 +267,7 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
                     out << separator;
             }
 
-            out << endl;
+            out << Qt::endl;
         }
 
         file.close();

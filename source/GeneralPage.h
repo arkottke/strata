@@ -41,7 +41,7 @@ class GeneralPage : public AbstractPage
     Q_OBJECT
 
 public:
-    explicit GeneralPage(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit GeneralPage(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     void setModel(SiteResponseModel* model);
 

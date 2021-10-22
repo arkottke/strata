@@ -281,7 +281,7 @@ void MotionPage::importSuite()
             _motionLibrary->removeRows(0, rowCount);
 
         // Load each of the filename/scale pairs in a map
-        QMap<QString, QStringList> map;
+        QMultiMap<QString, QStringList> map;
 
         QTextStream stream(&file);
         QString line = stream.readLine();
@@ -330,14 +330,14 @@ void MotionPage::importSuite()
                     args <<  AbstractMotion::typeList().first();
                 }
 
-                map.insertMulti(dir.absoluteFilePath(_fileName), args);
+                map.insert(dir.absoluteFilePath(_fileName), args);
             }
             line = stream.readLine();
         }
 
         QProgressDialog progressDialog(tr("Loading motion suite..."), tr("Abort"), 1, map.size(), this);
         progressDialog.setWindowModality(Qt::WindowModal);
-
+    
         QMapIterator<QString, QStringList> i(map);
         while (i.hasNext() && !progressDialog.wasCanceled()) {
             i.next();

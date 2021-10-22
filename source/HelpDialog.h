@@ -32,7 +32,7 @@ class HelpDialog : public QDialog
     Q_OBJECT
 
     public:
-    explicit HelpDialog(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit HelpDialog(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
 
     public slots:

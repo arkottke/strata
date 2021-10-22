@@ -34,7 +34,7 @@ class OutputExportDialog : public QDialog
     Q_OBJECT
 
     public:
-    OutputExportDialog(OutputCatalog *model, QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    OutputExportDialog(OutputCatalog *model, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     protected slots:
         void selectDirectory();
