@@ -17,6 +17,7 @@ tags
 tags.temp
 *.swp
 *.un~
+.ccls-cache/
 
 # Ignore deploy
 deploy/
