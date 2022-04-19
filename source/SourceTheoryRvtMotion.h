@@ -33,131 +33,133 @@ class CrustalAmplification;
 class Dimension;
 class PathDurationModel;
 
-class SourceTheoryRvtMotion : public AbstractRvtMotion
-{
-    Q_OBJECT
+class SourceTheoryRvtMotion : public AbstractRvtMotion {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const SourceTheoryRvtMotion* strm) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, SourceTheoryRvtMotion* strm) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const SourceTheoryRvtMotion *strm)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, SourceTheoryRvtMotion *strm)
+      -> QDataStream &;
 
 public:
-    SourceTheoryRvtMotion(QObject *parent = nullptr);
-    virtual ~SourceTheoryRvtMotion();
+  SourceTheoryRvtMotion(QObject *parent = nullptr);
+  virtual ~SourceTheoryRvtMotion();
 
-    virtual void setRegion(AbstractRvtMotion::Region region);
+  virtual void setRegion(AbstractRvtMotion::Region region);
 
-    virtual auto freq() const -> const QVector<double> &;
-    auto freqDimension() -> Dimension*;
+  virtual auto freq() const -> const QVector<double> &;
+  auto freqDimension() -> Dimension *;
 
-    virtual auto toHtml() const -> QString;
+  virtual auto toHtml() const -> QString;
 
-    auto isCustomized() const -> bool;
-    auto depth() const -> double;
-    auto hypoDistance() const -> double;
-    auto stressDrop() const -> double;
-    auto geoAtten() const -> double;
-    auto pathAttenCoeff() const -> double;
-    auto pathAttenPower() const -> double;
-    auto shearVelocity() const -> double;
-    auto density() const -> double;
-    auto siteAtten() const -> double;
-    auto duration() const -> double;
+  auto isCustomized() const -> bool;
+  auto depth() const -> double;
+  auto hypoDistance() const -> double;
+  auto stressDrop() const -> double;
+  auto geoAtten() const -> double;
+  auto pathAttenCoeff() const -> double;
+  auto pathAttenPower() const -> double;
+  auto shearVelocity() const -> double;
+  auto density() const -> double;
+  auto siteAtten() const -> double;
+  auto duration() const -> double;
 
-    //! Crustal amplification
-    auto crustalAmp() -> CrustalAmplification*;
+  //! Crustal amplification
+  auto crustalAmp() -> CrustalAmplification *;
 
-    //! Path duration model
-    auto pathDuration() -> PathDurationModel*;
+  //! Path duration model
+  auto pathDuration() -> PathDurationModel *;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void isCustomizedChanged(bool b);
+  void isCustomizedChanged(bool b);
 
-    void stressDropChanged(double d);
-    void geoAttenChanged(double d);
-    void pathAttenCoeffChanged(double d);
-    void pathAttenPowerChanged(double d);
-    void shearVelocityChanged(double d);
-    void densityChanged(double d);
-    void siteAttenChanged(double d);
-    void durationChanged(double d);
+  void stressDropChanged(double d);
+  void geoAttenChanged(double d);
+  void pathAttenCoeffChanged(double d);
+  void pathAttenPowerChanged(double d);
+  void shearVelocityChanged(double d);
+  void densityChanged(double d);
+  void siteAttenChanged(double d);
+  void durationChanged(double d);
 
-    void hypoDistanceChanged(double hypoDistance);
+  void hypoDistanceChanged(double hypoDistance);
 
 public slots:
-    void setDensity(double density);
-    void setDepth(double depth);
-    void setDistance(double dist);
-    void setGeoAtten(double geoAtten);
-    void setIsCustomized(bool b);
-    void setMagnitude(double mag);
-    void setStressDrop(double stressDrop);
-    void setPathAttenCoeff(double pathAttenCoeff);
-    void setPathAttenPower(double pathAttenPower);
-    void setShearVelocity(double shearVelocity);
-    void setSiteAtten(double siteAtten);
+  void setDensity(double density);
+  void setDepth(double depth);
+  void setDistance(double dist);
+  void setGeoAtten(double geoAtten);
+  void setIsCustomized(bool b);
+  void setMagnitude(double mag);
+  void setStressDrop(double stressDrop);
+  void setPathAttenCoeff(double pathAttenCoeff);
+  void setPathAttenPower(double pathAttenPower);
+  void setShearVelocity(double shearVelocity);
+  void setSiteAtten(double siteAtten);
 
-    //! Calculate the FAS and associated response spectrum
-    virtual void calculate();
+  //! Calculate the FAS and associated response spectrum
+  virtual void calculate();
 
 private:
-    //! Initialize parameters of the model
-    void init();
+  //! Initialize parameters of the model
+  void init();
 
-    //! Calculate the geometric attenuation
-    void calcGeoAtten();
+  //! Calculate the geometric attenuation
+  void calcGeoAtten();
 
-    //! If the model is custom
-    bool _isCustomized;
+  //! If the model is custom
+  bool _isCustomized;
 
-    /*! Seismic moment.
-     * The seismic moment is calculated from the moment magnitude.
-     */
-    double _seismicMoment;
+  /*! Seismic moment.
+   * The seismic moment is calculated from the moment magnitude.
+   */
+  double _seismicMoment;
 
-    //! Depth in km
-    double _depth;
+  //! Depth in km
+  double _depth;
 
-    //! Hypocentral distance in km
-    double _hypoDistance;
+  //! Hypocentral distance in km
+  double _hypoDistance;
 
-    /*! Corner frequency.
-     * The corner frequency is calculated from the stress drop and
-     * seismic moment.
-     */
-    double _cornerFreq;
+  /*! Corner frequency.
+   * The corner frequency is calculated from the stress drop and
+   * seismic moment.
+   */
+  double _cornerFreq;
 
-    //! Stress drop in bars
-    double _stressDrop;
+  //! Stress drop in bars
+  double _stressDrop;
 
-    //! Geometric attenuation
-    double _geoAtten;
+  //! Geometric attenuation
+  double _geoAtten;
 
-    //! Path attenuation coefficient
-    double _pathAttenCoeff;
+  //! Path attenuation coefficient
+  double _pathAttenCoeff;
 
-    //! Path attenuation power
-    double _pathAttenPower;
+  //! Path attenuation power
+  double _pathAttenPower;
 
-    //! Shear-velociy in km/sec
-    double _shearVelocity;
+  //! Shear-velociy in km/sec
+  double _shearVelocity;
 
-    //! Density in gm/cm^3
-    double _density;
+  //! Density in gm/cm^3
+  double _density;
 
-    //! Site attenuation
-    double _siteAtten;
+  //! Site attenuation
+  double _siteAtten;
 
-    //! Amplification by site effects (changes in density and shear-wave velocity in the crustal)
-    CrustalAmplification* _crustalAmp;
+  //! Amplification by site effects (changes in density and shear-wave velocity
+  //! in the crustal)
+  CrustalAmplification *_crustalAmp;
 
-    //! Model for the distance dependent duration;
-    PathDurationModel* _pathDuration;
+  //! Model for the distance dependent duration;
+  PathDurationModel *_pathDuration;
 
-    //! Frequency dimension
-    Dimension* _freq;
+  //! Frequency dimension
+  Dimension *_freq;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_H

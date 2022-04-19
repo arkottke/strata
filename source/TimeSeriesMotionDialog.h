@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,73 +35,74 @@
 
 class TimeSeriesMotion;
 
-class TimeSeriesMotionDialog : public QDialog
-{
-    Q_OBJECT
+class TimeSeriesMotionDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    TimeSeriesMotionDialog(TimeSeriesMotion* motion, bool readOnly, QWidget * parent=0, Qt::WindowFlags f = Qt::WindowFlags());
+  TimeSeriesMotionDialog(TimeSeriesMotion *motion, bool readOnly,
+                         QWidget *parent = 0,
+                         Qt::WindowFlags f = Qt::WindowFlags());
 
 signals:
-    void lineCountChanged(int lineCount);
+  void lineCountChanged(int lineCount);
 
 public slots:
-    void openFile();
+  void openFile();
 
-    void updateTextEdit();
-    void updatePosition();
-    void updateDataColumn(int);
+  void updateTextEdit();
+  void updatePosition();
+  void updateDataColumn(int);
 
-    void help();
+  void help();
 
-    void tryAccept();
+  void tryAccept();
 
-    void apply();
+  void apply();
 
 private:
-    //! Create the frame for defining the parameters of the motion
-    auto createInputFrame(bool readOnly) -> QFrame*;
+  //! Create the frame for defining the parameters of the motion
+  auto createInputFrame(bool readOnly) -> QFrame *;
 
-    //! Create the frame of plots of the data
-    auto createPlotsFrame() -> QTabWidget*;
+  //! Create the frame of plots of the data
+  auto createPlotsFrame() -> QTabWidget *;
 
-    //! Read the motion data from the file and update the text edit
-    void loadPreview(const QString &fileName);
+  //! Read the motion data from the file and update the text edit
+  void loadPreview(const QString &fileName);
 
-    //! Plot the data
-    void plot();
+  //! Plot the data
+  void plot();
 
-    //! Try to apply the settings to the motion
-    auto tryApply() -> bool;
+  //! Try to apply the settings to the motion
+  auto tryApply() -> bool;
 
-    TimeSeriesMotion * _motion;
+  TimeSeriesMotion *_motion;
 
-    QTabWidget *_tabWidget;
+  QTabWidget *_tabWidget;
 
-    QLineEdit *_fileNameLineEdit;
-    QLineEdit *_descripLineEdit;
+  QLineEdit *_fileNameLineEdit;
+  QLineEdit *_descripLineEdit;
 
-    QSpinBox *_pointCountSpinBox;
-    QDoubleSpinBox *_timeStepSpinBox;
-    QDoubleSpinBox *_scaleSpinBox;
+  QSpinBox *_pointCountSpinBox;
+  QDoubleSpinBox *_timeStepSpinBox;
+  QDoubleSpinBox *_scaleSpinBox;
 
-    QComboBox *_formatComboBox;
-    QSpinBox *_dataColSpinBox;
+  QComboBox *_formatComboBox;
+  QSpinBox *_dataColSpinBox;
 
-    QComboBox *_unitsComboBox;
-    QDoubleSpinBox *_pgaSpinBox;
+  QComboBox *_unitsComboBox;
+  QDoubleSpinBox *_pgaSpinBox;
 
-    QSpinBox *_startLineSpinBox;
-    QSpinBox *_stopLineSpinBox;
+  QSpinBox *_startLineSpinBox;
+  QSpinBox *_stopLineSpinBox;
 
-    QSpinBox *_positionSpinBox;
-    QTextEdit *_textEdit;
+  QSpinBox *_positionSpinBox;
+  QTextEdit *_textEdit;
 
-    QwtPlotCurve *_atsCurve;
-    QwtPlotCurve *_saCurve;
-    QwtPlotCurve *_fasCurve;
+  QwtPlotCurve *_atsCurve;
+  QwtPlotCurve *_saCurve;
+  QwtPlotCurve *_fasCurve;
 
-    //! Total number of lines in the file
-    int _lineCount;
+  //! Total number of lines in the file
+  int _lineCount;
 };
 #endif

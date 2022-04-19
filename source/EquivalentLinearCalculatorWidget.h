@@ -29,20 +29,19 @@
 
 class EquivalentLinearCalculator;
 
-class EquivalentLinearCalculatorWidget : public QWidget
-{
-Q_OBJECT
+class EquivalentLinearCalculatorWidget : public QWidget {
+  Q_OBJECT
 public:
-    explicit EquivalentLinearCalculatorWidget(QWidget *parent = nullptr);
+  explicit EquivalentLinearCalculatorWidget(QWidget *parent = nullptr);
 
 public slots:
-    void setCalculator(EquivalentLinearCalculator* elc);
-    void setReadOnly(bool readOnly);
+  void setCalculator(EquivalentLinearCalculator *elc);
+  void setReadOnly(bool readOnly);
 
 protected:
-    QDoubleSpinBox* _strainRatioSpinBox;
-    QDoubleSpinBox* _errorToleranceSpinBox;
-    QSpinBox* _maxIterationsSpinBox;
+  QDoubleSpinBox *_strainRatioSpinBox;
+  QDoubleSpinBox *_errorToleranceSpinBox;
+  QSpinBox *_maxIterationsSpinBox;
 };
 
 #endif // EQUIVALENT_LINEAR_CALCULATOR_WIDGET_H

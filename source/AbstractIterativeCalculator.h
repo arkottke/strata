@@ -27,57 +27,61 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-class AbstractIterativeCalculator : public AbstractCalculator
-{
-    Q_OBJECT
+class AbstractIterativeCalculator : public AbstractCalculator {
+  Q_OBJECT
 
-    friend auto operator<<(QDataStream &out, const AbstractIterativeCalculator *aic) -> QDataStream &;
-    friend auto operator>>(QDataStream &in, AbstractIterativeCalculator *aic) -> QDataStream &;
+  friend auto operator<<(QDataStream &out,
+                         const AbstractIterativeCalculator *aic)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, AbstractIterativeCalculator *aic)
+      -> QDataStream &;
 
 public:
-    explicit AbstractIterativeCalculator(QObject *parent = nullptr);
+  explicit AbstractIterativeCalculator(QObject *parent = nullptr);
 
-    //! Perform the site response calculation
-    virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool;
+  //! Perform the site response calculation
+  virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool;
 
-    auto maxIterations() const -> int;
-    auto errorTolerance() const -> double;
+  auto maxIterations() const -> int;
+  auto errorTolerance() const -> double;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void maxIterationsChanged(int maxIterations);
-    void errorToleranceChanged(double errorTolerance);
+  void maxIterationsChanged(int maxIterations);
+  void errorToleranceChanged(double errorTolerance);
 
 public slots:
-    void setMaxIterations(int maxIterations);
-    void setErrorTolerance(double errorTolerance);
+  void setMaxIterations(int maxIterations);
+  void setErrorTolerance(double errorTolerance);
 
 protected:
-    //! Compute the nonlinear properties
-    virtual auto updateSubLayer(int index, const QVector<std::complex<double>> &strainTf) -> bool = 0;
+  //! Compute the nonlinear properties
+  virtual auto updateSubLayer(int index,
+                              const QVector<std::complex<double>> &strainTf)
+      -> bool = 0;
 
-    //! Compute the relative error between two values
-    static inline auto relError(double value, double reference) -> double;
+  //! Compute the relative error between two values
+  static inline auto relError(double value, double reference) -> double;
 
-    //! Compute the maximum error of the maximum shear strain
-    auto maxError(const QVector<double> &maxStrain) -> double;
+  //! Compute the maximum error of the maximum shear strain
+  auto maxError(const QVector<double> &maxStrain) -> double;
 
-    //! Set initial strains of the layers
-    virtual void estimateInitialStrains() = 0;
+  //! Set initial strains of the layers
+  virtual void estimateInitialStrains() = 0;
 
-    //! Maximum number of iterations in the equivalent linear loop
-    int _maxIterations;
+  //! Maximum number of iterations in the equivalent linear loop
+  int _maxIterations;
 
-    //! Error tolerance of the equivalent linear loop -- percent
-    double _errorTolerance;
+  //! Error tolerance of the equivalent linear loop -- percent
+  double _errorTolerance;
 
-    //! Previous maximum strain
-    QVector<double> _prevMaxStrain;
+  //! Previous maximum strain
+  QVector<double> _prevMaxStrain;
 
-    //! Name of calcuation stage
-    QString _name;
+  //! Name of calcuation stage
+  QString _name;
 };
 
 #endif // ABSTRACT_ITERATIVE_CALCULATOR_H

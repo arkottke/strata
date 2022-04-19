@@ -23,35 +23,34 @@
 
 #include <QDebug>
 
-SteppedOutputInterpolater::SteppedOutputInterpolater()
-{
-}
+SteppedOutputInterpolater::SteppedOutputInterpolater() {}
 
-auto SteppedOutputInterpolater::calculate(
-        const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>
-{
-    // x is at the base of the layer
-    Q_ASSERT(x.size() <= y.size());
+auto SteppedOutputInterpolater::calculate(const QVector<double> &x,
+                                          const QVector<double> &y,
+                                          const QVector<double> &xi)
+    -> QVector<double> {
+  // x is at the base of the layer
+  Q_ASSERT(x.size() <= y.size());
 
-    // Interpolated data
-    QVector<double> yi;
+  // Interpolated data
+  QVector<double> yi;
 
-    int j = 0;
-    for (int i = 0; i < xi.size(); ++i) {
-        // Adjust j -- may skip points if the step of xi is too great
-        while (j < x.size() && x.at(j) <= xi.at(i))
-            ++j;
+  int j = 0;
+  for (int i = 0; i < xi.size(); ++i) {
+    // Adjust j -- may skip points if the step of xi is too great
+    while (j < x.size() && x.at(j) <= xi.at(i))
+      ++j;
 
-        if (j < x.size()) {
-            yi << y.at(j);
-        } else {
-            break;
-        }
+    if (j < x.size()) {
+      yi << y.at(j);
+    } else {
+      break;
     }
+  }
 
-    // Add the bedrock values to the end
-    if (x.size() < y.size())
-        yi << y.last();
+  // Add the bedrock values to the end
+  if (x.size() < y.size())
+    yi << y.last();
 
-    return yi;
+  return yi;
 }

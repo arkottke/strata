@@ -26,43 +26,39 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-ViscoElasticStressTimeSeriesOutput::ViscoElasticStressTimeSeriesOutput(OutputCatalog* catalog)
-    : AbstractTimeSeriesOutput(catalog)
-{
-    _type = AbstractMotion::Within;
+ViscoElasticStressTimeSeriesOutput::ViscoElasticStressTimeSeriesOutput(
+    OutputCatalog *catalog)
+    : AbstractTimeSeriesOutput(catalog) {
+  _type = AbstractMotion::Within;
 }
 
-auto ViscoElasticStressTimeSeriesOutput::name() const -> QString
-{
-    return tr("Visco-Elastic Shear-Stress Time Series");
+auto ViscoElasticStressTimeSeriesOutput::name() const -> QString {
+  return tr("Visco-Elastic Shear-Stress Time Series");
 }
 
-auto ViscoElasticStressTimeSeriesOutput::shortName() const -> QString
-{
-    return tr("viscElasticStressTs");
+auto ViscoElasticStressTimeSeriesOutput::shortName() const -> QString {
+  return tr("viscElasticStressTs");
 }
 
-auto ViscoElasticStressTimeSeriesOutput::yLabel() const -> const QString
-{
-    return tr("Visco-Elastic Shear Stress, %1 (%2)")
-            .arg(QChar(0x03C4))
-            .arg(Units::instance()->stress());
+auto ViscoElasticStressTimeSeriesOutput::yLabel() const -> const QString {
+  return tr("Visco-Elastic Shear Stress, %1 (%2)")
+      .arg(QChar(0x03C4))
+      .arg(Units::instance()->stress());
 }
 
+void ViscoElasticStressTimeSeriesOutput::extract(
+    AbstractCalculator *const calculator, QVector<double> &ref,
+    QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-void ViscoElasticStressTimeSeriesOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
+  const auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+  Q_ASSERT(tsm);
 
-    Q_ASSERT(tsm);
+  Location loc = calculator->site()->depthToLocation(_depth);
 
-    Location loc = calculator->site()->depthToLocation(_depth);
-
-    data = tsm->strainTimeSeries(
-            calculator->calcStressTf(
-                    calculator->site()->inputLocation(),
-                    calculator->motion()->type(), loc), _baselineCorrect);
+  data = tsm->strainTimeSeries(
+      calculator->calcStressTf(calculator->site()->inputLocation(),
+                               calculator->motion()->type(), loc),
+      _baselineCorrect);
 }

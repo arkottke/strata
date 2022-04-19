@@ -26,21 +26,21 @@
 
 class AbstractCalculator;
 
-class DissipatedEnergyProfileOutput : public AbstractProfileOutput
-{
-Q_OBJECT
+class DissipatedEnergyProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit DissipatedEnergyProfileOutput(OutputCatalog* catalog);
+  explicit DissipatedEnergyProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
 
-    virtual auto timeSeriesOnly() const -> bool;
+  virtual auto timeSeriesOnly() const -> bool;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // DISSIPATED_ENERGY_PROFILE_OUTPUT_H

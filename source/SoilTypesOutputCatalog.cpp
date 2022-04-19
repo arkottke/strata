@@ -30,190 +30,180 @@
 #include <QJsonObject>
 #include <QStringList>
 
-SoilTypesOutputCatalog::SoilTypesOutputCatalog(OutputCatalog *outputCatalog) :
-    AbstractOutputCatalog(outputCatalog), _soilTypeCatalog(0)
-{
+SoilTypesOutputCatalog::SoilTypesOutputCatalog(OutputCatalog *outputCatalog)
+    : AbstractOutputCatalog(outputCatalog), _soilTypeCatalog(0) {}
+
+auto SoilTypesOutputCatalog::rowCount(const QModelIndex &parent) const -> int {
+  Q_UNUSED(parent);
+
+  return _outputs.size();
 }
 
-auto SoilTypesOutputCatalog::rowCount(const QModelIndex & parent) const -> int
-{
-    Q_UNUSED(parent);
+auto SoilTypesOutputCatalog::columnCount(const QModelIndex &parent) const
+    -> int {
+  Q_UNUSED(parent);
 
-    return _outputs.size();
+  return 1;
 }
 
-auto SoilTypesOutputCatalog::columnCount(const QModelIndex & parent) const -> int
-{
-    Q_UNUSED(parent);
-
-    return 1;
-}
-
-auto SoilTypesOutputCatalog::data(const QModelIndex & index, int role) const -> QVariant
-{
-    if (index.parent() != QModelIndex())
-        return QVariant();
-
-    if (role==Qt::DisplayRole || role==Qt::EditRole) {
-        return _outputs.at(index.row())->name();
-    } else if (role == Qt::CheckStateRole) {
-        return _outputs.at(index.row())->enabled() ?
-                Qt::Checked : Qt::Unchecked;
-    }
-
-    return AbstractOutputCatalog::data(index, role);
-}
-
-auto SoilTypesOutputCatalog::headerData ( int section, Qt::Orientation orientation, int role) const -> QVariant
-{
-    if( role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole )
-        return QVariant();
-
-    switch( orientation ) {
-    case Qt::Horizontal:
-        return tr("Name");
-    case Qt::Vertical:
-        return section+1;
-    }
-
+auto SoilTypesOutputCatalog::data(const QModelIndex &index, int role) const
+    -> QVariant {
+  if (index.parent() != QModelIndex())
     return QVariant();
+
+  if (role == Qt::DisplayRole || role == Qt::EditRole) {
+    return _outputs.at(index.row())->name();
+  } else if (role == Qt::CheckStateRole) {
+    return _outputs.at(index.row())->enabled() ? Qt::Checked : Qt::Unchecked;
+  }
+
+  return AbstractOutputCatalog::data(index, role);
 }
 
-auto SoilTypesOutputCatalog::setData(const QModelIndex & index, const QVariant & value, int role) -> bool
-{
-    if (index.parent() != QModelIndex() || _readOnly)
-        return false;
+auto SoilTypesOutputCatalog::headerData(int section,
+                                        Qt::Orientation orientation,
+                                        int role) const -> QVariant {
+  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::UserRole)
+    return QVariant();
 
-    if (role == Qt::CheckStateRole) {
-        _outputs[index.row()]->setEnabled(value.toBool());
-    } else {
-        return false;
-    }
+  switch (orientation) {
+  case Qt::Horizontal:
+    return tr("Name");
+  case Qt::Vertical:
+    return section + 1;
+  }
 
-    emit dataChanged(index, index);
-    emit wasModified();
+  return QVariant();
+}
+
+auto SoilTypesOutputCatalog::setData(const QModelIndex &index,
+                                     const QVariant &value, int role) -> bool {
+  if (index.parent() != QModelIndex() || _readOnly)
     return false;
+
+  if (role == Qt::CheckStateRole) {
+    _outputs[index.row()]->setEnabled(value.toBool());
+  } else {
+    return false;
+  }
+
+  emit dataChanged(index, index);
+  emit wasModified();
+  return false;
 }
 
+auto SoilTypesOutputCatalog::flags(const QModelIndex &index) const
+    -> Qt::ItemFlags {
+  Q_UNUSED(index);
 
-auto SoilTypesOutputCatalog::flags(const QModelIndex & index) const -> Qt::ItemFlags
-{
-    Q_UNUSED(index);
-
-    return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-void SoilTypesOutputCatalog::setSoilTypeCatalog(SoilTypeCatalog *soilTypeCatalog)
-{
-    _soilTypeCatalog = soilTypeCatalog;
-    connect(_soilTypeCatalog, SIGNAL(soilTypeAdded(SoilType*)),
-            this, SLOT(addOutput(SoilType*)));
-    connect(_soilTypeCatalog, SIGNAL(soilTypeRemoved(SoilType*)),
-            this, SLOT(removeOutput(SoilType*)));
+void SoilTypesOutputCatalog::setSoilTypeCatalog(
+    SoilTypeCatalog *soilTypeCatalog) {
+  _soilTypeCatalog = soilTypeCatalog;
+  connect(_soilTypeCatalog, SIGNAL(soilTypeAdded(SoilType *)), this,
+          SLOT(addOutput(SoilType *)));
+  connect(_soilTypeCatalog, SIGNAL(soilTypeRemoved(SoilType *)), this,
+          SLOT(removeOutput(SoilType *)));
 }
 
-void SoilTypesOutputCatalog::addOutput(SoilType* soilType)
-{
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    _outputs << new SoilTypeOutput(soilType, _outputCatalog);
-    connect(_outputs.last(), SIGNAL(wasModified()),
-            this, SIGNAL(wasModified()));
-    endInsertRows();
+void SoilTypesOutputCatalog::addOutput(SoilType *soilType) {
+  beginInsertRows(QModelIndex(), rowCount(), rowCount());
+  _outputs << new SoilTypeOutput(soilType, _outputCatalog);
+  connect(_outputs.last(), SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  endInsertRows();
 }
 
-void SoilTypesOutputCatalog::removeOutput(SoilType *soilType)
-{
-    // Locate the row
-    int row = -1;
-    for (int i = 0; i < _outputs.size(); ++i) {
-        if (_outputs.at(i)->soilType() == soilType) {
-            row = i;
-            break;
-        }
+void SoilTypesOutputCatalog::removeOutput(SoilType *soilType) {
+  // Locate the row
+  int row = -1;
+  for (int i = 0; i < _outputs.size(); ++i) {
+    if (_outputs.at(i)->soilType() == soilType) {
+      row = i;
+      break;
     }
+  }
 
-    // If the soilType is found, remove it.
-    if (row >= 0) {
-        beginRemoveRows(QModelIndex(), row, row);
-        delete _outputs.takeAt(row);
-        endRemoveRows();
-    }
+  // If the soilType is found, remove it.
+  if (row >= 0) {
+    beginRemoveRows(QModelIndex(), row, row);
+    delete _outputs.takeAt(row);
+    endRemoveRows();
+  }
 }
 
-auto SoilTypesOutputCatalog::outputs() const -> QList<AbstractOutput*>
-{
-    QList<AbstractOutput*> list;
+auto SoilTypesOutputCatalog::outputs() const -> QList<AbstractOutput *> {
+  QList<AbstractOutput *> list;
 
-    foreach(SoilTypeOutput* sto, _outputs ) {
-        if (sto->enabled()) {
-            list << static_cast<AbstractOutput*>(sto->modulus())
-                    << static_cast<AbstractOutput*>(sto->damping());
-        }
+  foreach (SoilTypeOutput *sto, _outputs) {
+    if (sto->enabled()) {
+      list << static_cast<AbstractOutput *>(sto->modulus())
+           << static_cast<AbstractOutput *>(sto->damping());
     }
+  }
 
-    return list;
+  return list;
 }
 
-void SoilTypesOutputCatalog::fromJson(const QJsonArray &array)
-{
-    beginResetModel();
+void SoilTypesOutputCatalog::fromJson(const QJsonArray &array) {
+  beginResetModel();
 
-    while (_outputs.size())
-        _outputs.takeLast()->deleteLater();
+  while (_outputs.size())
+    _outputs.takeLast()->deleteLater();
 
-    foreach(const QJsonValue &v, array) {
-        const QJsonObject &json = v.toObject();
-        int row = json["row"].toInt();
-        auto * sto = new SoilTypeOutput(_soilTypeCatalog->soilType(row), _outputCatalog);
-        sto->fromJson(json);
-        _outputs << sto;
-    }
+  foreach (const QJsonValue &v, array) {
+    const QJsonObject &json = v.toObject();
+    int row = json["row"].toInt();
+    auto *sto =
+        new SoilTypeOutput(_soilTypeCatalog->soilType(row), _outputCatalog);
+    sto->fromJson(json);
+    _outputs << sto;
+  }
 
-    endResetModel();
+  endResetModel();
 }
 
-auto SoilTypesOutputCatalog::toJson() const -> QJsonArray
-{
-    QJsonArray array;
-    foreach (const SoilTypeOutput *sto, _outputs) {
-        QJsonObject json = sto->toJson();
-        json["row"] = _soilTypeCatalog->rowOf(sto->soilType());
-        array << QJsonValue(json);
-    }
-    return array;
+auto SoilTypesOutputCatalog::toJson() const -> QJsonArray {
+  QJsonArray array;
+  foreach (const SoilTypeOutput *sto, _outputs) {
+    QJsonObject json = sto->toJson();
+    json["row"] = _soilTypeCatalog->rowOf(sto->soilType());
+    array << QJsonValue(json);
+  }
+  return array;
 }
 
-auto operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc) -> QDataStream &
-{
-    out << (quint8)1;
+auto operator<<(QDataStream &out, const SoilTypesOutputCatalog *stoc)
+    -> QDataStream & {
+  out << (quint8)1;
 
-    out << stoc->_outputs.size();
+  out << stoc->_outputs.size();
 
-    foreach (SoilTypeOutput* sto, stoc->_outputs) {
-        out << stoc->_soilTypeCatalog->rowOf(sto->soilType())
-                << sto;
-    }
+  foreach (SoilTypeOutput *sto, stoc->_outputs) {
+    out << stoc->_soilTypeCatalog->rowOf(sto->soilType()) << sto;
+  }
 
-    return out;
+  return out;
 }
 
-auto operator>> (QDataStream & in, SoilTypesOutputCatalog* stoc) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
+auto operator>>(QDataStream &in, SoilTypesOutputCatalog *stoc)
+    -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-    int size;
-    in >> size;
+  int size;
+  in >> size;
 
-    stoc->beginResetModel();
-    int row;
-    while (stoc->_outputs.size() < size) {
-        in >> row;
-        stoc->_outputs << new SoilTypeOutput(
-                stoc->_soilTypeCatalog->soilType(row), stoc->_outputCatalog);
-        in >> stoc->_outputs.last();
-    }
-    stoc->endResetModel();
+  stoc->beginResetModel();
+  int row;
+  while (stoc->_outputs.size() < size) {
+    in >> row;
+    stoc->_outputs << new SoilTypeOutput(stoc->_soilTypeCatalog->soilType(row),
+                                         stoc->_outputCatalog);
+    in >> stoc->_outputs.last();
+  }
+  stoc->endResetModel();
 
-    return in;
+  return in;
 }

@@ -31,44 +31,43 @@
 
 #include <qwt_plot_curve.h>
 
-class AbstractRvtMotionDialog : public QDialog
-{
-    Q_OBJECT
+class AbstractRvtMotionDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    explicit AbstractRvtMotionDialog(
-            AbstractRvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
+  explicit AbstractRvtMotionDialog(AbstractRvtMotion *motion, bool readOnly,
+                                   QWidget *parent = nullptr);
 
 protected slots:
-    void calculate();
-    void tryAccept();
+  void calculate();
+  void tryAccept();
 
-    void openFrequencyDialog();
+  void openFrequencyDialog();
 
 protected:
-    void init();
-    virtual auto createParametersLayout() -> QFormLayout*;
-    virtual auto createTabWidget() -> QTabWidget*;
-    virtual auto createRSPlotWidget() -> QWidget*;
-    virtual auto createFSPlotWidget() -> QWidget*;
+  void init();
+  virtual auto createParametersLayout() -> QFormLayout *;
+  virtual auto createTabWidget() -> QTabWidget *;
+  virtual auto createRSPlotWidget() -> QWidget *;
+  virtual auto createFSPlotWidget() -> QWidget *;
 
-    virtual void addRespSpecCurves();
+  virtual void addRespSpecCurves();
 
-    bool _readOnly;
+  bool _readOnly;
 
-    AbstractRvtMotion *_motion;
+  AbstractRvtMotion *_motion;
 
-    QTabWidget* _dataTabWidget;
+  QTabWidget *_dataTabWidget;
 
-    QwtPlot* _rsPlot;
-    QwtPlotCurve *_saCurve;
+  QwtPlot *_rsPlot;
+  QwtPlotCurve *_saCurve;
 
-    MyTableView *_rsTableView;
+  MyTableView *_rsTableView;
 
-    QwtPlot* _fsPlot;
-    QwtPlotCurve *_faCurve;
+  QwtPlot *_fsPlot;
+  QwtPlotCurve *_faCurve;
 
-    MyTableView *_fsTableView;
+  MyTableView *_fsTableView;
 };
 
 #endif // ABSTRACT_RVT_MOTION_DIALOG_H

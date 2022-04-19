@@ -28,15 +28,15 @@
 
 #include <qwt_plot_curve.h>
 
-class RvtMotionDialog : public AbstractRvtMotionDialog
-{
-    Q_OBJECT
+class RvtMotionDialog : public AbstractRvtMotionDialog {
+  Q_OBJECT
 public:
-    explicit RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent = nullptr);
+  explicit RvtMotionDialog(RvtMotion *motion, bool readOnly,
+                           QWidget *parent = nullptr);
 
 protected:
-    virtual auto createParametersLayout() -> QFormLayout*;
-    virtual auto createTabWidget() -> QTabWidget*;
+  virtual auto createParametersLayout() -> QFormLayout *;
+  virtual auto createTabWidget() -> QTabWidget *;
 };
 
 #endif // RVT_MOTION_DIALOG_H

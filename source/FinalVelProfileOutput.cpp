@@ -26,31 +26,25 @@
 #include "SoilProfile.h"
 #include "Units.h"
 
-FinalVelProfileOutput::FinalVelProfileOutput(OutputCatalog* catalog)
-    : AbstractSteppedProfileOutput(catalog)
-{
+FinalVelProfileOutput::FinalVelProfileOutput(OutputCatalog *catalog)
+    : AbstractSteppedProfileOutput(catalog) {}
 
+auto FinalVelProfileOutput::name() const -> QString {
+  return tr("Final Shear-Wave Velocity Profile");
 }
 
-auto FinalVelProfileOutput::name() const -> QString
-{
-    return tr("Final Shear-Wave Velocity Profile");
+auto FinalVelProfileOutput::shortName() const -> QString {
+  return tr("finalVs");
 }
 
-auto FinalVelProfileOutput::shortName() const -> QString
-{
-    return tr("finalVs");
+auto FinalVelProfileOutput::xLabel() const -> const QString {
+  return tr("Final Shear-Wave Velocity (%1)").arg(Units::instance()->vel());
 }
 
-auto FinalVelProfileOutput::xLabel() const -> const QString
-{
-    return tr("Final Shear-Wave Velocity (%1)").arg(Units::instance()->vel());
-}
+void FinalVelProfileOutput::extract(AbstractCalculator *const calculator,
+                                    QVector<double> &ref,
+                                    QVector<double> &data) const {
+  AbstractSteppedProfileOutput::extract(calculator, ref, data);
 
-void FinalVelProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    AbstractSteppedProfileOutput::extract(calculator, ref, data);
-
-    data = calculator->site()->finalVelocityProfile();
+  data = calculator->site()->finalVelocityProfile();
 }

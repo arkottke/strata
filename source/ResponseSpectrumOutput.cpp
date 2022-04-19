@@ -32,64 +32,52 @@
 
 #include <QDebug>
 
-ResponseSpectrumOutput::ResponseSpectrumOutput(OutputCatalog* catalog)
-    : AbstractLocationOutput(catalog)
-{    
-    _statistics = new OutputStatistics(this);
-    connect(_statistics, SIGNAL(wasModified()),
-            this, SIGNAL(wasModified()));
+ResponseSpectrumOutput::ResponseSpectrumOutput(OutputCatalog *catalog)
+    : AbstractLocationOutput(catalog) {
+  _statistics = new OutputStatistics(this);
+  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
-auto ResponseSpectrumOutput::needsPeriod() const -> bool
-{
-    return true;
+auto ResponseSpectrumOutput::needsPeriod() const -> bool { return true; }
+
+auto ResponseSpectrumOutput::name() const -> QString {
+  return tr("Acceleration Response Spectrum");
 }
 
-auto ResponseSpectrumOutput::name() const -> QString
-{
-    return tr("Acceleration Response Spectrum");
+auto ResponseSpectrumOutput::shortName() const -> QString {
+  return tr("respSpec");
 }
 
-auto ResponseSpectrumOutput::shortName() const -> QString
-{
-    return tr("respSpec");
+auto ResponseSpectrumOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto ResponseSpectrumOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto ResponseSpectrumOutput::yScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto ResponseSpectrumOutput::yScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto ResponseSpectrumOutput::xLabel() const -> const QString {
+  return tr("Period (s)");
 }
 
-auto ResponseSpectrumOutput::xLabel() const -> const QString
-{
-    return tr("Period (s)");
+auto ResponseSpectrumOutput::yLabel() const -> const QString {
+  return tr("Spectral Accel. (g)");
 }
 
-auto ResponseSpectrumOutput::yLabel() const -> const QString
-{
-    return tr("Spectral Accel. (g)");
+auto ResponseSpectrumOutput::ref(int motion) const -> const QVector<double> & {
+  Q_UNUSED(motion);
+
+  return _catalog->period()->data();
 }
 
-auto ResponseSpectrumOutput::ref(int motion) const -> const QVector<double>&
-{
-    Q_UNUSED(motion);
+void ResponseSpectrumOutput::extract(AbstractCalculator *const calculator,
+                                     QVector<double> &ref,
+                                     QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-    return _catalog->period()->data();
-}
-
-void ResponseSpectrumOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
-
-    data = calculator->motion()->computeSa(
-            _catalog->period()->data(), _catalog->damping(),
-            calculator->calcAccelTf(
-                    calculator->site()->inputLocation(), calculator->motion()->type(),
-                    calculator->site()->depthToLocation(_depth), _type));
+  data = calculator->motion()->computeSa(
+      _catalog->period()->data(), _catalog->damping(),
+      calculator->calcAccelTf(
+          calculator->site()->inputLocation(), calculator->motion()->type(),
+          calculator->site()->depthToLocation(_depth), _type));
 }

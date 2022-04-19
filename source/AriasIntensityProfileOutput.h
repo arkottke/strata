@@ -26,21 +26,21 @@
 
 class AbstractCalculator;
 
-class AriasIntensityProfileOutput : public AbstractProfileOutput
-{
-Q_OBJECT
+class AriasIntensityProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit AriasIntensityProfileOutput(OutputCatalog* catalog);
+  explicit AriasIntensityProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
-    virtual auto xLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
+  virtual auto xLabel() const -> const QString;
 
-    virtual auto timeSeriesOnly() const -> bool;
+  virtual auto timeSeriesOnly() const -> bool;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // ARIAS_INTENSITY_PROFILE_OUTPUT_H

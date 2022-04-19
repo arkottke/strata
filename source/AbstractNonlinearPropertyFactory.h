@@ -28,47 +28,53 @@
 #include <QDataStream>
 #include <QJsonObject>
 
+class AbstractNonlinearPropertyFactory : public QAbstractListModel {
+  Q_OBJECT
 
-class AbstractNonlinearPropertyFactory : public QAbstractListModel
-{
-    Q_OBJECT
-
-    friend auto operator<< (QDataStream & out, const AbstractNonlinearPropertyFactory & anpf) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, AbstractNonlinearPropertyFactory & anpf) -> QDataStream &;
+  friend auto operator<<(QDataStream &out,
+                         const AbstractNonlinearPropertyFactory &anpf)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in,
+                         AbstractNonlinearPropertyFactory &anpf)
+      -> QDataStream &;
 
 public:
+  AbstractNonlinearPropertyFactory(QObject *parent = nullptr);
+  ~AbstractNonlinearPropertyFactory();
 
-    AbstractNonlinearPropertyFactory(QObject *parent = nullptr);
-    ~AbstractNonlinearPropertyFactory();
+  auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
 
-    auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  auto setData(const QModelIndex &index, const QVariant &value,
+               int role = Qt::EditRole) -> bool;
 
-    auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
-    auto setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) -> bool;
+  auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
+  auto headerData(int section, Qt::Orientation orientation,
+                  int role = Qt::DisplayRole) const -> QVariant;
 
-    auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
-    auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
+  auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex())
+      -> bool;
+  auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex())
+      -> bool;
 
-    auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
-    auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+  //! Return the model at the specified row
+  auto modelAt(int row) const -> NonlinearProperty *;
 
-    //! Return the model at the specified row
-    auto modelAt(int row) const -> NonlinearProperty*;
+  //! Return a duplicate of the model at the specified row
+  auto duplicateAt(int row) const -> NonlinearProperty *;
 
-    //! Return a duplicate of the model at the specified row
-    auto duplicateAt(int row) const -> NonlinearProperty*;
+  //! Tries the QVariant as an integer and a QString to match a possible model
+  auto duplicateAt(QVariant value) const -> NonlinearProperty *;
 
-    //! Tries the QVariant as an integer and a QString to match a possible model
-    auto duplicateAt(QVariant value) const -> NonlinearProperty*;
-
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 protected:
-    //! Type of models the factor produces
-    NonlinearProperty::Type _type;
+  //! Type of models the factor produces
+  NonlinearProperty::Type _type;
 
-    QList<NonlinearProperty*> _models;
+  QList<NonlinearProperty *> _models;
 };
 
 #endif // ABSTRACTNONLINEARPROPERTYFACTORY_H

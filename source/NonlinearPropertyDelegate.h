@@ -28,20 +28,21 @@
 
 class AbstractNonlinearPropertyFactory;
 
-class NonlinearPropertyDelegate : public QItemDelegate
-{
-Q_OBJECT
+class NonlinearPropertyDelegate : public QItemDelegate {
+  Q_OBJECT
 public:
-    explicit NonlinearPropertyDelegate(QObject *parent = nullptr);
+  explicit NonlinearPropertyDelegate(QObject *parent = nullptr);
 
-    void setModel(AbstractNonlinearPropertyFactory* factory);
+  void setModel(AbstractNonlinearPropertyFactory *factory);
 
-    auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget *;
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                    const QModelIndex &index) const -> QWidget *;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const;
 
 protected:
-    QPointer<AbstractNonlinearPropertyFactory> _factory;
+  QPointer<AbstractNonlinearPropertyFactory> _factory;
 };
 
 #endif // NONLINEAR_PROPERTY_DELEGATE_H

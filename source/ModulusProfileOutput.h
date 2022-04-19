@@ -26,19 +26,19 @@
 
 class AbstractCalculator;
 
-class ModulusProfileOutput : public AbstractSteppedProfileOutput
-{
-Q_OBJECT
+class ModulusProfileOutput : public AbstractSteppedProfileOutput {
+  Q_OBJECT
 public:
-    explicit ModulusProfileOutput(OutputCatalog* catalog);
+  explicit ModulusProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // MODULUS_PROFILE_OUTPUT_H

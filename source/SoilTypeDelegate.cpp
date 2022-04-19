@@ -25,38 +25,34 @@
 
 #include <QComboBox>
 
-SoilTypeDelegate::SoilTypeDelegate(QObject *parent) :
-    QItemDelegate(parent)
-{
+SoilTypeDelegate::SoilTypeDelegate(QObject *parent) : QItemDelegate(parent) {}
+
+void SoilTypeDelegate::setCatalog(SoilTypeCatalog *catalog) {
+  _catalog = catalog;
 }
 
-void SoilTypeDelegate::setCatalog(SoilTypeCatalog *catalog)
-{
-    _catalog = catalog;
+auto SoilTypeDelegate::createEditor(QWidget *parent,
+                                    const QStyleOptionViewItem &option,
+                                    const QModelIndex &index) const
+    -> QWidget * {
+  Q_UNUSED(option);
+  Q_UNUSED(index);
+
+  auto *editor = new QComboBox(parent);
+  return editor;
 }
 
-auto SoilTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                const QModelIndex & index) const -> QWidget*
-{
-    Q_UNUSED(option);
-    Q_UNUSED(index);
+void SoilTypeDelegate::setEditorData(QWidget *editor,
+                                     const QModelIndex &index) const {
+  auto *comboBox = static_cast<QComboBox *>(editor);
 
-    auto *editor = new QComboBox(parent);
-    return editor;
-}
-
-void SoilTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & index) const
-{
-    auto * comboBox = static_cast<QComboBox*>(editor);
-
-    comboBox->setModel(_catalog);
-    comboBox->setCurrentIndex(
-            comboBox->findText(index.model()->data(index, Qt::EditRole).toString()));
+  comboBox->setModel(_catalog);
+  comboBox->setCurrentIndex(
+      comboBox->findText(index.model()->data(index, Qt::EditRole).toString()));
 }
 
 void SoilTypeDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
-                const QModelIndex &index) const
-{
-    auto * comboBox = static_cast<QComboBox*>(editor);
-    model->setData(index, comboBox->currentIndex());
+                                    const QModelIndex &index) const {
+  auto *comboBox = static_cast<QComboBox *>(editor);
+  model->setData(index, comboBox->currentIndex());
 }

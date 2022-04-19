@@ -26,26 +26,24 @@
 
 class AbstractCalculator;
 
-class ResponseSpectrumOutput : public AbstractLocationOutput
-{
-Q_OBJECT
+class ResponseSpectrumOutput : public AbstractLocationOutput {
+  Q_OBJECT
 public:
-    explicit ResponseSpectrumOutput(OutputCatalog* catalog);
+  explicit ResponseSpectrumOutput(OutputCatalog *catalog);
 
-    virtual auto needsPeriod() const -> bool;
-    virtual auto name() const -> QString;
+  virtual auto needsPeriod() const -> bool;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
-    virtual auto yScaleEngine() const -> QwtScaleEngine*;
-    virtual auto xLabel() const -> const QString;
-    virtual auto yLabel() const -> const QString;
-    virtual auto ref(int motion = 0) const -> const QVector<double>&;
+  virtual auto shortName() const -> QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
+  virtual auto yScaleEngine() const -> QwtScaleEngine *;
+  virtual auto xLabel() const -> const QString;
+  virtual auto yLabel() const -> const QString;
+  virtual auto ref(int motion = 0) const -> const QVector<double> &;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
-
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
-
 
 #endif // RESPONSE_SPECTRUM_OUTPUT_H

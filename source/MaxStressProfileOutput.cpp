@@ -27,43 +27,39 @@
 #include "SubLayer.h"
 #include "Units.h"
 
-MaxStressProfileOutput::MaxStressProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
-{
-    _offset_bot = 1;
-    _offset_top = 1;
+MaxStressProfileOutput::MaxStressProfileOutput(OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  _offset_bot = 1;
+  _offset_top = 1;
 }
 
-auto MaxStressProfileOutput::name() const -> QString
-{
-    return tr("Maximum Shear-Stress Profile");
+auto MaxStressProfileOutput::name() const -> QString {
+  return tr("Maximum Shear-Stress Profile");
 }
 
-auto MaxStressProfileOutput::shortName() const -> QString
-{
-    return tr("stress");
+auto MaxStressProfileOutput::shortName() const -> QString {
+  return tr("stress");
 }
 
-auto MaxStressProfileOutput::xLabel() const -> const QString
-{
-    return tr("Maximum Shear Stress (%1)").arg(Units::instance()->stress());
+auto MaxStressProfileOutput::xLabel() const -> const QString {
+  return tr("Maximum Shear Stress (%1)").arg(Units::instance()->stress());
 }
 
-void MaxStressProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
-    // Uses depth from the center of the layer
-    ref.clear();
+void MaxStressProfileOutput::extract(AbstractCalculator *const calculator,
+                                     QVector<double> &ref,
+                                     QVector<double> &data) const {
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
+  // Uses depth from the center of the layer
+  ref.clear();
 
-    ref << 0;
-    for (const SubLayer &sl : subLayers)
-        ref << sl.depthToMid();
+  ref << 0;
+  for (const SubLayer &sl : subLayers)
+    ref << sl.depthToMid();
 
-    ref << subLayers.last().depthToBase();
+  ref << subLayers.last().depthToBase();
 
-    data = calculator->site()->shearStressProfile();
-    data.prepend(0);
+  data = calculator->site()->shearStressProfile();
+  data.prepend(0);
 
-    extrap(ref, data, subLayers.last().thickness());
+  extrap(ref, data, subLayers.last().thickness());
 }

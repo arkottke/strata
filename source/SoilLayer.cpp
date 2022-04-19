@@ -26,123 +26,93 @@
 #include "SoilType.h"
 #include "SoilTypeCatalog.h"
 
-
-SoilLayer::SoilLayer(QObject* parent)
-    : VelocityLayer(parent)
-{
-    _thickness = 0;
-    _soilType = nullptr;
+SoilLayer::SoilLayer(QObject *parent) : VelocityLayer(parent) {
+  _thickness = 0;
+  _soilType = nullptr;
 }
 
-SoilLayer::SoilLayer(const SoilLayer* other)
-{
-    // Abstract Distribution
-    _avg = other->avg();
-    _varied = other->shearVel();
-    _stdev = other->stdev();
-    _hasMin = other->hasMin();
-    _min = other->min();
-    _hasMax = other->hasMax();
-    _max = other->max();
+SoilLayer::SoilLayer(const SoilLayer *other) {
+  // Abstract Distribution
+  _avg = other->avg();
+  _varied = other->shearVel();
+  _stdev = other->stdev();
+  _hasMin = other->hasMin();
+  _min = other->min();
+  _hasMax = other->hasMax();
+  _max = other->max();
 
-    // VelocityLayer Information
-    _isVaried = other->isVaried();
-    _depth = other->depth();
+  // VelocityLayer Information
+  _isVaried = other->isVaried();
+  _depth = other->depth();
 
-    // SoilLayer Information
-    _soilType = other->soilType();
-    _thickness = other->thickness();
+  // SoilLayer Information
+  _soilType = other->soilType();
+  _thickness = other->thickness();
 }
 
-auto SoilLayer::soilType() const -> SoilType *
-{
-    return _soilType;
+auto SoilLayer::soilType() const -> SoilType * { return _soilType; }
+
+void SoilLayer::setSoilType(SoilType *soilType) { _soilType = soilType; }
+
+auto SoilLayer::thickness() const -> double { return _thickness; }
+
+void SoilLayer::setThickness(double thickness) {
+  _thickness = thickness;
+  emit wasModified();
 }
 
-void SoilLayer::setSoilType(SoilType * soilType)
-{
-    _soilType = soilType;
+auto SoilLayer::depthToBase() const -> double { return _depth + _thickness; }
+
+auto SoilLayer::toString() const -> QString {
+  return QString("%1 %2").arg(_soilType->name()).arg(_avg);
 }
 
-auto SoilLayer::thickness() const -> double
-{
-    return _thickness;
+auto SoilLayer::untWt() const -> double {
+  if (_soilType)
+    return _soilType->untWt();
+  else
+    return -1;
 }
 
-void SoilLayer::setThickness(double thickness)
-{
-    _thickness = thickness;
-    emit wasModified();
+auto SoilLayer::density() const -> double {
+  if (_soilType)
+    return _soilType->density();
+  else
+    return -1;
 }
 
-auto SoilLayer::depthToBase() const -> double
-{
-    return _depth + _thickness;
+auto SoilLayer::strainLimit() const -> double {
+  return *std::min(_soilType->dampingModel()->strain().end(),
+                   _soilType->modulusModel()->strain().end());
 }
 
-auto SoilLayer::toString() const -> QString
-{
-    return QString("%1 %2").arg(_soilType->name()).arg(_avg);
+void SoilLayer::fromJson(const QJsonObject &json) {
+  VelocityLayer::fromJson(json);
+  _thickness = json["thickness"].toDouble();
 }
 
-auto SoilLayer::untWt() const -> double
-{
-    if (_soilType)
-        return _soilType->untWt();
-    else
-        return -1;
+auto SoilLayer::toJson() const -> QJsonObject {
+  QJsonObject json = VelocityLayer::toJson();
+  json["thickness"] = _thickness;
+
+  return json;
 }
 
-auto SoilLayer::density() const -> double
-{
-    if (_soilType)
-        return _soilType->density();
-    else
-        return -1;
+auto operator<<(QDataStream &out, const SoilLayer *sl) -> QDataStream & {
+  out << (quint8)1;
+
+  out << qobject_cast<const VelocityLayer *>(sl);
+  out << sl->_thickness;
+
+  return out;
 }
 
+auto operator>>(QDataStream &in, SoilLayer *sl) -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-auto SoilLayer::strainLimit() const -> double
-{
-    return *std::min(
-            _soilType->dampingModel()->strain().end(),
-            _soilType->modulusModel()->strain().end()
-            );
-}
+  in >> qobject_cast<VelocityLayer *>(sl);
+  in >> sl->_thickness;
 
-void SoilLayer::fromJson(const QJsonObject &json)
-{
-    VelocityLayer::fromJson(json);
-    _thickness = json["thickness"].toDouble();
-}
-
-
-auto SoilLayer::toJson() const -> QJsonObject
-{
-    QJsonObject json = VelocityLayer::toJson();
-    json["thickness"] = _thickness;
-
-    return json;
-}
-
-
-auto operator<< (QDataStream & out, const SoilLayer* sl) -> QDataStream &
-{
-    out << (quint8)1;
-
-    out << qobject_cast<const VelocityLayer*>(sl);
-    out << sl->_thickness;
-
-    return out;
-}
-
-auto operator>> (QDataStream & in, SoilLayer* sl) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
-
-    in >>  qobject_cast<VelocityLayer*>(sl);
-    in >>  sl->_thickness;
-
-    return in;
+  return in;
 }

@@ -30,70 +30,73 @@
 #include <QJsonObject>
 #include <QVector>
 
-class PathDurationModel : public MyAbstractTableModel
-{
-    Q_OBJECT
+class PathDurationModel : public MyAbstractTableModel {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const PathDurationModel* pdm) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, PathDurationModel* pdm) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const PathDurationModel *pdm)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, PathDurationModel *pdm)
+      -> QDataStream &;
 
 public:
-    explicit PathDurationModel(QObject *parent = 0);
+  explicit PathDurationModel(QObject *parent = 0);
 
-    enum Columns {
-        DistanceColumn,
-        RateColumn,
-    };
+  enum Columns {
+    DistanceColumn,
+    RateColumn,
+  };
 
-    enum Source {
-        Default,
-        Specified
-    };
+  enum Source { Default, Specified };
 
-    static auto sourceList() -> QStringList;
+  static auto sourceList() -> QStringList;
 
-    void setRegion(AbstractRvtMotion::Region region);
-    void setSource(Source source);
-    auto source() const -> Source;
+  void setRegion(AbstractRvtMotion::Region region);
+  void setSource(Source source);
+  auto source() const -> Source;
 
-    //!@{ Methods for QAbstractTableModel
-    virtual auto rowCount(const QModelIndex &parent) const -> int;
+  //!@{ Methods for QAbstractTableModel
+  virtual auto rowCount(const QModelIndex &parent) const -> int;
 
-    virtual auto columnCount(const QModelIndex &parent) const -> int;
+  virtual auto columnCount(const QModelIndex &parent) const -> int;
 
-    virtual auto headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
+  virtual auto headerData(int section, Qt::Orientation orientation,
+                          int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
-    virtual auto setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  virtual auto setData(const QModelIndex &index, const QVariant &value,
+                       int role = Qt::EditRole) -> bool;
 
-    virtual auto flags( const QModelIndex & index) const -> Qt::ItemFlags;
+  virtual auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
 
-    virtual auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
-    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
-    //!@}
+  virtual auto insertRows(int row, int count,
+                          const QModelIndex &parent = QModelIndex()) -> bool;
+  virtual auto removeRows(int row, int count,
+                          const QModelIndex &parent = QModelIndex()) -> bool;
+  //!@}
 
-    /*! Compute the crustal amplification
-     */
-    auto duration(double distance) const -> double;
+  /*! Compute the crustal amplification
+   */
+  auto duration(double distance) const -> double;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void wasModified();
-    void sourceChanged(int source);
+  void wasModified();
+  void sourceChanged(int source);
 
 public slots:
-    void setRegion(int region);
-    void setSource(int source);
+  void setRegion(int region);
+  void setSource(int source);
 
 private:
-    //! Model source
-    Source _source;
-    //! Distance (km)
-    QVector<double> _distance;
-    //! Duration rate (sec)
-    QVector<double> _rate;
+  //! Model source
+  Source _source;
+  //! Distance (km)
+  QVector<double> _distance;
+  //! Duration rate (sec)
+  QVector<double> _rate;
 };
 
 #endif // PATHDURATIONMODEL_H

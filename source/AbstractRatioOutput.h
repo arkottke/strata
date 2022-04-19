@@ -22,66 +22,67 @@
 #ifndef ABSTRACT_RATIO_OUTPUT_H
 #define ABSTRACT_RATIO_OUTPUT_H
 
-#include "AbstractOutput.h"
 #include "AbstractMotion.h"
+#include "AbstractOutput.h"
 
 #include <QDataStream>
 #include <QJsonObject>
 
 class OutputStatistics;
 
-class AbstractRatioOutput : public AbstractOutput
-{
-    Q_OBJECT
+class AbstractRatioOutput : public AbstractOutput {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const AbstractRatioOutput* aro) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, AbstractRatioOutput* aro) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const AbstractRatioOutput *aro)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, AbstractRatioOutput *aro)
+      -> QDataStream &;
 
 public:
-    explicit AbstractRatioOutput(OutputCatalog* catalog);
+  explicit AbstractRatioOutput(OutputCatalog *catalog);
 
-    virtual auto fullName() const -> QString;
+  virtual auto fullName() const -> QString;
 
-    auto inDepth() const -> double;
-    auto inType() const -> AbstractMotion::Type;
-    void setInType(AbstractMotion::Type inType);
+  auto inDepth() const -> double;
+  auto inType() const -> AbstractMotion::Type;
+  void setInType(AbstractMotion::Type inType);
 
-    auto outDepth() const -> double;
-    auto outType() const -> AbstractMotion::Type;
-    void setOutType(AbstractMotion::Type outType);
+  auto outDepth() const -> double;
+  auto outType() const -> AbstractMotion::Type;
+  void setOutType(AbstractMotion::Type outType);
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 public slots:
-    void setInDepth(double inDepth);
-    void setInType(int inType);
+  void setInDepth(double inDepth);
+  void setInType(int inType);
 
-    void setOutDepth(double outDepth);
-    void setOutType(int outType);
+  void setOutDepth(double outDepth);
+  void setOutType(int outType);
 
 signals:
-    void inDepthChanged(double inDepth);
-    void inTypeChanged(int inType);
+  void inDepthChanged(double inDepth);
+  void inTypeChanged(int inType);
 
-    void outDepthChanged(double outDepth);
-    void outTypeChanged(int outType);
+  void outDepthChanged(double outDepth);
+  void outTypeChanged(int outType);
 
 protected:
-    virtual auto fileName(int motion = 0) const -> QString;
-    virtual auto prefix() const -> const QString;
+  virtual auto fileName(int motion = 0) const -> QString;
+  virtual auto prefix() const -> const QString;
 
-    //! Input depth
-    double  _inDepth;
+  //! Input depth
+  double _inDepth;
 
-    //! Input type
-    AbstractMotion::Type _inType;
+  //! Input type
+  AbstractMotion::Type _inType;
 
-    //! Output depth
-    double  _outDepth;
+  //! Output depth
+  double _outDepth;
 
-    //! Output type
-    AbstractMotion::Type _outType;
+  //! Output type
+  AbstractMotion::Type _outType;
 };
 
 #endif // ABSTRACT_RATIO_OUTPUT_H

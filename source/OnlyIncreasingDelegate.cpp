@@ -26,32 +26,32 @@
 
 #include <cfloat>
 
-OnlyIncreasingDelegate::OnlyIncreasingDelegate(QObject *parent) :
-    QStyledItemDelegate(parent)
-{
-}
+OnlyIncreasingDelegate::OnlyIncreasingDelegate(QObject *parent)
+    : QStyledItemDelegate(parent) {}
 
-auto OnlyIncreasingDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const -> QWidget*
-{
-    QWidget* editor = QStyledItemDelegate::createEditor(parent, option, index);
-    auto* lineEdit = qobject_cast<QLineEdit*>(editor);
-    if (lineEdit) {
-        double min = 0;
-        double max = 20;
+auto OnlyIncreasingDelegate::createEditor(QWidget *parent,
+                                          const QStyleOptionViewItem &option,
+                                          const QModelIndex &index) const
+    -> QWidget * {
+  QWidget *editor = QStyledItemDelegate::createEditor(parent, option, index);
+  auto *lineEdit = qobject_cast<QLineEdit *>(editor);
+  if (lineEdit) {
+    double min = 0;
+    double max = 20;
 
-        QModelIndex prev = index.sibling(index.row() - 1, index.column());
-        if (prev.isValid()) {
-            min = prev.data(Qt::UserRole).toDouble() + DBL_EPSILON;
-        }
-
-        QModelIndex next = index.sibling(index.row() + 1, index.column());
-        if (next.isValid()) {
-            max = next.data(Qt::UserRole).toDouble() - DBL_EPSILON;
-        }
-
-        auto* validator = new QDoubleValidator(min, max, 5);
-        lineEdit->setValidator(validator);
+    QModelIndex prev = index.sibling(index.row() - 1, index.column());
+    if (prev.isValid()) {
+      min = prev.data(Qt::UserRole).toDouble() + DBL_EPSILON;
     }
 
-    return editor;
+    QModelIndex next = index.sibling(index.row() + 1, index.column());
+    if (next.isValid()) {
+      max = next.data(Qt::UserRole).toDouble() - DBL_EPSILON;
+    }
+
+    auto *validator = new QDoubleValidator(min, max, 5);
+    lineEdit->setValidator(validator);
+  }
+
+  return editor;
 }

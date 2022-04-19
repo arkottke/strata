@@ -26,24 +26,23 @@
 
 #include <QStringList>
 
-class AbstractMutableOutputCatalog : public AbstractOutputCatalog
-{
-Q_OBJECT
+class AbstractMutableOutputCatalog : public AbstractOutputCatalog {
+  Q_OBJECT
 public:
-    explicit AbstractMutableOutputCatalog(OutputCatalog *outputCatalog);
+  explicit AbstractMutableOutputCatalog(OutputCatalog *outputCatalog);
 
-    //! If the OutputCatalog needs input information
-    virtual auto needsInputConditions() const -> bool;
+  //! If the OutputCatalog needs input information
+  virtual auto needsInputConditions() const -> bool;
 
-    //! If the OutputCatalog needs output information
-    virtual auto needsOutputConditions() const -> bool;
+  //! If the OutputCatalog needs output information
+  virtual auto needsOutputConditions() const -> bool;
 
-    virtual void addRow(const QString &name) = 0;
-    virtual auto names() const -> QStringList;
+  virtual void addRow(const QString &name) = 0;
+  virtual auto names() const -> QStringList;
 
 protected:
-    //! Relationship between human readable and QMetaObject classnames
-    QMap<QString, QString> _lookup;
+  //! Relationship between human readable and QMetaObject classnames
+  QMap<QString, QString> _lookup;
 };
 
 #endif // ABSTRACT_MUTABLE_OUTPUT_CATALOG_H

@@ -27,26 +27,24 @@
 class ModulusFactory;
 class DampingFactory;
 
-class NonlinearPropertyCatalog
-{
+class NonlinearPropertyCatalog {
 
 public:
-    NonlinearPropertyCatalog();
-    ~NonlinearPropertyCatalog();
+  NonlinearPropertyCatalog();
+  ~NonlinearPropertyCatalog();
 
-    auto modulusFactory() -> ModulusFactory*;
-    auto dampingFactory() -> DampingFactory*;
+  auto modulusFactory() -> ModulusFactory *;
+  auto dampingFactory() -> DampingFactory *;
 
-    //! Save the defined curves
-    auto save() const -> bool;
+  //! Save the defined curves
+  auto save() const -> bool;
 
 protected:
-    ModulusFactory *_modulusFactory;
-    DampingFactory *_dampingFactory;
+  ModulusFactory *_modulusFactory;
+  DampingFactory *_dampingFactory;
 
-    //! File for saving the user create models
-    QString _fileName;
+  //! File for saving the user create models
+  QString _fileName;
 };
-
 
 #endif // NONLINEAR_PROPERTY_CATALOG_H

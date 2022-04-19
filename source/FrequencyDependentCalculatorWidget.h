@@ -30,21 +30,20 @@
 
 class FrequencyDependentCalculator;
 
-class FrequencyDependentCalculatorWidget : public QWidget
-{
-    Q_OBJECT
+class FrequencyDependentCalculatorWidget : public QWidget {
+  Q_OBJECT
 
 public:
-    explicit FrequencyDependentCalculatorWidget(QWidget *parent = nullptr);
+  explicit FrequencyDependentCalculatorWidget(QWidget *parent = nullptr);
 
 public slots:
-    void setCalculator(FrequencyDependentCalculator* fdc);
-    void setReadOnly(bool readOnly);
+  void setCalculator(FrequencyDependentCalculator *fdc);
+  void setReadOnly(bool readOnly);
 
 protected:
-    QDoubleSpinBox* _errorToleranceSpinBox;
-    QSpinBox* _maxIterationsSpinBox;
-    QCheckBox* _useSmoothStrainCheckBox;
+  QDoubleSpinBox *_errorToleranceSpinBox;
+  QSpinBox *_maxIterationsSpinBox;
+  QCheckBox *_useSmoothStrainCheckBox;
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_WIDGET_H

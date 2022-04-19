@@ -30,22 +30,21 @@ class AbstractCalculator;
 class EquivalentLinearCalculatorWidget;
 class FrequencyDependentCalculatorWidget;
 
-class MethodGroupBox : public QGroupBox
-{
-Q_OBJECT
+class MethodGroupBox : public QGroupBox {
+  Q_OBJECT
 public:
-    explicit MethodGroupBox(QWidget *parent = nullptr);
+  explicit MethodGroupBox(QWidget *parent = nullptr);
 
 signals:
 
 public slots:
-    void setCalculator(AbstractCalculator* ac);
-    void setReadOnly(bool readOnly);
+  void setCalculator(AbstractCalculator *ac);
+  void setReadOnly(bool readOnly);
 
 protected:
-    QStackedLayout* _stackedLayout;
-    EquivalentLinearCalculatorWidget* _elcWidget;
-    FrequencyDependentCalculatorWidget* _fdcWidget;
+  QStackedLayout *_stackedLayout;
+  EquivalentLinearCalculatorWidget *_elcWidget;
+  FrequencyDependentCalculatorWidget *_fdcWidget;
 };
 
 #endif // METHOD_GROUP_BOX_H

@@ -24,6 +24,6 @@
 
 #include <qwt_scale_engine.h>
 
-auto logScaleEngine() -> QwtScaleEngine*;
+auto logScaleEngine() -> QwtScaleEngine *;
 
 #endif

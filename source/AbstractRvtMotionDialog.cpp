@@ -21,14 +21,14 @@
 
 #include "RvtMotionDialog.h"
 
+#include "CompatibleRvtMotion.h"
 #include "DimensionLayout.h"
 #include "EditActions.h"
 #include "MyQwtCompatibility.h"
 #include "OnlyIncreasingDelegate.h"
 #include "ResponseSpectrum.h"
-#include "TableGroupBox.h"
-#include "CompatibleRvtMotion.h"
 #include "SourceTheoryRvtMotion.h"
+#include "TableGroupBox.h"
 
 #include <QApplication>
 #include <QComboBox>
@@ -47,274 +47,262 @@
 #include <qwt_plot_picker.h>
 #include <qwt_text.h>
 
-AbstractRvtMotionDialog::AbstractRvtMotionDialog(
-        AbstractRvtMotion *motion, bool readOnly, QWidget *parent) :
-    QDialog(parent), _readOnly(readOnly), _motion(motion)
-{}
+AbstractRvtMotionDialog::AbstractRvtMotionDialog(AbstractRvtMotion *motion,
+                                                 bool readOnly, QWidget *parent)
+    : QDialog(parent), _readOnly(readOnly), _motion(motion) {}
 
-void AbstractRvtMotionDialog::init()
-{
-    // Buttons
-    auto buttonBox = new QDialogButtonBox(
-            QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Apply,
-            Qt::Horizontal);
+void AbstractRvtMotionDialog::init() {
+  // Buttons
+  auto buttonBox = new QDialogButtonBox(
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Apply,
+      Qt::Horizontal);
 
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()),
-            this, SLOT(calculate()));
+  connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
+  connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  connect(buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this,
+          SLOT(calculate()));
 
-    if (!qobject_cast<RvtMotion*>(_motion)) {
-        auto pushButton = new QPushButton(tr("Frequency Parameters..."));
-        connect(pushButton, SIGNAL(clicked()), this, SLOT(openFrequencyDialog()));
-        buttonBox->addButton(pushButton, QDialogButtonBox::ActionRole);
-    }
+  if (!qobject_cast<RvtMotion *>(_motion)) {
+    auto pushButton = new QPushButton(tr("Frequency Parameters..."));
+    connect(pushButton, SIGNAL(clicked()), this, SLOT(openFrequencyDialog()));
+    buttonBox->addButton(pushButton, QDialogButtonBox::ActionRole);
+  }
 
-    auto layout = new QGridLayout;
-    layout->setRowStretch(0, 1);
-    layout->setColumnStretch(1, 1);
+  auto layout = new QGridLayout;
+  layout->setRowStretch(0, 1);
+  layout->setColumnStretch(1, 1);
 
-    layout->addLayout(createParametersLayout(), 0, 0);
-    layout->addWidget(createTabWidget(), 0, 1);
-    layout->addWidget(buttonBox, 1, 0, 1, 2);
+  layout->addLayout(createParametersLayout(), 0, 0);
+  layout->addWidget(createTabWidget(), 0, 1);
+  layout->addWidget(buttonBox, 1, 0, 1, 2);
 
-    setLayout(layout);
+  setLayout(layout);
 
-    // Add copy and paste actions
-    addAction(EditActions::instance()->copyAction());
-    addAction(EditActions::instance()->pasteAction());
+  // Add copy and paste actions
+  addAction(EditActions::instance()->copyAction());
+  addAction(EditActions::instance()->pasteAction());
 }
 
-auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout*
-{
-    auto layout = new QFormLayout;
-    
-    // Name
-    auto lineEdit = new QLineEdit;
-    lineEdit->setText(_motion->nameTemplate());
-    lineEdit->setReadOnly(_readOnly);
+auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
+  auto layout = new QFormLayout;
 
-    connect(lineEdit, SIGNAL(textChanged(QString)),
-            _motion, SLOT(setName(QString)));
-    
-    layout->addRow(tr("Name:"), lineEdit);
+  // Name
+  auto lineEdit = new QLineEdit;
+  lineEdit->setText(_motion->nameTemplate());
+  lineEdit->setReadOnly(_readOnly);
 
-    // Description
-    lineEdit = new QLineEdit;
-    lineEdit->setText(_motion->description());
-    lineEdit->setReadOnly(_readOnly);
+  connect(lineEdit, SIGNAL(textChanged(QString)), _motion,
+          SLOT(setName(QString)));
 
-    connect(lineEdit, SIGNAL(textChanged(QString)),
-            _motion, SLOT(setDescription(QString)));
+  layout->addRow(tr("Name:"), lineEdit);
 
-    layout->addRow(tr("Description:"), lineEdit);
+  // Description
+  lineEdit = new QLineEdit;
+  lineEdit->setText(_motion->description());
+  lineEdit->setReadOnly(_readOnly);
 
-    // Region
-    auto comboBox = new QComboBox;
-    comboBox->addItems(AbstractRvtMotion::regionList());
-    comboBox->setCurrentIndex(
-                static_cast<int>(_motion->region()));
-    connect(comboBox, SIGNAL(currentIndexChanged(int)),
-            _motion, SLOT(setRegion(int)));
+  connect(lineEdit, SIGNAL(textChanged(QString)), _motion,
+          SLOT(setDescription(QString)));
 
-    layout->addRow(tr("Region:"), comboBox);
+  layout->addRow(tr("Description:"), lineEdit);
 
-    // Magnitude
-    auto spinBox = new QDoubleSpinBox;
-    spinBox->setRange(4, 9);
-    spinBox->setDecimals(2);
-    spinBox->setSingleStep(0.1);
-    spinBox->setReadOnly(_readOnly);
+  // Region
+  auto comboBox = new QComboBox;
+  comboBox->addItems(AbstractRvtMotion::regionList());
+  comboBox->setCurrentIndex(static_cast<int>(_motion->region()));
+  connect(comboBox, SIGNAL(currentIndexChanged(int)), _motion,
+          SLOT(setRegion(int)));
 
-    spinBox->setValue(_motion->magnitude());
-    connect(spinBox, SIGNAL(valueChanged(double)),
-            _motion, SLOT(setMagnitude(double)));
+  layout->addRow(tr("Region:"), comboBox);
 
-    layout->addRow(tr("Magnitude (<b>M</b>):"), spinBox);
+  // Magnitude
+  auto spinBox = new QDoubleSpinBox;
+  spinBox->setRange(4, 9);
+  spinBox->setDecimals(2);
+  spinBox->setSingleStep(0.1);
+  spinBox->setReadOnly(_readOnly);
 
-    // Distance
-    spinBox = new QDoubleSpinBox;
-    spinBox->setRange(0, 2000);
-    spinBox->setDecimals(1);
-    spinBox->setSingleStep(1);
-    spinBox->setSuffix(" km");
-    spinBox->setReadOnly(_readOnly);
+  spinBox->setValue(_motion->magnitude());
+  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
+          SLOT(setMagnitude(double)));
 
-    spinBox->setValue(_motion->distance());
-    connect(spinBox, SIGNAL(valueChanged(double)),
-            _motion, SLOT(setDistance(double)));
+  layout->addRow(tr("Magnitude (<b>M</b>):"), spinBox);
 
-    layout->addRow(tr("Epicentral distance:"), spinBox);
+  // Distance
+  spinBox = new QDoubleSpinBox;
+  spinBox->setRange(0, 2000);
+  spinBox->setDecimals(1);
+  spinBox->setSingleStep(1);
+  spinBox->setSuffix(" km");
+  spinBox->setReadOnly(_readOnly);
 
-    // Type
-    comboBox = new QComboBox;
-    comboBox->addItems(AbstractMotion::typeList());
-    comboBox->setCurrentIndex(_motion->type());
-    // Only permit setting type for RvtMotions
-    comboBox->setDisabled(_readOnly || !qobject_cast<RvtMotion*>(_motion));
-    connect(comboBox, SIGNAL(currentIndexChanged(int)),
-            _motion, SLOT(setType(int)));
+  spinBox->setValue(_motion->distance());
+  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
+          SLOT(setDistance(double)));
 
-    layout->addRow(tr("Motion type:"), comboBox);
+  layout->addRow(tr("Epicentral distance:"), spinBox);
 
-    return layout;
+  // Type
+  comboBox = new QComboBox;
+  comboBox->addItems(AbstractMotion::typeList());
+  comboBox->setCurrentIndex(_motion->type());
+  // Only permit setting type for RvtMotions
+  comboBox->setDisabled(_readOnly || !qobject_cast<RvtMotion *>(_motion));
+  connect(comboBox, SIGNAL(currentIndexChanged(int)), _motion,
+          SLOT(setType(int)));
+
+  layout->addRow(tr("Motion type:"), comboBox);
+
+  return layout;
 }
 
-auto AbstractRvtMotionDialog::createTabWidget() -> QTabWidget*
-{
-    _dataTabWidget = new QTabWidget;
-    _dataTabWidget->addTab(createRSPlotWidget(), tr("RS Plot"));
-    
-    // Response spectrum table
-    _rsTableView = new MyTableView;
-    _rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    _rsTableView->setModel(_motion->respSpec());
-    _rsTableView->setReadOnly(true);
-    _dataTabWidget->addTab(_rsTableView, tr("RS Data"));
+auto AbstractRvtMotionDialog::createTabWidget() -> QTabWidget * {
+  _dataTabWidget = new QTabWidget;
+  _dataTabWidget->addTab(createRSPlotWidget(), tr("RS Plot"));
 
-    _dataTabWidget->addTab(createFSPlotWidget(), tr("FAS Plot"));
+  // Response spectrum table
+  _rsTableView = new MyTableView;
+  _rsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  _rsTableView->setModel(_motion->respSpec());
+  _rsTableView->setReadOnly(true);
+  _dataTabWidget->addTab(_rsTableView, tr("RS Data"));
 
-    // Fourier amplitude spectrum table
-    _fsTableView = new MyTableView;
+  _dataTabWidget->addTab(createFSPlotWidget(), tr("FAS Plot"));
 
-    if (auto rm = qobject_cast<RvtMotion*>(_motion)) {
-        _fsTableView->setModel(rm);
-    } else {
-        _fsTableView->setModel(_motion);
-        _fsTableView->setReadOnly(true);
-    }
-    _dataTabWidget->addTab(_fsTableView, tr("FAS Data"));
+  // Fourier amplitude spectrum table
+  _fsTableView = new MyTableView;
 
-    return _dataTabWidget;
+  if (auto rm = qobject_cast<RvtMotion *>(_motion)) {
+    _fsTableView->setModel(rm);
+  } else {
+    _fsTableView->setModel(_motion);
+    _fsTableView->setReadOnly(true);
+  }
+  _dataTabWidget->addTab(_fsTableView, tr("FAS Data"));
+
+  return _dataTabWidget;
 }
 
-auto AbstractRvtMotionDialog::createRSPlotWidget() -> QWidget*
-{
-    // Response spectrum plot
-    _rsPlot = new QwtPlot;
-    _rsPlot->setAutoReplot(true);
-    auto picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                                              QwtPicker::CrossRubberBand,
-                                              QwtPicker::ActiveOnly, _rsPlot->canvas());
-    picker->setStateMachine(new QwtPickerDragPointMachine());
+auto AbstractRvtMotionDialog::createRSPlotWidget() -> QWidget * {
+  // Response spectrum plot
+  _rsPlot = new QwtPlot;
+  _rsPlot->setAutoReplot(true);
+  auto picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
+                                  QwtPicker::CrossRubberBand,
+                                  QwtPicker::ActiveOnly, _rsPlot->canvas());
+  picker->setStateMachine(new QwtPickerDragPointMachine());
 
-    _rsPlot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
+  _rsPlot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
 
-    QFont font = QApplication::font();
-    _rsPlot->setAxisFont(QwtPlot::xBottom, font);
+  QFont font = QApplication::font();
+  _rsPlot->setAxisFont(QwtPlot::xBottom, font);
 
-    _rsPlot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
-    _rsPlot->setAxisFont(QwtPlot::yLeft, font);
+  _rsPlot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
+  _rsPlot->setAxisFont(QwtPlot::yLeft, font);
 
-    font.setBold(true);
-    QwtText text = QwtText(tr("Period (s)"));
-    text.setFont(font);
-    _rsPlot->setAxisTitle(QwtPlot::xBottom, text);
+  font.setBold(true);
+  QwtText text = QwtText(tr("Period (s)"));
+  text.setFont(font);
+  _rsPlot->setAxisTitle(QwtPlot::xBottom, text);
 
-    text.setText(tr("Spectral Accel. (g)"));
-    _rsPlot->setAxisTitle(QwtPlot::yLeft, text);
+  text.setText(tr("Spectral Accel. (g)"));
+  _rsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
-    _saCurve = new QwtPlotCurve(tr("Calculated"));
-    _saCurve->setPen(QPen(Qt::blue, 2));
-    _saCurve->setSamples(_motion->respSpec()->period(),
+  _saCurve = new QwtPlotCurve(tr("Calculated"));
+  _saCurve->setPen(QPen(Qt::blue, 2));
+  _saCurve->setSamples(_motion->respSpec()->period(),
                        _motion->respSpec()->sa());
-    _saCurve->attach(_rsPlot);
+  _saCurve->attach(_rsPlot);
 
-    addRespSpecCurves();
+  addRespSpecCurves();
 
-    auto *scrollArea = new QScrollArea;
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setWidget(_rsPlot);
+  auto *scrollArea = new QScrollArea;
+  scrollArea->setWidgetResizable(true);
+  scrollArea->setWidget(_rsPlot);
 
-    return scrollArea;
+  return scrollArea;
 }
 
-void AbstractRvtMotionDialog::addRespSpecCurves()
-{
-    // Do nothing.
+void AbstractRvtMotionDialog::addRespSpecCurves() {
+  // Do nothing.
 }
 
-auto AbstractRvtMotionDialog::createFSPlotWidget() -> QWidget*
-{
-    // Fourier amplitude spectrum plot
-    _fsPlot = new QwtPlot;
-    _fsPlot->setAutoReplot(true);
-    auto picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
-                               QwtPlotPicker::CrossRubberBand,
-                               QwtPlotPicker::ActiveOnly, _fsPlot->canvas());
-    picker->setStateMachine(new QwtPickerDragPointMachine());
+auto AbstractRvtMotionDialog::createFSPlotWidget() -> QWidget * {
+  // Fourier amplitude spectrum plot
+  _fsPlot = new QwtPlot;
+  _fsPlot->setAutoReplot(true);
+  auto picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
+                                  QwtPlotPicker::CrossRubberBand,
+                                  QwtPlotPicker::ActiveOnly, _fsPlot->canvas());
+  picker->setStateMachine(new QwtPickerDragPointMachine());
 
-    _fsPlot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
-    QFont font = QApplication::font();
-    _fsPlot->setAxisFont(QwtPlot::xBottom, font);
+  _fsPlot->setAxisScaleEngine(QwtPlot::xBottom, logScaleEngine());
+  QFont font = QApplication::font();
+  _fsPlot->setAxisFont(QwtPlot::xBottom, font);
 
-    _fsPlot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
-    _fsPlot->setAxisFont(QwtPlot::yLeft, font);
+  _fsPlot->setAxisScaleEngine(QwtPlot::yLeft, logScaleEngine());
+  _fsPlot->setAxisFont(QwtPlot::yLeft, font);
 
-    font.setBold(true);
-    QwtText text(tr("Frequency (Hz)"));
-    text.setFont(font);
-    _fsPlot->setAxisTitle(QwtPlot::xBottom, text);
+  font.setBold(true);
+  QwtText text(tr("Frequency (Hz)"));
+  text.setFont(font);
+  _fsPlot->setAxisTitle(QwtPlot::xBottom, text);
 
-    text.setText(tr("Fourier Amplitude (g-s)"));
-    _fsPlot->setAxisTitle(QwtPlot::yLeft, text);
+  text.setText(tr("Fourier Amplitude (g-s)"));
+  _fsPlot->setAxisTitle(QwtPlot::yLeft, text);
 
-    _faCurve = new QwtPlotCurve;
-    _faCurve->setPen(QPen(Qt::blue, 2));
-    _faCurve->setSamples(_motion->freq(),_motion->fourierAcc());
-    _faCurve->attach(_fsPlot);
+  _faCurve = new QwtPlotCurve;
+  _faCurve->setPen(QPen(Qt::blue, 2));
+  _faCurve->setSamples(_motion->freq(), _motion->fourierAcc());
+  _faCurve->attach(_fsPlot);
 
-    auto scrollArea = new QScrollArea;
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setWidget(_fsPlot);
+  auto scrollArea = new QScrollArea;
+  scrollArea->setWidgetResizable(true);
+  scrollArea->setWidget(_fsPlot);
 
-    return scrollArea;
+  return scrollArea;
 }
 
-void AbstractRvtMotionDialog::openFrequencyDialog()
-{
-    Dimension* freq;
+void AbstractRvtMotionDialog::openFrequencyDialog() {
+  Dimension *freq;
 
-    if (auto m = qobject_cast<CompatibleRvtMotion*>(_motion)) {
-        freq = m->freqDimension(); 
-    } else if (auto m = qobject_cast<SourceTheoryRvtMotion*>(_motion)) {
-        freq = m->freqDimension(); 
-    } else {
-        return; 
-    }
+  if (auto m = qobject_cast<CompatibleRvtMotion *>(_motion)) {
+    freq = m->freqDimension();
+  } else if (auto m = qobject_cast<SourceTheoryRvtMotion *>(_motion)) {
+    freq = m->freqDimension();
+  } else {
+    return;
+  }
 
-    QDialog dialog(this);
-    auto layout = new DimensionLayout;
-    layout->setRange(0.001, 1000);
-    layout->setModel(freq);
-    layout->setSuffix(" Hz");
+  QDialog dialog(this);
+  auto layout = new DimensionLayout;
+  layout->setRange(0.001, 1000);
+  layout->setModel(freq);
+  layout->setSuffix(" Hz");
 
-    auto* buttonBox = new QDialogButtonBox(
-            QDialogButtonBox::Ok, Qt::Horizontal);
-    connect(buttonBox, SIGNAL(accepted()),
-            &dialog, SLOT(accept()));
+  auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
+  connect(buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
 
-    layout->addRow(buttonBox);
+  layout->addRow(buttonBox);
 
-    dialog.setLayout(layout);
-    dialog.exec();
+  dialog.setLayout(layout);
+  dialog.exec();
 }
 
-void AbstractRvtMotionDialog::calculate()
-{
-    _motion->calculate();
+void AbstractRvtMotionDialog::calculate() {
+  _motion->calculate();
 
-    _fsTableView->resizeRowsToContents();
-    _rsTableView->resizeRowsToContents();
+  _fsTableView->resizeRowsToContents();
+  _rsTableView->resizeRowsToContents();
 
-    _faCurve->setSamples(_motion->freq(),_motion->fourierAcc());
-    _saCurve->setSamples(_motion->respSpec()->period(), _motion->respSpec()->sa());
+  _faCurve->setSamples(_motion->freq(), _motion->fourierAcc());
+  _saCurve->setSamples(_motion->respSpec()->period(),
+                       _motion->respSpec()->sa());
 
-    _dataTabWidget->setCurrentIndex(0);
+  _dataTabWidget->setCurrentIndex(0);
 }
 
-void AbstractRvtMotionDialog::tryAccept()
-{
-    _motion->calculate();
-    accept();
+void AbstractRvtMotionDialog::tryAccept() {
+  _motion->calculate();
+  accept();
 }

@@ -28,30 +28,29 @@
 class AbstractMutableOutputCatalog;
 class MyTableView;
 
-class OutputTableFrame : public QFrame
-{
-Q_OBJECT
+class OutputTableFrame : public QFrame {
+  Q_OBJECT
 public:
-    explicit OutputTableFrame(QWidget *parent = nullptr);
+  explicit OutputTableFrame(QWidget *parent = nullptr);
 
-    void setModel(AbstractMutableOutputCatalog* amoc);
-    void setReadOnly(bool readOnly);
+  void setModel(AbstractMutableOutputCatalog *amoc);
+  void setReadOnly(bool readOnly);
 
 signals:
 
 public slots:
-    void add();
-    void remove();
+  void add();
+  void remove();
 
 protected slots:
-    void updateButtons();
+  void updateButtons();
 
 protected:
-    QPushButton* _addButton;
-    QPushButton* _removeButton;
-    MyTableView* _tableView;
+  QPushButton *_addButton;
+  QPushButton *_removeButton;
+  MyTableView *_tableView;
 
-    AbstractMutableOutputCatalog* _outputCatalog;
+  AbstractMutableOutputCatalog *_outputCatalog;
 };
 
 #endif // OUTPUT_TABLE_FRAME_H

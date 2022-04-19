@@ -26,19 +26,19 @@
 
 class AbstractCalculator;
 
-class MaxAccelProfileOutput : public AbstractProfileOutput
-{
-Q_OBJECT
+class MaxAccelProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit MaxAccelProfileOutput(OutputCatalog* catalog);
+  explicit MaxAccelProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // MAX_ACCEL_PROFILE_OUTPUT_H

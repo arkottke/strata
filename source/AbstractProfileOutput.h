@@ -30,47 +30,51 @@
 class OutputStatistics;
 class OutputCatalog;
 
-class AbstractProfileOutput : public AbstractOutput
-{
-    Q_OBJECT
+class AbstractProfileOutput : public AbstractOutput {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const AbstractProfileOutput* ao) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, AbstractProfileOutput* ao) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const AbstractProfileOutput *ao)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, AbstractProfileOutput *ao)
+      -> QDataStream &;
 
 public:
-    enum CurveType{
-        Yfx, //!< Y data is a function of x data
-        Xfx  //!< X data is a function of y data
-    };
+  enum CurveType {
+    Yfx, //!< Y data is a function of x data
+    Xfx  //!< X data is a function of y data
+  };
 
-    explicit AbstractProfileOutput(OutputCatalog* catalog, bool interpolated = true);
+  explicit AbstractProfileOutput(OutputCatalog *catalog,
+                                 bool interpolated = true);
 
-    virtual auto fullName() const -> QString;
-    virtual auto needsDepth() const -> bool;
+  virtual auto fullName() const -> QString;
+  virtual auto needsDepth() const -> bool;
 
-    auto enabled() const -> bool;
-    void setEnabled(bool enabled);
+  auto enabled() const -> bool;
+  void setEnabled(bool enabled);
 
-    virtual auto curveType() const -> AbstractOutput::CurveType;
+  virtual auto curveType() const -> AbstractOutput::CurveType;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 protected:
-    auto fileName(int motion = 0) const -> QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
-    virtual auto yScaleEngine() const -> QwtScaleEngine*;
-    virtual auto yLabel() const -> const QString;
-    virtual auto ref(int motion = 0) const -> const QVector<double>&;
+  auto fileName(int motion = 0) const -> QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
+  virtual auto yScaleEngine() const -> QwtScaleEngine *;
+  virtual auto yLabel() const -> const QString;
+  virtual auto ref(int motion = 0) const -> const QVector<double> &;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 
-    //! Extrapolate the data -- used for the final point in a strain based profiles
-    void extrap(const QVector<double> & ref, QVector<double> & data, double layerThickness) const;
+  //! Extrapolate the data -- used for the final point in a strain based
+  //! profiles
+  void extrap(const QVector<double> &ref, QVector<double> &data,
+              double layerThickness) const;
 
-    //! If the output is enabled
-    bool _enabled;
+  //! If the output is enabled
+  bool _enabled;
 };
 
 #endif // ABSTRACT_PROFILE_OUTPUT_H

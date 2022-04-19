@@ -19,34 +19,31 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef WANG_RATHJE_PEAK_CALCULATOR_H
 #define WANG_RATHJE_PEAK_CALCULATOR_H
 
 #include "BooreThompsonPeakCalculator.h"
 
 struct WangRathjeCoef {
-    int mode;
-    double a;
-    double b;
-    double d;
-    double e;
-    double sd;
+  int mode;
+  double a;
+  double b;
+  double d;
+  double e;
+  double sd;
 };
 
 class WangRathjePeakCalculator : public BooreThompsonPeakCalculator {
 
 public:
-    WangRathjePeakCalculator();
+  WangRathjePeakCalculator();
 
-    virtual auto calcDurationRms(
-            double duration,
-            double oscFreq,
-            double oscDamping,
-            const QVector<std::complex<double> > &siteTransFunc) -> double;
+  virtual auto
+  calcDurationRms(double duration, double oscFreq, double oscDamping,
+                  const QVector<std::complex<double>> &siteTransFunc) -> double;
+
 protected:
-
-    QList<WangRathjeCoef> _coefs;
+  QList<WangRathjeCoef> _coefs;
 };
 
-#endif //WANG_RATHJE_PEAK_CALCULATOR_H
+#endif // WANG_RATHJE_PEAK_CALCULATOR_H

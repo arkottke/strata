@@ -28,42 +28,43 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-class AbstractLocationOutput : public AbstractOutput
-{
-    Q_OBJECT
+class AbstractLocationOutput : public AbstractOutput {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const AbstractLocationOutput* alo) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, AbstractLocationOutput* alo) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const AbstractLocationOutput *alo)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, AbstractLocationOutput *alo)
+      -> QDataStream &;
 
 public:
-    explicit AbstractLocationOutput(OutputCatalog* catalog);
+  explicit AbstractLocationOutput(OutputCatalog *catalog);
 
-    auto needsOutputConditions() const -> bool;
-    virtual auto fullName() const -> QString;
+  auto needsOutputConditions() const -> bool;
+  virtual auto fullName() const -> QString;
 
-    auto depth() const -> double;
-    auto type() const -> AbstractMotion::Type;
-    void setType(AbstractMotion::Type type);
+  auto depth() const -> double;
+  auto type() const -> AbstractMotion::Type;
+  void setType(AbstractMotion::Type type);
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 public slots:
-    void setDepth(double depth);
-    void setType(int type);
+  void setDepth(double depth);
+  void setType(int type);
 
 signals:
-    void depthChanged(double depth);
-    void typeChanged(int type);
+  void depthChanged(double depth);
+  void typeChanged(int type);
 
 protected:
-    virtual auto fileName(int motion = 0) const -> QString;
-    virtual auto prefix() const -> const QString;
+  virtual auto fileName(int motion = 0) const -> QString;
+  virtual auto prefix() const -> const QString;
 
-    //! Depth of the response
-    double  _depth;
+  //! Depth of the response
+  double _depth;
 
-    //! Type of the repsonse
-    AbstractMotion::Type _type;
+  //! Type of the repsonse
+  AbstractMotion::Type _type;
 };
 #endif // ABSTRACTLOCATIONOUTPUT_H

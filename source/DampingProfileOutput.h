@@ -26,19 +26,20 @@
 
 class AbstractCalculator;
 
-class DampingProfileOutput : public AbstractSteppedProfileOutput
-{
-Q_OBJECT
+class DampingProfileOutput : public AbstractSteppedProfileOutput {
+  Q_OBJECT
 public:
-    explicit DampingProfileOutput(OutputCatalog* catalog);
+  explicit DampingProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
-};;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
+};
+;
 
 #endif // DAMPING_PROFILE_OUTPUT_H

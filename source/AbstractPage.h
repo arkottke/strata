@@ -26,20 +26,19 @@
 
 class SiteResponseModel;
 
-class AbstractPage : public QWidget
-{
-Q_OBJECT
+class AbstractPage : public QWidget {
+  Q_OBJECT
 public:
-    explicit AbstractPage(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+  explicit AbstractPage(QWidget *parent = nullptr,
+                        Qt::WindowFlags f = Qt::WindowFlags());
 
-    virtual void setModel(SiteResponseModel* model) = 0;
+  virtual void setModel(SiteResponseModel *model) = 0;
 
 signals:
-    void linkActivated(const QString& link);
+  void linkActivated(const QString &link);
 
 public slots:
-    virtual void setReadOnly(bool readOnly);
-
+  virtual void setReadOnly(bool readOnly);
 };
 
 #endif // ABSTRACTPAGE_H

@@ -25,35 +25,35 @@
 #include "AbstractNonlinearPropertyFactory.h"
 
 #include <QGroupBox>
-#include <QPushButton>
 #include <QListView>
+#include <QPushButton>
 
-class NonlinearPropertyFactoryGroupBox : public QGroupBox
-{
-    Q_OBJECT
+class NonlinearPropertyFactoryGroupBox : public QGroupBox {
+  Q_OBJECT
 
 public:
-    explicit NonlinearPropertyFactoryGroupBox(AbstractNonlinearPropertyFactory *model,
-                                              const QString &title, QWidget *parent = nullptr);
+  explicit NonlinearPropertyFactoryGroupBox(
+      AbstractNonlinearPropertyFactory *model, const QString &title,
+      QWidget *parent = nullptr);
 
-    void selectRow(int row);
+  void selectRow(int row);
 signals:
-    void nlPropertyChanged(NonlinearProperty *nlProperty, bool readOnly);
+  void nlPropertyChanged(NonlinearProperty *nlProperty, bool readOnly);
 
 public slots:
-    void clearSelection();
+  void clearSelection();
 
 protected slots:
-    void addRow();
-    void removeRow();
+  void addRow();
+  void removeRow();
 
-    void updateCurrent(const QModelIndex &current, const QModelIndex &previous);
-    void modelsInserted(const QModelIndex & parent, int start, int end);
+  void updateCurrent(const QModelIndex &current, const QModelIndex &previous);
+  void modelsInserted(const QModelIndex &parent, int start, int end);
 
 protected:
-    AbstractNonlinearPropertyFactory *_model;
-    QListView *_view;
-    QPushButton *_removeButton;
+  AbstractNonlinearPropertyFactory *_model;
+  QListView *_view;
+  QPushButton *_removeButton;
 };
 
 #endif // NONLINEAR_PROPERTY_FACTORY_GROUP_BOX_H

@@ -23,8 +23,8 @@
 
 #include "AbstractCalculator.h"
 #include "AbstractMotion.h"
-#include "MyQwtCompatibility.h"
 #include "LinearOutputInterpolater.h"
+#include "MyQwtCompatibility.h"
 #include "OutputCatalog.h"
 #include "OutputStatistics.h"
 #include "SoilProfile.h"
@@ -37,129 +37,112 @@
 
 #include <qwt_scale_engine.h>
 
-AbstractProfileOutput::AbstractProfileOutput(OutputCatalog* catalog, bool interpolated)
-    : AbstractOutput(catalog), _enabled(false)
-{    
-    if (interpolated)
-        _interp = new LinearOutputInterpolater;
+AbstractProfileOutput::AbstractProfileOutput(OutputCatalog *catalog,
+                                             bool interpolated)
+    : AbstractOutput(catalog), _enabled(false) {
+  if (interpolated)
+    _interp = new LinearOutputInterpolater;
 
-    _statistics = new OutputStatistics(this);
-    connect(_statistics, SIGNAL(wasModified()),
-            this, SIGNAL(wasModified()));
+  _statistics = new OutputStatistics(this);
+  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
-auto AbstractProfileOutput::fullName() const -> QString
-{
-    return "Profile -- " + name();
+auto AbstractProfileOutput::fullName() const -> QString {
+  return "Profile -- " + name();
 }
 
-auto AbstractProfileOutput::enabled() const -> bool
-{
-    return _enabled;
+auto AbstractProfileOutput::enabled() const -> bool { return _enabled; }
+
+void AbstractProfileOutput::setEnabled(bool enabled) {
+  _enabled = enabled;
+  emit wasModified();
 }
 
-void AbstractProfileOutput::setEnabled(bool enabled)
-{
-    _enabled = enabled;
-    emit wasModified();
+auto AbstractProfileOutput::curveType() const -> AbstractOutput::CurveType {
+  return AbstractOutput::Xfy;
 }
 
-auto AbstractProfileOutput::curveType() const -> AbstractOutput::CurveType
-{
-    return AbstractOutput::Xfy;
+auto AbstractProfileOutput::needsDepth() const -> bool { return true; }
+auto AbstractProfileOutput::fileName(int motion) const -> QString {
+  Q_UNUSED(motion);
+
+  return "profile-" + shortName();
 }
 
-auto AbstractProfileOutput::needsDepth() const -> bool
-{
-    return true;
-}
-auto AbstractProfileOutput::fileName(int motion) const -> QString
-{
-    Q_UNUSED(motion);
-
-    return "profile-" + shortName();
+auto AbstractProfileOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto AbstractProfileOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto AbstractProfileOutput::yScaleEngine() const -> QwtScaleEngine * {
+  auto *scaleEngine = new QwtLinearScaleEngine;
+  scaleEngine->setAttribute(QwtScaleEngine::Inverted, true);
+
+  return scaleEngine;
 }
 
-auto AbstractProfileOutput::yScaleEngine() const -> QwtScaleEngine*
-{
-    auto *scaleEngine = new QwtLinearScaleEngine;
-    scaleEngine->setAttribute(QwtScaleEngine::Inverted, true);
-
-    return scaleEngine;
+auto AbstractProfileOutput::yLabel() const -> const QString {
+  return tr("Depth (%1)").arg(Units::instance()->length());
 }
 
-auto AbstractProfileOutput::yLabel() const -> const QString
-{
-    return tr("Depth (%1)").arg(Units::instance()->length());
+auto AbstractProfileOutput::ref(int motion) const -> const QVector<double> & {
+  Q_UNUSED(motion);
+  return _catalog->depth();
 }
 
-auto AbstractProfileOutput::ref(int motion) const -> const QVector<double>&
-{
-    Q_UNUSED(motion);
-    return _catalog->depth();
+void AbstractProfileOutput::extract(AbstractCalculator *const calculator,
+                                    QVector<double> &ref,
+                                    QVector<double> &data) const {
+  Q_UNUSED(data);
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
+
+  // Populate the reference with the depth to the top of the layers
+  ref.clear();
+
+  for (const SubLayer &sl : subLayers)
+    ref << sl.depth();
+
+  // Add the depth at the surface of the bedrock
+  ref << subLayers.last().depthToBase();
 }
 
-void AbstractProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(data);
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
+void AbstractProfileOutput::extrap(const QVector<double> &ref,
+                                   QVector<double> &data,
+                                   double layerThickness) const {
+  Q_ASSERT(ref.size() - 1 == data.size());
+  // Compute the slope based on the last two values and extrapolate.
+  const int n = ref.size() - 2;
+  const double slope =
+      (data.at(n) - data.at(n - 1)) / (ref.at(n) - ref.at(n - 1));
 
-    // Populate the reference with the depth to the top of the layers
-    ref.clear();
-
-    for (const SubLayer &sl : subLayers)
-        ref << sl.depth();
-
-    // Add the depth at the surface of the bedrock
-    ref << subLayers.last().depthToBase();
+  // Limit the extrapolation by the minimum double value (greater than 0.)
+  data << std::max(DBL_MIN, data.last() + slope * layerThickness / 2.);
 }
 
-void AbstractProfileOutput::extrap(const QVector<double> & ref, QVector<double> & data, double layerThickness) const
-{
-    Q_ASSERT(ref.size() - 1  == data.size());
-    // Compute the slope based on the last two values and extrapolate.
-    const int n = ref.size() - 2;
-    const double slope = (data.at(n) - data.at(n-1)) /
-                   (ref.at(n) - ref.at(n-1));
-
-    // Limit the extrapolation by the minimum double value (greater than 0.)
-    data << std::max(DBL_MIN, data.last() + slope * layerThickness / 2.);
+void AbstractProfileOutput::fromJson(const QJsonObject &json) {
+  AbstractOutput::fromJson(json);
+  _enabled = json["enabled"].toBool();
 }
 
-void AbstractProfileOutput::fromJson(const QJsonObject &json)
-{
-    AbstractOutput::fromJson(json);
-    _enabled = json["enabled"].toBool();
+auto AbstractProfileOutput::toJson() const -> QJsonObject {
+  QJsonObject json = AbstractOutput::toJson();
+  json["enabled"] = _enabled;
+  return json;
 }
 
-auto AbstractProfileOutput::toJson() const -> QJsonObject
-{
-    QJsonObject json = AbstractOutput::toJson();
-    json["enabled"] = _enabled;
-    return json;
+auto operator<<(QDataStream &out, const AbstractProfileOutput *apo)
+    -> QDataStream & {
+  out << (quint8)1;
+
+  out << apo->_enabled << qobject_cast<const AbstractOutput *>(apo);
+
+  return out;
 }
 
-auto operator<< (QDataStream & out, const AbstractProfileOutput* apo) -> QDataStream &
-{
-    out << (quint8)1;
+auto operator>>(QDataStream &in, AbstractProfileOutput *apo) -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-    out << apo->_enabled << qobject_cast<const AbstractOutput*>(apo);
+  in >> apo->_enabled >> qobject_cast<AbstractOutput *>(apo);
 
-    return out;
-}
-
-auto operator>> (QDataStream & in, AbstractProfileOutput* apo) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
-
-    in >> apo->_enabled >> qobject_cast<AbstractOutput*>(apo);
-
-    return in;
+  return in;
 }

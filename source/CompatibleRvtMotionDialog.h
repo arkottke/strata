@@ -27,23 +27,22 @@
 class MyTableView;
 class CompatibleRvtMotion;
 
-class CompatibleRvtMotionDialog : public AbstractRvtMotionDialog
-{
-Q_OBJECT
+class CompatibleRvtMotionDialog : public AbstractRvtMotionDialog {
+  Q_OBJECT
 public:
-    explicit CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly,
-                                       QWidget *parent = nullptr);
+  explicit CompatibleRvtMotionDialog(CompatibleRvtMotion *motion, bool readOnly,
+                                     QWidget *parent = nullptr);
 
 protected slots:
-    void calculate();
+  void calculate();
 
 protected:
-    virtual auto createParametersLayout() -> QFormLayout*;
-    virtual auto createTabWidget() -> QTabWidget*;
-    virtual void addRespSpecCurves();
+  virtual auto createParametersLayout() -> QFormLayout *;
+  virtual auto createTabWidget() -> QTabWidget *;
+  virtual void addRespSpecCurves();
 
-    MyTableView *_targetSaTableView;
-    QwtPlotCurve *_targetSaCurve;
+  MyTableView *_targetSaTableView;
+  QwtPlotCurve *_targetSaCurve;
 };
 
 #endif // COMPATIBLE_RVT_MOTION_DIALOG_H

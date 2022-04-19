@@ -28,36 +28,31 @@
 
 #include <qwt_scale_engine.h>
 
-MaxErrorProfileOutput::MaxErrorProfileOutput(OutputCatalog* catalog)
-    : AbstractSteppedProfileOutput(catalog)
-{
-    _statistics = 0;
+MaxErrorProfileOutput::MaxErrorProfileOutput(OutputCatalog *catalog)
+    : AbstractSteppedProfileOutput(catalog) {
+  _statistics = 0;
 }
 
-auto MaxErrorProfileOutput::name() const -> QString
-{
-    return tr("Maximum Error Profile");
+auto MaxErrorProfileOutput::name() const -> QString {
+  return tr("Maximum Error Profile");
 }
 
-auto MaxErrorProfileOutput::shortName() const -> QString
-{
-    return tr("dispTs");
+auto MaxErrorProfileOutput::shortName() const -> QString {
+  return tr("dispTs");
 }
 
-auto MaxErrorProfileOutput::xLabel() const -> const QString
-{
-    return tr("Maximum Error (%)");
+auto MaxErrorProfileOutput::xLabel() const -> const QString {
+  return tr("Maximum Error (%)");
 }
 
-auto MaxErrorProfileOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return new QwtLinearScaleEngine;
+auto MaxErrorProfileOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return new QwtLinearScaleEngine;
 }
 
-void MaxErrorProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    AbstractSteppedProfileOutput::extract(calculator, ref, data);
+void MaxErrorProfileOutput::extract(AbstractCalculator *const calculator,
+                                    QVector<double> &ref,
+                                    QVector<double> &data) const {
+  AbstractSteppedProfileOutput::extract(calculator, ref, data);
 
-    data = calculator->site()->maxErrorProfile();
+  data = calculator->site()->maxErrorProfile();
 }

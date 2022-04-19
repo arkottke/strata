@@ -24,12 +24,11 @@
 
 #include "AbstractNonlinearPropertyFactory.h"
 
-class DampingFactory : public AbstractNonlinearPropertyFactory
-{
-    Q_OBJECT
+class DampingFactory : public AbstractNonlinearPropertyFactory {
+  Q_OBJECT
 
 public:
-    DampingFactory(QObject *parent = nullptr);
+  DampingFactory(QObject *parent = nullptr);
 };
 
 #endif // DAMPING_FACTORY_H

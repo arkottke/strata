@@ -26,17 +26,17 @@
 
 class AbstractCalculator;
 
-class MaxStrainProfileOutput : public AbstractProfileOutput
-{
-    Q_OBJECT
+class MaxStrainProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit MaxStrainProfileOutput(OutputCatalog* catalog);
-    virtual auto name() const -> QString;
-protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+  explicit MaxStrainProfileOutput(OutputCatalog *catalog);
+  virtual auto name() const -> QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+protected:
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
+
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // MAX_STRAIN_PROFILE_OUTPUT_H

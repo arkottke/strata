@@ -36,139 +36,148 @@ class Location;
 class SoilProfile;
 class TextLog;
 
-enum CalculationStatus
-{
-    NotRun,
-    Successful,
-    WavePropagationError,
-    StrainLimitExceeded,
-    NoConvergence,
-    CanceledByUser
+enum CalculationStatus {
+  NotRun,
+  Successful,
+  WavePropagationError,
+  StrainLimitExceeded,
+  NoConvergence,
+  CanceledByUser
 };
 
-class AbstractCalculator : public QObject
-{
-    Q_OBJECT
+class AbstractCalculator : public QObject {
+  Q_OBJECT
 
 public:
-    explicit AbstractCalculator(QObject *parent = nullptr);
+  explicit AbstractCalculator(QObject *parent = nullptr);
 
-    //! Produce an HTML table summarizing the calculator
-    virtual auto toHtml() const -> QString;
+  //! Produce an HTML table summarizing the calculator
+  virtual auto toHtml() const -> QString;
 
-    auto site() const -> SoilProfile *;
-    auto motion() const -> AbstractMotion *;
+  auto site() const -> SoilProfile *;
+  auto motion() const -> AbstractMotion *;
 
-    //! Set text log to record calculation steps
-    void setTextLog(TextLog *const textLog);
+  //! Set text log to record calculation steps
+  void setTextLog(TextLog *const textLog);
 
-    //! Reset the object to the default values
-    virtual void reset();
+  //! Reset the object to the default values
+  virtual void reset();
 
-    //! Perform the site response calculation
-    virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool = 0;
+  //! Perform the site response calculation
+  virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool = 0;
 
-    //! Calculation status
-    auto status() const -> CalculationStatus;
+  //! Calculation status
+  auto status() const -> CalculationStatus;
 
-    //! Compute the peak ground acceleration at the surface
-    auto surfacePGA() const -> double;
+  //! Compute the peak ground acceleration at the surface
+  auto surfacePGA() const -> double;
 
-    /*! Compute the acceleration transfer functions for a specific layer.
-     *
-     * \param inLocation input location
-     * \param inputType type of input
-     * \param outLocation output location
-     * \param outputType type of output
-     * \return the transfer function
-     */
-    auto calcAccelTf(
-        const Location &inLocation, const AbstractMotion::Type inputType,
-        const Location &outLocation, const AbstractMotion::Type outputType) const -> const QVector<std::complex<double>>;
+  /*! Compute the acceleration transfer functions for a specific layer.
+   *
+   * \param inLocation input location
+   * \param inputType type of input
+   * \param outLocation output location
+   * \param outputType type of output
+   * \return the transfer function
+   */
+  auto calcAccelTf(const Location &inLocation,
+                   const AbstractMotion::Type inputType,
+                   const Location &outLocation,
+                   const AbstractMotion::Type outputType) const
+      -> const QVector<std::complex<double>>;
 
-    /*! Compute the velocity to strain transfer function.
-     *
-     * \param inLocation input location
-     * \param inputType type of input
-     * \param outLocation location of the desired transfer fucntion
-     * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
-     */
-    auto calcStrainTf(
-        const Location &inLocation, const AbstractMotion::Type inputType, const Location &outLocation) const -> QVector<std::complex<double>>;
+  /*! Compute the velocity to strain transfer function.
+   *
+   * \param inLocation input location
+   * \param inputType type of input
+   * \param outLocation location of the desired transfer fucntion
+   * \return tf the strain transfer function to be applied to the Fourier
+   * amplitude spectrum of the velocity
+   */
+  auto calcStrainTf(const Location &inLocation,
+                    const AbstractMotion::Type inputType,
+                    const Location &outLocation) const
+      -> QVector<std::complex<double>>;
 
-    /*! Compute the velocity to visco-elastic stress transfer function.
-     *
-     * \param inLocation input location
-     * \param inputType type of input
-     * \param outLocation location of the desired transfer fucntion
-     * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
-     */
-    auto calcStressTf(
-        const Location &inLocation, const AbstractMotion::Type inputType, const Location &outLocation) const -> QVector<std::complex<double>>;
+  /*! Compute the velocity to visco-elastic stress transfer function.
+   *
+   * \param inLocation input location
+   * \param inputType type of input
+   * \param outLocation location of the desired transfer fucntion
+   * \return tf the strain transfer function to be applied to the Fourier
+   * amplitude spectrum of the velocity
+   */
+  auto calcStressTf(const Location &inLocation,
+                    const AbstractMotion::Type inputType,
+                    const Location &outLocation) const
+      -> QVector<std::complex<double>>;
 signals:
-    void wasModified();
+  void wasModified();
 
 public slots:
-    void stop();
+  void stop();
 
 protected:
-    //! Initialize vectors
-    void init(AbstractMotion *motion, SoilProfile *site);
+  //! Initialize vectors
+  void init(AbstractMotion *motion, SoilProfile *site);
 
-    //! Compute the complex shear modulus
-    static auto calcCompShearMod(const double shearMod, const double damping) -> std::complex<double>;
+  //! Compute the complex shear modulus
+  static auto calcCompShearMod(const double shearMod, const double damping)
+      -> std::complex<double>;
 
-    /*! Compute the up-going and down-going waves
-     * \return if the calculation is successful
-     */
-    auto calcWaves() -> bool;
+  /*! Compute the up-going and down-going waves
+   * \return if the calculation is successful
+   */
+  auto calcWaves() -> bool;
 
-    /*! Return the combined waves for a given set of conditions
-     * \param freqIdx index of the frequency
-     * \param location the location in the site profile
-     * \param type type of motion
-     */
-    auto waves(const int freqIdx, const Location &location, const AbstractMotion::Type type) const -> const std::complex<double>;
+  /*! Return the combined waves for a given set of conditions
+   * \param freqIdx index of the frequency
+   * \param location the location in the site profile
+   * \param type type of motion
+   */
+  auto waves(const int freqIdx, const Location &location,
+             const AbstractMotion::Type type) const
+      -> const std::complex<double>;
 
-    //! Site profile
-    SoilProfile *_site;
+  //! Site profile
+  SoilProfile *_site;
 
-    //! Motion that is propagated through the site profile.
-    AbstractMotion *_motion;
+  //! Motion that is propagated through the site profile.
+  AbstractMotion *_motion;
 
-    //! Number of SubLayers in the site profile
-    int _nsl;
+  //! Number of SubLayers in the site profile
+  int _nsl;
 
-    //! Number of frequency points in the motion
-    int _nf;
+  //! Number of frequency points in the motion
+  int _nf;
 
-    //! If the calculation should continue
-    bool _okToContinue;
+  //! If the calculation should continue
+  bool _okToContinue;
 
-    //! Status of the calculation
-    CalculationStatus _status;
+  //! Status of the calculation
+  CalculationStatus _status;
 
-    /*! @name Wave propagation parameters
-     *
-     * The first dimension of the vectors are the number of soil layers, the
-     * second is the frequency.
-     */
-    //@{
-    //! Complex shear modulus
-    QVector<QVector<std::complex<double>>> _shearMod;
+  /*! @name Wave propagation parameters
+   *
+   * The first dimension of the vectors are the number of soil layers, the
+   * second is the frequency.
+   */
+  //@{
+  //! Complex shear modulus
+  QVector<QVector<std::complex<double>>> _shearMod;
 
-    //! Up-going wave
-    QVector<QVector<std::complex<double>>> _waveA;
+  //! Up-going wave
+  QVector<QVector<std::complex<double>>> _waveA;
 
-    //! Down-going wave
-    QVector<QVector<std::complex<double>>> _waveB;
+  //! Down-going wave
+  QVector<QVector<std::complex<double>>> _waveB;
 
-    //! Complex wave number
-    QVector<QVector<std::complex<double>>> _waveNum;
-    //@}
+  //! Complex wave number
+  QVector<QVector<std::complex<double>>> _waveNum;
+  //@}
 
-    //! Text log to record calculation steps
-    TextLog *_textLog;
+  //! Text log to record calculation steps
+  TextLog *_textLog;
 };
 
 #endif // ABSTRACT_CALCULATOR_H

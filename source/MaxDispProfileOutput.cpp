@@ -25,43 +25,34 @@
 #include "SoilProfile.h"
 #include "Units.h"
 
-MaxDispProfileOutput::MaxDispProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog, false)
-{
+MaxDispProfileOutput::MaxDispProfileOutput(OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog, false) {}
 
+auto MaxDispProfileOutput::name() const -> QString {
+  return tr("Peak Ground Displacement Profile");
 }
 
-auto MaxDispProfileOutput::name() const -> QString
-{
-    return tr("Peak Ground Displacement Profile");
+auto MaxDispProfileOutput::shortName() const -> QString { return tr("pgd"); }
+
+auto MaxDispProfileOutput::xLabel() const -> const QString {
+  return tr("Maximum Displacement (%1)").arg(Units::instance()->dispTs());
 }
 
-auto MaxDispProfileOutput::shortName() const -> QString
-{
-    return tr("pgd");
-}
+void MaxDispProfileOutput::extract(AbstractCalculator *const calculator,
+                                   QVector<double> &ref,
+                                   QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-auto MaxDispProfileOutput::xLabel() const -> const QString
-{
-    return tr("Maximum Displacement (%1)").arg(Units::instance()->dispTs());
-}
+  const AbstractMotion *motion = calculator->motion();
+  const SoilProfile *site = calculator->site();
 
+  // Outcrop for the first layer. Within for subsequent.
+  AbstractMotion::Type type = AbstractMotion::Outcrop;
 
-void MaxDispProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
-
-    const AbstractMotion* motion = calculator->motion();
-    const SoilProfile* site = calculator->site();
-
-    // Outcrop for the first layer. Within for subsequent.
-    AbstractMotion::Type type = AbstractMotion::Outcrop;
-
-    for (const double &depth : this->ref()) {
-        data << motion->maxDisp(calculator->calcAccelTf(
-                                site->inputLocation(), motion->type(),
+  for (const double &depth : this->ref()) {
+    data << motion->maxDisp(
+        calculator->calcAccelTf(site->inputLocation(), motion->type(),
                                 site->depthToLocation(depth), type));
-        type = AbstractMotion::Within;
-    }
+    type = AbstractMotion::Within;
+  }
 }

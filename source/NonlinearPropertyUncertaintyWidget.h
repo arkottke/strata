@@ -30,27 +30,28 @@
 
 class NonlinearPropertyUncertainty;
 
-class NonlinearPropertyUncertaintyWidget : public QObject
-{
-    Q_OBJECT
+class NonlinearPropertyUncertaintyWidget : public QObject {
+  Q_OBJECT
 public:
-    explicit NonlinearPropertyUncertaintyWidget(const QString& title, QGridLayout *layout, QObject *parent);
+  explicit NonlinearPropertyUncertaintyWidget(const QString &title,
+                                              QGridLayout *layout,
+                                              QObject *parent);
 
-    void setDecimals(int prec);
-    void setLnStdevRange(double min, double max);
-    void setMinRange(double min, double max);
-    void setMaxRange(double min, double max);
-    void setSuffix(const QString& suffix);
-    void setModel(NonlinearPropertyUncertainty* model);
+  void setDecimals(int prec);
+  void setLnStdevRange(double min, double max);
+  void setMinRange(double min, double max);
+  void setMaxRange(double min, double max);
+  void setSuffix(const QString &suffix);
+  void setModel(NonlinearPropertyUncertainty *model);
 
 public slots:
-    void setReadOnly(bool readOnly);
-    void setUncertaintyModel(int model);
+  void setReadOnly(bool readOnly);
+  void setUncertaintyModel(int model);
 
 protected:
-    QDoubleSpinBox* _lnStdevSpinBox;
-    QDoubleSpinBox* _minSpinBox;
-    QDoubleSpinBox* _maxSpinBox;
+  QDoubleSpinBox *_lnStdevSpinBox;
+  QDoubleSpinBox *_minSpinBox;
+  QDoubleSpinBox *_maxSpinBox;
 };
 
 #endif // NONLINEAR_PROPERTY_UNCERTAINTY_WIDGET_H

@@ -27,36 +27,38 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-class FrequencyDependentCalculator : public AbstractIterativeCalculator
-{
-    Q_OBJECT
+class FrequencyDependentCalculator : public AbstractIterativeCalculator {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out,
-                                     const FrequencyDependentCalculator* fdc) -> QDataStream &;
-    friend auto operator>> (QDataStream & in,
-                                     FrequencyDependentCalculator* fdc) -> QDataStream &;
+  friend auto operator<<(QDataStream &out,
+                         const FrequencyDependentCalculator *fdc)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, FrequencyDependentCalculator *fdc)
+      -> QDataStream &;
 
 public:
-    explicit FrequencyDependentCalculator(QObject *parent = nullptr);
+  explicit FrequencyDependentCalculator(QObject *parent = nullptr);
 
-    virtual auto toHtml() const -> QString;
+  virtual auto toHtml() const -> QString;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
-    auto useSmoothSpectrum() -> bool;
+  auto useSmoothSpectrum() -> bool;
 
 signals:
-    void useSmoothSpectrumChanged(bool b);
+  void useSmoothSpectrumChanged(bool b);
 
 public slots:
-    void setUseSmoothSpectrum(bool b);
+  void setUseSmoothSpectrum(bool b);
 
 protected:
-    virtual auto updateSubLayer(int index, const QVector<std::complex<double> > &strainTf) -> bool;
-    virtual void estimateInitialStrains();
+  virtual auto updateSubLayer(int index,
+                              const QVector<std::complex<double>> &strainTf)
+      -> bool;
+  virtual void estimateInitialStrains();
 
-    bool _useSmoothSpectrum;
+  bool _useSmoothSpectrum;
 };
 
 #endif // FREQUENCY_DEPENDENT_CALCULATOR_H

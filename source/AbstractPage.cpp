@@ -21,14 +21,11 @@
 
 #include "AbstractPage.h"
 
-AbstractPage::AbstractPage(QWidget * parent, Qt::WindowFlags f )
-    : QWidget(parent, f)
-{
-}
+AbstractPage::AbstractPage(QWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent, f) {}
 
-void AbstractPage::setReadOnly(bool readOnly)
-{
-    Q_UNUSED(readOnly);
+void AbstractPage::setReadOnly(bool readOnly) {
+  Q_UNUSED(readOnly);
 
-    // Do nothing
+  // Do nothing
 }

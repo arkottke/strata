@@ -26,19 +26,19 @@
 
 class AbstractCalculator;
 
-class StressReducCoeffProfileOutput : public AbstractProfileOutput
-{
-Q_OBJECT
+class StressReducCoeffProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit StressReducCoeffProfileOutput(OutputCatalog* catalog);
+  explicit StressReducCoeffProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // STRESS_REDUC_COEFF_PROFILE_OUTPUT_H

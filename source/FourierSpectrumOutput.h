@@ -26,23 +26,23 @@
 
 class AbstractCalculator;
 
-class FourierSpectrumOutput : public AbstractLocationOutput
-{
-Q_OBJECT
+class FourierSpectrumOutput : public AbstractLocationOutput {
+  Q_OBJECT
 public:
-    explicit FourierSpectrumOutput(OutputCatalog* catalog);
+  explicit FourierSpectrumOutput(OutputCatalog *catalog);
 
-    virtual auto needsFreq() const -> bool;
-    virtual auto name() const -> QString;
+  virtual auto needsFreq() const -> bool;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
-    virtual auto yScaleEngine() const -> QwtScaleEngine*;
-    virtual auto xLabel() const -> const QString;
-    virtual auto yLabel() const -> const QString;
-    virtual auto ref(int motion = 0) const -> const QVector<double>&;
+  virtual auto shortName() const -> QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
+  virtual auto yScaleEngine() const -> QwtScaleEngine *;
+  virtual auto xLabel() const -> const QString;
+  virtual auto yLabel() const -> const QString;
+  virtual auto ref(int motion = 0) const -> const QVector<double> &;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // FOURIER_SPECTRUM_OUTPUT_H

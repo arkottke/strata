@@ -27,25 +27,24 @@
 class AbstractCalculator;
 class OutputCatalog;
 
-class AccelTransferFunctionOutput : public AbstractRatioOutput
-{
-Q_OBJECT
+class AccelTransferFunctionOutput : public AbstractRatioOutput {
+  Q_OBJECT
 public:
-    explicit AccelTransferFunctionOutput(OutputCatalog* catalog);
+  explicit AccelTransferFunctionOutput(OutputCatalog *catalog);
 
-    auto name() const -> QString;
-    auto needsFreq() const -> bool;
+  auto name() const -> QString;
+  auto needsFreq() const -> bool;
 
 protected:
-    auto shortName() const -> QString;
+  auto shortName() const -> QString;
 
-    auto xScaleEngine() const -> QwtScaleEngine*;
-    auto yScaleEngine() const -> QwtScaleEngine*;
-    auto xLabel() const -> const QString;
-    auto yLabel() const -> const QString;
-    auto ref(int motion = 0) const -> const QVector<double>&;
+  auto xScaleEngine() const -> QwtScaleEngine *;
+  auto yScaleEngine() const -> QwtScaleEngine *;
+  auto xLabel() const -> const QString;
+  auto yLabel() const -> const QString;
+  auto ref(int motion = 0) const -> const QVector<double> &;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // ACCEL_TRANSFER_FUNCTION_OUTPUT_H

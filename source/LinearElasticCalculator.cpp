@@ -29,40 +29,40 @@
 #include "Units.h"
 
 LinearElasticCalculator::LinearElasticCalculator(QObject *parent)
-    : AbstractCalculator(parent)
-{
-}
+    : AbstractCalculator(parent) {}
 
-auto LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site) -> bool
-{
-    init(motion, site);
+auto LinearElasticCalculator::run(AbstractMotion *motion, SoilProfile *site)
+    -> bool {
+  init(motion, site);
 
-    // Complex shear modulus for all layers.
-    // The shear modulus is constant over the frequency range.
-    for (int i = 0; i < _nsl; ++i)
-        _shearMod[i].fill(calcCompShearMod(_site->shearMod(i), _site->damping(i) / 100.));
+  // Complex shear modulus for all layers.
+  // The shear modulus is constant over the frequency range.
+  for (int i = 0; i < _nsl; ++i)
+    _shearMod[i].fill(
+        calcCompShearMod(_site->shearMod(i), _site->damping(i) / 100.));
 
-    // Compute the bedrock properties -- these do not change during the process.
-    // The shear modulus is constant over the frequency range.
-    _shearMod[_nsl].fill(calcCompShearMod(
-            _site->bedrock()->shearMod(), _site->bedrock()->damping() / 100.));
+  // Compute the bedrock properties -- these do not change during the process.
+  // The shear modulus is constant over the frequency range.
+  _shearMod[_nsl].fill(calcCompShearMod(_site->bedrock()->shearMod(),
+                                        _site->bedrock()->damping() / 100.));
 
-    // Compute upgoing and downgoing waves
-    bool success = calcWaves();
+  // Compute upgoing and downgoing waves
+  bool success = calcWaves();
 
-    if (success) {
-        QVector<std::complex<double> > strainTf;
+  if (success) {
+    QVector<std::complex<double>> strainTf;
 
-        // Compute the maximum strain predicted in the layers
-        for (int i = 0; i < _nsl; ++i) {
-            strainTf = calcStrainTf(_site->inputLocation(), _motion->type(),
-                                    Location(i, _site->subLayers().at(i).thickness() / 2));
-            // Compute maximum shear strain in percent
-            const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
+    // Compute the maximum strain predicted in the layers
+    for (int i = 0; i < _nsl; ++i) {
+      strainTf =
+          calcStrainTf(_site->inputLocation(), _motion->type(),
+                       Location(i, _site->subLayers().at(i).thickness() / 2));
+      // Compute maximum shear strain in percent
+      const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
-            _site->subLayers()[i].setStrain(strainMax, strainMax, false);
-        }
+      _site->subLayers()[i].setStrain(strainMax, strainMax, false);
     }
+  }
 
-    return success;
+  return success;
 }

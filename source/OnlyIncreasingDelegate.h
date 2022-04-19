@@ -24,18 +24,17 @@
 
 #include <QStyledItemDelegate>
 
-class OnlyIncreasingDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
+class OnlyIncreasingDelegate : public QStyledItemDelegate {
+  Q_OBJECT
 public:
-    explicit OnlyIncreasingDelegate(QObject *parent = nullptr);
+  explicit OnlyIncreasingDelegate(QObject *parent = nullptr);
 
-    virtual auto createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const -> QWidget*;
+  virtual auto createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                            const QModelIndex &index) const -> QWidget *;
 
 signals:
 
 public slots:
-
 };
 
 #endif // ONLY_INCREASING_DELEGATE_H

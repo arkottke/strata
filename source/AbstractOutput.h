@@ -34,191 +34,197 @@ class AbstractOutputInterpolater;
 class OutputCatalog;
 class OutputStatistics;
 
-class AbstractOutput : public QAbstractTableModel
-{
-    Q_OBJECT
+class AbstractOutput : public QAbstractTableModel {
+  Q_OBJECT
 
-    friend auto operator<<(QDataStream &out, const AbstractOutput *ao) -> QDataStream &;
-    friend auto operator>>(QDataStream &in, AbstractOutput *ao) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const AbstractOutput *ao)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, AbstractOutput *ao) -> QDataStream &;
 
 public:
-    enum CurveType
-    {
-        Yfx,
-        Xfy,
-    };
+  enum CurveType {
+    Yfx,
+    Xfy,
+  };
 
-    explicit AbstractOutput(OutputCatalog *catalog);
+  explicit AbstractOutput(OutputCatalog *catalog);
 
-    virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
-    virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const
+      -> int;
 
-    virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
-    virtual auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  virtual auto headerData(int section, Qt::Orientation orientation,
+                          int role = Qt::DisplayRole) const -> QVariant;
 
-    //! Add the data to the output
-    virtual void addData(int motion, AbstractCalculator *const calculator);
+  //! Add the data to the output
+  virtual void addData(int motion, AbstractCalculator *const calculator);
 
-    //! Finalize the output by computing statistics if possible
-    virtual void finalize();
+  //! Finalize the output by computing statistics if possible
+  virtual void finalize();
 
-    //! Remove the last site from the output
-    void removeLastSite();
+  //! Remove the last site from the output
+  void removeLastSite();
 
-    //! Configure the plot
-    virtual void plot(QwtPlot *const qwtPlot, QList<QwtPlotCurve *> &curves) const;
+  //! Configure the plot
+  virtual void plot(QwtPlot *const qwtPlot,
+                    QList<QwtPlotCurve *> &curves) const;
 
-    /*! Create a text file from the data
-     *
-     * \param path location to save the files
-     * \param separator character used to separate the columns of data
-     * \param prefix prefix to append to the start of filename
-     */
-    virtual void exportData(const QString &path, const QString &separator, const QString &prefix);
+  /*! Create a text file from the data
+   *
+   * \param path location to save the files
+   * \param separator character used to separate the columns of data
+   * \param prefix prefix to append to the start of filename
+   */
+  virtual void exportData(const QString &path, const QString &separator,
+                          const QString &prefix);
 
-    //! Short name to identify the output
-    virtual auto name() const -> QString = 0;
+  //! Short name to identify the output
+  virtual auto name() const -> QString = 0;
 
-    //! Fullname that includes the general class of the output
-    virtual auto fullName() const -> QString = 0;
+  //! Fullname that includes the general class of the output
+  virtual auto fullName() const -> QString = 0;
 
-    //! Remove all saved data
-    virtual void clear();
+  //! Remove all saved data
+  virtual void clear();
 
-    //! If the output is enabled for export to text file
-    auto exportEnabled() const -> bool;
+  //! If the output is enabled for export to text file
+  auto exportEnabled() const -> bool;
 
-    //! If the series is enabled and included in the statistics
-    auto seriesEnabled(int site, int motion) -> bool;
+  //! If the series is enabled and included in the statistics
+  auto seriesEnabled(int site, int motion) -> bool;
 
-    //! If the Output needs depth for reference
-    virtual auto needsDepth() const -> bool;
+  //! If the Output needs depth for reference
+  virtual auto needsDepth() const -> bool;
 
-    //! If the Output needs frequency for reference
-    virtual auto needsFreq() const -> bool;
+  //! If the Output needs frequency for reference
+  virtual auto needsFreq() const -> bool;
 
-    //! If the Output need period and damping for reference
-    virtual auto needsPeriod() const -> bool;
+  //! If the Output need period and damping for reference
+  virtual auto needsPeriod() const -> bool;
 
-    //! If the Output needs time for reference
-    virtual auto needsTime() const -> bool;
+  //! If the Output needs time for reference
+  virtual auto needsTime() const -> bool;
 
-    //! If the Output is only provided for Time Series
-    virtual auto timeSeriesOnly() const -> bool;
+  //! If the Output is only provided for Time Series
+  virtual auto timeSeriesOnly() const -> bool;
 
-    auto motionIndex() const -> int;
+  auto motionIndex() const -> int;
 
-    //! Data for a given motion and site index
-    virtual auto data(int site, int motion) const -> const QVector<double> &;
+  //! Data for a given motion and site index
+  virtual auto data(int site, int motion) const -> const QVector<double> &;
 
-    //! Reference for a given motion and site index
-    virtual auto ref(int motion = 0) const -> const QVector<double> & = 0;
+  //! Reference for a given motion and site index
+  virtual auto ref(int motion = 0) const -> const QVector<double> & = 0;
 
-    //! Convert between general index and the site and motion
-    void intToSiteMotion(int i, int *site, int *motion) const;
+  //! Convert between general index and the site and motion
+  void intToSiteMotion(int i, int *site, int *motion) const;
 
-    //! Convert between a general index and a site index
-    auto intToSite(int i) const -> int;
+  //! Convert between a general index and a site index
+  auto intToSite(int i) const -> int;
 
-    //! Convert between a general index and a motion index
-    auto intToMotion(int i) const -> int;
+  //! Convert between a general index and a motion index
+  auto intToMotion(int i) const -> int;
 
-    //! If the output is independent of the site
-    virtual auto siteIndependent() const -> bool;
+  //! If the output is independent of the site
+  virtual auto siteIndependent() const -> bool;
 
-    //! If the output is independent of the motion
-    virtual auto motionIndependent() const -> bool;
+  //! If the output is independent of the motion
+  virtual auto motionIndependent() const -> bool;
 
-    //! Number of known sites
-    auto siteCount() const -> int;
+  //! Number of known sites
+  auto siteCount() const -> int;
 
-    //! Number of known motions
-    auto motionCount() const -> int;
+  //! Number of known motions
+  auto motionCount() const -> int;
 
-    //! Type of Curve
-    virtual auto curveType() const -> AbstractOutput::CurveType;
+  //! Type of Curve
+  virtual auto curveType() const -> AbstractOutput::CurveType;
 
-    //! Add data to a curve
-    void setCurveSamples(QwtPlotCurve *curve, const QVector<double> &x, const QVector<double> &y) const;
+  //! Add data to a curve
+  void setCurveSamples(QwtPlotCurve *curve, const QVector<double> &x,
+                       const QVector<double> &y) const;
 
-    //! Z order for a data curve
-    static auto zOrder() -> int;
+  //! Z order for a data curve
+  static auto zOrder() -> int;
 
-    auto isComplete() const -> bool;
+  auto isComplete() const -> bool;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void exportEnabledChanged(bool exportEnabled);
-    void wasModified();
-    void cleared();
+  void exportEnabledChanged(bool exportEnabled);
+  void wasModified();
+  void cleared();
 
 public slots:
-    void setExportEnabled(bool exportEnabled);
-    void setMotionIndex(int motionIndex);
+  void setExportEnabled(bool exportEnabled);
+  void setMotionIndex(int motionIndex);
 
 protected:
-    //! Name suitable for a text file
-    virtual auto fileName(int motion = 0) const -> QString = 0;
+  //! Name suitable for a text file
+  virtual auto fileName(int motion = 0) const -> QString = 0;
 
-    //! Abbreviated name suitable for files
-    virtual auto shortName() const -> QString = 0;
+  //! Abbreviated name suitable for files
+  virtual auto shortName() const -> QString = 0;
 
-    //! Set the font and labels of the axes
-    virtual void labelAxes(QwtPlot *const qwtPlot) const;
+  //! Set the font and labels of the axes
+  virtual void labelAxes(QwtPlot *const qwtPlot) const;
 
-    //! Reference axis
-    virtual auto xScaleEngine() const -> QwtScaleEngine * = 0;
+  //! Reference axis
+  virtual auto xScaleEngine() const -> QwtScaleEngine * = 0;
 
-    //! Data axis
-    virtual auto yScaleEngine() const -> QwtScaleEngine * = 0;
+  //! Data axis
+  virtual auto yScaleEngine() const -> QwtScaleEngine * = 0;
 
-    //! Name of the reference label
-    virtual auto xLabel() const -> const QString = 0;
+  //! Name of the reference label
+  virtual auto xLabel() const -> const QString = 0;
 
-    //! Name of the data label
-    virtual auto yLabel() const -> const QString = 0;
+  //! Name of the data label
+  virtual auto yLabel() const -> const QString = 0;
 
-    //! Prefix for the name and fileName
-    virtual auto prefix() const -> const QString;
+  //! Prefix for the name and fileName
+  virtual auto prefix() const -> const QString;
 
-    //! Suffix for the name and fileName
-    virtual auto suffix() const -> const QString;
+  //! Suffix for the name and fileName
+  virtual auto suffix() const -> const QString;
 
-    //! Extract the data from the calculator
-    virtual void extract(AbstractCalculator *const calculator,
-                         QVector<double> &ref, QVector<double> &data) const = 0;
+  //! Extract the data from the calculator
+  virtual void extract(AbstractCalculator *const calculator,
+                       QVector<double> &ref, QVector<double> &data) const = 0;
 
-    //! Convert from a table column to a site motion pair
-    void columnToSiteMotion(const int column, int *site, int *motion) const;
+  //! Convert from a table column to a site motion pair
+  void columnToSiteMotion(const int column, int *site, int *motion) const;
 
-    //! If the output is to be exported and saved to a text file
-    bool _exportEnabled;
+  //! If the output is to be exported and saved to a text file
+  bool _exportEnabled;
 
-    //! Reference the catalog the stores the reference information
-    OutputCatalog *_catalog;
+  //! Reference the catalog the stores the reference information
+  OutputCatalog *_catalog;
 
-    //! Data values
-    QList<QList<QVector<double>>> _data;
+  //! Data values
+  QList<QList<QVector<double>>> _data;
 
-    //! Statistics of the output
-    OutputStatistics *_statistics;
+  //! Statistics of the output
+  OutputStatistics *_statistics;
 
-    //! Interpolater used to interpolate the output
-    AbstractOutputInterpolater *_interp;
+  //! Interpolater used to interpolate the output
+  AbstractOutputInterpolater *_interp;
 
-    //! Which motion should be displayed by the table -- only important for output that needs time
-    int _motionIndex;
+  //! Which motion should be displayed by the table -- only important for output
+  //! that needs time
+  int _motionIndex;
 
-    //! Size of the longest output
-    int _maxSize;
+  //! Size of the longest output
+  int _maxSize;
 
-    //! Visible window for plotting from the top of the profile
-    bool _offset_top;
+  //! Visible window for plotting from the top of the profile
+  bool _offset_top;
 
-    //! Visible window for plotting from the bottom of the profile
-    bool _offset_bot;
+  //! Visible window for plotting from the bottom of the profile
+  bool _offset_bot;
 };
 
 #endif // ABSTRACT_OUTPUT_H

@@ -25,29 +25,28 @@
 
 #include "QComboBox"
 
-MotionTypeDelegate::MotionTypeDelegate(QObject *parent) :
-        QItemDelegate(parent)
-{
+MotionTypeDelegate::MotionTypeDelegate(QObject *parent)
+    : QItemDelegate(parent) {}
+
+auto MotionTypeDelegate::createEditor(QWidget *parent,
+                                      const QStyleOptionViewItem & /*option*/,
+                                      const QModelIndex & /*index*/) const
+    -> QWidget * {
+  auto *editor = new QComboBox(parent);
+  return editor;
 }
 
-auto MotionTypeDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/,
-                                          const QModelIndex & /*index*/) const -> QWidget*
-{
-    auto *editor = new QComboBox(parent);
-    return editor;
+void MotionTypeDelegate::setEditorData(QWidget *editor,
+                                       const QModelIndex &index) const {
+  auto *comboBox = static_cast<QComboBox *>(editor);
+  comboBox->addItems(AbstractMotion::typeList());
+  comboBox->setCurrentIndex(index.model()->data(index, Qt::EditRole).toInt());
 }
 
-void MotionTypeDelegate::setEditorData(QWidget *editor, const QModelIndex & index) const
-{
-    auto * comboBox = static_cast<QComboBox*>(editor);
-    comboBox->addItems(AbstractMotion::typeList());
-    comboBox->setCurrentIndex(index.model()->data(index, Qt::EditRole).toInt());
-}
-
-void MotionTypeDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
-                                      const QModelIndex &index) const
-{
-    auto * comboBox = static_cast<QComboBox*>(editor);
-    model->setData(index, comboBox->currentIndex());
-    return;
+void MotionTypeDelegate::setModelData(QWidget *editor,
+                                      QAbstractItemModel *model,
+                                      const QModelIndex &index) const {
+  auto *comboBox = static_cast<QComboBox *>(editor);
+  model->setData(index, comboBox->currentIndex());
+  return;
 }

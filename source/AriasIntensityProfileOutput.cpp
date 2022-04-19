@@ -30,51 +30,45 @@
 
 #include <qwt_scale_engine.h>
 
-AriasIntensityProfileOutput::AriasIntensityProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog, false)
-{
+AriasIntensityProfileOutput::AriasIntensityProfileOutput(OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog, false) {}
+
+auto AriasIntensityProfileOutput::name() const -> QString {
+  return tr("Arias Intensity Profile");
 }
 
-auto AriasIntensityProfileOutput::name() const -> QString
-{
-    return tr("Arias Intensity Profile");
+auto AriasIntensityProfileOutput::shortName() const -> QString {
+  return tr("AriasIntensity");
 }
 
-auto AriasIntensityProfileOutput::shortName() const -> QString
-{
-    return tr("AriasIntensity");
+auto AriasIntensityProfileOutput::xLabel() const -> const QString {
+  return tr("Arias Intensity (m/sec)");
 }
 
-auto AriasIntensityProfileOutput::xLabel() const -> const QString
-{
-    return tr("Arias Intensity (m/sec)");
+auto AriasIntensityProfileOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return new QwtLinearScaleEngine;
 }
 
-auto AriasIntensityProfileOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return new QwtLinearScaleEngine;
+auto AriasIntensityProfileOutput::timeSeriesOnly() const -> bool {
+  return true;
 }
 
-auto AriasIntensityProfileOutput::timeSeriesOnly() const -> bool
-{
-    return true;
-}
+void AriasIntensityProfileOutput::extract(AbstractCalculator *const calculator,
+                                          QVector<double> &ref,
+                                          QVector<double> &data) const {
+  Q_UNUSED(ref)
 
-void AriasIntensityProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref)
+  const auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
+  const SoilProfile *site = calculator->site();
 
-    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
-    const SoilProfile* site = calculator->site();
+  // Outcrop for the first layer. Within for subsequent.
+  AbstractMotion::Type type = AbstractMotion::Outcrop;
 
-    // Outcrop for the first layer. Within for subsequent.
-    AbstractMotion::Type type = AbstractMotion::Outcrop;
-
-    for (const double &depth : this->ref()) {
-        data << tsm->ariasIntensity(calculator->calcAccelTf(
-                                site->inputLocation(), tsm->type(),
-                                        site->depthToLocation(depth), type)).last();
-        type = AbstractMotion::Within;
-    }
+  for (const double &depth : this->ref()) {
+    data << tsm->ariasIntensity(
+                   calculator->calcAccelTf(site->inputLocation(), tsm->type(),
+                                           site->depthToLocation(depth), type))
+                .last();
+    type = AbstractMotion::Within;
+  }
 }

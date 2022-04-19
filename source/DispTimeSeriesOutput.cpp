@@ -27,38 +27,30 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-DispTimeSeriesOutput::DispTimeSeriesOutput(OutputCatalog* catalog)
-    : AbstractTimeSeriesOutput(catalog)
-{
+DispTimeSeriesOutput::DispTimeSeriesOutput(OutputCatalog *catalog)
+    : AbstractTimeSeriesOutput(catalog) {}
 
+auto DispTimeSeriesOutput::name() const -> QString {
+  return tr("Displacement Time Series");
 }
 
-auto DispTimeSeriesOutput::name() const -> QString
-{
-    return tr("Displacement Time Series");
+auto DispTimeSeriesOutput::shortName() const -> QString { return tr("dispTs"); }
+
+auto DispTimeSeriesOutput::yLabel() const -> const QString {
+  return tr("Displacement (%1)").arg(Units::instance()->dispTs());
 }
 
-auto DispTimeSeriesOutput::shortName() const -> QString
-{
-    return tr("dispTs");
-}
+void DispTimeSeriesOutput::extract(AbstractCalculator *const calculator,
+                                   QVector<double> &ref,
+                                   QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-auto DispTimeSeriesOutput::yLabel() const -> const QString
-{
-    return tr("Displacement (%1)").arg(Units::instance()->dispTs());
-}
+  const auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-
-void DispTimeSeriesOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
-
-    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
-
-    data = tsm->timeSeries(TimeSeriesMotion::Displacement,
-                              calculator->calcAccelTf(
-                                      calculator->site()->inputLocation(), tsm->type(),
-                                      calculator->site()->depthToLocation(_depth), _type),
-                              _baselineCorrect);
+  data =
+      tsm->timeSeries(TimeSeriesMotion::Displacement,
+                      calculator->calcAccelTf(
+                          calculator->site()->inputLocation(), tsm->type(),
+                          calculator->site()->depthToLocation(_depth), _type),
+                      _baselineCorrect);
 }

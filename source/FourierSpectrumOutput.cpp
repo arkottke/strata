@@ -34,92 +34,77 @@
 
 #include <gsl/gsl_interp.h>
 
-FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog* catalog)
-    : AbstractLocationOutput(catalog)
-{
-    _interp = new LinearOutputInterpolater;
+FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog *catalog)
+    : AbstractLocationOutput(catalog) {
+  _interp = new LinearOutputInterpolater;
 
-    _statistics = new OutputStatistics(this);
-    connect(_statistics, SIGNAL(wasModified()),
-            this, SIGNAL(wasModified()));
+  _statistics = new OutputStatistics(this);
+  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
-auto FourierSpectrumOutput::needsFreq() const -> bool
-{
-    return true;
+auto FourierSpectrumOutput::needsFreq() const -> bool { return true; }
+
+auto FourierSpectrumOutput::name() const -> QString {
+  return tr("Fourier Amplitude Spectrum");
 }
 
-auto FourierSpectrumOutput::name() const -> QString
-{
-    return tr("Fourier Amplitude Spectrum");
+auto FourierSpectrumOutput::shortName() const -> QString { return tr("fas"); }
+
+auto FourierSpectrumOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto FourierSpectrumOutput::shortName() const -> QString
-{
-    return tr("fas");
+auto FourierSpectrumOutput::yScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto FourierSpectrumOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto FourierSpectrumOutput::xLabel() const -> const QString {
+  return tr("Frequency (Hz)");
 }
 
-auto FourierSpectrumOutput::yScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto FourierSpectrumOutput::yLabel() const -> const QString {
+  // FIXME should scale to cm/s or in/s
+  return tr("|FAS| (%1/s)").arg(Units::instance()->accel());
 }
 
-auto FourierSpectrumOutput::xLabel() const -> const QString
-{
-    return tr("Frequency (Hz)");
+auto FourierSpectrumOutput::ref(int motion) const -> const QVector<double> & {
+  Q_UNUSED(motion);
+
+  return _catalog->frequency()->data();
 }
 
-auto FourierSpectrumOutput::yLabel() const -> const QString
-{
-    // FIXME should scale to cm/s or in/s
-    return tr("|FAS| (%1/s)").arg(Units::instance()->accel());
-}
+void FourierSpectrumOutput::extract(AbstractCalculator *const calculator,
+                                    QVector<double> &ref,
+                                    QVector<double> &data) const {
+  // Layer associated with the depth
+  const Location loc = calculator->site()->depthToLocation(_depth);
 
-auto FourierSpectrumOutput::ref(int motion) const -> const QVector<double>&
-{
-    Q_UNUSED(motion);
+  ref = calculator->motion()->freq();
 
-    return _catalog->frequency()->data();
-}
+  data = calculator->motion()->absFourierAcc(calculator->calcAccelTf(
+      // Input parameters
+      calculator->site()->inputLocation(), calculator->motion()->type(),
+      // Output parameters
+      loc, _type));
 
+  if (qobject_cast<TimeSeriesMotion *>(calculator->motion())) {
+    // Apply a little bit of smoothing
+    const int window = 5;
 
-void FourierSpectrumOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    // Layer associated with the depth
-    const Location loc = calculator->site()->depthToLocation(_depth);
+    // Smoothed Fourier amplitudes
+    QVector<double> smooth(data.size());
 
-    ref = calculator->motion()->freq();
+    for (int i = 0; i < smooth.size(); ++i) {
+      // Adjust the window size based on the position
+      const int _window =
+          qMin(window, qMin(2 * i + 1, 2 * (smooth.size() - 1 - i) + 1));
 
-    data = calculator->motion()->absFourierAcc(
-            calculator->calcAccelTf(
-                    // Input parameters
-                    calculator->site()->inputLocation(), calculator->motion()->type(),
-                    // Output parameters
-                    loc, _type));
+      double sum = 0;
+      for (int j = i - _window / 2; j <= i + _window / 2; ++j)
+        sum += data.at(j);
 
-    if (qobject_cast<TimeSeriesMotion*>(calculator->motion())) {
-        // Apply a little bit of smoothing
-        const int window = 5;
-
-        // Smoothed Fourier amplitudes
-        QVector<double> smooth(data.size());
-
-        for (int i = 0; i < smooth.size(); ++i) {
-            // Adjust the window size based on the position
-            const int _window = qMin(window, qMin(2 * i + 1, 2 * (smooth.size() - 1 - i) + 1));
-
-            double sum = 0;
-            for (int j = i - _window / 2; j <= i + _window / 2; ++j)
-                sum += data.at(j);
-
-            smooth[i] = sum / _window;
-        }
-        data = smooth;
-    }    
+      smooth[i] = sum / _window;
+    }
+    data = smooth;
+  }
 }

@@ -27,121 +27,109 @@
 #include "Units.h"
 
 EquivalentLinearCalculator::EquivalentLinearCalculator(QObject *parent)
-    : AbstractIterativeCalculator(parent)
-{
-    _name = "EQL";
-    _strainRatio = 0.65;
+    : AbstractIterativeCalculator(parent) {
+  _name = "EQL";
+  _strainRatio = 0.65;
 }
 
-auto EquivalentLinearCalculator::toHtml() const -> QString
-{
-    return tr(
-            "<li>Equivalent Linear Parameters"
+auto EquivalentLinearCalculator::toHtml() const -> QString {
+  return tr("<li>Equivalent Linear Parameters"
             "<table border=\"0\">"
             "<tr><th>Effective strain ratio:</th><td>%1 Hz</td></tr>"
             "<tr><th>Error tolerance:</th><td>%2</td></tr>"
             "<tr><th>Maximum number of iterations:</th><td>%3</td></tr>"
             "</table>"
-            "</li>"
-            )
-            .arg(_strainRatio)
-            .arg(_errorTolerance)
-            .arg(_maxIterations);
+            "</li>")
+      .arg(_strainRatio)
+      .arg(_errorTolerance)
+      .arg(_maxIterations);
 }
 
-auto EquivalentLinearCalculator::strainRatio() const -> double
-{
-    return _strainRatio;
+auto EquivalentLinearCalculator::strainRatio() const -> double {
+  return _strainRatio;
 }
 
-void EquivalentLinearCalculator::setStrainRatio(double strainRatio)
-{
-    if (abs(_strainRatio - strainRatio) > 1E-2) {
-        _strainRatio = strainRatio;
+void EquivalentLinearCalculator::setStrainRatio(double strainRatio) {
+  if (abs(_strainRatio - strainRatio) > 1E-2) {
+    _strainRatio = strainRatio;
 
-        emit strainRatioChanged(_strainRatio);
-        emit wasModified();
-    }
+    emit strainRatioChanged(_strainRatio);
+    emit wasModified();
+  }
 }
 
 auto EquivalentLinearCalculator::updateSubLayer(
-        int index,
-        const QVector<std::complex<double> > &strainTf) -> bool
-{
-    const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
+    int index, const QVector<std::complex<double>> &strainTf) -> bool {
+  const double strainMax = 100 * _motion->calcMaxStrain(strainTf);
 
-    if (strainMax <= 0) {
-        return false;
-    }
+  if (strainMax <= 0) {
+    return false;
+  }
 
-    if (!_site->subLayers()[index].setStrain(_strainRatio * strainMax, strainMax)) {
-        return false;
-    }
+  if (!_site->subLayers()[index].setStrain(_strainRatio * strainMax,
+                                           strainMax)) {
+    return false;
+  }
 
-    // Compute the complex shear modulus and complex shear-wave velocity
-    // for each soil layer -- these change because the damping and shear
-    // modulus change.
-    _shearMod[index].fill(calcCompShearMod(
-            _site->subLayers().at(index).shearMod(),
-            _site->subLayers().at(index).damping() / 100.));
+  // Compute the complex shear modulus and complex shear-wave velocity
+  // for each soil layer -- these change because the damping and shear
+  // modulus change.
+  _shearMod[index].fill(
+      calcCompShearMod(_site->subLayers().at(index).shearMod(),
+                       _site->subLayers().at(index).damping() / 100.));
 
-    return true;
+  return true;
 }
 
-void EquivalentLinearCalculator::estimateInitialStrains()
-{
-    if ( _textLog->level() > TextLog::Low ) {
-        _textLog->append(
-                tr("\t\tEstimating strains using PGV and shear velocity."));
-    }
+void EquivalentLinearCalculator::estimateInitialStrains() {
+  if (_textLog->level() > TextLog::Low) {
+    _textLog->append(
+        tr("\t\tEstimating strains using PGV and shear velocity."));
+  }
 
-    // Estimate the intial strain from the ratio of peak ground velocity of the
-    //  motion and the shear-wave velocity of the layer.
-    double estimatedStrain = 0;
-    for (SubLayer &sl : _site->subLayers()) {
-        estimatedStrain = _motion->pgv() / sl.shearVel();
-        sl.setInitialStrain(estimatedStrain);
-    }
+  // Estimate the intial strain from the ratio of peak ground velocity of the
+  //  motion and the shear-wave velocity of the layer.
+  double estimatedStrain = 0;
+  for (SubLayer &sl : _site->subLayers()) {
+    estimatedStrain = _motion->pgv() / sl.shearVel();
+    sl.setInitialStrain(estimatedStrain);
+  }
 
-    // Compute the complex shear modulus and complex shear-wave velocity for
-    // each soil layer -- initially this is assumed to be frequency independent
-    for (int i = 0; i < _nsl; ++i ) {
-        _shearMod[i].fill(calcCompShearMod(
-                _site->shearMod(i), _site->damping(i) / 100.));
-    }
+  // Compute the complex shear modulus and complex shear-wave velocity for
+  // each soil layer -- initially this is assumed to be frequency independent
+  for (int i = 0; i < _nsl; ++i) {
+    _shearMod[i].fill(
+        calcCompShearMod(_site->shearMod(i), _site->damping(i) / 100.));
+  }
 }
 
-void EquivalentLinearCalculator::fromJson(const QJsonObject &json)
-{
-    AbstractIterativeCalculator::fromJson(json);
-    _strainRatio = json["strainRatio"].toDouble();
+void EquivalentLinearCalculator::fromJson(const QJsonObject &json) {
+  AbstractIterativeCalculator::fromJson(json);
+  _strainRatio = json["strainRatio"].toDouble();
 }
 
-auto EquivalentLinearCalculator::toJson() const -> QJsonObject
-{
-    QJsonObject json = AbstractIterativeCalculator ::toJson();
-    json["strainRatio"] = _strainRatio;
-    return json;
+auto EquivalentLinearCalculator::toJson() const -> QJsonObject {
+  QJsonObject json = AbstractIterativeCalculator ::toJson();
+  json["strainRatio"] = _strainRatio;
+  return json;
 }
 
-auto operator<< (QDataStream & out,
-                                 const EquivalentLinearCalculator* elc) -> QDataStream &
-{
-    out << (quint8)1;
-    out << qobject_cast<const AbstractIterativeCalculator*>(elc)
-            << elc->_strainRatio;
+auto operator<<(QDataStream &out, const EquivalentLinearCalculator *elc)
+    -> QDataStream & {
+  out << (quint8)1;
+  out << qobject_cast<const AbstractIterativeCalculator *>(elc)
+      << elc->_strainRatio;
 
-    return out;
+  return out;
 }
 
-auto operator>> (QDataStream & in,
-                                 EquivalentLinearCalculator* elc) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
+auto operator>>(QDataStream &in, EquivalentLinearCalculator *elc)
+    -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-    in >> qobject_cast<AbstractIterativeCalculator*>(elc);
-    in >> elc->_strainRatio;
+  in >> qobject_cast<AbstractIterativeCalculator *>(elc);
+  in >> elc->_strainRatio;
 
-    return in;
+  return in;
 }

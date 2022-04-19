@@ -30,38 +30,34 @@
 
 #include <QDebug>
 
-MethodGroupBox::MethodGroupBox(QWidget* parent)
-    : QGroupBox(parent)
-{    
-    _stackedLayout = new QStackedLayout;
+MethodGroupBox::MethodGroupBox(QWidget *parent) : QGroupBox(parent) {
+  _stackedLayout = new QStackedLayout;
 
-    _elcWidget = new EquivalentLinearCalculatorWidget;
-    _stackedLayout->addWidget(_elcWidget);
+  _elcWidget = new EquivalentLinearCalculatorWidget;
+  _stackedLayout->addWidget(_elcWidget);
 
-    _fdcWidget = new FrequencyDependentCalculatorWidget;
-    _stackedLayout->addWidget(_fdcWidget);
+  _fdcWidget = new FrequencyDependentCalculatorWidget;
+  _stackedLayout->addWidget(_fdcWidget);
 
-    setTitle("Calculation Parameters");
-    setLayout(_stackedLayout);    
+  setTitle("Calculation Parameters");
+  setLayout(_stackedLayout);
 }
 
-void MethodGroupBox::setCalculator(AbstractCalculator* ac)
-{
-    const QString className = ac->metaObject()->className();
+void MethodGroupBox::setCalculator(AbstractCalculator *ac) {
+  const QString className = ac->metaObject()->className();
 
-    setDisabled(className == "LinearElasticCalculator");
+  setDisabled(className == "LinearElasticCalculator");
 
-    if (className == "EquivalentLinearCalculator") {
-        _elcWidget->setCalculator(qobject_cast<EquivalentLinearCalculator*>(ac));
-        _stackedLayout->setCurrentIndex(0);
-    } else if (className == "FrequencyDependentCalculator") {
-        _fdcWidget->setCalculator(qobject_cast<FrequencyDependentCalculator*>(ac));
-        _stackedLayout->setCurrentIndex(1);
-    }
+  if (className == "EquivalentLinearCalculator") {
+    _elcWidget->setCalculator(qobject_cast<EquivalentLinearCalculator *>(ac));
+    _stackedLayout->setCurrentIndex(0);
+  } else if (className == "FrequencyDependentCalculator") {
+    _fdcWidget->setCalculator(qobject_cast<FrequencyDependentCalculator *>(ac));
+    _stackedLayout->setCurrentIndex(1);
+  }
 }
 
-void MethodGroupBox::setReadOnly(bool readOnly)
-{
-    _elcWidget->setReadOnly(readOnly);
-    _fdcWidget->setReadOnly(readOnly);
+void MethodGroupBox::setReadOnly(bool readOnly) {
+  _elcWidget->setReadOnly(readOnly);
+  _fdcWidget->setReadOnly(readOnly);
 }

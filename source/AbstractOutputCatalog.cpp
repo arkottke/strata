@@ -28,32 +28,27 @@
 
 #include <QStringList>
 
-AbstractOutputCatalog::AbstractOutputCatalog(OutputCatalog *outputCatalog) :
-    MyAbstractTableModel(outputCatalog), 
-    _outputCatalog(outputCatalog),
-    _approach(MotionLibrary::TimeSeries)
-{
-}
+AbstractOutputCatalog::AbstractOutputCatalog(OutputCatalog *outputCatalog)
+    : MyAbstractTableModel(outputCatalog), _outputCatalog(outputCatalog),
+      _approach(MotionLibrary::TimeSeries) {}
 
-void AbstractOutputCatalog::setApproach(int approach)
-{
-    beginResetModel();
-    _approach = (MotionLibrary::Approach)approach;
+void AbstractOutputCatalog::setApproach(int approach) {
+  beginResetModel();
+  _approach = (MotionLibrary::Approach)approach;
 
-    // Disable time series only outputs
-    if (_approach == MotionLibrary::RandomVibrationTheory) {
-        for (auto *ao : outputs()) {
-            auto *apo = qobject_cast<AbstractProfileOutput *>(ao);
-            if (apo && apo->timeSeriesOnly())
-                apo->setEnabled(false);
-        }
+  // Disable time series only outputs
+  if (_approach == MotionLibrary::RandomVibrationTheory) {
+    for (auto *ao : outputs()) {
+      auto *apo = qobject_cast<AbstractProfileOutput *>(ao);
+      if (apo && apo->timeSeriesOnly())
+        apo->setEnabled(false);
     }
+  }
 
-    endResetModel();
+  endResetModel();
 }
 
-auto AbstractOutputCatalog::data(const QModelIndex & index, int role ) const -> QVariant
-{
-    return MyAbstractTableModel::data(index, role);
+auto AbstractOutputCatalog::data(const QModelIndex &index, int role) const
+    -> QVariant {
+  return MyAbstractTableModel::data(index, role);
 }
-

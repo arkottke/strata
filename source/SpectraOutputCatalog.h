@@ -29,45 +29,48 @@
 
 class AbstractLocationOutput;
 
-class SpectraOutputCatalog : public AbstractMutableOutputCatalog
-{
-    Q_OBJECT
+class SpectraOutputCatalog : public AbstractMutableOutputCatalog {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const SpectraOutputCatalog* soc) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, SpectraOutputCatalog* soc) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const SpectraOutputCatalog *soc)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, SpectraOutputCatalog *soc)
+      -> QDataStream &;
 
 public:
-    explicit SpectraOutputCatalog(OutputCatalog *outputCatalog);
+  explicit SpectraOutputCatalog(OutputCatalog *outputCatalog);
 
-    auto needsOutputConditions() const -> bool;
+  auto needsOutputConditions() const -> bool;
 
-    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
-    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
+  virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const
+      -> int;
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
-    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  virtual auto setData(const QModelIndex &index, const QVariant &value,
+                       int role = Qt::EditRole) -> bool;
 
-    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
-    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
+  virtual auto headerData(int section, Qt::Orientation orientation,
+                          int role = Qt::DisplayRole) const -> QVariant;
+  virtual auto removeRows(int row, int count,
+                          const QModelIndex &parent = QModelIndex()) -> bool;
 
-    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
+  virtual auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
 
-    virtual void addRow(const QString &name);
-    virtual auto outputs() const -> QList<AbstractOutput*>;
+  virtual void addRow(const QString &name);
+  virtual auto outputs() const -> QList<AbstractOutput *>;
 
-    void fromJson(const QJsonArray &array);
-    auto toJson() const -> QJsonArray;
+  void fromJson(const QJsonArray &array);
+  auto toJson() const -> QJsonArray;
 
 protected:
-    auto factory(const QString & className, OutputCatalog * parent) const -> AbstractLocationOutput*;
+  auto factory(const QString &className, OutputCatalog *parent) const
+      -> AbstractLocationOutput *;
 
-    enum Columns {
-        NameColumn,
-        DepthColumn,
-        TypeColumn
-    };
+  enum Columns { NameColumn, DepthColumn, TypeColumn };
 
-    QList<AbstractLocationOutput*> _outputs;
+  QList<AbstractLocationOutput *> _outputs;
 };
 
 #endif // SPECTRA_OUTPUT_CATALOG_H

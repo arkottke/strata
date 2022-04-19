@@ -26,42 +26,39 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-StrainTimeSeriesOutput::StrainTimeSeriesOutput(OutputCatalog* catalog)
-    : AbstractTimeSeriesOutput(catalog)
-{
-    _type = AbstractMotion::Within;
+StrainTimeSeriesOutput::StrainTimeSeriesOutput(OutputCatalog *catalog)
+    : AbstractTimeSeriesOutput(catalog) {
+  _type = AbstractMotion::Within;
 }
 
-auto StrainTimeSeriesOutput::name() const -> QString
-{
-    return tr("Shear-Strain Time Series");
+auto StrainTimeSeriesOutput::name() const -> QString {
+  return tr("Shear-Strain Time Series");
 }
 
-auto StrainTimeSeriesOutput::shortName() const -> QString
-{
-    return tr("strainTs");
+auto StrainTimeSeriesOutput::shortName() const -> QString {
+  return tr("strainTs");
 }
 
-auto StrainTimeSeriesOutput::yLabel() const -> const QString
-{
-    return tr("Shear Strain, %1 (%)")
-            .arg(QChar(0x03B3));
+auto StrainTimeSeriesOutput::yLabel() const -> const QString {
+  return tr("Shear Strain, %1 (%)").arg(QChar(0x03B3));
 }
 
-void StrainTimeSeriesOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
+void StrainTimeSeriesOutput::extract(AbstractCalculator *const calculator,
+                                     QVector<double> &ref,
+                                     QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+  const auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-    Q_ASSERT(tsm);
+  Q_ASSERT(tsm);
 
-    data = tsm->strainTimeSeries(calculator->calcStrainTf(
-            calculator->site()->inputLocation(), calculator->motion()->type(),
-            calculator->site()->depthToLocation(_depth)), _baselineCorrect);
+  data = tsm->strainTimeSeries(
+      calculator->calcStrainTf(calculator->site()->inputLocation(),
+                               calculator->motion()->type(),
+                               calculator->site()->depthToLocation(_depth)),
+      _baselineCorrect);
 
-    // Convert to percent
-    for (int i = 0; i < data.size(); ++i)
-        data[i] *= 100;
+  // Convert to percent
+  for (int i = 0; i < data.size(); ++i)
+    data[i] *= 100;
 }

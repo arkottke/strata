@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,49 +35,49 @@ class SiteResponseModel;
 
 //! Widget for the AbstractMotion Page.
 
-class MotionPage : public AbstractPage
-{
-    Q_OBJECT
+class MotionPage : public AbstractPage {
+  Q_OBJECT
 
 public:
-    explicit MotionPage(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+  explicit MotionPage(QWidget *parent = nullptr,
+                      Qt::WindowFlags f = Qt::WindowFlags());
 
-    void setModel(SiteResponseModel* model);
+  void setModel(SiteResponseModel *model);
 
 public slots:
-    void setReadOnly(bool b);
-    void setApproach(int i);
+  void setReadOnly(bool b);
+  void setApproach(int i);
 
 private slots:
-    void add();
-    void remove();
-    void importSuite();
+  void add();
+  void remove();
+  void importSuite();
 
-    void edit();
+  void edit();
 
-    void updateButtons();
+  void updateButtons();
 
 private:
-    //! Create the group box for defining the input location
-    auto createInputLocationGroupBox() -> QGroupBox*;
+  //! Create the group box for defining the input location
+  auto createInputLocationGroupBox() -> QGroupBox *;
 
-    //! Create the group box for editting the input motions
-    auto createMotionsTableGroupBox() -> QGroupBox*;
+  //! Create the group box for editting the input motions
+  auto createMotionsTableGroupBox() -> QGroupBox *;
 
-    QGroupBox* _inputLocationGroupBox;
-    QGroupBox* _motionsTableGroupBox;
+  QGroupBox *_inputLocationGroupBox;
+  QGroupBox *_motionsTableGroupBox;
 
-    QPushButton* _addButton;
-    QPushButton* _removeButton;
-    QPushButton* _editButton;
-    QPushButton* _importButton;
-    MyTableView* _tableView;
+  QPushButton *_addButton;
+  QPushButton *_removeButton;
+  QPushButton *_editButton;
+  QPushButton *_importButton;
+  MyTableView *_tableView;
 
-    DepthComboBox* _depthComboBox;
+  DepthComboBox *_depthComboBox;
 
-    MotionLibrary* _motionLibrary;
+  MotionLibrary *_motionLibrary;
 
-    //! If the model is in read-only mode
-    bool _readOnly;
+  //! If the model is in read-only mode
+  bool _readOnly;
 };
 #endif

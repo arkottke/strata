@@ -25,56 +25,55 @@
 
 #include <QFormLayout>
 
-EquivalentLinearCalculatorWidget::EquivalentLinearCalculatorWidget(QWidget *parent) :
-    QWidget(parent)
-{
-    auto* layout = new QFormLayout;
+EquivalentLinearCalculatorWidget::EquivalentLinearCalculatorWidget(
+    QWidget *parent)
+    : QWidget(parent) {
+  auto *layout = new QFormLayout;
 
-    // Error tolerance row
-    _errorToleranceSpinBox = new QDoubleSpinBox;
-    _errorToleranceSpinBox->setRange( 0.5, 10.0);
-    _errorToleranceSpinBox->setDecimals(1);
-    _errorToleranceSpinBox->setSingleStep(0.25);
-    _errorToleranceSpinBox->setSuffix(" %");
+  // Error tolerance row
+  _errorToleranceSpinBox = new QDoubleSpinBox;
+  _errorToleranceSpinBox->setRange(0.5, 10.0);
+  _errorToleranceSpinBox->setDecimals(1);
+  _errorToleranceSpinBox->setSingleStep(0.25);
+  _errorToleranceSpinBox->setSuffix(" %");
 
-    layout->addRow(tr("Error tolerance:"), _errorToleranceSpinBox);
+  layout->addRow(tr("Error tolerance:"), _errorToleranceSpinBox);
 
-    // Max Iterations row
-    _maxIterationsSpinBox = new QSpinBox;
-    _maxIterationsSpinBox->setMinimum(2);
-    _maxIterationsSpinBox->setMaximum(60);
+  // Max Iterations row
+  _maxIterationsSpinBox = new QSpinBox;
+  _maxIterationsSpinBox->setMinimum(2);
+  _maxIterationsSpinBox->setMaximum(60);
 
-    layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
+  layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
 
-    // Effective Strain Ratio
-    _strainRatioSpinBox = new QDoubleSpinBox;
-    _strainRatioSpinBox->setRange( 0.45, 0.80);
-    _strainRatioSpinBox->setSingleStep(0.05);
-    _strainRatioSpinBox->setDecimals(2);
+  // Effective Strain Ratio
+  _strainRatioSpinBox = new QDoubleSpinBox;
+  _strainRatioSpinBox->setRange(0.45, 0.80);
+  _strainRatioSpinBox->setSingleStep(0.05);
+  _strainRatioSpinBox->setDecimals(2);
 
-    layout->addRow("Effective strain ratio:", _strainRatioSpinBox);
+  layout->addRow("Effective strain ratio:", _strainRatioSpinBox);
 
-    setLayout(layout);
+  setLayout(layout);
 }
 
-void EquivalentLinearCalculatorWidget::setCalculator(EquivalentLinearCalculator* elc)
-{
-    _strainRatioSpinBox->setValue(elc->strainRatio());
-    connect(_strainRatioSpinBox, SIGNAL(valueChanged(double)),
-            elc, SLOT(setStrainRatio(double)));
+void EquivalentLinearCalculatorWidget::setCalculator(
+    EquivalentLinearCalculator *elc) {
+  _strainRatioSpinBox->setValue(elc->strainRatio());
+  connect(_strainRatioSpinBox, SIGNAL(valueChanged(double)), elc,
+          SLOT(setStrainRatio(double)));
 
-    _errorToleranceSpinBox->setValue(elc->errorTolerance());
-    connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)),
-            elc, SLOT(setErrorTolerance(double)));
+  _errorToleranceSpinBox->setValue(elc->errorTolerance());
+  connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)), elc,
+          SLOT(setErrorTolerance(double)));
 
-    _maxIterationsSpinBox->setValue(elc->maxIterations());
-    connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)),
-             elc, SLOT(setMaxIterations(int)));
+  _maxIterationsSpinBox->setValue(elc->maxIterations());
+  connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)), elc,
+          SLOT(setMaxIterations(int)));
 }
 
-void EquivalentLinearCalculatorWidget::setReadOnly(bool readOnly)
-{
-    _strainRatioSpinBox->setReadOnly(readOnly);
-    _errorToleranceSpinBox->setReadOnly(readOnly);
-    _maxIterationsSpinBox->setReadOnly(readOnly);
+void EquivalentLinearCalculatorWidget::setReadOnly(bool readOnly) {
+  _strainRatioSpinBox->setReadOnly(readOnly);
+  _errorToleranceSpinBox->setReadOnly(readOnly);
+  _maxIterationsSpinBox->setReadOnly(readOnly);
 }

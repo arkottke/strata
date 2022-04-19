@@ -27,38 +27,34 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-AccelTimeSeriesOutput::AccelTimeSeriesOutput(OutputCatalog* catalog)
-    : AbstractTimeSeriesOutput(catalog)
-{
+AccelTimeSeriesOutput::AccelTimeSeriesOutput(OutputCatalog *catalog)
+    : AbstractTimeSeriesOutput(catalog) {}
 
+auto AccelTimeSeriesOutput::name() const -> QString {
+  return tr("Acceleration Time Series");
 }
 
-auto AccelTimeSeriesOutput::name() const -> QString
-{
-    return tr("Acceleration Time Series");
+auto AccelTimeSeriesOutput::shortName() const -> QString {
+  return tr("accelTs");
 }
 
-auto AccelTimeSeriesOutput::shortName() const -> QString
-{
-    return tr("accelTs");
+auto AccelTimeSeriesOutput::yLabel() const -> const QString {
+  return tr("Acceleration (%1)").arg(Units::instance()->accel());
 }
 
-auto AccelTimeSeriesOutput::yLabel() const -> const QString
-{
-    return tr("Acceleration (%1)").arg(Units::instance()->accel());
-}
+void AccelTimeSeriesOutput::extract(AbstractCalculator *const calculator,
+                                    QVector<double> &ref,
+                                    QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-void AccelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
+  const auto *motion =
+      qobject_cast<const TimeSeriesMotion *>(calculator->motion());
+  Q_ASSERT(motion);
 
-    const auto* motion = qobject_cast<const TimeSeriesMotion*>(calculator->motion());
-    Q_ASSERT(motion);
-
-    data = motion->timeSeries(TimeSeriesMotion::Acceleration,
-                              calculator->calcAccelTf(
-                                      calculator->site()->inputLocation(), motion->type(),
-                                      calculator->site()->depthToLocation(_depth), _type),
-                              _baselineCorrect);
+  data = motion->timeSeries(
+      TimeSeriesMotion::Acceleration,
+      calculator->calcAccelTf(
+          calculator->site()->inputLocation(), motion->type(),
+          calculator->site()->depthToLocation(_depth), _type),
+      _baselineCorrect);
 }

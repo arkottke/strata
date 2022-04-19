@@ -27,161 +27,131 @@
 
 #include <QDebug>
 
-AbstractRatioOutput::AbstractRatioOutput(OutputCatalog* catalog)
-    : AbstractOutput(catalog)
-{
-    _inDepth = -1;
-    _inType = AbstractMotion::Outcrop;
-    _outDepth = 0;
-    _outType = AbstractMotion::Outcrop;
+AbstractRatioOutput::AbstractRatioOutput(OutputCatalog *catalog)
+    : AbstractOutput(catalog) {
+  _inDepth = -1;
+  _inType = AbstractMotion::Outcrop;
+  _outDepth = 0;
+  _outType = AbstractMotion::Outcrop;
 
-    _statistics = new OutputStatistics(this);
-    connect(_statistics, SIGNAL(wasModified()),
-            this, SIGNAL(wasModified()));
+  _statistics = new OutputStatistics(this);
+  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
 }
 
-auto AbstractRatioOutput::fullName() const -> QString
-{
-    return tr("Ratio -- %1 -- %2")
-            .arg(prefix())
-            .arg(name());
+auto AbstractRatioOutput::fullName() const -> QString {
+  return tr("Ratio -- %1 -- %2").arg(prefix()).arg(name());
 }
 
-auto AbstractRatioOutput::inDepth() const -> double
-{
-    return _inDepth;
+auto AbstractRatioOutput::inDepth() const -> double { return _inDepth; }
+
+auto AbstractRatioOutput::inType() const -> AbstractMotion::Type {
+  return _inType;
 }
 
-auto AbstractRatioOutput::inType() const -> AbstractMotion::Type
-{
-    return _inType;
+void AbstractRatioOutput::setInType(AbstractMotion::Type inType) {
+  if (_inType != inType) {
+    _inType = inType;
+
+    emit inTypeChanged(_inType);
+    emit wasModified();
+  }
 }
 
-void AbstractRatioOutput::setInType(AbstractMotion::Type inType)
-{
-    if (_inType != inType) {
-        _inType = inType;
+auto AbstractRatioOutput::outDepth() const -> double { return _outDepth; }
 
-        emit inTypeChanged(_inType);
-        emit wasModified();
-    }
+auto AbstractRatioOutput::outType() const -> AbstractMotion::Type {
+  return _outType;
 }
 
-auto AbstractRatioOutput::outDepth() const -> double
-{
-    return _outDepth;
+void AbstractRatioOutput::setOutType(AbstractMotion::Type outType) {
+  if (_outType != outType) {
+    _outType = outType;
+
+    emit outTypeChanged(_outType);
+    emit wasModified();
+  }
 }
 
-auto AbstractRatioOutput::outType() const -> AbstractMotion::Type
-{
-    return _outType;
+void AbstractRatioOutput::setInDepth(double inDepth) {
+  if (_inDepth != inDepth) {
+    _inDepth = inDepth;
+
+    emit inDepthChanged(_inDepth);
+    emit wasModified();
+  }
 }
 
-void AbstractRatioOutput::setOutType(AbstractMotion::Type outType)
-{
-    if (_outType != outType) {
-        _outType = outType;
-
-        emit outTypeChanged(_outType);
-        emit wasModified();
-    }
+void AbstractRatioOutput::setInType(int inType) {
+  setInType((AbstractMotion::Type)inType);
 }
 
-void AbstractRatioOutput::setInDepth(double inDepth)
-{
-    if (_inDepth != inDepth) {
-        _inDepth = inDepth;
+void AbstractRatioOutput::setOutDepth(double outDepth) {
+  if (_outDepth != outDepth) {
+    _outDepth = outDepth;
 
-        emit inDepthChanged(_inDepth);
-        emit wasModified();
-    }
+    emit outDepthChanged(_outDepth);
+    emit wasModified();
+  }
 }
 
-void AbstractRatioOutput::setInType(int inType)
-{
-    setInType((AbstractMotion::Type)inType);
+void AbstractRatioOutput::setOutType(int outType) {
+  setOutType((AbstractMotion::Type)outType);
 }
 
-void AbstractRatioOutput::setOutDepth(double outDepth)
-{
-    if (_outDepth != outDepth) {
-        _outDepth = outDepth;
+auto AbstractRatioOutput::fileName(int motion) const -> QString {
+  Q_UNUSED(motion);
 
-        emit outDepthChanged(_outDepth);
-        emit wasModified();
-    }
+  return prefix() + '-' + shortName();
 }
 
-void AbstractRatioOutput::setOutType(int outType)
-{
-    setOutType((AbstractMotion::Type)outType);
+auto AbstractRatioOutput::prefix() const -> const QString {
+  return QString("%1 (%2) from %3 (%4)")
+      .arg(locationToString(_outDepth))
+      .arg(AbstractMotion::typeList().at(_outType))
+      .arg(locationToString(_inDepth))
+      .arg(AbstractMotion::typeList().at(_inType));
 }
 
-auto AbstractRatioOutput::fileName(int motion) const -> QString
-{
-    Q_UNUSED(motion);
-
-    return prefix() + '-' + shortName();
+void AbstractRatioOutput::fromJson(const QJsonObject &json) {
+  AbstractOutput::fromJson(json);
+  _outType = (AbstractMotion::Type)json["outType"].toInt();
+  _inType = (AbstractMotion::Type)json["inType"].toInt();
+  _outDepth = json["outDepth"].toDouble();
+  _inDepth = json["inDepth"].toDouble();
 }
 
-auto AbstractRatioOutput::prefix() const -> const QString
-{
-    return QString("%1 (%2) from %3 (%4)")
-            .arg(locationToString(_outDepth))
-            .arg(AbstractMotion::typeList().at(_outType))
-            .arg(locationToString(_inDepth))
-            .arg(AbstractMotion::typeList().at(_inType));
+auto AbstractRatioOutput::toJson() const -> QJsonObject {
+  QJsonObject json = AbstractOutput::toJson();
+  json["outType"] = (int)_outType;
+  json["inType"] = (int)_inType;
+  json["outDepth"] = _outDepth;
+  json["inDepth"] = _inDepth;
+
+  return json;
 }
 
-void AbstractRatioOutput::fromJson(const QJsonObject &json)
-{
-    AbstractOutput::fromJson(json);
-    _outType = (AbstractMotion::Type) json["outType"].toInt();
-    _inType = (AbstractMotion::Type) json["inType"].toInt();
-    _outDepth = json["outDepth"].toDouble();
-    _inDepth = json["inDepth"].toDouble();
+auto operator<<(QDataStream &out, const AbstractRatioOutput *aro)
+    -> QDataStream & {
+  out << (quint8)1;
+
+  out << static_cast<const AbstractOutput *>(aro) << (int)aro->_outType
+      << aro->_outDepth << (int)aro->_inType << aro->_inDepth;
+
+  return out;
 }
 
-auto AbstractRatioOutput::toJson() const -> QJsonObject
-{
-    QJsonObject json = AbstractOutput::toJson();
-    json["outType"] = (int) _outType;
-    json["inType"] = (int) _inType;
-    json["outDepth"] = _outDepth;
-    json["inDepth"] = _inDepth;
+auto operator>>(QDataStream &in, AbstractRatioOutput *aro) -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-    return json;
-}
+  int outType;
+  int inType;
 
-auto operator<< (QDataStream & out, const AbstractRatioOutput* aro) -> QDataStream &
-{
-    out << (quint8)1;
+  in >> static_cast<AbstractOutput *>(aro) >> outType >> aro->_outDepth >>
+      inType >> aro->_inDepth;
 
-    out << static_cast<const AbstractOutput*>(aro)
-            << (int)aro->_outType
-            << aro->_outDepth
-            << (int)aro->_inType
-            << aro->_inDepth;
+  aro->_outType = (AbstractMotion::Type)outType;
+  aro->_inType = (AbstractMotion::Type)inType;
 
-    return out;
-}
-
-auto operator>> (QDataStream & in, AbstractRatioOutput* aro) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
-
-    int outType;
-    int inType;
-
-    in >> static_cast<AbstractOutput*>(aro)
-            >> outType
-            >> aro->_outDepth
-            >> inType
-            >> aro->_inDepth;
-
-    aro->_outType = (AbstractMotion::Type)outType;
-    aro->_inType = (AbstractMotion::Type)inType;
-
-    return in;
+  return in;
 }

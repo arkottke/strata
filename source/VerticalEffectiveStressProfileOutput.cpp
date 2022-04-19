@@ -28,49 +28,46 @@
 
 #include <qwt_scale_engine.h>
 
-VerticalEffectiveStressProfileOutput::VerticalEffectiveStressProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
-{
-    _offset_bot = 1;
+VerticalEffectiveStressProfileOutput::VerticalEffectiveStressProfileOutput(
+    OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  _offset_bot = 1;
 }
 
-auto VerticalEffectiveStressProfileOutput::name() const -> QString
-{
-    return tr("Vertical Effective Stress Profile");
+auto VerticalEffectiveStressProfileOutput::name() const -> QString {
+  return tr("Vertical Effective Stress Profile");
 }
 
-auto VerticalEffectiveStressProfileOutput::shortName() const -> QString
-{
-    return tr("vEffectiveStress");
+auto VerticalEffectiveStressProfileOutput::shortName() const -> QString {
+  return tr("vEffectiveStress");
 }
 
-auto VerticalEffectiveStressProfileOutput::xLabel() const -> const QString
-{
-    return tr("Vertical Effective Stress (%1)").arg(Units::instance()->stress());
+auto VerticalEffectiveStressProfileOutput::xLabel() const -> const QString {
+  return tr("Vertical Effective Stress (%1)").arg(Units::instance()->stress());
 }
 
-auto VerticalEffectiveStressProfileOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    auto *scaleEngine = new QwtLinearScaleEngine;
-    return scaleEngine;
+auto VerticalEffectiveStressProfileOutput::xScaleEngine() const
+    -> QwtScaleEngine * {
+  auto *scaleEngine = new QwtLinearScaleEngine;
+  return scaleEngine;
 }
 
-void VerticalEffectiveStressProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
-    // Populate the reference with the depth to middle of the layers
-    ref.clear();
-    data.clear();
-    ref << 0.;
-    data << 0.;
+void VerticalEffectiveStressProfileOutput::extract(
+    AbstractCalculator *const calculator, QVector<double> &ref,
+    QVector<double> &data) const {
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
+  // Populate the reference with the depth to middle of the layers
+  ref.clear();
+  data.clear();
+  ref << 0.;
+  data << 0.;
 
-    for (const SubLayer &sl : subLayers) {
-        ref << sl.depthToMid();
-        data << sl.vEffectiveStress();
-    }
+  for (const SubLayer &sl : subLayers) {
+    ref << sl.depthToMid();
+    data << sl.vEffectiveStress();
+  }
 
-    // Add the depth at the surface of the bedrock
-    ref << subLayers.last().depthToBase();
-    data << subLayers.last().vEffectiveStress(1.0);
+  // Add the depth at the surface of the bedrock
+  ref << subLayers.last().depthToBase();
+  data << subLayers.last().vEffectiveStress(1.0);
 }

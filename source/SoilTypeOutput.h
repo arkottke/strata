@@ -30,44 +30,44 @@ class SoilType;
 class NonlinearPropertyOutput;
 class OutputCatalog;
 
-class SoilTypeOutput : public QObject
-{
-    Q_OBJECT
+class SoilTypeOutput : public QObject {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const SoilTypeOutput* sto) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, SoilTypeOutput* sto) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const SoilTypeOutput *sto)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, SoilTypeOutput *sto) -> QDataStream &;
 
 public:
-    explicit SoilTypeOutput(SoilType* soilType, OutputCatalog* catalog);
+  explicit SoilTypeOutput(SoilType *soilType, OutputCatalog *catalog);
 
-    auto soilType() const -> SoilType*;
-    auto name() const -> QString;
-    auto modulus() -> NonlinearPropertyOutput*;
-    auto damping() -> NonlinearPropertyOutput*;
+  auto soilType() const -> SoilType *;
+  auto name() const -> QString;
+  auto modulus() -> NonlinearPropertyOutput *;
+  auto damping() -> NonlinearPropertyOutput *;
 
-    auto enabled() const -> bool;
+  auto enabled() const -> bool;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void wasModified();
+  void wasModified();
 
 public slots:
-    void setEnabled(bool enabled);
+  void setEnabled(bool enabled);
 
 protected:
-    //! Associated soilType
-    SoilType*  _soilType;
+  //! Associated soilType
+  SoilType *_soilType;
 
-    //! If the is enabled
-    bool _enabled;
+  //! If the is enabled
+  bool _enabled;
 
-    //! Output for the shear modulus reduction
-    NonlinearPropertyOutput* _modulus;
+  //! Output for the shear modulus reduction
+  NonlinearPropertyOutput *_modulus;
 
-    //! Output for the damping
-    NonlinearPropertyOutput* _damping;
+  //! Output for the damping
+  NonlinearPropertyOutput *_damping;
 };
 
 #endif // SOILTYPEOUTPUT_H

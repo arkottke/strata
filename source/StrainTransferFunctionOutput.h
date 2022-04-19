@@ -27,24 +27,24 @@
 class OutputCatalog;
 class AbstractCalculator;
 
-class StrainTransferFunctionOutput : public AbstractRatioOutput
-{
-    Q_OBJECT
+class StrainTransferFunctionOutput : public AbstractRatioOutput {
+  Q_OBJECT
 public:
-    explicit StrainTransferFunctionOutput(OutputCatalog* catalog);
+  explicit StrainTransferFunctionOutput(OutputCatalog *catalog);
 
-    virtual auto needsFreq() const -> bool;
-    virtual auto name() const -> QString;
+  virtual auto needsFreq() const -> bool;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
-    virtual auto yScaleEngine() const -> QwtScaleEngine*;
-    virtual auto xLabel() const -> const QString;
-    virtual auto yLabel() const -> const QString;
-    virtual auto ref(int motion = 0) const -> const QVector<double>&;    
+  virtual auto shortName() const -> QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
+  virtual auto yScaleEngine() const -> QwtScaleEngine *;
+  virtual auto xLabel() const -> const QString;
+  virtual auto yLabel() const -> const QString;
+  virtual auto ref(int motion = 0) const -> const QVector<double> &;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // STRAIN_TRANSFER_FUNCTION_OUTPUT_H

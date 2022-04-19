@@ -27,31 +27,23 @@
 #include "SubLayer.h"
 #include "Units.h"
 
-DampingProfileOutput::DampingProfileOutput(OutputCatalog* catalog)
-    : AbstractSteppedProfileOutput(catalog)
-{
+DampingProfileOutput::DampingProfileOutput(OutputCatalog *catalog)
+    : AbstractSteppedProfileOutput(catalog) {}
 
+auto DampingProfileOutput::name() const -> QString {
+  return tr("Damping Ratio");
 }
 
-auto DampingProfileOutput::name() const -> QString
-{
-    return tr("Damping Ratio");
+auto DampingProfileOutput::shortName() const -> QString { return "damping"; }
+
+auto DampingProfileOutput::xLabel() const -> const QString {
+  return tr("Damping (%)");
 }
 
-auto DampingProfileOutput::shortName() const -> QString
-{
-    return "damping";
-}
+void DampingProfileOutput::extract(AbstractCalculator *const calculator,
+                                   QVector<double> &ref,
+                                   QVector<double> &data) const {
+  AbstractSteppedProfileOutput::extract(calculator, ref, data);
 
-auto DampingProfileOutput::xLabel() const -> const QString
-{
-    return tr("Damping (%)");
-}
-
-void DampingProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    AbstractSteppedProfileOutput::extract(calculator, ref, data);
-
-    data = calculator->site()->dampingProfile();
+  data = calculator->site()->dampingProfile();
 }

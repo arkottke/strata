@@ -25,18 +25,17 @@
 #include <QItemDelegate>
 #include <QModelIndex>
 
-class MotionTypeDelegate : public QItemDelegate
-{
-Q_OBJECT
+class MotionTypeDelegate : public QItemDelegate {
+  Q_OBJECT
 public:
-    explicit MotionTypeDelegate(QObject *parent = nullptr);
+  explicit MotionTypeDelegate(QObject *parent = nullptr);
 
-    auto createEditor(QWidget *parent, const QStyleOptionViewItem
-                           &option, const QModelIndex &index) const -> QWidget *;
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                    const QModelIndex &index) const -> QWidget *;
 
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model,
-                      const QModelIndex &index) const;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const;
 };
 
 #endif // MOTION_TYPE_DELEGATE_H

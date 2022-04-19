@@ -26,36 +26,27 @@
 #include "SoilProfile.h"
 #include "Units.h"
 
-InitialVelProfileOutput::InitialVelProfileOutput(OutputCatalog* catalog)
-    : AbstractSteppedProfileOutput(catalog)
-{
+InitialVelProfileOutput::InitialVelProfileOutput(OutputCatalog *catalog)
+    : AbstractSteppedProfileOutput(catalog) {}
 
+auto InitialVelProfileOutput::motionIndependent() const -> bool { return true; }
+
+auto InitialVelProfileOutput::name() const -> QString {
+  return tr("Initial Shear-Wave Velocity Profile");
 }
 
-auto InitialVelProfileOutput::motionIndependent() const -> bool
-{
-    return true;
+auto InitialVelProfileOutput::shortName() const -> QString {
+  return tr("initialVs");
 }
 
-auto InitialVelProfileOutput::name() const -> QString
-{
-    return tr("Initial Shear-Wave Velocity Profile");
+auto InitialVelProfileOutput::xLabel() const -> const QString {
+  return tr("Initial Shear-Wave Velocity (%1)").arg(Units::instance()->vel());
 }
 
-auto InitialVelProfileOutput::shortName() const -> QString
-{
-    return tr("initialVs");
-}
+void InitialVelProfileOutput::extract(AbstractCalculator *const calculator,
+                                      QVector<double> &ref,
+                                      QVector<double> &data) const {
+  AbstractSteppedProfileOutput::extract(calculator, ref, data);
 
-auto InitialVelProfileOutput::xLabel() const -> const QString
-{
-    return tr("Initial Shear-Wave Velocity (%1)").arg(Units::instance()->vel());
-}
-
-void InitialVelProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    AbstractSteppedProfileOutput::extract(calculator, ref, data);
-
-    data = calculator->site()->initialVelocityProfile();
+  data = calculator->site()->initialVelocityProfile();
 }

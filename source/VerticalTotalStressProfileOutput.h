@@ -26,20 +26,19 @@
 
 class AbstractCalculator;
 
-class VerticalTotalStressProfileOutput : public AbstractProfileOutput
-{
-    Q_OBJECT
+class VerticalTotalStressProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit VerticalTotalStressProfileOutput(OutputCatalog* catalog);
+  explicit VerticalTotalStressProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;    
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
 
-
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // VERTICAL_TOTAL_STRESS_PROFILE_OUTPUT_H

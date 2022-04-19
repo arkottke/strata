@@ -28,49 +28,46 @@
 
 #include <qwt_scale_engine.h>
 
-VerticalTotalStressProfileOutput::VerticalTotalStressProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
-{
-    _offset_bot = 1;
+VerticalTotalStressProfileOutput::VerticalTotalStressProfileOutput(
+    OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  _offset_bot = 1;
 }
 
-auto VerticalTotalStressProfileOutput::name() const -> QString
-{
-    return tr("Vertical Total Stress Profile");
+auto VerticalTotalStressProfileOutput::name() const -> QString {
+  return tr("Vertical Total Stress Profile");
 }
 
-auto VerticalTotalStressProfileOutput::shortName() const -> QString
-{
-    return tr("vTotalStress");
+auto VerticalTotalStressProfileOutput::shortName() const -> QString {
+  return tr("vTotalStress");
 }
 
-auto VerticalTotalStressProfileOutput::xLabel() const -> const QString
-{
-    return tr("Vertical Total Stress (%1)").arg(Units::instance()->stress());
+auto VerticalTotalStressProfileOutput::xLabel() const -> const QString {
+  return tr("Vertical Total Stress (%1)").arg(Units::instance()->stress());
 }
 
-auto VerticalTotalStressProfileOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    auto *scaleEngine = new QwtLinearScaleEngine;
-    return scaleEngine;
+auto VerticalTotalStressProfileOutput::xScaleEngine() const
+    -> QwtScaleEngine * {
+  auto *scaleEngine = new QwtLinearScaleEngine;
+  return scaleEngine;
 }
 
-void VerticalTotalStressProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
-    // Populate the reference with the depth to middle of the layers
-    ref.clear();
-    data.clear();
-    ref << 0.;
-    data << 0.;
+void VerticalTotalStressProfileOutput::extract(
+    AbstractCalculator *const calculator, QVector<double> &ref,
+    QVector<double> &data) const {
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
+  // Populate the reference with the depth to middle of the layers
+  ref.clear();
+  data.clear();
+  ref << 0.;
+  data << 0.;
 
-    for (const SubLayer &sl : subLayers) {
-        ref << sl.depthToMid();
-        data << sl.vTotalStress();
-    }
+  for (const SubLayer &sl : subLayers) {
+    ref << sl.depthToMid();
+    data << sl.vTotalStress();
+  }
 
-    // Add the depth at the surface of the bedrock
-    ref << subLayers.last().depthToBase();
-    data << subLayers.last().vTotalStress(1.0);
+  // Add the depth at the surface of the bedrock
+  ref << subLayers.last().depthToBase();
+  data << subLayers.last().vTotalStress(1.0);
 }

@@ -26,19 +26,20 @@
 
 class SoilTypeCatalog;
 
-class SoilTypeDelegate : public QItemDelegate
-{
-    Q_OBJECT
+class SoilTypeDelegate : public QItemDelegate {
+  Q_OBJECT
 public:
-    explicit SoilTypeDelegate(QObject *parent = nullptr);
+  explicit SoilTypeDelegate(QObject *parent = nullptr);
 
-    auto createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const -> QWidget *;
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;    
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+  auto createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                    const QModelIndex &index) const -> QWidget *;
+  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const;
 
-    void setCatalog(SoilTypeCatalog *catalog);
+  void setCatalog(SoilTypeCatalog *catalog);
 
 protected:
-    SoilTypeCatalog* _catalog;
+  SoilTypeCatalog *_catalog;
 };
 #endif // SOIL_TYPE_DELEGATE_H

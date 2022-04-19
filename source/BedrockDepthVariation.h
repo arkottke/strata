@@ -31,36 +31,38 @@
 
 class ProfileRandomizer;
 
-class BedrockDepthVariation : public Distribution
-{
-    Q_OBJECT
+class BedrockDepthVariation : public Distribution {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const BedrockDepthVariation* bdv) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, BedrockDepthVariation* bdv) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const BedrockDepthVariation *bdv)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, BedrockDepthVariation *bdv)
+      -> QDataStream &;
 
 public:
-    explicit BedrockDepthVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer);
+  explicit BedrockDepthVariation(gsl_rng *rng,
+                                 ProfileRandomizer *profileRandomizer);
 
-    auto enabled() const -> bool;
+  auto enabled() const -> bool;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void enabledChanged(bool enabled);
+  void enabledChanged(bool enabled);
 
 public slots:
-    void setEnabled(bool enabled);
+  void setEnabled(bool enabled);
 
 protected slots:
-    void updateEnabled();
+  void updateEnabled();
 
 private:
-    //! Enable variation of the profile
-    bool _enabled;
+  //! Enable variation of the profile
+  bool _enabled;
 
-    //! Profile randomizer that controls if the option is available
-    ProfileRandomizer* _profileRandomizer;
+  //! Profile randomizer that controls if the option is available
+  ProfileRandomizer *_profileRandomizer;
 };
 
 #endif // BEDROCK_DEPTH_VARIATION_H

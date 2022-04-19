@@ -24,12 +24,12 @@
 
 #include "AbstractOutputInterpolater.h"
 
-class LinearOutputInterpolater : public AbstractOutputInterpolater
-{
+class LinearOutputInterpolater : public AbstractOutputInterpolater {
 public:
-    LinearOutputInterpolater();
+  LinearOutputInterpolater();
 
-    auto calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>;
+  auto calculate(const QVector<double> &x, const QVector<double> &y,
+                 const QVector<double> &xi) -> QVector<double>;
 };
 
 #endif // LINEAR_OUTPUT_INTERPOLATER_H

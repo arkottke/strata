@@ -25,31 +25,25 @@
 #include "SoilProfile.h"
 #include "Units.h"
 
-ModulusProfileOutput::ModulusProfileOutput(OutputCatalog* catalog)
-    : AbstractSteppedProfileOutput(catalog)
-{
+ModulusProfileOutput::ModulusProfileOutput(OutputCatalog *catalog)
+    : AbstractSteppedProfileOutput(catalog) {}
 
+auto ModulusProfileOutput::name() const -> QString {
+  return tr("Shear-Modulus Profile");
 }
 
-auto ModulusProfileOutput::name() const -> QString
-{
-    return tr("Shear-Modulus Profile");
+auto ModulusProfileOutput::shortName() const -> QString {
+  return tr("modulus");
 }
 
-auto ModulusProfileOutput::shortName() const -> QString
-{
-    return tr("modulus");
+auto ModulusProfileOutput::xLabel() const -> const QString {
+  return tr("Shear modulus (%1)").arg(Units::instance()->stress());
 }
 
-auto ModulusProfileOutput::xLabel() const -> const QString
-{
-    return tr("Shear modulus (%1)").arg(Units::instance()->stress());
-}
+void ModulusProfileOutput::extract(AbstractCalculator *const calculator,
+                                   QVector<double> &ref,
+                                   QVector<double> &data) const {
+  AbstractSteppedProfileOutput::extract(calculator, ref, data);
 
-void ModulusProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    AbstractSteppedProfileOutput::extract(calculator, ref, data);
-
-    data = calculator->site()->modulusProfile();
+  data = calculator->site()->modulusProfile();
 }

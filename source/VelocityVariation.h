@@ -36,119 +36,122 @@ class ProfileRandomizer;
 class SoilLayer;
 class RockLayer;
 
-class VelocityVariation : public QObject
-{
-    Q_OBJECT
+class VelocityVariation : public QObject {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const VelocityVariation* vv) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, VelocityVariation* vv) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const VelocityVariation *vv)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, VelocityVariation *vv)
+      -> QDataStream &;
 
 public:
-    explicit VelocityVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer);
+  explicit VelocityVariation(gsl_rng *rng,
+                             ProfileRandomizer *profileRandomizer);
 
-    enum Model{
-        Custom,
-        GeoMatrix_AB,
-        GeoMatrix_CD,
-        USGS_AB,
-        USGS_CD,
-        USGS_A,
-        USGS_B,
-        USGS_C,
-        USGS_D };
+  enum Model {
+    Custom,
+    GeoMatrix_AB,
+    GeoMatrix_CD,
+    USGS_AB,
+    USGS_CD,
+    USGS_A,
+    USGS_B,
+    USGS_C,
+    USGS_D
+  };
 
-    static auto modelList() -> QStringList;
+  static auto modelList() -> QStringList;
 
-    //! Vary the shear-wave velocity of the layers
-    void vary(QList<SoilLayer*>& soilLayers, RockLayer* bedrock) const;
+  //! Vary the shear-wave velocity of the layers
+  void vary(QList<SoilLayer *> &soilLayers, RockLayer *bedrock) const;
 
-    auto enabled() const -> bool;
+  auto enabled() const -> bool;
 
-    auto isBedrockDepthVaried() const -> bool;
-    auto stdevModel() const -> Model;
-    auto stdevCustomEnabled() const -> bool;
-    void setStdevModel(Model model);
-    auto stdevIsLayerSpecific() const -> bool;
-    auto stdev() const -> double;
+  auto isBedrockDepthVaried() const -> bool;
+  auto stdevModel() const -> Model;
+  auto stdevCustomEnabled() const -> bool;
+  void setStdevModel(Model model);
+  auto stdevIsLayerSpecific() const -> bool;
+  auto stdev() const -> double;
 
-    auto correlModel() const -> Model;
-    void setCorrelModel(Model model);
-    auto correlCustomEnabled() const -> bool;
-    auto correlInitial() const -> double;
-    auto correlFinal() const -> double;
-    auto correlDelta() const -> double;
-    auto correlIntercept() const -> double;
-    auto correlExponent() const -> double;
+  auto correlModel() const -> Model;
+  void setCorrelModel(Model model);
+  auto correlCustomEnabled() const -> bool;
+  auto correlInitial() const -> double;
+  auto correlFinal() const -> double;
+  auto correlDelta() const -> double;
+  auto correlIntercept() const -> double;
+  auto correlExponent() const -> double;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void enabledChanged(bool enabled);
-    void stdevIsLayerSpecificChanged(bool stdevIsLayerSpecific);
-    void stdevChanged(double stdev);
-    void stdevModelChanged(int model);
-    void stdevCustomEnabledChanged(bool customEnabled);
-    void correlModelChanged(int model);
-    void correlCustomEnabledChanged(bool customEnabled);
-    void correlInitialChanged(double correlInitial);
-    void correlFinalChanged(double correlFinal);
-    void correlDeltaChanged(double correlDelta);
-    void correlInterceptChanged(double correlIntercept);
-    void correlExponentChanged(double correlExponent);
+  void enabledChanged(bool enabled);
+  void stdevIsLayerSpecificChanged(bool stdevIsLayerSpecific);
+  void stdevChanged(double stdev);
+  void stdevModelChanged(int model);
+  void stdevCustomEnabledChanged(bool customEnabled);
+  void correlModelChanged(int model);
+  void correlCustomEnabledChanged(bool customEnabled);
+  void correlInitialChanged(double correlInitial);
+  void correlFinalChanged(double correlFinal);
+  void correlDeltaChanged(double correlDelta);
+  void correlInterceptChanged(double correlIntercept);
+  void correlExponentChanged(double correlExponent);
 
-    void wasModified();
+  void wasModified();
 
 public slots:
-    void setEnabled(bool enabled);
-    void setStdevIsLayerSpecific(bool stdevIsLayerSpecific);
-    void setStdev(double stdev);
-    void setStdevModel(int model);
-    void setCorrelModel(int model);
-    void setCorrelInitial(double correlInitial);
-    void setCorrelFinal(double correlFinal);
-    void setCorrelDelta(double correlDelta);
-    void setCorrelIntercept(double correlIntercept);
-    void setCorrelExponent(double correlExponent);
+  void setEnabled(bool enabled);
+  void setStdevIsLayerSpecific(bool stdevIsLayerSpecific);
+  void setStdev(double stdev);
+  void setStdevModel(int model);
+  void setCorrelModel(int model);
+  void setCorrelInitial(double correlInitial);
+  void setCorrelFinal(double correlFinal);
+  void setCorrelDelta(double correlDelta);
+  void setCorrelIntercept(double correlIntercept);
+  void setCorrelExponent(double correlExponent);
 
 protected slots:
-    void updateEnabled();
+  void updateEnabled();
 
 protected:
-    //! If the variation is enabled
-    bool _enabled;
+  //! If the variation is enabled
+  bool _enabled;
 
-    //! Model for the standard deviation
-    Model _stdevModel;
+  //! Model for the standard deviation
+  Model _stdevModel;
 
-    //! Allows the standard deviation to be defined at the layer
-    bool _stdevIsLayerSpecific;
+  //! Allows the standard deviation to be defined at the layer
+  bool _stdevIsLayerSpecific;
 
-    //! Standard deviation of the entire site
-    double _stdev;
+  //! Standard deviation of the entire site
+  double _stdev;
 
-    //! Model for the correlation
-    Model _correlModel;
+  //! Model for the correlation
+  Model _correlModel;
 
-    //! Initial correlation (depth of 0 m)
-    double _correlInitial;
+  //! Initial correlation (depth of 0 m)
+  double _correlInitial;
 
-    //! Final correlation  (depth of 200 m)
-    double _correlFinal;
+  //! Final correlation  (depth of 200 m)
+  double _correlFinal;
 
-    //! Change in correlation with depth
-    double _correlDelta;
+  //! Change in correlation with depth
+  double _correlDelta;
 
-    //! Depth intercept
-    double _correlIntercept;
+  //! Depth intercept
+  double _correlIntercept;
 
-    //! Exponent of the correlation model
-    double _correlExponent;
+  //! Exponent of the correlation model
+  double _correlExponent;
 
-    //! Random number generator
-    gsl_rng* _rng;
+  //! Random number generator
+  gsl_rng *_rng;
 
-    //! Profile randomizer
-    ProfileRandomizer* _profileRandomizer;
+  //! Profile randomizer
+  ProfileRandomizer *_profileRandomizer;
 };
 #endif // VELOCITYVARIATION_H

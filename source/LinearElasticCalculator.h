@@ -24,17 +24,16 @@
 
 #include "AbstractCalculator.h"
 
-class LinearElasticCalculator : public AbstractCalculator
-{
-    Q_OBJECT
+class LinearElasticCalculator : public AbstractCalculator {
+  Q_OBJECT
 
 public:
-    explicit LinearElasticCalculator(QObject *parent = nullptr);
+  explicit LinearElasticCalculator(QObject *parent = nullptr);
 
-    virtual auto run(AbstractMotion* motion, SoilProfile* site) -> bool;
+  virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool;
 
-    //! Always converges
-    virtual auto converged() const -> bool {return true;}
+  //! Always converges
+  virtual auto converged() const -> bool { return true; }
 };
 
 #endif // LINEAR_ELASTIC_CALCULATOR_H

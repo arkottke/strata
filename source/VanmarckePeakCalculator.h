@@ -28,14 +28,14 @@
 
 class VanmarckePeakCalculator : public AbstractPeakCalculator {
 public:
-    explicit VanmarckePeakCalculator();
-    ~VanmarckePeakCalculator();
-
+  explicit VanmarckePeakCalculator();
+  ~VanmarckePeakCalculator();
 
 protected:
-    auto calcPeakFactor(double duration, double oscFreq, double oscDamping) -> double;
+  auto calcPeakFactor(double duration, double oscFreq, double oscDamping)
+      -> double;
 
-    gsl_integration_workspace *_workspace;
+  gsl_integration_workspace *_workspace;
 };
 
 #endif // VANMARCKEPEAKCALCULATOR_H

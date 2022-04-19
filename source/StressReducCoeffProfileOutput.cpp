@@ -27,42 +27,39 @@
 #include "SubLayer.h"
 #include "Units.h"
 
-StressReducCoeffProfileOutput::StressReducCoeffProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
-{
-    _offset_bot = 1;
+StressReducCoeffProfileOutput::StressReducCoeffProfileOutput(
+    OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  _offset_bot = 1;
 }
 
-auto StressReducCoeffProfileOutput::name() const -> QString
-{
+auto StressReducCoeffProfileOutput::name() const -> QString {
 
-    return tr("Stress Reduction Coefficient (r_d) Profile");
+  return tr("Stress Reduction Coefficient (r_d) Profile");
 }
 
-auto StressReducCoeffProfileOutput::shortName() const -> QString
-{
-    return tr("stressReducCoeff");
+auto StressReducCoeffProfileOutput::shortName() const -> QString {
+  return tr("stressReducCoeff");
 }
 
-auto StressReducCoeffProfileOutput::xLabel() const -> const QString
-{
-    return tr("Stress Reduction Coefficient (r_d)");
+auto StressReducCoeffProfileOutput::xLabel() const -> const QString {
+  return tr("Stress Reduction Coefficient (r_d)");
 }
 
-void StressReducCoeffProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
+void StressReducCoeffProfileOutput::extract(
+    AbstractCalculator *const calculator, QVector<double> &ref,
+    QVector<double> &data) const {
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
 
-    // Populate the reference with the depth to the top of the layers
-    ref.clear();
+  // Populate the reference with the depth to the top of the layers
+  ref.clear();
 
-    ref << 0;
-    for (const SubLayer &sl : subLayers)
-        ref << sl.depthToMid();
+  ref << 0;
+  for (const SubLayer &sl : subLayers)
+    ref << sl.depthToMid();
 
-    // Add the depth at the surface of the bedrock
-    ref << subLayers.last().depthToBase();
+  // Add the depth at the surface of the bedrock
+  ref << subLayers.last().depthToBase();
 
-    data = calculator->site()->stressReducCoeffProfile(calculator->surfacePGA());
+  data = calculator->site()->stressReducCoeffProfile(calculator->surfacePGA());
 }

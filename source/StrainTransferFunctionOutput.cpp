@@ -32,69 +32,59 @@
 
 #include <qwt_scale_engine.h>
 
-StrainTransferFunctionOutput::StrainTransferFunctionOutput(OutputCatalog* catalog)
-    : AbstractRatioOutput(catalog)
-{
-    _interp = new LinearOutputInterpolater;
+StrainTransferFunctionOutput::StrainTransferFunctionOutput(
+    OutputCatalog *catalog)
+    : AbstractRatioOutput(catalog) {
+  _interp = new LinearOutputInterpolater;
 }
 
-auto StrainTransferFunctionOutput::needsFreq() const -> bool
-{
-    return true;
+auto StrainTransferFunctionOutput::needsFreq() const -> bool { return true; }
+
+auto StrainTransferFunctionOutput::name() const -> QString {
+  return tr("Strain Transfer Function");
 }
 
-auto StrainTransferFunctionOutput::name() const -> QString
-{
-    return tr("Strain Transfer Function");
+auto StrainTransferFunctionOutput::shortName() const -> QString {
+  return tr("strainTf");
 }
 
-auto StrainTransferFunctionOutput::shortName() const -> QString
-{
-    return tr("strainTf");
+auto StrainTransferFunctionOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-
-auto StrainTransferFunctionOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto StrainTransferFunctionOutput::yScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto StrainTransferFunctionOutput::yScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto StrainTransferFunctionOutput::xLabel() const -> const QString {
+  return tr("Frequency (Hz");
 }
 
-auto StrainTransferFunctionOutput::xLabel() const -> const QString
-{
-    return tr("Frequency (Hz");
+auto StrainTransferFunctionOutput::yLabel() const -> const QString {
+  return tr("FAS (strain) at %1 / FAS (accel) at %2")
+      .arg(locationToString(_outDepth))
+      .arg(locationToString(_inDepth));
 }
 
-auto StrainTransferFunctionOutput::yLabel() const -> const QString
-{
-    return tr("FAS (strain) at %1 / FAS (accel) at %2")
-            .arg(locationToString(_outDepth))
-            .arg(locationToString(_inDepth));
+auto StrainTransferFunctionOutput::ref(int motion) const
+    -> const QVector<double> & {
+  Q_UNUSED(motion);
+
+  return _catalog->frequency()->data();
 }
 
-auto StrainTransferFunctionOutput::ref(int motion) const -> const QVector<double>&
-{
-    Q_UNUSED(motion);
+void StrainTransferFunctionOutput::extract(AbstractCalculator *const calculator,
+                                           QVector<double> &ref,
+                                           QVector<double> &data) const {
+  const Location inLoc = calculator->site()->depthToLocation(_inDepth);
+  const Location outLoc = calculator->site()->depthToLocation(_outDepth);
 
-    return _catalog->frequency()->data();
-}
+  ref = calculator->motion()->freq();
+  QVector<std::complex<double>> tf =
+      calculator->calcStrainTf(inLoc, _inType, outLoc);
 
-void StrainTransferFunctionOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    const Location inLoc = calculator->site()->depthToLocation(_inDepth);
-    const Location outLoc = calculator->site()->depthToLocation(_outDepth);
+  data.clear();
 
-    ref = calculator->motion()->freq();
-    QVector<std::complex<double> > tf = calculator->calcStrainTf(
-            inLoc, _inType, outLoc);
-
-    data.clear();
-
-    foreach (std::complex<double> c, tf)
-        data << abs(c);
+  foreach (std::complex<double> c, tf)
+    data << abs(c);
 }

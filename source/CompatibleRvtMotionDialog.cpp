@@ -42,8 +42,8 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
-#include <qwt_picker_machine.h>
 #include <qwt_legend.h>
+#include <qwt_picker_machine.h>
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
 #include <qwt_scale_engine.h>
@@ -51,104 +51,99 @@
 #include <qwt_text.h>
 
 CompatibleRvtMotionDialog::CompatibleRvtMotionDialog(
-        CompatibleRvtMotion *motion, 
-        bool readOnly, 
-        QWidget *parent) :
-    AbstractRvtMotionDialog(motion, readOnly, parent)
-{
-    init();
+    CompatibleRvtMotion *motion, bool readOnly, QWidget *parent)
+    : AbstractRvtMotionDialog(motion, readOnly, parent) {
+  init();
 }
 
-auto CompatibleRvtMotionDialog::createParametersLayout() -> QFormLayout*
-{
-    auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
+auto CompatibleRvtMotionDialog::createParametersLayout() -> QFormLayout * {
+  auto crm = qobject_cast<CompatibleRvtMotion *>(_motion);
 
-    auto layout = AbstractRvtMotionDialog::createParametersLayout();
+  auto layout = AbstractRvtMotionDialog::createParametersLayout();
 
-    // Duration
-    auto spinBox = new QDoubleSpinBox;
-    spinBox->setRange(0.10, 100.00);
-    spinBox->setDecimals(2);
-    spinBox->setSingleStep(0.10);
-    spinBox->setSuffix(" s");
-    spinBox->setValue(_motion->duration());
-    spinBox->setReadOnly(_readOnly);
+  // Duration
+  auto spinBox = new QDoubleSpinBox;
+  spinBox->setRange(0.10, 100.00);
+  spinBox->setDecimals(2);
+  spinBox->setSingleStep(0.10);
+  spinBox->setSuffix(" s");
+  spinBox->setValue(_motion->duration());
+  spinBox->setReadOnly(_readOnly);
 
-    connect(spinBox, SIGNAL(valueChanged(double)),
-            _motion, SLOT(setDuration(double)));
+  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
+          SLOT(setDuration(double)));
 
-    layout->addRow(tr("Duration:"), spinBox);
+  layout->addRow(tr("Duration:"), spinBox);
 
-    // Damping
-    spinBox = new QDoubleSpinBox;
-    spinBox->setRange(1, 20);
-    spinBox->setDecimals(1);
-    spinBox->setSingleStep(1);
-    spinBox->setSuffix(" %");
-    spinBox->setValue(crm->targetRespSpec()->damping());
-    spinBox->setReadOnly(_readOnly);
+  // Damping
+  spinBox = new QDoubleSpinBox;
+  spinBox->setRange(1, 20);
+  spinBox->setDecimals(1);
+  spinBox->setSingleStep(1);
+  spinBox->setSuffix(" %");
+  spinBox->setValue(crm->targetRespSpec()->damping());
+  spinBox->setReadOnly(_readOnly);
 
-    connect(spinBox, SIGNAL(valueChanged(double)),
-            crm->targetRespSpec(), SLOT(setDamping(double)));
+  connect(spinBox, SIGNAL(valueChanged(double)), crm->targetRespSpec(),
+          SLOT(setDamping(double)));
 
-    layout->addRow(tr("Damping of target:"), spinBox);
+  layout->addRow(tr("Damping of target:"), spinBox);
 
-    // Limit
-    auto checkBox = new QCheckBox(tr("Limit shape of FAS"));
-    checkBox->setChecked(crm->limitFas());
-    connect(checkBox, SIGNAL(toggled(bool)), _motion, SLOT(setLimitFas(bool)));
+  // Limit
+  auto checkBox = new QCheckBox(tr("Limit shape of FAS"));
+  checkBox->setChecked(crm->limitFas());
+  connect(checkBox, SIGNAL(toggled(bool)), _motion, SLOT(setLimitFas(bool)));
 
-    layout->addRow(checkBox);
+  layout->addRow(checkBox);
 
-    return layout;
+  return layout;
 }
 
-void CompatibleRvtMotionDialog::calculate()
-{
-    AbstractRvtMotionDialog::calculate();
+void CompatibleRvtMotionDialog::calculate() {
+  AbstractRvtMotionDialog::calculate();
 
-    auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
-    _targetSaCurve->setSamples(
-            crm->targetRespSpec()->period(),
-            crm->targetRespSpec()->sa());
+  auto crm = qobject_cast<CompatibleRvtMotion *>(_motion);
+  _targetSaCurve->setSamples(crm->targetRespSpec()->period(),
+                             crm->targetRespSpec()->sa());
 
-    _dataTabWidget->setCurrentIndex(1);
+  _dataTabWidget->setCurrentIndex(1);
 }
 
-auto CompatibleRvtMotionDialog::createTabWidget() -> QTabWidget*
-{
-    auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
-    auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
+auto CompatibleRvtMotionDialog::createTabWidget() -> QTabWidget * {
+  auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
+  auto crm = qobject_cast<CompatibleRvtMotion *>(_motion);
 
-    // Target response specturm
-    auto tableGroupBox = new TableGroupBox(tr("Target Response Spectrum"), this);
-    tableGroupBox->setModel(crm->targetRespSpec());
-    tableGroupBox->setReadOnly(_readOnly);
-    tableGroupBox->table()->setItemDelegateForColumn(0, new OnlyIncreasingDelegate);
-    
-    auto scrollArea = new QScrollArea;
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setWidget(tableGroupBox);
+  // Target response specturm
+  auto tableGroupBox = new TableGroupBox(tr("Target Response Spectrum"), this);
+  tableGroupBox->setModel(crm->targetRespSpec());
+  tableGroupBox->setReadOnly(_readOnly);
+  tableGroupBox->table()->setItemDelegateForColumn(0,
+                                                   new OnlyIncreasingDelegate);
 
-    tabWidget->insertTab(0, scrollArea, "Target RS");
-    tabWidget->setCurrentIndex(0);
+  auto scrollArea = new QScrollArea;
+  scrollArea->setWidgetResizable(true);
+  scrollArea->setWidget(tableGroupBox);
 
-    return tabWidget;
+  tabWidget->insertTab(0, scrollArea, "Target RS");
+  tabWidget->setCurrentIndex(0);
+
+  return tabWidget;
 }
 
-void CompatibleRvtMotionDialog::addRespSpecCurves()
-{
-    auto crm = qobject_cast<CompatibleRvtMotion*>(_motion);
+void CompatibleRvtMotionDialog::addRespSpecCurves() {
+  auto crm = qobject_cast<CompatibleRvtMotion *>(_motion);
 
-    _targetSaCurve = new QwtPlotCurve(tr("Target"));
-    _targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
-    _targetSaCurve->setSymbol(new QwtSymbol(
-                QwtSymbol::Ellipse, QBrush(Qt::transparent), QPen(Qt::red, 1.5), QSize(8, 8)));
+  _targetSaCurve = new QwtPlotCurve(tr("Target"));
+  _targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
+  _targetSaCurve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
+                                          QBrush(Qt::transparent),
+                                          QPen(Qt::red, 1.5), QSize(8, 8)));
 
-    _targetSaCurve->setSamples(crm->targetRespSpec()->period(), crm->targetRespSpec()->sa());
-    _targetSaCurve->attach(_rsPlot);
+  _targetSaCurve->setSamples(crm->targetRespSpec()->period(),
+                             crm->targetRespSpec()->sa());
+  _targetSaCurve->attach(_rsPlot);
 
-    auto *legend = new QwtLegend;
-    legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
-    _rsPlot->insertLegend(legend, QwtPlot::BottomLegend);
+  auto *legend = new QwtLegend;
+  legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
+  _rsPlot->insertLegend(legend, QwtPlot::BottomLegend);
 }

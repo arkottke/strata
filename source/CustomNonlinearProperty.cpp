@@ -21,81 +21,75 @@
 
 #include "CustomNonlinearProperty.h"
 
-CustomNonlinearProperty::CustomNonlinearProperty(Type type, bool retain, QObject *parent)
-    : NonlinearProperty(parent), _retain(retain)
-{
-    _name = "Custom";
-    _type = type;
+CustomNonlinearProperty::CustomNonlinearProperty(Type type, bool retain,
+                                                 QObject *parent)
+    : NonlinearProperty(parent), _retain(retain) {
+  _name = "Custom";
+  _type = type;
 }
 
-void CustomNonlinearProperty::setName(const QString &name)
-{
-    _name = name;
-}
+void CustomNonlinearProperty::setName(const QString &name) { _name = name; }
 
-auto CustomNonlinearProperty::retain() const -> bool
-{
-    return _retain;
-}
+auto CustomNonlinearProperty::retain() const -> bool { return _retain; }
 
-auto CustomNonlinearProperty::setData(const QModelIndex &index, const QVariant &value, int role) -> bool
-{
-    if(index.parent() != QModelIndex() && role != Qt::EditRole) {
-        return false;
+auto CustomNonlinearProperty::setData(const QModelIndex &index,
+                                      const QVariant &value, int role) -> bool {
+  if (index.parent() != QModelIndex() && role != Qt::EditRole) {
+    return false;
+  }
+
+  bool b;
+  const double d = value.toDouble(&b);
+
+  if (b) {
+    switch (index.column()) {
+    case StrainColumn:
+      _strain[index.row()] = d;
+      break;
+    case PropertyColumn:
+      _average[index.row()] = d;
+      _varied[index.row()] = d;
+      gsl_interp_accel_reset(_acc);
+      break;
     }
-
-    bool b;
-    const double d = value.toDouble(&b);
-
-    if (b) {
-        switch (index.column()) {
-        case StrainColumn:
-            _strain[index.row()] = d;
-            break;
-        case PropertyColumn:
-            _average[index.row()] = d;
-            _varied[index.row()] = d;
-            gsl_interp_accel_reset(_acc);
-            break;
-        }
-        dataChanged(index, index);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-auto CustomNonlinearProperty::flags(const QModelIndex &index) const -> Qt::ItemFlags
-{
-    return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
-}
-
-auto CustomNonlinearProperty::insertRows(int row, int count, const QModelIndex &parent) -> bool
-{
-    if (!count)
-        return false;
-
-    emit beginInsertRows(parent, row, row+count-1);
-
-    _strain.insert(row, count, 0);
-    _average.insert(row, count, 0);
-    _varied.insert(row, count, 0);
-
-    emit endInsertRows();
+    dataChanged(index, index);
     return true;
+  } else {
+    return false;
+  }
 }
 
-auto CustomNonlinearProperty::removeRows(int row, int count, const QModelIndex &parent) -> bool
-{
-    if (!count)
-        return false;
+auto CustomNonlinearProperty::flags(const QModelIndex &index) const
+    -> Qt::ItemFlags {
+  return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
+}
 
-    emit beginRemoveRows(parent, row, row+count-1);
+auto CustomNonlinearProperty::insertRows(int row, int count,
+                                         const QModelIndex &parent) -> bool {
+  if (!count)
+    return false;
 
-    _strain.remove(row, count);
-    _average.remove(row, count);
-    _varied.remove(row, count);
+  emit beginInsertRows(parent, row, row + count - 1);
 
-    emit endRemoveRows();
-    return true;
+  _strain.insert(row, count, 0);
+  _average.insert(row, count, 0);
+  _varied.insert(row, count, 0);
+
+  emit endInsertRows();
+  return true;
+}
+
+auto CustomNonlinearProperty::removeRows(int row, int count,
+                                         const QModelIndex &parent) -> bool {
+  if (!count)
+    return false;
+
+  emit beginRemoveRows(parent, row, row + count - 1);
+
+  _strain.remove(row, count);
+  _average.remove(row, count);
+  _varied.remove(row, count);
+
+  emit endRemoveRows();
+  return true;
 }

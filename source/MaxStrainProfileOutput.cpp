@@ -27,43 +27,39 @@
 #include "SubLayer.h"
 #include "Units.h"
 
-MaxStrainProfileOutput::MaxStrainProfileOutput(OutputCatalog* catalog)
-        : AbstractProfileOutput(catalog)
-{
-    _offset_bot = 1;
-    _offset_top = 1;
+MaxStrainProfileOutput::MaxStrainProfileOutput(OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  _offset_bot = 1;
+  _offset_top = 1;
 }
 
-auto MaxStrainProfileOutput::name() const -> QString
-{
-    return tr("Maximum Shear-Strain Profile");
+auto MaxStrainProfileOutput::name() const -> QString {
+  return tr("Maximum Shear-Strain Profile");
 }
 
-auto MaxStrainProfileOutput::shortName() const -> QString
-{
-    return tr("strain");
+auto MaxStrainProfileOutput::shortName() const -> QString {
+  return tr("strain");
 }
 
-auto MaxStrainProfileOutput::xLabel() const -> const QString
-{
-    return tr("Maximum Shear Strain (%)");
+auto MaxStrainProfileOutput::xLabel() const -> const QString {
+  return tr("Maximum Shear Strain (%)");
 }
 
-void MaxStrainProfileOutput::extract(AbstractCalculator* const calculator,
-                                     QVector<double> &ref, QVector<double> &data) const
-{
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
-    // Uses depth from the center of the layer
-    ref.clear();
+void MaxStrainProfileOutput::extract(AbstractCalculator *const calculator,
+                                     QVector<double> &ref,
+                                     QVector<double> &data) const {
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
+  // Uses depth from the center of the layer
+  ref.clear();
 
-    ref << 0;
-    for (const SubLayer &sl : subLayers)
-        ref << sl.depthToMid();
+  ref << 0;
+  for (const SubLayer &sl : subLayers)
+    ref << sl.depthToMid();
 
-    ref << subLayers.last().depthToBase();
+  ref << subLayers.last().depthToBase();
 
-    data = calculator->site()->maxShearStrainProfile();
-    data.prepend(0);
+  data = calculator->site()->maxShearStrainProfile();
+  data.prepend(0);
 
-    extrap(ref, data, subLayers.last().thickness());
+  extrap(ref, data, subLayers.last().thickness());
 }

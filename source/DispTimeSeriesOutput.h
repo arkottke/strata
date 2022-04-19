@@ -24,18 +24,18 @@
 
 #include "AbstractTimeSeriesOutput.h"
 
-class DispTimeSeriesOutput : public AbstractTimeSeriesOutput
-{
-    Q_OBJECT
+class DispTimeSeriesOutput : public AbstractTimeSeriesOutput {
+  Q_OBJECT
 public:
-    explicit DispTimeSeriesOutput(OutputCatalog* catalog);
+  explicit DispTimeSeriesOutput(OutputCatalog *catalog);
 
-    auto name() const -> QString;
+  auto name() const -> QString;
+
 protected:
-    auto shortName() const -> QString;
-    auto yLabel() const -> const QString;
+  auto shortName() const -> QString;
+  auto yLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                 QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // DISP_TIME_SERIES_OUTPUT_H

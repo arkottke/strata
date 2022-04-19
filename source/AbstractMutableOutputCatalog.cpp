@@ -21,22 +21,18 @@
 
 #include "AbstractMutableOutputCatalog.h"
 
-AbstractMutableOutputCatalog::AbstractMutableOutputCatalog(OutputCatalog *outputCatalog) :
-    AbstractOutputCatalog(outputCatalog)
-{
+AbstractMutableOutputCatalog::AbstractMutableOutputCatalog(
+    OutputCatalog *outputCatalog)
+    : AbstractOutputCatalog(outputCatalog) {}
+
+auto AbstractMutableOutputCatalog::names() const -> QStringList {
+  return _lookup.keys();
 }
 
-auto AbstractMutableOutputCatalog::names() const -> QStringList
-{
-    return _lookup.keys();
+auto AbstractMutableOutputCatalog::needsInputConditions() const -> bool {
+  return false;
 }
 
-auto AbstractMutableOutputCatalog::needsInputConditions() const -> bool
-{
-    return false;
-}
-
-auto AbstractMutableOutputCatalog::needsOutputConditions() const -> bool
-{
-    return false;
+auto AbstractMutableOutputCatalog::needsOutputConditions() const -> bool {
+  return false;
 }

@@ -27,38 +27,30 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-VelTimeSeriesOutput::VelTimeSeriesOutput(OutputCatalog* catalog)
-    : AbstractTimeSeriesOutput(catalog)
-{
+VelTimeSeriesOutput::VelTimeSeriesOutput(OutputCatalog *catalog)
+    : AbstractTimeSeriesOutput(catalog) {}
 
+auto VelTimeSeriesOutput::name() const -> QString {
+  return tr("Velocity Time Series");
 }
 
-auto VelTimeSeriesOutput::name() const -> QString
-{
-    return tr("Velocity Time Series");
+auto VelTimeSeriesOutput::shortName() const -> QString { return tr("velTs"); }
+
+auto VelTimeSeriesOutput::yLabel() const -> const QString {
+  return tr("Velocity (%1)").arg(Units::instance()->velTs());
 }
 
-auto VelTimeSeriesOutput::shortName() const -> QString
-{
-    return tr("velTs");
-}
+void VelTimeSeriesOutput::extract(AbstractCalculator *const calculator,
+                                  QVector<double> &ref,
+                                  QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-auto VelTimeSeriesOutput::yLabel() const -> const QString
-{
-    return tr("Velocity (%1)").arg(Units::instance()->velTs());
-}
+  const auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-
-void VelTimeSeriesOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
-
-    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
-
-    data = tsm->timeSeries(TimeSeriesMotion::Velocity,
-                              calculator->calcAccelTf(
-                                      calculator->site()->inputLocation(), tsm->type(),
-                                      calculator->site()->depthToLocation(_depth), _type),
-                              _baselineCorrect);
+  data =
+      tsm->timeSeries(TimeSeriesMotion::Velocity,
+                      calculator->calcAccelTf(
+                          calculator->site()->inputLocation(), tsm->type(),
+                          calculator->site()->depthToLocation(_depth), _type),
+                      _baselineCorrect);
 }

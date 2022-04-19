@@ -27,26 +27,26 @@
 class TableGroupBox;
 class SourceTheoryRvtMotion;
 
-class SourceTheoryRvtMotionDialog : public AbstractRvtMotionDialog
-{
-Q_OBJECT
+class SourceTheoryRvtMotionDialog : public AbstractRvtMotionDialog {
+  Q_OBJECT
 public:
-    explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion, bool readOnly,
-                                         QWidget *parent = nullptr);
+  explicit SourceTheoryRvtMotionDialog(SourceTheoryRvtMotion *motion,
+                                       bool readOnly,
+                                       QWidget *parent = nullptr);
 protected slots:
-    void updatePathDurSource(int source);
-    void updateCrustalAmpSource(int source);
+  void updatePathDurSource(int source);
+  void updateCrustalAmpSource(int source);
 
 protected:
-    virtual auto createParametersLayout() -> QFormLayout*;
+  virtual auto createParametersLayout() -> QFormLayout *;
 
-    int _crustModelIndex;
+  int _crustModelIndex;
 
-    QTabWidget* _paramsTabWidget;
+  QTabWidget *_paramsTabWidget;
 
-    TableGroupBox* _pathDurTableGroupBox;
-    TableGroupBox* _crustalModelGroupBox;
-    TableGroupBox* _crustalAmpGroupBox;
+  TableGroupBox *_pathDurTableGroupBox;
+  TableGroupBox *_crustalModelGroupBox;
+  TableGroupBox *_crustalAmpGroupBox;
 };
 
 #endif // SOURCE_THEORY_RVT_MOTION_DIALOG_H

@@ -27,15 +27,14 @@
 class AbstractCalculator;
 class OutputCatalog;
 
-class AbstractSteppedProfileOutput : public AbstractProfileOutput
-{
-Q_OBJECT
+class AbstractSteppedProfileOutput : public AbstractProfileOutput {
+  Q_OBJECT
 public:
-    explicit AbstractSteppedProfileOutput(OutputCatalog* catalog);
+  explicit AbstractSteppedProfileOutput(OutputCatalog *catalog);
 
 protected:
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // ABSTRACT_STEPPED_PROFILE_OUTPUT_H

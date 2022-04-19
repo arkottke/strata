@@ -26,20 +26,20 @@
 
 class AbstractCalculator;
 
-class InitialVelProfileOutput : public AbstractSteppedProfileOutput
-{
-Q_OBJECT
+class InitialVelProfileOutput : public AbstractSteppedProfileOutput {
+  Q_OBJECT
 public:
-    explicit InitialVelProfileOutput(OutputCatalog* catalog);
+  explicit InitialVelProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
-    auto motionIndependent() const -> bool;
+  virtual auto name() const -> QString;
+  auto motionIndependent() const -> bool;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // INITIAL_VEL_PROFILE_OUTPUT_H

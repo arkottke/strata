@@ -26,49 +26,44 @@
 #include "TimeSeriesMotion.h"
 #include "Units.h"
 
-StressTimeSeriesOutput::StressTimeSeriesOutput(OutputCatalog* catalog)
-    : AbstractTimeSeriesOutput(catalog)
-{
-    _type = AbstractMotion::Within;
+StressTimeSeriesOutput::StressTimeSeriesOutput(OutputCatalog *catalog)
+    : AbstractTimeSeriesOutput(catalog) {
+  _type = AbstractMotion::Within;
 }
 
-auto StressTimeSeriesOutput::name() const -> QString
-{
-    return tr("Shear-Stress Time Series");
+auto StressTimeSeriesOutput::name() const -> QString {
+  return tr("Shear-Stress Time Series");
 }
 
-auto StressTimeSeriesOutput::shortName() const -> QString
-{
-    return tr("stressTs");
+auto StressTimeSeriesOutput::shortName() const -> QString {
+  return tr("stressTs");
 }
 
-auto StressTimeSeriesOutput::yLabel() const -> const QString
-{
-    return tr("Shear Stress, %1 (%2)")
-            .arg(QChar(0x03C4))
-            .arg(Units::instance()->stress());
+auto StressTimeSeriesOutput::yLabel() const -> const QString {
+  return tr("Shear Stress, %1 (%2)")
+      .arg(QChar(0x03C4))
+      .arg(Units::instance()->stress());
 }
 
+void StressTimeSeriesOutput::extract(AbstractCalculator *const calculator,
+                                     QVector<double> &ref,
+                                     QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-void StressTimeSeriesOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
+  const auto *tsm = static_cast<const TimeSeriesMotion *>(calculator->motion());
 
-    const auto* tsm = static_cast<const TimeSeriesMotion*>(calculator->motion());
+  Q_ASSERT(tsm);
 
-    Q_ASSERT(tsm);
+  Location loc = calculator->site()->depthToLocation(_depth);
 
-    Location loc = calculator->site()->depthToLocation(_depth);
+  data = tsm->strainTimeSeries(
+      calculator->calcStrainTf(calculator->site()->inputLocation(),
+                               calculator->motion()->type(), loc),
+      _baselineCorrect);
 
-    data = tsm->strainTimeSeries(
-            calculator->calcStrainTf(
-                    calculator->site()->inputLocation(),
-                    calculator->motion()->type(), loc), _baselineCorrect);
+  // Convert to appropriate units
+  const double shearMod = calculator->site()->shearMod(loc.layer());
 
-    // Convert to appropriate units
-    const double shearMod = calculator->site()->shearMod(loc.layer());
-
-    for (int i = 0; i < data.size(); ++i)
-        data[i] *= shearMod;
+  for (int i = 0; i < data.size(); ++i)
+    data[i] *= shearMod;
 }

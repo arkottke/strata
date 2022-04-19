@@ -22,39 +22,38 @@
 #ifndef BATCHRUNNER_H
 #define BATCHRUNNER_H
 
-#include <QtCore>
 #include <QElapsedTimer>
 #include <QTextStream>
+#include <QtCore>
 
 #include "SiteResponseModel.h"
 
-class BatchRunner : public QObject
-{
-    Q_OBJECT
+class BatchRunner : public QObject {
+  Q_OBJECT
 
 public:
-    explicit BatchRunner(const QStringList &fileNames);
-    void startNext();
+  explicit BatchRunner(const QStringList &fileNames);
+  void startNext();
 
 public slots:
-    void updateLog(QString line);
-    void updateEtc(int value);
-    void rangeChanged(int _begin, int _end);
-    void finalize();
+  void updateLog(QString line);
+  void updateEtc(int value);
+  void rangeChanged(int _begin, int _end);
+  void finalize();
 
 private:
-    // All files to process
-    QStringList _fileNames;
+  // All files to process
+  QStringList _fileNames;
 
-    // Current site response model
-    SiteResponseModel * _model;
+  // Current site response model
+  SiteResponseModel *_model;
 
-    // model range for timing
-    int _begin;
-    int _end;
+  // model range for timing
+  int _begin;
+  int _end;
 
-    // timer for updates
-    QElapsedTimer _timer;
+  // timer for updates
+  QElapsedTimer _timer;
 };
 
 #endif // BATCHRUNNER_H

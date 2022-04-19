@@ -27,21 +27,20 @@
 class OutputCatalog;
 class AbstractCalculator;
 
-class AccelTimeSeriesOutput : public AbstractTimeSeriesOutput
-{
-    Q_OBJECT
+class AccelTimeSeriesOutput : public AbstractTimeSeriesOutput {
+  Q_OBJECT
 
 public:
-    AccelTimeSeriesOutput(OutputCatalog* catalog);
+  AccelTimeSeriesOutput(OutputCatalog *catalog);
 
-    auto name() const -> QString;
+  auto name() const -> QString;
+
 protected:
-    auto shortName() const -> QString;
-    auto yLabel() const -> const QString;
+  auto shortName() const -> QString;
+  auto yLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
-
 
 #endif // ACCEL_TIME_SERIES_OUTPUT_H

@@ -26,19 +26,19 @@
 
 class AbstractCalculator;
 
-class StrainTimeSeriesOutput : public AbstractTimeSeriesOutput
-{
-    Q_OBJECT
+class StrainTimeSeriesOutput : public AbstractTimeSeriesOutput {
+  Q_OBJECT
 public:
-    explicit StrainTimeSeriesOutput(OutputCatalog* catalog);
+  explicit StrainTimeSeriesOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto yLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto yLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                 QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // STRAIN_TIME_SERIES_OUTPUT_H

@@ -36,92 +36,92 @@
 
 class CrustalModel;
 
-class CrustalAmplification : public MyAbstractTableModel
-{
-    Q_OBJECT
+class CrustalAmplification : public MyAbstractTableModel {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const CrustalAmplification* ca) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, CrustalAmplification* ca) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const CrustalAmplification *ca)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, CrustalAmplification *ca)
+      -> QDataStream &;
 
 public:
-    CrustalAmplification(QObject *parent=0);
-    ~CrustalAmplification();
+  CrustalAmplification(QObject *parent = 0);
+  ~CrustalAmplification();
 
-    enum Columns {
-        FreqColumn,
-        AmpColumn
-    };
+  enum Columns { FreqColumn, AmpColumn };
 
-    enum Source {
-        Default,
-        Specified,
-        Calculated
-    };
+  enum Source { Default, Specified, Calculated };
 
-    static auto sourceList() -> QStringList;
+  static auto sourceList() -> QStringList;
 
-    void setRegion(AbstractRvtMotion::Region region);
-    void setSource(Source source);
-    auto source() const -> Source;
+  void setRegion(AbstractRvtMotion::Region region);
+  void setSource(Source source);
+  auto source() const -> Source;
 
-    //!@{ Methods for QAbstractTableModel
-    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
-    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
+  //!@{ Methods for QAbstractTableModel
+  virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const
+      -> int;
 
-    virtual auto headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
+  virtual auto headerData(int section, Qt::Orientation orientation,
+                          int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
-    virtual auto setData( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  virtual auto setData(const QModelIndex &index, const QVariant &value,
+                       int role = Qt::EditRole) -> bool;
 
-    virtual auto flags( const QModelIndex & index) const -> Qt::ItemFlags;
+  virtual auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
 
-    virtual auto insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
-    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
-    //!@}
+  virtual auto insertRows(int row, int count,
+                          const QModelIndex &parent = QModelIndex()) -> bool;
+  virtual auto removeRows(int row, int count,
+                          const QModelIndex &parent = QModelIndex()) -> bool;
+  //!@}
 
-    auto crustalModel() -> CrustalModel*;
+  auto crustalModel() -> CrustalModel *;
 
-    auto interpAmpAt(double freq) -> double;
+  auto interpAmpAt(double freq) -> double;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void readOnlyChanged(bool b);
-    void sourceChanged(int source);
-    void wasModified();
+  void readOnlyChanged(bool b);
+  void sourceChanged(int source);
+  void wasModified();
 
 public slots:
-    void setRegion(int region);
-    void setSource(int source);
+  void setRegion(int region);
+  void setSource(int source);
 
 private slots:
-    void calculate();
+  void calculate();
 
 private:
-    //! Initialize the interpolator
-    void initInterp();
+  //! Initialize the interpolator
+  void initInterp();
 
-    //! Clear the interpolator
-    void clearInterp();
+  //! Clear the interpolator
+  void clearInterp();
 
-    //! If the amplification is calculated
-    Source _source;
+  //! If the amplification is calculated
+  Source _source;
 
-    //! Frequency
-    QVector<double> _freq;
+  //! Frequency
+  QVector<double> _freq;
 
-    //! Amplification
-    QVector<double> _amp;
+  //! Amplification
+  QVector<double> _amp;
 
-    //! Specific crustal model
-    CrustalModel *_crustalModel;
+  //! Specific crustal model
+  CrustalModel *_crustalModel;
 
-    //! GSL interpolator
-    gsl_interp *_interpolator;
+  //! GSL interpolator
+  gsl_interp *_interpolator;
 
-    //! Accelerator for the interpolation
-    gsl_interp_accel *_accelerator;
+  //! Accelerator for the interpolation
+  gsl_interp_accel *_accelerator;
 };
 
 #endif // CRUSTAL_AMPLIFICATION_H

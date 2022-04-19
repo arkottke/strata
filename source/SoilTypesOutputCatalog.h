@@ -31,41 +31,46 @@ class SoilType;
 class SoilTypeOutput;
 class SoilTypeCatalog;
 
-class SoilTypesOutputCatalog : public AbstractOutputCatalog
-{
-    Q_OBJECT
+class SoilTypesOutputCatalog : public AbstractOutputCatalog {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const SoilTypesOutputCatalog* stoc) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, SoilTypesOutputCatalog* stoc) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const SoilTypesOutputCatalog *stoc)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, SoilTypesOutputCatalog *stoc)
+      -> QDataStream &;
 
 public:
-    explicit SoilTypesOutputCatalog(OutputCatalog *outputCatalog);
+  explicit SoilTypesOutputCatalog(OutputCatalog *outputCatalog);
 
-    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
-    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
+  virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const
+      -> int;
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
-    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  virtual auto setData(const QModelIndex &index, const QVariant &value,
+                       int role = Qt::EditRole) -> bool;
 
-    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
+  virtual auto headerData(int section, Qt::Orientation orientation,
+                          int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
+  virtual auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
 
-    void setSoilTypeCatalog(SoilTypeCatalog* soilTypeCatalog);
-    virtual auto outputs() const -> QList<AbstractOutput*>;
+  void setSoilTypeCatalog(SoilTypeCatalog *soilTypeCatalog);
+  virtual auto outputs() const -> QList<AbstractOutput *>;
 
-    void fromJson(const QJsonArray &json);
-    auto toJson() const -> QJsonArray;
+  void fromJson(const QJsonArray &json);
+  auto toJson() const -> QJsonArray;
 
 protected slots:
-    void addOutput(SoilType* soilType);
-    void removeOutput(SoilType* soilType);
+  void addOutput(SoilType *soilType);
+  void removeOutput(SoilType *soilType);
 
 protected:
-    QList<SoilTypeOutput*> _outputs;
+  QList<SoilTypeOutput *> _outputs;
 
-    //! SoilType catalog
-    SoilTypeCatalog* _soilTypeCatalog;
+  //! SoilType catalog
+  SoilTypeCatalog *_soilTypeCatalog;
 };
 
 #endif // SOIL_TYPES_OUTPUT_CATALOG_H

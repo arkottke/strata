@@ -21,60 +21,57 @@
 
 #include "RvtMotionDialog.h"
 
-
 #include "EditActions.h"
 #include "MyQwtCompatibility.h"
-#include "ResponseSpectrum.h"
 #include "OnlyIncreasingDelegate.h"
+#include "ResponseSpectrum.h"
 #include "TableGroupBox.h"
 
 #include <QApplication>
 #include <QComboBox>
 #include <QDebug>
-#include <QDoubleSpinBox>
 #include <QDialogButtonBox>
+#include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QTabWidget>
 
+#include <qwt_picker_machine.h>
 #include <qwt_plot.h>
 #include <qwt_plot_picker.h>
-#include <qwt_picker_machine.h>
 #include <qwt_text.h>
 
-RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly, QWidget *parent) :
-    AbstractRvtMotionDialog(motion, readOnly, parent)
-{
-    init();
+RvtMotionDialog::RvtMotionDialog(RvtMotion *motion, bool readOnly,
+                                 QWidget *parent)
+    : AbstractRvtMotionDialog(motion, readOnly, parent) {
+  init();
 }
 
-auto RvtMotionDialog::createParametersLayout() -> QFormLayout*
-{
-    auto layout = AbstractRvtMotionDialog::createParametersLayout();
+auto RvtMotionDialog::createParametersLayout() -> QFormLayout * {
+  auto layout = AbstractRvtMotionDialog::createParametersLayout();
 
-    // Duration
-    auto spinBox = new QDoubleSpinBox;
-    spinBox->setRange(0.10, 100.00);
-    spinBox->setDecimals(2);
-    spinBox->setSingleStep(0.10);
-    spinBox->setSuffix(" s");
-    spinBox->setValue(_motion->duration());
-    spinBox->setReadOnly(_readOnly);
+  // Duration
+  auto spinBox = new QDoubleSpinBox;
+  spinBox->setRange(0.10, 100.00);
+  spinBox->setDecimals(2);
+  spinBox->setSingleStep(0.10);
+  spinBox->setSuffix(" s");
+  spinBox->setValue(_motion->duration());
+  spinBox->setReadOnly(_readOnly);
 
-    connect(spinBox, SIGNAL(valueChanged(double)),
-            _motion, SLOT(setDuration(double)));
+  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
+          SLOT(setDuration(double)));
 
-    layout->addRow(tr("Duration:"), spinBox);
+  layout->addRow(tr("Duration:"), spinBox);
 
-    return layout;
+  return layout;
 }
 
-auto RvtMotionDialog::createTabWidget() -> QTabWidget*
-{
-    auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
-    tabWidget->setCurrentIndex(3);
+auto RvtMotionDialog::createTabWidget() -> QTabWidget * {
+  auto tabWidget = AbstractRvtMotionDialog::createTabWidget();
+  tabWidget->setCurrentIndex(3);
 
-    return tabWidget;
+  return tabWidget;
 }

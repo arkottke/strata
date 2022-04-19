@@ -22,33 +22,33 @@
 #include "AbstractSteppedProfileOutput.h"
 
 #include "AbstractCalculator.h"
+#include "OutputCatalog.h"
 #include "SoilProfile.h"
 #include "SteppedOutputInterpolater.h"
 #include "SubLayer.h"
-#include "OutputCatalog.h"
 
 #include <qwt_plot_curve.h>
 
-AbstractSteppedProfileOutput::AbstractSteppedProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
-{
-    if (_interp)
-        delete _interp;
+AbstractSteppedProfileOutput::AbstractSteppedProfileOutput(
+    OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  if (_interp)
+    delete _interp;
 
-    _interp = new SteppedOutputInterpolater;
+  _interp = new SteppedOutputInterpolater;
 }
 
-void AbstractSteppedProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(data);
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
+void AbstractSteppedProfileOutput::extract(AbstractCalculator *const calculator,
+                                           QVector<double> &ref,
+                                           QVector<double> &data) const {
+  Q_UNUSED(data);
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
 
-    Q_ASSERT(subLayers.size());
+  Q_ASSERT(subLayers.size());
 
-    // Populate the reference with the depth to the base of the layers
-    ref.clear();
+  // Populate the reference with the depth to the base of the layers
+  ref.clear();
 
-    for (const SubLayer &sl : subLayers)
-        ref << sl.depthToBase();
+  for (const SubLayer &sl : subLayers)
+    ref << sl.depthToBase();
 }

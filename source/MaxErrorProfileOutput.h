@@ -26,20 +26,20 @@
 
 class AbstractCalculator;
 
-class MaxErrorProfileOutput : public AbstractSteppedProfileOutput
-{
-Q_OBJECT
+class MaxErrorProfileOutput : public AbstractSteppedProfileOutput {
+  Q_OBJECT
 public:
-    explicit MaxErrorProfileOutput(OutputCatalog* catalog);
+  explicit MaxErrorProfileOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto xLabel() const -> const QString;
-    virtual auto xScaleEngine() const -> QwtScaleEngine*;
+  virtual auto shortName() const -> QString;
+  virtual auto xLabel() const -> const QString;
+  virtual auto xScaleEngine() const -> QwtScaleEngine *;
 
-    void extract(AbstractCalculator* const calculator,
-                             QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // MAX_ERROR_PROFILE_OUTPUT_H

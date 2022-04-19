@@ -23,71 +23,60 @@
 
 #include "ProfileRandomizer.h"
 
-BedrockDepthVariation::BedrockDepthVariation(gsl_rng* rng, ProfileRandomizer* profileRandomizer) :
-    Distribution(rng), _profileRandomizer(profileRandomizer)
-{
-    connect(_profileRandomizer, SIGNAL(enabledChanged(bool)),
-            this, SLOT(updateEnabled()));
+BedrockDepthVariation::BedrockDepthVariation(
+    gsl_rng *rng, ProfileRandomizer *profileRandomizer)
+    : Distribution(rng), _profileRandomizer(profileRandomizer) {
+  connect(_profileRandomizer, SIGNAL(enabledChanged(bool)), this,
+          SLOT(updateEnabled()));
 
-    _enabled = false;
+  _enabled = false;
 }
 
-auto BedrockDepthVariation::enabled() const -> bool
-{
-    return _profileRandomizer->enabled() && _enabled;
+auto BedrockDepthVariation::enabled() const -> bool {
+  return _profileRandomizer->enabled() && _enabled;
 }
 
-void BedrockDepthVariation::setEnabled(bool enabled)
-{
-    if (_enabled != enabled) {
-        _enabled = enabled;
+void BedrockDepthVariation::setEnabled(bool enabled) {
+  if (_enabled != enabled) {
+    _enabled = enabled;
 
-        emit enabledChanged(this->enabled());
-        emit wasModified();
-    }
+    emit enabledChanged(this->enabled());
+    emit wasModified();
+  }
 }
 
-void BedrockDepthVariation::updateEnabled()
-{
-    emit enabledChanged(enabled());
+void BedrockDepthVariation::updateEnabled() { emit enabledChanged(enabled()); }
+
+void BedrockDepthVariation::fromJson(const QJsonObject &json) {
+  Distribution::fromJson(json);
+  bool enabled = json["enabled"].toBool();
+  setEnabled(enabled);
 }
 
-void BedrockDepthVariation::fromJson(const QJsonObject &json)
-{
-    Distribution::fromJson(json);
-    bool enabled = json["enabled"].toBool();
-    setEnabled(enabled);
+auto BedrockDepthVariation::toJson() const -> QJsonObject {
+  QJsonObject json = Distribution::toJson();
+  json["enabled"] = _enabled;
+  return json;
 }
 
-auto BedrockDepthVariation::toJson() const -> QJsonObject
+auto operator<<(QDataStream &out, const BedrockDepthVariation *bdv)
+    -> QDataStream &
+
 {
-    QJsonObject json = Distribution::toJson();
-    json["enabled"] = _enabled;
-    return json;
+  out << (quint8)1;
+
+  out << qobject_cast<const Distribution *>(bdv) << bdv->_enabled;
+  return out;
 }
 
+auto operator>>(QDataStream &in, BedrockDepthVariation *bdv) -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-auto operator<< (QDataStream & out, const BedrockDepthVariation* bdv) -> QDataStream &
+  bool enabled;
+  in >> qobject_cast<Distribution *>(bdv) >> enabled;
 
-{
-    out << (quint8)1;
+  bdv->setEnabled(enabled);
 
-    out << qobject_cast<const Distribution*>(bdv)
-        << bdv->_enabled;
-    return out;
-}
-
-auto operator>> (QDataStream & in, BedrockDepthVariation* bdv) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
-
-
-    bool enabled;
-    in >> qobject_cast<Distribution*>(bdv)
-       >> enabled;
-
-    bdv->setEnabled(enabled);
-
-    return in;
+  return in;
 }

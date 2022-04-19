@@ -30,30 +30,29 @@
 
 class Dimension;
 
-class DimensionLayout : public QFormLayout
-{
-    Q_OBJECT
+class DimensionLayout : public QFormLayout {
+  Q_OBJECT
 public:
-    explicit DimensionLayout(QWidget *parent = nullptr);
+  explicit DimensionLayout(QWidget *parent = nullptr);
 
-    void setModel(Dimension* dimension);
-    void setSuffix(const QString &suffix);
-    void setRange(double min, double max);
-    void setSingleStep(double step);
+  void setModel(Dimension *dimension);
+  void setSuffix(const QString &suffix);
+  void setRange(double min, double max);
+  void setSingleStep(double step);
 
 public slots:
-    void setReadOnly(bool readOnly);
+  void setReadOnly(bool readOnly);
 
 protected slots:
-    void updateMaxMin(double min);
-    void updateMinMax(double max);
-    void updateSpacing(int spacing);
+  void updateMaxMin(double min);
+  void updateMinMax(double max);
+  void updateSpacing(int spacing);
 
 protected:
-    QDoubleSpinBox* _minSpinBox;
-    QDoubleSpinBox* _maxSpinBox;
-    QSpinBox* _sizeSpinBox;
-    QComboBox* _spacingComboBox;
+  QDoubleSpinBox *_minSpinBox;
+  QDoubleSpinBox *_maxSpinBox;
+  QSpinBox *_sizeSpinBox;
+  QComboBox *_spacingComboBox;
 };
 
 #endif // DIMENSION_LAYOUT_H

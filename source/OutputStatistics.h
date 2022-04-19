@@ -29,63 +29,63 @@
 
 class AbstractOutput;
 
-class OutputStatistics : public QObject
-{
-    Q_OBJECT
+class OutputStatistics : public QObject {
+  Q_OBJECT
 
 public:
-    explicit OutputStatistics(AbstractOutput* output);
+  explicit OutputStatistics(AbstractOutput *output);
 
-    enum Distribution {
-        Normal, //!< Normal Distribution (average=mean)
-        LogNormal //!< Log Normal Distribution (average=median, stdev=lnStd)
-    };
+  enum Distribution {
+    Normal,   //!< Normal Distribution (average=mean)
+    LogNormal //!< Log Normal Distribution (average=median, stdev=lnStd)
+  };
 
-    void calculate();
-    void plot(QwtPlot* qwtPlot) const;
+  void calculate();
+  void plot(QwtPlot *qwtPlot) const;
 
-    //! If the output has enough data to compute statistics
-    auto hasEnoughData() const -> bool;
+  //! If the output has enough data to compute statistics
+  auto hasEnoughData() const -> bool;
 
-    auto distribution() const -> Distribution;
-    void setDistribution(Distribution distribution);
+  auto distribution() const -> Distribution;
+  void setDistribution(Distribution distribution);
 
-    auto averageLabel() const -> QString;
-    auto stdevLabel() const -> QString;
+  auto averageLabel() const -> QString;
+  auto stdevLabel() const -> QString;
 
-    auto average() const -> const QVector<double>&;
-    auto stdev() const -> const QVector<double>&;
+  auto average() const -> const QVector<double> &;
+  auto stdev() const -> const QVector<double> &;
 
 public slots:
-    void setDistribution(int distribution);
+  void setDistribution(int distribution);
 
 signals:
-    void distributionChanged(int distribution);
-    void wasModified();
+  void distributionChanged(int distribution);
+  void wasModified();
 
 protected slots:
-    void clear();
+  void clear();
 
 protected:
-    auto plotCurve(QwtPlot* const plot, const QVector<double> & data, Qt::PenStyle penStyle) const -> QwtPlotCurve*;
+  auto plotCurve(QwtPlot *const plot, const QVector<double> &data,
+                 Qt::PenStyle penStyle) const -> QwtPlotCurve *;
 
-    //! Parent AbstractOutput
-    AbstractOutput* _output;
+  //! Parent AbstractOutput
+  AbstractOutput *_output;
 
-    //! Assumed distribution
-    Distribution _distribution;
+  //! Assumed distribution
+  Distribution _distribution;
 
-    //! Average value
-    QVector<double> _average;
+  //! Average value
+  QVector<double> _average;
 
-    //! Standard deviation of the mode
-    QVector<double> _stdev;
+  //! Standard deviation of the mode
+  QVector<double> _stdev;
 
-    //! Median plus one standard deviation
-    QVector<double> _plusStd;
+  //! Median plus one standard deviation
+  QVector<double> _plusStd;
 
-    //! Median minus one standard deviation
-    QVector<double> _minusStd;
+  //! Median minus one standard deviation
+  QVector<double> _minusStd;
 };
 
 #endif // OUTPUTSTATISTICS_H

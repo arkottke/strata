@@ -27,37 +27,39 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-class EquivalentLinearCalculator : public AbstractIterativeCalculator
-{
-    Q_OBJECT
+class EquivalentLinearCalculator : public AbstractIterativeCalculator {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out,
-                                     const EquivalentLinearCalculator* elc) -> QDataStream &;
-    friend auto operator>> (QDataStream & in,
-                                     EquivalentLinearCalculator* elc) -> QDataStream &;
+  friend auto operator<<(QDataStream &out,
+                         const EquivalentLinearCalculator *elc)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, EquivalentLinearCalculator *elc)
+      -> QDataStream &;
 
 public:
-    EquivalentLinearCalculator(QObject *parent = nullptr);
+  EquivalentLinearCalculator(QObject *parent = nullptr);
 
-    virtual auto toHtml() const -> QString;
-    auto strainRatio() const -> double;
+  virtual auto toHtml() const -> QString;
+  auto strainRatio() const -> double;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void strainRatioChanged(double strainRatio);
+  void strainRatioChanged(double strainRatio);
 
 public slots:
-    void setStrainRatio(double strainRatio);
+  void setStrainRatio(double strainRatio);
 
 protected:
-    virtual auto updateSubLayer(int index, const QVector<std::complex<double> > &strainTf) -> bool;
+  virtual auto updateSubLayer(int index,
+                              const QVector<std::complex<double>> &strainTf)
+      -> bool;
 
-    virtual void estimateInitialStrains();
+  virtual void estimateInitialStrains();
 
-    //! Ratio between the maximum strain and the strain of the layer
-    double _strainRatio;
+  //! Ratio between the maximum strain and the strain of the layer
+  double _strainRatio;
 };
 
 #endif // EQUIVALENTLINEARCALCULATOR_H

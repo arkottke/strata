@@ -24,221 +24,170 @@
 #include <QDebug>
 #include <QJsonObject>
 
-#include <cmath>
 #include <cfloat>
+#include <cmath>
 
-AbstractDistribution::AbstractDistribution( QObject * parent)
-    : QObject(parent)
-{
-    _type = LogNormal;
-    _avg = 0;
-    _stdev = 0;
-    _hasMin = false;
-    _min = 0;
-    _hasMax = false;
-    _max = 0;
+AbstractDistribution::AbstractDistribution(QObject *parent) : QObject(parent) {
+  _type = LogNormal;
+  _avg = 0;
+  _stdev = 0;
+  _hasMin = false;
+  _min = 0;
+  _hasMax = false;
+  _max = 0;
 }
 
-auto AbstractDistribution::typeList() -> QStringList
-{
-    QStringList list;
+auto AbstractDistribution::typeList() -> QStringList {
+  QStringList list;
 
-    list << QObject::tr("Uniform") << QObject::tr("Normal") << QObject::tr("Log Normal");
+  list << QObject::tr("Uniform") << QObject::tr("Normal")
+       << QObject::tr("Log Normal");
 
-    return list;
+  return list;
 }
 
-auto AbstractDistribution::type() const -> AbstractDistribution::Type
-{
-    return _type;
+auto AbstractDistribution::type() const -> AbstractDistribution::Type {
+  return _type;
 }
 
-void AbstractDistribution::setType(int type)
-{
-    setType((Type)type);
+void AbstractDistribution::setType(int type) { setType((Type)type); }
+
+void AbstractDistribution::setType(AbstractDistribution::Type type) {
+  if (_type != type) {
+    _type = type;
+
+    emit requiresLimits(_type == Uniform);
+
+    emit typeChanged(_type);
+    emit stdevRequiredChanged(stdevRequired());
+    emit wasModified();
+  }
 }
 
-void AbstractDistribution::setType(AbstractDistribution::Type type)
-{
-    if (_type != type) {
-        _type = type;
+void AbstractDistribution::reset() { _varied = _avg; }
 
-        emit requiresLimits(_type == Uniform);
+auto AbstractDistribution::stdevRequired() -> bool { return _type != Uniform; }
 
-        emit typeChanged(_type);
-        emit stdevRequiredChanged(stdevRequired());
-        emit wasModified();
-    }
+auto AbstractDistribution::avg() const -> double { return _avg; }
+
+void AbstractDistribution::setAvg(double avg) {
+  if (abs(_avg - avg) > DBL_EPSILON) {
+    _avg = avg;
+    _varied = avg;
+
+    emit avgChanged(_avg);
+    emit wasModified();
+  }
 }
 
-void AbstractDistribution::reset()
-{
-    _varied = _avg;
+auto AbstractDistribution::stdev() const -> double { return _stdev; }
+
+void AbstractDistribution::setStdev(double stdev) {
+  if (abs(_stdev - stdev) > DBL_EPSILON) {
+    _stdev = stdev;
+
+    emit stdevChanged(_stdev);
+    emit wasModified();
+  }
 }
 
-auto AbstractDistribution::stdevRequired() -> bool
-{
-    return _type != Uniform;
+auto AbstractDistribution::hasMin() const -> bool { return _hasMin; }
+
+void AbstractDistribution::setHasMin(bool hasMin) {
+  if (_hasMin != hasMin) {
+    _hasMin = hasMin;
+
+    emit hasMinChanged(_hasMin);
+    emit wasModified();
+  }
 }
 
-auto AbstractDistribution::avg() const -> double
-{
-    return _avg;
+auto AbstractDistribution::min() const -> double { return _min; }
+
+void AbstractDistribution::setMin(double min) {
+  if (abs(_min - min) > DBL_EPSILON) {
+    _min = min;
+
+    emit minChanged(_min);
+    emit wasModified();
+  }
 }
 
-void AbstractDistribution::setAvg(double avg)
-{
-    if (abs(_avg - avg) > DBL_EPSILON) {
-        _avg = avg;
-        _varied = avg;
+auto AbstractDistribution::hasMax() const -> bool { return _hasMax; }
 
-        emit avgChanged(_avg);
-        emit wasModified();
-    }
+void AbstractDistribution::setHasMax(bool hasMax) {
+  if (_hasMax != hasMax) {
+    _hasMax = hasMax;
+
+    emit hasMaxChanged(_hasMax);
+    emit wasModified();
+  }
 }
 
-auto AbstractDistribution::stdev() const -> double
-{
-    return _stdev;
+auto AbstractDistribution::max() const -> double { return _max; }
+
+void AbstractDistribution::setMax(double max) {
+  if (abs(_max - max) > DBL_EPSILON) {
+    _max = max;
+
+    emit maxChanged(_max);
+    emit wasModified();
+  }
 }
 
-void AbstractDistribution::setStdev(double stdev)
-{
-    if (abs(_stdev - stdev) > DBL_EPSILON) {
-        _stdev = stdev;
+void AbstractDistribution::setVaried(double varied) {
+  if (hasMax())
+    varied = qMin(_max, varied);
 
-        emit stdevChanged(_stdev);
-        emit wasModified();
-    }
+  if (hasMin())
+    varied = qMax(_min, varied);
+
+  _varied = varied;
 }
 
-auto AbstractDistribution::hasMin() const -> bool
-{
-    return _hasMin;
+void AbstractDistribution::fromJson(const QJsonObject &json) {
+  _type = (AbstractDistribution::Type)json["type"].toInt();
+  _avg = json["avg"].toDouble();
+  _stdev = json["stdev"].toDouble();
+  _max = json["max"].toDouble();
+  _min = json["min"].toDouble();
+  _hasMax = json["hasMax"].toBool();
+  _hasMin = json["hasMin"].toBool();
 }
 
-void AbstractDistribution::setHasMin(bool hasMin)
-{
-    if (_hasMin != hasMin) {
-        _hasMin = hasMin;
+auto AbstractDistribution::toJson() const -> QJsonObject {
+  QJsonObject json;
 
-        emit hasMinChanged(_hasMin);
-        emit wasModified();
-    }
+  json["type"] = (int)_type;
+  json["avg"] = _avg;
+  json["stdev"] = _stdev;
+  json["max"] = _max;
+  json["min"] = _min;
+  json["hasMax"] = _hasMax;
+  json["hasMin"] = _hasMin;
+
+  return json;
 }
 
-auto AbstractDistribution::min() const -> double
-{
-    return _min;
+auto operator<<(QDataStream &out, const AbstractDistribution *ad)
+    -> QDataStream & {
+  out << (quint8)1;
+
+  out << (int)ad->_type << ad->_avg << ad->_stdev << ad->_hasMax << ad->_max
+      << ad->_hasMin << ad->_min;
+
+  return out;
 }
 
-void AbstractDistribution::setMin(double min)
-{
-    if (abs(_min - min) > DBL_EPSILON) {
-        _min = min;
+auto operator>>(QDataStream &in, AbstractDistribution *ad) -> QDataStream & {
+  quint8 ver;
+  in >> ver;
 
-        emit minChanged(_min);
-        emit wasModified();
-    }
-}
+  int type;
+  in >> type >> ad->_avg >> ad->_stdev >> ad->_hasMax >> ad->_max >>
+      ad->_hasMin >> ad->_min;
 
-auto AbstractDistribution::hasMax() const -> bool
-{
-    return _hasMax;
-}
+  ad->_type = (AbstractDistribution::Type)type;
 
-void AbstractDistribution::setHasMax(bool hasMax)
-{
-    if (_hasMax != hasMax) {
-        _hasMax = hasMax;
-
-        emit hasMaxChanged(_hasMax);
-        emit wasModified();
-    }
-}
-
-auto AbstractDistribution::max() const -> double
-{
-    return _max;
-}
-
-void AbstractDistribution::setMax(double max)
-{
-    if (abs(_max - max) > DBL_EPSILON) {
-        _max = max;
-
-        emit maxChanged(_max);
-        emit wasModified();
-    }
-}
-
-void AbstractDistribution::setVaried(double varied)
-{
-    if (hasMax())
-        varied = qMin(_max, varied);
-
-    if (hasMin())
-        varied = qMax(_min, varied);
-
-    _varied = varied;
-}
-
-void AbstractDistribution::fromJson(const QJsonObject &json)
-{
-    _type = (AbstractDistribution::Type)json["type"].toInt();
-    _avg = json["avg"].toDouble();
-    _stdev = json["stdev"].toDouble();
-    _max = json["max"].toDouble();
-    _min = json["min"].toDouble();
-    _hasMax = json["hasMax"].toBool();
-    _hasMin = json["hasMin"].toBool();
-}
-
-auto AbstractDistribution::toJson() const -> QJsonObject
-{
-    QJsonObject json;
-
-    json["type"] = (int)_type;
-    json["avg"] = _avg;
-    json["stdev"] = _stdev;
-    json["max"] = _max;
-    json["min"] = _min;
-    json["hasMax"] = _hasMax;
-    json["hasMin"] = _hasMin;
-
-    return json;
-}
-
-auto operator<< (QDataStream & out, const AbstractDistribution* ad) -> QDataStream &
-{
-    out << (quint8)1;
-
-    out << (int)ad->_type
-        << ad->_avg
-        << ad->_stdev
-        << ad->_hasMax
-        << ad->_max
-        << ad->_hasMin
-        << ad->_min;
-
-    return out;
-}
-
-auto operator>> (QDataStream & in, AbstractDistribution* ad) -> QDataStream &
-{
-    quint8 ver;
-    in >> ver;
-
-    int type;
-    in >> type
-       >> ad->_avg
-       >> ad->_stdev
-       >> ad->_hasMax
-       >> ad->_max
-       >> ad->_hasMin
-       >> ad->_min;
-
-    ad->_type = (AbstractDistribution::Type)type;
-
-    return in;
+  return in;
 }

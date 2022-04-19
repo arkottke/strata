@@ -30,61 +30,65 @@
 class Dimension;
 
 /*! RvtAbstractMotion defined by a response spectrum.
-  */
+ */
 
-class CompatibleRvtMotion : public AbstractRvtMotion
-{
-    Q_OBJECT
+class CompatibleRvtMotion : public AbstractRvtMotion {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const CompatibleRvtMotion* crm) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, CompatibleRvtMotion* crm) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const CompatibleRvtMotion *crm)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, CompatibleRvtMotion *crm)
+      -> QDataStream &;
 
 public:
-    CompatibleRvtMotion(QObject *parent = nullptr);
-    virtual ~CompatibleRvtMotion();
+  CompatibleRvtMotion(QObject *parent = nullptr);
+  virtual ~CompatibleRvtMotion();
 
-    virtual auto freq() const -> const QVector<double> &;
-    auto freqDimension() -> Dimension*;
+  virtual auto freq() const -> const QVector<double> &;
+  auto freqDimension() -> Dimension *;
 
-    //! Target response spectrum
-    auto targetRespSpec() -> ResponseSpectrum *;
+  //! Target response spectrum
+  auto targetRespSpec() -> ResponseSpectrum *;
 
-    //! Limit the FAS to be seismologically plausible
-    auto limitFas() const -> bool;
+  //! Limit the FAS to be seismologically plausible
+  auto limitFas() const -> bool;
 
-    //! Create a html document containing the information of the model
-    virtual auto toHtml() const -> QString;
+  //! Create a html document containing the information of the model
+  virtual auto toHtml() const -> QString;
 
-    //! Load the motion from a TextStream
-    virtual auto loadFromTextStream(QTextStream &stream, double scale = 1.) -> bool;
+  //! Load the motion from a TextStream
+  virtual auto loadFromTextStream(QTextStream &stream, double scale = 1.)
+      -> bool;
 
-    virtual void fromJson(const QJsonObject &json);
-    virtual auto toJson() const -> QJsonObject;
+  virtual void fromJson(const QJsonObject &json);
+  virtual auto toJson() const -> QJsonObject;
 
 public slots:
-    void setDuration(double duration);
-    void setLimitFas(bool limitFas);
+  void setDuration(double duration);
+  void setLimitFas(bool limitFas);
 
-    /*! Compute the FAS from a response spectrum.
-     * The targetPeriod, targetSa, and targetDamping must be set ahead of calling the inversion
-     * \return returns true if the inversion provided a valid result (determined by rmse value)
-     */
-    virtual void calculate();
+  /*! Compute the FAS from a response spectrum.
+   * The targetPeriod, targetSa, and targetDamping must be set ahead of calling
+   * the inversion \return returns true if the inversion provided a valid result
+   * (determined by rmse value)
+   */
+  virtual void calculate();
 
 private:
-    /*! Compute the FAS based on the Vanmarcke 1976 inversion technique.
-     * \return Fourier amplitude spectrum spaced at the same periods as the target response spectrum
-     */
-    auto vanmarckeInversion() const -> QVector<double>;
+  /*! Compute the FAS based on the Vanmarcke 1976 inversion technique.
+   * \return Fourier amplitude spectrum spaced at the same periods as the target
+   * response spectrum
+   */
+  auto vanmarckeInversion() const -> QVector<double>;
 
-    //! If the FAS should be corrected to better fit theory
-    bool _limitFas;
+  //! If the FAS should be corrected to better fit theory
+  bool _limitFas;
 
-    //! Target response spectrum
-    ResponseSpectrum * _targetRespSpec;
+  //! Target response spectrum
+  ResponseSpectrum *_targetRespSpec;
 
-    //! Frequency dimension
-    Dimension* _freq;
+  //! Frequency dimension
+  Dimension *_freq;
 };
 
 #endif // COMPATIBLE_RVT_MOTION_H

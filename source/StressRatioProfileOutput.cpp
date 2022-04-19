@@ -28,44 +28,41 @@
 
 #include <QChar>
 
-StressRatioProfileOutput::StressRatioProfileOutput(OutputCatalog* catalog)
-    : AbstractProfileOutput(catalog)
-{
-    _offset_bot = 1;
-    _offset_top = 1;
+StressRatioProfileOutput::StressRatioProfileOutput(OutputCatalog *catalog)
+    : AbstractProfileOutput(catalog) {
+  _offset_bot = 1;
+  _offset_top = 1;
 }
 
-auto StressRatioProfileOutput::name() const -> QString
-{
-    return tr("Stress Ratio Profile");
+auto StressRatioProfileOutput::name() const -> QString {
+  return tr("Stress Ratio Profile");
 }
 
-auto StressRatioProfileOutput::shortName() const -> QString
-{
-    return tr("stressRatio");
+auto StressRatioProfileOutput::shortName() const -> QString {
+  return tr("stressRatio");
 }
 
-auto StressRatioProfileOutput::xLabel() const -> const QString
-{
-    return tr("Stress Ratio, %1_max / %2_v").arg(QChar(0x03C4)).arg(QChar(0x03C3));
+auto StressRatioProfileOutput::xLabel() const -> const QString {
+  return tr("Stress Ratio, %1_max / %2_v")
+      .arg(QChar(0x03C4))
+      .arg(QChar(0x03C3));
 }
 
+void StressRatioProfileOutput::extract(AbstractCalculator *const calculator,
+                                       QVector<double> &ref,
+                                       QVector<double> &data) const {
+  const QList<SubLayer> &subLayers = calculator->site()->subLayers();
+  // Uses depth from the center of the layer
+  ref.clear();
 
-void StressRatioProfileOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    const QList<SubLayer> & subLayers = calculator->site()->subLayers();
-    // Uses depth from the center of the layer
-    ref.clear();
+  ref << 0;
+  for (const SubLayer &sl : subLayers)
+    ref << sl.depthToMid();
 
-    ref << 0;
-    for (const SubLayer &sl : subLayers)
-        ref << sl.depthToMid();
+  ref << subLayers.last().depthToBase();
 
-    ref << subLayers.last().depthToBase();
+  data = calculator->site()->stressRatioProfile();
+  data.prepend(0);
 
-    data = calculator->site()->stressRatioProfile();
-    data.prepend(0);
-
-    extrap(ref, data, subLayers.last().thickness());
+  extrap(ref, data, subLayers.last().thickness());
 }

@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,18 +22,17 @@
 #ifndef MAIN_WINDOW_H_
 #define MAIN_WINDOW_H_
 
-
-#include <QMainWindow>
-#include <QCloseEvent>
-#include <QTabWidget>
+#include <QAction>
 #include <QApplication>
+#include <QCloseEvent>
+#include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
-#include <QAction>
-#include <QString>
-#include <QStackedWidget>
 #include <QPrinter>
 #include <QSettings>
+#include <QStackedWidget>
+#include <QString>
+#include <QTabWidget>
 
 class AbstractPage;
 class ConfiningStressDialog;
@@ -43,113 +42,110 @@ class OutputExportDialog;
 class ResultsPage;
 class SiteResponseModel;
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
 public:
-    explicit MainWindow(QMainWindow *parent = nullptr);
-    ~MainWindow();
+  explicit MainWindow(QMainWindow *parent = nullptr);
+  ~MainWindow();
 
 protected:
-    void closeEvent(QCloseEvent * event);
+  void closeEvent(QCloseEvent *event);
 
-    enum Pages {
-        COMPUTE_PAGE = 5,
-        RESULTS_PAGE = 6};
+  enum Pages { COMPUTE_PAGE = 5, RESULTS_PAGE = 6 };
 
 public slots:
-    void open(QString fileName = "");
+  void open(QString fileName = "");
 
 protected slots:
-    //! Reset the window the default values
-    void newModel();
+  //! Reset the window the default values
+  void newModel();
 
-    bool save();
-    bool saveAs();
+  bool save();
+  bool saveAs();
 
-    void exportData();
+  void exportData();
 
-    void print();
-    void printToPdf();
-    // void pageSetup();
+  void print();
+  void printToPdf();
+  // void pageSetup();
 
-    void showNonlinearDialog();
-    void showConfiningStressDialog();
+  void showNonlinearDialog();
+  void showConfiningStressDialog();
 
-    //! Update the title of the window to reflect the fileName of the document
-    void updateWindowTitle(const QString & fileName);
+  //! Update the title of the window to reflect the fileName of the document
+  void updateWindowTitle(const QString &fileName);
 
-    void help();
-    // FIXME void update();
-    void about();
+  void help();
+  // FIXME void update();
+  void about();
 
-    //! Update the tabs to reflect the state of the widget (working and having results)
-    void updateTabs();
-    void setReadOnly(bool readOnly);
+  //! Update the tabs to reflect the state of the widget (working and having
+  //! results)
+  void updateTabs();
+  void setReadOnly(bool readOnly);
 
-    void tabChanged(int tab);
+  void tabChanged(int tab);
 
 private:
-    //! Create the actions
-    void createActions();
+  //! Create the actions
+  void createActions();
 
-    //! Create the tab widget and pages
-    void createPages();
+  //! Create the tab widget and pages
+  void createPages();
 
-    //! Create the menus
-    void createMenus();
+  //! Create the menus
+  void createMenus();
 
-    //! Create the toolbar
-    void createToolbar();
+  //! Create the toolbar
+  void createToolbar();
 
-    //! Set the model
-    void setModel(SiteResponseModel* model);
+  //! Set the model
+  void setModel(SiteResponseModel *model);
 
+  //! Allow the user to save changes before things happen
+  /*!
+   * \return true to continue
+   */
+  auto okToClose() -> bool;
 
-    //! Allow the user to save changes before things happen
-    /*!
-     * \return true to continue
-     */
-    auto okToClose() -> bool;
+  //! Help dialog
+  HelpDialog *_helpDialog;
 
-    //! Help dialog
-    HelpDialog * _helpDialog;
+  ConfiningStressDialog *_confiningStressDialog;
 
-    ConfiningStressDialog * _confiningStressDialog;
+  QAction *_readOnlyAction;
 
-    QAction * _readOnlyAction;
+  QAction *_newAction;
+  QAction *_openAction;
 
-    QAction * _newAction;
-    QAction * _openAction;
+  QAction *_exportAction;
 
-    QAction * _exportAction;
+  QAction *_printAction;
+  QAction *_printToPdfAction;
 
-    QAction * _printAction;
-    QAction * _printToPdfAction;
+  QAction *_saveAction;
+  QAction *_saveAsAction;
+  QAction *_exitAction;
 
-    QAction * _saveAction;
-    QAction * _saveAsAction;
-    QAction * _exitAction;
+  QAction *_nlCurveDatabaseAction;
+  QAction *_confiningStressDialogAction;
 
-    QAction * _nlCurveDatabaseAction;
-    QAction * _confiningStressDialogAction;
+  QAction *_helpAction;
+  QAction *_updateAction;
+  QAction *_aboutAction;
 
-    QAction * _helpAction;
-    QAction * _updateAction;
-    QAction * _aboutAction;
+  QToolBar *_toolBar;
 
-    QToolBar * _toolBar;
+  QTabWidget *_tabWidget;
 
-    QTabWidget * _tabWidget;
+  QPrinter *_printer;
 
-    QPrinter * _printer;
+  QSettings *_settings;
 
-    QSettings * _settings;
-    
-    ResultsPage* _resultsPage;
-    QList<AbstractPage*> _pages;
+  ResultsPage *_resultsPage;
+  QList<AbstractPage *> _pages;
 
-    SiteResponseModel * _model;
+  SiteResponseModel *_model;
 };
 #endif

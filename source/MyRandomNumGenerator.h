@@ -30,42 +30,44 @@
 
 #include <gsl/gsl_rng.h>
 
-class MyRandomNumGenerator : public QObject
-{
-    Q_OBJECT
+class MyRandomNumGenerator : public QObject {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const MyRandomNumGenerator* myGenerator) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, MyRandomNumGenerator* myGenerator) -> QDataStream &;
+  friend auto operator<<(QDataStream &out,
+                         const MyRandomNumGenerator *myGenerator)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, MyRandomNumGenerator *myGenerator)
+      -> QDataStream &;
 
 public:
-    MyRandomNumGenerator(QObject *parent = nullptr);
-    ~MyRandomNumGenerator();
-    
-    auto seedSpecified() const -> bool;
+  MyRandomNumGenerator(QObject *parent = nullptr);
+  ~MyRandomNumGenerator();
 
-    auto seed() const -> quint32;
-    void setSeed(quint32 seed);
+  auto seedSpecified() const -> bool;
 
-    auto gsl_pointer() -> gsl_rng*;
+  auto seed() const -> quint32;
+  void setSeed(quint32 seed);
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  auto gsl_pointer() -> gsl_rng *;
+
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 public slots:
-    void setSeedSpecified(bool seedSpecified);
-    void setSeed(int seed);
+  void setSeedSpecified(bool seedSpecified);
+  void setSeed(int seed);
 
-    void init();
+  void init();
 
 signals:
-    void seedSpecifiedChanged(int seedType);
-    void seedChanged(int seed);
-    void wasModified();
+  void seedSpecifiedChanged(int seedType);
+  void seedChanged(int seed);
+  void wasModified();
 
 protected:
-    bool _seedSpecified;
-    quint32 _seed;
+  bool _seedSpecified;
+  quint32 _seed;
 
-    gsl_rng* _gsl_rng;
+  gsl_rng *_gsl_rng;
 };
 #endif

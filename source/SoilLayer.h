@@ -33,44 +33,44 @@ class SoilType;
 
 //! Describes the velocity variation and nonlinear response of soil
 
-class SoilLayer : public VelocityLayer
-{
-    Q_OBJECT
+class SoilLayer : public VelocityLayer {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const SoilLayer* sl) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, SoilLayer* sl) -> QDataStream &;
-    friend class SoilProfile;
+  friend auto operator<<(QDataStream &out, const SoilLayer *sl)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, SoilLayer *sl) -> QDataStream &;
+  friend class SoilProfile;
 
 public:
-    explicit SoilLayer(QObject *parent = nullptr);
+  explicit SoilLayer(QObject *parent = nullptr);
 
-    explicit SoilLayer(const SoilLayer *soilLayer);
+  explicit SoilLayer(const SoilLayer *soilLayer);
 
-    auto soilType() const -> SoilType*;
-    void setSoilType(SoilType* soilType);
+  auto soilType() const -> SoilType *;
+  void setSoilType(SoilType *soilType);
 
-    auto thickness() const -> double;
+  auto thickness() const -> double;
 
-    auto depthToBase() const -> double;
+  auto depthToBase() const -> double;
 
-    auto toString() const -> QString;
+  auto toString() const -> QString;
 
-    auto untWt() const -> double;
-    auto density() const -> double;
+  auto untWt() const -> double;
+  auto density() const -> double;
 
-    auto strainLimit() const -> double;
+  auto strainLimit() const -> double;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 protected:
-    void setThickness(double thickness);
+  void setThickness(double thickness);
 
 private:
-    //! Soil type of the layer
-    QPointer<SoilType> _soilType;
+  //! Soil type of the layer
+  QPointer<SoilType> _soilType;
 
-    //! Total thickness of the layer
-    double _thickness;
+  //! Total thickness of the layer
+  double _thickness;
 };
 #endif

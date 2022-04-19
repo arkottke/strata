@@ -24,12 +24,12 @@
 
 #include "AbstractOutputInterpolater.h"
 
-class SteppedOutputInterpolater : public AbstractOutputInterpolater
-{
+class SteppedOutputInterpolater : public AbstractOutputInterpolater {
 public:
-    SteppedOutputInterpolater();
+  SteppedOutputInterpolater();
 
-    auto calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double>;
+  auto calculate(const QVector<double> &x, const QVector<double> &y,
+                 const QVector<double> &xi) -> QVector<double>;
 };
 
 #endif // STEPPED_OUTPUT_INTERPOLATER_H

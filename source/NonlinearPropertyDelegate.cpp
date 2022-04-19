@@ -25,41 +25,40 @@
 
 #include "AbstractNonlinearPropertyFactory.h"
 
-NonlinearPropertyDelegate::NonlinearPropertyDelegate(QObject *parent) :
-    QItemDelegate(parent)
-{
+NonlinearPropertyDelegate::NonlinearPropertyDelegate(QObject *parent)
+    : QItemDelegate(parent) {}
+
+void NonlinearPropertyDelegate::setModel(
+    AbstractNonlinearPropertyFactory *factory) {
+  _factory = factory;
 }
 
-void NonlinearPropertyDelegate::setModel(AbstractNonlinearPropertyFactory* factory)
-{
-    _factory = factory;
+auto NonlinearPropertyDelegate::createEditor(QWidget *parent,
+                                             const QStyleOptionViewItem &option,
+                                             const QModelIndex &index) const
+    -> QWidget * {
+  Q_UNUSED(option);
+  Q_UNUSED(index);
+
+  auto *editor = new QComboBox(parent);
+  return editor;
 }
 
-auto NonlinearPropertyDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                const QModelIndex & index) const -> QWidget*
-{
-    Q_UNUSED(option);
-    Q_UNUSED(index);
+void NonlinearPropertyDelegate::setEditorData(QWidget *editor,
+                                              const QModelIndex &index) const {
+  auto *comboBox = static_cast<QComboBox *>(editor);
 
-    auto *editor = new QComboBox(parent);
-    return editor;
+  if (_factory) {
+    comboBox->setModel(_factory);
+
+    comboBox->setCurrentIndex(comboBox->findText(
+        index.model()->data(index, Qt::EditRole).toString()));
+  }
 }
 
-void NonlinearPropertyDelegate::setEditorData(QWidget *editor, const QModelIndex & index) const
-{
-    auto * comboBox = static_cast<QComboBox*>(editor);
-
-    if (_factory) {
-        comboBox->setModel(_factory);
-
-        comboBox->setCurrentIndex(
-                comboBox->findText(index.model()->data(index, Qt::EditRole).toString()));
-    }
-}
-
-void NonlinearPropertyDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
-                const QModelIndex &index) const
-{
-    auto* comboBox = static_cast<QComboBox*>(editor);
-    model->setData(index, comboBox->currentIndex());
+void NonlinearPropertyDelegate::setModelData(QWidget *editor,
+                                             QAbstractItemModel *model,
+                                             const QModelIndex &index) const {
+  auto *comboBox = static_cast<QComboBox *>(editor);
+  model->setData(index, comboBox->currentIndex());
 }

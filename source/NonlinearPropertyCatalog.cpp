@@ -21,8 +21,8 @@
 
 #include "NonlinearPropertyCatalog.h"
 
-#include "ModulusFactory.h"
 #include "DampingFactory.h"
+#include "ModulusFactory.h"
 
 #include <QDataStream>
 #include <QDebug>
@@ -30,53 +30,49 @@
 #include <QFile>
 #include <QStandardPaths>
 
-NonlinearPropertyCatalog::NonlinearPropertyCatalog()
-{
-    _modulusFactory = new ModulusFactory;
-    _dampingFactory = new DampingFactory;
+NonlinearPropertyCatalog::NonlinearPropertyCatalog() {
+  _modulusFactory = new ModulusFactory;
+  _dampingFactory = new DampingFactory;
 
-    _fileName = QStandardPaths::writableLocation(QStandardPaths::DataLocation)
-                 + "/nonlinearCurves";
+  _fileName = QStandardPaths::writableLocation(QStandardPaths::DataLocation) +
+              "/nonlinearCurves";
 
-    QFile file(_fileName);
-    if (file.exists() && file.open(QIODevice::ReadOnly)) {
-        QDataStream in(&file);
-        in >> *(_modulusFactory) >> *(_dampingFactory);
-    } 
+  QFile file(_fileName);
+  if (file.exists() && file.open(QIODevice::ReadOnly)) {
+    QDataStream in(&file);
+    in >> *(_modulusFactory) >> *(_dampingFactory);
+  }
 }
 
-NonlinearPropertyCatalog::~NonlinearPropertyCatalog()
-{
-    delete _modulusFactory;
-    delete _dampingFactory;
+NonlinearPropertyCatalog::~NonlinearPropertyCatalog() {
+  delete _modulusFactory;
+  delete _dampingFactory;
 }
 
-auto NonlinearPropertyCatalog::modulusFactory() -> ModulusFactory*
-{
-    return _modulusFactory;
+auto NonlinearPropertyCatalog::modulusFactory() -> ModulusFactory * {
+  return _modulusFactory;
 }
 
-auto NonlinearPropertyCatalog::dampingFactory() -> DampingFactory*
-{
-    return _dampingFactory;
+auto NonlinearPropertyCatalog::dampingFactory() -> DampingFactory * {
+  return _dampingFactory;
 }
 
-auto NonlinearPropertyCatalog::save() const -> bool
-{
-    const QString dest = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-    QDir dir;
+auto NonlinearPropertyCatalog::save() const -> bool {
+  const QString dest =
+      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+  QDir dir;
 
-    if (!dir.exists(dest) && !dir.mkpath(dest)) {
-        return false;
-    }
+  if (!dir.exists(dest) && !dir.mkpath(dest)) {
+    return false;
+  }
 
-    QFile file(_fileName);
-    if (file.open(QIODevice::WriteOnly)) {
-        QDataStream out(&file);
-        out << *(_modulusFactory) << *(_dampingFactory);
-    } else {
-        return false;
-    }
+  QFile file(_fileName);
+  if (file.open(QIODevice::WriteOnly)) {
+    QDataStream out(&file);
+    out << *(_modulusFactory) << *(_dampingFactory);
+  } else {
+    return false;
+  }
 
-    return true;
+  return true;
 }

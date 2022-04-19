@@ -24,12 +24,11 @@
 
 #include "AbstractNonlinearPropertyFactory.h"
 
-class ModulusFactory : public AbstractNonlinearPropertyFactory
-{
-    Q_OBJECT
+class ModulusFactory : public AbstractNonlinearPropertyFactory {
+  Q_OBJECT
 
 public:
-    ModulusFactory(QObject *parent = nullptr);
+  ModulusFactory(QObject *parent = nullptr);
 };
 
 #endif // MODULUSREDUCTIONNONLINEARPROPERTYFACTORY_H

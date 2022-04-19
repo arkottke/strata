@@ -24,15 +24,14 @@
 
 #include "NonlinearProperty.h"
 
-class DarendeliNonlinearProperty : public NonlinearProperty
-{
-    Q_OBJECT
+class DarendeliNonlinearProperty : public NonlinearProperty {
+  Q_OBJECT
 
 public:
-    DarendeliNonlinearProperty(Type type, QObject *parent = nullptr);
+  DarendeliNonlinearProperty(Type type, QObject *parent = nullptr);
 
-    // Compute the curves
-    void calculate(const SoilType *soilType);
+  // Compute the curves
+  void calculate(const SoilType *soilType);
 };
 
 #endif // DARENDELINONLINEARPROPERTY_H

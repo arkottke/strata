@@ -21,10 +21,6 @@
 
 #include "AbstractOutputInterpolater.h"
 
-AbstractOutputInterpolater::AbstractOutputInterpolater()
-{
-}
+AbstractOutputInterpolater::AbstractOutputInterpolater() {}
 
-AbstractOutputInterpolater::~AbstractOutputInterpolater()
-{
-}
+AbstractOutputInterpolater::~AbstractOutputInterpolater() {}

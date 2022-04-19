@@ -33,81 +33,67 @@
 
 #include <qwt_scale_engine.h>
 
-SpectralRatioOutput::SpectralRatioOutput(OutputCatalog* catalog)
-    : AbstractRatioOutput(catalog)
-{
+SpectralRatioOutput::SpectralRatioOutput(OutputCatalog *catalog)
+    : AbstractRatioOutput(catalog) {}
+
+auto SpectralRatioOutput::needsPeriod() const -> bool { return true; }
+
+auto SpectralRatioOutput::name() const -> QString {
+  return tr("Spectral Ratio");
 }
 
-auto SpectralRatioOutput::needsPeriod() const -> bool
-{
-    return true;
+auto SpectralRatioOutput::shortName() const -> QString {
+  return tr("specRatio");
 }
 
-auto SpectralRatioOutput::name() const -> QString
-{
-    return tr("Spectral Ratio");
+auto SpectralRatioOutput::xScaleEngine() const -> QwtScaleEngine * {
+  return logScaleEngine();
 }
 
-auto SpectralRatioOutput::shortName() const -> QString
-{
-    return tr("specRatio");
+auto SpectralRatioOutput::yScaleEngine() const -> QwtScaleEngine * {
+  auto *scaleEngine = new QwtLinearScaleEngine;
+  scaleEngine->setAttribute(QwtScaleEngine::IncludeReference, true);
+
+  return scaleEngine;
 }
 
-auto SpectralRatioOutput::xScaleEngine() const -> QwtScaleEngine*
-{
-    return logScaleEngine();
+auto SpectralRatioOutput::xLabel() const -> const QString {
+  return tr("Period (s)");
 }
 
-auto SpectralRatioOutput::yScaleEngine() const -> QwtScaleEngine*
-{
-    auto* scaleEngine = new QwtLinearScaleEngine;
-    scaleEngine->setAttribute(QwtScaleEngine::IncludeReference, true);
-
-    return scaleEngine;
+auto SpectralRatioOutput::yLabel() const -> const QString {
+  return tr("Sa at %1 / Sa at %2")
+      .arg(locationToString(_outDepth))
+      .arg(locationToString(_inDepth));
 }
 
-auto SpectralRatioOutput::xLabel() const -> const QString
-{
-    return tr("Period (s)");
+auto SpectralRatioOutput::ref(int motion) const -> const QVector<double> & {
+  Q_UNUSED(motion);
+
+  return _catalog->period()->data();
 }
 
-auto SpectralRatioOutput::yLabel() const -> const QString
-{
-    return tr("Sa at %1 / Sa at %2")
-            .arg(locationToString(_outDepth))
-            .arg(locationToString(_inDepth));
-}
+void SpectralRatioOutput::extract(AbstractCalculator *const calculator,
+                                  QVector<double> &ref,
+                                  QVector<double> &data) const {
+  Q_UNUSED(ref);
 
-auto SpectralRatioOutput::ref(int motion) const -> const QVector<double>&
-{
-    Q_UNUSED(motion);
+  const Location inLoc = calculator->site()->depthToLocation(_inDepth);
+  const Location outLoc = calculator->site()->depthToLocation(_outDepth);
 
-    return _catalog->period()->data();
-}
+  const QVector<double> inSa = calculator->motion()->computeSa(
+      _catalog->period()->data(), _catalog->damping(),
+      calculator->calcAccelTf(calculator->site()->inputLocation(),
+                              calculator->motion()->type(), inLoc, _inType));
 
-void SpectralRatioOutput::extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const
-{
-    Q_UNUSED(ref);
+  const QVector<double> outSa = calculator->motion()->computeSa(
+      _catalog->period()->data(), _catalog->damping(),
+      calculator->calcAccelTf(calculator->site()->inputLocation(),
+                              calculator->motion()->type(), outLoc, _outType));
 
-    const Location inLoc = calculator->site()->depthToLocation(_inDepth);
-    const Location outLoc = calculator->site()->depthToLocation(_outDepth);
+  // Compute the ratio
+  data.resize(_catalog->period()->size());
 
-    const QVector<double> inSa = calculator->motion()->computeSa(
-            _catalog->period()->data(), _catalog->damping(),
-            calculator->calcAccelTf(
-                    calculator->site()->inputLocation(), calculator->motion()->type(),
-                    inLoc, _inType));
-
-    const QVector<double> outSa = calculator->motion()->computeSa(
-            _catalog->period()->data(), _catalog->damping(),
-            calculator->calcAccelTf(
-                    calculator->site()->inputLocation(), calculator->motion()->type(),
-                    outLoc, _outType));
-
-    // Compute the ratio
-    data.resize(_catalog->period()->size());
-
-    for (int i = 0; i < data.size(); ++i)
-        data[i] = outSa.at(i) / inSa.at(i);
+  for (int i = 0; i < data.size(); ++i)
+    data[i] = outSa.at(i) / inSa.at(i);
 }

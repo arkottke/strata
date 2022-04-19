@@ -22,38 +22,38 @@
 #ifndef ABSTRACT_OUTPUT_CATALOG_H
 #define ABSTRACT_OUTPUT_CATALOG_H
 
-#include "MyAbstractTableModel.h"
 #include "MotionLibrary.h"
+#include "MyAbstractTableModel.h"
 
 #include <QList>
 
 class AbstractOutput;
 class OutputCatalog;
 
-class AbstractOutputCatalog : public MyAbstractTableModel
-{
-    Q_OBJECT
+class AbstractOutputCatalog : public MyAbstractTableModel {
+  Q_OBJECT
 
 public:
-    explicit AbstractOutputCatalog(OutputCatalog *outputCatalog);
+  explicit AbstractOutputCatalog(OutputCatalog *outputCatalog);
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
 
-    virtual auto outputs() const -> QList<AbstractOutput*> = 0;
+  virtual auto outputs() const -> QList<AbstractOutput *> = 0;
 
 public slots:
-    void setApproach(int approach);
+  void setApproach(int approach);
 
 signals:
-    void timesAreNeededChanged(bool timesAreNeeded) const;
-    void periodIsNeededChanged(bool periodIsNeeded) const;
-    void frequencyIsNeededChanged(bool frequencyIsNeeded) const;
+  void timesAreNeededChanged(bool timesAreNeeded) const;
+  void periodIsNeededChanged(bool periodIsNeeded) const;
+  void frequencyIsNeededChanged(bool frequencyIsNeeded) const;
 
-    void wasModified();
+  void wasModified();
 
 protected:
-    OutputCatalog* _outputCatalog;
-    MotionLibrary::Approach _approach;
+  OutputCatalog *_outputCatalog;
+  MotionLibrary::Approach _approach;
 };
 
 #endif // ABSTRACT_OUTPUT_CATALOG_H

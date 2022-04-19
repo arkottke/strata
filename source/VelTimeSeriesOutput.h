@@ -27,19 +27,19 @@
 class OutputCatalog;
 class AbstractCalculator;
 
-class VelTimeSeriesOutput : public AbstractTimeSeriesOutput
-{
-    Q_OBJECT
+class VelTimeSeriesOutput : public AbstractTimeSeriesOutput {
+  Q_OBJECT
 public:
-    explicit VelTimeSeriesOutput(OutputCatalog* catalog);
+  explicit VelTimeSeriesOutput(OutputCatalog *catalog);
 
-    auto name() const -> QString;
+  auto name() const -> QString;
+
 protected:
-    auto shortName() const -> QString;
-    auto yLabel() const -> const QString;
+  auto shortName() const -> QString;
+  auto yLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                 QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 
 #endif // VEL_TIME_SERIES_OUTPUT_H

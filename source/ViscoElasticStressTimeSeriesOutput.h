@@ -26,18 +26,18 @@
 
 class AbstractCalculator;
 
-class ViscoElasticStressTimeSeriesOutput : public  AbstractTimeSeriesOutput
-{
-    Q_OBJECT
+class ViscoElasticStressTimeSeriesOutput : public AbstractTimeSeriesOutput {
+  Q_OBJECT
 public:
-    explicit ViscoElasticStressTimeSeriesOutput(OutputCatalog* catalog);
+  explicit ViscoElasticStressTimeSeriesOutput(OutputCatalog *catalog);
 
-    virtual auto name() const -> QString;
+  virtual auto name() const -> QString;
+
 protected:
-    virtual auto shortName() const -> QString;
-    virtual auto yLabel() const -> const QString;
+  virtual auto shortName() const -> QString;
+  virtual auto yLabel() const -> const QString;
 
-    void extract(AbstractCalculator* const calculator,
-                 QVector<double> & ref, QVector<double> & data) const;
+  void extract(AbstractCalculator *const calculator, QVector<double> &ref,
+               QVector<double> &data) const;
 };
 #endif // VISCO_ELASTIC_STRESS_TIME_SERIES_OUTPUT_H

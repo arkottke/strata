@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,58 +30,55 @@
 #include <QStringList>
 #include <QVariant>
 
+class TextLog : public QObject {
+  Q_OBJECT
 
-class TextLog : public QObject
-{
-    Q_OBJECT
+  friend auto operator<<(QDataStream &out, const TextLog *tl) -> QDataStream &;
+  friend auto operator>>(QDataStream &in, TextLog *tl) -> QDataStream &;
 
-    friend auto operator<< (QDataStream & out, const TextLog* tl) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, TextLog* tl) -> QDataStream &;
+public:
+  explicit TextLog(QObject *parent = nullptr);
 
-    public:
-    explicit TextLog(QObject *parent = nullptr);
-        
-        //! Level of detail of the logging
-        enum Level {
-            Low, //!< Print out of the input and the progress of the calculation
-            Medium, //!< Low plus the results of each run of the calculation
-            High //!< Results for each iteration of the calculation
-        };
-        
-        static auto levelList() -> QStringList;
+  //! Level of detail of the logging
+  enum Level {
+    Low,    //!< Print out of the input and the progress of the calculation
+    Medium, //!< Low plus the results of each run of the calculation
+    High    //!< Results for each iteration of the calculation
+  };
 
-        //! Append text to the log
-        void append(const QString & text);
-        
-        //! Clear the log
-        void clear();
+  static auto levelList() -> QStringList;
 
-        auto level() const -> Level;
-        void setLevel(Level level);
+  //! Append text to the log
+  void append(const QString &text);
 
-        auto text() const -> const QStringList&;
+  //! Clear the log
+  void clear();
 
-        void fromJson(const QJsonObject &json);
-        auto toJson() const -> QJsonObject;
+  auto level() const -> Level;
+  void setLevel(Level level);
 
+  auto text() const -> const QStringList &;
 
-    public slots:
-        void setLevel(int level);
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
-    signals:
-        void textCleared();
-        void textChanged(const QString & text);
+public slots:
+  void setLevel(int level);
 
-        void wasModified();
+signals:
+  void textCleared();
+  void textChanged(const QString &text);
 
-    private:
-        //! Level of detail in the log
-        Level _level;
+  void wasModified();
 
-        //! Text
-        QStringList _text;
+private:
+  //! Level of detail in the log
+  Level _level;
+
+  //! Text
+  QStringList _text;
 };
-        
-auto operator<< ( TextLog & log, const QString & string ) -> TextLog &;
+
+auto operator<<(TextLog &log, const QString &string) -> TextLog &;
 
 #endif

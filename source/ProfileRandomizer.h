@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,8 +27,8 @@
 #include <QDataStream>
 #include <QJsonObject>
 #include <QMap>
-#include <QStringList>
 #include <QString>
+#include <QStringList>
 #include <QTextStream>
 #include <QVariant>
 
@@ -46,50 +46,51 @@ class VelocityVariation;
  * layers is varied using the Toro (1995) model.
  */
 
-class ProfileRandomizer : public QObject
-{
-    Q_OBJECT
+class ProfileRandomizer : public QObject {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const ProfileRandomizer* pr) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, ProfileRandomizer* pr) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const ProfileRandomizer *pr)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, ProfileRandomizer *pr)
+      -> QDataStream &;
 
 public:
-    ProfileRandomizer(gsl_rng * rng, SoilProfile* siteProfile);
-    ~ProfileRandomizer();
+  ProfileRandomizer(gsl_rng *rng, SoilProfile *siteProfile);
+  ~ProfileRandomizer();
 
-    auto enabled() const -> bool;
+  auto enabled() const -> bool;
 
-    auto bedrockDepthVariation() -> BedrockDepthVariation*;
-    auto layerThicknessVariation() -> LayerThicknessVariation*;
-    auto velocityVariation() -> VelocityVariation*;
+  auto bedrockDepthVariation() -> BedrockDepthVariation *;
+  auto layerThicknessVariation() -> LayerThicknessVariation *;
+  auto velocityVariation() -> VelocityVariation *;
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
 signals:
-    void enabledChanged(bool enabled);
-    void wasModified();
+  void enabledChanged(bool enabled);
+  void wasModified();
 
 public slots:
-    void setEnabled(bool enabled);
+  void setEnabled(bool enabled);
 
 protected slots:
-    void updateEnabled();
+  void updateEnabled();
 
 private:
-    //! Enable variation of the profile
-    bool _enabled;
+  //! Enable variation of the profile
+  bool _enabled;
 
-    //! Model for the shear-wave velocity variation
-    VelocityVariation* _velocityVariation;
+  //! Model for the shear-wave velocity variation
+  VelocityVariation *_velocityVariation;
 
-    //! Model for layering thickness
-    LayerThicknessVariation* _layerThicknessVariation;
+  //! Model for layering thickness
+  LayerThicknessVariation *_layerThicknessVariation;
 
-    //! Variation of the bedrock layer
-    BedrockDepthVariation* _bedrockDepthVariation;
+  //! Variation of the bedrock layer
+  BedrockDepthVariation *_bedrockDepthVariation;
 
-    //! Site profile
-    SoilProfile* _siteProfile;
+  //! Site profile
+  SoilProfile *_siteProfile;
 };
 #endif

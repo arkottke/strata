@@ -24,13 +24,13 @@
 
 #include <QVector>
 
-class AbstractOutputInterpolater
-{
+class AbstractOutputInterpolater {
 public:
-    AbstractOutputInterpolater();
-    virtual ~AbstractOutputInterpolater();
+  AbstractOutputInterpolater();
+  virtual ~AbstractOutputInterpolater();
 
-    virtual auto calculate(const QVector<double> & x, const QVector<double> & y, const QVector<double> & xi) -> QVector<double> = 0;
+  virtual auto calculate(const QVector<double> &x, const QVector<double> &y,
+                         const QVector<double> &xi) -> QVector<double> = 0;
 };
 
 #endif // ABSTRACT_OUTPUT_INTERPOLATER_H

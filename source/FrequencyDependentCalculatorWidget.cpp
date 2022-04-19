@@ -25,52 +25,52 @@
 
 #include <QFormLayout>
 
-FrequencyDependentCalculatorWidget::FrequencyDependentCalculatorWidget(QWidget *parent)
-    : QWidget(parent)
-{
-    auto* layout = new QFormLayout;
+FrequencyDependentCalculatorWidget::FrequencyDependentCalculatorWidget(
+    QWidget *parent)
+    : QWidget(parent) {
+  auto *layout = new QFormLayout;
 
-    // Error tolerance row
-    _errorToleranceSpinBox = new QDoubleSpinBox;
-    _errorToleranceSpinBox->setRange( 0.5, 10.0);
-    _errorToleranceSpinBox->setDecimals(1);
-    _errorToleranceSpinBox->setSingleStep(0.25);
-    _errorToleranceSpinBox->setSuffix(" %");
+  // Error tolerance row
+  _errorToleranceSpinBox = new QDoubleSpinBox;
+  _errorToleranceSpinBox->setRange(0.5, 10.0);
+  _errorToleranceSpinBox->setDecimals(1);
+  _errorToleranceSpinBox->setSingleStep(0.25);
+  _errorToleranceSpinBox->setSuffix(" %");
 
-    layout->addRow(tr("Error tolerance:"), _errorToleranceSpinBox);
+  layout->addRow(tr("Error tolerance:"), _errorToleranceSpinBox);
 
-    // Max Iterations row
-    _maxIterationsSpinBox = new QSpinBox;
-    _maxIterationsSpinBox->setMinimum(2);
-    _maxIterationsSpinBox->setMaximum(60);
+  // Max Iterations row
+  _maxIterationsSpinBox = new QSpinBox;
+  _maxIterationsSpinBox->setMinimum(2);
+  _maxIterationsSpinBox->setMaximum(60);
 
-    layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
+  layout->addRow(tr("Maximum number of iterations:"), _maxIterationsSpinBox);
 
-    // Use smooth Strain FAS shape
-    _useSmoothStrainCheckBox = new QCheckBox(tr("Use Kausel & Assimaki spectral shape"));
-    layout->addRow(_useSmoothStrainCheckBox);
+  // Use smooth Strain FAS shape
+  _useSmoothStrainCheckBox =
+      new QCheckBox(tr("Use Kausel & Assimaki spectral shape"));
+  layout->addRow(_useSmoothStrainCheckBox);
 
-    setLayout(layout);
+  setLayout(layout);
 }
 
-void FrequencyDependentCalculatorWidget::setCalculator(FrequencyDependentCalculator* fdc)
-{
-    _errorToleranceSpinBox->setValue(fdc->errorTolerance());
-    connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)),
-            fdc, SLOT(setErrorTolerance(double)));
+void FrequencyDependentCalculatorWidget::setCalculator(
+    FrequencyDependentCalculator *fdc) {
+  _errorToleranceSpinBox->setValue(fdc->errorTolerance());
+  connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)), fdc,
+          SLOT(setErrorTolerance(double)));
 
-    _maxIterationsSpinBox->setValue(fdc->maxIterations());
-    connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)),
-            fdc, SLOT(setMaxIterations(int)));
+  _maxIterationsSpinBox->setValue(fdc->maxIterations());
+  connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)), fdc,
+          SLOT(setMaxIterations(int)));
 
-    _useSmoothStrainCheckBox->setChecked(fdc->useSmoothSpectrum());
-    connect(_useSmoothStrainCheckBox, SIGNAL(toggled(bool)),
-            fdc, SLOT(setUseSmoothSpectrum(bool)));
+  _useSmoothStrainCheckBox->setChecked(fdc->useSmoothSpectrum());
+  connect(_useSmoothStrainCheckBox, SIGNAL(toggled(bool)), fdc,
+          SLOT(setUseSmoothSpectrum(bool)));
 }
 
-void FrequencyDependentCalculatorWidget::setReadOnly(bool readOnly)
-{
-    _errorToleranceSpinBox->setReadOnly(readOnly);
-    _maxIterationsSpinBox->setReadOnly(readOnly);
-    _useSmoothStrainCheckBox->setDisabled(readOnly);
+void FrequencyDependentCalculatorWidget::setReadOnly(bool readOnly) {
+  _errorToleranceSpinBox->setReadOnly(readOnly);
+  _maxIterationsSpinBox->setReadOnly(readOnly);
+  _useSmoothStrainCheckBox->setDisabled(readOnly);
 }

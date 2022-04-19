@@ -28,93 +28,98 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-class MotionLibrary : public MyAbstractTableModel
-{
-    Q_OBJECT
+class MotionLibrary : public MyAbstractTableModel {
+  Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const MotionLibrary* ml) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, MotionLibrary* ml) -> QDataStream &;
+  friend auto operator<<(QDataStream &out, const MotionLibrary *ml)
+      -> QDataStream &;
+  friend auto operator>>(QDataStream &in, MotionLibrary *ml) -> QDataStream &;
 
 public:
-    explicit MotionLibrary(QObject *parent = nullptr);
+  explicit MotionLibrary(QObject *parent = nullptr);
 
-    //! Table columns
-    enum Column {
-        NameColumn,
-        DescriptionColumn,
-        TypeColumn,
-        PgaColumn,
-        PgvColumn,
-        ScaleColumn
-    };
+  //! Table columns
+  enum Column {
+    NameColumn,
+    DescriptionColumn,
+    TypeColumn,
+    PgaColumn,
+    PgvColumn,
+    ScaleColumn
+  };
 
-    //! Approach for preforming the analysi
-    enum Approach {
-        TimeSeries, //!< Use time series
-        RandomVibrationTheory //!< Use random vibration theory
-    };
+  //! Approach for preforming the analysi
+  enum Approach {
+    TimeSeries,           //!< Use time series
+    RandomVibrationTheory //!< Use random vibration theory
+  };
 
-    static auto approachList() -> QStringList;
+  static auto approachList() -> QStringList;
 
-    auto toHtml() const -> QString;
+  auto toHtml() const -> QString;
 
-    //!@{ Methods modifying the library
-    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
-    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
+  //!@{ Methods modifying the library
+  virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+  virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const
+      -> int;
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
-    virtual auto headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const -> QVariant;
+  virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const
+      -> QVariant;
+  virtual auto headerData(int section, Qt::Orientation orientation,
+                          int role = Qt::DisplayRole) const -> QVariant;
 
-    virtual auto flags(const QModelIndex & index) const -> Qt::ItemFlags;
+  virtual auto flags(const QModelIndex &index) const -> Qt::ItemFlags;
 
-    virtual auto setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) -> bool;
+  virtual auto setData(const QModelIndex &index, const QVariant &value,
+                       int role = Qt::EditRole) -> bool;
 
-    virtual auto removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) -> bool;
-    //!@}
+  virtual auto removeRows(int row, int count,
+                          const QModelIndex &parent = QModelIndex()) -> bool;
+  //!@}
 
-    auto saveData() const -> bool;
+  auto saveData() const -> bool;
 
-    //! Number of enabled motions
-    auto motionCount() const -> int;
+  //! Number of enabled motions
+  auto motionCount() const -> int;
 
-    //! Add a motion to the model
-    void addMotion(AbstractMotion *motion);
+  //! Add a motion to the model
+  void addMotion(AbstractMotion *motion);
 
-    //! Return the motion at the index
-    auto motionAt(int row) -> AbstractMotion*;
+  //! Return the motion at the index
+  auto motionAt(int row) -> AbstractMotion *;
 
-    //! Update the data along a row
-    void updateRow(int row);
+  //! Update the data along a row
+  void updateRow(int row);
 
-    auto approach() const -> Approach;
-    void setApproach(Approach approach);
+  auto approach() const -> Approach;
+  void setApproach(Approach approach);
 
-    void fromJson(const QJsonObject &json);
-    auto toJson() const -> QJsonObject;
+  void fromJson(const QJsonObject &json);
+  auto toJson() const -> QJsonObject;
 
-signals:    
-    void wasModified();
-    void approachChanged(int approach);
-    void saveDataChanged(bool saveData);
+signals:
+  void wasModified();
+  void approachChanged(int approach);
+  void saveDataChanged(bool saveData);
 
 public slots:
-    void setSaveData(bool b);
-    void setApproach(int approach);
-    virtual void setReadOnly(bool readOnly);
+  void setSaveData(bool b);
+  void setApproach(int approach);
+  virtual void setReadOnly(bool readOnly);
 
 protected slots:
-    void updateUnits();
+  void updateUnits();
 
-protected:    
-    //! Approach used to characterize input motions
-    Approach _approach;
+protected:
+  //! Approach used to characterize input motions
+  Approach _approach;
 
-    //! If the motion data should be saved within the file -- only important for time series
-    bool _saveData;
+  //! If the motion data should be saved within the file -- only important for
+  //! time series
+  bool _saveData;
 
-    //! List of motions
-    QList<AbstractMotion*> _motions;
-
+  //! List of motions
+  QList<AbstractMotion *> _motions;
 };
 
 #endif // MOTION_LIBRARY_H
