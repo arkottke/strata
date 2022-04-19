@@ -31,7 +31,7 @@ DarendeliNonlinearProperty::DarendeliNonlinearProperty(Type type, QObject *paren
 {
     _name = "Darendeli & Stokoe (2001)";
     _type = type;
-    _strain = Dimension::logSpace(pow(10.,-4), pow(10.,0.5), 19);
+    _strain = Dimension::logSpace(pow(10.,-4), pow(10.,1), 21);
     _average.resize(_strain.size());
     initialize();
 }
