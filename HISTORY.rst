@@ -1,6 +1,10 @@
 History
 =======
 
+v0.8.2 (2021-09-10)
+-------------------
+- Changed: Extended maximum strain of Darendeli model out to 10%
+
 v0.8.1 (2021-09-10)
 -------------------
 - Fixed: Changed to log-linear interpolatio of nonlinear properties. Previously
@@ -9,7 +13,7 @@ v0.8.1 (2021-09-10)
 v0.8.0 (2020-03-17)
 -------------------
 - Improved: Modernized source code with clang-tidy
-- Fixed: Qt depreciations 
+- Fixed: Qt depreciations
 - Fixed: Plotting of profiles
 - Minor fixes in manual from Subrat Subedi
 
@@ -74,7 +78,7 @@ v0.5.5
 - Fixed: allow reading integers in time series
 - Fixed: Added organization (ARKottke) to fix QSettings usage
 - Fixed: Removed incomplete example
-- Changed: Copy Qt DLLs to archive using windeployqt 
+- Changed: Copy Qt DLLs to archive using windeployqt
 
 v0.5.4
 ------

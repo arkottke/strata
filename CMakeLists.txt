@@ -32,10 +32,10 @@ project(strata)
 set(PROJECT_LONGNAME "Strata")
 
 execute_process(
-    COMMAND git rev-parse --short HEAD 
+    COMMAND git rev-parse --short HEAD
     OUTPUT_VARIABLE PROJECT_GITHASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(PROJECT_VERSION "0.8.1")
+set(PROJECT_VERSION "0.8.2")
 
 # Global CMake options
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -96,7 +96,7 @@ add_subdirectory(source)
 add_subdirectory(tests)
 
 find_program(PDFLATEX_PATH pdflatex)
-if (PDFLATEX_PATH) 
+if (PDFLATEX_PATH)
     add_subdirectory(manual)
 endif()
 
