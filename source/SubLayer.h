@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ public:
     auto stressRatio() const -> double;
 
     //! Interpolation using the curves
-    void interp(double strain, double* modulus, double* damping) const;
+    bool interp(double strain, double* modulus, double* damping) const;
 
     //! Compute the properties from an initial estimate of strain
     void setInitialStrain(double strain);
@@ -88,7 +88,7 @@ public:
          * \param effStrain effective strain -- maximum strain reduced by effective strain ratio
          * \param maxStrain maximum strain
          */
-    void setStrain(double effStrain, double maxStrain, bool updateProperties=true);
+    bool setStrain(double effStrain, double maxStrain, bool updateProperties=true);
 
     //! The shear-wave velocity -- corrected for strain
     auto shearVel() const -> double;

@@ -74,7 +74,9 @@ auto EquivalentLinearCalculator::updateSubLayer(
         return false;
     }
 
-    _site->subLayers()[index].setStrain(_strainRatio * strainMax, strainMax);
+    if (!_site->subLayers()[index].setStrain(_strainRatio * strainMax, strainMax)) {
+        return false;
+    }
 
     // Compute the complex shear modulus and complex shear-wave velocity
     // for each soil layer -- these change because the damping and shear

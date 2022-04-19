@@ -31,18 +31,17 @@ class AbstractIterativeCalculator : public AbstractCalculator
 {
     Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const AbstractIterativeCalculator* aic) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, AbstractIterativeCalculator* aic) -> QDataStream &;
+    friend auto operator<<(QDataStream &out, const AbstractIterativeCalculator *aic) -> QDataStream &;
+    friend auto operator>>(QDataStream &in, AbstractIterativeCalculator *aic) -> QDataStream &;
 
 public:
     explicit AbstractIterativeCalculator(QObject *parent = nullptr);
 
     //! Perform the site response calculation
-    virtual auto run(AbstractMotion* motion, SoilProfile* site) -> bool;
+    virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool;
 
     auto maxIterations() const -> int;
     auto errorTolerance() const -> double;
-    virtual auto converged() const -> bool;
 
     void fromJson(const QJsonObject &json);
     auto toJson() const -> QJsonObject;
@@ -57,13 +56,13 @@ public slots:
 
 protected:
     //! Compute the nonlinear properties
-    virtual auto updateSubLayer(int index, const QVector<std::complex<double> > &strainTf) -> bool = 0;
+    virtual auto updateSubLayer(int index, const QVector<std::complex<double>> &strainTf) -> bool = 0;
 
     //! Compute the relative error between two values
     static inline auto relError(double value, double reference) -> double;
 
     //! Compute the maximum error of the maximum shear strain
-    auto maxError(const QVector<double> & maxStrain) -> double;
+    auto maxError(const QVector<double> &maxStrain) -> double;
 
     //! Set initial strains of the layers
     virtual void estimateInitialStrains() = 0;
@@ -77,9 +76,6 @@ protected:
     //! Previous maximum strain
     QVector<double> _prevMaxStrain;
 
-    //! If the error tolerance was achieved
-    bool _converged;
-    
     //! Name of calcuation stage
     QString _name;
 };

@@ -1,20 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // This file is part of Strata.
-// 
+//
 // Strata is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-// 
+//
 // Strata is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along with
 // Strata.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 // Copyright 2010-2018 Albert Kottke
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +27,7 @@
 #include <QDebug>
 
 #include <cmath>
+#include <algorithm>
 
 SubLayer::SubLayer(double thickness, double depth, double vTotalStress, double waterTableDepth, SoilLayer * soilLayer)
     : _thickness(thickness), _depth(depth), _waterTableDepth(waterTableDepth), _soilLayer(soilLayer)
@@ -76,8 +77,8 @@ auto SubLayer::vTotalStress(double layerFraction) const -> double
 auto SubLayer::vEffectiveStress(double layerFraction) const -> double
 {
     const double waterUntWt = Units::instance()->waterUntWt();
-    
-    const double poreWaterPressure = waterUntWt * qMax(0., 
+
+    const double poreWaterPressure = waterUntWt * qMax(0.,
             (_depth + _thickness * (layerFraction)) - _waterTableDepth);
 
     return vTotalStress(layerFraction)- poreWaterPressure;
@@ -139,13 +140,22 @@ auto SubLayer::stressRatio() const -> double
 }
 
 //! Interpolation using the curves
-void SubLayer::interp(double strain, double* modulus, double* damping) const
+bool SubLayer::interp(double strain, double* modulus, double* damping) const
 {
-    *modulus = initialShearMod() * _soilLayer->soilType()->modulusModel()->interp(strain);
+    auto soilType = _soilLayer->soilType();
+
+    if (strain > _soilLayer->strainLimit()) {
+        return false;
+    }
+
+
+    *modulus = initialShearMod() * soilType->modulusModel()->interp(strain);
     // Limit the damping by the minimum strain
     *damping = std::max(
                 _minDamping,
-                _soilLayer->soilType()->dampingModel()->interp(strain));
+                soilType->dampingModel()->interp(strain));
+
+    return true;
 }
 
 
@@ -156,7 +166,7 @@ void SubLayer::setInitialStrain(double strain)
     _damping = _soilLayer->soilType()->dampingModel()->interp(strain);
 }
 
-void SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperties)
+bool SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperties)
 {
     _effStrain = effStrain;
     _maxStrain = maxStrain;
@@ -167,7 +177,11 @@ void SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperti
         _oldShearMod = _shearMod;
         _oldDamping = _damping;
 
-        interp(effStrain, &_shearMod, &_damping);
+        bool success = interp(effStrain, &_shearMod, &_damping);
+        if (!success) {
+            return success;
+        }
+
         _normShearMod = _shearMod / initialShearMod();
 
         // Update the shear-wave velocity
@@ -180,6 +194,8 @@ void SubLayer::setStrain(double effStrain, double maxStrain, bool updateProperti
         _shearModError = 0;
         _dampingError = 0;
     }
+
+    return true;
 }
 
 auto SubLayer::shearVel() const -> double

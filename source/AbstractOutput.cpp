@@ -37,7 +37,7 @@
 #include <qwt_text.h>
 #include <qwt_scale_engine.h>
 
-AbstractOutput::AbstractOutput(OutputCatalog* catalog)
+AbstractOutput::AbstractOutput(OutputCatalog *catalog)
     : QAbstractTableModel(catalog),
       _catalog(catalog),
       _statistics(nullptr),
@@ -50,30 +50,35 @@ AbstractOutput::AbstractOutput(OutputCatalog* catalog)
     _maxSize = 0;
 }
 
-auto AbstractOutput::rowCount(const QModelIndex & parent) const -> int
+auto AbstractOutput::rowCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
     int count;
-    if (_data.size() == 0) {
+    if (_data.size() == 0)
+    {
         // Empty data
         count = 0;
-    } else {
-        if (needsTime()) {
+    }
+    else
+    {
+        if (needsTime())
+        {
             count = ref(_motionIndex).size();
-        } else {
+        }
+        else
+        {
             count = _maxSize;
         }
     }
     return count;
- }
+}
 
-auto AbstractOutput::columnCount(const QModelIndex & parent) const -> int
+auto AbstractOutput::columnCount(const QModelIndex &parent) const -> int
 {
     Q_UNUSED(parent);
 
-    int count = needsTime() ?
-                (1 + siteCount()) : (1 + siteCount() * motionCount());
+    int count = needsTime() ? (1 + siteCount()) : (1 + siteCount() * motionCount());
 
     if (_statistics && _statistics->hasEnoughData())
         count += 2;
@@ -81,28 +86,31 @@ auto AbstractOutput::columnCount(const QModelIndex & parent) const -> int
     return count;
 }
 
-auto AbstractOutput::data(const QModelIndex & index, int role) const -> QVariant
+auto AbstractOutput::data(const QModelIndex &index, int role) const -> QVariant
 {
-    if (index.parent()!=QModelIndex())
+    if (index.parent() != QModelIndex())
         return QVariant();
 
     int site, motion;
     columnToSiteMotion(index.column(), &site, &motion);
 
-    if (role==Qt::DisplayRole) {
-        if (index.column() == 0) {
+    if (role == Qt::DisplayRole)
+    {
+        if (index.column() == 0)
+        {
             return ref(motion).at(index.row());
-        } else if (_statistics && _statistics->hasEnoughData()
-            && index.column() == columnCount() - 2) {
-            return index.row() < _statistics->average().size()?
-                    QVariant(_statistics->average().at(index.row())) : QVariant();
-        } else if (_statistics && _statistics->hasEnoughData()
-            && index.column() == columnCount() - 1) {
-            return index.row() < _statistics->stdev().size() ?
-                    QVariant(_statistics->stdev().at(index.row())) : QVariant();
-        } else {
-            return index.row() < _data.at(site).at(motion).size() ?
-                    QVariant(_data.at(site).at(motion).at(index.row())) : QVariant("NaN");
+        }
+        else if (_statistics && _statistics->hasEnoughData() && index.column() == columnCount() - 2)
+        {
+            return index.row() < _statistics->average().size() ? QVariant(_statistics->average().at(index.row())) : QVariant();
+        }
+        else if (_statistics && _statistics->hasEnoughData() && index.column() == columnCount() - 1)
+        {
+            return index.row() < _statistics->stdev().size() ? QVariant(_statistics->stdev().at(index.row())) : QVariant();
+        }
+        else
+        {
+            return index.row() < _data.at(site).at(motion).size() ? QVariant(_data.at(site).at(motion).at(index.row())) : QVariant("NaN");
         }
     }
 
@@ -114,37 +122,44 @@ auto AbstractOutput::headerData(int section, Qt::Orientation orientation, int ro
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    switch (orientation) {
+    switch (orientation)
+    {
     case Qt::Horizontal:
-        if (section == 0) {
-            return (curveType() == Yfx) ?
-                    xLabel() : yLabel();
-        } else if (_statistics && _statistics->hasEnoughData()
-            && section == columnCount() - 2) {
+        if (section == 0)
+        {
+            return (curveType() == Yfx) ? xLabel() : yLabel();
+        }
+        else if (_statistics && _statistics->hasEnoughData() && section == columnCount() - 2)
+        {
             return _statistics->averageLabel();
-        } else if (_statistics && _statistics->hasEnoughData()
-            && section == columnCount() - 1) {
+        }
+        else if (_statistics && _statistics->hasEnoughData() && section == columnCount() - 1)
+        {
             return _statistics->stdevLabel();
-        } else {
+        }
+        else
+        {
             int site, motion;
             columnToSiteMotion(section, &site, &motion);
 
-            if (motionIndependent()) {
+            if (motionIndependent())
+            {
                 return QString("S-%1%2")
-                            .arg(site + 1) // Start at 1
-                            .arg(_catalog->siteEnabled(site) ?
-                                 "" : " (disabled)");
-            } else if (siteIndependent()) {
+                    .arg(site + 1) // Start at 1
+                    .arg(_catalog->siteEnabled(site) ? "" : " (disabled)");
+            }
+            else if (siteIndependent())
+            {
                 return QString("M-%1%2")
-                            .arg(_catalog->motionNameAt(motion))
-                            .arg(_catalog->motionEnabled(motion) ?
-                                 "" : " (disabled)");
-            } else {
+                    .arg(_catalog->motionNameAt(motion))
+                    .arg(_catalog->motionEnabled(motion) ? "" : " (disabled)");
+            }
+            else
+            {
                 return QString("S-%1-M-%2%3")
-                        .arg(site + 1) // Start at 1
-                        .arg(_catalog->motionNameAt(motion))
-                        .arg(_catalog->enabledAt(section - 1) ?
-                             "" : " (disabled)");
+                    .arg(site + 1) // Start at 1
+                    .arg(_catalog->motionNameAt(motion))
+                    .arg(_catalog->enabledAt(section - 1) ? "" : " (disabled)");
             }
         }
     case Qt::Vertical:
@@ -154,7 +169,7 @@ auto AbstractOutput::headerData(int section, Qt::Orientation orientation, int ro
     return QVariant();
 }
 
-void AbstractOutput::addData(int motion, AbstractCalculator* const calculator)
+void AbstractOutput::addData(int motion, AbstractCalculator *const calculator)
 {
     QVector<double> ref;
     QVector<double> data;
@@ -165,7 +180,7 @@ void AbstractOutput::addData(int motion, AbstractCalculator* const calculator)
         data = _interp->calculate(ref, data, this->ref(motion));
 
     if (motion == 0)
-        _data << QList<QVector<double > >();
+        _data << QList<QVector<double>>();
 
     if (!motionIndependent() || motion == 0)
         // Save the data for the first motion or for motion depedent results
@@ -187,8 +202,11 @@ void AbstractOutput::finalize()
         _statistics->calculate();
 }
 
-void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves) const
+void AbstractOutput::plot(QwtPlot *const qwtPlot, QList<QwtPlotCurve *> &curves) const
 {
+    if (!isComplete())
+        return;
+
     curves.clear();
     qwtPlot->detachItems();
 
@@ -202,15 +220,15 @@ void AbstractOutput::plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves)
     // Create the curves
     int n;
     int offset;
-    for (int i = 0; i < siteCount(); ++i) {
-        for (int j = 0; j < motionCount(); ++j) {
-            const QVector<double> & x = (curveType() == Yfx) ?
-                                        ref(j) : _data.at(i).at(j);
+    for (int i = 0; i < siteCount(); ++i)
+    {
+        for (int j = 0; j < motionCount(); ++j)
+        {
+            const QVector<double> &x = (curveType() == Yfx) ? ref(j) : _data.at(i).at(j);
 
-            const QVector<double> & y = (curveType() == Yfx) ?
-                                        _data.at(i).at(j) : ref(j);
+            const QVector<double> &y = (curveType() == Yfx) ? _data.at(i).at(j) : ref(j);
 
-            auto* curve = new QwtPlotCurve;         
+            auto *curve = new QwtPlotCurve;
             setCurveSamples(curve, x, y);
 
             curve->setPen(QPen(Qt::darkGray));
@@ -236,11 +254,13 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
 {
     const int oldMotionIndex = _motionIndex;
 
-    for (int m = 0; m < motionCount(); ++m) { 
+    for (int m = 0; m < motionCount(); ++m)
+    {
         _motionIndex = m;
         QFile file(QDir(path).absoluteFilePath(prefix + fileName(m) + ".csv"));
 
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
             qDebug() << "Error opening:" << file.fileName();
             return;
         }
@@ -251,7 +271,7 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
         out << "# Project:" << _catalog->title() << Qt::endl;
 
         // Column names
-        out << "# ";        
+        out << "# ";
         const int colCount = columnCount();
         for (int i = 0; i < colCount; ++i)
             out << headerData(i, Qt::Horizontal, Qt::DisplayRole).toString() << separator;
@@ -259,8 +279,10 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
         out << Qt::endl;
 
         // Data
-        for (int r = 0; r < rowCount(); ++r) {
-            for (int c = 0; c < colCount; ++c) {
+        for (int r = 0; r < rowCount(); ++r)
+        {
+            for (int c = 0; c < colCount; ++c)
+            {
                 out << data(index(r, c), Qt::DisplayRole).toString();
 
                 if (c < colCount - 1)
@@ -280,7 +302,7 @@ void AbstractOutput::exportData(const QString &path, const QString &separator, c
     _motionIndex = oldMotionIndex;
 }
 
-void AbstractOutput::intToSiteMotion(int i, int* site, int* motion) const
+void AbstractOutput::intToSiteMotion(int i, int *site, int *motion) const
 {
     *site = intToSite(i);
     *motion = intToMotion(i);
@@ -301,7 +323,7 @@ void AbstractOutput::clear()
     emit beginResetModel();
     _data.clear();
     _motionIndex = 0;
-    _maxSize = 0;    
+    _maxSize = 0;
     emit endResetModel();
 }
 
@@ -317,7 +339,8 @@ auto AbstractOutput::exportEnabled() const -> bool
 
 void AbstractOutput::setExportEnabled(bool exportEnabled)
 {
-    if ( _exportEnabled != exportEnabled ) {
+    if (_exportEnabled != exportEnabled)
+    {
         _exportEnabled = exportEnabled;
 
         emit exportEnabledChanged(_exportEnabled);
@@ -365,7 +388,7 @@ auto AbstractOutput::timeSeriesOnly() const -> bool
     return false;
 }
 
-void AbstractOutput::labelAxes(QwtPlot* const qwtPlot) const
+void AbstractOutput::labelAxes(QwtPlot *const qwtPlot) const
 {
     // Label the axes
     QFont font = QApplication::font();
@@ -400,7 +423,12 @@ auto AbstractOutput::zOrder() -> int
     return 20;
 }
 
-auto AbstractOutput::data(int site, int motion) const -> const QVector<double>&
+auto AbstractOutput::isComplete() const -> bool
+{
+    return (_data.size() == siteCount()) && (_data.at(0).size() == motionCount());
+}
+
+auto AbstractOutput::data(int site, int motion) const -> const QVector<double> &
 {
     Q_ASSERT(site < _data.size());
     Q_ASSERT(motion < _data.at(site).size());
@@ -435,12 +463,16 @@ void AbstractOutput::columnToSiteMotion(const int column, int *site, int *motion
     const int end = columnCount() -
                     ((_statistics && _statistics->hasEnoughData()) ? 2 : 0);
 
-    if (0 < column && column < end) {
+    if (0 < column && column < end)
+    {
         // Only find values of the site and motion indices for the data columns (column != 0)
-        if (needsTime()) {
+        if (needsTime())
+        {
             *site = column - 1;
             *motion = _motionIndex;
-        } else {
+        }
+        else
+        {
             intToSiteMotion(column - 1, site, motion);
         }
     }
@@ -461,11 +493,14 @@ void AbstractOutput::fromJson(const QJsonObject &json)
     _exportEnabled = json["exportEnabled"].toBool();
 
     QJsonArray data = json["data"].toArray();
-    for (const QJsonValue &site : data) {
-        QList<QVector<double> > l;
-        for (const QJsonValue &motion : site.toArray()) {
+    for (const QJsonValue &site : data)
+    {
+        QList<QVector<double>> l;
+        for (const QJsonValue &motion : site.toArray())
+        {
             QVector<double> v;
-            for (const QJsonValue &qjv : motion.toArray()) {
+            for (const QJsonValue &qjv : motion.toArray())
+            {
                 v << qjv.toDouble();
             }
             l << v;
@@ -476,8 +511,10 @@ void AbstractOutput::fromJson(const QJsonObject &json)
     }
 
     _maxSize = 0;
-    for (const QList<QVector<double> > &l : _data) {
-        for (const QVector<double> &v : l) {
+    for (const QList<QVector<double>> &l : _data)
+    {
+        for (const QVector<double> &v : l)
+        {
             if (_maxSize < v.size())
                 _maxSize = v.size();
         }
@@ -491,11 +528,14 @@ auto AbstractOutput::toJson() const -> QJsonObject
     json["exportEnabled"] = _exportEnabled;
 
     QJsonArray data;
-    for (const QList<QVector<double> > &l : _data) {
+    for (const QList<QVector<double>> &l : _data)
+    {
         QJsonArray site;
-        for (const QVector<double> &v : l) {
+        for (const QVector<double> &v : l)
+        {
             QJsonArray motion;
-            for (const double &d : v) {
+            for (const double &d : v)
+            {
                 motion << QJsonValue(d);
             }
             // FIXME: Need the QJV?
@@ -508,8 +548,7 @@ auto AbstractOutput::toJson() const -> QJsonObject
     return json;
 }
 
-
-auto operator<< (QDataStream & out, const AbstractOutput* ao) -> QDataStream &
+auto operator<<(QDataStream &out, const AbstractOutput *ao) -> QDataStream &
 {
     out << static_cast<quint8>(1);
 
@@ -518,7 +557,7 @@ auto operator<< (QDataStream & out, const AbstractOutput* ao) -> QDataStream &
     return out;
 }
 
-auto operator>> (QDataStream & in, AbstractOutput* ao) -> QDataStream &
+auto operator>>(QDataStream &in, AbstractOutput *ao) -> QDataStream &
 {
     quint8 ver;
     in >> ver;
@@ -526,8 +565,10 @@ auto operator>> (QDataStream & in, AbstractOutput* ao) -> QDataStream &
     in >> ao->_exportEnabled >> ao->_data;
 
     // Find the maximum length of all data vectors
-    for (const QList<QVector<double> > &l : ao->_data) {
-        for (const QVector<double> &v : l) {
+    for (const QList<QVector<double>> &l : ao->_data)
+    {
+        for (const QVector<double> &v : l)
+        {
             if (ao->_maxSize < v.size())
                 ao->_maxSize = v.size();
         }

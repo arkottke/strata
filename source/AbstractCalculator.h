@@ -36,6 +36,16 @@ class Location;
 class SoilProfile;
 class TextLog;
 
+enum CalculationStatus
+{
+    NotRun,
+    Successful,
+    WavePropagationError,
+    StrainLimitExceeded,
+    NoConvergence,
+    CanceledByUser
+};
+
 class AbstractCalculator : public QObject
 {
     Q_OBJECT
@@ -46,20 +56,20 @@ public:
     //! Produce an HTML table summarizing the calculator
     virtual auto toHtml() const -> QString;
 
-    auto site() const -> SoilProfile*;
-    auto motion() const -> AbstractMotion*;
+    auto site() const -> SoilProfile *;
+    auto motion() const -> AbstractMotion *;
 
     //! Set text log to record calculation steps
-    void setTextLog(TextLog* const textLog);
+    void setTextLog(TextLog *const textLog);
 
     //! Reset the object to the default values
     virtual void reset();
 
     //! Perform the site response calculation
-    virtual auto run(AbstractMotion* motion, SoilProfile* site) -> bool = 0;
+    virtual auto run(AbstractMotion *motion, SoilProfile *site) -> bool = 0;
 
-    //! If the analysis converged
-    virtual auto converged() const -> bool = 0;
+    //! Calculation status
+    auto status() const -> CalculationStatus;
 
     //! Compute the peak ground acceleration at the surface
     auto surfacePGA() const -> double;
@@ -73,8 +83,8 @@ public:
      * \return the transfer function
      */
     auto calcAccelTf(
-            const Location & inLocation, const AbstractMotion::Type inputType,
-            const Location & outLocation, const AbstractMotion::Type outputType ) const -> const QVector<std::complex<double> >;
+        const Location &inLocation, const AbstractMotion::Type inputType,
+        const Location &outLocation, const AbstractMotion::Type outputType) const -> const QVector<std::complex<double>>;
 
     /*! Compute the velocity to strain transfer function.
      *
@@ -84,7 +94,7 @@ public:
      * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
      */
     auto calcStrainTf(
-            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >;
+        const Location &inLocation, const AbstractMotion::Type inputType, const Location &outLocation) const -> QVector<std::complex<double>>;
 
     /*! Compute the velocity to visco-elastic stress transfer function.
      *
@@ -94,7 +104,7 @@ public:
      * \return tf the strain transfer function to be applied to the Fourier amplitude spectrum of the velocity
      */
     auto calcStressTf(
-            const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >;
+        const Location &inLocation, const AbstractMotion::Type inputType, const Location &outLocation) const -> QVector<std::complex<double>>;
 signals:
     void wasModified();
 
@@ -103,10 +113,10 @@ public slots:
 
 protected:
     //! Initialize vectors
-    void init(AbstractMotion* motion, SoilProfile* site);
+    void init(AbstractMotion *motion, SoilProfile *site);
 
     //! Compute the complex shear modulus
-    static auto calcCompShearMod(const double shearMod, const double damping ) -> std::complex<double> ;
+    static auto calcCompShearMod(const double shearMod, const double damping) -> std::complex<double>;
 
     /*! Compute the up-going and down-going waves
      * \return if the calculation is successful
@@ -118,13 +128,13 @@ protected:
      * \param location the location in the site profile
      * \param type type of motion
      */
-    auto waves(const int freqIdx, const Location & location, const AbstractMotion::Type type) const -> const std::complex<double>;
+    auto waves(const int freqIdx, const Location &location, const AbstractMotion::Type type) const -> const std::complex<double>;
 
     //! Site profile
-    SoilProfile* _site;
+    SoilProfile *_site;
 
     //! Motion that is propagated through the site profile.
-    AbstractMotion* _motion;
+    AbstractMotion *_motion;
 
     //! Number of SubLayers in the site profile
     int _nsl;
@@ -135,6 +145,9 @@ protected:
     //! If the calculation should continue
     bool _okToContinue;
 
+    //! Status of the calculation
+    CalculationStatus _status;
+
     /*! @name Wave propagation parameters
      *
      * The first dimension of the vectors are the number of soil layers, the
@@ -142,20 +155,20 @@ protected:
      */
     //@{
     //! Complex shear modulus
-    QVector<QVector<std::complex<double> > > _shearMod;
+    QVector<QVector<std::complex<double>>> _shearMod;
 
     //! Up-going wave
-    QVector<QVector<std::complex<double> > > _waveA;
+    QVector<QVector<std::complex<double>>> _waveA;
 
     //! Down-going wave
-    QVector<QVector<std::complex<double> > > _waveB;
+    QVector<QVector<std::complex<double>>> _waveB;
 
     //! Complex wave number
-    QVector<QVector<std::complex<double> > > _waveNum;
+    QVector<QVector<std::complex<double>>> _waveNum;
     //@}
 
     //! Text log to record calculation steps
-    TextLog * _textLog;
+    TextLog *_textLog;
 };
 
 #endif // ABSTRACT_CALCULATOR_H

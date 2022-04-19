@@ -28,9 +28,9 @@
 
 #include <QDebug>
 
-AbstractCalculator::AbstractCalculator(QObject *parent) :
-        QObject(parent)
-{  
+AbstractCalculator::AbstractCalculator(QObject *parent) : QObject(parent),
+                                                          _status(CalculationStatus::NotRun)
+{
     _site = nullptr;
     _motion = nullptr;
     _nsl = 0;
@@ -49,12 +49,12 @@ void AbstractCalculator::reset()
     // Do nothing!
 }
 
-auto AbstractCalculator::site() const -> SoilProfile*
+auto AbstractCalculator::site() const -> SoilProfile *
 {
     return _site;
 }
 
-auto AbstractCalculator::motion() const -> AbstractMotion*
+auto AbstractCalculator::motion() const -> AbstractMotion *
 {
     return _motion;
 }
@@ -64,7 +64,12 @@ void AbstractCalculator::stop()
     _okToContinue = false;
 }
 
-void AbstractCalculator::setTextLog( TextLog * textLog )
+auto AbstractCalculator::status() const -> CalculationStatus
+{
+    return _status;
+}
+
+void AbstractCalculator::setTextLog(TextLog *textLog)
 {
     _textLog = textLog;
 }
@@ -75,34 +80,39 @@ auto AbstractCalculator::surfacePGA() const -> double
     return _motion->max(calcAccelTf(_site->inputLocation(), _motion->type(), Location(0, 0), AbstractMotion::Outcrop));
 }
 
-void AbstractCalculator::init(AbstractMotion* motion, SoilProfile* site)
+void AbstractCalculator::init(AbstractMotion *motion, SoilProfile *site)
 {
     bool motionChanged = false;
-    if (_motion != motion) {
+    if (_motion != motion)
+    {
         _motion = motion;
         _nf = _motion->freqCount();
         motionChanged = true;
     }
 
     bool siteChanged = false;
-    if (_site != site) {
+    if (_site != site)
+    {
         _site = site;
         siteChanged = true;
     }
 
-    if (_nsl != _site->subLayerCount()) {
+    if (_nsl != _site->subLayerCount())
+    {
         _nsl = _site->subLayerCount();
         siteChanged = true;
     }
 
-    if (siteChanged || motionChanged) {
+    if (siteChanged || motionChanged)
+    {
         // Size the vectors
         _shearMod.resize(_nsl + 1);
         _waveA.resize(_nsl + 1);
         _waveB.resize(_nsl + 1);
         _waveNum.resize(_nsl + 1);
 
-        for (int i = 0; i <= _nsl; ++i) {
+        for (int i = 0; i <= _nsl; ++i)
+        {
             _shearMod[i].resize(_nf);
             _waveA[i].resize(_nf);
             _waveB[i].resize(_nf);
@@ -111,7 +121,7 @@ void AbstractCalculator::init(AbstractMotion* motion, SoilProfile* site)
     }
 }
 
-auto AbstractCalculator::calcCompShearMod(const double shearMod, const double damping) -> std::complex<double> 
+auto AbstractCalculator::calcCompShearMod(const double shearMod, const double damping) -> std::complex<double>
 {
     // This is the complex shear-modulus used in SHAKE91.  The DeepSoil manual
     // states that this shear modulus results in frequency dependent dependent
@@ -119,7 +129,7 @@ auto AbstractCalculator::calcCompShearMod(const double shearMod, const double da
     // return shearMod * std::complex<double>( 1.0 - 2 * damping * damping, 2 * damping * sqrt( 1.0 - damping * damping ));
 
     // Simplified complex shear modulus (Kramer, 1996)
-    return shearMod * std::complex<double>( 1.0 - damping * damping, 2 * damping);
+    return shearMod * std::complex<double>(1.0 - damping * damping, 2 * damping);
 }
 
 auto AbstractCalculator::calcWaves() -> bool
@@ -128,42 +138,47 @@ auto AbstractCalculator::calcWaves() -> bool
     std::complex<double> cTerm;
 
     // Compute the complex wave numbers of the system
-    for (int i = 0; i <= _nsl; ++i) {
-        for (int j = 0; j < _nf; ++j) {
-            _waveNum[i][j] = _motion->angFreqAt(j)
-                              / sqrt(_shearMod.at(i).at(j) / _site->density(i));
+    for (int i = 0; i <= _nsl; ++i)
+    {
+        for (int j = 0; j < _nf; ++j)
+        {
+            _waveNum[i][j] = _motion->angFreqAt(j) / sqrt(_shearMod.at(i).at(j) / _site->density(i));
         }
     }
 
-    for (int i = 0; i < _nsl; ++i ) {
-        for (int j = 0; j < _nf; ++j ) {
+    for (int i = 0; i < _nsl; ++i)
+    {
+        for (int j = 0; j < _nf; ++j)
+        {
             // In the top surface layer, the up-going and down-going waves have
             // an amplitude of 1 as they are completely reflected at the
             // surface.
-            if (i == 0) {
+            if (i == 0)
+            {
                 _waveA[i][j] = 1.0;
                 _waveB[i][j] = 1.0;
             }
 
             // At frequencies less than 0.000001 (zero) the amplitude of the
             // upgoing and downgoing waves is 1.
-            if (_motion->freqAt(j) < 0.000001 ) {
-                _waveA[i+1][j] = 1.0;
-                _waveB[i+1][j] = 1.0;
-            } else {
+            if (_motion->freqAt(j) < 0.000001)
+            {
+                _waveA[i + 1][j] = 1.0;
+                _waveB[i + 1][j] = 1.0;
+            }
+            else
+            {
                 // Complex impedence
                 cImped = (_waveNum.at(i).at(j) * _shearMod.at(i).at(j)) /
-                         (_waveNum.at(i+1).at(j) * _shearMod.at(i+1).at(j));
+                         (_waveNum.at(i + 1).at(j) * _shearMod.at(i + 1).at(j));
 
                 // Complex term to simplify equations -- uses full layer height
-                cTerm =  std::complex<double>( 0.0, 1.0) * _waveNum.at(i).at(j) *
-                         _site->subLayers().at(i).thickness();
+                cTerm = std::complex<double>(0.0, 1.0) * _waveNum.at(i).at(j) *
+                        _site->subLayers().at(i).thickness();
 
-                _waveA[i+1][j] = 0.5 * _waveA.at(i).at(j) * (1.0 + cImped) * exp(cTerm)
-                                  + 0.5 * _waveB.at(i).at(j) * (1.0 - cImped) * exp(-cTerm);
+                _waveA[i + 1][j] = 0.5 * _waveA.at(i).at(j) * (1.0 + cImped) * exp(cTerm) + 0.5 * _waveB.at(i).at(j) * (1.0 - cImped) * exp(-cTerm);
 
-                _waveB[i+1][j] = 0.5 * _waveA.at(i).at(j) * (1.0 - cImped) * exp(cTerm)
-                                  + 0.5 * _waveB.at(i).at(j) * (1.0 + cImped) * exp(-cTerm);
+                _waveB[i + 1][j] = 0.5 * _waveA.at(i).at(j) * (1.0 - cImped) * exp(cTerm) + 0.5 * _waveB.at(i).at(j) * (1.0 + cImped) * exp(-cTerm);
             }
         }
     }
@@ -171,7 +186,7 @@ auto AbstractCalculator::calcWaves() -> bool
 }
 
 auto AbstractCalculator::calcStrainTf(
-        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >
+    const Location &inLocation, const AbstractMotion::Type inputType, const Location &outLocation) const -> QVector<std::complex<double>>
 {
 
     /* The strain transfer function from the acceleration at layer n (outcrop)
@@ -193,7 +208,7 @@ auto AbstractCalculator::calcStrainTf(
 
     */
 
-    QVector<std::complex<double> > tf(_nf);
+    QVector<std::complex<double>> tf(_nf);
     std::complex<double> cTerm, numer, denom;
     std::complex<double> value;
 
@@ -201,8 +216,9 @@ auto AbstractCalculator::calcStrainTf(
     const double gravity = Units::instance()->gravity();
 
     // Strain is inversely proportional to the complex shear-wave velocity
-    for (int i = 0; i < tf.size(); ++i) {
-        cTerm = std::complex<double>( 0.0,  1.0 ) *
+    for (int i = 0; i < tf.size(); ++i)
+    {
+        cTerm = std::complex<double>(0.0, 1.0) *
                 _waveNum.at(outLocation.layer()).at(i) * outLocation.depth();
 
         // Compute the numerator cannot be computed using waves since it is
@@ -221,12 +237,13 @@ auto AbstractCalculator::calcStrainTf(
 }
 
 auto AbstractCalculator::calcStressTf(
-        const Location & inLocation, const AbstractMotion::Type inputType, const Location & outLocation) const -> QVector<std::complex<double> >
+    const Location &inLocation, const AbstractMotion::Type inputType, const Location &outLocation) const -> QVector<std::complex<double>>
 {
-    QVector<std::complex<double> > tf = calcStrainTf(inLocation, inputType, outLocation);
+    QVector<std::complex<double>> tf = calcStrainTf(inLocation, inputType, outLocation);
     const int l = outLocation.layer();
 
-    for (int i = 0; i < tf.size(); ++i) {
+    for (int i = 0; i < tf.size(); ++i)
+    {
         tf[i] *= _shearMod.at(l).at(i);
     }
 
@@ -234,13 +251,14 @@ auto AbstractCalculator::calcStressTf(
 }
 
 auto AbstractCalculator::calcAccelTf(
-        const Location & inLocation, const AbstractMotion::Type inputType,
-        const Location & outLocation, const AbstractMotion::Type outputType ) const -> const QVector<std::complex<double> >
+    const Location &inLocation, const AbstractMotion::Type inputType,
+    const Location &outLocation, const AbstractMotion::Type outputType) const -> const QVector<std::complex<double>>
 {
-    QVector<std::complex<double> > tf(_nf);
+    QVector<std::complex<double>> tf(_nf);
     std::complex<double> value;
 
-    for (int i = 0; i < _nf; i++) {
+    for (int i = 0; i < _nf; i++)
+    {
         value = waves(i, outLocation, outputType) / waves(i, inLocation, inputType);
         tf[i] = (value == value) ? value : 0;
     }
@@ -249,17 +267,22 @@ auto AbstractCalculator::calcAccelTf(
 }
 
 auto AbstractCalculator::waves(const int freqIdx,
-                                                     const Location & location, const AbstractMotion::Type type ) const -> const std::complex<double>
+                               const Location &location, const AbstractMotion::Type type) const -> const std::complex<double>
 {
     std::complex<double> cTerm = std::complex<double>(0., 1.) *
                                  _waveNum.at(location.layer()).at(freqIdx) * location.depth();
 
-    if (type == AbstractMotion::Within) {
+    if (type == AbstractMotion::Within)
+    {
         return _waveA.at(location.layer()).at(freqIdx) * exp(cTerm) +
-                _waveB.at(location.layer()).at(freqIdx) * exp(-cTerm);
-    } else if (type == AbstractMotion::Outcrop) {
+               _waveB.at(location.layer()).at(freqIdx) * exp(-cTerm);
+    }
+    else if (type == AbstractMotion::Outcrop)
+    {
         return 2.0 * _waveA.at(location.layer()).at(freqIdx) * exp(cTerm);
-    } else { // type == AbstractMotion::IncomingOnly
+    }
+    else
+    { // type == AbstractMotion::IncomingOnly
         return _waveA.at(location.layer()).at(freqIdx) * exp(cTerm);
     }
 }

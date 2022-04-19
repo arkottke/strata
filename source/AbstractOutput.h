@@ -38,25 +38,26 @@ class AbstractOutput : public QAbstractTableModel
 {
     Q_OBJECT
 
-    friend auto operator<< (QDataStream & out, const AbstractOutput* ao) -> QDataStream &;
-    friend auto operator>> (QDataStream & in, AbstractOutput* ao) -> QDataStream &;
+    friend auto operator<<(QDataStream &out, const AbstractOutput *ao) -> QDataStream &;
+    friend auto operator>>(QDataStream &in, AbstractOutput *ao) -> QDataStream &;
 
 public:
-    enum CurveType{
+    enum CurveType
+    {
         Yfx,
         Xfy,
     };
 
-    explicit AbstractOutput(OutputCatalog* catalog);
+    explicit AbstractOutput(OutputCatalog *catalog);
 
-    virtual auto rowCount(const QModelIndex & parent = QModelIndex()) const -> int;
-    virtual auto columnCount(const QModelIndex & parent = QModelIndex()) const -> int;
+    virtual auto rowCount(const QModelIndex &parent = QModelIndex()) const -> int;
+    virtual auto columnCount(const QModelIndex &parent = QModelIndex()) const -> int;
 
-    virtual auto data(const QModelIndex & index, int role = Qt::DisplayRole) const -> QVariant;
+    virtual auto data(const QModelIndex &index, int role = Qt::DisplayRole) const -> QVariant;
     virtual auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const -> QVariant;
 
     //! Add the data to the output
-    virtual void addData(int motion, AbstractCalculator* const calculator);
+    virtual void addData(int motion, AbstractCalculator *const calculator);
 
     //! Finalize the output by computing statistics if possible
     virtual void finalize();
@@ -65,7 +66,7 @@ public:
     void removeLastSite();
 
     //! Configure the plot
-    virtual void plot(QwtPlot* const qwtPlot, QList<QwtPlotCurve*> & curves) const;
+    virtual void plot(QwtPlot *const qwtPlot, QList<QwtPlotCurve *> &curves) const;
 
     /*! Create a text file from the data
      *
@@ -108,13 +109,13 @@ public:
     auto motionIndex() const -> int;
 
     //! Data for a given motion and site index
-    virtual auto data(int site, int motion) const -> const QVector<double>&;
+    virtual auto data(int site, int motion) const -> const QVector<double> &;
 
     //! Reference for a given motion and site index
-    virtual auto ref(int motion = 0) const -> const QVector<double>& = 0;
+    virtual auto ref(int motion = 0) const -> const QVector<double> & = 0;
 
     //! Convert between general index and the site and motion
-    void intToSiteMotion(int i, int* site, int* motion) const;
+    void intToSiteMotion(int i, int *site, int *motion) const;
 
     //! Convert between a general index and a site index
     auto intToSite(int i) const -> int;
@@ -138,10 +139,12 @@ public:
     virtual auto curveType() const -> AbstractOutput::CurveType;
 
     //! Add data to a curve
-    void setCurveSamples(QwtPlotCurve *curve, const QVector<double> & x, const QVector<double> & y) const;
+    void setCurveSamples(QwtPlotCurve *curve, const QVector<double> &x, const QVector<double> &y) const;
 
     //! Z order for a data curve
     static auto zOrder() -> int;
+
+    auto isComplete() const -> bool;
 
     void fromJson(const QJsonObject &json);
     auto toJson() const -> QJsonObject;
@@ -155,7 +158,7 @@ public slots:
     void setExportEnabled(bool exportEnabled);
     void setMotionIndex(int motionIndex);
 
-protected:       
+protected:
     //! Name suitable for a text file
     virtual auto fileName(int motion = 0) const -> QString = 0;
 
@@ -163,13 +166,13 @@ protected:
     virtual auto shortName() const -> QString = 0;
 
     //! Set the font and labels of the axes
-    virtual void labelAxes(QwtPlot* const qwtPlot) const;
+    virtual void labelAxes(QwtPlot *const qwtPlot) const;
 
     //! Reference axis
-    virtual auto xScaleEngine() const -> QwtScaleEngine* = 0;
+    virtual auto xScaleEngine() const -> QwtScaleEngine * = 0;
 
     //! Data axis
-    virtual auto yScaleEngine() const -> QwtScaleEngine* = 0;
+    virtual auto yScaleEngine() const -> QwtScaleEngine * = 0;
 
     //! Name of the reference label
     virtual auto xLabel() const -> const QString = 0;
@@ -184,26 +187,26 @@ protected:
     virtual auto suffix() const -> const QString;
 
     //! Extract the data from the calculator
-    virtual void extract(AbstractCalculator* const calculator,
-                         QVector<double> & ref, QVector<double> & data) const = 0;
+    virtual void extract(AbstractCalculator *const calculator,
+                         QVector<double> &ref, QVector<double> &data) const = 0;
 
     //! Convert from a table column to a site motion pair
-    void columnToSiteMotion(const int column, int* site, int* motion) const;
+    void columnToSiteMotion(const int column, int *site, int *motion) const;
 
     //! If the output is to be exported and saved to a text file
     bool _exportEnabled;
 
     //! Reference the catalog the stores the reference information
-    OutputCatalog* _catalog;
+    OutputCatalog *_catalog;
 
     //! Data values
-    QList<QList<QVector<double> > > _data;
+    QList<QList<QVector<double>>> _data;
 
     //! Statistics of the output
-    OutputStatistics* _statistics;
+    OutputStatistics *_statistics;
 
     //! Interpolater used to interpolate the output
-    AbstractOutputInterpolater* _interp;
+    AbstractOutputInterpolater *_interp;
 
     //! Which motion should be displayed by the table -- only important for output that needs time
     int _motionIndex;
