@@ -19,6 +19,7 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
           cmake --build . --target install
+          ./dist/usr/bin/strata -v
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
@@ -43,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: ${{ fromJson(needs.find-cases.outputs.cases) }}
+        case: ${{ fromJson(needs.find-cases.outputs.tests) }}
     steps:
       - uses: actions/checkout@v2
       - name: install qt
