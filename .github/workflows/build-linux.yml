@@ -1,0 +1,53 @@
+name: build-linux
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt5-default cmake libgsl-dev
+      - name: build
+        run: cmake --build build -DCMAKE_BUILD_TYPE=Release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: strata
+          path: ${{github.workspace}}/build/source/strata
+          retention-days: 5
+  find-tests:
+    runs-on: ubuntu-latest
+    outputs:
+      tests: $${{ steps.find-tests.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-tests
+        working-directory: ${{github.workspace}}/example
+        run: |
+          tests=$(ls *.json *.strata | jq -cnR '[inputs | select(length>0)]')
+          echo $cases
+          echo "::set-output name=tests::$tests"
+  test:
+    runs-on: ubuntu-latest
+    needs: [find-cases, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        case: ${{ fromJson(needs.find-cases.outputs.cases) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: strata
+          path: ${{github.workspace}}
+      - name: perform tests
+        run: |
+          # Permissions reset on downloading artifact
+          chmod +x strata
+          ./strata -b example/${{ matrix.case }}
+
