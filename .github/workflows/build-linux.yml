@@ -7,10 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: install qt
+        uses: jurplel/install-qt-action@v2
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt5-default cmake libgsl-dev libqwt-qt5-dev
+          sudo apt-get install -y cmake libgsl-dev libqwt-qt5-dev
       - name: build
         run: |
           mkdir build
@@ -44,10 +46,12 @@ jobs:
         case: ${{ fromJson(needs.find-cases.outputs.cases) }}
     steps:
       - uses: actions/checkout@v2
+      - name: install qt
+        uses: jurplel/install-qt-action@v2
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
+          sudo apt-get install -y gsl-bin libqwt-qt5-6
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
