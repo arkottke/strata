@@ -1,6 +1,6 @@
 name: build-windows
 
-on: [release]
+on: [push, release]
 
 
 jobs:
