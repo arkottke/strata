@@ -13,7 +13,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
-          sudo apt-get install -y cmake libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
+          sudo apt-get install -y cmake make libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
       - name: build qwt
         working-directory: ${{github.workspace}}/..
         run: |
