@@ -25,7 +25,7 @@ jobs:
           git clone https://github.com/ampl/gsl.git gsl
           cd gsl
           git submodule update --init --recursive
-          cmake -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DMSVC_RUNTIME_DYNAMIC:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -G "%CMAKE_GENERATOR%" .
+          cmake -DGSL_DISABLE_WARNINGS:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON -DMSVC_RUNTIME_DYNAMIC:BOOL=ON -DCMAKE_BUILD_TYPE="Release" -G "Visual Studio 16 2019" .
           cmake --build . --target install
       - name: build
         run: |
