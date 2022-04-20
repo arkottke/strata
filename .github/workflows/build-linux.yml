@@ -11,13 +11,22 @@ jobs:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: |
+          sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
-          sudo apt-get install -y qt5-default cmake libgsl-dev libqwt-qt5-dev
-      - name: build
+          sudo apt-get install -y cmake libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
+      - name: build qwt
+        working-directory: ${{github.workspace}}/..
+        run: |
+          git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
+          cd qwt
+          qmake
+          make
+      - name: build strata
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+          LD_LIBRARY_PATH=$(readlink -f ../../qwt/lib):$LD_LIBRARY_PATH
+          cmake .. -DQWT_ROOT_DIR=../../qwt -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
           cmake --build . --target install
           ./dist/usr/bin/strata -v
       - name: Upload artifact
