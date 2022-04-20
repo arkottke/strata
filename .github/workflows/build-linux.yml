@@ -10,16 +10,19 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt5-default cmake libgsl-dev
+          sudo apt-get install -y qt5-default cmake libgsl-dev libqwt-qt5-dev
       - name: build
         run: |
           mkdir build
           cmake --build build --config Release
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+          cmake --build . --target install
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: strata
-          path: ${{github.workspace}}/build/source/strata
+          path: ${{github.workspace}}/build/dist/strata
           retention-days: 5
   find-tests:
     runs-on: ubuntu-latest
@@ -42,6 +45,10 @@ jobs:
         case: ${{ fromJson(needs.find-cases.outputs.cases) }}
     steps:
       - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
