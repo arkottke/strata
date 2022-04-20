@@ -19,10 +19,12 @@ jobs:
         run: |
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
+          source /opt/qt515/bin/qt515-env.sh
           qmake
           make
       - name: build strata
         run: |
+          source /opt/qt515/bin/qt515-env.sh
           mkdir build
           cd build
           LD_LIBRARY_PATH=$(readlink -f ../../qwt/lib):$LD_LIBRARY_PATH
