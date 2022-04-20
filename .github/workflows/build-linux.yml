@@ -18,7 +18,10 @@ jobs:
         run: |
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
+          ls -lh /opt/qt515/bin/qt515-env.sh
+          which qmake
           source /opt/qt515/bin/qt515-env.sh
+          which qmake
           qmake --version
           qmake
           make -j2
