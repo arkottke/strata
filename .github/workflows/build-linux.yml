@@ -20,7 +20,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: build/dist
+          name: build
           path: ${{github.workspace}}/build/dist
           retention-days: 5
   find-tests:
@@ -51,8 +51,8 @@ jobs:
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
-          name: build/dist
-          path: ${{github.workspace}}
+          name: build
+          path: ${{github.workspace}}/dist
       - name: perform tests
         run: |
           # Permissions reset on downloading artifact
@@ -70,8 +70,8 @@ jobs:
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
-          name: build/dist
-          path: ${{github.workspace}}
+          name: build
+          path: ${{github.workspace}}/dist
       - name: create appimage
         run: |
           # Create the AppImage
