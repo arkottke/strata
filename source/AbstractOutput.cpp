@@ -24,6 +24,7 @@
 #include "AbstractOutputInterpolater.h"
 #include "OutputCatalog.h"
 #include "OutputStatistics.h"
+#include "QtCompatibility.h"
 
 #include <QApplication>
 #include <QBrush>
