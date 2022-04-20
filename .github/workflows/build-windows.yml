@@ -11,8 +11,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
+        with:
+          extra:   --external 7z
+      - uses: ilammy/msvc-dev-cmd@v1
       - name: install qwt
-        shell: bash
         working-directory: ${{github.workspace}}/..
         run: |
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
@@ -20,7 +22,6 @@ jobs:
           qmake
           nmake
       - name: install gsl
-        shell: bash
         working-directory: ${{github.workspace}}/..
         run: |
           git clone https://github.com/ampl/gsl.git gsl
