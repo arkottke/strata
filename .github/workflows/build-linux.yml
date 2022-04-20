@@ -13,21 +13,17 @@ jobs:
         run: |
           sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
-          sudo apt-get install -y cmake make libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
+          sudo apt-get install -y cmake libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
       - name: build qwt
         shell: bash
         run: |
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
-          ls -lh /opt/qt515/bin/qt515-env.sh
-          which qmake
           source /opt/qt515/bin/qt515-env.sh
-          which qmake
           qmake --version
           qmake
           make -j2
       - name: build strata
-        shell: bash
         run: |
           source /opt/qt515/bin/qt515-env.sh
           mkdir build
