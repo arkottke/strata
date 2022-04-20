@@ -14,7 +14,6 @@ jobs:
       - name: build
         run: |
           mkdir build
-          cmake --build build --config Release
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
           cmake --build . --target install
@@ -59,4 +58,3 @@ jobs:
           # Permissions reset on downloading artifact
           chmod +x strata
           ./strata -b example/${{ matrix.case }}
-
