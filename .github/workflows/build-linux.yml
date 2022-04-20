@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: ${{ fromJson(needs.find-cases.outputs.tests) }}
+        case: ${{ fromJson(needs.find-tests.outputs.tests) }}
     steps:
       - uses: actions/checkout@v2
       - name: install qt
@@ -52,7 +52,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
+          sudo apt-get install -y gsl-bin libqwt-qt5-6
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
@@ -63,3 +63,31 @@ jobs:
           # Permissions reset on downloading artifact
           chmod +x strata
           ./strata -b example/${{ matrix.case }}
+  create-appimage:
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        case: ${{ fromJson(needs.find-cases.outputs.tests) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gsl-bin libqwt-qt5-6
+      - name: create appimage
+        run: |
+          # Create the AppImage
+          wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+          ARCH=x86_64 ./linuxdeployqt-continuous-x86_64.AppImage dist/strata.desktop -appimage -no-translations
+          # Rename and upload the AppImage
+          VERSION=$(sed -ne 's/.*VERSION "\([0-9.]\+\)".*/\1/p' ../CMakeLists.txt)
+          GITHASH=$(git rev-parse --short HEAD)
+          IMAGE=Strata-v$VERSION-$GITHASH-x86_64.AppImage
+          mv Strata-*.AppImage $IMAGE
+      - uses: actions/upload-artifact@v3
+        with:
+          name: strata appimage
+          path: ${{ github.workspace }}/Strata-*.AppImage
