@@ -2,9 +2,11 @@ name: build-linux
 
 on: [push, pull_request]
 
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Based on requirement by linuxdeployqt
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: install qt
@@ -27,19 +29,19 @@ jobs:
           path: ${{github.workspace}}/build/dist/usr/bin/strata
           retention-days: 5
   find-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     outputs:
-      tests: $${{ steps.find-tests.outputs.tests }}
+      tests: ${{ steps.find-tests.outputs.tests }}
     steps:
       - uses: actions/checkout@v2
-      - id: set-tests
+      - name: find tests
         working-directory: ${{github.workspace}}/example
         run: |
           tests=$(ls *.json *.strata | jq -cnR '[inputs | select(length>0)]')
           echo $tests
           echo "::set-output name=tests::$tests"
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: [find-tests, build]
     strategy:
       fail-fast: false
@@ -64,7 +66,7 @@ jobs:
           chmod +x strata
           ./strata -b example/${{ matrix.case }}
   create-appimage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: [build]
     steps:
       - uses: actions/checkout@v2
