@@ -62,7 +62,7 @@ if (UNIX)
         )
     install(FILES
         ${CMAKE_BINARY_DIR}/resources/strata.desktop
-        DESTINATION usr/share/${CMAKE_PROJECT_NAME}/application
+        DESTINATION usr/share/applications
         COMPONENT executable
         )
     # Manual and example
