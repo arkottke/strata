@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -o nounset
-set -o errexit
-
 source /opt/qt515/bin/qt515-env.sh
 
 echo "Cloning Qwt"
