@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: strata
-          path: ${{github.workspace}}/build/dist/strata
+          path: ${{github.workspace}}/build/dist/usr/bin/strata
           retention-days: 5
   find-tests:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gsl-bin libqwt-qt5-6
+          sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
