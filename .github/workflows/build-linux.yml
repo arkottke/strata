@@ -16,12 +16,10 @@ jobs:
           sudo apt-get install -y cmake make libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
       - name: build qwt
         run: |
-          ls
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
-          ls
           ls /opt/
-          ls /opt/bin
+          ls /opt/qt515
           ls /opt/qt515/bin
           source /opt/qt515/bin/qt515-env.sh
           qmake
