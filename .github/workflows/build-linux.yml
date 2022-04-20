@@ -20,8 +20,8 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: strata
-          path: ${{github.workspace}}/build/dist/usr/bin/strata
+          name: build/dist
+          path: ${{github.workspace}}/build/dist
           retention-days: 5
   find-tests:
     runs-on: ubuntu-18.04
@@ -51,7 +51,7 @@ jobs:
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
-          name: strata
+          name: build/dist
           path: ${{github.workspace}}
       - name: perform tests
         run: |
@@ -67,6 +67,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
+      - name: download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build/dist
+          path: ${{github.workspace}}
       - name: create appimage
         run: |
           # Create the AppImage
