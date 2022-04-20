@@ -18,12 +18,10 @@ jobs:
         run: |
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
-          ls /opt/
-          ls /opt/qt515
-          ls /opt/qt515/bin
           source /opt/qt515/bin/qt515-env.sh
+          qmake --version
           qmake
-          make
+          make -j2
       - name: build strata
         run: |
           source /opt/qt515/bin/qt515-env.sh
