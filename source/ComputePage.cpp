@@ -55,7 +55,7 @@ ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
   layout->addWidget(_cancelButton, 0, 3);
 
   //_computeButton = new QPushButton(QIcon(":/images/system-run.svg"),
-  //tr("Compute"));
+  // tr("Compute"));
   _computeButton = new QPushButton(tr("Compute"));
   _computeButton->setDefault(true);
   connect(_computeButton, SIGNAL(clicked()), this, SLOT(compute()));

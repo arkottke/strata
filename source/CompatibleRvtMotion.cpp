@@ -277,7 +277,7 @@ void CompatibleRvtMotion::calculate() {
         // Extrapolate the value based, but reduce the value using a kappa
         // filter
         //_fourierAcc[idx] = exp( cutoff * (log(freq().at(idx)) - x0 ) + y0 ) *
-        //exp(-M_PI * 0.01 * freq().at(idx) ) / kappa0 ;
+        // exp(-M_PI * 0.01 * freq().at(idx) ) / kappa0 ;
         _fourierAcc[i] = exp(-slope * (log(freq().at(i)) - x0) + y0);
         ++i;
       }
