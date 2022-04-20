@@ -56,7 +56,7 @@ jobs:
       - name: perform tests
         run: |
           # Permissions reset on downloading artifact
-          chmod +x strata
+          chmod +x dist/usr/bin/strata
           ./strata -b example/${{ matrix.case }}
   create-appimage:
     runs-on: ubuntu-18.04
@@ -74,6 +74,8 @@ jobs:
           path: ${{github.workspace}}/dist
       - name: create appimage
         run: |
+          # Permissions reset on downloading artifact
+          chmod +x dist/usr/bin/strata
           # Create the AppImage
           wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
