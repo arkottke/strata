@@ -1,11 +1,12 @@
 #!/bin/bash
 
-source /opt/qt515/bin/qt515-env.sh
+source /opt/qt*/bin/qt*-env.sh
 
 set -o errexit   # abort on nonzero exitstatus
 set -o nounset   # abort on unbound variable
 set -o pipefail  # don't hide errors within pipes
 
+# Build Qwt
 echo "Cloning Qwt"
 git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
 cd qwt
@@ -13,13 +14,11 @@ echo "Configuring Qwt"
 qmake
 echo "Building Qwt"
 make -j2
-make install
 
 QWT_ROOT_DIR=`pwd`
-LD_LIBRARY_PATH=$(readlink -f lib):$LD_LIBRARY_PATH
 
+# Build Strata
 cd ..
-
 mkdir build
 cd build
 echo "Configuring Strata"

@@ -1,17 +1,15 @@
 #!/bin/bash
 
-source /opt/qt515/bin/qt515-env.sh
+source /opt/qt*/bin/qt*-env.sh
 
-LD_LIBRARY_PATH=$(readlink -f ../qwt/lib):$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=$(readlink -f qwt/lib):$LD_LIBRARY_PATH
 
-echo `readlink -f ../qwt/lib`
-
-echo `ldd build/dist/usr/bin/strata`
+echo $LD_LIBRARY_PATH
 
 cd build
 
 # Create the AppImage
-wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+wget -qc "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
 ./linuxdeployqt-continuous-x86_64.AppImage dist/usr/share/applications/strata.desktop -appimage -no-translations
