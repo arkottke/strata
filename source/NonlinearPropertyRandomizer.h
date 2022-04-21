@@ -100,7 +100,7 @@ protected slots:
 
 private:
   //! If the variation is enabled.
-  int _enabled;
+  bool _enabled;
 
   //! Model for the standard deviation
   Model _model;
