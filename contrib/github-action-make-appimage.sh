@@ -2,11 +2,9 @@
 
 source /opt/qt*/bin/qt*-env.sh
 
-LD_LIBRARY_PATH=$(readlink -f qwt/lib):$LD_LIBRARY_PATH
-
-echo $LD_LIBRARY_PATH
-
 cd build
+
+LD_LIBRARY_PATH=$(readlink -f dist/usr/lib):$LD_LIBRARY_PATH
 
 # Create the AppImage
 wget -qc "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"

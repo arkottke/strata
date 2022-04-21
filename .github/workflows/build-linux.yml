@@ -64,4 +64,5 @@ jobs:
         run: |
           # Permissions reset on downloading artifact
           chmod +x dist/usr/bin/strata
+          LD_LIBRARY_PATH=$(readlink -f dist/usr/lib):$LD_LIBRARY_PATH
           ./dist/usr/bin/strata -b example/${{ matrix.example }}

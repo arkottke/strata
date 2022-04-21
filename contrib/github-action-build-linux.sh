@@ -27,7 +27,7 @@ cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL
 echo "Building Strata"
 cmake --build . --target install
 
-cp ../qwt/lib/libqwt.so dist/usr/bin/
+mv ../qwt/lib dist/usr/lib
 
 cd dist/usr/bin
 
