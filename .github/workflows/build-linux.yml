@@ -23,6 +23,13 @@ jobs:
           name: build
           path: ${{github.workspace}}/build/dist
           retention-days: 5
+      - name: cache multiple paths
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+            deps/*/build
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
       - name: create appimage
         run: bash contrib/github-action-make-appimage.sh
       - uses: actions/upload-artifact@v3
