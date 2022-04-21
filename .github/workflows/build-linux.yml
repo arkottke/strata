@@ -29,36 +29,26 @@ jobs:
         with:
           name: strata appimage
           path: ${{ github.workspace }}/build/Strata-*.AppImage
-  find-tests:
+  find-examples:
     runs-on: ubuntu-18.04
     outputs:
-      tests: ${{ steps.find-tests.outputs.tests }}
+      examples: ${{ steps.find-examples.outputs.examples }}
     steps:
       - uses: actions/checkout@v2
-      - name: find tests
-        id: find-tests
+      - name: find examples
+        # Specifying this id is critical
+        id: find-examples
         working-directory: ${{github.workspace}}/example
         run: |
-          tests=$(ls *.json *.strata | jq -cnR '[inputs | select(length>0)]')
-          echo $tests
-          echo $tests | jq .
-          echo "::set-output name=tests::$tests"
-  check-tests:
-    runs-on: ubuntu-latest
-    needs: find-tests
-    steps:
-      - name: check located test cases
-        run: |
-          tests='${{ needs.find-tests.outputs.tests }}'
-          echo $tests
-          echo $tests | jq .
+          examples=$(ls *.json *.strata | jq -cnR '[inputs | select(length>0)]')
+          echo "::set-output name=examples::$examples"
   test:
     runs-on: ubuntu-18.04
-    needs: [find-tests, build]
+    needs: [find-examples, build]
     strategy:
       fail-fast: false
       matrix:
-        case: ${{ fromJson(needs.find-tests.outputs.tests) }}
+        example: ${{ fromJson(needs.find-examples.outputs.examples) }}
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies
@@ -70,8 +60,8 @@ jobs:
         with:
           name: build
           path: ${{github.workspace}}/dist
-      - name: perform tests
+      - name: run examples
         run: |
           # Permissions reset on downloading artifact
           chmod +x dist/usr/bin/strata
-          ./dist/usr/bin/strata -b example/${{ matrix.case }}
+          ./dist/usr/bin/strata -b example/${{ matrix.example }}
