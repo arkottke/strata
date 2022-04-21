@@ -49,7 +49,7 @@ jobs:
         run: |
           cd deps/qwt
           nmake install
-          cd ../gsl
+          cd ../gsl/build
           cmake --build . --target install --config Release
           # - name: Setup tmate session
           #   uses: mxschmitt/action-tmate@v3
