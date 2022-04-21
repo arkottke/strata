@@ -25,4 +25,7 @@ cmake --build . --target install
 
 cp ../qwt/lib/libqwt.so dist/usr/bin/
 
+cd dist/usr/bin
+ln -s libqwt.so libqwt.so.6.2
+
 echo "Built $(./dist/usr/bin/strata -v)"
