@@ -19,6 +19,7 @@ jobs:
         run: |
           echo "::set-output name=key::$(qmake --version | sha256sum - | cut -c-8)"
       - uses: actions/cache@v3
+        id: cache
         with:
           path: ${{ github.workspace }}/deps
           key: ${{ runner.os }}-${{ steps.qt-hash.outputs.key }}
