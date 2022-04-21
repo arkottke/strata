@@ -23,6 +23,12 @@ jobs:
           name: build
           path: ${{github.workspace}}/build/dist
           retention-days: 5
+      - name: create appimage
+        run: bash contrib/github-action-make-appimage.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: strata appimage
+          path: ${{ github.workspace }}/Strata-*.AppImage
   find-tests:
     runs-on: ubuntu-18.04
     outputs:
@@ -58,23 +64,3 @@ jobs:
           # Permissions reset on downloading artifact
           chmod +x dist/usr/bin/strata
           ./strata -b example/${{ matrix.case }}
-  create-appimage:
-    runs-on: ubuntu-18.04
-    needs: [build]
-    steps:
-      - uses: actions/checkout@v2
-      - name: install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
-      - name: download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: build
-          path: ${{github.workspace}}/dist
-      - name: create appimage
-        run: bash contrib/github-action-make-appimage.sh
-      - uses: actions/upload-artifact@v3
-        with:
-          name: strata appimage
-          path: ${{ github.workspace }}/Strata-*.AppImage

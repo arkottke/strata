@@ -24,4 +24,5 @@ echo "Building Strata"
 cmake --build . --target install
 
 cp ../qwt/lib/libqwt.so dist/usr/bin/
-./dist/usr/bin/strata -v
+
+echo "Built $(./dist/usr/bin/strata -v)"
