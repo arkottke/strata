@@ -17,7 +17,7 @@ jobs:
       - name: Make Qt hash
         id: qt-hash
         run: |
-          echo "::set-output name=key::$(qmake --version | sha256sum - | cut -c-8)"
+          echo "::set-output name=key::$(/opt/qt515/bin/qmake --version | sha256sum - | cut -c-8)"
       - uses: actions/cache@v3
         id: cache
         with:
