@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: install dependencies
+      - name: Install dependencies with apt
         run: |
           sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
           sudo apt-get install -y cmake libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
-      - name: make Qt hash
+      - name: Make Qt hash
         id: qt-hash
         run: |
           echo "::set-output name=key::$(qmake --version | sha256sum - | cut -c-8)"
@@ -22,20 +22,38 @@ jobs:
         with:
           path: ${{ github.workspace }}/qwt
           key: ${{ runner.os }}-${{ steps.qt-hash.outputs.key }}
-      - name: build qwt
+      - name: Build Qt based dependencies (qwt)
         if: steps.cache.outputs.cache-hit != 'true'
         run: bash contrib/github-action-build-deps-linux.sh
       # Here we need to run the build steps within a script because we cannot source the qtvars file
-      - name: build
+      - name: Build Strata
         run: bash contrib/github-action-build-strata-linux.sh
-      - name: upload artifact
+      - name: Upload Strata artifact
         uses: actions/upload-artifact@v2
         with:
           name: build
           path: ${{github.workspace}}/build/dist
           retention-days: 5
-      - name: create appimage
-        run: bash contrib/github-action-make-appimage.sh
+  make-appimage:
+    runs-on: ubuntu-18.04
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies with apt
+        run: |
+          sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
+          sudo apt-get update
+          sudo apt-get install -y gsl-bin libgl1-mesa-dev qt515base qt515tools qt515svg
+      - name: download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: ${{github.workspace}}/dist
+      - name: Create Strata AppImage
+        run: |
+          # Permissions reset on downloading artifact
+          chmod +x dist/usr/bin/strata
+          bash contrib/github-action-make-appimage.sh
       - uses: actions/upload-artifact@v3
         with:
           name: strata appimage
@@ -46,7 +64,7 @@ jobs:
       examples: ${{ steps.find-examples.outputs.examples }}
     steps:
       - uses: actions/checkout@v2
-      - name: find examples
+      - name: Find examples
         # Specifying this id is critical
         id: find-examples
         working-directory: ${{github.workspace}}/example
@@ -62,7 +80,7 @@ jobs:
         example: ${{ fromJson(needs.find-examples.outputs.examples) }}
     steps:
       - uses: actions/checkout@v2
-      - name: install dependencies
+      - name: Install dependencies with apt
         run: |
           sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
@@ -72,8 +90,8 @@ jobs:
         with:
           name: build
           path: ${{github.workspace}}/dist
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+            # - name: Setup tmate session
+            #   uses: mxschmitt/action-tmate@v3
       - name: run examples
         run: |
           # Permissions reset on downloading artifact

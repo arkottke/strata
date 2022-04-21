@@ -2,8 +2,6 @@
 
 source /opt/qt*/bin/qt*-env.sh
 
-cd build
-
 LD_LIBRARY_PATH=$(readlink -f dist/usr/lib):$LD_LIBRARY_PATH
 
 # Create the AppImage
