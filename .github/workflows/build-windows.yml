@@ -14,14 +14,21 @@ jobs:
         with:
           extra:   --external 7z
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: install qwt
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ github.workspace }}/deps
+          key: ${{ runner.os }}
+      - name: Build dependencies (qwt & gsl)
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
+          mkdir deps
+          cd deps
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
           qmake
           nmake
-      - name: install gsl
-        run: |
+          cd ..
           git clone https://github.com/ampl/gsl.git gsl
           cd gsl
           git submodule update --init --recursive
@@ -31,6 +38,6 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
+          cmake .. -DQWT_ROOT_DIR="../deps/qwt" -DQWT_ROOT_DIR="../deps/gsl" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:STRING=dist
           cmake --build . --target install
-          ./dist/usr/bin/strata -v
+          dist/usr/bin/strata.exe -v
