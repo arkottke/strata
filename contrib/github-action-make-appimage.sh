@@ -1,8 +1,10 @@
 #!/bin/bash
 
-cd build
-
 source /opt/qt515/bin/qt515-env.sh
+
+LD_LIBRARY_PATH=$(readlink -f ../qwt/lib):$LD_LIBRARY_PATH
+
+cd build
 
 # Create the AppImage
 wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
