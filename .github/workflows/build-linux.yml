@@ -60,6 +60,8 @@ jobs:
         with:
           name: build
           path: ${{github.workspace}}/dist
+      - name: setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: run examples
         run: |
           # Permissions reset on downloading artifact
