@@ -13,10 +13,21 @@ jobs:
         run: |
           sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
-          sudo apt-get install -y cmake make grep sed libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
+          sudo apt-get install -y cmake libgsl-dev libgl1-mesa-dev qt515base qt515tools qt515svg
+      - name: make Qt hash
+        id: qt-hash
+        run: |
+          echo "::set-output name=key::$(qmake --version | sha256sum - | cut -c-8)"
+      - uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/qwt
+          key: ${{ runner.os }}-${{ steps.qt-hash.outputs.key }}
+      - name: build qwt
+        if: setps.cache.outputs.cache-hit != 'true'
+        run: bash contrib/github-action-build-deps-linux.sh
       # Here we need to run the build steps within a script because we cannot source the qtvars file
       - name: build
-        run: bash contrib/github-action-build-linux.sh
+        run: bash contrib/github-action-build-strata-linux.sh
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
@@ -53,8 +64,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: |
+          sudo add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic
           sudo apt-get update
-          sudo apt-get install -y qt5-default gsl-bin libqwt-qt5-6
+          sudo apt-get install -y gsl-bin libgl1-mesa-dev qt515base qt515tools qt515svg
       - name: download artifact
         uses: actions/download-artifact@v2
         with:
@@ -66,5 +78,4 @@ jobs:
         run: |
           # Permissions reset on downloading artifact
           chmod +x dist/usr/bin/strata
-          LD_LIBRARY_PATH=$(readlink -f dist/usr/lib):$LD_LIBRARY_PATH
-          ./dist/usr/bin/strata -b example/${{ matrix.example }}
+          bash contrib/github-action-run-strata.sh example/${{ matrix.example }}
