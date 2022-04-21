@@ -10,19 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ilammy/msvc-dev-cmd@v1
-      - uses: actions/cache@v1
-        id: cache-qt
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
           version: '5.15.2'
           dir: '${{ github.workspace }}/../Qt'
-          target: 'desktop'
-          tools: 'tools_ifw,qt.tools.ifw.43'
+          tools: 'tools_ifw'
           extra: '--external 7z'
       - uses: actions/cache@v3
         id: cache-deps
