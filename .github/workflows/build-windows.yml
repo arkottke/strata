@@ -44,6 +44,12 @@ jobs:
             -DGSL_DISABLE_TESTS=1 `
             -DNO_AMPL_BINDINGS=1 `
             -DDOCUMENTATION=OFF
+          cmake --build . --config Release
+      - name: Install dependencies (qwt & gsl)
+        run: |
+          cd deps/qwt
+          nmake install
+          cd ../gsl
           cmake --build . --target install --config Release
           # - name: Setup tmate session
           #   uses: mxschmitt/action-tmate@v3
@@ -57,6 +63,7 @@ jobs:
           cmake .. `
             -G "Visual Studio 16 2019" `
             -DQWT_ROOT_DIR="C:/Qwt-6.2.0-dev" `
+            -DQWT_INCLUDE_DIR="C:/Qwt-6.2.0-dev/include" `
             -DGSL_ROOT_DIR="C:/Program Files (x86)/GSL" `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_INSTALL_PREFIX:STRING=dist
