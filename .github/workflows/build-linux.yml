@@ -23,19 +23,12 @@ jobs:
           name: build
           path: ${{github.workspace}}/build/dist
           retention-days: 5
-      - name: cache multiple paths
-        uses: actions/cache@v3
-        with:
-          path: |
-            build
-            deps/*/build
-          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
       - name: create appimage
         run: bash contrib/github-action-make-appimage.sh
       - uses: actions/upload-artifact@v3
         with:
           name: strata appimage
-          path: ${{ github.workspace }}/Strata-*.AppImage
+          path: ${{ github.workspace }}/build/Strata-*.AppImage
   find-tests:
     runs-on: ubuntu-18.04
     outputs:
@@ -48,6 +41,15 @@ jobs:
           tests=$(ls *.json *.strata | jq -cnR '[inputs | select(length>0)]')
           echo $tests
           echo "::set-output name=tests::$tests"
+  check-tests:
+    runs-on: ubuntu-latest
+    needs: find-tests
+    steps:
+      - name: check located test cases
+        run: |
+          tests='${{ needs.find-tests.outputs.tests }}'
+          echo $tests
+          echo $tests | jq .
   test:
     runs-on: ubuntu-18.04
     needs: [find-tests, build]
