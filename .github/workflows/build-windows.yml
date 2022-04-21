@@ -9,19 +9,28 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/cache@v1
+        id: cache-qt
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          tools: 'tools_ifw'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: '5.15.2'
+          dir: '${{ github.workspace }}/../Qt'
+          target: 'desktop'
+          tools: 'tools_ifw,qt.tools.ifw.43'
           extra: '--external 7z'
-      - uses: ilammy/msvc-dev-cmd@v1
       - uses: actions/cache@v3
-        id: cache
+        id: cache-deps
         with:
           path: ${{ github.workspace }}/deps
           key: ${{ runner.os }}
       - name: Build dependencies (qwt & gsl)
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
           mkdir deps
           cd deps
