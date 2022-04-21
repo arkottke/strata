@@ -36,6 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: find tests
+        id: find-tests
         working-directory: ${{github.workspace}}/example
         run: |
           tests=$(ls *.json *.strata | jq -cnR '[inputs | select(length>0)]')
@@ -73,4 +74,4 @@ jobs:
         run: |
           # Permissions reset on downloading artifact
           chmod +x dist/usr/bin/strata
-          ./strata -b example/${{ matrix.case }}
+          ./dist/usr/bin/strata -b example/${{ matrix.case }}
