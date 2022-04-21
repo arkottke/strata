@@ -1,9 +1,9 @@
 #!/bin/bash
 
+cd build
+
 source /opt/qt515/bin/qt515-env.sh
 
-# Permissions reset on downloading artifact
-chmod +x dist/usr/bin/strata
 # Create the AppImage
 wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
