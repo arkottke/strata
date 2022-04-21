@@ -23,7 +23,7 @@ jobs:
           path: ${{ github.workspace }}/qwt
           key: ${{ runner.os }}-${{ steps.qt-hash.outputs.key }}
       - name: build qwt
-        if: setps.cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: bash contrib/github-action-build-deps-linux.sh
       # Here we need to run the build steps within a script because we cannot source the qtvars file
       - name: build
