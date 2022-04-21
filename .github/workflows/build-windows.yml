@@ -12,6 +12,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
+          tools: 'tools_ifw'
           extra:   --external 7z
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: actions/cache@v3
