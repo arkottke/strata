@@ -14,13 +14,15 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2'
-          dir: '${{ github.workspace }}/../Qt'
+          dir: '${{ github.workspace }}/deps'
           tools: 'tools_ifw'
           extra: '--external 7z'
       - uses: actions/cache@v3
         id: cache-deps
         with:
-          path: ${{ github.workspace }}/deps
+          path: |
+            ${{ github.workspace }}/deps/qwt
+            ${{ github.workspace }}/deps/gsl
           key: ${{ runner.os }}
       - name: Build dependencies (qwt & gsl)
         if: steps.cache-deps.outputs.cache-hit != 'true'
