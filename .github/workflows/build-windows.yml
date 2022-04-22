@@ -14,19 +14,18 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '5.15.2'
-          dir: '${{ github.workspace }}/deps'
           tools: 'tools_ifw'
           extra: '--external 7z'
       - uses: actions/cache@v3
         id: cache-deps
         with:
           path: |
-            ${{ github.workspace }}/deps/qwt
-            ${{ github.workspace }}/deps/gsl
+            ${{ github.workspace }}/deps
           key: ${{ runner.os }}
       - name: Build dependencies (qwt & gsl)
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
+          mkdir deps
           cd deps
           git clone --branch qwt-6.2 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
