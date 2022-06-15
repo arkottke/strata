@@ -57,6 +57,9 @@ jobs:
       - name: Set path for candle and light
         run: echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" >> $GITHUB_PATH
         shell: bash
+      - name: Add path for Qt IFW
+        run: echo "D:\a\strata\Qt\Tools\QtInstallerFramework\4.4\bin" >> $GITHUB_PATH
+        shell: bash
       - name: build
         run: |
           mkdir build
