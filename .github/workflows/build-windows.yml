@@ -61,6 +61,8 @@ jobs:
         run: echo "D:\a\strata\Qt\Tools\QtInstallerFramework\4.4\bin" >> $GITHUB_PATH
         shell: bash
       - name: build
+        env:
+          QTIFWDIR: ${{ github.workspace }}/../Qt/Tools/QtInstallerFramework/4.4
         run: |
           mkdir build
           cd build
