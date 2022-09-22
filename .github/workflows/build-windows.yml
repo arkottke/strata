@@ -77,8 +77,9 @@ jobs:
           echo "Built $(dist/strata.exe -v)$"
           cmake --build . --target package --config Release
           cmake --build . --target archive --config Release
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+          # tmate session for debugging
+          #       - name: Setup tmate session
+          #         uses: mxschmitt/action-tmate@v3
       - uses: actions/upload-artifact@v3
         with:
           name: strata installer
