@@ -3,6 +3,9 @@ cmake-build-debug/
 build*/
 release*/
 
+.cache/
+.vscode/
+
 # IDEA configuration
 .idea/
 
