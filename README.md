@@ -9,6 +9,14 @@
 Equivalent linear site response with random vibration theory, site property
 randomization, and a graphical user interface.
 
+The _Strata_ GUI simplifies the process for performing site response analysis, but
+limits the flexibility and requires extensive coding to add features. To help
+address these shortcomings, I have written
+[pyStrata](https://github.com/arkottke/pystrata), which is a Python library for
+performing site response. With _pyStrata_, complicated customized workflows can be
+developed, or examples using Jupyter notebooks can be used to aid in
+understanding of the process.
+
 ## Binaries
 
 Pre-built binaries for Windows are available from the [Github releases
@@ -131,7 +139,7 @@ Right now (12/15/2019) on macOS Mojave homebrew installs qwt version 6.1.4 and g
     $> QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.4"
     $> QWT_INCLUDE_DIR="/usr/local/Cellar/qwt/6.1.4/lib/qwt.framework/Versions/6/Headers"
     $> GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.6"
-    
+
 or in case of error control the version in the directory: /usr/local/Cellar/
 
 If you find a cleaner way to specific the library paths, please let me know.
