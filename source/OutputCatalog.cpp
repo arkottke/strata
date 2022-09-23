@@ -275,7 +275,11 @@ auto OutputCatalog::motionCount() const -> int { return _motionCount; }
 auto OutputCatalog::siteCount() const -> int { return _siteCount; }
 
 auto OutputCatalog::enabledAt(int site, int motion) const -> bool {
-  return _enabled.at(site).at(motion);
+  if (site < _enabled.size() && motion < _enabled.at(site).size()) {
+    return _enabled.at(site).at(motion);
+  } else {
+    return false;
+  }
 }
 
 auto OutputCatalog::enabledAt(int row) const -> bool {
@@ -285,7 +289,7 @@ auto OutputCatalog::enabledAt(int row) const -> bool {
   int site;
   _selectedOutput->intToSiteMotion(row, &site, &motion);
 
-  return _enabled.at(site).at(motion);
+  return enabledAt(site, motion);
 }
 
 auto OutputCatalog::siteEnabled(int row) const -> bool {
@@ -354,7 +358,11 @@ auto OutputCatalog::motionNameAt(int row) const -> const QString {
   int motion;
   _selectedOutput->intToSiteMotion(row, &site, &motion);
 
-  return _motionNames.at(motion);
+  if (motion < _motionNames.size()) {
+    return _motionNames.at(motion);
+  } else {
+    return QString();
+  }
 }
 
 void OutputCatalog::initialize(int siteCount, MotionLibrary *motionLibrary) {
