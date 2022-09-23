@@ -1,6 +1,11 @@
 History
 =======
 
+v0.9.0 (2022-09-22)
+-------------------
+- Changed: Stopped iterations if strain exceeds nonlinear curves
+- Changed: New build system using Github actions
+
 v0.8.2 (2021-09-10)
 -------------------
 - Changed: Extended maximum strain of Darendeli model out to 10%
