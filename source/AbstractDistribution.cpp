@@ -173,7 +173,7 @@ auto operator<<(QDataStream &out, const AbstractDistribution *ad)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << (int)ad->_type << ad->_avg << ad->_stdev << ad->_hasMax << ad->_max
+  out << (qint32)ad->_type << ad->_avg << ad->_stdev << ad->_hasMax << ad->_max
       << ad->_hasMin << ad->_min;
 
   return out;
@@ -183,7 +183,7 @@ auto operator>>(QDataStream &in, AbstractDistribution *ad) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int type;
+  qint32 type;
   in >> type >> ad->_avg >> ad->_stdev >> ad->_hasMax >> ad->_max >>
       ad->_hasMin >> ad->_min;
 

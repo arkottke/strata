@@ -103,6 +103,6 @@ private:
   QwtPlotCurve *_fasCurve;
 
   //! Total number of lines in the file
-  int _lineCount;
+  qint32 _lineCount;
 };
 #endif

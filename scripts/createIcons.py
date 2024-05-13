@@ -20,4 +20,3 @@ for file in files:
 
 	# Delete the temporary files
 	#os.system( "rm %s" % (pngFiles) )
-

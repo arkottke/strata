@@ -25,7 +25,7 @@
 #include "BooreThompsonPeakCalculator.h"
 
 struct WangRathjeCoef {
-  int mode;
+  qint32 mode;
   double a;
   double b;
   double d;

@@ -1199,7 +1199,7 @@ auto operator<<(QDataStream &out, const SoilProfile *sp) -> QDataStream & {
   out << sp->_soilTypeCatalog;
 
   // Save soil layers
-  out << sp->_soilLayers.size();
+  out << (quint32)sp->_soilLayers.size();
   for (const SoilLayer *sl : sp->_soilLayers) {
     out << sl;
     // Save which soil type the soil layer is connected to.
@@ -1230,10 +1230,11 @@ auto operator>>(QDataStream &in, SoilProfile *sp) -> QDataStream & {
   // Load soil layers
   sp->beginResetModel();
 
-  int count;
+  quint32 count;
   in >> count;
-  while (sp->_soilLayers.size() < count) {
-    int row;
+
+  for (int i = 0; i < count; ++i) {
+    quint32 row;
     auto *sl = new SoilLayer(sp);
 
     in >> sl >> row;

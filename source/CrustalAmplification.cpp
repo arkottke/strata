@@ -287,7 +287,7 @@ auto CrustalAmplification::toJson() const -> QJsonObject {
 auto operator<<(QDataStream &out, const CrustalAmplification *ca)
     -> QDataStream & {
   out << (quint8)1;
-  out << (int)ca->_source;
+  out << (qint32)ca->_source;
 
   switch (ca->_source) {
   case CrustalAmplification::Specified:
@@ -306,7 +306,7 @@ auto operator>>(QDataStream &in, CrustalAmplification *ca) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int source;
+  qint32 source;
   in >> source;
   ca->setSource(source);
 

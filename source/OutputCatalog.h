@@ -204,10 +204,10 @@ protected:
   QStringList _motionNames;
 
   //! Number of sites analyzed
-  int _siteCount;
+  qint32 _siteCount;
 
   //! Number of motions analyzed
-  int _motionCount;
+  qint32 _motionCount;
 
   //! Time vectors for the various time series
   QList<QVector<double>> _time;

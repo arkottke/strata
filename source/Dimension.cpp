@@ -153,7 +153,7 @@ auto Dimension::toJson() const -> QJsonObject {
 auto operator<<(QDataStream &out, const Dimension *d) -> QDataStream & {
   out << (quint8)1;
 
-  out << d->_min << d->_max << d->_size << (int)d->_spacing;
+  out << d->_min << d->_max << d->_size << (qint32)d->_spacing;
 
   return out;
 }

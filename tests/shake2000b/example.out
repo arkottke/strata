@@ -18,24 +18,24 @@
   *             August   2006 -- Release 1.1 by ND          *
   ***********************************************************
 
-SHAKE2000  Release 1.1.  Example Problem                                        
+SHAKE2000  Release 1.1.  Example Problem
 
  This run is in English Units (kip-ft-sec)
 
   MAX. NUMBER OF TERMS IN FOURIER TRANSFORM =       65536
   NECESSARY LENGTH OF BLANK COMMON X        =      524306
 
-******   OPTION  1  ***  READ RELATION BETWEEN SOIL PROPERTIES AND STRAIN 
+******   OPTION  1  ***  READ RELATION BETWEEN SOIL PROPERTIES AND STRAIN
 
  **********************
   MATERIAL TYPE NO. 1
  **********************
 
- CURVE NO.  1:      #1 modulus for clay (seed & sun 1989) upper range      
- CURVE NO.  2:        damping for clay (Idriss 1990) -                     
+ CURVE NO.  1:      #1 modulus for clay (seed & sun 1989) upper range
+ CURVE NO.  2:        damping for clay (Idriss 1990) -
 
 
-      CURVE NO. 1              CURVE NO. 2    
+      CURVE NO. 1              CURVE NO. 2
   ===================       ==================
     STRAIN    G/Gmax         STRAIN    DAMPING
   --------   -------        --------  --------
@@ -55,11 +55,11 @@ SHAKE2000  Release 1.1.  Example Problem
   MATERIAL TYPE NO. 2
  **********************
 
- CURVE NO.  3:      #2 modulus for sand (seed & idriss 1970) - upper Range 
- CURVE NO.  4:        damping for sand (Idriss 1990) - (about LRng from SI 
+ CURVE NO.  3:      #2 modulus for sand (seed & idriss 1970) - upper Range
+ CURVE NO.  4:        damping for sand (Idriss 1990) - (about LRng from SI
 
 
-      CURVE NO. 3              CURVE NO. 4    
+      CURVE NO. 3              CURVE NO. 4
   ===================       ==================
     STRAIN    G/Gmax         STRAIN    DAMPING
   --------   -------        --------  --------
@@ -79,11 +79,11 @@ SHAKE2000  Release 1.1.  Example Problem
   MATERIAL TYPE NO. 3
  **********************
 
- CURVE NO.  5:       #3 ATTENUATION OF  ROCK  AVERAGE                      
- CURVE NO.  6:       DAMPING IN ROCK                                       
+ CURVE NO.  5:       #3 ATTENUATION OF  ROCK  AVERAGE
+ CURVE NO.  6:       DAMPING IN ROCK
 
 
-      CURVE NO. 5              CURVE NO. 6    
+      CURVE NO. 5              CURVE NO. 6
   ===================       ==================
     STRAIN    G/Gmax         STRAIN    DAMPING
   --------   -------        --------  --------
@@ -96,9 +96,9 @@ SHAKE2000  Release 1.1.  Example Problem
     0.1000     0.725         0.0000      0.00
     1.0000     0.550         0.0000      0.00
 
-******   OPTION  2  ***  READ SOIL PROFILE   
+******   OPTION  2  ***  READ SOIL PROFILE
 
- NEW SOIL PROFILE NO.   1      IDENTIFICATION     Example - 150-ft layer; EQ: Diam 
+ NEW SOIL PROFILE NO.   1      IDENTIFICATION     Example - 150-ft layer; EQ: Diam
  NUMBER OF LAYERS                   17          DEPTH TO BEDROCK        150.00
 
   NO. TYPE  THICKNESS   DEPTH  EFF.PRESS.  MODULUS  DAMPING   UNIT WT.  SHEAR VEL
@@ -127,21 +127,21 @@ SHAKE2000  Release 1.1.  Example Problem
  FOR FREQUENCY         =   2.32 C/SEC.
      PERIOD            =   0.43 SEC.
 
-******   OPTION  3  ***  READ INPUT MOTION   
+******   OPTION  3  ***  READ INPUT MOTION
 
-  FILE NAME FOR INPUT MOTION =  diam.acc                     
+  FILE NAME FOR INPUT MOTION =  diam.acc
     NO. OF INPUT ACC. POINTS =  2000
    NO. OF POINTS USED IN FFT =  4096
         NO. OF HEADING LINES =     3
       NO. OF POINTS PER LINE =     8
   TIME STEP FOR INPUT MOTION = 0.0200
-  FORMAT FOR OF TIME HISTORY = (8f10.6)    
+  FORMAT FOR OF TIME HISTORY = (8f10.6)
 
 
- ***** H E A D E R   
-"Loma P. Eqk","Diamond Hts","H1_90","init. vel:"," .307 c/s","disp: -0.016 cm"  
-"Total No. of Points :",2000,"@ DT =",.02                                       
-"Peak Acceleration (g) =",.1128945,"@ Time (sec) :",10.92                       
+ ***** H E A D E R
+"Loma P. Eqk","Diamond Hts","H1_90","init. vel:"," .307 c/s","disp: -0.016 cm"
+"Total No. of Points :",2000,"@ DT =",.02
+"Peak Acceleration (g) =",.1128945,"@ Time (sec) :",10.92
  **  FIRST & LAST 5 LINES OF INPUT MOTION *****
 
      1     -0.001694   -0.001668   -0.000086   -0.001356   -0.000678    0.000700   -0.001209   -0.000604
@@ -163,7 +163,7 @@ SHAKE2000  Release 1.1.  Example Problem
  MEAN SQUARE FREQUENCY =        2.52 C/SEC.
   MAX ACCELERATION =    0.10000 FOR FREQUENCIES REMOVED ABOVE      25.00 C/SEC.
 
-******   OPTION  4  ***  READ WHERE OBJECT MOTION IS GIVEN 
+******   OPTION  4  ***  READ WHERE OBJECT MOTION IS GIVEN
 
   OBJECT MOTION IN LAYER NUMBER  17 OUTCROPPING
 
@@ -173,8 +173,8 @@ SHAKE2000  Release 1.1.  Example Problem
       FACTOR FOR UNIFORM STRAIN IN TIME DOMAIN    =  0.50
 	STRESS CALCULATION CONTROL KEY              =    1
 
-     EARTHQUAKE   -   diam.acc                     
-     SOIL PROFILE -    Example - 150-ft layer; EQ: Diam 
+     EARTHQUAKE   -   diam.acc
+     SOIL PROFILE -    Example - 150-ft layer; EQ: Diam
 
   ITERATION NUMBER    1
 
@@ -235,7 +235,7 @@ SHAKE2000  Release 1.1.  Example Problem
  14  2   125.0  0.01280  0.033  0.033      0.0    7299.6    7299.6      0.0   0.803
  15  2   135.0  0.01114  0.030  0.030      0.0    8580.7    8580.6      0.0   0.829
  16  2   145.0  0.00864  0.026  0.026      0.0   11304.4   11304.4      0.0   0.863
-
+
   VALUES IN TIME DOMAIN
 
   LAYER  TYPE      THICKNESS         DEPTH      MAX STRAIN          TIME        MAX STRESS        TIME
@@ -264,10 +264,10 @@ SHAKE2000  Release 1.1.  Example Problem
  FOR FREQUENCY         =   2.11 C/SEC.
      PERIOD            =   0.47 SEC.
 
-******   OPTION  6  ***  COMPUTE MOTION IN NEW SUBLAYERS         
+******   OPTION  6  ***  COMPUTE MOTION IN NEW SUBLAYERS
 
-   EARTHQUAKE - diam.acc                     
-  SOIL DEPOSIT -    Example - 150-ft layer; EQ: Diam 
+   EARTHQUAKE - diam.acc
+  SOIL DEPOSIT -    Example - 150-ft layer; EQ: Diam
    LAYER       LAYER       DEPTH     MAX. ACC.      TIME     MEAN SQ. FR.    ACC. RATIO     TH SAVED
     NO.        TYPE         FT          G           SEC        C/SEC         QUIET ZONE    ACC. RECORD
 
@@ -287,10 +287,10 @@ SHAKE2000  Release 1.1.  Example Problem
     14        WITHIN       120.0     0.08545       10.94        2.39            0.000             0
     15        WITHIN       130.0     0.08200       10.94        2.45            0.000             0
 
-******   OPTION  6  ***  COMPUTE MOTION IN NEW SUBLAYERS         
+******   OPTION  6  ***  COMPUTE MOTION IN NEW SUBLAYERS
 
-   EARTHQUAKE - diam.acc                     
-  SOIL DEPOSIT -    Example - 150-ft layer; EQ: Diam 
+   EARTHQUAKE - diam.acc
+  SOIL DEPOSIT -    Example - 150-ft layer; EQ: Diam
    LAYER       LAYER       DEPTH     MAX. ACC.      TIME     MEAN SQ. FR.    ACC. RATIO     TH SAVED
     NO.        TYPE         FT          G           SEC        C/SEC         QUIET ZONE    ACC. RECORD
 
@@ -298,30 +298,30 @@ SHAKE2000  Release 1.1.  Example Problem
     17        WITHIN       150.0     0.07616       10.92        2.48            0.000           512
     17        OUTCR.       150.0     0.10000       10.92        2.52            0.000           512
 
-******   OPTION  7  ***  COMPUTE STRESS/STRAIN HISTORY             
+******   OPTION  7  ***  COMPUTE STRESS/STRAIN HISTORY
 
   COMPUTE STRESS OR STRAIN HISTORY AT THE TOP OF  LAYER    4
-  IDENTIFICATION - stress in level 4             
+  IDENTIFICATION - stress in level 4
 
   COMPUTE STRESS OR STRAIN HISTORY AT THE TOP OF  LAYER    4
-  IDENTIFICATION - strain in level 4             
+  IDENTIFICATION - strain in level 4
 
-******   OPTION  7  ***  COMPUTE STRESS/STRAIN HISTORY             
-
-  COMPUTE STRESS OR STRAIN HISTORY AT THE TOP OF  LAYER    8
-  IDENTIFICATION - stress in level 8             
+******   OPTION  7  ***  COMPUTE STRESS/STRAIN HISTORY
 
   COMPUTE STRESS OR STRAIN HISTORY AT THE TOP OF  LAYER    8
-  IDENTIFICATION - strain in level 8             
+  IDENTIFICATION - stress in level 8
 
-******   OPTION  9  ***  COMPUTE RESPONSE SPECTRUM               
+  COMPUTE STRESS OR STRAIN HISTORY AT THE TOP OF  LAYER    8
+  IDENTIFICATION - strain in level 8
+
+******   OPTION  9  ***  COMPUTE RESPONSE SPECTRUM
 
   RESPONSE SPECTRUM ANALYSIS FOR LAYER NUMBER       1  OUTCROPPING
-  RESPONSES ARE CALCULATED FOR DAMPING 
+  RESPONSES ARE CALCULATED FOR DAMPING
      0.050
   RESPONSES ARE CALCULATED USING CONSTANT TIME STEP
 
- Response Spectra Computation: 
+ Response Spectra Computation:
   The Shortest Period =                  0.01 (Second)
   The Longest Period =                  10.00 (Second)
   Total Number of Calculated Points:   140
@@ -482,40 +482,39 @@ SHAKE2000  Release 1.1.  Example Problem
                MAX. ACCELERATION RESPONSE VALUE =       0.844
                MAX. VELOCITY     RESPONSE VALUE =       1.884
 
-******   OPTION 10  ***  COMPUTE AMPLIFICATION FUNCTION            
+******   OPTION 10  ***  COMPUTE AMPLIFICATION FUNCTION
 
     AMPLIFICATION SPECTRUM BETWEEN LAYER  17 AND   1
- REFERENCE MOTION AT LAYER   17  WITHIN      
-    OUTPUT MOTION AT LAYER    1  OUTCROPPING 
+ REFERENCE MOTION AT LAYER   17  WITHIN
+    OUTPUT MOTION AT LAYER    1  OUTCROPPING
 
-** AMPLIFICATION FUNCTION IS WRITTEN ON FILE example.tfs                                                 
+** AMPLIFICATION FUNCTION IS WRITTEN ON FILE example.tfs
 
  MAXIMUM AMPLIFICATION =  20.52
  FOR FREQUENCY         =   2.11 C/SEC.
      PERIOD            =   0.47 SEC.
 
-******   OPTION 10  ***  COMPUTE AMPLIFICATION FUNCTION            
+******   OPTION 10  ***  COMPUTE AMPLIFICATION FUNCTION
 
     AMPLIFICATION SPECTRUM BETWEEN LAYER  17 AND  17
- REFERENCE MOTION AT LAYER   17  WITHIN      
-    OUTPUT MOTION AT LAYER   17  OUTCROPPING 
+ REFERENCE MOTION AT LAYER   17  WITHIN
+    OUTPUT MOTION AT LAYER   17  OUTCROPPING
 
-** AMPLIFICATION FUNCTION IS WRITTEN ON FILE example.tfs                                                 
+** AMPLIFICATION FUNCTION IS WRITTEN ON FILE example.tfs
 
  MAXIMUM AMPLIFICATION =   5.97
  FOR FREQUENCY         =   2.11 C/SEC.
      PERIOD            =   0.47 SEC.
 
 ******   OPTION 11  ***       FOURIER SPECTRUM OF COMPUTED MOTION
-  LAYER NUMBER    1  OUTCROPPING 
-  LAYER NUMBER   17  WITHIN      
+  LAYER NUMBER    1  OUTCROPPING
+  LAYER NUMBER   17  WITHIN
 
-** FOURIER SPECTRA ARE WRITTEN ON FILE example.fsm                                                 
-
-
+** FOURIER SPECTRA ARE WRITTEN ON FILE example.fsm
 
 
- *** END OF INPUT FILE  *** 
 
- *** NORMAL TERMINATION	*** 
 
+ *** END OF INPUT FILE  ***
+
+ *** NORMAL TERMINATION	***

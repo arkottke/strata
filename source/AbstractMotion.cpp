@@ -212,7 +212,7 @@ auto AbstractMotion::toJson() const -> QJsonObject {
 auto operator<<(QDataStream &out, const AbstractMotion *m) -> QDataStream & {
   out << (quint8)1;
 
-  out << (int)m->_type << m->_description << m->_enabled;
+  out << (qint32)m->_type << m->_description << m->_enabled;
 
   return out;
 }

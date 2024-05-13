@@ -22,6 +22,8 @@
 #ifndef LOCATION_H_
 #define LOCATION_H_
 
+#include <QtGlobal>
+
 class Location {
 public:
   explicit Location(int layer = 0, double depth = 0);
@@ -36,7 +38,7 @@ public:
 
 private:
   //! Sublayer index of the location
-  int _layer;
+  qint32 _layer;
 
   //! Depth from the top of the layer
   double _depth;

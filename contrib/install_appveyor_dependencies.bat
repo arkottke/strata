@@ -7,7 +7,7 @@ IF %PLATFORM%==x86 (
     CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
 ) ELSE (
     ECHO "Using x64 Environment"
-    CALL "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 
+    CALL "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
     CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 )
 
@@ -47,10 +47,10 @@ IF EXIST qwt (
     CD qwt
     svn update
 ) ELSE (
-    svn co -r HEAD svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt 
+    svn co -r HEAD svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1 qwt
     CD qwt
 )
 
 qmake
-nmake 
+nmake
 set QWT_ROOT_DIR=%CD%

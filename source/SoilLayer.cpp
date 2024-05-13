@@ -82,8 +82,8 @@ auto SoilLayer::density() const -> double {
 }
 
 auto SoilLayer::strainLimit() const -> double {
-  return *std::min(_soilType->dampingModel()->strain().end(),
-                   _soilType->modulusModel()->strain().end());
+  return std::min(_soilType->dampingModel()->strain().last(),
+                  _soilType->modulusModel()->strain().last());
 }
 
 void SoilLayer::fromJson(const QJsonObject &json) {

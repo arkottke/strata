@@ -30,7 +30,7 @@ if (MSVC)
     set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP true)
     include(InstallRequiredSystemLibraries)
     install(
-        FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} 
+        FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
         DESTINATION .
         COMPONENT dependencies
         )
@@ -73,7 +73,7 @@ install(FILES
     ${GSL_DLL_DIR}/../bin/gslcblas.dll
     DESTINATION .
     COMPONENT dependencies
-    )  
+    )
 # Qt Platform Plugin
 install(FILES
     ${QT_DLL_DIR}/../plugins/platforms/qwindows.dll
@@ -103,9 +103,9 @@ if (7Z_PATH)
         )
 endif()
 
-# Qt Installer Framework 
+# Qt Installer Framework
 set(CPACK_PACKAGE_NAME Strata)
-set(CPACK_PACKAGE_FILE_NAME 
+set(CPACK_PACKAGE_FILE_NAME
     Strata-$ENV{platform}-v${PROJECT_VERSION}-${PROJECT_GITHASH}
 )
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Installation Tool")

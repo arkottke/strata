@@ -179,7 +179,7 @@ auto Units::stress() const -> QString {
 auto operator<<(QDataStream &out, const Units *units) -> QDataStream & {
   out << (quint8)1;
 
-  out << (int)units->_system;
+  out << (qint32)units->_system;
 
   return out;
 }
@@ -188,7 +188,7 @@ auto operator>>(QDataStream &in, Units *units) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int system;
+  qint32 system;
   in >> system;
 
   units->setSystem(system);

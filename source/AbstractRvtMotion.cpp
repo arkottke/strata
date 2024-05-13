@@ -42,7 +42,7 @@ AbstractRvtMotion::AbstractRvtMotion(QObject *parent)
       _region(AbstractRvtMotion::Unknown), _magnitude(6), _distance(20),
       _okToContinue(false) {
   _peakCalculator = new WangRathjePeakCalculator;
-  //    _peakCalculator = new VanmarckePeakCalculator;
+  //_peakCalculator = new VanmarckePeakCalculator;
   setRegion(WUS);
 }
 
@@ -350,14 +350,14 @@ auto operator>>(QDataStream &in, AbstractRvtMotion *arm) -> QDataStream & {
 
   arm->beginResetModel();
   if (ver == 1) {
-    int i;
+    qint32 i;
     in >> i;
     Q_UNUSED(i);
   }
   in >> arm->_fourierAcc >> arm->_duration >> arm->_name;
 
   if (ver > 1) {
-    int region;
+    qint32 region;
     in >> region >> arm->_magnitude >> arm->_distance;
     // Update the model
     arm->setRegion(region);

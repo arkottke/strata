@@ -319,7 +319,7 @@ auto operator>>(QDataStream &in, RatiosOutputCatalog *roc) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int size;
+  qint32 size;
   in >> size;
 
   roc->beginResetModel();

@@ -1,4 +1,4 @@
-SHAKE2000  Release 1.1.  Example Problem 
+SHAKE2000  Release 1.1.  Example Problem
 English
 option 1 - dynamic soil properties:
     1
@@ -80,20 +80,19 @@ option 7 -- sublayer for which shear stress or strain are computed & saved:
     8    0    1    0            -- strain in level 8
 option 9 -- compute & save acceleration response spectrum:
     9
-    1    0    
-    1    1     
-  0.05       
+    1    0
+    1    1
+  0.05
   0.01       10.      140
 option 10 -- compute & save amplification spectrum:
    10
-   17    1    1    0 
+   17    1    1    0
 option 10 -- compute & save amplification spectrum:
    10
-   17    1   17    0 
+   17    1   17    0
 option 11 -- compute & save Fourier spectrum:
    11
-    1    0    0    0 
-   17    1    1    0 
-option 0 -- execution termination. No more data 
+    1    0    0    0
+   17    1    1    0
+option 0 -- execution termination. No more data
     0
-

@@ -30,7 +30,7 @@ def plotSteps( title, series ):
 			y=graph.axis.lin(title="Depth", min=0, reverse=1) )
 
 	x,y =  stepify(series)
-	g.plot( graph.data.values( x=x, y=y), 
+	g.plot( graph.data.values( x=x, y=y),
 			[graph.style.line([color.rgb.blue])])
 
 	g.writePDFfile(title)
@@ -73,6 +73,6 @@ c = -0.89
 npp = ( ( c * unit_pp ) / a + unit_pp / a + b ** (c+1) ) ** (1/(c+1)) - b
 
 plotSteps( 'poisson-npp', npp )
-plotTransform( 'poisson-npp-warp', unit_pp, npp, 
+plotTransform( 'poisson-npp-warp', unit_pp, npp,
 	'y(x)=1.98*((x+10.86)**(-0.89+1.) / (-0.89+1.) - 10.86**(-0.89+1.)/(-0.89+1.))',
 	'Depth ($\lambda(d)$)')

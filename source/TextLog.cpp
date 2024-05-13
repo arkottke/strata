@@ -88,7 +88,7 @@ auto TextLog::toJson() const -> QJsonObject {
 auto operator<<(QDataStream &out, const TextLog *tl) -> QDataStream & {
   out << (quint8)1;
 
-  out << (int)tl->_level << tl->_text;
+  out << (qint32)tl->_level << tl->_text;
 
   return out;
 }
@@ -97,7 +97,7 @@ auto operator>>(QDataStream &in, TextLog *tl) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int level;
+  qint32 level;
 
   in >> level >> tl->_text;
 

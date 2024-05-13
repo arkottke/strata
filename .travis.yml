@@ -13,10 +13,10 @@ addons:
     sources:
       - sourceline: 'ppa:beineri/opt-qt-5.12.0-xenial'
     packages:
-      - libgsl-dev 
+      - libgsl-dev
       - libgl1-mesa-dev
-      - qt512base 
-      - qt512tools 
+      - qt512base
+      - qt512tools
       - qt512svg
 install:
   - source /opt/qt512/bin/qt512-env.sh

@@ -146,10 +146,10 @@ protected:
   AbstractMotion *_motion;
 
   //! Number of SubLayers in the site profile
-  int _nsl;
+  qint32 _nsl;
 
   //! Number of frequency points in the motion
-  int _nf;
+  qint32 _nf;
 
   //! If the calculation should continue
   bool _okToContinue;

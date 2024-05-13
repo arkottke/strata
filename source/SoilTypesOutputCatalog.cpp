@@ -178,10 +178,10 @@ auto operator<<(QDataStream &out, const SoilTypesOutputCatalog *stoc)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << stoc->_outputs.size();
+  out << (qint32)stoc->_outputs.size();
 
   foreach (SoilTypeOutput *sto, stoc->_outputs) {
-    out << stoc->_soilTypeCatalog->rowOf(sto->soilType()) << sto;
+    out << (qint32)stoc->_soilTypeCatalog->rowOf(sto->soilType()) << sto;
   }
 
   return out;
@@ -192,11 +192,11 @@ auto operator>>(QDataStream &in, SoilTypesOutputCatalog *stoc)
   quint8 ver;
   in >> ver;
 
-  int size;
+  qint32 size;
   in >> size;
 
   stoc->beginResetModel();
-  int row;
+  qint32 row;
   while (stoc->_outputs.size() < size) {
     in >> row;
     stoc->_outputs << new SoilTypeOutput(stoc->_soilTypeCatalog->soilType(row),

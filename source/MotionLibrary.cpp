@@ -416,7 +416,7 @@ auto MotionLibrary::toJson() const -> QJsonObject {
 auto operator<<(QDataStream &out, const MotionLibrary *ml) -> QDataStream & {
   out << (quint8)1;
 
-  out << (int)ml->_approach << ml->_saveData << ml->_motions.size();
+  out << (qint32)ml->_approach << ml->_saveData << (quint32)ml->_motions.size();
 
   for (auto *m : ml->_motions) {
     const QString &className = m->metaObject()->className();
@@ -440,9 +440,9 @@ auto operator>>(QDataStream &in, MotionLibrary *ml) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int approach;
+  qint32 approach;
   bool saveData;
-  int size;
+  quint32 size;
 
   in >> approach >> saveData >> size;
 
@@ -452,9 +452,8 @@ auto operator>>(QDataStream &in, MotionLibrary *ml) -> QDataStream & {
   ml->beginResetModel();
   QString className;
 
-  while (ml->_motions.size() < size) {
+  for (int i = 0; i < size; i++) {
     in >> className;
-
     if (className == "TimeSeriesMotion") {
       auto *m = new TimeSeriesMotion(ml);
       m->setSaveData(ml->_saveData);
@@ -479,6 +478,8 @@ auto operator>>(QDataStream &in, MotionLibrary *ml) -> QDataStream & {
       auto *m = new SourceTheoryRvtMotion(ml);
       in >> m;
       ml->_motions << m;
+    } else {
+      qCritical() << "Unknown className: %s" << qPrintable(className);
     }
   }
 

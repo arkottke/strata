@@ -56,8 +56,8 @@ protected:
   gsl_interp_accel *_magAcc;
   gsl_interp_accel *_lnDistAcc;
 
-  int _nmags;
-  int _ndists;
+  qint32 _nmags;
+  qint32 _ndists;
 
   // Model coefficients
   QMap<QString, QMap<QString, QVector<double>>> _tabularData;
