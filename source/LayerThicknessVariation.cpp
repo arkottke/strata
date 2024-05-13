@@ -211,7 +211,7 @@ auto operator<<(QDataStream &out, const LayerThicknessVariation *ltv)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << ltv->_enabled << (int)ltv->_model;
+  out << ltv->_enabled << (qint32)ltv->_model;
 
   if (ltv->_model == LayerThicknessVariation::Custom) {
     out << ltv->_coeff << ltv->_initial << ltv->_exponent;
@@ -225,7 +225,7 @@ auto operator>>(QDataStream &in, LayerThicknessVariation *ltv)
   quint8 ver;
   in >> ver;
 
-  int model;
+  qint32 model;
 
   in >> ltv->_enabled >> model;
 

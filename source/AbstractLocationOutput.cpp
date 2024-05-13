@@ -97,7 +97,7 @@ auto operator<<(QDataStream &out, const AbstractLocationOutput *alo)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << static_cast<const AbstractOutput *>(alo) << (int)alo->_type
+  out << static_cast<const AbstractOutput *>(alo) << (qint32)alo->_type
       << alo->_depth;
 
   return out;
@@ -107,7 +107,7 @@ auto operator>>(QDataStream &in, AbstractLocationOutput *alo) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int type;
+  qint32 type;
   in >> static_cast<AbstractOutput *>(alo) >> type >> alo->_depth;
 
   alo->_type = (AbstractMotion::Type)type;

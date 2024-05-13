@@ -72,7 +72,7 @@ protected:
   virtual void estimateInitialStrains() = 0;
 
   //! Maximum number of iterations in the equivalent linear loop
-  int _maxIterations;
+  qint32 _maxIterations;
 
   //! Error tolerance of the equivalent linear loop -- percent
   double _errorTolerance;

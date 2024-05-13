@@ -270,7 +270,7 @@ private:
   bool _isVaried;
 
   //! Number of artificial profiles to generate
-  int _profileCount;
+  qint32 _profileCount;
 
   //! Method used to find representative soillayer
   LayerSelectionMethod _layerSelectionMethod;

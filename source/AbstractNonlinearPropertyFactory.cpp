@@ -227,7 +227,7 @@ auto operator>>(QDataStream &in, AbstractNonlinearPropertyFactory &anpf)
   quint8 ver;
   in >> ver;
 
-  int size;
+  qint32 size;
   in >> size;
 
   for (int i = 0; i < size; ++i) {

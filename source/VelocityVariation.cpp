@@ -430,13 +430,13 @@ auto operator<<(QDataStream &out, const VelocityVariation *vv)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << vv->_enabled << (int)vv->_stdevModel;
+  out << vv->_enabled << (qint32)vv->_stdevModel;
 
   if (vv->_stdevModel == VelocityVariation::Custom) {
     out << vv->_stdevIsLayerSpecific << vv->_stdev;
   }
 
-  out << (int)vv->_correlModel;
+  out << (qint32)vv->_correlModel;
 
   if (vv->_correlModel == VelocityVariation::Custom) {
     out << vv->_correlInitial << vv->_correlFinal << vv->_correlDelta
@@ -450,8 +450,8 @@ auto operator>>(QDataStream &in, VelocityVariation *vv) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int stdevModel;
-  int correlModel;
+  qint32 stdevModel;
+  qint32 correlModel;
 
   in >> vv->_enabled >> stdevModel;
 

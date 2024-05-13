@@ -26,7 +26,7 @@ fas = array( tmp[1] )
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.log(min=0.1, max=100., title="Frequency (Hz)"),
 		y=graph.axis.log(min=1e-4, max=1e0, title="Fourier Amp. (g-s)") )
-g.plot( graph.data.values( x=freq, y=fas), 
+g.plot( graph.data.values( x=freq, y=fas),
 		[graph.style.line([color.rgb.blue])])
 
 g.text( plotWidth - 1, plotHeight - 0.5, "(a)")
@@ -54,7 +54,7 @@ tf = 1 / ( 0.5 * ( 1 + impRatio ) * exp( 1j * waveNo * soilHeight ) + 0.5 * (1 -
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.log(min=0.1, max=100., title="Frequency (Hz)"),
 		y=graph.axis.log(min=0.01, max=10., title="$|TF|$") )
-g.plot( graph.data.values( x=freq, y=abs(tf) ), 
+g.plot( graph.data.values( x=freq, y=abs(tf) ),
 		[graph.style.line([color.rgb.blue])])
 g.text( plotWidth - 1, plotHeight - 0.5, "(b)")
 
@@ -67,7 +67,7 @@ surfFas = abs(tf) * fas
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.log(min=0.1, max=100, title="Frequency (Hz)"),
 		y=graph.axis.log(min=1e-4, max=1e0, title="Fourier Amp. (g-s)") )
-g.plot( graph.data.values( x=freq, y=surfFas ), 
+g.plot( graph.data.values( x=freq, y=surfFas ),
 		[graph.style.line([color.rgb.blue])])
 g.text( plotWidth - 1, plotHeight - 0.5, "(c)")
 

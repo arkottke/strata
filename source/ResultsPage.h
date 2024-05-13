@@ -120,7 +120,7 @@ private:
   AbstractOutput *_selectedOutput;
 
   //! Currently selected row
-  int _selectedRow;
+  qint32 _selectedRow;
 
   //! If the statistics need to be re-computed
   bool _statsNeedUpdate;

@@ -49,8 +49,8 @@ private:
   SiteResponseModel *_model;
 
   // model range for timing
-  int _begin;
-  int _end;
+  qint32 _begin;
+  qint32 _end;
 
   // timer for updates
   QElapsedTimer _timer;

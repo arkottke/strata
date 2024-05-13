@@ -132,10 +132,9 @@ bool SubLayer::setStrain(double effStrain, double maxStrain,
     _oldShearMod = _shearMod;
     _oldDamping = _damping;
 
-    bool success = interp(effStrain, &_shearMod, &_damping);
-    if (!success) {
-      return success;
-    }
+    // Try to interpolate, and if fails stop
+    if (!interp(effStrain, &_shearMod, &_damping))
+      return false;
 
     _normShearMod = _shearMod / initialShearMod();
 

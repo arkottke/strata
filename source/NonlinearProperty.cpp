@@ -223,7 +223,7 @@ void NonlinearProperty::setVaried(const QVector<double> &varied) {
 }
 
 void NonlinearProperty::initialize() {
-  if (_lnStrain.size() > 2) {
+  if (_lnStrain.size() > 1) {
     if (_interp)
       gsl_interp_free(_interp);
     _interp = gsl_interp_alloc(gsl_interp_linear, _lnStrain.size());
@@ -264,7 +264,7 @@ auto operator<<(QDataStream &out, const NonlinearProperty *np)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << np->_name << (int)np->_type << np->_strain << np->_average;
+  out << np->_name << (qint32)np->_type << np->_strain << np->_average;
 
   return out;
 }
@@ -275,7 +275,7 @@ auto operator>>(QDataStream &in, NonlinearProperty *np) -> QDataStream & {
 
   np->beginResetModel();
 
-  int type;
+  qint32 type;
 
   in >> np->_name >> type >> np->_strain >> np->_average;
 

@@ -143,7 +143,7 @@ private:
   double _freq;
 
   //! Number of cycles of excitation
-  int _nCycles;
+  qint32 _nCycles;
   //@}
   //! Shear modulus reduction
   NonlinearProperty *_modulusModel;

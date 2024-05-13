@@ -41,7 +41,7 @@ print "Input PGA:", max(abs(accel))
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.linear(min=5, max=20, title="Time (s)"),
 		y=graph.axis.linear(min=-1, max=1, title="Accel (g)"))
-g.plot( graph.data.values(x=time, y=accel ), 
+g.plot( graph.data.values(x=time, y=accel ),
 		[graph.style.line([color.rgb.blue, style.linewidth.Thin])])
 
 g.text( plotWidth - 1, plotHeight - 0.5, "(a)")
@@ -56,7 +56,7 @@ n = len(fas)
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.linear(min=0., max=15., title="Frequency (Hz)"),
 		y=graph.axis.linear(min=0., max=75., title="Fourier Amp. (g-s)") )
-g.plot( graph.data.values( x=freq[0:n/2], y=abs(fas[0:n/2]) ), 
+g.plot( graph.data.values( x=freq[0:n/2], y=abs(fas[0:n/2]) ),
 		[graph.style.line([color.rgb.blue, style.linewidth.Thin])])
 
 g.text( plotWidth - 1, plotHeight - 0.5, "(b)")
@@ -84,7 +84,7 @@ tf = 1 / ( 0.5 * ( 1 + impRatio ) * exp( 1j * waveNo * soilHeight ) + 0.5 * (1 -
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.linear(min=0, max=15, title="Frequency (Hz)"),
 		y=graph.axis.linear(min=0, max=4, title="$|TF|$") )
-g.plot( graph.data.values( x=freq[0:n/2], y=abs(tf[0:n/2]) ), 
+g.plot( graph.data.values( x=freq[0:n/2], y=abs(tf[0:n/2]) ),
 		[graph.style.line([color.rgb.blue, style.linewidth.Thin])])
 g.text( plotWidth - 1, plotHeight - 0.5, "(c)")
 
@@ -97,7 +97,7 @@ surfFas = tf * fas
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.linear(min=0, max=15, title="Frequency (Hz)"),
 		y=graph.axis.linear(min=0, max=75, title="Fourier Amp. (g-s)") )
-g.plot( graph.data.values( x=freq[0:n/2], y=abs(surfFas[0:n/2]) ), 
+g.plot( graph.data.values( x=freq[0:n/2], y=abs(surfFas[0:n/2]) ),
 		[graph.style.line([color.rgb.blue, style.linewidth.Thin])])
 g.text( plotWidth - 1, plotHeight - 0.5, "(d)")
 
@@ -112,7 +112,7 @@ print "Surface PGA:", max(abs(surfAccelTs))
 g = graph.graphxy(height= plotHeight, width= plotWidth,
 		x=graph.axis.linear(min=5, max=20, title="Time (s)"),
 		y=graph.axis.linear(min=-1, max=1, title="Accel (g)") )
-g.plot( graph.data.values( x=time, y=surfAccelTs ), 
+g.plot( graph.data.values( x=time, y=surfAccelTs ),
 		[graph.style.line([color.rgb.blue, style.linewidth.Thin])])
 g.text( plotWidth - 1, plotHeight - 0.5, "(e)")
 

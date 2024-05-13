@@ -20,8 +20,8 @@ for line in dataFile:
 	col = 0
 	if parts[col]:
 		target['period'].append(float(parts[col]))
-	
-	col += 1	
+
+	col += 1
 	if parts[col]:
 		target['sa'].append(float(parts[col]))
 
@@ -44,13 +44,13 @@ g = graph.graphxy(height=6, width=10,
 		x=graph.axis.log(title="Period (s)"),
 		y=graph.axis.log(title="Spectral Accel. (g)"),
 		key = graph.key.key(pos="bl", dist=0.1) )
-g.plot( graph.data.values( title="Ratio Corrected", x=ratio['period'], y=ratio['sa'] ), 
+g.plot( graph.data.values( title="Ratio Corrected", x=ratio['period'], y=ratio['sa'] ),
 	[graph.style.line([color.rgb.green, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Ratio \& Extrapolated", x=extrap['period'], y=extrap['sa'] ), 
+g.plot( graph.data.values( title="Ratio \& Extrapolated", x=extrap['period'], y=extrap['sa'] ),
 	[graph.style.line([color.rgb.blue, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Ratio, Extrap., \& Slope Forced", x=forced['period'], y=forced['sa'] ), 
+g.plot( graph.data.values( title="Ratio, Extrap., \& Slope Forced", x=forced['period'], y=forced['sa'] ),
 	[graph.style.line([color.rgb.red, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Target", x=target['period'], y=target['sa'] ), 
+g.plot( graph.data.values( title="Target", x=target['period'], y=target['sa'] ),
 	[graph.style.symbol( graph.style.symbol.circle, size=0.15, symbolattrs=[color.rgb.black])])
 
 g.writePDFfile("irvt-respSpec.pdf")
@@ -60,15 +60,15 @@ g = graph.graphxy(height=6, width=10,
 		x=graph.axis.log(title="Frequency (Hz)"),
 		y=graph.axis.log(title="$|$FAS$|$ (g-s)"),
 		key = graph.key.key(pos="bl", dist=0.1) )
-g.plot( graph.data.values( title="Ratio Corrected", x=ratio['freq'], y=ratio['fas'] ), 
+g.plot( graph.data.values( title="Ratio Corrected", x=ratio['freq'], y=ratio['fas'] ),
 	[graph.style.line([color.rgb.green, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Ratio \& Extrapolated", x=extrap['freq'], y=extrap['fas'] ), 
+g.plot( graph.data.values( title="Ratio \& Extrapolated", x=extrap['freq'], y=extrap['fas'] ),
 	[graph.style.line([color.rgb.blue, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Ratio, Extrap., \& Slope Forced", x=forced['freq'], y=forced['fas'] ), 
+g.plot( graph.data.values( title="Ratio, Extrap., \& Slope Forced", x=forced['freq'], y=forced['fas'] ),
 	[graph.style.line([color.rgb.red, style.linewidth.Thick])] )
 
 g.writePDFfile("irvt-fas.pdf")
-		
+
 # Compute error
 for i in range(len(target['period'])):
 	for d in [ratio, extrap, forced ]:
@@ -78,11 +78,11 @@ g = graph.graphxy(height=6, width=10,
 		x=graph.axis.log(title="Period (s)"),
 		y=graph.axis.linear(title="Relative Error (\%)"),
 		key = graph.key.key(pos="br", dist=0.1) )
-g.plot( graph.data.values( title="Ratio Corrected", x=ratio['period'], y=ratio['error'] ), 
+g.plot( graph.data.values( title="Ratio Corrected", x=ratio['period'], y=ratio['error'] ),
 	[graph.style.line([color.rgb.green, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Ratio \& Extrapolated", x=extrap['period'], y=extrap['error'] ), 
+g.plot( graph.data.values( title="Ratio \& Extrapolated", x=extrap['period'], y=extrap['error'] ),
 	[graph.style.line([color.rgb.blue, style.linewidth.Thick])] )
-g.plot( graph.data.values( title="Ratio, Extrap., \& Slope Forced", x=forced['period'], y=forced['error'] ), 
+g.plot( graph.data.values( title="Ratio, Extrap., \& Slope Forced", x=forced['period'], y=forced['error'] ),
 	[graph.style.line([color.rgb.red, style.linewidth.Thick])] )
 
 g.writePDFfile("irvt-error.pdf")

@@ -1,4 +1,4 @@
-\documentclass[12pt,oneside]{book}         
+\documentclass[12pt,oneside]{book}
 
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
@@ -115,7 +115,7 @@ wave frequency ($\omega$) provides displacement ($u$) as a function of depth
 ($z$) and time ($t$) \citep{kramer96}:
 \begin{equation}
     u(z,t) = A\exp\left[i\left( \omega t + k^* z \right)\right] + B\exp\left[i\left( \omega t - k^* z
-    \right)\right] 
+    \right)\right]
     \label{eq:waveEq}
 \end{equation}
 In equation (\ref{eq:waveEq}), $A$ and $B$ represent the respective amplitudes
@@ -131,7 +131,7 @@ ratio ($D$), and mass density ($\rho$) of the soil using:
     v_s^* = \sqrt{ \frac{G^*}{\rho} } %
 \end{equation}
 \begin{equation}
-    G^* = G \left( 1 - 2D^2 + \imath 2 D \sqrt{ 1 - D^2 }\right) 
+    G^* = G \left( 1 - 2D^2 + \imath 2 D \sqrt{ 1 - D^2 }\right)
     \simeq G ( 1 + \imath 2 D ) %
     \label{eq:complexShear}
 \end{equation}
@@ -169,11 +169,11 @@ where $m$ is the layer number, $h_m$ is the layer height and $\alpha_m^*$ is the
 complex impedance ratio.  The complex impedance ratio is defined as:
 \begin{equation}
     \alpha_m^* = \frac{k_m^* G_m^*}{k_{m+1}^* G_{m+1}^*} = \frac{\rho_m v_{s,m}^* }{\rho_{m+1}
-    v_{s,m+1}^* } 
+    v_{s,m+1}^* }
 \end{equation}
 and quantifies the relative amplitudes of the upward and downward waves.  At the
 surface of the soil column ($m=1$), the shear stress must equal zero, therefore
-the amplitudes of the upward and downward waves must be equal ($A_1=B_1$).  
+the amplitudes of the upward and downward waves must be equal ($A_1=B_1$).
 
 \begin{figure}
     \begin{center}
@@ -257,7 +257,7 @@ period is defined as \citep{kramer:96}:
     \label{eq:sitePeriod}
 \end{equation}
 In equation (\ref{eq:sitePeriod}), $h_{soil}$ is the total height of the soil
-and $\overline{v}_s$ average velocity of the site.  
+and $\overline{v}_s$ average velocity of the site.
 
 For the example site (Table~\ref{tab:siteResponse:site}), the site period is
 calculated to be 0.57 s which corresponds to a natural frequency of 1.75 Hz.  In
@@ -326,7 +326,7 @@ as:
 
 Motions recorded at depth (e.g. recorded in a borehole) are referred to as
 \emph{within}\index{motion type!within} motions and for these motions the transfer function given in
-equation (\ref{eq:transFunc}) can be used.  
+equation (\ref{eq:transFunc}) can be used.
 
 Figure~\ref{fig:siteResponse:transFunc} shows the transfer function for the site profile presented
 in Table~\ref{tab:siteResponse:site} using equation (\ref{eq:transFunc:withinToOutcrop} where the
@@ -351,7 +351,7 @@ thus the intensity of shaking.  In equivalent-linear site response analysis, the
 of the soil is approximated by modifying the linear elastic properties of the soil based on the
 induced strain level.  Because the induced strains depend on the soil properties, the strain
 compatible shear modulus and damping ratio values are iteratively calculated based on the computed
-strain.  
+strain.
 
 A transfer function is used to compute the shear strain in the layer based on the outcropping input
 motion.  In the calculation of the strain transfer function, the shear strain is computed at the middle of
@@ -411,7 +411,7 @@ response analysis involves the following steps:
         stops.
 \end{enumerate}
 After the iterative portion of the program finishes, the dynamic response of the soil deposit is
-computed.  
+computed.
 
 
 % FIXME Find a place to discuss response spectrum
@@ -430,7 +430,7 @@ computed.
 % transfer function to the Fourier spectrum of interest and computing the maximum response.  The
 % response spectrum is computed by varying the natural frequency of the oscillator over a range of
 % interest, typically 0.01 to 10 seconds.
-% 
+%
 % \begin{figure}[tb]
 %   \begin{center}
 %  \includegraphics[width=\linewidth]{figures/siteResponse/accelSa.pdf}
@@ -454,7 +454,7 @@ characterized.
 Defining the mass density of the system is a straight forward process because the density of soil falls
 within a limited range for soil and a good estimate of the mass density can be made based on soil
 type alone.  Characterization of the stiffness and damping properties of soil is more complicated,
-the most rigorous approach requiring testing in both the field and laboratory.  
+the most rigorous approach requiring testing in both the field and laboratory.
 
 The shear modulus and material damping of the soil are characterized using the small strain shear
 modulus ($G_{max}$), modulus reduction curves that relate $G/G_{max}$ to shear strain, and damping
@@ -464,7 +464,7 @@ shear-wave velocity profile is shown in Figure~\ref{fig:siteResponse:vsProfile}.
 separated into discrete layers with a generally increasing shear-wave velocity with increasing
 depth.  Examples of modulus reduction and damping curves for soil are shown in
 Figure~\ref{fig:siteResponse:nlLab}.  These curves show a decrease in the soil stiffness and an
-increase in the damping ratio with an increase in shear strain. 
+increase in the damping ratio with an increase in shear strain.
 
 \begin{figure}[tb]
     \begin{center}
@@ -486,7 +486,7 @@ comprehensive empirical models was developed by \citet{darendeli:01} and is incl
 The model expands on the hyperbolic model presented by \citet{hardin:72} and accounts for the
 effects of confining pressure ($\sigma_0'$), plasticity index ($PI$), over-consolidation ratio
 ($OCR$), frequency ($f$), and number of cycles of loading ($N$) on the modulus reduction and damping
-curves. 
+curves.
 
 In the \citet{darendeli:01} model, the shear modulus reduction curve is a hyperbola defined by:
 \begin{equation}
@@ -530,7 +530,7 @@ where:
 The minimum damping ratio in equation (\ref{eq:dmin}) and the Masing damping in equation
 (\ref{eq:dmasing}) are combined to compute the total damping ratio ($D$) using:
 \begin{equation}
-    D = b  \left( \frac{G}{G_{max}} \right)^{0.1} \cdot D_{Masing} + D_{min} 
+    D = b  \left( \frac{G}{G_{max}} \right)^{0.1} \cdot D_{Masing} + D_{min}
     \label{eq:damping}
 \end{equation}
 where $b$ is defined as:
@@ -580,7 +580,7 @@ at a confining pressure of 1 atm are shown in Figure~\ref{fig:siteResponse:nlEmp
     \caption{The mean and mean $\pm\sigma$ nonlinear soil properties predicted by \citet{darendeli:01}.}
     \label{fig:siteResponse:nlEmpiricalSigma}
 \end{figure}
-\clearpage 
+\clearpage
 
 \section{Site Response Methods}\label{ch:sra:methods}
 The previous section introduced transfer functions which transform the input Fourier amplitude
@@ -654,7 +654,7 @@ does not have the accompanying phase angles to the Fourier amplitudes, a time hi
 cannot be computed.  Instead, extreme value statistics are used to compute peak time domain
 parameters of motion (e.g. peak ground acceleration, spectral acceleration) from the Fourier
 amplitude information. Due to RVT's stochastic nature one analysis can provide a median estimate of
-the site response with a single analysis and with the need for time domain input motions.  
+the site response with a single analysis and with the need for time domain input motions.
 
 \subsubsection{The Basics of RVT}
 Random vibration theory can be separated into two parts: (1) conversion between time and frequency
@@ -748,7 +748,7 @@ empirical models.  \citet{boore:03} recommends the following description of grou
 \end{equation}
 where $R$ is the distance in km, and the corner frequency ($f_o$) in hertz is given by:
 \begin{displaymath}
-    f_0 = 4.9 \cdot 10^6 \beta_s \left( \frac{\Delta\sigma}{M_0} \right)^{1/3} 
+    f_0 = 4.9 \cdot 10^6 \beta_s \left( \frac{\Delta\sigma}{M_0} \right)^{1/3}
 \end{displaymath}
 where $\Delta\sigma$ is the stress drop in bar, $\beta_s$ is the shear-wave velocity in units of
 km/s, and $M_0$ is the seismic moment is units of dyne-cm \citep{brune:70,brune:71}.  The seismic
@@ -851,13 +851,13 @@ is applied.  This methodology results in a good agreement -- less than 5\% relat
 in Figure~\ref{fig:irvt:error} -- with the target response spectrum (Figure~\ref{fig:irvt:sa}), but
 the associated FAS tends to curl up at low and high frequencies (curve labeled ``Ratio Corrected''
 in Figure~\ref{fig:irvt:fas}).  The curling up at low frequencies can be mitigated by extending the
-frequency domain.  
+frequency domain.
 
 The frequency domain is extended to half of the minimum frequency and twice the maximum
 frequency specified in the target response spectrum.  For example, if the target response spectrum is provided from 0.2 to 100 Hz (5
 to 0.01 seconds), then the frequencies of the FAS are defined to be 2048 points equally spaced in log
 space from  0.1 to 200 Hz.  The resulting response spectrum shows even better agreement with a
-maximum error of about 3\% (curve labeled ``Ratio and Extrapolated'' in Figure~\ref{fig:irvt:error}).  
+maximum error of about 3\% (curve labeled ``Ratio and Extrapolated'' in Figure~\ref{fig:irvt:error}).
 
 % FIXME Rathje wants to talk about th
 Theoretically the slope of the FAS at high frequencies should be increasingly negative due to a
@@ -996,7 +996,7 @@ estimate the response of a system by generating parameters of the system based o
 statistical distributions and computing the response for each set of input parameters.  The
 following chapter introduces Monte Carlo simulations as applied to site response analysis and
 presents the models that describe the variability of the layering, shear-wave velocity, and
-nonlinear properties ($G/G_{max}$ and $D$).  
+nonlinear properties ($G/G_{max}$ and $D$).
 
 \section{Random Variables}
 The goal of a Monte Carlo simulation is to estimate the statistical properties of the response of a
@@ -1018,7 +1018,7 @@ generated by:
     \label{eq:randVar}
 \end{equation}
 where $\mu_x$ is the mean value, $\sigma_x$ is the standard deviation, and $\varepsilon$ is a random
-variable with zero mean and unit standard deviation.  
+variable with zero mean and unit standard deviation.
 
 There are a variety of methods for generating random variables for a given distribution.  The most
 general technique involves using the cumulative density function (CDF) to convert between
@@ -1044,7 +1044,7 @@ not be used when the variables are related (i.e. correlated).
 
 In the case of random variables that are not independent, a more complicated procedure is required
 for the generation of values. Before discussing the technique for generating correlated random
-variables, the concepts of correlation and linear functions of random variables must be introduced. 
+variables, the concepts of correlation and linear functions of random variables must be introduced.
 
 Consider random variables $x_1$ and $x_2$.  The covariance of the two random variables is defined as:
 \begin{equation}
@@ -1067,14 +1067,14 @@ variables is defined as:
 
 For two variables, the covariance matrix expands to:
 \begin{equation}
-    [C] = 
+    [C] =
     \left[
         \begin{array}{cc}
             \textrm{cov}(x_1, x_1) & \textrm{cov}(x_1, x_2 ) \\
             \textrm{cov}(x_2, x_1) & \textrm{cov}(x_2, x_2 ) \\
         \end{array}
     \right]
-    = 
+    =
     \left[
         \begin{array}{cc}
             \sigma_{x_1} ^ 2 & \rho_{x_1, x_2} \sigma_{x_1} \sigma_{x_2} \\
@@ -1085,7 +1085,7 @@ For two variables, the covariance matrix expands to:
 where $\sigma_{x_1}$ and $\sigma_{x_2}$ are the standard deviations of $x_1$ and $x_2$,
 respectively, and $\rho_{x_1, x_2}$ is the correlation coefficient, defined as:
 \begin{equation}
-    \rho_{x_1,x_2} = \frac{\mathrm{cov}(x_1,x_2)}{\sigma_{x_1} \sigma_{x_2}} = 
+    \rho_{x_1,x_2} = \frac{\mathrm{cov}(x_1,x_2)}{\sigma_{x_1} \sigma_{x_2}} =
     \frac{E[x_1 x_2] - E[x_1] E[x_2]}{\sigma_{x_1} \sigma_{x_2}}
     \label{eq:correlCoeff}
 \end{equation}
@@ -1110,7 +1110,7 @@ is achieved by multiplying a vector of random variables ($\vec{\varepsilon}$) by
             x_1 \\
             x_2 \\
         \end{array}
-    \right\} 
+    \right\}
     =
     \left[
         \begin{array}{ccc}
@@ -1124,7 +1124,7 @@ is achieved by multiplying a vector of random variables ($\vec{\varepsilon}$) by
             \varepsilon_2 \\
         \end{array}
     \right\}
-    + 
+    +
     \left\{
         \begin{array}{c}
             \mu_1 \\
@@ -1137,7 +1137,7 @@ where $\varepsilon_1$ and $\varepsilon_2$ are random variables randomly selected
 normal distribution ($\mu=0$ and $\sigma=1$), $\sigma_{x_1}$ and $\sigma_{x_2}$ are the standard
 deviations of $x_1$ and $x_2$, respectively, and $\mu_{x_1}$ and $\mu_{x_2}$ are the mean values of
 $x_1$ and $x_2$, respectively.  Because the random variables $x_1$ and $x_2$ are independent
-($\rho_{x_1,x_2}=0$), the off-diagonal values in the matrix ($[\sigma]$) are zero.  
+($\rho_{x_1,x_2}=0$), the off-diagonal values in the matrix ($[\sigma]$) are zero.
 
 Using the same framework, a linear system of equations is used to generate a pair of correlated
 random variables.  However, because of the correlation between $x_1$ and $x_2$ the off diagonal
@@ -1149,12 +1149,12 @@ values in the matrix will no longer be zero.  Instead, a pair of correlated rand
             x_1 \\
             x_2 \\
         \end{array}
-    \right\} 
+    \right\}
     =
     \left[
         \begin{array}{cc}
             \sigma_{x_1} & 0 \\
-            \rho_{x_1,x_2}\sigma_{x_2} & \sigma_{x_2} \sqrt{1 - \rho_{x_1,x_2}^2} \\ 
+            \rho_{x_1,x_2}\sigma_{x_2} & \sigma_{x_2} \sqrt{1 - \rho_{x_1,x_2}^2} \\
         \end{array}
     \right]
     \left\{
@@ -1163,7 +1163,7 @@ values in the matrix will no longer be zero.  Instead, a pair of correlated rand
             \varepsilon_2 \\
         \end{array}
     \right\}
-    + 
+    +
     \left\{
         \begin{array}{c}
             \mu_1 \\
@@ -1215,7 +1215,7 @@ constant rate.  For a Poisson process with a constant occurrence rate ($\lambda$
 between layer boundaries, or layer thickness ($h$), is an exponential distribution with rate
 $\lambda$.  The probability density function of an exponential distribution is defined as:
 \begin{equation}
-    f(h;\lambda) = 
+    f(h;\lambda) =
     \left\{
         \begin{array}{ll}
             \lambda \exp(-\lambda h) & \text{for } h \ge 0 \\
@@ -1226,7 +1226,7 @@ $\lambda$.  The probability density function of an exponential distribution is d
 \end{equation}
 The cumulative density function for the exponential distribution is given by:
 \begin{equation}
-    F(h;\lambda) = 
+    F(h;\lambda) =
     \left\{
         \begin{array}{ll}
             1- \exp(-\lambda h) & \text{for } h \ge 0 \\
@@ -1253,7 +1253,7 @@ associated thicknesses with Equation~\ref{eq:exponential:inv}, a layering profil
     \label{fig:rand:poisson:homo}
 \end{figure}
 
-% FIXME need references for warping 
+% FIXME need references for warping
 Simulating a non-homogeneous Poisson process is achieved by first simulating a homogeneous Poisson
 process and then warping the homogeneous layer boundaries ($S'_n$) into the non-homogeneous
 equivalent ($S_n$).  The process is very similar to the generation of random variables with a
@@ -1267,7 +1267,7 @@ the CDF.  For a non-homogeneous Poisson process with rate $\lambda(d)$ the cumul
 $\Lambda(d)$ represents the expected number of layers up to a depth $d$.  The non-homogeneous
 process is simulated by generating exponential distributions with a unit rate ($\lambda=1$) and
 mapping them to the non-homogeneous space using the inverse of
-Equation~\ref{eq:poisson:cumulativeRate} ($\Lambda^{-1}(d)$).  
+Equation~\ref{eq:poisson:cumulativeRate} ($\Lambda^{-1}(d)$).
 
 As an example, the warping technique
 will be used on the homogeneous Poisson process to take a unit rate exponential random variables and
@@ -1311,7 +1311,7 @@ for the \citet{toro:95} modeled is defined as:
 \end{equation}
 The inverse cumulative rate function is then defined as:
 \begin{equation}
-    \Lambda^{-1}(d)=\left( \frac{c \cdot d}{a} + \frac{d}{a} + b^{c+1} \right)^\frac{1}{c+1} - b 
+    \Lambda^{-1}(d)=\left( \frac{c \cdot d}{a} + \frac{d}{a} + b^{c+1} \right)^\frac{1}{c+1} - b
     \label{eq:toro:invCumRate}
 \end{equation}
 Using this equation the homogeneous Poisson process (Figure~\ref{fig:rand:poisson:homo}) can
@@ -1370,11 +1370,11 @@ where $\varepsilon_1$ is an independent normal random variable with zero mean an
 deviation.  The standard normal variables of the other layers in the profile are calculated by a
 recursive formula, defined as:
 \begin{equation}
-    Z_i = \rho \cdot Z_{i-1} + \varepsilon_i \cdot \sqrt{1 - \rho^2} 
+    Z_i = \rho \cdot Z_{i-1} + \varepsilon_i \cdot \sqrt{1 - \rho^2}
 \end{equation}
 where $Z_{i-1}$ is the standard normal variable of the previous layer, $\varepsilon_i$ is a new
 normal random variable with zero mean and unit standard deviation, and $\rho$ is the inter-layer
-correlation.  
+correlation.
 
 Correlation is a measure of the strength and direction of a relationship between two random
 variables.  The inter-layer correlation between the shear-wave velocities proposed by
@@ -1390,15 +1390,15 @@ correlation.  The thickness dependent correlation is defined as:
 \end{equation}
 where $\rho_0$ is the initial correlation and $\Delta$ is a model fitting parameter.  As the
 thickness of the layer increases, the thickness-dependent correlation decreases.  The depth
-dependent correlation ($\rho_d$) is defined as a function of depth ($d$): 
+dependent correlation ($\rho_d$) is defined as a function of depth ($d$):
 \begin{equation}
-    \rho_d(d) = 
+    \rho_d(d) =
     \left\{
         \begin{array}{ll}
             \rho_{200} \cdot \left[ \frac{d+d_0}{200+d_0} \right]^b & \mathrm{for}\ d \leq 200 \\
             \rho_{200} & \mathrm{for}\ d > 200 \\
         \end{array}
-    \right. 
+    \right.
 \end{equation}
 where $\rho_{200}$ is the correlation coefficient at 200 m and $d_0$ is an initial depth parameter.
 As the depth of the layer increases, the depth-dependent correlation increases.  The final layer in
@@ -1478,7 +1478,7 @@ Table~\ref{tab:rand:velocity}.
         \hline\hline
         & \multicolumn{8}{c}{\textbf{Site Classification}} \\
         \hline
-        & \multicolumn{2}{c|}{\textbf{GeoMatrix}} 
+        & \multicolumn{2}{c|}{\textbf{GeoMatrix}}
         & \multicolumn{6}{c}{\textbf{USGS}} \\
         \textbf{Parameter} & A \& B & C \& D & A \& B & C \& D &
         A & B & C & D  \\
@@ -1503,7 +1503,7 @@ Table~\ref{tab:rand:velocity}.
         \hline\hline
         & \multicolumn{8}{c}{\textbf{Median Shear-Wave Velocity (m/s)}} \\
         \hline
-        & \multicolumn{2}{c|}{\textbf{GeoMatrix}} 
+        & \multicolumn{2}{c|}{\textbf{GeoMatrix}}
         & \multicolumn{6}{c}{\textbf{USGS}} \\
         \hline
         \textbf{Depth (m)} & A \& B & C \& D & A \& B & C \& D &
@@ -1577,7 +1577,7 @@ generic USGS site C median shear-wave velocity profile.
 %FIXME finish this section
 
 
-\subsection{Non-Linear Soil Properties Model} 
+\subsection{Non-Linear Soil Properties Model}
 The \citet{darendeli:01} empirical model for nonlinear soil properties ($G/G_{max}$ and $D$) was
 previously discussed in Section~\ref{ch:sra:dynprops}.  The \citet{darendeli:01} empirical
 model assumes the variation of the properties is normal in distribution.  The standard deviation of
@@ -1616,7 +1616,7 @@ reduction corresponds to a relative low damping ratio.
 \chapter{Using Strata}\label{ch:strata}
 Strata is introduced through two examples that demonstrates the organization and most of the
 features found in Strata. Before these two examples some particular differences between Strata and
-other site response programs are introduced. 
+other site response programs are introduced.
 
 To someone that is used to working with text input files, operating Strata will seem a little
 foreign.  With the exception of acceleration time-series, all of the input to Strata is
@@ -1698,7 +1698,7 @@ Figure~\ref{fig:strata:allRowsButton}).
 
 Data can copied from spreadsheets and be pasted into tables by:
 \begin{enumerate}
-    \item Pressing \texttt{Ctrl+v}, 
+    \item Pressing \texttt{Ctrl+v},
     \item Clicking on the table, and then selecting \texttt{Paste} from the \texttt{Edit} menu, or
     \item Right clicking on the table and selecting paste.
 \end{enumerate}
@@ -1785,7 +1785,7 @@ formats using the following steps:
     \item After the form has been completed, the time-series can be viewed by clicking on the
         \texttt{Plot} button.
     \item Click \texttt{OK} to finish loading the file.
-\end{enumerate} 
+\end{enumerate}
 
 \begin{sidewaysfigure}[tpb]
     \begin{center}
@@ -1807,7 +1807,7 @@ formats using the following steps:
 \subsection{Output Widget}\label{ch:strata:particulars:outputWidget}
 Once the site response calculation has been completed the view will change to the \texttt{Output
 Widget}.  The \texttt{Output Widget} is also selected if a Strata output file is opened, or by
-selecting \texttt{Output View} from the \texttt{Window} menu.  
+selecting \texttt{Output View} from the \texttt{Window} menu.
 
 Strata does not output any data files automatically.   The data can also be exported by selecting
 \texttt{Export\dots} from the \texttt{File} menu.  The exported data file is in a comma-separated
@@ -1829,7 +1829,7 @@ selected by either clicking on the corresponding in the \texttt{Data Selection} 
 clicking on the result in the plot.  In both cases, the result is colored green if the result is
 enabled, or red if the result is disabled.  After the status of a result has been changed, the
 \texttt{Recomputed Statistics} button will become enabled indicating that the median and standard
-deviation (shown on the plot in solid and dash blue lines, respectively) need to be updated.  
+deviation (shown on the plot in solid and dash blue lines, respectively) need to be updated.
 
 \begin{sidewaysfigure}[p]
     \begin{center}
@@ -1847,7 +1847,7 @@ selecting \texttt{Copy}.
 
 Strata can be run from the command line, which allows for processing multiple files
 sequentially. This functionality permits the input files to be created or modified using another
-program, and then the site response to be computed in Strata. 
+program, and then the site response to be computed in Strata.
 
 
 The following steps are recommended for running Strata from the command-line:
@@ -1863,7 +1863,7 @@ The following steps are recommended for running Strata from the command-line:
         PATH for this to work nicely.  The PATH variable tells an operating system where to look for
         executables. This allows running programs that aren't present locally. It can be helpful to
         add location of the Strata executable (i.e., strata.exe on Windows) to the PATH, if Strata
-        is not in the PATH the full path to Strata must be provided on the call. 
+        is not in the PATH the full path to Strata must be provided on the call.
 \end{enumerate}
 The results from the output are saved to the same file that was passed to Strata and old results are
 silently replaced. Note that multiple file names can be provided in the call to Strata.
@@ -1959,7 +1959,7 @@ There are generally four different types of output that can be computed by Strat
     \item[Ratio output] involves the ratio of a response at two different location at a given location
         (e.g. transfer function or spectral ratio).
     \item[Profile] variation of a property with depth (e.g. maximum shear-strain).  The profiles are
-        computed at particular depths because the layering of the model may change as a result of variation. 
+        computed at particular depths because the layering of the model may change as a result of variation.
     \item[Non-linear curves] the nonlinear curves.
 \end{description}
 

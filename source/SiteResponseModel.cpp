@@ -657,9 +657,9 @@ auto operator<<(QDataStream &out, const SiteResponseModel *srm)
     -> QDataStream & {
   out << static_cast<quint8>(2);
 
-  out << Units::instance() << srm->_notes->toPlainText() << srm->_method
-      << srm->_siteProfile << srm->_motionLibrary << srm->_outputCatalog
-      << srm->_randNumGen << srm->_hasResults;
+  out << Units::instance() << srm->_notes->toPlainText()
+      << (quint32)srm->_method << srm->_siteProfile << srm->_motionLibrary
+      << srm->_outputCatalog << srm->_randNumGen << srm->_hasResults;
 
   switch (srm->_method) {
   case SiteResponseModel::EquivalentLinear:
@@ -680,12 +680,15 @@ auto operator>>(QDataStream &in, SiteResponseModel *srm) -> QDataStream & {
   in >> ver;
 
   QString notes;
-  int method;
+  quint32 method;
   bool hasResults;
 
-  in >> Units::instance() >> notes >> method >> srm->_siteProfile >>
-      srm->_motionLibrary // TODO Need to update motion count
-      >> srm->_outputCatalog;
+  in >> Units::instance() >> notes >> method;
+
+  in >> srm->_siteProfile;
+  // TODO Need to update motion count
+  in >> srm->_motionLibrary;
+  in >> srm->_outputCatalog;
 
   if (ver > 1) {
     in >> srm->_randNumGen;

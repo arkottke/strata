@@ -1095,11 +1095,11 @@ auto operator<<(QDataStream &out, const TimeSeriesMotion *tsm)
 
   // Properties for TimeSeriesMotion
   out << tsm->_saveData << tsm->_fileName << tsm->_timeStep << tsm->_pointCount
-      << tsm->_scale << (int)tsm->_format << tsm->_dataColumn << tsm->_startLine
-      << tsm->_stopLine;
+      << tsm->_scale << (qint32)tsm->_format << tsm->_dataColumn
+      << tsm->_startLine << tsm->_stopLine;
 
   // Added in version 2
-  out << (int)tsm->_inputUnits;
+  out << (qint32)tsm->_inputUnits;
 
   // Save the data internally if requested
   if (tsm->_saveData) {
@@ -1116,7 +1116,7 @@ auto operator>>(QDataStream &in, TimeSeriesMotion *tsm) -> QDataStream & {
   in >> qobject_cast<AbstractMotion *>(tsm);
 
   // Propertise for TimeSeriesMotion
-  int format;
+  qint32 format;
 
   in >> tsm->_saveData;
 
@@ -1133,7 +1133,7 @@ auto operator>>(QDataStream &in, TimeSeriesMotion *tsm) -> QDataStream & {
 
   if (ver > 1) {
     // Units added in version 2
-    int units;
+    qint32 units;
     in >> units;
     tsm->setInputUnits(units);
   }

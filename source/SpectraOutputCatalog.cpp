@@ -265,7 +265,7 @@ auto operator<<(QDataStream &out, const SpectraOutputCatalog *soc)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << soc->_outputs.size();
+  out << (qint32)soc->_outputs.size();
 
   foreach (const AbstractLocationOutput *alo, soc->_outputs)
     out << QString(alo->metaObject()->className()) << alo;
@@ -277,7 +277,7 @@ auto operator>>(QDataStream &in, SpectraOutputCatalog *soc) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int size;
+  qint32 size;
   in >> size;
 
   soc->beginResetModel();

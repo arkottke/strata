@@ -31,7 +31,7 @@ if action == 'query':
 	print latestRev
 elif action == 'download':
 	requestedRev = form.getfirst('revision', 'latest').lower()
-	
+
 	if requestedRev == 'latest':
 		requestedRev = latestRev
 

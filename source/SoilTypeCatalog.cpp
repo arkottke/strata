@@ -333,7 +333,7 @@ auto SoilTypeCatalog::toJson() const -> QJsonArray {
 auto operator<<(QDataStream &out, const SoilTypeCatalog *stc) -> QDataStream & {
   out << static_cast<quint8>(1);
 
-  out << stc->_soilTypes.size();
+  out << (qint32)stc->_soilTypes.size();
 
   foreach (SoilType *st, stc->_soilTypes)
     out << st;
@@ -347,7 +347,7 @@ auto operator>>(QDataStream &in, SoilTypeCatalog *stc) -> QDataStream & {
 
   stc->beginResetModel();
 
-  int size;
+  qint32 size;
   in >> size;
 
   while (stc->_soilTypes.size() < size) {

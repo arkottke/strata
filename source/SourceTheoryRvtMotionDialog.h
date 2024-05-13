@@ -40,7 +40,7 @@ protected slots:
 protected:
   virtual auto createParametersLayout() -> QFormLayout *;
 
-  int _crustModelIndex;
+  qint32 _crustModelIndex;
 
   QTabWidget *_paramsTabWidget;
 

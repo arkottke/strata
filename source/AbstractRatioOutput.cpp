@@ -135,7 +135,7 @@ auto operator<<(QDataStream &out, const AbstractRatioOutput *aro)
   out << (quint8)1;
 
   out << static_cast<const AbstractOutput *>(aro) << (int)aro->_outType
-      << aro->_outDepth << (int)aro->_inType << aro->_inDepth;
+      << aro->_outDepth << (qint32)aro->_inType << aro->_inDepth;
 
   return out;
 }
@@ -144,8 +144,8 @@ auto operator>>(QDataStream &in, AbstractRatioOutput *aro) -> QDataStream & {
   quint8 ver;
   in >> ver;
 
-  int outType;
-  int inType;
+  qint32 outType;
+  qint32 inType;
 
   in >> static_cast<AbstractOutput *>(aro) >> outType >> aro->_outDepth >>
       inType >> aro->_inDepth;

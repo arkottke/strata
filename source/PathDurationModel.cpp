@@ -217,7 +217,7 @@ auto PathDurationModel::toJson() const -> QJsonObject {
 auto operator<<(QDataStream &out, const PathDurationModel *pdm)
     -> QDataStream & {
   out << static_cast<quint8>(2);
-  out << (int)pdm->_source << pdm->_distance << pdm->_rate;
+  out << (qint32)pdm->_source << pdm->_distance << pdm->_rate;
 
   return out;
 }
@@ -229,7 +229,7 @@ auto operator>>(QDataStream &in, PathDurationModel *pdm) -> QDataStream & {
   pdm->beginResetModel();
 
   if (ver > 1) {
-    int source;
+    qint32 source;
     in >> source;
     pdm->setSource(source);
   }

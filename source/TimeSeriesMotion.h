@@ -54,7 +54,7 @@ public:
   enum MotionType {
     Acceleration, //!< Acceleration time series
     Velocity, //!< Velocity time series -- single integrated acceleration time
-              //!< series
+    //!< series
     Displacement //!< Displacement time series -- double integrated acceleration
                  //!< time series
   };
@@ -251,7 +251,7 @@ protected:
   double _timeStep;
 
   //! The number of points in the time series
-  int _pointCount;
+  qint32 _pointCount;
 
   //! The scale factor that is applied to the motion
   double _scale;
@@ -263,13 +263,13 @@ protected:
   Format _format;
 
   //! The column of the acceleration data
-  int _dataColumn;
+  qint32 _dataColumn;
 
   //! The line the data starts on
-  int _startLine;
+  qint32 _startLine;
 
   //! The line the data stops on, 0 for complete file.
-  int _stopLine;
+  qint32 _stopLine;
 
   //! The acceleration data points in g
   QVector<double> _accel;

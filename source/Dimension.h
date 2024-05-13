@@ -95,7 +95,7 @@ private:
   double _max;
 
   //! Number of points
-  int _size;
+  qint32 _size;
 
   //! Spacing
   Spacing _spacing;

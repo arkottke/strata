@@ -215,10 +215,10 @@ protected:
 
   //! Which motion should be displayed by the table -- only important for output
   //! that needs time
-  int _motionIndex;
+  qint32 _motionIndex;
 
   //! Size of the longest output
-  int _maxSize;
+  qint32 _maxSize;
 
   //! Visible window for plotting from the top of the profile
   bool _offset_top;

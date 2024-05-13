@@ -172,7 +172,7 @@ auto operator<<(QDataStream &out, const NonlinearPropertyRandomizer *npv)
     -> QDataStream & {
   out << (quint8)2;
 
-  out << npv->_enabled << (int)npv->_model << npv->_bedrockIsEnabled
+  out << npv->_enabled << (qint32)npv->_model << npv->_bedrockIsEnabled
       << npv->_correl << npv->_modulusUncert << npv->_dampingUncert;
 
   return out;
@@ -183,7 +183,7 @@ auto operator>>(QDataStream &in, NonlinearPropertyRandomizer *npv)
   quint8 ver;
   in >> ver;
 
-  int model;
+  qint32 model;
 
   in >> npv->_enabled >> model >> npv->_bedrockIsEnabled >> npv->_correl;
 

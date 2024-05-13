@@ -49,7 +49,7 @@ SetCompressor lzma
 !insertmacro MUI_PAGE_DIRECTORY
 
 ; Start menu folder page configuration
-!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU" 
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\Strata"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 
@@ -138,11 +138,11 @@ File "${MINGW_PATH}\bin\qwt.dll"
 File "${MINGW_PATH}\bin\zlib1.dll"
 
 ;Plugins for SVG icons
-SetOutPath "$INSTDIR\iconengines" 
+SetOutPath "$INSTDIR\iconengines"
 File "${MINGW_PATH}\share\qt5\plugins\iconengines\qsvgicon.dll"
-SetOutPath "$INSTDIR\imageformats" 
+SetOutPath "$INSTDIR\imageformats"
 File "${MINGW_PATH}\share\qt5\plugins\imageformats\qsvg.dll"
-SetOutPath "$INSTDIR\platforms" 
+SetOutPath "$INSTDIR\platforms"
 File "${MINGW_PATH}\share\qt5\plugins\platforms\qwindows.dll"
 
 ;Store installation folder
@@ -264,7 +264,7 @@ RMDir  "$INSTDIR\iconengines"
 Delete "$INSTDIR\imageformats\qsvg.dll"
 RMDir  "$INSTDIR\imageformats"
 Delete "$INSTDIR\platforms\qwindows.dll"
-RMDir  "$INSTDIR\platforms" 
+RMDir  "$INSTDIR\platforms"
 
 Delete "$INSTDIR\examples\example-1-td.strata"
 Delete "$INSTDIR\examples\example-2-td.strata"

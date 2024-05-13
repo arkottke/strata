@@ -300,7 +300,7 @@ auto operator<<(QDataStream &out, const TimeSeriesOutputCatalog *tsoc)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << tsoc->_outputs.size();
+  out << (qint32)tsoc->_outputs.size();
 
   for (auto *atso : tsoc->_outputs)
     out << QString(atso->metaObject()->className()) << atso;
@@ -313,7 +313,7 @@ auto operator>>(QDataStream &in, TimeSeriesOutputCatalog *tsoc)
   quint8 ver;
   in >> ver;
 
-  int size;
+  qint32 size;
   in >> size;
 
   tsoc->beginResetModel();
