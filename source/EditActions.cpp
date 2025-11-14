@@ -31,22 +31,22 @@ EditActions::EditActions(QObject *parent) : QObject(parent) {
   _pasteAction =
       new QAction(QIcon(":/images/edit-paste.svg"), tr("&Paste"), this);
   _pasteAction->setShortcut(QKeySequence::Paste);
-  connect(_pasteAction, SIGNAL(triggered()), SLOT(paste()));
+  connect(_pasteAction, &QAction::triggered, this, &EditActions::paste);
 
   // Copy Action
   _copyAction = new QAction(QIcon(":/images/edit-copy.svg"), tr("&Copy"), this);
   _copyAction->setShortcut(QKeySequence::Copy);
-  connect(_copyAction, SIGNAL(triggered()), SLOT(copy()));
+  connect(_copyAction, &QAction::triggered, this, &EditActions::copy);
 
   // Cut Action
   _cutAction = new QAction(QIcon(":/images/edit-cut.svg"), tr("Cu&t"), this);
   _cutAction->setShortcut(QKeySequence::Cut);
-  connect(_cutAction, SIGNAL(triggered()), SLOT(cut()));
+  connect(_cutAction, &QAction::triggered, this, &EditActions::cut);
 
   // Clear Action
   _clearAction =
       new QAction(QIcon(":/images/edit-clear.svg"), tr("Clear"), this);
-  connect(_clearAction, SIGNAL(triggered()), SLOT(clear()));
+  connect(_clearAction, &QAction::triggered, this, &EditActions::clear);
 }
 
 auto EditActions::instance() -> EditActions * {
@@ -71,13 +71,16 @@ void EditActions::cut() {
 }
 
 void EditActions::copy() {
-  QMetaObject::invokeMethod(QApplication::focusWidget(), "copy");
+  // FIXME
+  // QMetaObject::invokeMethod(QApplication::focusWidget(), "copy");
 }
 
 void EditActions::paste() {
-  QMetaObject::invokeMethod(QApplication::focusWidget(), "paste");
+  // FIXME
+  // QMetaObject::invokeMethod(QApplication::focusWidget(), "paste");
 }
 
 void EditActions::clear() {
-  QMetaObject::invokeMethod(QApplication::focusWidget(), "clear");
+  // FIXME
+  // QMetaObject::invokeMethod(QApplication::focusWidget(), "clear");
 }

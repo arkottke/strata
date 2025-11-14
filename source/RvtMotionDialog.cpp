@@ -61,8 +61,9 @@ auto RvtMotionDialog::createParametersLayout() -> QFormLayout * {
   spinBox->setValue(_motion->duration());
   spinBox->setReadOnly(_readOnly);
 
-  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
-          SLOT(setDuration(double)));
+  auto rm = qobject_cast<RvtMotion *>(_motion);
+  connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), rm,
+          &RvtMotion::setDuration);
 
   layout->addRow(tr("Duration:"), spinBox);
 

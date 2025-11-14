@@ -67,19 +67,18 @@ void MotionPage::setModel(SiteResponseModel *model) {
   _motionLibrary = model->motionLibrary();
 
   _depthComboBox->setDepth(model->siteProfile()->inputDepth());
-  connect(_depthComboBox, SIGNAL(depthChanged(double)), model->siteProfile(),
-          SLOT(setInputDepth(double)));
+  connect(_depthComboBox, &DepthComboBox::depthChanged, model->siteProfile(),
+          &SoilProfile::setInputDepth);
 
   _tableView->setModel(_motionLibrary);
-  connect(_tableView->selectionModel(),
-          SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-          SLOT(updateButtons()));
+  connect(_tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          this, &MotionPage::updateButtons);
   _tableView->resizeColumnsToContents();
   _tableView->resizeRowsToContents();
 
   setApproach(_motionLibrary->approach());
-  connect(_motionLibrary, SIGNAL(approachChanged(int)), this,
-          SLOT(setApproach(int)));
+  connect(_motionLibrary, &MotionLibrary::approachChanged, this,
+          &MotionPage::setApproach);
 }
 
 void MotionPage::setReadOnly(bool readOnly) {
@@ -120,23 +119,23 @@ auto MotionPage::createMotionsTableGroupBox() -> QGroupBox * {
   auto *buttonRow = new QHBoxLayout;
 
   _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-  connect(_addButton, SIGNAL(clicked()), this, SLOT(add()));
+  connect(_addButton, &QPushButton::clicked, this, &MotionPage::add);
   buttonRow->addWidget(_addButton);
 
   _removeButton =
       new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
   _removeButton->setEnabled(false);
-  connect(_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
+  connect(_removeButton, &QPushButton::clicked, this, &MotionPage::remove);
   buttonRow->addWidget(_removeButton);
 
   _editButton = new QPushButton;
   _editButton->setEnabled(false);
-  connect(_editButton, SIGNAL(clicked()), this, SLOT(edit()));
+  connect(_editButton, &QPushButton::clicked, this, &MotionPage::edit);
   buttonRow->addWidget(_editButton);
 
   _importButton =
       new QPushButton(QIcon(":/images/document-import.svg"), tr("Load Suite"));
-  connect(_importButton, SIGNAL(clicked()), this, SLOT(importSuite()));
+  connect(_importButton, &QPushButton::clicked, this, &MotionPage::importSuite);
 
   buttonRow->addStretch(1);
   buttonRow->addWidget(_importButton);
@@ -149,7 +148,7 @@ auto MotionPage::createMotionsTableGroupBox() -> QGroupBox * {
   _tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   _tableView->setItemDelegateForColumn(2, new MotionTypeDelegate);
 
-  connect(_tableView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(edit()));
+  connect(_tableView, &QTableView::doubleClicked, this, &MotionPage::edit);
   layout->addWidget(_tableView, 1);
 
   // Form the groupbox
@@ -262,91 +261,67 @@ void MotionPage::importSuite() {
     if (rowCount)
       _motionLibrary->removeRows(0, rowCount);
 
-    // Load each of the filename/scale pairs in a map
-    QMultiMap<QString, QStringList> map;
-
+    // Count the number of lines
     QTextStream stream(&file);
     QString line = stream.readLine();
+    QStringList lines;
     while (!line.isNull()) {
-      if (!line.startsWith("#")) {
-        QStringList args = line.split(",");
-        if (args.size() < 1 || args.size() > 3) {
-          qCritical() << tr("Invalid file format on line:") << line;
-          return;
-        }
-
-        const QString _fileName = args.takeFirst();
-
-        if (!args.isEmpty()) {
-          // First argument is the scale that is applied to the motion
-          // Test to see if we can parse the scale
-          bool ok = false;
-          double d = args.at(0).toDouble(&ok);
-          Q_UNUSED(d);
-
-          if (!ok) {
-            qCritical() << "Error converting" << args.at(0) << "to a number!\n"
-                        << "Assuming a scale of 1.0.";
-
-            args[0] = "1.";
-          }
-        } else {
-          // Assume a scale of 1.
-          args << "1.";
-        }
-
-        if (args.size() > 1) {
-          bool ok;
-
-          AbstractMotion::Type type =
-              AbstractMotion::variantToType(args.at(1), &ok);
-          Q_UNUSED(type);
-
-          if (!ok) {
-            qCritical() << "Unknown type specified:" << args.at(2)
-                        << ". Valid options are 'Outcrop'"
-                        << "\nAssuming 'Outcrop'";
-            args[1] = AbstractMotion::typeList().first();
-          }
-        } else {
-          // Assume Outcrop
-          args << AbstractMotion::typeList().first();
-        }
-
-        map.insert(dir.absoluteFilePath(_fileName), args);
-      }
-      line = stream.readLine();
+      if (!line.startsWith("#"))
+        lines << line;
     }
 
+    // FIXME: Check this
+
+    // Load each of the filename/scale pairs in a map
     QProgressDialog progressDialog(tr("Loading motion suite..."), tr("Abort"),
-                                   1, map.size(), this);
+                                   1, lines.size(), this);
     progressDialog.setWindowModality(Qt::WindowModal);
 
-    QMapIterator<QString, QStringList> i(map);
-    while (i.hasNext() && !progressDialog.wasCanceled()) {
-      i.next();
+    foreach (line, lines) {
+      QStringList args = line.split(",");
+      if (args.size() < 1 || args.size() > 3) {
+        qCritical() << tr("Invalid file format on line:") << line;
+        return;
+      }
+
+      const QString _fileName = args.takeFirst();
+
+      double scale = 1;
+      auto type = AbstractMotion::Outcrop;
+      bool ok;
+
+      if (args.size() > 0) {
+        scale = args.at(0).toDouble(&ok);
+        if (!ok) {
+          qCritical() << "Error converting" << args.at(0) << "to a number!\n"
+                      << "Assuming a scale of 1.0.";
+          scale = 1;
+        }
+      }
+
+      if (args.size() > 1) {
+        type = AbstractMotion::variantToType(args.at(1), &ok);
+        if (!ok) {
+          qCritical() << "Unknown type specified:" << args.at(2)
+                      << ". Valid options are 'Outcrop'"
+                      << "\nAssuming 'Outcrop'";
+          type = AbstractMotion::Outcrop;
+        }
+      }
 
       if (_motionLibrary->approach() == MotionLibrary::TimeSeries) {
         // Load the motion
-        bool successful = true;
-        double scale = i.value().at(0).toDouble();
-        AbstractMotion::Type type =
-            AbstractMotion::variantToType(i.value().at(1), &successful);
-
-        auto *tsm = new TimeSeriesMotion(i.key(), scale, type, &successful);
-
-        if (successful)
+        auto *tsm = new TimeSeriesMotion(_fileName, scale, type, &ok);
+        if (ok)
           _motionLibrary->addMotion(tsm);
       } else {
-        double scale = i.value().at(0).toDouble();
-        AbstractRvtMotion *arm = loadRvtMotionFromTextFile(i.key(), scale);
-
+        auto *arm = loadRvtMotionFromTextFile(_fileName, scale);
         if (arm)
           _motionLibrary->addMotion(arm);
       }
-
       progressDialog.setValue(_motionLibrary->rowCount());
     }
+    line = stream.readLine();
   }
 
   _tableView->resizeColumnsToContents();

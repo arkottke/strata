@@ -57,14 +57,17 @@ void AbstractRvtMotionDialog::init() {
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Apply,
       Qt::Horizontal);
 
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
-  connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-  connect(buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this,
-          SLOT(calculate()));
+  connect(buttonBox, &QDialogButtonBox::accepted, this,
+          &AbstractRvtMotionDialog::tryAccept);
+  connect(buttonBox, &QDialogButtonBox::rejected, this,
+          &AbstractRvtMotionDialog::reject);
+  connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,
+          this, &AbstractRvtMotionDialog::calculate);
 
   if (!qobject_cast<RvtMotion *>(_motion)) {
     auto pushButton = new QPushButton(tr("Frequency Parameters..."));
-    connect(pushButton, SIGNAL(clicked()), this, SLOT(openFrequencyDialog()));
+    connect(pushButton, &QPushButton::clicked, this,
+            &AbstractRvtMotionDialog::openFrequencyDialog);
     buttonBox->addButton(pushButton, QDialogButtonBox::ActionRole);
   }
 
@@ -91,8 +94,8 @@ auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   lineEdit->setText(_motion->nameTemplate());
   lineEdit->setReadOnly(_readOnly);
 
-  connect(lineEdit, SIGNAL(textChanged(QString)), _motion,
-          SLOT(setName(QString)));
+  connect(lineEdit, &QLineEdit::textChanged, _motion,
+          &AbstractRvtMotion::setName);
 
   layout->addRow(tr("Name:"), lineEdit);
 
@@ -101,8 +104,8 @@ auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   lineEdit->setText(_motion->description());
   lineEdit->setReadOnly(_readOnly);
 
-  connect(lineEdit, SIGNAL(textChanged(QString)), _motion,
-          SLOT(setDescription(QString)));
+  connect(lineEdit, &QLineEdit::textChanged, _motion,
+          &AbstractRvtMotion::setDescription);
 
   layout->addRow(tr("Description:"), lineEdit);
 
@@ -110,8 +113,8 @@ auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   auto comboBox = new QComboBox;
   comboBox->addItems(AbstractRvtMotion::regionList());
   comboBox->setCurrentIndex(static_cast<int>(_motion->region()));
-  connect(comboBox, SIGNAL(currentIndexChanged(int)), _motion,
-          SLOT(setRegion(int)));
+  connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), _motion,
+          qOverload<int>(&AbstractRvtMotion::setRegion));
 
   layout->addRow(tr("Region:"), comboBox);
 
@@ -123,8 +126,8 @@ auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   spinBox->setReadOnly(_readOnly);
 
   spinBox->setValue(_motion->magnitude());
-  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
-          SLOT(setMagnitude(double)));
+  connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), _motion,
+          &AbstractRvtMotion::setMagnitude);
 
   layout->addRow(tr("Magnitude (<b>M</b>):"), spinBox);
 
@@ -137,8 +140,8 @@ auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   spinBox->setReadOnly(_readOnly);
 
   spinBox->setValue(_motion->distance());
-  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
-          SLOT(setDistance(double)));
+  connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), _motion,
+          &AbstractRvtMotion::setDistance);
 
   layout->addRow(tr("Epicentral distance:"), spinBox);
 
@@ -148,8 +151,8 @@ auto AbstractRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   comboBox->setCurrentIndex(_motion->type());
   // Only permit setting type for RvtMotions
   comboBox->setDisabled(_readOnly || !qobject_cast<RvtMotion *>(_motion));
-  connect(comboBox, SIGNAL(currentIndexChanged(int)), _motion,
-          SLOT(setType(int)));
+  connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), _motion,
+          qOverload<int>(&AbstractRvtMotion::setType));
 
   layout->addRow(tr("Motion type:"), comboBox);
 
@@ -210,8 +213,9 @@ auto AbstractRvtMotionDialog::createRSPlotWidget() -> QWidget * {
 
   _saCurve = new QwtPlotCurve(tr("Calculated"));
   _saCurve->setPen(QPen(Qt::blue, 2));
-  _saCurve->setSamples(_motion->respSpec()->period(),
-                       _motion->respSpec()->sa());
+  _saCurve->setSamples(_motion->respSpec()->period().data(),
+                       _motion->respSpec()->sa().data(),
+                       _motion->respSpec()->period().size());
   _saCurve->attach(_rsPlot);
 
   addRespSpecCurves();
@@ -253,7 +257,8 @@ auto AbstractRvtMotionDialog::createFSPlotWidget() -> QWidget * {
 
   _faCurve = new QwtPlotCurve;
   _faCurve->setPen(QPen(Qt::blue, 2));
-  _faCurve->setSamples(_motion->freq(), _motion->fourierAcc());
+  _faCurve->setSamples(_motion->freq().data(), _motion->fourierAcc().data(),
+                       _motion->freq().size());
   _faCurve->attach(_fsPlot);
 
   auto scrollArea = new QScrollArea;
@@ -281,7 +286,7 @@ void AbstractRvtMotionDialog::openFrequencyDialog() {
   layout->setSuffix(" Hz");
 
   auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
-  connect(buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
 
   layout->addRow(buttonBox);
 
@@ -295,9 +300,11 @@ void AbstractRvtMotionDialog::calculate() {
   _fsTableView->resizeRowsToContents();
   _rsTableView->resizeRowsToContents();
 
-  _faCurve->setSamples(_motion->freq(), _motion->fourierAcc());
-  _saCurve->setSamples(_motion->respSpec()->period(),
-                       _motion->respSpec()->sa());
+  _faCurve->setSamples(_motion->freq().data(), _motion->fourierAcc().data(),
+                       _motion->freq().size());
+  _saCurve->setSamples(_motion->respSpec()->period().data(),
+                       _motion->respSpec()->sa().data(),
+                       _motion->respSpec()->period().size());
 
   _dataTabWidget->setCurrentIndex(0);
 }

@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Serialize.h"
+
 #include <QtCore/QJsonValue>
 
 namespace Serialize {
@@ -41,15 +42,6 @@ auto toVariantList(const QList<double> &list) -> QList<QVariant> {
 
   for (const double &d : list)
     newList << QVariant(d);
-
-  return newList;
-}
-
-auto toVariantList(const QVector<double> &vector) -> QList<QVariant> {
-  QList<QVariant> newList;
-
-  for (int i = 0; i < vector.size(); ++i)
-    newList << QVariant(vector.at(i));
 
   return newList;
 }

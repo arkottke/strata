@@ -202,8 +202,8 @@ void SpectraOutputCatalog::addRow(const QString &name) {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     _outputs << factory(_lookup.value(name), _outputCatalog);
 
-    connect(_outputs.last(), SIGNAL(wasModified()), this,
-            SIGNAL(wasModified()));
+    connect(_outputs.last(), &AbstractOutput::wasModified, this,
+            &SpectraOutputCatalog::wasModified);
 
     endInsertRows();
 

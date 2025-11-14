@@ -51,7 +51,8 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   checkbox->setChecked(isCustomized);
   checkbox->setDisabled(_readOnly);
 
-  connect(checkbox, SIGNAL(clicked(bool)), strm, SLOT(setIsCustomized(bool)));
+  connect(checkbox, &QCheckBox::clicked, strm,
+          &SourceTheoryRvtMotion::setIsCustomized);
 
   layout->addRow(checkbox);
 
@@ -65,10 +66,10 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->depth());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setDepth(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setDepth);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   layout->addRow(tr("Depth:"), doubleSpinBox);
 
@@ -82,12 +83,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->stressDrop());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setStressDrop(double)));
-  connect(strm, SIGNAL(stressDropChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setStressDrop);
+  connect(strm, &SourceTheoryRvtMotion::stressDropChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   layout->addRow(
       QString(tr("Stress drop (%1%2)")).arg(QChar(0x0394)).arg(QChar(0x03c3)),
@@ -102,12 +103,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->geoAtten());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setGeoAtten(double)));
-  connect(strm, SIGNAL(geoAttenChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setGeoAtten);
+  connect(strm, &SourceTheoryRvtMotion::geoAttenChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   layout->addRow(tr("Geometric atten. coeff.:"), doubleSpinBox);
 
@@ -123,12 +124,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->pathAttenCoeff());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setPathAttenCoeff(double)));
-  connect(strm, SIGNAL(pathAttenCoeffChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setPathAttenCoeff);
+  connect(strm, &SourceTheoryRvtMotion::pathAttenCoeffChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   auto label = new QLabel(tr("Coefficient (a):"));
   const int indent = 20;
@@ -143,12 +144,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->pathAttenPower());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setPathAttenPower(double)));
-  connect(strm, SIGNAL(pathAttenPowerChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setPathAttenPower);
+  connect(strm, &SourceTheoryRvtMotion::pathAttenPowerChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   label = new QLabel(tr("Power (b):"));
   label->setIndent(indent);
@@ -164,12 +165,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->shearVelocity());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setShearVelocity(double)));
-  connect(strm, SIGNAL(shearVelocityChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setShearVelocity);
+  connect(strm, &SourceTheoryRvtMotion::shearVelocityChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   layout->addRow(tr("Shear velocity (v<sub>s</sub>):"), doubleSpinBox);
 
@@ -183,12 +184,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->density());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setDensity(double)));
-  connect(strm, SIGNAL(densityChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setDensity);
+  connect(strm, &SourceTheoryRvtMotion::densityChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   layout->addRow(QString(tr("Density (%1)")).arg(QChar(0x03c1)), doubleSpinBox);
 
@@ -202,12 +203,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   doubleSpinBox->setValue(strm->siteAtten());
   doubleSpinBox->setEnabled(isCustomized);
-  connect(doubleSpinBox, SIGNAL(valueChanged(double)), strm,
-          SLOT(setSiteAtten(double)));
-  connect(strm, SIGNAL(siteAttenChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), doubleSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setSiteAtten);
+  connect(strm, &SourceTheoryRvtMotion::siteAttenChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   layout->addRow(
       QString(tr("Site attenuation (%1<sub>0</sub>)")).arg(QChar(0x03ba)),
@@ -222,8 +223,8 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   doubleSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
 
   doubleSpinBox->setValue(strm->duration());
-  connect(strm, SIGNAL(durationChanged(double)), doubleSpinBox,
-          SLOT(setValue(double)));
+  connect(strm, &SourceTheoryRvtMotion::durationChanged, doubleSpinBox,
+          &QDoubleSpinBox::setValue);
 
   layout->addRow(tr("Duration:"), doubleSpinBox);
 
@@ -233,12 +234,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   comboBox->setCurrentIndex(strm->pathDuration()->source());
   comboBox->setDisabled(_readOnly | !isCustomized);
 
-  connect(comboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updatePathDurSource(int)));
-  connect(comboBox, SIGNAL(currentIndexChanged(int)), strm->pathDuration(),
-          SLOT(setSource(int)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), comboBox,
-          SLOT(setEnabled(bool)));
+  connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this,
+          &SourceTheoryRvtMotionDialog::updatePathDurSource);
+  connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          strm->pathDuration(), qOverload<int>(&PathDurationModel::setSource));
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, comboBox,
+          &QComboBox::setEnabled);
 
   layout->addRow(tr("Path duration model:"), comboBox);
 
@@ -248,12 +249,12 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   comboBox->setCurrentIndex(strm->crustalAmp()->source());
   comboBox->setDisabled(_readOnly | !isCustomized);
 
-  connect(comboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateCrustalAmpSource(int)));
-  connect(comboBox, SIGNAL(currentIndexChanged(int)), strm->crustalAmp(),
-          SLOT(setSource(int)));
-  connect(strm, SIGNAL(isCustomizedChanged(bool)), comboBox,
-          SLOT(setEnabled(bool)));
+  connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this,
+          &SourceTheoryRvtMotionDialog::updateCrustalAmpSource);
+  connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          strm->crustalAmp(), qOverload<int>(&CrustalAmplification::setSource));
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, comboBox,
+          &QComboBox::setEnabled);
 
   layout->addRow(tr("Crustal amplification model:"), comboBox);
 
@@ -279,8 +280,8 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   _crustalAmpGroupBox = new TableGroupBox(tr("Crustal Ampl."));
   _crustalAmpGroupBox->setModel(strm->crustalAmp());
   _crustalAmpGroupBox->setReadOnly(_readOnly);
-  connect(strm->crustalAmp(), SIGNAL(readOnlyChanged(bool)),
-          _crustalAmpGroupBox, SLOT(setReadOnly(bool)));
+  connect(strm->crustalAmp(), &CrustalAmplification::readOnlyChanged,
+          _crustalAmpGroupBox, &TableGroupBox::setReadOnly);
 
   vboxLayout->addWidget(_crustalAmpGroupBox);
   frame = new QFrame;

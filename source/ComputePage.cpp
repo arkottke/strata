@@ -28,6 +28,7 @@
 #include <QDebug>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLocale>
 #include <QTime>
 
 ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
@@ -36,7 +37,8 @@ ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
 
   // Progress bar
   _progressBar = new QProgressBar;
-  connect(_progressBar, SIGNAL(valueChanged(int)), this, SLOT(updateEta(int)));
+  connect(_progressBar, &QProgressBar::valueChanged, this,
+          &ComputePage::updateEta);
   layout->addWidget(_progressBar, 0, 0);
 
   // Completion time
@@ -58,7 +60,7 @@ ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
   // tr("Compute"));
   _computeButton = new QPushButton(tr("Compute"));
   _computeButton->setDefault(true);
-  connect(_computeButton, SIGNAL(clicked()), this, SLOT(compute()));
+  connect(_computeButton, &QPushButton::clicked, this, &ComputePage::compute);
 
   layout->addWidget(_computeButton, 0, 4);
 
@@ -79,25 +81,27 @@ ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
 void ComputePage::setModel(SiteResponseModel *model) {
   _model = model;
 
-  connect(model, SIGNAL(progressRangeChanged(int, int)), _progressBar,
-          SLOT(setRange(int, int)));
+  connect(model, &SiteResponseModel::progressRangeChanged, _progressBar,
+          &QProgressBar::setRange);
 
-  connect(model, SIGNAL(progressChanged(int)), _progressBar,
-          SLOT(setValue(int)));
+  connect(model, &SiteResponseModel::progressChanged, _progressBar,
+          &QProgressBar::setValue);
 
-  connect(_cancelButton, SIGNAL(clicked()), model, SLOT(stop()));
+  connect(_cancelButton, &QPushButton::clicked, model,
+          &SiteResponseModel::stop);
 
-  connect(this, SIGNAL(startCalculation()), model, SLOT(start()));
-  connect(model, SIGNAL(finished()), this, SLOT(reset()));
+  connect(this, &ComputePage::startCalculation, model,
+          [model]() { model->start(); });
+  connect(model, &SiteResponseModel::finished, this, &ComputePage::reset);
 
   _logView->clear();
   for (const QString &line : model->outputCatalog()->log()->text())
     _logView->append(line);
 
-  connect(model->outputCatalog()->log(), SIGNAL(textChanged(QString)), _logView,
-          SLOT(append(QString)));
-  connect(model->outputCatalog()->log(), SIGNAL(textCleared()), _logView,
-          SLOT(clear()));
+  connect(model->outputCatalog()->log(), &TextLog::textChanged, _logView,
+          &QTextEdit::append);
+  connect(model->outputCatalog()->log(), &TextLog::textCleared, _logView,
+          &QTextEdit::clear);
 }
 
 void ComputePage::setReadOnly(bool b) {
@@ -136,6 +140,6 @@ void ComputePage::updateEta(int value) {
     QTime eta = QTime::currentTime().addMSecs(
         int(avgRate * (_progressBar->maximum() - value)));
 
-    _etaLineEdit->setText(eta.toString(Qt::LocalDate));
+    _etaLineEdit->setText(QLocale::system().toString(eta));
   }
 }

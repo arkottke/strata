@@ -35,20 +35,22 @@ TableGroupBox::TableGroupBox(const QString &title, QWidget *parent)
 
   // Create the buttons
   _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-  connect(_addButton, SIGNAL(clicked()), this, SLOT(addRow()));
+  connect(_addButton, &QPushButton::clicked, this, &TableGroupBox::addRow);
   _buttonRow->addWidget(_addButton);
   _buttonRow->addSpacing(spacing);
 
   _insertButton = new QPushButton(tr("Insert"));
   _insertButton->setEnabled(false);
-  connect(_insertButton, SIGNAL(clicked()), this, SLOT(insertRow()));
+  connect(_insertButton, &QPushButton::clicked, this,
+          &TableGroupBox::insertRow);
   _buttonRow->addWidget(_insertButton);
   _buttonRow->addSpacing(spacing);
 
   _removeButton =
       new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
   _removeButton->setEnabled(false);
-  connect(_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
+  connect(_removeButton, &QPushButton::clicked, this,
+          &TableGroupBox::removeRow);
   _buttonRow->addWidget(_removeButton);
   _buttonRow->addStretch(1);
 
@@ -69,12 +71,10 @@ void TableGroupBox::setModel(QAbstractTableModel *model) {
   _table->resizeRowsToContents();
   _table->resizeColumnsToContents();
 
-  connect(_table->selectionModel(),
-          SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-          SLOT(cellSelected()));
-  connect(_table->selectionModel(),
-          SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-          SIGNAL(currentChanged(QModelIndex, QModelIndex)));
+  connect(_table->selectionModel(), &QItemSelectionModel::selectionChanged,
+          this, &TableGroupBox::cellSelected);
+  connect(_table->selectionModel(), &QItemSelectionModel::currentChanged, this,
+          &TableGroupBox::currentChanged);
 }
 
 void TableGroupBox::setItemDelegateForColumn(int column,

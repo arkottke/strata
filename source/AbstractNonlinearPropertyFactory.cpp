@@ -28,6 +28,7 @@
 #include <QColor>
 #include <QDebug>
 #include <QJsonArray>
+#include <QMetaType>
 
 AbstractNonlinearPropertyFactory::AbstractNonlinearPropertyFactory(
     QObject *parent)
@@ -153,9 +154,9 @@ auto AbstractNonlinearPropertyFactory::duplicateAt(int row) const
 auto AbstractNonlinearPropertyFactory::duplicateAt(QVariant value) const
     -> NonlinearProperty * {
   int i = -1;
-  if (value.type() == QVariant::Int) {
+  if (value.metaType() == QMetaType::fromType<int>()) {
     i = value.toInt();
-  } else if (value.type() == QVariant::String) {
+  } else if (value.metaType() == QMetaType::fromType<QString>()) {
     // Strings might come from the clipboard and actually be integers
     QString s = value.toString();
 

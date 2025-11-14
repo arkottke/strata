@@ -32,7 +32,8 @@ NonlinearPropertyOutput::NonlinearPropertyOutput(
     NonlinearProperty *nonlinearProperty, OutputCatalog *catalog)
     : AbstractOutput(catalog), _nonlinearProperty(nonlinearProperty) {
   _statistics = new OutputStatistics(this);
-  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_statistics, &OutputStatistics::wasModified, this,
+          &NonlinearPropertyOutput::wasModified);
 }
 
 auto NonlinearPropertyOutput::name() const -> QString {

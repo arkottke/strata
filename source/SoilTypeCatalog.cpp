@@ -34,8 +34,8 @@ SoilTypeCatalog::SoilTypeCatalog(QObject *parent)
     : MyAbstractTableModel(parent) {
   _nlCatalog = new NonlinearPropertyCatalog;
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &SoilTypeCatalog::updateUnits);
 }
 
 auto SoilTypeCatalog::toHtml() const -> QString {
@@ -275,9 +275,9 @@ auto SoilTypeCatalog::rowOf(SoilType *st) const -> int {
 
 auto SoilTypeCatalog::soilTypeOf(QVariant value) -> SoilType * {
   int i = -1;
-  if (value.type() == QVariant::Int) {
+  if (value.metaType() == QMetaType::fromType<int>()) {
     i = value.toInt();
-  } else if (value.type() == QVariant::String) {
+  } else if (value.metaType() == QMetaType::fromType<QString>()) {
     // Strings might come from the clipboard and actually be integers
     QString s = value.toString();
 

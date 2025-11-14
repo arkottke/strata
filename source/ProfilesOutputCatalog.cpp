@@ -63,7 +63,8 @@ ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog)
            << new VerticalEffectiveStressProfileOutput(_outputCatalog);
 
   for (auto *output : _outputs)
-    connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+    connect(output, &AbstractOutput::wasModified, this,
+            &ProfilesOutputCatalog::wasModified);
 }
 
 auto ProfilesOutputCatalog::rowCount(const QModelIndex &parent) const -> int {

@@ -28,10 +28,10 @@
 
 ConfiningStressTableModel::ConfiningStressTableModel(QObject *parent)
     : MyAbstractTableModel(parent), _waterTableDepth(0.0) {
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(computeStress()));
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateHeader()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &ConfiningStressTableModel::computeStress);
+  connect(Units::instance(), &Units::systemChanged, this,
+          &ConfiningStressTableModel::updateHeader);
 }
 
 auto ConfiningStressTableModel::rowCount(const QModelIndex & /* index */) const

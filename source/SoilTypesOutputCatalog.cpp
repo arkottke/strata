@@ -102,16 +102,17 @@ auto SoilTypesOutputCatalog::flags(const QModelIndex &index) const
 void SoilTypesOutputCatalog::setSoilTypeCatalog(
     SoilTypeCatalog *soilTypeCatalog) {
   _soilTypeCatalog = soilTypeCatalog;
-  connect(_soilTypeCatalog, SIGNAL(soilTypeAdded(SoilType *)), this,
-          SLOT(addOutput(SoilType *)));
-  connect(_soilTypeCatalog, SIGNAL(soilTypeRemoved(SoilType *)), this,
-          SLOT(removeOutput(SoilType *)));
+  connect(_soilTypeCatalog, &SoilTypeCatalog::soilTypeAdded, this,
+          &SoilTypesOutputCatalog::addOutput);
+  connect(_soilTypeCatalog, &SoilTypeCatalog::soilTypeRemoved, this,
+          &SoilTypesOutputCatalog::removeOutput);
 }
 
 void SoilTypesOutputCatalog::addOutput(SoilType *soilType) {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   _outputs << new SoilTypeOutput(soilType, _outputCatalog);
-  connect(_outputs.last(), SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_outputs.last(), &SoilTypeOutput::wasModified, this,
+          &AbstractOutputCatalog::wasModified);
   endInsertRows();
 }
 

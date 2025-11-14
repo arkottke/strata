@@ -31,17 +31,17 @@ SoilTypeOutput::SoilTypeOutput(SoilType *soilType, OutputCatalog *catalog)
   _modulus = new NonlinearPropertyOutput(soilType->modulusModel(), catalog);
 
   _modulus->setSoilName(soilType->name());
-  connect(_soilType, SIGNAL(nameChanged(QString)), _modulus,
-          SLOT(setSoilName(QString)));
-  connect(_soilType, SIGNAL(modulusModelChanged(NonlinearProperty *)), _modulus,
-          SLOT(setNonlinearProperty(NonlinearProperty *)));
+  connect(_soilType, &SoilType::nameChanged, _modulus,
+          &NonlinearPropertyOutput::setSoilName);
+  connect(_soilType, &SoilType::modulusModelChanged, _modulus,
+          &NonlinearPropertyOutput::setNonlinearProperty);
 
   _damping = new NonlinearPropertyOutput(soilType->dampingModel(), catalog);
   _damping->setSoilName(soilType->name());
-  connect(_soilType, SIGNAL(nameChanged(QString)), _damping,
-          SLOT(setSoilName(QString)));
-  connect(_soilType, SIGNAL(dampingModelChanged(NonlinearProperty *)), _damping,
-          SLOT(setNonlinearProperty(NonlinearProperty *)));
+  connect(_soilType, &SoilType::nameChanged, _damping,
+          &NonlinearPropertyOutput::setSoilName);
+  connect(_soilType, &SoilType::dampingModelChanged, _damping,
+          &NonlinearPropertyOutput::setNonlinearProperty);
 }
 
 auto SoilTypeOutput::soilType() const -> SoilType * { return _soilType; }

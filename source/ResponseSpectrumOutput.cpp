@@ -35,7 +35,8 @@
 ResponseSpectrumOutput::ResponseSpectrumOutput(OutputCatalog *catalog)
     : AbstractLocationOutput(catalog) {
   _statistics = new OutputStatistics(this);
-  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_statistics, &OutputStatistics::wasModified, this,
+          &ResponseSpectrumOutput::wasModified);
 }
 
 auto ResponseSpectrumOutput::needsPeriod() const -> bool { return true; }

@@ -30,8 +30,8 @@ DimensionLayout::DimensionLayout(QWidget *parent) : QFormLayout(parent) {
   _minSpinBox = new QDoubleSpinBox;
   _minSpinBox->setDecimals(3);
   _minSpinBox->setSingleStep(0.01);
-  connect(_minSpinBox, SIGNAL(valueChanged(double)), this,
-          SLOT(updateMaxMin(double)));
+  connect(_minSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+          &DimensionLayout::updateMaxMin);
 
   addRow(tr("Minimum:"), _minSpinBox);
 
@@ -40,8 +40,8 @@ DimensionLayout::DimensionLayout(QWidget *parent) : QFormLayout(parent) {
   _maxSpinBox->setMaximum(300.);
   _maxSpinBox->setDecimals(3);
   _maxSpinBox->setSingleStep(1);
-  connect(_maxSpinBox, SIGNAL(valueChanged(double)), this,
-          SLOT(updateMinMax(double)));
+  connect(_maxSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+          &DimensionLayout::updateMinMax);
 
   addRow(tr("Maximum:"), _maxSpinBox);
 
@@ -55,28 +55,28 @@ DimensionLayout::DimensionLayout(QWidget *parent) : QFormLayout(parent) {
   _spacingComboBox = new QComboBox;
   _spacingComboBox->addItems(Dimension::spacingList());
 
-  connect(_spacingComboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateSpacing(int)));
+  connect(_spacingComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          this, &DimensionLayout::updateSpacing);
 
   addRow(tr("Spacing:"), _spacingComboBox);
 }
 
 void DimensionLayout::setModel(Dimension *dimension) {
   _minSpinBox->setValue(dimension->min());
-  connect(_minSpinBox, SIGNAL(valueChanged(double)), dimension,
-          SLOT(setMin(double)));
+  connect(_minSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          dimension, &Dimension::setMin);
 
   _maxSpinBox->setValue(dimension->max());
-  connect(_maxSpinBox, SIGNAL(valueChanged(double)), dimension,
-          SLOT(setMax(double)));
+  connect(_maxSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          dimension, &Dimension::setMax);
 
   _sizeSpinBox->setValue(dimension->size());
-  connect(_sizeSpinBox, SIGNAL(valueChanged(int)), dimension,
-          SLOT(setSize(int)));
+  connect(_sizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), dimension,
+          &Dimension::setSize);
 
   _spacingComboBox->setCurrentIndex(dimension->spacing());
-  connect(_spacingComboBox, SIGNAL(currentIndexChanged(int)), dimension,
-          SLOT(setSpacing(int)));
+  connect(_spacingComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          dimension, qOverload<int>(&Dimension::setSpacing));
 }
 
 void DimensionLayout::setSuffix(const QString &suffix) {

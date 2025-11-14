@@ -21,7 +21,7 @@ if (NOT 7Z_PATH)
 endif()
 
 # Paths to Qt DLLs
-get_target_property(QtCore_LOCATION Qt5::Core LOCATION)
+get_target_property(QtCore_LOCATION Qt6::Core LOCATION)
 get_filename_component(QT_DLL_DIR ${QtCore_LOCATION} PATH)
 
 # Compiler Runtime DLLs
@@ -48,13 +48,13 @@ endif()
 
 # Qt Libraries
 install(FILES
-    ${QT_DLL_DIR}/Qt5Core.dll
-    ${QT_DLL_DIR}/Qt5Gui.dll
-    ${QT_DLL_DIR}/Qt5OpenGL.dll
-    ${QT_DLL_DIR}/Qt5PrintSupport.dll
-    ${QT_DLL_DIR}/Qt5Svg.dll
-    ${QT_DLL_DIR}/Qt5Widgets.dll
-    ${QT_DLL_DIR}/Qt5Xml.dll
+    ${QT_DLL_DIR}/Qt6Core.dll
+    ${QT_DLL_DIR}/Qt6Gui.dll
+    ${QT_DLL_DIR}/Qt6OpenGL.dll
+    ${QT_DLL_DIR}/Qt6PrintSupport.dll
+    ${QT_DLL_DIR}/Qt6Svg.dll
+    ${QT_DLL_DIR}/Qt6Widgets.dll
+    ${QT_DLL_DIR}/Qt6Xml.dll
     ${CMAKE_SOURCE_DIR}/win/qt.conf
     DESTINATION .
     COMPONENT dependencies

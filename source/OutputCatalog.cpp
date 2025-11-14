@@ -42,7 +42,7 @@
 OutputCatalog::OutputCatalog(QObject *parent)
     : QAbstractTableModel(parent), _selectedOutput(0) {
   _log = new TextLog(this);
-  connect(_log, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_log, &TextLog::wasModified, this, &OutputCatalog::wasModified);
 
   _frequency = new Dimension(this);
   _frequency->setMin(0.05);
@@ -60,40 +60,42 @@ OutputCatalog::OutputCatalog(QObject *parent)
   _periodIsNeeded = false;
 
   _profilesOutputCatalog = new ProfilesOutputCatalog(this);
-  connect(_profilesOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_profilesOutputCatalog, &ProfilesOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
   _catalogs << _profilesOutputCatalog;
 
   _ratiosOutputCatalog = new RatiosOutputCatalog(this);
-  connect(_ratiosOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
-  connect(_ratiosOutputCatalog, SIGNAL(periodIsNeededChanged(bool)), this,
-          SLOT(setPeriodIsNeeded(bool)));
-  connect(_ratiosOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)), this,
-          SLOT(setFrequencyIsNeeded(bool)));
+  connect(_ratiosOutputCatalog, &RatiosOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
+  connect(_ratiosOutputCatalog, &RatiosOutputCatalog::periodIsNeededChanged,
+          this, &OutputCatalog::setPeriodIsNeeded);
+  connect(_ratiosOutputCatalog, &RatiosOutputCatalog::frequencyIsNeededChanged,
+          this, &OutputCatalog::setFrequencyIsNeeded);
 
   _catalogs << _ratiosOutputCatalog;
 
   _soilTypesOutputCatalog = new SoilTypesOutputCatalog(this);
-  connect(_soilTypesOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_soilTypesOutputCatalog, &SoilTypesOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
   _catalogs << _soilTypesOutputCatalog;
 
   _spectraOutputCatalog = new SpectraOutputCatalog(this);
-  connect(_spectraOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
-  connect(_spectraOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)), this,
-          SLOT(setFrequencyIsNeeded(bool)));
-  connect(_spectraOutputCatalog, SIGNAL(periodIsNeededChanged(bool)), this,
-          SLOT(setPeriodIsNeeded(bool)));
+  connect(_spectraOutputCatalog, &SpectraOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
+  connect(_spectraOutputCatalog,
+          &SpectraOutputCatalog::frequencyIsNeededChanged, this,
+          &OutputCatalog::setFrequencyIsNeeded);
+  connect(_spectraOutputCatalog, &SpectraOutputCatalog::periodIsNeededChanged,
+          this, &OutputCatalog::setPeriodIsNeeded);
 
   _catalogs << _spectraOutputCatalog;
 
   _timeSeriesOutputCatalog = new TimeSeriesOutputCatalog(this);
-  connect(_timeSeriesOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
-  connect(_timeSeriesOutputCatalog, SIGNAL(timesAreNeededChanged(bool)), this,
-          SLOT(setTimesAreNeeded(bool)));
+  connect(_timeSeriesOutputCatalog, &TimeSeriesOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
+  connect(_timeSeriesOutputCatalog,
+          &TimeSeriesOutputCatalog::timesAreNeededChanged, this,
+          &OutputCatalog::setTimesAreNeeded);
 
   _catalogs << _timeSeriesOutputCatalog;
 }
@@ -373,7 +375,8 @@ void OutputCatalog::initialize(int siteCount, MotionLibrary *motionLibrary) {
       if (!output->needsTime() ||
           (output->needsTime() &&
            motionLibrary->approach() == MotionLibrary::TimeSeries)) {
-        connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+        connect(output, &AbstractOutput::wasModified, this,
+                &OutputCatalog::wasModified);
         _outputs << output;
       }
     }

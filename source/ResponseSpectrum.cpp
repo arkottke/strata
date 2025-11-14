@@ -29,8 +29,8 @@
 
 ResponseSpectrum::ResponseSpectrum(QObject *parent)
     : MyAbstractTableModel(parent), _modified(false), _damping(0) {
-  connect(this, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this,
-          SIGNAL(wasModified()));
+  connect(this, &ResponseSpectrum::dataChanged, this,
+          &ResponseSpectrum::wasModified);
 }
 
 auto ResponseSpectrum::modified() const -> bool { return _modified; }

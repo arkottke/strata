@@ -38,8 +38,8 @@ VelocityVariation::VelocityVariation(gsl_rng *rng,
       _stdev(0), _correlModel(Custom), _rng(rng), _correlInitial(0),
       _correlFinal(0), _correlDelta(0), _correlIntercept(0), _correlExponent(0),
       _profileRandomizer(profileRandomizer) {
-  connect(_profileRandomizer, SIGNAL(enabledChanged(bool)), this,
-          SLOT(updateEnabled()));
+  connect(_profileRandomizer, &ProfileRandomizer::enabledChanged, this,
+          &VelocityVariation::updateEnabled);
   setStdevModel(USGS_C);
   setCorrelModel(USGS_C);
 }

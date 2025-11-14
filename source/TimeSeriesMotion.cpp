@@ -32,7 +32,7 @@
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonValue>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 
 #ifdef USE_FFTW
@@ -389,35 +389,39 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
       setDescription(stream.readLine());
       Q_UNUSED(stream.readLine());
 
-      QList<QRegExp> patterns = {
+      QList<QRegularExpression> patterns = {
           // Example: 8751    0.0040    NPTS, DT
-          QRegExp("(\\d+)\\s+([0-9.]+)\\s+NPTS, DT"),
+          QRegularExpression("(\\d+)\\s+([0-9.]+)\\s+NPTS, DT"),
           // Example: NPTS=   7998, DT=   .0050 SEC,
           // Example: NPTS=   3666, DT=   0.025 SEC
-          QRegExp("NPTS=\\s+(\\d+), DT=\\s+([0-9.]+) SEC,?"),
+          QRegularExpression("NPTS=\\s+(\\d+), DT=\\s+([0-9.]+) SEC,?"),
       };
 
       QString line = stream.readLine();
       bool success = false;
-      for (QRegExp &pattern : patterns) {
-        int pos = pattern.indexIn(line);
-        if (pos < 0) {
-          continue;
-        }
+      for (QRegularExpression &pattern : patterns) {
+        bool ok;
+        int pos = 0;
+        // FIXME
+        // int pos = pattern.indexIn(line);
+        // if (pos < 0) {
+        //   continue;
+        // }
 
-        bool b;
-        const int count = pattern.cap(1).toInt(&b);
-        if (b && count > 1) {
-          // Greater than one condition to catch if an acceleration value is
-          // read
-          setPointCount(count);
-        } else {
-          qCritical() << "Unable to parse the point count in AT2 file!";
-          return false;
-        }
+        // bool b;
+        // const int count = pattern.cap(1).toInt(&b);
+        // if (b && count > 1) {
+        //   // Greater than one condition to catch if an acceleration value is
+        //   // read
+        //   setPointCount(count);
+        // } else {
+        //   qCritical() << "Unable to parse the point count in AT2 file!";
+        //   return false;
+        // }
 
-        const double timeStep = pattern.cap(2).toDouble(&b);
-        if (b) {
+        // const double timeStep = pattern.cap(2).toDouble(&b);
+        const double timeStep = 0.005;
+        if (ok) {
           setTimeStep(timeStep);
         } else {
           qCritical() << "Unable to parse the time step in AT2 file!";
@@ -485,14 +489,15 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
     }
 
     // Read the line and split the line
-    QRegExp rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
+    QRegularExpression rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
     int pos = 0;
     QStringList row;
 
-    while ((pos = rx.indexIn(line, pos)) != -1) {
-      row << rx.cap(1);
-      pos += rx.matchedLength();
-    }
+    // FIXME
+    // while ((pos = rx.indexIn(line, pos)) != -1) {
+    //   row << rx.cap(1);
+    //   pos += rx.matchedLength();
+    // }
 
     // Process the row based on the format
     bool ok;

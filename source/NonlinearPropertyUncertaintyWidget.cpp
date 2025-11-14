@@ -62,16 +62,16 @@ NonlinearPropertyUncertaintyWidget::NonlinearPropertyUncertaintyWidget(
 void NonlinearPropertyUncertaintyWidget::setModel(
     NonlinearPropertyUncertainty *model) {
   _lnStdevSpinBox->setValue(model->lnStdev());
-  connect(_lnStdevSpinBox, SIGNAL(valueChanged(double)), model,
-          SLOT(setLnStdev(double)));
+  connect(_lnStdevSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          model, &NonlinearPropertyUncertainty::setLnStdev);
 
   _minSpinBox->setValue(model->min());
-  connect(_minSpinBox, SIGNAL(valueChanged(double)), model,
-          SLOT(setMin(double)));
+  connect(_minSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), model,
+          &NonlinearPropertyUncertainty::setMin);
 
   _maxSpinBox->setValue(model->max());
-  connect(_maxSpinBox, SIGNAL(valueChanged(double)), model,
-          SLOT(setMax(double)));
+  connect(_maxSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), model,
+          &NonlinearPropertyUncertainty::setMax);
 }
 
 void NonlinearPropertyUncertaintyWidget::setDecimals(int prec) {

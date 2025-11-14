@@ -35,8 +35,8 @@ LayerThicknessVariation::LayerThicknessVariation(
     gsl_rng *rng, ProfileRandomizer *profileRandomizer)
     : _enabled(false), _model(Custom), _coeff(0), _initial(0), _exponent(0),
       _rng(rng), _profileRandomizer(profileRandomizer) {
-  connect(_profileRandomizer, SIGNAL(enabledChanged(bool)), this,
-          SLOT(updateEnabled()));
+  connect(_profileRandomizer, &ProfileRandomizer::enabledChanged, this,
+          &LayerThicknessVariation::updateEnabled);
   setModel(Default);
 }
 

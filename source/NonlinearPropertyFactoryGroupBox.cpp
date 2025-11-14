@@ -34,14 +34,16 @@ NonlinearPropertyFactoryGroupBox::NonlinearPropertyFactoryGroupBox(
 
   // Add push button
   auto *pushButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-  connect(pushButton, SIGNAL(clicked()), this, SLOT(addRow()));
+  connect(pushButton, &QPushButton::clicked, this,
+          &NonlinearPropertyFactoryGroupBox::addRow);
   layout->addWidget(pushButton, 0, 0);
 
   // Remove push button
   _removeButton =
       new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
   _removeButton->setEnabled(false);
-  connect(_removeButton, SIGNAL(clicked()), this, SLOT(removeRow()));
+  connect(_removeButton, &QPushButton::clicked, this,
+          &NonlinearPropertyFactoryGroupBox::removeRow);
   layout->addWidget(_removeButton, 0, 1);
 
   // List view
@@ -49,11 +51,10 @@ NonlinearPropertyFactoryGroupBox::NonlinearPropertyFactoryGroupBox(
   _view->setSelectionMode(QAbstractItemView::SingleSelection);
   _view->setModel(_model);
 
-  connect(_view->selectionModel(),
-          SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-          SLOT(updateCurrent(QModelIndex, QModelIndex)));
-  connect(_model, SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-          SLOT(modelsInserted(QModelIndex, int, int)));
+  connect(_view->selectionModel(), &QItemSelectionModel::currentChanged, this,
+          &NonlinearPropertyFactoryGroupBox::updateCurrent);
+  connect(_model, &QAbstractItemModel::rowsInserted, this,
+          &NonlinearPropertyFactoryGroupBox::modelsInserted);
 
   layout->addWidget(_view, 1, 0, 1, 3);
   setLayout(layout);

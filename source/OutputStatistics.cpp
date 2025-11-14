@@ -30,7 +30,7 @@
 
 OutputStatistics::OutputStatistics(AbstractOutput *output)
     : QObject(output), _output(output), _distribution(LogNormal) {
-  connect(_output, SIGNAL(cleared()), this, SLOT(clear()));
+  connect(_output, &AbstractOutput::cleared, this, &OutputStatistics::clear);
 }
 
 void OutputStatistics::calculate() {

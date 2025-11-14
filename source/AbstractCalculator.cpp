@@ -114,13 +114,15 @@ auto AbstractCalculator::calcWaves() -> bool {
 
   // Compute the complex wave numbers of the system
   for (int i = 0; i <= _nsl; ++i) {
+    const double density_i = _site->density(i);
     for (int j = 0; j < _nf; ++j) {
-      _waveNum[i][j] = _motion->angFreqAt(j) /
-                       sqrt(_shearMod.at(i).at(j) / _site->density(i));
+      _waveNum[i][j] =
+          _motion->angFreqAt(j) / sqrt(_shearMod[i][j] / density_i);
     }
   }
 
   for (int i = 0; i < _nsl; ++i) {
+    const double thickness = _site->subLayers().at(i).thickness();
     for (int j = 0; j < _nf; ++j) {
       // In the top surface layer, the up-going and down-going waves have
       // an amplitude of 1 as they are completely reflected at the
@@ -136,21 +138,31 @@ auto AbstractCalculator::calcWaves() -> bool {
         _waveA[i + 1][j] = 1.0;
         _waveB[i + 1][j] = 1.0;
       } else {
+        // Cache complex values to avoid repeated lookups
+        const std::complex<double> &waveNum_i_j = _waveNum[i][j];
+        const std::complex<double> &waveNum_ip1_j = _waveNum[i + 1][j];
+        const std::complex<double> &shearMod_i_j = _shearMod[i][j];
+        const std::complex<double> &shearMod_ip1_j = _shearMod[i + 1][j];
+        const std::complex<double> &waveA_i_j = _waveA[i][j];
+        const std::complex<double> &waveB_i_j = _waveB[i][j];
+
         // Complex impedence
-        cImped = (_waveNum.at(i).at(j) * _shearMod.at(i).at(j)) /
-                 (_waveNum.at(i + 1).at(j) * _shearMod.at(i + 1).at(j));
+        cImped =
+            (waveNum_i_j * shearMod_i_j) / (waveNum_ip1_j * shearMod_ip1_j);
 
         // Complex term to simplify equations -- uses full layer height
-        cTerm = std::complex<double>(0.0, 1.0) * _waveNum.at(i).at(j) *
-                _site->subLayers().at(i).thickness();
+        cTerm = std::complex<double>(0.0, 1.0) * waveNum_i_j * thickness;
 
-        _waveA[i + 1][j] =
-            0.5 * _waveA.at(i).at(j) * (1.0 + cImped) * exp(cTerm) +
-            0.5 * _waveB.at(i).at(j) * (1.0 - cImped) * exp(-cTerm);
+        const std::complex<double> exp_cTerm = exp(cTerm);
+        const std::complex<double> exp_neg_cTerm = exp(-cTerm);
+        const std::complex<double> one_plus_cImped = 1.0 + cImped;
+        const std::complex<double> one_minus_cImped = 1.0 - cImped;
 
-        _waveB[i + 1][j] =
-            0.5 * _waveA.at(i).at(j) * (1.0 - cImped) * exp(cTerm) +
-            0.5 * _waveB.at(i).at(j) * (1.0 + cImped) * exp(-cTerm);
+        _waveA[i + 1][j] = 0.5 * waveA_i_j * one_plus_cImped * exp_cTerm +
+                           0.5 * waveB_i_j * one_minus_cImped * exp_neg_cTerm;
+
+        _waveB[i + 1][j] = 0.5 * waveA_i_j * one_minus_cImped * exp_cTerm +
+                           0.5 * waveB_i_j * one_plus_cImped * exp_neg_cTerm;
       }
     }
   }
@@ -191,23 +203,27 @@ auto AbstractCalculator::calcStrainTf(const Location &inLocation,
 
   const int l = outLocation.layer();
   const double gravity = Units::instance()->gravity();
+  const double outDepth = outLocation.depth();
+  const double density_l = _site->density(l);
+  const std::complex<double> gravity_cmplx(gravity, 0.0);
+  const std::complex<double> imag_unit(0.0, 1.0);
 
   // Strain is inversely proportional to the complex shear-wave velocity
   for (int i = 0; i < tf.size(); ++i) {
-    cTerm = std::complex<double>(0.0, 1.0) *
-            _waveNum.at(outLocation.layer()).at(i) * outLocation.depth();
+    cTerm = imag_unit * _waveNum[l][i] * outDepth;
+
+    const std::complex<double> exp_cTerm = exp(cTerm);
+    const std::complex<double> exp_neg_cTerm = exp(-cTerm);
 
     // Compute the numerator cannot be computed using waves since it is
     // A-B. The numerator includes gravity to correct for the Vs scaling.
-    numer = std::complex<double>(gravity, 0) *
-            (_waveA.at(outLocation.layer()).at(i) * exp(cTerm) -
-             _waveB.at(outLocation.layer()).at(i) * exp(-cTerm));
+    numer = gravity_cmplx *
+            (_waveA[l][i] * exp_cTerm - _waveB[l][i] * exp_neg_cTerm);
 
-    denom = sqrt(_shearMod.at(l).at(i) / _site->density(l)) *
-            waves(i, inLocation, inputType);
+    denom = sqrt(_shearMod[l][i] / density_l) * waves(i, inLocation, inputType);
 
     value = numer / denom;
-    tf[i] = (value == value) ? value : 0;
+    tf[i] = (value == value) ? value : 0; // Check for NaN
   }
 
   return tf;

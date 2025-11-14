@@ -35,7 +35,8 @@ AbstractRatioOutput::AbstractRatioOutput(OutputCatalog *catalog)
   _outType = AbstractMotion::Outcrop;
 
   _statistics = new OutputStatistics(this);
-  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_statistics, &OutputStatistics::wasModified, this,
+          &AbstractRatioOutput::wasModified);
 }
 
 auto AbstractRatioOutput::fullName() const -> QString {

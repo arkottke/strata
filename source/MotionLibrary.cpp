@@ -37,8 +37,8 @@ MotionLibrary::MotionLibrary(QObject *parent) : MyAbstractTableModel(parent) {
   _approach = TimeSeries;
   _saveData = true;
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &MotionLibrary::updateUnits);
 }
 
 auto MotionLibrary::approachList() -> QStringList {

@@ -89,63 +89,64 @@ void MainWindow::createActions() {
   _newAction =
       new QAction(QIcon(":/images/document-new.svg"), tr("&New"), this);
   _newAction->setShortcut(tr("Ctrl+n"));
-  connect(_newAction, SIGNAL(triggered()), this, SLOT(newModel()));
+  connect(_newAction, &QAction::triggered, this, &MainWindow::newModel);
 
   // Open
   _openAction =
       new QAction(QIcon(":/images/document-open.svg"), tr("&Open..."), this);
   _openAction->setShortcut(tr("Ctrl+o"));
-  connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
+  connect(_openAction, &QAction::triggered, this, [this]() { open(); });
 
   // Save
   _saveAction =
       new QAction(QIcon(":/images/document-save.svg"), tr("&Save"), this);
   _saveAction->setShortcut(tr("Ctrl+s"));
-  connect(_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+  connect(_saveAction, &QAction::triggered, this, &MainWindow::save);
   // Save As
   _saveAsAction = new QAction(QIcon(":/images/document-save-as.svg"),
                               tr("Save &As..."), this);
-  connect(_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+  connect(_saveAsAction, &QAction::triggered, this, &MainWindow::saveAs);
 
   // Export the data to text file
   _exportAction = new QAction(QIcon(":/images/document-export.svg"),
                               tr("&Export..."), this);
   _exportAction->setEnabled(false);
-  connect(_exportAction, SIGNAL(triggered()), this, SLOT(exportData()));
+  connect(_exportAction, &QAction::triggered, this, &MainWindow::exportData);
 
   // Print
   _printAction =
       new QAction(QIcon(":/images/document-print.svg"), tr("&Print..."), this);
   _printAction->setShortcut(tr("Ctrl+p"));
-  connect(_printAction, SIGNAL(triggered()), this, SLOT(print()));
+  connect(_printAction, &QAction::triggered, this, &MainWindow::print);
 
   // Print to pdf
   _printToPdfAction = new QAction(tr("&Print to PDF..."), this);
-  connect(_printToPdfAction, SIGNAL(triggered()), this, SLOT(printToPdf()));
+  connect(_printToPdfAction, &QAction::triggered, this,
+          &MainWindow::printToPdf);
 
   // Exit
   _exitAction = new QAction(tr("E&xit"), this);
-  connect(_exitAction, SIGNAL(triggered()), this, SLOT(close()));
+  connect(_exitAction, &QAction::triggered, this, &MainWindow::close);
 
   // Non Linear Curve Database
   _nlCurveDatabaseAction =
       new QAction(QIcon(":/images/system-file-manager.svg"),
                   tr("Add/Remove Nonlinear Curves"), this);
-  connect(_nlCurveDatabaseAction, SIGNAL(triggered()), this,
-          SLOT(showNonlinearDialog()));
+  connect(_nlCurveDatabaseAction, &QAction::triggered, this,
+          &MainWindow::showNonlinearDialog);
 
   // Confining Stress Calculator
   _confiningStressDialogAction =
       new QAction(QIcon(":/images/accessories-calculator.svg"),
                   tr("Confining Stress Calculator"), this);
-  connect(_confiningStressDialogAction, SIGNAL(triggered()), this,
-          SLOT(showConfiningStressDialog()));
+  connect(_confiningStressDialogAction, &QAction::triggered, this,
+          &MainWindow::showConfiningStressDialog);
 
   // Help Action
   _helpAction =
       new QAction(QIcon(":/images/help-browser.svg"), tr("&User Manual"), this);
   _helpAction->setShortcut(tr("F1"));
-  connect(_helpAction, SIGNAL(triggered()), this, SLOT(help()));
+  connect(_helpAction, &QAction::triggered, this, &MainWindow::help);
 
   // Check for updates
   // _updateAction = new QAction(tr("&Check for updates..."), this);
@@ -154,20 +155,21 @@ void MainWindow::createActions() {
   // About action
   _aboutAction = new QAction(tr("&About"), this);
   _aboutAction->setStatusTip(tr("Show the application's About box"));
-  connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+  connect(_aboutAction, &QAction::triggered, this, &MainWindow::about);
 }
 
 void MainWindow::createPages() {
   _tabWidget = new QTabWidget;
-  connect(_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+  connect(_tabWidget, &QTabWidget::currentChanged, this,
+          &MainWindow::tabChanged);
 
   // Create the pages
   _pages << new GeneralPage;
   _tabWidget->addTab(_pages.last(), tr("General Settings"));
 
   _pages << new SoilTypePage;
-  connect(_pages.last(), SIGNAL(linkActivated(QString)), _helpDialog,
-          SLOT(gotoLink(QString)));
+  connect(_pages.last(), &AbstractPage::linkActivated, _helpDialog,
+          &HelpDialog::gotoLink);
   _tabWidget->addTab(_pages.last(), tr("Soil Types"));
 
   _pages << new SoilProfilePage;
@@ -180,7 +182,7 @@ void MainWindow::createPages() {
   _tabWidget->addTab(_pages.last(), tr("Output Specification"));
 
   auto *cp = new ComputePage;
-  connect(cp, SIGNAL(saveRequested()), this, SLOT(save()));
+  connect(cp, &ComputePage::saveRequested, this, &MainWindow::save);
   _pages << cp;
   _tabWidget->addTab(_pages.last(), tr("Compute"));
 
@@ -542,7 +544,7 @@ void MainWindow::tabChanged(int tab) {
     layout->addWidget(buttons);
 
     QDialog dialog(this);
-    connect(buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     dialog.setLayout(layout);
 
     if (dialog.exec())
@@ -562,21 +564,22 @@ void MainWindow::setModel(SiteResponseModel *model) {
     page->setModel(_model);
 
   updateTabs();
-  connect(_readOnlyAction, SIGNAL(triggered()), _model, SLOT(clearResults()));
+  connect(_readOnlyAction, &QAction::triggered, _model,
+          &SiteResponseModel::clearResults);
   setReadOnly(_model->hasResults());
-  connect(_model, SIGNAL(hasResultsChanged(bool)), this,
-          SLOT(setReadOnly(bool)));
+  connect(_model, &SiteResponseModel::hasResultsChanged, this,
+          &MainWindow::setReadOnly);
 
   setWindowModified(false);
-  connect(_model, SIGNAL(modifiedChanged(bool)), this,
-          SLOT(setWindowModified(bool)));
+  connect(_model, &SiteResponseModel::modifiedChanged, this,
+          &MainWindow::setWindowModified);
 
   updateWindowTitle(_model->fileName());
-  connect(_model, SIGNAL(fileNameChanged(QString)), this,
-          SLOT(updateWindowTitle(QString)));
+  connect(_model, &SiteResponseModel::fileNameChanged, this,
+          &MainWindow::updateWindowTitle);
 
-  connect(_model, SIGNAL(started()), this, SLOT(updateTabs()));
-  connect(_model, SIGNAL(finished()), this, SLOT(updateTabs()));
+  connect(_model, &SiteResponseModel::started, this, &MainWindow::updateTabs);
+  connect(_model, &SiteResponseModel::finished, this, &MainWindow::updateTabs);
 
   // During this process clear() is called on the OutputCatalog which flags
   // the SiteResponseModel as being modified. We should reset this flag.

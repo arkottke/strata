@@ -55,23 +55,24 @@ SoilProfile::SoilProfile(SiteResponseModel *parent)
   MyRandomNumGenerator *randNumGen = _siteResponseModel->randNumGen();
 
   _bedrock = new RockLayer;
-  connect(_bedrock, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_bedrock, &RockLayer::wasModified, this, &SoilProfile::wasModified);
 
   _profileRandomizer = new ProfileRandomizer(randNumGen->gsl_pointer(), this);
-  connect(_profileRandomizer, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_profileRandomizer, &ProfileRandomizer::wasModified, this,
+          &SoilProfile::wasModified);
 
   _nonlinearPropertyRandomizer =
       new NonlinearPropertyRandomizer(randNumGen->gsl_pointer(), this);
-  connect(_nonlinearPropertyRandomizer, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_nonlinearPropertyRandomizer,
+          &NonlinearPropertyRandomizer::wasModified, this,
+          &SoilProfile::wasModified);
 
   _soilTypeCatalog = new SoilTypeCatalog;
-  connect(_soilTypeCatalog, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this,
-          SIGNAL(wasModified()));
+  connect(_soilTypeCatalog, &SoilTypeCatalog::dataChanged, this,
+          &SoilProfile::wasModified);
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &SoilProfile::updateUnits);
 
   _isVaried = false;
   _profileCount = 100;

@@ -44,7 +44,8 @@ AbstractProfileOutput::AbstractProfileOutput(OutputCatalog *catalog,
     _interp = new LinearOutputInterpolater;
 
   _statistics = new OutputStatistics(this);
-  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_statistics, &OutputStatistics::wasModified, this,
+          &AbstractProfileOutput::wasModified);
 }
 
 auto AbstractProfileOutput::fullName() const -> QString {

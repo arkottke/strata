@@ -14,7 +14,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.10)
 
 # Default configuration values. These must be before the project command or
 # they won't work in Windows.
@@ -48,26 +48,30 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 option(ADVANCED_FEATURES "Compile with advanced features" ON)
 
 
-if(APPLE AND EXISTS /usr/local/opt/qt5)
-	# Homebrew installs Qt5 (up to at least 5.9.1) in
-	# /usr/local/opt/qt5, ensure it can be found by CMake since
+# Required Qt5.16+ for Qt6 compatibility
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
+
+
+if(APPLE AND EXISTS /usr/local/opt/qt6)
+	# Homebrew installs Qt6 (up to at least 5.9.1) in
+	# /usr/local/opt/qt6, ensure it can be found by CMake since
 	# it is not in the default /usr/local prefix.
-	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt6")
 endif()
 
+# Enable the C++17 standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Configure libraries
-find_package(Qt5PrintSupport REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Xml REQUIRED)
-# find_package(Qt5Test REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport)
 find_package(GSL REQUIRED)
 find_package(Qwt REQUIRED)
 
+qt_standard_project_setup()
+
 include_directories(${GSL_INCLUDE_DIRS} ${QWT_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
-
-# Enable the C++14 standard
-set(CMAKE_CXX_STANDARD 14)
 
 if (ADVANCED_FEATURES)
     add_definitions(-DADVANCED_FEATURES)
@@ -86,10 +90,6 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-
-# Testing configuration
-enable_testing()
-set(TEST_LINK_LIBRARIES Qt5::Test)
 
 add_subdirectory(resources)
 add_subdirectory(source)

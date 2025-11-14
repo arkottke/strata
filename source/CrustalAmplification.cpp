@@ -33,8 +33,8 @@
 CrustalAmplification::CrustalAmplification(QObject *parent)
     : MyAbstractTableModel(parent), _source(Default) {
   _crustalModel = new CrustalModel;
-  connect(_crustalModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this,
-          SLOT(calculate()));
+  connect(_crustalModel, &CrustalModel::dataChanged, this,
+          &CrustalAmplification::calculate);
 
   _interpolator = 0;
   _accelerator = gsl_interp_accel_alloc();

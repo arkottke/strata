@@ -82,12 +82,15 @@ TimeSeriesMotionDialog::TimeSeriesMotionDialog(TimeSeriesMotion *motion,
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel |
             QDialogButtonBox::Apply | QDialogButtonBox::Help,
         Qt::Horizontal, this);
-    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
-    connect(buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this,
-            SLOT(apply()));
+    connect(buttonBox, &QDialogButtonBox::helpRequested, this,
+            &TimeSeriesMotionDialog::help);
+    connect(buttonBox, &QDialogButtonBox::accepted, this,
+            &TimeSeriesMotionDialog::tryAccept);
+    connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,
+            this, &TimeSeriesMotionDialog::apply);
   }
-  connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  connect(buttonBox, &QDialogButtonBox::rejected, this,
+          &TimeSeriesMotionDialog::reject);
 
   layout->addWidget(buttonBox);
 
@@ -219,7 +222,7 @@ void TimeSeriesMotionDialog::tryAccept() {
 void TimeSeriesMotionDialog::apply() {
   // Clear the plots
   for (auto *curve : {_atsCurve, _saCurve, _fasCurve}) {
-    curve->setSamples(QVector<double>(), QVector<double>());
+    curve->setSamples(QList<double>().data(), QList<double>().data(), 0);
   }
 
   if (tryApply()) {
@@ -237,7 +240,8 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   auto *pushButton = new QPushButton(tr("&File..."));
   pushButton->setWhatsThis(tr("Opens a dialog to select the file."));
   pushButton->setDisabled(readOnly);
-  connect(pushButton, SIGNAL(clicked()), this, SLOT(openFile()));
+  connect(pushButton, &QPushButton::clicked, this,
+          &TimeSeriesMotionDialog::openFile);
   layout->addWidget(pushButton, 0, 0);
 
   _fileNameLineEdit = new QLineEdit;
@@ -254,10 +258,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _descripLineEdit->setText(_motion->description());
   _descripLineEdit->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(descriptionChanged(QString)), _descripLineEdit,
-          SLOT(setText(QString)));
-  connect(_descripLineEdit, SIGNAL(textChanged(QString)), _motion,
-          SLOT(setDescription(QString)));
+  connect(_motion, &TimeSeriesMotion::descriptionChanged, _descripLineEdit,
+          &QLineEdit::setText);
+  connect(_descripLineEdit, &QLineEdit::textChanged, _motion,
+          &TimeSeriesMotion::setDescription);
 
   layout->addWidget(new QLabel(tr("Description:")), 1, 0);
   layout->addWidget(_descripLineEdit, 1, 1, 1, 8);
@@ -270,10 +274,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _pointCountSpinBox->setValue(_motion->pointCount());
   _pointCountSpinBox->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(pointCountChanged(int)), _pointCountSpinBox,
-          SLOT(setValue(int)));
-  connect(_pointCountSpinBox, SIGNAL(valueChanged(int)), _motion,
-          SLOT(setPointCount(int)));
+  connect(_motion, &TimeSeriesMotion::pointCountChanged, _pointCountSpinBox,
+          &QSpinBox::setValue);
+  connect(_pointCountSpinBox, qOverload<int>(&QSpinBox::valueChanged), _motion,
+          &TimeSeriesMotion::setPointCount);
 
   layout->addWidget(new QLabel(tr("Point count:")), 2, 0);
   layout->addWidget(_pointCountSpinBox, 2, 1);
@@ -287,10 +291,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _timeStepSpinBox->setValue(_motion->timeStep());
   _timeStepSpinBox->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(timeStepChanged(double)), _timeStepSpinBox,
-          SLOT(setValue(double)));
-  connect(_timeStepSpinBox, SIGNAL(valueChanged(double)), _motion,
-          SLOT(setTimeStep(double)));
+  connect(_motion, &TimeSeriesMotion::timeStepChanged, _timeStepSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(_timeStepSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          _motion, &TimeSeriesMotion::setTimeStep);
 
   layout->addWidget(new QLabel(tr("Time step:")), 2, 2);
   layout->addWidget(_timeStepSpinBox, 2, 3);
@@ -304,10 +308,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _scaleSpinBox->setValue(_motion->scale());
   _scaleSpinBox->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(scaleChanged(double)), _scaleSpinBox,
-          SLOT(setValue(double)));
-  connect(_scaleSpinBox, SIGNAL(valueChanged(double)), _motion,
-          SLOT(setScale(double)));
+  connect(_motion, &TimeSeriesMotion::scaleChanged, _scaleSpinBox,
+          &QDoubleSpinBox::setValue);
+  connect(_scaleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          _motion, &TimeSeriesMotion::setScale);
 
   layout->addWidget(new QLabel(tr("Scale factor:")), 2, 6);
   layout->addWidget(_scaleSpinBox, 2, 7);
@@ -322,12 +326,12 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _formatComboBox->setCurrentIndex(_motion->format());
   _formatComboBox->setEnabled(!readOnly);
 
-  connect(_formatComboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateDataColumn(int)));
-  connect(_motion, SIGNAL(formatChanged(int)), _formatComboBox,
-          SLOT(setCurrentIndex(int)));
-  connect(_formatComboBox, SIGNAL(currentIndexChanged(int)), _motion,
-          SLOT(setFormat(int)));
+  connect(_formatComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          this, &TimeSeriesMotionDialog::updateDataColumn);
+  connect(_motion, &TimeSeriesMotion::formatChanged, _formatComboBox,
+          &QComboBox::setCurrentIndex);
+  connect(_formatComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          _motion, qOverload<int>(&TimeSeriesMotion::setFormat));
 
   layout->addWidget(new QLabel(tr("Format:")), 3, 0);
   layout->addWidget(_formatComboBox, 3, 1);
@@ -339,10 +343,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _dataColSpinBox->setValue(_motion->dataColumn());
   _dataColSpinBox->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(dataColumnChanged(int)), _dataColSpinBox,
-          SLOT(setValue(int)));
-  connect(_dataColSpinBox, SIGNAL(valueChanged(int)), _motion,
-          SLOT(setDataColumn(int)));
+  connect(_motion, &TimeSeriesMotion::dataColumnChanged, _dataColSpinBox,
+          &QSpinBox::setValue);
+  connect(_dataColSpinBox, qOverload<int>(&QSpinBox::valueChanged), _motion,
+          &TimeSeriesMotion::setDataColumn);
 
   layout->addWidget(new QLabel(tr("Data column:")), 3, 2);
   layout->addWidget(_dataColSpinBox, 3, 3);
@@ -352,10 +356,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _unitsComboBox->setWhatsThis(tr("Units of the time series."));
   _unitsComboBox->addItems(TimeSeriesMotion::inputUnitsList());
   _unitsComboBox->setCurrentIndex(_motion->inputUnits());
-  connect(_motion, SIGNAL(inputUnitsChanged(int)), _unitsComboBox,
-          SLOT(setCurrentIndex(int)));
-  connect(_unitsComboBox, SIGNAL(currentIndexChanged(int)), _motion,
-          SLOT(setInputUnits(int)));
+  connect(_motion, &TimeSeriesMotion::inputUnitsChanged, _unitsComboBox,
+          &QComboBox::setCurrentIndex);
+  connect(_unitsComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          _motion, qOverload<int>(&TimeSeriesMotion::setInputUnits));
 
   layout->addWidget(new QLabel(tr("Units:")), 3, 4);
   layout->addWidget(_unitsComboBox, 3, 5);
@@ -371,8 +375,8 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _pgaSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
   _pgaSpinBox->setValue(_motion->pga());
 
-  connect(_motion, SIGNAL(pgaChanged(double)), _pgaSpinBox,
-          SLOT(setValue(double)));
+  connect(_motion, &TimeSeriesMotion::pgaChanged, _pgaSpinBox,
+          &QDoubleSpinBox::setValue);
 
   layout->addWidget(new QLabel(tr("PGA:")), 3, 6);
   layout->addWidget(_pgaSpinBox, 3, 7);
@@ -385,10 +389,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _startLineSpinBox->setValue(_motion->startLine());
   _startLineSpinBox->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(startLineChanged(int)), _startLineSpinBox,
-          SLOT(setValue(int)));
-  connect(_startLineSpinBox, SIGNAL(valueChanged(int)), _motion,
-          SLOT(setStartLine(int)));
+  connect(_motion, &TimeSeriesMotion::startLineChanged, _startLineSpinBox,
+          &QSpinBox::setValue);
+  connect(_startLineSpinBox, qOverload<int>(&QSpinBox::valueChanged), _motion,
+          &TimeSeriesMotion::setStartLine);
 
   layout->addWidget(new QLabel(tr("Start line:")), 4, 0);
   layout->addWidget(_startLineSpinBox, 4, 1);
@@ -401,10 +405,10 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _stopLineSpinBox->setValue(_motion->stopLine());
   _stopLineSpinBox->setReadOnly(readOnly);
 
-  connect(_motion, SIGNAL(stopLineChanged(int)), _stopLineSpinBox,
-          SLOT(setValue(int)));
-  connect(_stopLineSpinBox, SIGNAL(valueChanged(int)), _motion,
-          SLOT(setStopLine(int)));
+  connect(_motion, &TimeSeriesMotion::stopLineChanged, _stopLineSpinBox,
+          &QSpinBox::setValue);
+  connect(_stopLineSpinBox, qOverload<int>(&QSpinBox::valueChanged), _motion,
+          &TimeSeriesMotion::setStopLine);
 
   layout->addWidget(new QLabel(tr("Stop line:")), 4, 2);
   layout->addWidget(_stopLineSpinBox, 4, 3);
@@ -427,8 +431,8 @@ auto TimeSeriesMotionDialog::createInputFrame(bool readOnly) -> QFrame * {
   _textEdit->setReadOnly(true);
   _textEdit->setFontFamily("Courier");
 
-  connect(_textEdit, SIGNAL(cursorPositionChanged()), this,
-          SLOT(updatePosition()));
+  connect(_textEdit, &QTextEdit::cursorPositionChanged, this,
+          &TimeSeriesMotionDialog::updatePosition);
 
   layout->addWidget(_textEdit, 5, 0, 1, 9);
 
@@ -547,10 +551,13 @@ void TimeSeriesMotionDialog::loadPreview(const QString &fileName) {
 }
 
 void TimeSeriesMotionDialog::plot() {
-  _atsCurve->setSamples(_motion->time(),
-                        _motion->timeSeries(TimeSeriesMotion::Acceleration));
-  _saCurve->setSamples(_motion->respSpec()->period(),
-                       _motion->respSpec()->sa());
+  _atsCurve->setSamples(
+      _motion->time().data(),
+      _motion->timeSeries(TimeSeriesMotion::Acceleration).data(),
+      _motion->time().size());
+  _saCurve->setSamples(_motion->respSpec()->period().data(),
+                       _motion->respSpec()->sa().data(),
+                       _motion->respSpec()->period().size());
 
   // Don't plot the first point (0 Hz)
   _fasCurve->setSamples(_motion->freq().data() + 1,

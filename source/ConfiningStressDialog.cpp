@@ -31,8 +31,8 @@
 
 ConfiningStressDialog::ConfiningStressDialog(QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f) {
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateLabels()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &ConfiningStressDialog::updateLabels);
 
   auto *layout = new QGridLayout;
   layout->setColumnStretch(0, 1);
@@ -52,8 +52,8 @@ ConfiningStressDialog::ConfiningStressDialog(QWidget *parent, Qt::WindowFlags f)
   auto *tableModel = new ConfiningStressTableModel;
 
   _waterDepthSpinBox->setValue(tableModel->waterTableDepth());
-  connect(_waterDepthSpinBox, SIGNAL(valueChanged(double)), tableModel,
-          SLOT(setWaterTableDepth(double)));
+  connect(_waterDepthSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          tableModel, &ConfiningStressTableModel::setWaterTableDepth);
 
   auto *tgb = new TableGroupBox(tr("Soil Profile"));
   tgb->setModel(tableModel);
@@ -62,7 +62,8 @@ ConfiningStressDialog::ConfiningStressDialog(QWidget *parent, Qt::WindowFlags f)
 
   // Button box
   auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Close);
-  connect(buttonBox, SIGNAL(rejected()), SLOT(reject()));
+  connect(buttonBox, &QDialogButtonBox::rejected, this,
+          &ConfiningStressDialog::reject);
   layout->addWidget(buttonBox, ++row, 0, 1, 2);
 
   setLayout(layout);

@@ -60,16 +60,17 @@ EquivalentLinearCalculatorWidget::EquivalentLinearCalculatorWidget(
 void EquivalentLinearCalculatorWidget::setCalculator(
     EquivalentLinearCalculator *elc) {
   _strainRatioSpinBox->setValue(elc->strainRatio());
-  connect(_strainRatioSpinBox, SIGNAL(valueChanged(double)), elc,
-          SLOT(setStrainRatio(double)));
+  connect(_strainRatioSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          elc, &EquivalentLinearCalculator::setStrainRatio);
 
   _errorToleranceSpinBox->setValue(elc->errorTolerance());
-  connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)), elc,
-          SLOT(setErrorTolerance(double)));
+  connect(_errorToleranceSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), elc,
+          &EquivalentLinearCalculator::setErrorTolerance);
 
   _maxIterationsSpinBox->setValue(elc->maxIterations());
-  connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)), elc,
-          SLOT(setMaxIterations(int)));
+  connect(_maxIterationsSpinBox, qOverload<int>(&QSpinBox::valueChanged), elc,
+          &EquivalentLinearCalculator::setMaxIterations);
 }
 
 void EquivalentLinearCalculatorWidget::setReadOnly(bool readOnly) {
