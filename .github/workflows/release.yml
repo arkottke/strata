@@ -147,9 +147,7 @@ jobs:
 
           # Build Qwt
           cd deps
-          Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2" -OutFile qwt-6.3.0.tar.bz2
-          7z x qwt-6.3.0.tar.bz2
-          7z x qwt-6.3.0.tar
+          git clone --depth 1 --branch v6.3.0 https://git.code.sf.net/p/qwt/git qwt-6.3.0
           cd qwt-6.3.0
           qmake CONFIG+=release qwt.pro
           nmake
