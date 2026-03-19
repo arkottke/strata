@@ -412,7 +412,7 @@ auto SoilProfile::depthToLocation(const double depth) const -> const Location {
     // Use the layer whose bottom depth is deeper
     index = 0;
 
-    while (index <= _subLayers.size() &&
+    while (index < _subLayers.size() &&
            _subLayers.at(index).depthToBase() <= depth)
       ++index;
 
@@ -833,14 +833,16 @@ auto SoilProfile::stressReducCoeffProfile(const double pga) const
 
     const double rigidStress = totalWeight * pga;
 
-    profile << sl.shearStress() / rigidStress;
+    profile << (rigidStress == 0. ? 0. : sl.shearStress() / rigidStress);
 
     // Add the half layer to the total weight
     totalWeight += sl.untWt() * sl.thickness() / 2.;
   }
 
   // Add the value at the base of the profile
-  profile << _subLayers.last().shearStress() / (totalWeight * pga);
+  const double baseStress = totalWeight * pga;
+  profile << (baseStress == 0. ? 0.
+                               : _subLayers.last().shearStress() / baseStress);
 
   return profile;
 }
@@ -1235,7 +1237,7 @@ auto operator>>(QDataStream &in, SoilProfile *sp) -> QDataStream & {
   in >> count;
 
   for (int i = 0; i < count; ++i) {
-    quint32 row;
+    qint32 row;
     auto *sl = new SoilLayer(sp);
 
     in >> sl >> row;

@@ -195,7 +195,7 @@ public slots:
 signals:
   void maxFreqChanged(double maxFreq);
   void profileCountChanged(int profileCount);
-  void onlyConvergedChanged(double onlyConverged);
+  void onlyConvergedChanged(bool onlyConverged);
   void isVariedChanged(bool isVaried);
   void inputDepthChanged(double depth);
   void waveFractionChanged(double waveFraction);

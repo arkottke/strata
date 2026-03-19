@@ -399,28 +399,24 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
 
       QString line = stream.readLine();
       bool success = false;
-      for (QRegularExpression &pattern : patterns) {
+      for (const QRegularExpression &pattern : patterns) {
+        QRegularExpressionMatch match = pattern.match(line);
+        if (!match.hasMatch()) {
+          continue;
+        }
+
         bool ok;
-        int pos = 0;
-        // FIXME
-        // int pos = pattern.indexIn(line);
-        // if (pos < 0) {
-        //   continue;
-        // }
+        const int count = match.captured(1).toInt(&ok);
+        if (ok && count > 1) {
+          // Greater than one condition to catch if an acceleration value is
+          // read
+          setPointCount(count);
+        } else {
+          qCritical() << "Unable to parse the point count in AT2 file!";
+          return false;
+        }
 
-        // bool b;
-        // const int count = pattern.cap(1).toInt(&b);
-        // if (b && count > 1) {
-        //   // Greater than one condition to catch if an acceleration value is
-        //   // read
-        //   setPointCount(count);
-        // } else {
-        //   qCritical() << "Unable to parse the point count in AT2 file!";
-        //   return false;
-        // }
-
-        // const double timeStep = pattern.cap(2).toDouble(&b);
-        const double timeStep = 0.005;
+        const double timeStep = match.captured(2).toDouble(&ok);
         if (ok) {
           setTimeStep(timeStep);
         } else {
@@ -428,6 +424,7 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
           return false;
         }
         success = true;
+        break;
       }
       if (!success) {
         qCritical() << "Unrecognized header format!" << line;
@@ -490,14 +487,12 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
 
     // Read the line and split the line
     QRegularExpression rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
-    int pos = 0;
     QStringList row;
-
-    // FIXME
-    // while ((pos = rx.indexIn(line, pos)) != -1) {
-    //   row << rx.cap(1);
-    //   pos += rx.matchedLength();
-    // }
+    QRegularExpressionMatchIterator it = rx.globalMatch(line);
+    while (it.hasNext()) {
+      QRegularExpressionMatch match = it.next();
+      row << match.captured(1);
+    }
 
     // Process the row based on the format
     bool ok;

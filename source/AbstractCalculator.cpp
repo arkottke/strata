@@ -27,6 +27,7 @@
 #include "Units.h"
 
 #include <QDebug>
+#include <cmath>
 
 AbstractCalculator::AbstractCalculator(QObject *parent)
     : QObject(parent), _status(CalculationStatus::NotRun) {
@@ -223,7 +224,7 @@ auto AbstractCalculator::calcStrainTf(const Location &inLocation,
     denom = sqrt(_shearMod[l][i] / density_l) * waves(i, inLocation, inputType);
 
     value = numer / denom;
-    tf[i] = (value == value) ? value : 0; // Check for NaN
+    tf[i] = std::isnan(std::abs(value)) ? 0. : value;
   }
 
   return tf;
@@ -253,7 +254,7 @@ auto AbstractCalculator::calcAccelTf(
 
   for (int i = 0; i < _nf; i++) {
     value = waves(i, outLocation, outputType) / waves(i, inLocation, inputType);
-    tf[i] = (value == value) ? value : 0;
+    tf[i] = std::isnan(std::abs(value)) ? 0. : value;
   }
 
   return tf;

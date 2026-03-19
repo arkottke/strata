@@ -78,8 +78,6 @@ SiteResponseModel::SiteResponseModel(QObject *parent)
 
   _outputCatalog = new OutputCatalog(this);
   _outputCatalog->setReadOnly(_hasResults);
-  connect(_motionLibrary, &MotionLibrary::wasModified, this,
-          [this]() { setModified(); });
   connect(this, &SiteResponseModel::hasResultsChanged, _outputCatalog,
           &OutputCatalog::setReadOnly);
   connect(_outputCatalog, &OutputCatalog::wasModified, this,
@@ -346,7 +344,7 @@ auto SiteResponseModel::saveBinary() -> bool {
   QFile file(_fileName);
   // If the file can't be opened halt
   if (!file.open(QIODevice::WriteOnly)) {
-    qCritical() << "Error opening file: %s" << qPrintable(_fileName);
+    qCritical() << "Error opening file:" << _fileName;
     return false;
   }
   // Open the data stream
