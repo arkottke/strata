@@ -93,6 +93,19 @@ add_subdirectory(resources)
 add_subdirectory(source)
 add_subdirectory(tests)
 
+# Example regression tests using Python comparison script
+find_package(Python3 COMPONENTS Interpreter)
+if (Python3_FOUND)
+    enable_testing()
+    add_test(
+        NAME example_regression
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/scripts/compare_examples.py
+            $<TARGET_FILE:strata>
+            ${CMAKE_SOURCE_DIR}/example
+    )
+    set_tests_properties(example_regression PROPERTIES TIMEOUT 600)
+endif()
 find_program(PDFLATEX_PATH pdflatex)
 if (PDFLATEX_PATH)
     add_subdirectory(manual)
