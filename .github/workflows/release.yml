@@ -46,7 +46,8 @@ jobs:
           wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          /usr/lib/qt6/bin/qmake "QWT_INSTALL_PREFIX=$HOME/qwt-qt6-install" qwt.pro
+          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
+          /usr/lib/qt6/bin/qmake qwt.pro
           make -j$(nproc)
           make install
 
@@ -146,7 +147,8 @@ jobs:
           cd deps
           git clone --depth 1 --branch qwt-6.3 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
-          qmake "QWT_INSTALL_PREFIX=C:/Qwt-6.3.0" CONFIG+=release qwt.pro
+          Add-Content -Path qwtconfig.pri -Value "QWT_INSTALL_PREFIX = C:/Qwt-6.3.0"
+          qmake CONFIG+=release qwt.pro
           nmake
           nmake install
 
@@ -264,7 +266,8 @@ jobs:
           curl -L https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2 -o qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          $(brew --prefix qt@6)/bin/qmake "QWT_INSTALL_PREFIX=$HOME/qwt-qt6-install" qwt.pro
+          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
+          $(brew --prefix qt@6)/bin/qmake qwt.pro
           make -j$(sysctl -n hw.ncpu)
           make install
 
