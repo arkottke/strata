@@ -148,7 +148,8 @@ jobs:
           # Build Qwt
           cd deps
           Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2" -OutFile qwt-6.3.0.tar.bz2
-          tar xjf qwt-6.3.0.tar.bz2
+          7z x qwt-6.3.0.tar.bz2
+          7z x qwt-6.3.0.tar
           cd qwt-6.3.0
           qmake CONFIG+=release qwt.pro
           nmake
