@@ -21,7 +21,7 @@ jobs:
             ninja-build \
             libgsl-dev \
             qt6-base-dev \
-            qt6-svg-dev \
+            libqt6svg6-dev \
             qt6-tools-dev \
             libgl1-mesa-dev \
             libxkbcommon-x11-0 \
