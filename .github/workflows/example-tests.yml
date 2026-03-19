@@ -1,0 +1,61 @@
+name: Example Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  example-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt6 and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            libgsl-dev \
+            qt6-base-dev \
+            qt6-svg-dev \
+            qt6-tools-dev \
+            libgl1-mesa-dev \
+            python3
+
+      - name: Cache Qwt-Qt6
+        id: cache-qwt
+        uses: actions/cache@v4
+        with:
+          path: ~/qwt-qt6-install
+          key: ${{ runner.os }}-qwt-qt6-6.3.0
+
+      - name: Build Qwt-Qt6
+        if: steps.cache-qwt.outputs.cache-hit != 'true'
+        run: |
+          cd ~
+          wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
+          tar xjf qwt-6.3.0.tar.bz2
+          cd qwt-6.3.0
+          sed -i 's|^QWT_INSTALL_PREFIX.*|QWT_INSTALL_PREFIX = $${HOME}/qwt-qt6-install|' qwtconfig.pri
+          /usr/lib/qt6/bin/qmake qwt.pro
+          make -j$(nproc)
+          make install
+
+      - name: Build Strata
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
+            -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.so"
+          cmake --build . --parallel
+
+      - name: Run example tests
+        run: |
+          python3 scripts/compare_examples.py \
+            build/source/strata \
+            example/

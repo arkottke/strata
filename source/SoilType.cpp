@@ -236,12 +236,9 @@ auto SoilType::toHtml() const -> QString {
                     "<tr><th>Unit Weight:</th><td>%3 %4</td></tr>"
                     "<tr><th>Initial Damping:</th><td>%5</td></tr>"
                     "<tr><th>Varied:</th><td>%6</td></tr>")
-                     .arg(_name)
-                     .arg(_notes)
-                     .arg(_untWt)
-                     .arg(Units::instance()->untWt())
-                     .arg(_damping)
-                     .arg(boolToString(_isVaried));
+                     .arg(_name, _notes, QString::number(_untWt),
+                          Units::instance()->untWt(), QString::number(_damping),
+                          boolToString(_isVaried));
 
   // Print the darendeli model parameters
   if (qobject_cast<DarendeliNonlinearProperty *>(_modulusModel) ||
@@ -263,8 +260,7 @@ auto SoilType::toHtml() const -> QString {
   // Techincally tables aren't supposed to be used for layout, but fuck em
   html +=
       QString("<table border = \"0\"><tr><td>%1</td><td>%2</td></tr></table>")
-          .arg(_modulusModel->toHtml())
-          .arg(_dampingModel->toHtml());
+          .arg(_modulusModel->toHtml(), _dampingModel->toHtml());
 
   return html;
 }

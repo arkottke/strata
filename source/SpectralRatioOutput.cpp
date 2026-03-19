@@ -63,8 +63,7 @@ auto SpectralRatioOutput::xLabel() const -> const QString {
 
 auto SpectralRatioOutput::yLabel() const -> const QString {
   return tr("Sa at %1 / Sa at %2")
-      .arg(locationToString(_outDepth))
-      .arg(locationToString(_inDepth));
+      .arg(locationToString(_outDepth), locationToString(_inDepth));
 }
 
 auto SpectralRatioOutput::ref(int motion) const -> const QVector<double> & {

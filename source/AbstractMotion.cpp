@@ -41,9 +41,10 @@ AbstractMotion::AbstractMotion(QObject *parent) : MyAbstractTableModel(parent) {
   _respSpec->setDamping(5.0);
   _respSpec->setPeriod(Dimension::logSpace(0.01, 5, 60));
 
-  connect(_respSpec, SIGNAL(wasModified()), SLOT(setModified()));
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(scaleProperties()));
+  connect(_respSpec, &ResponseSpectrum::wasModified, this,
+          [this]() { setModified(); });
+  connect(Units::instance(), &Units::systemChanged, this,
+          &AbstractMotion::scaleProperties);
 }
 
 AbstractMotion::~AbstractMotion() { _respSpec->deleteLater(); }
@@ -72,7 +73,8 @@ auto AbstractMotion::variantToType(QVariant variant, bool *ok)
 
     // Need to split about the type because when advance options are turned on
     // the name includes the wave parts
-    for (const QString &possibleType : typeList()) {
+    const QStringList types = typeList();
+    for (const QString &possibleType : types) {
       if (possibleType.startsWith(s))
         break;
 

@@ -28,6 +28,7 @@
 #include <QColor>
 #include <QDebug>
 #include <QJsonArray>
+#include <QMetaType>
 
 AbstractNonlinearPropertyFactory::AbstractNonlinearPropertyFactory(
     QObject *parent)
@@ -68,7 +69,7 @@ auto AbstractNonlinearPropertyFactory::setData(const QModelIndex &index,
 
   if (cnp) {
     cnp->setName(value.toString());
-    dataChanged(index, index);
+    emit dataChanged(index, index);
     return true;
   } else {
     return false;
@@ -107,12 +108,12 @@ auto AbstractNonlinearPropertyFactory::insertRows(int row, int count,
   if (!count)
     return false;
 
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i)
     _models.insert(row, new CustomNonlinearProperty(_type, true));
 
-  emit endInsertRows();
+  endInsertRows();
   return true;
 }
 
@@ -124,9 +125,9 @@ auto AbstractNonlinearPropertyFactory::removeRows(int row, int count,
 
   for (int i = 0; i < count; ++i) {
     if (flags(index(row)) & Qt::ItemIsEditable) {
-      emit beginRemoveRows(parent, row, row);
+      beginRemoveRows(parent, row, row);
       _models.takeAt(row)->deleteLater();
-      emit endRemoveRows();
+      endRemoveRows();
     } else {
       return false;
     }
@@ -153,9 +154,9 @@ auto AbstractNonlinearPropertyFactory::duplicateAt(int row) const
 auto AbstractNonlinearPropertyFactory::duplicateAt(QVariant value) const
     -> NonlinearProperty * {
   int i = -1;
-  if (value.type() == QVariant::Int) {
+  if (value.metaType() == QMetaType::fromType<int>()) {
     i = value.toInt();
-  } else if (value.type() == QVariant::String) {
+  } else if (value.metaType() == QMetaType::fromType<QString>()) {
     // Strings might come from the clipboard and actually be integers
     QString s = value.toString();
 
@@ -180,7 +181,8 @@ auto AbstractNonlinearPropertyFactory::duplicateAt(QVariant value) const
 }
 
 void AbstractNonlinearPropertyFactory::fromJson(const QJsonObject &json) {
-  for (const QJsonValue &v : json["models"].toArray()) {
+  const QJsonArray models = json["models"].toArray();
+  for (const QJsonValue &v : models) {
     auto *np = new CustomNonlinearProperty(_type, true);
     np->fromJson(v.toObject());
     _models << np;

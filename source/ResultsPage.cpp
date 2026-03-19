@@ -90,11 +90,11 @@ void ResultsPage::setModel(SiteResponseModel *model) {
   _outputCatalog = model->outputCatalog();
   _catalogTableView->setModel(_outputCatalog);
 
-  connect(_outputCatalog, SIGNAL(enabledChanged(int)), this,
-          SLOT(enableSelectedCurve(int)));
+  connect(_outputCatalog, &OutputCatalog::enabledChanged, this,
+          &ResultsPage::enableSelectedCurve);
   connect(_catalogTableView->selectionModel(),
-          SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), this,
-          SLOT(setSelectedSeries(QModelIndex, QModelIndex)));
+          &QItemSelectionModel::currentRowChanged, this,
+          &ResultsPage::setSelectedSeries);
 
   _outputComboBox->clear();
   _outputComboBox->addItems(_outputCatalog->outputNames());
@@ -177,8 +177,8 @@ void ResultsPage::setSelectedSeries(const QModelIndex &current,
   _enableMotionPushButton->setChecked(enabled);
   _enableMotionPushButton->setText(
       QString(tr("%1 Motion: %2"))
-          .arg(enabled ? tr("Disable") : tr("Enable"))
-          .arg(_outputCatalog->motionNameAt(_selectedRow)));
+          .arg(enabled ? tr("Disable") : tr("Enable"),
+               _outputCatalog->motionNameAt(_selectedRow)));
 
   // Select the appropriate column
   if (_selectedOutput->needsTime()) {
@@ -239,8 +239,8 @@ void ResultsPage::setSelectedOutput(int index) {
   // multiple times
   disconnect(_outputTableView->selectionModel(), nullptr, this, nullptr);
   connect(_outputTableView->selectionModel(),
-          SIGNAL(currentColumnChanged(QModelIndex, QModelIndex)), this,
-          SLOT(selectedDataChanged(QModelIndex, QModelIndex)));
+          &QItemSelectionModel::currentColumnChanged, this,
+          &ResultsPage::selectedDataChanged);
 
   // Site indepedent
   _catalogTableView->setColumnHidden(OutputCatalog::SiteColumn,
@@ -307,8 +307,8 @@ void ResultsPage::setMotionEnabled(bool enabled) {
 
   _enableMotionPushButton->setText(
       QString(tr("%1 Motion: %2"))
-          .arg(enabled ? tr("Disable") : tr("Enable"))
-          .arg(_outputCatalog->motionNameAt(_selectedRow)));
+          .arg(enabled ? tr("Disable") : tr("Enable"),
+               _outputCatalog->motionNameAt(_selectedRow)));
 
   colorCurve(_selectedRow);
   _plot->replot();
@@ -349,8 +349,8 @@ auto ResultsPage::createOutputGroup() -> QGroupBox * {
   // Type combo box
   _outputComboBox = new QComboBox;
 
-  connect(_outputComboBox, SIGNAL(activated(int)), this,
-          SLOT(setSelectedOutput(int)));
+  connect(_outputComboBox, qOverload<int>(&QComboBox::activated), this,
+          &ResultsPage::setSelectedOutput);
 
   layout->addWidget(new QLabel(tr("Output:")), 0, 0);
   layout->addWidget(_outputComboBox, 0, 1, 1, 3);
@@ -366,24 +366,24 @@ auto ResultsPage::createOutputGroup() -> QGroupBox * {
   _enableSitePushButton = new QPushButton;
   _enableSitePushButton->setCheckable(true);
 
-  connect(_enableSitePushButton, SIGNAL(clicked(bool)), this,
-          SLOT(setSiteEnabled(bool)));
+  connect(_enableSitePushButton, &QPushButton::clicked, this,
+          &ResultsPage::setSiteEnabled);
 
   layout->addWidget(_enableSitePushButton, 2, 0);
 
   _enableMotionPushButton = new QPushButton;
   _enableMotionPushButton->setCheckable(true);
 
-  connect(_enableMotionPushButton, SIGNAL(clicked(bool)), this,
-          SLOT(setMotionEnabled(bool)));
+  connect(_enableMotionPushButton, &QPushButton::clicked, this,
+          &ResultsPage::setMotionEnabled);
 
   layout->addWidget(_enableMotionPushButton, 2, 1);
 
   _recomputePushButton = new QPushButton(tr("Recompute Statistics"));
   _recomputePushButton->setEnabled(false);
 
-  connect(_recomputePushButton, SIGNAL(clicked()), this,
-          SLOT(recomputeStats()));
+  connect(_recomputePushButton, &QPushButton::clicked, this,
+          &ResultsPage::recomputeStats);
 
   layout->addWidget(_recomputePushButton, 2, 3);
 
@@ -403,8 +403,8 @@ auto ResultsPage::createDataTabWidget() -> QTabWidget * {
   _plot->setContextMenuPolicy(Qt::CustomContextMenu);
   _plot->setAutoReplot(false);
 
-  connect(_plot, SIGNAL(customContextMenuRequested(QPoint)), this,
-          SLOT(showPlotContextMenu(QPoint)));
+  connect(_plot, &QwtPlot::customContextMenuRequested, this,
+          &ResultsPage::showPlotContextMenu);
 
   // Picker to allow for selection of the closest curve and displays curve
   // coordinates with a cross rubber band.
@@ -413,15 +413,15 @@ auto ResultsPage::createDataTabWidget() -> QTabWidget * {
                                    QwtPicker::ActiveOnly, _plot->canvas());
   picker->setStateMachine(new QwtPickerDragPointMachine());
 
-  connect(picker, SIGNAL(appended(QPoint)), this, SLOT(pointSelected(QPoint)));
+  connect(picker, &QwtPlotPicker::appended, this,
+          [this](const QPointF &point) { pointSelected(point.toPoint()); });
 
   // Legend
   auto *legend = new QwtLegend;
   legend->setFrameStyle(QFrame::Box | QFrame::Sunken);
   _plot->insertLegend(legend, QwtPlot::BottomLegend);
 #if QWT_VERSION >= 0x060100
-  connect(_plot, SIGNAL(legendDataChanged(QVariant, QList<QwtLegendData>)),
-          legend, SLOT(updateLegend(QVariant, QList<QwtLegendData>)));
+  connect(_plot, &QwtPlot::legendDataChanged, legend, &QwtLegend::updateLegend);
 #endif
 
   // Add the generic curves to the legend
@@ -462,7 +462,8 @@ void ResultsPage::createContextMenu() {
   // Create the context menu
   _plotContextMenu = new QMenu;
   _plotContextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"), this,
-                              SLOT(copyPlot()));
+                              &ResultsPage::copyPlot);
   _plotContextMenu->addSeparator();
-  _plotContextMenu->addAction(tr("Plot Options"), this, SLOT(configurePlot()));
+  _plotContextMenu->addAction(tr("Plot Options"), this,
+                              &ResultsPage::configurePlot);
 }

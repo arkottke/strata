@@ -34,8 +34,8 @@ SoilTypeCatalog::SoilTypeCatalog(QObject *parent)
     : MyAbstractTableModel(parent) {
   _nlCatalog = new NonlinearPropertyCatalog;
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &SoilTypeCatalog::updateUnits);
 }
 
 auto SoilTypeCatalog::toHtml() const -> QString {
@@ -233,14 +233,14 @@ auto SoilTypeCatalog::insertRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     _soilTypes.insert(row, new SoilType(this));
     emit soilTypeAdded(_soilTypes.at(row));
   }
 
-  emit endInsertRows();
+  endInsertRows();
   return true;
 }
 
@@ -249,14 +249,14 @@ auto SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     emit soilTypeRemoved(_soilTypes.at(row));
     _soilTypes.takeAt(row)->deleteLater();
   }
 
-  emit endRemoveRows();
+  endRemoveRows();
 
   return true;
 }
@@ -275,9 +275,9 @@ auto SoilTypeCatalog::rowOf(SoilType *st) const -> int {
 
 auto SoilTypeCatalog::soilTypeOf(QVariant value) -> SoilType * {
   int i = -1;
-  if (value.type() == QVariant::Int) {
+  if (value.metaType() == QMetaType::fromType<int>()) {
     i = value.toInt();
-  } else if (value.type() == QVariant::String) {
+  } else if (value.metaType() == QMetaType::fromType<QString>()) {
     // Strings might come from the clipboard and actually be integers
     QString s = value.toString();
 
@@ -314,7 +314,7 @@ void SoilTypeCatalog::fromJson(const QJsonArray &json) {
   while (_soilTypes.size())
     _soilTypes.takeLast()->deleteLater();
 
-  foreach (const QJsonValue &v, json) {
+  for (const QJsonValue &v : json) {
     auto *st = new SoilType(this);
     st->fromJson(v.toObject());
     _soilTypes << st;

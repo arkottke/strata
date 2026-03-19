@@ -32,7 +32,10 @@
 #include <QTextStream>
 #include <QThread>
 #include <QTimer>
-#include <QtCore>
+
+#include <QCommandLineParser>
+#include <QCoreApplication>
+#include <QScopedPointer>
 
 #include <fstream>
 #include <iostream>

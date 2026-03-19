@@ -169,11 +169,11 @@ auto Units::wt() const -> QString {
 }
 
 auto Units::untWt() const -> QString {
-  return QString("%1/%2").arg(wt()).arg(vol());
+  return QString("%1/%2").arg(wt(), vol());
 }
 
 auto Units::stress() const -> QString {
-  return QString("%1/%2").arg(wt()).arg(area());
+  return QString("%1/%2").arg(wt(), area());
 }
 
 auto operator<<(QDataStream &out, const Units *units) -> QDataStream & {

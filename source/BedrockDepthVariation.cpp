@@ -26,8 +26,8 @@
 BedrockDepthVariation::BedrockDepthVariation(
     gsl_rng *rng, ProfileRandomizer *profileRandomizer)
     : Distribution(rng), _profileRandomizer(profileRandomizer) {
-  connect(_profileRandomizer, SIGNAL(enabledChanged(bool)), this,
-          SLOT(updateEnabled()));
+  connect(_profileRandomizer, &ProfileRandomizer::enabledChanged, this,
+          &BedrockDepthVariation::updateEnabled);
 
   _enabled = false;
 }

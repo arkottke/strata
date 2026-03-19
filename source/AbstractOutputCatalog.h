@@ -45,9 +45,9 @@ public slots:
   void setApproach(int approach);
 
 signals:
-  void timesAreNeededChanged(bool timesAreNeeded) const;
-  void periodIsNeededChanged(bool periodIsNeeded) const;
-  void frequencyIsNeededChanged(bool frequencyIsNeeded) const;
+  void timesAreNeededChanged(bool timesAreNeeded);
+  void periodIsNeededChanged(bool periodIsNeeded);
+  void frequencyIsNeededChanged(bool frequencyIsNeeded);
 
   void wasModified();
 

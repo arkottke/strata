@@ -143,8 +143,10 @@ bool SubLayer::setStrain(double effStrain, double maxStrain,
 
     // Compute the error between old and new values of the damping and shear
     // modulus
-    _shearModError = 100 * abs(_shearMod - _oldShearMod) / _shearMod;
-    _dampingError = 100 * abs(_damping - _oldDamping) / _damping;
+    _shearModError =
+        _shearMod == 0. ? 0. : 100 * abs(_shearMod - _oldShearMod) / _shearMod;
+    _dampingError =
+        _damping == 0. ? 0. : 100 * abs(_damping - _oldDamping) / _damping;
   } else {
     _shearModError = 0;
     _dampingError = 0;

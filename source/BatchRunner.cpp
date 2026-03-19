@@ -24,6 +24,7 @@
 #include "OutputCatalog.h"
 #include "TextLog.h"
 
+#include <QLocale>
 #include <QTextDocument>
 #include <QtDebug>
 
@@ -50,12 +51,13 @@ void BatchRunner::startNext() {
   _model->clearResults();
 
   // Need to call save after task is done, order not handled correctly....
-  connect(_model->outputCatalog()->log(), SIGNAL(textChanged(QString)), this,
-          SLOT(updateLog(QString)));
-  connect(_model, SIGNAL(progressRangeChanged(int, int)), this,
-          SLOT(rangeChanged(int, int)));
-  connect(_model, SIGNAL(progressChanged(int)), this, SLOT(updateEtc(int)));
-  connect(_model, SIGNAL(finished()), this, SLOT(finalize()));
+  connect(_model->outputCatalog()->log(), &TextLog::textChanged, this,
+          &BatchRunner::updateLog);
+  connect(_model, &SiteResponseModel::progressRangeChanged, this,
+          &BatchRunner::rangeChanged);
+  connect(_model, &SiteResponseModel::progressChanged, this,
+          &BatchRunner::updateEtc);
+  connect(_model, &SiteResponseModel::finished, this, &BatchRunner::finalize);
 
   _model->start();
 }
@@ -83,7 +85,7 @@ void BatchRunner::updateEtc(int value) {
   // rate by the number of remaining increments
   QTime eta = QTime::currentTime().addMSecs(int(avgRate * (_end - value)));
 
-  qInfo().noquote() << "[BATCH] ETC:" << eta.toString(Qt::LocalDate) << "("
+  qInfo().noquote() << "[BATCH] ETC:" << QLocale::system().toString(eta) << "("
                     << value + 1 << "of" << _end << ")";
 }
 

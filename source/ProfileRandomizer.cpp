@@ -41,20 +41,20 @@
 
 ProfileRandomizer::ProfileRandomizer(gsl_rng *rng, SoilProfile *siteProfile)
     : _siteProfile(siteProfile) {
-  connect(_siteProfile, SIGNAL(isVariedChanged(bool)), this,
-          SLOT(updateEnabled()));
+  connect(_siteProfile, &SoilProfile::isVariedChanged, this,
+          &ProfileRandomizer::updateEnabled);
 
   _bedrockDepthVariation = new BedrockDepthVariation(rng, this);
-  connect(_bedrockDepthVariation, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_bedrockDepthVariation, &BedrockDepthVariation::wasModified, this,
+          &ProfileRandomizer::wasModified);
 
   _layerThicknessVariation = new LayerThicknessVariation(rng, this);
-  connect(_layerThicknessVariation, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_layerThicknessVariation, &LayerThicknessVariation::wasModified, this,
+          &ProfileRandomizer::wasModified);
 
   _velocityVariation = new VelocityVariation(rng, this);
-  connect(_velocityVariation, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_velocityVariation, &VelocityVariation::wasModified, this,
+          &ProfileRandomizer::wasModified);
 
   _enabled = false;
 }

@@ -140,7 +140,7 @@ auto PathDurationModel::setData(const QModelIndex &index, const QVariant &value,
       _rate[index.row()] = d;
       break;
     }
-    dataChanged(index, index);
+    emit dataChanged(index, index);
     emit wasModified();
     return true;
   } else {
@@ -154,26 +154,26 @@ auto PathDurationModel::flags(const QModelIndex &index) const -> Qt::ItemFlags {
 
 auto PathDurationModel::insertRows(int row, int count,
                                    const QModelIndex &parent) -> bool {
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   _distance.insert(row, count, 0);
   _rate.insert(row, count, 0);
 
   emit wasModified();
-  emit endInsertRows();
+  endInsertRows();
 
   return true;
 }
 
 auto PathDurationModel::removeRows(int row, int count,
                                    const QModelIndex &parent) -> bool {
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   _distance.remove(row, count);
   _rate.remove(row, count);
 
   emit wasModified();
-  emit endRemoveRows();
+  endRemoveRows();
 
   return true;
 }

@@ -60,15 +60,18 @@ HelpDialog::HelpDialog(QWidget *parent, Qt::WindowFlags f)
   _textBrowser->setSource(QUrl("qrc:/docs/index.html"));
   // connect( tocBrowser, SIGNAL(anchorClicked(QUrl)), _textBrowser,
   // SLOT(setSource(QUrl)));
-  connect(backPushButton, SIGNAL(clicked()), _textBrowser, SLOT(backward()));
-  connect(_textBrowser, SIGNAL(backwardAvailable(bool)), backPushButton,
-          SLOT(setEnabled(bool)));
-  connect(forwardPushButton, SIGNAL(clicked()), _textBrowser, SLOT(forward()));
-  connect(_textBrowser, SIGNAL(forwardAvailable(bool)), forwardPushButton,
-          SLOT(setEnabled(bool)));
-  connect(homePushButton, SIGNAL(clicked()), _textBrowser, SLOT(home()));
-  connect(_textBrowser, SIGNAL(sourceChanged(QUrl)),
-          SLOT(setCurrentAddress(QUrl)));
+  connect(backPushButton, &QPushButton::clicked, _textBrowser,
+          &QTextBrowser::backward);
+  connect(_textBrowser, &QTextBrowser::backwardAvailable, backPushButton,
+          &QPushButton::setEnabled);
+  connect(forwardPushButton, &QPushButton::clicked, _textBrowser,
+          &QTextBrowser::forward);
+  connect(_textBrowser, &QTextBrowser::forwardAvailable, forwardPushButton,
+          &QPushButton::setEnabled);
+  connect(homePushButton, &QPushButton::clicked, _textBrowser,
+          &QTextBrowser::home);
+  connect(_textBrowser, &QTextBrowser::sourceChanged, this,
+          &HelpDialog::setCurrentAddress);
 
   // rowLayout->addWidget( _textBrowser, 1 );
 
@@ -76,7 +79,7 @@ HelpDialog::HelpDialog(QWidget *parent, Qt::WindowFlags f)
   layout->addWidget(_textBrowser, 1, 0, 1, 5);
 
   auto *closePushButton = new QPushButton(tr("Close"));
-  connect(closePushButton, SIGNAL(clicked()), SLOT(close()));
+  connect(closePushButton, &QPushButton::clicked, this, &HelpDialog::close);
   layout->addWidget(closePushButton, 2, 4);
 
   // Add the layout to the dialog

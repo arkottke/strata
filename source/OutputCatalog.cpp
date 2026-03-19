@@ -42,7 +42,7 @@
 OutputCatalog::OutputCatalog(QObject *parent)
     : QAbstractTableModel(parent), _selectedOutput(0) {
   _log = new TextLog(this);
-  connect(_log, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_log, &TextLog::wasModified, this, &OutputCatalog::wasModified);
 
   _frequency = new Dimension(this);
   _frequency->setMin(0.05);
@@ -60,40 +60,42 @@ OutputCatalog::OutputCatalog(QObject *parent)
   _periodIsNeeded = false;
 
   _profilesOutputCatalog = new ProfilesOutputCatalog(this);
-  connect(_profilesOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_profilesOutputCatalog, &ProfilesOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
   _catalogs << _profilesOutputCatalog;
 
   _ratiosOutputCatalog = new RatiosOutputCatalog(this);
-  connect(_ratiosOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
-  connect(_ratiosOutputCatalog, SIGNAL(periodIsNeededChanged(bool)), this,
-          SLOT(setPeriodIsNeeded(bool)));
-  connect(_ratiosOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)), this,
-          SLOT(setFrequencyIsNeeded(bool)));
+  connect(_ratiosOutputCatalog, &RatiosOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
+  connect(_ratiosOutputCatalog, &RatiosOutputCatalog::periodIsNeededChanged,
+          this, &OutputCatalog::setPeriodIsNeeded);
+  connect(_ratiosOutputCatalog, &RatiosOutputCatalog::frequencyIsNeededChanged,
+          this, &OutputCatalog::setFrequencyIsNeeded);
 
   _catalogs << _ratiosOutputCatalog;
 
   _soilTypesOutputCatalog = new SoilTypesOutputCatalog(this);
-  connect(_soilTypesOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_soilTypesOutputCatalog, &SoilTypesOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
   _catalogs << _soilTypesOutputCatalog;
 
   _spectraOutputCatalog = new SpectraOutputCatalog(this);
-  connect(_spectraOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
-  connect(_spectraOutputCatalog, SIGNAL(frequencyIsNeededChanged(bool)), this,
-          SLOT(setFrequencyIsNeeded(bool)));
-  connect(_spectraOutputCatalog, SIGNAL(periodIsNeededChanged(bool)), this,
-          SLOT(setPeriodIsNeeded(bool)));
+  connect(_spectraOutputCatalog, &SpectraOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
+  connect(_spectraOutputCatalog,
+          &SpectraOutputCatalog::frequencyIsNeededChanged, this,
+          &OutputCatalog::setFrequencyIsNeeded);
+  connect(_spectraOutputCatalog, &SpectraOutputCatalog::periodIsNeededChanged,
+          this, &OutputCatalog::setPeriodIsNeeded);
 
   _catalogs << _spectraOutputCatalog;
 
   _timeSeriesOutputCatalog = new TimeSeriesOutputCatalog(this);
-  connect(_timeSeriesOutputCatalog, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
-  connect(_timeSeriesOutputCatalog, SIGNAL(timesAreNeededChanged(bool)), this,
-          SLOT(setTimesAreNeeded(bool)));
+  connect(_timeSeriesOutputCatalog, &TimeSeriesOutputCatalog::wasModified, this,
+          &OutputCatalog::wasModified);
+  connect(_timeSeriesOutputCatalog,
+          &TimeSeriesOutputCatalog::timesAreNeededChanged, this,
+          &OutputCatalog::setTimesAreNeeded);
 
   _catalogs << _timeSeriesOutputCatalog;
 }
@@ -368,12 +370,14 @@ auto OutputCatalog::motionNameAt(int row) const -> const QString {
 void OutputCatalog::initialize(int siteCount, MotionLibrary *motionLibrary) {
   // Create a list of all enabled outputs
   _outputs.clear();
-  for (auto *catalog : _catalogs) {
-    for (auto *output : catalog->outputs()) {
+  for (auto *catalog : std::as_const(_catalogs)) {
+    const auto catalogOutputs = catalog->outputs();
+    for (auto *output : catalogOutputs) {
       if (!output->needsTime() ||
           (output->needsTime() &&
            motionLibrary->approach() == MotionLibrary::TimeSeries)) {
-        connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+        connect(output, &AbstractOutput::wasModified, this,
+                &OutputCatalog::wasModified);
         _outputs << output;
       }
     }
@@ -417,8 +421,9 @@ void OutputCatalog::clear() {
 
   // Need to loop over the catalogs as _outputs my have previously deleted
   // pointers
-  for (auto *catalog : _catalogs) {
-    for (auto *output : catalog->outputs()) {
+  for (auto *catalog : std::as_const(_catalogs)) {
+    const auto catalogOutputs = catalog->outputs();
+    for (auto *output : catalogOutputs) {
       output->clear();
     }
   }
@@ -427,14 +432,14 @@ void OutputCatalog::clear() {
 }
 
 void OutputCatalog::finalize() {
-  for (AbstractOutput *output : _outputs)
+  for (AbstractOutput *output : std::as_const(_outputs))
     output->finalize();
 
   emit wasModified();
 }
 
 void OutputCatalog::setReadOnly(bool readOnly) {
-  for (AbstractOutputCatalog *catalog : _catalogs)
+  for (AbstractOutputCatalog *catalog : std::as_const(_catalogs))
     catalog->setReadOnly(readOnly);
 }
 
@@ -444,13 +449,13 @@ void OutputCatalog::saveResults(int motion,
   // sublayer. These depths are updated as the velocity profile is varied.
   populateDepthVector(calculator->site()->subLayers().last().depthToBase());
 
-  for (AbstractOutput *output : _outputs) {
+  for (AbstractOutput *output : std::as_const(_outputs)) {
     output->addData(motion, calculator);
   }
 }
 
 void OutputCatalog::removeLastSite() {
-  for (AbstractOutput *output : _outputs)
+  for (AbstractOutput *output : std::as_const(_outputs))
     output->removeLastSite();
 }
 
@@ -483,7 +488,7 @@ void OutputCatalog::setFrequencyIsNeeded(bool frequencyIsNeeded) {
 auto OutputCatalog::outputNames() const -> QStringList {
   QStringList list;
 
-  for (AbstractOutput *output : _outputs)
+  for (AbstractOutput *output : std::as_const(_outputs))
     list << output->fullName();
 
   return list;
@@ -495,7 +500,7 @@ auto OutputCatalog::outputs() const -> const QList<AbstractOutput *> & {
 
 void OutputCatalog::exportData(const QString &path, const QString &separator,
                                const QString &prefix) {
-  for (AbstractOutput *output : _outputs) {
+  for (AbstractOutput *output : std::as_const(_outputs)) {
     if (output->exportEnabled())
       output->exportData(path, separator, prefix);
   }
@@ -558,9 +563,11 @@ void OutputCatalog::fromJson(const QJsonObject &json) {
   }
 
   _enabled.clear();
-  for (const QJsonValue &value : json["enabled"].toArray()) {
+  const QJsonArray enabledArray = json["enabled"].toArray();
+  for (const QJsonValue &value : enabledArray) {
     QList<bool> l;
-    for (const QJsonValue &v : value.toArray())
+    const QJsonArray innerArray = value.toArray();
+    for (const QJsonValue &v : innerArray)
       l << v.toBool();
     _enabled << l;
   }

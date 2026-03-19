@@ -146,6 +146,8 @@ void AbstractIterativeCalculator::setErrorTolerance(double errorTolerance) {
 
 auto AbstractIterativeCalculator::relError(double value, double reference)
     -> double {
+  if (reference == 0.)
+    return 0.;
   return 100. * (value - reference) / reference;
 }
 

@@ -50,8 +50,8 @@ SoilProfilePage::SoilProfilePage(QWidget *parent, Qt::WindowFlags f)
   setLayout(layout);
 
   // Connections
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &SoilProfilePage::updateUnits);
 }
 
 void SoilProfilePage::setModel(SiteResponseModel *model) {
@@ -61,223 +61,237 @@ void SoilProfilePage::setModel(SiteResponseModel *model) {
   _velocityVariation =
       model->siteProfile()->profileRandomizer()->velocityVariation();
   updateHiddenColumns();
-  connect(_velocityVariation, SIGNAL(enabledChanged(bool)), this,
-          SLOT(updateHiddenColumns()));
+  connect(_velocityVariation, &VelocityVariation::enabledChanged, this,
+          &SoilProfilePage::updateHiddenColumns);
 
   ProfileRandomizer *pr = model->siteProfile()->profileRandomizer();
 
   _profileVariationGroupBox->setVisible(pr->enabled());
-  connect(pr, SIGNAL(enabledChanged(bool)), _profileVariationGroupBox,
-          SLOT(setVisible(bool)));
+  connect(pr, &ProfileRandomizer::enabledChanged, _profileVariationGroupBox,
+          &QGroupBox::setVisible);
 
   _isVelocityVariedCheckBox->setChecked(pr->velocityVariation()->enabled());
-  connect(_isVelocityVariedCheckBox, SIGNAL(toggled(bool)),
-          pr->velocityVariation(), SLOT(setEnabled(bool)));
-  connect(pr->velocityVariation(), SIGNAL(enabledChanged(bool)),
-          _isVelocityVariedCheckBox, SLOT(setChecked(bool)));
+  connect(_isVelocityVariedCheckBox, &QCheckBox::toggled,
+          pr->velocityVariation(), &VelocityVariation::setEnabled);
+  connect(pr->velocityVariation(), &VelocityVariation::enabledChanged,
+          _isVelocityVariedCheckBox, &QCheckBox::setChecked);
 
   _isLayeringVariedCheckBox->setChecked(
       pr->layerThicknessVariation()->enabled());
-  connect(_isLayeringVariedCheckBox, SIGNAL(toggled(bool)),
-          pr->layerThicknessVariation(), SLOT(setEnabled(bool)));
-  connect(pr->layerThicknessVariation(), SIGNAL(enabledChanged(bool)),
-          _isLayeringVariedCheckBox, SLOT(setChecked(bool)));
+  connect(_isLayeringVariedCheckBox, &QCheckBox::toggled,
+          pr->layerThicknessVariation(), &LayerThicknessVariation::setEnabled);
+  connect(pr->layerThicknessVariation(),
+          &LayerThicknessVariation::enabledChanged, _isLayeringVariedCheckBox,
+          &QCheckBox::setChecked);
 
   _isBedrockDepthVariedCheckBox->setChecked(
       pr->bedrockDepthVariation()->enabled());
-  connect(_isBedrockDepthVariedCheckBox, SIGNAL(toggled(bool)),
-          pr->bedrockDepthVariation(), SLOT(setEnabled(bool)));
-  connect(pr->bedrockDepthVariation(), SIGNAL(enabledChanged(bool)),
-          _isBedrockDepthVariedCheckBox, SLOT(setChecked(bool)));
+  connect(_isBedrockDepthVariedCheckBox, &QCheckBox::toggled,
+          pr->bedrockDepthVariation(), &BedrockDepthVariation::setEnabled);
+  connect(pr->bedrockDepthVariation(), &BedrockDepthVariation::enabledChanged,
+          _isBedrockDepthVariedCheckBox, &QCheckBox::setChecked);
 
   // Velocity Variation
   VelocityVariation *vv =
       model->siteProfile()->profileRandomizer()->velocityVariation();
 
   setVelocityItemEnabled(vv->enabled());
-  connect(vv, SIGNAL(enabledChanged(bool)), this,
-          SLOT(setVelocityItemEnabled(bool)));
+  connect(vv, &VelocityVariation::enabledChanged, this,
+          &SoilProfilePage::setVelocityItemEnabled);
 
   _velocityVariationFrame->setEnabled(vv->enabled());
-  connect(vv, SIGNAL(enabledChanged(bool)), _velocityVariationFrame,
-          SLOT(setEnabled(bool)));
+  connect(vv, &VelocityVariation::enabledChanged, _velocityVariationFrame,
+          &QFrame::setEnabled);
 
   _layerSpecificCheckBox->setChecked(vv->stdevIsLayerSpecific());
-  connect(_layerSpecificCheckBox, SIGNAL(toggled(bool)), vv,
-          SLOT(setStdevIsLayerSpecific(bool)));
-  connect(vv, SIGNAL(stdevIsLayerSpecificChanged(bool)), _layerSpecificCheckBox,
-          SLOT(setChecked(bool)));
-  connect(vv, SIGNAL(stdevIsLayerSpecificChanged(bool)), this,
-          SLOT(updateHiddenColumns()));
+  connect(_layerSpecificCheckBox, &QCheckBox::toggled, vv,
+          &VelocityVariation::setStdevIsLayerSpecific);
+  connect(vv, &VelocityVariation::stdevIsLayerSpecificChanged,
+          _layerSpecificCheckBox, &QCheckBox::setChecked);
+  connect(vv, &VelocityVariation::stdevIsLayerSpecificChanged, this,
+          &SoilProfilePage::updateHiddenColumns);
 
   _stdevModelComboBox->setCurrentIndex(vv->stdevModel());
-  connect(_stdevModelComboBox, SIGNAL(currentIndexChanged(int)), vv,
-          SLOT(setStdevModel(int)));
+  connect(_stdevModelComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          vv, qOverload<int>(&VelocityVariation::setStdevModel));
 
   _stdevModelComboBox->setDisabled(vv->stdevIsLayerSpecific());
-  connect(vv, SIGNAL(stdevIsLayerSpecificChanged(bool)), _stdevModelComboBox,
-          SLOT(setDisabled(bool)));
+  connect(vv, &VelocityVariation::stdevIsLayerSpecificChanged,
+          _stdevModelComboBox, &QComboBox::setDisabled);
 
   _stdevSpinBox->setValue(vv->stdev());
-  connect(_stdevSpinBox, SIGNAL(valueChanged(double)), vv,
-          SLOT(setStdev(double)));
-  connect(vv, SIGNAL(stdevChanged(double)), _stdevSpinBox,
-          SLOT(setValue(double)));
+  connect(_stdevSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), vv,
+          &VelocityVariation::setStdev);
+  connect(vv, &VelocityVariation::stdevChanged, _stdevSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _stdevSpinBox->setEnabled(vv->stdevCustomEnabled());
-  connect(vv, SIGNAL(stdevCustomEnabledChanged(bool)), _stdevSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(vv, &VelocityVariation::stdevCustomEnabledChanged, _stdevSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   _correlModelComboBox->setCurrentIndex(vv->stdevModel());
-  connect(_correlModelComboBox, SIGNAL(currentIndexChanged(int)), vv,
-          SLOT(setCorrelModel(int)));
+  connect(_correlModelComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          vv, qOverload<int>(&VelocityVariation::setCorrelModel));
 
   _correlInitialSpinBox->setValue(vv->correlInitial());
-  connect(_correlInitialSpinBox, SIGNAL(valueChanged(double)), vv,
-          SLOT(setCorrelInitial(double)));
-  connect(vv, SIGNAL(correlInitialChanged(double)), _correlInitialSpinBox,
-          SLOT(setValue(double)));
+  connect(_correlInitialSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), vv,
+          &VelocityVariation::setCorrelInitial);
+  connect(vv, &VelocityVariation::correlInitialChanged, _correlInitialSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _correlFinalSpinBox->setValue(vv->correlFinal());
-  connect(_correlFinalSpinBox, SIGNAL(valueChanged(double)), vv,
-          SLOT(setCorrelFinal(double)));
-  connect(vv, SIGNAL(correlFinalChanged(double)), _correlFinalSpinBox,
-          SLOT(setValue(double)));
+  connect(_correlFinalSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          vv, &VelocityVariation::setCorrelFinal);
+  connect(vv, &VelocityVariation::correlFinalChanged, _correlFinalSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _correlDeltaSpinBox->setValue(vv->correlDelta());
-  connect(_correlDeltaSpinBox, SIGNAL(valueChanged(double)), vv,
-          SLOT(setCorrelDelta(double)));
-  connect(vv, SIGNAL(correlDeltaChanged(double)), _correlDeltaSpinBox,
-          SLOT(setValue(double)));
+  connect(_correlDeltaSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          vv, &VelocityVariation::setCorrelDelta);
+  connect(vv, &VelocityVariation::correlDeltaChanged, _correlDeltaSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _correlInterceptSpinBox->setValue(vv->correlIntercept());
-  connect(_correlInterceptSpinBox, SIGNAL(valueChanged(double)), vv,
-          SLOT(setCorrelIntercept(double)));
-  connect(vv, SIGNAL(correlInterceptChanged(double)), _correlInterceptSpinBox,
-          SLOT(setValue(double)));
+  connect(_correlInterceptSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), vv,
+          &VelocityVariation::setCorrelIntercept);
+  connect(vv, &VelocityVariation::correlInterceptChanged,
+          _correlInterceptSpinBox, &QDoubleSpinBox::setValue);
 
   _correlExponentSpinBox->setValue(vv->correlExponent());
-  connect(_correlExponentSpinBox, SIGNAL(valueChanged(double)), vv,
-          SLOT(setCorrelExponent(double)));
-  connect(vv, SIGNAL(correlExponentChanged(double)), _correlExponentSpinBox,
-          SLOT(setValue(double)));
+  connect(_correlExponentSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), vv,
+          &VelocityVariation::setCorrelExponent);
+  connect(vv, &VelocityVariation::correlExponentChanged, _correlExponentSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _correlGroupBox->setEnabled(vv->correlCustomEnabled());
-  connect(vv, SIGNAL(correlCustomEnabledChanged(bool)), _correlGroupBox,
-          SLOT(setEnabled(bool)));
+  connect(vv, &VelocityVariation::correlCustomEnabledChanged, _correlGroupBox,
+          &QGroupBox::setEnabled);
 
   // Layering variation
   LayerThicknessVariation *ltv =
       model->siteProfile()->profileRandomizer()->layerThicknessVariation();
 
   _layerVariationFrame->setEnabled(ltv->enabled());
-  connect(ltv, SIGNAL(enabledChanged(bool)), this,
-          SLOT(setLayeringItemEnabled(bool)));
-  connect(ltv, SIGNAL(enabledChanged(bool)), _layerVariationFrame,
-          SLOT(setEnabled(bool)));
+  connect(ltv, &LayerThicknessVariation::enabledChanged, this,
+          &SoilProfilePage::setLayeringItemEnabled);
+  connect(ltv, &LayerThicknessVariation::enabledChanged, _layerVariationFrame,
+          &QFrame::setEnabled);
 
   _layeringModelComboBox->setCurrentIndex(ltv->model());
-  connect(_layeringModelComboBox, SIGNAL(currentIndexChanged(int)), ltv,
-          SLOT(setModel(int)));
+  connect(_layeringModelComboBox,
+          qOverload<int>(&QComboBox::currentIndexChanged), ltv,
+          qOverload<int>(&LayerThicknessVariation::setModel));
 
   _layeringCoeffSpinBox->setValue(ltv->coeff());
-  connect(_layeringCoeffSpinBox, SIGNAL(valueChanged(double)), ltv,
-          SLOT(setCoeff(double)));
-  connect(ltv, SIGNAL(coeffChanged(double)), _layeringCoeffSpinBox,
-          SLOT(setValue(double)));
+  connect(_layeringCoeffSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), ltv,
+          &LayerThicknessVariation::setCoeff);
+  connect(ltv, &LayerThicknessVariation::coeffChanged, _layeringCoeffSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _layeringCoeffSpinBox->setEnabled(ltv->customEnabled());
-  connect(ltv, SIGNAL(customEnabledChanged(bool)), _layeringCoeffSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(ltv, &LayerThicknessVariation::customEnabledChanged,
+          _layeringCoeffSpinBox, &QDoubleSpinBox::setEnabled);
 
   _layeringInitialSpinBox->setValue(ltv->initial());
-  connect(_layeringInitialSpinBox, SIGNAL(valueChanged(double)), ltv,
-          SLOT(setInitial(double)));
-  connect(ltv, SIGNAL(initialChanged(double)), _layeringInitialSpinBox,
-          SLOT(setValue(double)));
+  connect(_layeringInitialSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), ltv,
+          &LayerThicknessVariation::setInitial);
+  connect(ltv, &LayerThicknessVariation::initialChanged,
+          _layeringInitialSpinBox, &QDoubleSpinBox::setValue);
 
   _layeringInitialSpinBox->setEnabled(ltv->customEnabled());
-  connect(ltv, SIGNAL(customEnabledChanged(bool)), _layeringInitialSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(ltv, &LayerThicknessVariation::customEnabledChanged,
+          _layeringInitialSpinBox, &QDoubleSpinBox::setEnabled);
 
   _layeringExponentSpinBox->setValue(ltv->exponent());
-  connect(_layeringExponentSpinBox, SIGNAL(valueChanged(double)), ltv,
-          SLOT(setExponent(double)));
-  connect(ltv, SIGNAL(exponentChanged(double)), _layeringExponentSpinBox,
-          SLOT(setValue(double)));
+  connect(_layeringExponentSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), ltv,
+          &LayerThicknessVariation::setExponent);
+  connect(ltv, &LayerThicknessVariation::exponentChanged,
+          _layeringExponentSpinBox, &QDoubleSpinBox::setValue);
 
   _layeringExponentSpinBox->setEnabled(ltv->customEnabled());
-  connect(ltv, SIGNAL(customEnabledChanged(bool)), _layeringExponentSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(ltv, &LayerThicknessVariation::customEnabledChanged,
+          _layeringExponentSpinBox, &QDoubleSpinBox::setEnabled);
 
   // Bedrock depth variation
   BedrockDepthVariation *bdv =
       model->siteProfile()->profileRandomizer()->bedrockDepthVariation();
 
   _bedrockDepthFrame->setEnabled(bdv->enabled());
-  connect(bdv, SIGNAL(enabledChanged(bool)), this,
-          SLOT(setBedrockDepthItemEnabled(bool)));
+  connect(bdv, &BedrockDepthVariation::enabledChanged, this,
+          &SoilProfilePage::setBedrockDepthItemEnabled);
 
   _bedrockDepthFrame->setEnabled(bdv->enabled());
-  connect(bdv, SIGNAL(enabledChanged(bool)), _bedrockDepthFrame,
-          SLOT(setEnabled(bool)));
+  connect(bdv, &BedrockDepthVariation::enabledChanged, _bedrockDepthFrame,
+          &QFrame::setEnabled);
 
   _bedrockModelComboBox->setCurrentIndex(bdv->type());
-  connect(_bedrockModelComboBox, SIGNAL(currentIndexChanged(int)), bdv,
-          SLOT(setType(int)));
+  connect(_bedrockModelComboBox,
+          qOverload<int>(&QComboBox::currentIndexChanged), bdv,
+          qOverload<int>(&BedrockDepthVariation::setType));
 
   _bedrockStdevSpinBox->setValue(bdv->stdev());
-  connect(_bedrockStdevSpinBox, SIGNAL(valueChanged(double)), bdv,
-          SLOT(setStdev(double)));
-  connect(bdv, SIGNAL(stdevChanged(double)), _bedrockStdevSpinBox,
-          SLOT(setValue(double)));
+  connect(_bedrockStdevSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), bdv,
+          &BedrockDepthVariation::setStdev);
+  connect(bdv, &BedrockDepthVariation::stdevChanged, _bedrockStdevSpinBox,
+          &QDoubleSpinBox::setValue);
 
   _bedrockStdevSpinBox->setEnabled(bdv->stdevRequired());
-  connect(bdv, SIGNAL(stdevRequiredChanged(bool)), _bedrockStdevSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(bdv, &BedrockDepthVariation::stdevRequiredChanged,
+          _bedrockStdevSpinBox, &QDoubleSpinBox::setEnabled);
 
   // Minimum
   _bedrockDepthMinCheckBox->setChecked(bdv->hasMin());
-  connect(_bedrockDepthMinCheckBox, SIGNAL(toggled(bool)), bdv,
-          SLOT(setHasMin(bool)));
-  connect(bdv, SIGNAL(requiresLimits(bool)), _bedrockDepthMinCheckBox,
-          SLOT(setChecked(bool)));
-  connect(bdv, SIGNAL(requiresLimits(bool)), _bedrockDepthMinCheckBox,
-          SLOT(setDisabled(bool)));
+  connect(_bedrockDepthMinCheckBox, &QCheckBox::toggled, bdv,
+          &BedrockDepthVariation::setHasMin);
+  connect(bdv, &BedrockDepthVariation::requiresLimits, _bedrockDepthMinCheckBox,
+          &QCheckBox::setChecked);
+  connect(bdv, &BedrockDepthVariation::requiresLimits, _bedrockDepthMinCheckBox,
+          &QCheckBox::setDisabled);
 
   _bedrockDepthMinSpinBox->setRange(0, bdv->max());
   _bedrockDepthMinSpinBox->setEnabled(bdv->hasMin());
-  connect(bdv, SIGNAL(hasMinChanged(bool)), _bedrockDepthMinSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(bdv, &BedrockDepthVariation::hasMinChanged, _bedrockDepthMinSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   _bedrockDepthMinSpinBox->setValue(bdv->min());
-  connect(_bedrockDepthMinSpinBox, SIGNAL(valueChanged(double)), bdv,
-          SLOT(setMin(double)));
-  connect(_bedrockDepthMinSpinBox, SIGNAL(valueChanged(double)), this,
-          SLOT(setBedrockDepthMin(double)));
+  connect(_bedrockDepthMinSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), bdv,
+          &BedrockDepthVariation::setMin);
+  connect(_bedrockDepthMinSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+          &SoilProfilePage::setBedrockDepthMin);
 
   // Maximum
   _bedrockDepthMaxCheckBox->setChecked(bdv->hasMax());
 
-  connect(_bedrockDepthMaxCheckBox, SIGNAL(toggled(bool)), bdv,
-          SLOT(setHasMax(bool)));
-  connect(bdv, SIGNAL(hasMaxChanged(bool)), _bedrockDepthMaxCheckBox,
-          SLOT(setChecked(bool)));
-  connect(bdv, SIGNAL(requiresLimits(bool)), _bedrockDepthMaxCheckBox,
-          SLOT(setChecked(bool)));
-  connect(bdv, SIGNAL(requiresLimits(bool)), _bedrockDepthMaxCheckBox,
-          SLOT(setDisabled(bool)));
+  connect(_bedrockDepthMaxCheckBox, &QCheckBox::toggled, bdv,
+          &BedrockDepthVariation::setHasMax);
+  connect(bdv, &BedrockDepthVariation::hasMaxChanged, _bedrockDepthMaxCheckBox,
+          &QCheckBox::setChecked);
+  connect(bdv, &BedrockDepthVariation::requiresLimits, _bedrockDepthMaxCheckBox,
+          &QCheckBox::setChecked);
+  connect(bdv, &BedrockDepthVariation::requiresLimits, _bedrockDepthMaxCheckBox,
+          &QCheckBox::setDisabled);
 
   _bedrockDepthMaxSpinBox->setRange(bdv->min(), 10000);
   _bedrockDepthMaxSpinBox->setEnabled(bdv->hasMax());
-  connect(bdv, SIGNAL(hasMaxChanged(bool)), _bedrockDepthMaxSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(bdv, &BedrockDepthVariation::hasMaxChanged, _bedrockDepthMaxSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   _bedrockDepthMaxSpinBox->setValue(bdv->max());
-  connect(_bedrockDepthMaxSpinBox, SIGNAL(valueChanged(double)), bdv,
-          SLOT(setMax(double)));
-  connect(_bedrockDepthMaxSpinBox, SIGNAL(valueChanged(double)), this,
-          SLOT(setBedrockDepthMax(double)));
+  connect(_bedrockDepthMaxSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), bdv,
+          &BedrockDepthVariation::setMax);
+  connect(_bedrockDepthMaxSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+          &SoilProfilePage::setBedrockDepthMax);
 }
 
 void SoilProfilePage::setReadOnly(bool readOnly) {

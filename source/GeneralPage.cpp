@@ -161,8 +161,8 @@ auto GeneralPage::createVariationGroupBox() -> QGroupBox * {
   _seedSpinBox = new QSpinBox;
   _seedSpinBox->setRange(0, 65535);
   _seedSpinBox->setEnabled(false);
-  connect(_specifiedSeedCheckBox, SIGNAL(toggled(bool)), _seedSpinBox,
-          SLOT(setEnabled(bool)));
+  connect(_specifiedSeedCheckBox, &QCheckBox::toggled, _seedSpinBox,
+          &QSpinBox::setEnabled);
 
   layout->addRow(_specifiedSeedCheckBox, _seedSpinBox);
 
@@ -206,85 +206,87 @@ auto GeneralPage::createDiscretizationGroupBox() -> QGroupBox * {
 
 void GeneralPage::setModel(SiteResponseModel *model) {
   _titleLineEdit->setText(model->outputCatalog()->title());
-  connect(_titleLineEdit, SIGNAL(textChanged(QString)), model->outputCatalog(),
-          SLOT(setTitle(QString)));
+  connect(_titleLineEdit, &QLineEdit::textChanged, model->outputCatalog(),
+          &OutputCatalog::setTitle);
 
   _notesTextEdit->setDocument(model->notes());
 
   _prefixLineEdit->setText(model->outputCatalog()->filePrefix());
 
-  connect(_prefixLineEdit, SIGNAL(textChanged(QString)), model->outputCatalog(),
-          SLOT(setFilePrefix(QString)));
+  connect(_prefixLineEdit, &QLineEdit::textChanged, model->outputCatalog(),
+          &OutputCatalog::setFilePrefix);
 
   _unitsComboBox->setCurrentIndex(Units::instance()->system());
-  connect(_unitsComboBox, SIGNAL(currentIndexChanged(int)), Units::instance(),
-          SLOT(setSystem(int)));
+  connect(_unitsComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          Units::instance(), qOverload<int>(&Units::setSystem));
 
   _saveMotionDataCheckBox->setChecked(model->motionLibrary()->saveData());
-  connect(_saveMotionDataCheckBox, SIGNAL(toggled(bool)),
-          model->motionLibrary(), SLOT(setSaveData(bool)));
+  connect(_saveMotionDataCheckBox, &QCheckBox::toggled, model->motionLibrary(),
+          &MotionLibrary::setSaveData);
 
   _methodComboBox->setCurrentIndex(model->method());
-  connect(_methodComboBox, SIGNAL(currentIndexChanged(int)), model,
-          SLOT(setMethod(int)));
+  connect(_methodComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          model, qOverload<int>(&SiteResponseModel::setMethod));
 
   _approachComboBox->setCurrentIndex(model->motionLibrary()->approach());
-  connect(_approachComboBox, SIGNAL(currentIndexChanged(int)),
-          model->motionLibrary(), SLOT(setApproach(int)));
+  connect(_approachComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          model->motionLibrary(), qOverload<int>(&MotionLibrary::setApproach));
 
   _propertiesAreVariedCheckBox->setChecked(model->siteProfile()->isVaried());
-  connect(_propertiesAreVariedCheckBox, SIGNAL(toggled(bool)),
-          model->siteProfile(), SLOT(setIsVaried(bool)));
+  connect(_propertiesAreVariedCheckBox, &QCheckBox::toggled,
+          model->siteProfile(), &SoilProfile::setIsVaried);
 
   _variationGroupBox->setEnabled(model->siteProfile()->isVaried());
-  connect(model->siteProfile(), SIGNAL(isVariedChanged(bool)),
-          _variationGroupBox, SLOT(setEnabled(bool)));
+  connect(model->siteProfile(), &SoilProfile::isVariedChanged,
+          _variationGroupBox, &QGroupBox::setEnabled);
 
   _countSpinBox->setValue(model->siteProfile()->profileCount());
-  connect(_countSpinBox, SIGNAL(valueChanged(int)), model->siteProfile(),
-          SLOT(setProfileCount(int)));
+  connect(_countSpinBox, qOverload<int>(&QSpinBox::valueChanged),
+          model->siteProfile(), &SoilProfile::setProfileCount);
 
   _onlyConvergedCheckBox->setChecked(model->siteProfile()->onlyConverged());
-  connect(_onlyConvergedCheckBox, SIGNAL(toggled(bool)), model->siteProfile(),
-          SLOT(setOnlyConverged(bool)));
+  connect(_onlyConvergedCheckBox, &QCheckBox::toggled, model->siteProfile(),
+          &SoilProfile::setOnlyConverged);
 
   _nlPropertiesAreVariedCheckBox->setChecked(
       model->siteProfile()->nonlinearPropertyRandomizer()->enabled());
-  connect(_nlPropertiesAreVariedCheckBox, SIGNAL(toggled(bool)),
+  connect(_nlPropertiesAreVariedCheckBox, &QCheckBox::toggled,
           model->siteProfile()->nonlinearPropertyRandomizer(),
-          SLOT(setEnabled(bool)));
+          &NonlinearPropertyRandomizer::setEnabled);
 
   _siteIsVariedCheckBox->setChecked(
       model->siteProfile()->profileRandomizer()->enabled());
-  connect(_siteIsVariedCheckBox, SIGNAL(toggled(bool)),
-          model->siteProfile()->profileRandomizer(), SLOT(setEnabled(bool)));
+  connect(_siteIsVariedCheckBox, &QCheckBox::toggled,
+          model->siteProfile()->profileRandomizer(),
+          &ProfileRandomizer::setEnabled);
 
   _specifiedSeedCheckBox->setChecked(model->randNumGen()->seedSpecified());
-  connect(_specifiedSeedCheckBox, SIGNAL(toggled(bool)), model->randNumGen(),
-          SLOT(setSeedSpecified(bool)));
+  connect(_specifiedSeedCheckBox, &QCheckBox::toggled, model->randNumGen(),
+          &MyRandomNumGenerator::setSeedSpecified);
 
   _seedSpinBox->setValue(static_cast<int>(model->randNumGen()->seed()));
-  connect(_seedSpinBox, SIGNAL(valueChanged(int)), model->randNumGen(),
-          SLOT(setSeed(int)));
-  connect(model->randNumGen(), SIGNAL(seedChanged(int)), _seedSpinBox,
-          SLOT(setValue(int)));
+  connect(_seedSpinBox, qOverload<int>(&QSpinBox::valueChanged),
+          model->randNumGen(), qOverload<int>(&MyRandomNumGenerator::setSeed));
+  connect(model->randNumGen(), &MyRandomNumGenerator::seedChanged, _seedSpinBox,
+          &QSpinBox::setValue);
 
   _methodGroupBox->setCalculator(model->calculator());
-  connect(model, SIGNAL(calculatorChanged(AbstractCalculator *)),
-          _methodGroupBox, SLOT(setCalculator(AbstractCalculator *)));
+  connect(model, &SiteResponseModel::calculatorChanged, _methodGroupBox,
+          &MethodGroupBox::setCalculator);
 
   _maxFreqSpinBox->setValue(model->siteProfile()->maxFreq());
-  connect(_maxFreqSpinBox, SIGNAL(valueChanged(double)), model->siteProfile(),
-          SLOT(setMaxFreq(double)));
+  connect(_maxFreqSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          model->siteProfile(), &SoilProfile::setMaxFreq);
 
   _waveFractionSpinBox->setValue(model->siteProfile()->waveFraction());
-  connect(_waveFractionSpinBox, SIGNAL(valueChanged(double)),
-          model->siteProfile(), SLOT(setWaveFraction(double)));
+  connect(_waveFractionSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged),
+          model->siteProfile(), &SoilProfile::setWaveFraction);
 
   _disableDiscretzationCheckBox->setChecked(
       model->siteProfile()->disableAutoDiscretization());
-  connect(_disableDiscretzationCheckBox, SIGNAL(toggled(bool)),
-          model->siteProfile(), SLOT(setDisableAutoDiscretization(bool)));
+  connect(_disableDiscretzationCheckBox, &QCheckBox::toggled,
+          model->siteProfile(), &SoilProfile::setDisableAutoDiscretization);
 }
 
 void GeneralPage::setReadOnly(bool readOnly) {

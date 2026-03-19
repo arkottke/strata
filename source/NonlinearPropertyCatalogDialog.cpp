@@ -43,8 +43,8 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(
   auto *modulus = new NonlinearPropertyFactoryGroupBox(
       catalog->modulusFactory(), tr("Shear Modulus Reduction Models"), this);
 
-  connect(modulus, SIGNAL(nlPropertyChanged(NonlinearProperty *, bool)), this,
-          SLOT(setDataModel(NonlinearProperty *, bool)));
+  connect(modulus, &NonlinearPropertyFactoryGroupBox::nlPropertyChanged, this,
+          &NonlinearPropertyCatalogDialog::setDataModel);
 
   layout->addWidget(modulus, 0, 0);
 
@@ -52,15 +52,15 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(
   auto *damping = new NonlinearPropertyFactoryGroupBox(
       catalog->dampingFactory(), tr("Damping Models"), this);
 
-  connect(damping, SIGNAL(nlPropertyChanged(NonlinearProperty *, bool)), this,
-          SLOT(setDataModel(NonlinearProperty *, bool)));
+  connect(damping, &NonlinearPropertyFactoryGroupBox::nlPropertyChanged, this,
+          &NonlinearPropertyCatalogDialog::setDataModel);
 
   layout->addWidget(damping, 1, 0);
 
-  connect(modulus, SIGNAL(nlPropertyChanged(NonlinearProperty *, bool)),
-          damping, SLOT(clearSelection()));
-  connect(damping, SIGNAL(nlPropertyChanged(NonlinearProperty *, bool)),
-          modulus, SLOT(clearSelection()));
+  connect(modulus, &NonlinearPropertyFactoryGroupBox::nlPropertyChanged,
+          damping, &NonlinearPropertyFactoryGroupBox::clearSelection);
+  connect(damping, &NonlinearPropertyFactoryGroupBox::nlPropertyChanged,
+          modulus, &NonlinearPropertyFactoryGroupBox::clearSelection);
 
   // Data group box
   _dataGroupBox = new TableGroupBox(tr("Nonlinear Curve Data"));
@@ -74,7 +74,8 @@ NonlinearPropertyCatalogDialog::NonlinearPropertyCatalogDialog(
   // Button box
   auto *buttonBox =
       new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+  connect(buttonBox, &QDialogButtonBox::accepted, this,
+          &NonlinearPropertyCatalogDialog::accept);
 
   layout->addWidget(buttonBox, 2, 1);
 

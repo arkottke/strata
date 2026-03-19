@@ -68,7 +68,7 @@ void AriasIntensityProfileOutput::extract(AbstractCalculator *const calculator,
     data << tsm->ariasIntensity(
                    calculator->calcAccelTf(site->inputLocation(), tsm->type(),
                                            site->depthToLocation(depth), type))
-                .last();
+                .constLast();
     type = AbstractMotion::Within;
   }
 }

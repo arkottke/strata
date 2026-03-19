@@ -41,10 +41,10 @@ NonlinearPropertyRandomizer::NonlinearPropertyRandomizer(
     : QObject(siteProfile), _enabled(false), _model(Darendeli),
       _bedrockIsEnabled(false), _correl(-0.50), _rng(rng),
       _siteProfile(siteProfile) {
-  connect(_siteProfile, SIGNAL(isVariedChanged(bool)), this,
-          SLOT(updateEnabled()));
-  connect(_siteProfile, SIGNAL(isVariedChanged(bool)), this,
-          SLOT(updateBedrockIsEnabled()));
+  connect(_siteProfile, &SoilProfile::isVariedChanged, this,
+          &NonlinearPropertyRandomizer::updateEnabled);
+  connect(_siteProfile, &SoilProfile::isVariedChanged, this,
+          &NonlinearPropertyRandomizer::updateBedrockIsEnabled);
 
   _modulusUncert = new NonlinearPropertyUncertainty(0.15, 0.001, 1.);
   _dampingUncert = new NonlinearPropertyUncertainty(0.30, 0.001, 20);

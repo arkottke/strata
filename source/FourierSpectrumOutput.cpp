@@ -39,7 +39,8 @@ FourierSpectrumOutput::FourierSpectrumOutput(OutputCatalog *catalog)
   _interp = new LinearOutputInterpolater;
 
   _statistics = new OutputStatistics(this);
-  connect(_statistics, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_statistics, &OutputStatistics::wasModified, this,
+          &FourierSpectrumOutput::wasModified);
 }
 
 auto FourierSpectrumOutput::needsFreq() const -> bool { return true; }

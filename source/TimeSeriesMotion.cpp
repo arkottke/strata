@@ -32,7 +32,7 @@
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonValue>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 
 #ifdef USE_FFTW
@@ -351,11 +351,8 @@ auto TimeSeriesMotion::toHtml() const -> QString {
                   "<td>%4</td>"
                   "<td>%5</td>"
                   "</tr>")
-              .arg(name())
-              .arg(_description)
-              .arg(typeList().at(_type))
-              .arg(_scale)
-              .arg(_pga);
+              .arg(name(), _description, typeList().at(_type),
+                   QString::number(_scale), QString::number(_pga));
 
   return html;
 }
@@ -389,25 +386,25 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
       setDescription(stream.readLine());
       Q_UNUSED(stream.readLine());
 
-      QList<QRegExp> patterns = {
+      QList<QRegularExpression> patterns = {
           // Example: 8751    0.0040    NPTS, DT
-          QRegExp("(\\d+)\\s+([0-9.]+)\\s+NPTS, DT"),
+          QRegularExpression("(\\d+)\\s+([0-9.]+)\\s+NPTS, DT"),
           // Example: NPTS=   7998, DT=   .0050 SEC,
           // Example: NPTS=   3666, DT=   0.025 SEC
-          QRegExp("NPTS=\\s+(\\d+), DT=\\s+([0-9.]+) SEC,?"),
+          QRegularExpression("NPTS=\\s+(\\d+), DT=\\s+([0-9.]+) SEC,?"),
       };
 
       QString line = stream.readLine();
       bool success = false;
-      for (QRegExp &pattern : patterns) {
-        int pos = pattern.indexIn(line);
-        if (pos < 0) {
+      for (const QRegularExpression &pattern : patterns) {
+        QRegularExpressionMatch match = pattern.match(line);
+        if (!match.hasMatch()) {
           continue;
         }
 
-        bool b;
-        const int count = pattern.cap(1).toInt(&b);
-        if (b && count > 1) {
+        bool ok;
+        const int count = match.captured(1).toInt(&ok);
+        if (ok && count > 1) {
           // Greater than one condition to catch if an acceleration value is
           // read
           setPointCount(count);
@@ -416,14 +413,15 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
           return false;
         }
 
-        const double timeStep = pattern.cap(2).toDouble(&b);
-        if (b) {
+        const double timeStep = match.captured(2).toDouble(&ok);
+        if (ok) {
           setTimeStep(timeStep);
         } else {
           qCritical() << "Unable to parse the time step in AT2 file!";
           return false;
         }
         success = true;
+        break;
       }
       if (!success) {
         qCritical() << "Unrecognized header format!" << line;
@@ -485,13 +483,12 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
     }
 
     // Read the line and split the line
-    QRegExp rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
-    int pos = 0;
+    static const QRegularExpression rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
     QStringList row;
-
-    while ((pos = rx.indexIn(line, pos)) != -1) {
-      row << rx.cap(1);
-      pos += rx.matchedLength();
+    QRegularExpressionMatchIterator it = rx.globalMatch(line);
+    while (it.hasNext()) {
+      QRegularExpressionMatch match = it.next();
+      row << match.captured(1);
     }
 
     // Process the row based on the format

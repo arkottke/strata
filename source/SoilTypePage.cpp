@@ -64,8 +64,8 @@ SoilTypePage::SoilTypePage(QWidget *parent, Qt::WindowFlags f)
 
   setLayout(layout);
   // Connections
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &SoilTypePage::updateUnits);
 }
 
 void SoilTypePage::setModel(SiteResponseModel *model) {
@@ -76,71 +76,75 @@ void SoilTypePage::setModel(SiteResponseModel *model) {
   _modulusDelegate->setModel(_soilTypeCatalog->nlCatalog()->modulusFactory());
   _dampingDelegate->setModel(_soilTypeCatalog->nlCatalog()->dampingFactory());
 
-  connect(_soilTypeTableBox, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
-          this, SLOT(selectIndex(QModelIndex, QModelIndex)));
+  connect(_soilTypeTableBox, &TableGroupBox::currentChanged, this,
+          &SoilTypePage::selectIndex);
 
   _soilPropsGroupBox->setEnabled(false);
   _nlPropTableBox->setEnabled(false);
 
   updateNonlinearPropertiesRequired(model->nonlinearPropertiesRequired());
-  connect(model, SIGNAL(nonlinearPropertiesRequiredChanged(bool)), this,
-          SLOT(updateNonlinearPropertiesRequired(bool)));
+  connect(model, &SiteResponseModel::nonlinearPropertiesRequiredChanged, this,
+          &SoilTypePage::updateNonlinearPropertiesRequired);
 
   updateDampingRequired(model->dampingRequired());
-  connect(model, SIGNAL(dampingRequiredChanged(bool)), this,
-          SLOT(updateDampingRequired(bool)));
+  connect(model, &SiteResponseModel::dampingRequiredChanged, this,
+          &SoilTypePage::updateDampingRequired);
 
   updateVariedColumn(
       model->siteProfile()->nonlinearPropertyRandomizer()->enabled());
   connect(model->siteProfile()->nonlinearPropertyRandomizer(),
-          SIGNAL(enabledChanged(bool)), this, SLOT(updateVariedColumn(bool)));
+          &NonlinearPropertyRandomizer::enabledChanged, this,
+          &SoilTypePage::updateVariedColumn);
 
   RockLayer *rl = model->siteProfile()->bedrock();
 
   _bedrockUntWtSpinBox->setValue(rl->untWt());
-  connect(_bedrockUntWtSpinBox, SIGNAL(valueChanged(double)), rl,
-          SLOT(setUntWt(double)));
+  connect(_bedrockUntWtSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), rl,
+          &RockLayer::setUntWt);
 
   _bedrockDampingSpinBox->setValue(rl->avgDamping());
-  connect(_bedrockDampingSpinBox, SIGNAL(valueChanged(double)), rl,
-          SLOT(setAvgDamping(double)));
+  connect(_bedrockDampingSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), rl,
+          &RockLayer::setAvgDamping);
 
   _waterTableDepthSpinBox->setValue(model->siteProfile()->waterTableDepth());
-  connect(_waterTableDepthSpinBox, SIGNAL(valueChanged(double)),
-          model->siteProfile(), SLOT(setWaterTableDepth(double)));
+  connect(_waterTableDepthSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged),
+          model->siteProfile(), &SoilProfile::setWaterTableDepth);
 
   NonlinearPropertyRandomizer *npr =
       model->siteProfile()->nonlinearPropertyRandomizer();
 
   _varyBedrockDampingCheckBox->setChecked(npr->bedrockIsEnabled());
-  connect(_varyBedrockDampingCheckBox, SIGNAL(toggled(bool)), npr,
-          SLOT(setBedrockIsEnabled(bool)));
+  connect(_varyBedrockDampingCheckBox, &QCheckBox::toggled, npr,
+          &NonlinearPropertyRandomizer::setBedrockIsEnabled);
 
   _varyBedrockDampingCheckBox->setVisible(npr->enabled());
-  connect(npr, SIGNAL(enabledChanged(bool)), _varyBedrockDampingCheckBox,
-          SLOT(setVisible(bool)));
+  connect(npr, &NonlinearPropertyRandomizer::enabledChanged,
+          _varyBedrockDampingCheckBox, &QCheckBox::setVisible);
 
   _nprModelComboBox->setCurrentIndex(npr->model());
-  connect(_nprModelComboBox, SIGNAL(currentIndexChanged(int)), npr,
-          SLOT(setModel(int)));
+  connect(_nprModelComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          npr, qOverload<int>(&NonlinearPropertyRandomizer::setModel));
 
   _modulusUncertWidget->setUncertaintyModel(npr->model());
   _modulusUncertWidget->setModel(npr->modulusUncert());
-  connect(npr, SIGNAL(modelChanged(int)), _modulusUncertWidget,
-          SLOT(setUncertaintyModel(int)));
+  connect(npr, &NonlinearPropertyRandomizer::modelChanged, _modulusUncertWidget,
+          &NonlinearPropertyUncertaintyWidget::setUncertaintyModel);
 
   _dampingUncertWidget->setUncertaintyModel(npr->model());
   _dampingUncertWidget->setModel(npr->dampingUncert());
-  connect(npr, SIGNAL(modelChanged(int)), _dampingUncertWidget,
-          SLOT(setUncertaintyModel(int)));
+  connect(npr, &NonlinearPropertyRandomizer::modelChanged, _dampingUncertWidget,
+          &NonlinearPropertyUncertaintyWidget::setUncertaintyModel);
 
   _correlSpinBox->setValue(npr->correl());
-  connect(_correlSpinBox, SIGNAL(valueChanged(double)), npr,
-          SLOT(setCorrel(double)));
+  connect(_correlSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), npr,
+          &NonlinearPropertyRandomizer::setCorrel);
 
   _randomizerGroupBox->setVisible(npr->enabled());
-  connect(npr, SIGNAL(enabledChanged(bool)), _randomizerGroupBox,
-          SLOT(setVisible(bool)));
+  connect(npr, &NonlinearPropertyRandomizer::enabledChanged,
+          _randomizerGroupBox, &QGroupBox::setVisible);
 }
 
 void SoilTypePage::setReadOnly(bool readOnly) {
@@ -327,8 +331,8 @@ auto SoilTypePage::createSoilPropsGroupBox() -> QGroupBox * {
       new QGroupBox(tr("Darendeli and Stokoe Model Parameters"));
   _soilPropsGroupBox->setLayout(layout);
 
-  connect(this, SIGNAL(soilPropertiesNeeded(bool)), _soilPropsGroupBox,
-          SLOT(setEnabled(bool)));
+  connect(this, &SoilTypePage::soilPropertiesNeeded, _soilPropsGroupBox,
+          &QGroupBox::setEnabled);
 
   return _soilPropsGroupBox;
 }
@@ -358,9 +362,9 @@ void SoilTypePage::selectIndex(const QModelIndex &current,
   if (previous.isValid()) {
     // Stop listening to the previous soil type
     disconnect(_soilTypeCatalog->soilType(previous.row()),
-               SIGNAL(modulusModelChanged(NonlinearProperty *)), 0, 0);
+               &SoilType::modulusModelChanged, nullptr, nullptr);
     disconnect(_soilTypeCatalog->soilType(previous.row()),
-               SIGNAL(dampingModelChanged(NonlinearProperty *)), 0, 0);
+               &SoilType::dampingModelChanged, nullptr, nullptr);
   }
 
   if (current.isValid()) {
@@ -370,13 +374,13 @@ void SoilTypePage::selectIndex(const QModelIndex &current,
     if (current.column() == SoilTypeCatalog::ModulusModelColumn) {
       np = st->modulusModel();
 
-      connect(st, SIGNAL(modulusModelChanged(NonlinearProperty *)), this,
-              SLOT(setCurrentNonlinearProperty(NonlinearProperty *)));
+      connect(st, &SoilType::modulusModelChanged, this,
+              &SoilTypePage::setCurrentNonlinearProperty);
     } else if (current.column() == SoilTypeCatalog::DampingModelColumn) {
       np = st->dampingModel();
 
-      connect(st, SIGNAL(dampingModelChanged(NonlinearProperty *)), this,
-              SLOT(setCurrentNonlinearProperty(NonlinearProperty *)));
+      connect(st, &SoilType::dampingModelChanged, this,
+              &SoilTypePage::setCurrentNonlinearProperty);
     }
 
     _nlPropTableBox->setEnabled(np);
@@ -391,28 +395,28 @@ void SoilTypePage::selectIndex(const QModelIndex &current,
       disconnect(_stressSpinBox, 0, 0, 0);
 
       _stressSpinBox->setValue(st->meanStress());
-      connect(_stressSpinBox, SIGNAL(valueChanged(double)), st,
-              SLOT(setMeanStress(double)));
+      connect(_stressSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+              st, &SoilType::setMeanStress);
 
       disconnect(_piSpinBox, 0, 0, 0);
       _piSpinBox->setValue(st->pi());
-      connect(_piSpinBox, SIGNAL(valueChanged(double)), st,
-              SLOT(setPi(double)));
+      connect(_piSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), st,
+              &SoilType::setPi);
 
       disconnect(_ocrSpinBox, 0, 0, 0);
       _ocrSpinBox->setValue(st->ocr());
-      connect(_ocrSpinBox, SIGNAL(valueChanged(double)), st,
-              SLOT(setOcr(double)));
+      connect(_ocrSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), st,
+              &SoilType::setOcr);
 
       disconnect(_freqSpinBox, 0, 0, 0);
       _freqSpinBox->setValue(st->freq());
-      connect(_freqSpinBox, SIGNAL(valueChanged(double)), st,
-              SLOT(setFreq(double)));
+      connect(_freqSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+              st, &SoilType::setFreq);
 
       disconnect(_nCyclesSpinBox, 0, 0, 0);
       _nCyclesSpinBox->setValue(st->nCycles());
-      connect(_nCyclesSpinBox, SIGNAL(valueChanged(int)), st,
-              SLOT(setNCycles(int)));
+      connect(_nCyclesSpinBox, qOverload<int>(&QSpinBox::valueChanged), st,
+              &SoilType::setNCycles);
     }
   }
 }

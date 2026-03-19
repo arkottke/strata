@@ -64,10 +64,10 @@ AxisOptions::AxisOptions(const QString &title, QWidget *parent)
 
   layout->addWidget(_maxLineEdit, 3, 1);
 
-  connect(_autoCheckBox, SIGNAL(toggled(bool)), _minLineEdit,
-          SLOT(setDisabled(bool)));
-  connect(_autoCheckBox, SIGNAL(toggled(bool)), _maxLineEdit,
-          SLOT(setDisabled(bool)));
+  connect(_autoCheckBox, &QCheckBox::toggled, _minLineEdit,
+          &QLineEdit::setDisabled);
+  connect(_autoCheckBox, &QCheckBox::toggled, _maxLineEdit,
+          &QLineEdit::setDisabled);
 
   setLayout(layout);
 }
@@ -146,8 +146,10 @@ ConfigurePlotDialog::ConfigurePlotDialog(QwtPlot *plot, QWidget *parent)
   auto *buttonBox =
       new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
-  connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  connect(buttonBox, &QDialogButtonBox::accepted, this,
+          &ConfigurePlotDialog::tryAccept);
+  connect(buttonBox, &QDialogButtonBox::rejected, this,
+          &ConfigurePlotDialog::reject);
 
   layout->addWidget(buttonBox, 2, 0);
 

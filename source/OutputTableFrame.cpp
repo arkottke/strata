@@ -40,12 +40,13 @@ OutputTableFrame::OutputTableFrame(QWidget *parent) : QFrame(parent) {
   layout->setColumnStretch(2, 1);
   // Create the buttons
   _addButton = new QPushButton(QIcon(":/images/list-add.svg"), tr("Add"));
-  connect(_addButton, SIGNAL(clicked()), this, SLOT(add()));
+  connect(_addButton, &QPushButton::clicked, this, &OutputTableFrame::add);
   layout->addWidget(_addButton, 0, 0);
 
   _removeButton =
       new QPushButton(QIcon(":/images/list-remove.svg"), tr("Remove"));
-  connect(_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
+  connect(_removeButton, &QPushButton::clicked, this,
+          &OutputTableFrame::remove);
   layout->addWidget(_removeButton, 0, 1);
 
   // Create table
@@ -60,9 +61,8 @@ void OutputTableFrame::setModel(AbstractMutableOutputCatalog *amoc) {
   _outputCatalog = amoc;
   _tableView->setModel(_outputCatalog);
   updateButtons();
-  connect(_tableView->selectionModel(),
-          SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-          SLOT(updateButtons()));
+  connect(_tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          this, &OutputTableFrame::updateButtons);
 
   if (_outputCatalog->needsOutputConditions()) {
     _tableView->setItemDelegateForColumn(1, new DepthComboBoxDelegate);

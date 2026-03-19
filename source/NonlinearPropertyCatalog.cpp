@@ -34,8 +34,9 @@ NonlinearPropertyCatalog::NonlinearPropertyCatalog() {
   _modulusFactory = new ModulusFactory;
   _dampingFactory = new DampingFactory;
 
-  _fileName = QStandardPaths::writableLocation(QStandardPaths::DataLocation) +
-              "/nonlinearCurves";
+  _fileName =
+      QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+      "/nonlinearCurves";
 
   QFile file(_fileName);
   if (file.exists() && file.open(QIODevice::ReadOnly)) {
@@ -59,7 +60,7 @@ auto NonlinearPropertyCatalog::dampingFactory() -> DampingFactory * {
 
 auto NonlinearPropertyCatalog::save() const -> bool {
   const QString dest =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
   QDir dir;
 
   if (!dir.exists(dest) && !dir.mkpath(dest)) {

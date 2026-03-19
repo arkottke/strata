@@ -62,8 +62,9 @@ ProfilesOutputCatalog::ProfilesOutputCatalog(OutputCatalog *outputCatalog)
            << new VerticalTotalStressProfileOutput(_outputCatalog)
            << new VerticalEffectiveStressProfileOutput(_outputCatalog);
 
-  for (auto *output : _outputs)
-    connect(output, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  for (auto *output : std::as_const(_outputs))
+    connect(output, &AbstractOutput::wasModified, this,
+            &ProfilesOutputCatalog::wasModified);
 }
 
 auto ProfilesOutputCatalog::rowCount(const QModelIndex &parent) const -> int {
@@ -143,19 +144,19 @@ auto ProfilesOutputCatalog::removeRows(int row, int count,
                                        const QModelIndex &parent) -> bool {
   if (!count)
     return false;
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i)
     _outputs.takeAt(row)->deleteLater();
 
-  emit endRemoveRows();
+  endRemoveRows();
   return true;
 }
 
 auto ProfilesOutputCatalog::outputs() const -> QList<AbstractOutput *> {
   QList<AbstractOutput *> list;
 
-  for (AbstractProfileOutput *apo : _outputs)
+  for (AbstractProfileOutput *apo : std::as_const(_outputs))
     if (apo->enabled())
       list << static_cast<AbstractOutput *>(apo);
 
@@ -166,7 +167,7 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json) {
   beginResetModel();
 
   QMap<QString, AbstractProfileOutput *> output_map;
-  for (AbstractProfileOutput *o : _outputs)
+  for (AbstractProfileOutput *o : std::as_const(_outputs))
     output_map.insert(o->metaObject()->className(), o);
 
   for (const QJsonValue &qjv : json) {
@@ -181,7 +182,7 @@ void ProfilesOutputCatalog::fromJson(const QJsonArray &json) {
 
 auto ProfilesOutputCatalog::toJson() const -> QJsonArray {
   QJsonArray json;
-  for (AbstractProfileOutput *apo : _outputs) {
+  for (AbstractProfileOutput *apo : std::as_const(_outputs)) {
     json << apo->toJson();
   }
 
@@ -192,7 +193,7 @@ auto operator<<(QDataStream &out, const ProfilesOutputCatalog *poc)
     -> QDataStream & {
   out << (quint8)4;
 
-  for (AbstractProfileOutput *apo : poc->_outputs) {
+  for (AbstractProfileOutput *apo : std::as_const(poc->_outputs)) {
     out << apo;
   }
 
@@ -204,7 +205,7 @@ auto operator>>(QDataStream &in, ProfilesOutputCatalog *poc) -> QDataStream & {
   in >> ver;
   poc->beginResetModel();
 
-  for (AbstractProfileOutput *apo : poc->_outputs) {
+  for (AbstractProfileOutput *apo : std::as_const(poc->_outputs)) {
     // Skip profiles not included in earlier versions
     if (ver < 2 && qobject_cast<MaxDispProfileOutput *>(apo))
       continue;

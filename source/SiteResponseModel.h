@@ -26,6 +26,8 @@
 #include <QJsonObject>
 #include <QThread>
 
+#include <atomic>
+
 class SoilProfile;
 class SiteResponseOutput;
 class AbstractCalculator;
@@ -153,7 +155,7 @@ private:
   MyRandomNumGenerator *_randNumGen;
 
   //! Okay to continue calculation.
-  bool _okToContinue;
+  std::atomic<bool> _okToContinue;
 
   //! A list of motions
   MotionLibrary *_motionLibrary;

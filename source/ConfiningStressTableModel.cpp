@@ -28,10 +28,10 @@
 
 ConfiningStressTableModel::ConfiningStressTableModel(QObject *parent)
     : MyAbstractTableModel(parent), _waterTableDepth(0.0) {
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(computeStress()));
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateHeader()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &ConfiningStressTableModel::computeStress);
+  connect(Units::instance(), &Units::systemChanged, this,
+          &ConfiningStressTableModel::updateHeader);
 }
 
 auto ConfiningStressTableModel::rowCount(const QModelIndex & /* index */) const
@@ -126,7 +126,7 @@ auto ConfiningStressTableModel::setData(const QModelIndex &index,
     }
   }
 
-  dataChanged(index, index);
+  emit dataChanged(index, index);
   return true;
 }
 
@@ -142,7 +142,7 @@ auto ConfiningStressTableModel::flags(const QModelIndex &index) const
 
 auto ConfiningStressTableModel::insertRows(int row, int count,
                                            const QModelIndex &parent) -> bool {
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     _layers.insert(row, new Layer);
@@ -152,19 +152,19 @@ auto ConfiningStressTableModel::insertRows(int row, int count,
     _layers[row]->atRestCoeff = 0.5;
   }
 
-  emit endInsertRows();
+  endInsertRows();
 
   return true;
 }
 
 auto ConfiningStressTableModel::removeRows(int row, int count,
                                            const QModelIndex &parent) -> bool {
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i)
     delete _layers.takeAt(row);
 
-  emit endRemoveRows();
+  endRemoveRows();
 
   return true;
 }

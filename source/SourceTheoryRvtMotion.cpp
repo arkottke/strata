@@ -41,13 +41,16 @@ SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject *parent)
   _fourierAcc = QVector<double>(freqCount(), 0.);
 
   _crustalAmp = new CrustalAmplification;
-  connect(_crustalAmp, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
-  connect(this, SIGNAL(regionChanged(int)), _crustalAmp, SLOT(setRegion(int)));
+  connect(_crustalAmp, &CrustalAmplification::wasModified, this,
+          &SourceTheoryRvtMotion::wasModified);
+  connect(this, &SourceTheoryRvtMotion::regionChanged, _crustalAmp,
+          qOverload<int>(&CrustalAmplification::setRegion));
 
   _pathDuration = new PathDurationModel;
-  connect(_pathDuration, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
-  connect(this, SIGNAL(regionChanged(int)), _pathDuration,
-          SLOT(setRegion(int)));
+  connect(_pathDuration, &PathDurationModel::wasModified, this,
+          &SourceTheoryRvtMotion::wasModified);
+  connect(this, &SourceTheoryRvtMotion::regionChanged, _pathDuration,
+          qOverload<int>(&PathDurationModel::setRegion));
 
   // Reset the parameters
   setRegion(_region);
@@ -371,8 +374,8 @@ void SourceTheoryRvtMotion::calculate() {
         conv * pow(2 * M_PI * freqAt(i), 2) * sourceComp * pathComp * siteComp;
   }
 
-  dataChanged(index(0, AmplitudeColumn),
-              index(_fourierAcc.size(), AmplitudeColumn));
+  emit dataChanged(index(0, AmplitudeColumn),
+                   index(_fourierAcc.size(), AmplitudeColumn));
 
   AbstractRvtMotion::calculate();
 }

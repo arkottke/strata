@@ -209,12 +209,12 @@ auto TimeSeriesOutputCatalog::removeRows(int row, int count,
                                          const QModelIndex &parent) -> bool {
   if (!count)
     return false;
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i)
     _outputs.takeAt(row)->deleteLater();
 
-  emit endRemoveRows();
+  endRemoveRows();
   emit wasModified();
 
   if (!rowCount())
@@ -228,8 +228,8 @@ void TimeSeriesOutputCatalog::addRow(const QString &name) {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     _outputs << factory(_lookup.value(name), _outputCatalog);
 
-    connect(_outputs.last(), SIGNAL(wasModified()), this,
-            SIGNAL(wasModified()));
+    connect(_outputs.last(), &AbstractOutput::wasModified, this,
+            &TimeSeriesOutputCatalog::wasModified);
 
     endInsertRows();
 
@@ -247,7 +247,7 @@ auto TimeSeriesOutputCatalog::outputs() const -> QList<AbstractOutput *> {
 }
 
 auto TimeSeriesOutputCatalog::factory(const QString &className,
-                                      OutputCatalog *parent) const
+                                      OutputCatalog *parent)
     -> AbstractTimeSeriesOutput * {
   AbstractTimeSeriesOutput *atso = 0;
 

@@ -61,8 +61,7 @@ auto AccelTransferFunctionOutput::xLabel() const -> const QString {
 
 auto AccelTransferFunctionOutput::yLabel() const -> const QString {
   return tr("FAS (accel) at %1 / FAS (accel) at %2")
-      .arg(locationToString(_outDepth))
-      .arg(locationToString(_inDepth));
+      .arg(locationToString(_outDepth), locationToString(_inDepth));
 }
 
 auto AccelTransferFunctionOutput::ref(int motion) const

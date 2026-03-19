@@ -14,7 +14,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 # Default configuration values. These must be before the project command or
 # they won't work in Windows.
@@ -48,26 +48,30 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 option(ADVANCED_FEATURES "Compile with advanced features" ON)
 
 
-if(APPLE AND EXISTS /usr/local/opt/qt5)
-	# Homebrew installs Qt5 (up to at least 5.9.1) in
-	# /usr/local/opt/qt5, ensure it can be found by CMake since
+# Required Qt5.16+ for Qt6 compatibility
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
+
+
+if(APPLE AND EXISTS /usr/local/opt/qt6)
+	# Homebrew installs Qt6 (up to at least 5.9.1) in
+	# /usr/local/opt/qt6, ensure it can be found by CMake since
 	# it is not in the default /usr/local prefix.
-	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt6")
 endif()
 
+# Enable the C++17 standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Configure libraries
-find_package(Qt5PrintSupport REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Xml REQUIRED)
-# find_package(Qt5Test REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport)
 find_package(GSL REQUIRED)
 find_package(Qwt REQUIRED)
 
+qt_standard_project_setup()
+
 include_directories(${GSL_INCLUDE_DIRS} ${QWT_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
-
-# Enable the C++14 standard
-set(CMAKE_CXX_STANDARD 14)
 
 if (ADVANCED_FEATURES)
     add_definitions(-DADVANCED_FEATURES)
@@ -76,10 +80,8 @@ endif()
 if(MSVC)
     # Add GSL DLL definition for MSVC. Add define for math constants
     add_definitions(-DGSL_DLL -D_USE_MATH_DEFINES)
-    # Optimize for speed and link dynamically "-MD"
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-    # Dynamic linking
-    set(CMAKE_CXX_FLAGS_RELEASE "/MD")
+    # Optimize for speed and link dynamically
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
 else()
     # Add optimization for GCC
     # SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
@@ -87,14 +89,23 @@ else()
 endif()
 
 
-# Testing configuration
-enable_testing()
-set(TEST_LINK_LIBRARIES Qt5::Test)
-
 add_subdirectory(resources)
 add_subdirectory(source)
 add_subdirectory(tests)
 
+# Example regression tests using Python comparison script
+find_package(Python3 COMPONENTS Interpreter)
+if (Python3_FOUND)
+    enable_testing()
+    add_test(
+        NAME example_regression
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/scripts/compare_examples.py
+            $<TARGET_FILE:strata>
+            ${CMAKE_SOURCE_DIR}/example
+    )
+    set_tests_properties(example_regression PROPERTIES TIMEOUT 600)
+endif()
 find_program(PDFLATEX_PATH pdflatex)
 if (PDFLATEX_PATH)
     add_subdirectory(manual)

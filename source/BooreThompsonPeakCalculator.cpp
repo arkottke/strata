@@ -45,7 +45,7 @@ BooreThompsonPeakCalculator::BooreThompsonPeakCalculator() {
   _lnDistAcc = gsl_interp_accel_alloc();
 
   // Load the model coefficients
-  for (QString region : {"cena", "wna"}) {
+  for (const QString &region : {QString("cena"), QString("wna")}) {
     // Load the JSON and convert to vectors
     QString fileName =
         QString(":/data/%1_bt15_trms4osc.json").arg(region).toUtf8();
@@ -61,7 +61,8 @@ BooreThompsonPeakCalculator::BooreThompsonPeakCalculator() {
     QJsonObject json = jsonDoc.object();
 
     QMap<QString, QVector<double>> paramMap;
-    for (QString key : json.keys()) {
+    const QStringList keys = json.keys();
+    for (const QString &key : keys) {
       Serialize::toDoubleVector(json[key], paramMap[key]);
     }
 

@@ -57,16 +57,17 @@ FrequencyDependentCalculatorWidget::FrequencyDependentCalculatorWidget(
 void FrequencyDependentCalculatorWidget::setCalculator(
     FrequencyDependentCalculator *fdc) {
   _errorToleranceSpinBox->setValue(fdc->errorTolerance());
-  connect(_errorToleranceSpinBox, SIGNAL(valueChanged(double)), fdc,
-          SLOT(setErrorTolerance(double)));
+  connect(_errorToleranceSpinBox,
+          qOverload<double>(&QDoubleSpinBox::valueChanged), fdc,
+          &FrequencyDependentCalculator::setErrorTolerance);
 
   _maxIterationsSpinBox->setValue(fdc->maxIterations());
-  connect(_maxIterationsSpinBox, SIGNAL(valueChanged(int)), fdc,
-          SLOT(setMaxIterations(int)));
+  connect(_maxIterationsSpinBox, qOverload<int>(&QSpinBox::valueChanged), fdc,
+          &FrequencyDependentCalculator::setMaxIterations);
 
   _useSmoothStrainCheckBox->setChecked(fdc->useSmoothSpectrum());
-  connect(_useSmoothStrainCheckBox, SIGNAL(toggled(bool)), fdc,
-          SLOT(setUseSmoothSpectrum(bool)));
+  connect(_useSmoothStrainCheckBox, &QCheckBox::toggled, fdc,
+          &FrequencyDependentCalculator::setUseSmoothSpectrum);
 }
 
 void FrequencyDependentCalculatorWidget::setReadOnly(bool readOnly) {

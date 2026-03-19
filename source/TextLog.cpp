@@ -70,7 +70,8 @@ void TextLog::fromJson(const QJsonObject &json) {
   _level = (TextLog::Level)json["level"].toInt();
 
   _text.clear();
-  for (const QJsonValue &v : json["text"].toArray())
+  const QJsonArray textArray = json["text"].toArray();
+  for (const QJsonValue &v : textArray)
     _text << v.toString();
 }
 

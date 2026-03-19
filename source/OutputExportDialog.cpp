@@ -102,8 +102,8 @@ void OutputExportDialog::createDialog() {
   // Path selection
   auto *selectDirPushButton = new QPushButton(tr("Select directory..."), this);
   selectDirPushButton->setAutoDefault(false);
-  connect(selectDirPushButton, SIGNAL(clicked()), this,
-          SLOT(selectDirectory()));
+  connect(selectDirPushButton, &QPushButton::clicked, this,
+          &OutputExportDialog::selectDirectory);
 
   _destDirLineEdit = new QLineEdit;
 
@@ -146,8 +146,10 @@ void OutputExportDialog::createDialog() {
   auto *buttonBox = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
-  connect(buttonBox, SIGNAL(accepted()), this, SLOT(exportData()));
-  connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  connect(buttonBox, &QDialogButtonBox::accepted, this,
+          &OutputExportDialog::exportData);
+  connect(buttonBox, &QDialogButtonBox::rejected, this,
+          &OutputExportDialog::reject);
 
   layout->addWidget(buttonBox, 3, 0, 1, 2);
 

@@ -37,8 +37,8 @@ MotionLibrary::MotionLibrary(QObject *parent) : MyAbstractTableModel(parent) {
   _approach = TimeSeries;
   _saveData = true;
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &MotionLibrary::updateUnits);
 }
 
 auto MotionLibrary::approachList() -> QStringList {
@@ -79,7 +79,7 @@ void MotionLibrary::setSaveData(bool b) {
     _saveData = b;
     emit saveDataChanged(_saveData);
 
-    for (auto *m : _motions) {
+    for (auto *m : std::as_const(_motions)) {
       if (auto *tsm = qobject_cast<TimeSeriesMotion *>(m)) {
         tsm->setSaveData(b);
       }
@@ -228,12 +228,12 @@ auto MotionLibrary::setData(const QModelIndex &index, const QVariant &value,
     }
     }
     // Signal that the data has changed
-    dataChanged(index, index);
+    emit dataChanged(index, index);
   } else if (role == Qt::CheckStateRole && index.column() == NameColumn) {
     _motions[index.row()]->setEnabled(value.toBool());
     // Change entire row information
-    dataChanged(index.sibling(index.row(), 0),
-                index.sibling(index.row(), columnCount()));
+    emit dataChanged(index.sibling(index.row(), 0),
+                     index.sibling(index.row(), columnCount()));
   }
 
   return false;
@@ -243,13 +243,13 @@ auto MotionLibrary::removeRows(int row, int count, const QModelIndex &parent)
     -> bool {
   if (!count)
     return false;
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     _motions.takeAt(row)->deleteLater();
   }
 
-  emit endRemoveRows();
+  endRemoveRows();
   return true;
 }
 
@@ -271,10 +271,10 @@ void MotionLibrary::addMotion(AbstractMotion *motion) {
   if (auto *tsm = qobject_cast<TimeSeriesMotion *>(motion))
     tsm->setSaveData(_saveData);
 
-  emit beginInsertRows(QModelIndex(), row, row);
+  beginInsertRows(QModelIndex(), row, row);
   _motions.insert(row, motion);
   emit wasModified();
-  emit endInsertRows();
+  endInsertRows();
 }
 
 auto MotionLibrary::motionAt(int row) -> AbstractMotion * {
@@ -325,7 +325,7 @@ void MotionLibrary::fromJson(const QJsonObject &json) {
   while (_motions.size())
     _motions.takeLast()->deleteLater();
 
-  QJsonArray motions = json["motions"].toArray();
+  const QJsonArray motions = json["motions"].toArray();
   for (const QJsonValue &value : motions) {
     QJsonObject mjo = value.toObject();
     QString className = mjo["className"].toString();

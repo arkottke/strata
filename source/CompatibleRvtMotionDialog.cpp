@@ -70,8 +70,8 @@ auto CompatibleRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   spinBox->setValue(_motion->duration());
   spinBox->setReadOnly(_readOnly);
 
-  connect(spinBox, SIGNAL(valueChanged(double)), _motion,
-          SLOT(setDuration(double)));
+  connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), crm,
+          &CompatibleRvtMotion::setDuration);
 
   layout->addRow(tr("Duration:"), spinBox);
 
@@ -84,15 +84,16 @@ auto CompatibleRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   spinBox->setValue(crm->targetRespSpec()->damping());
   spinBox->setReadOnly(_readOnly);
 
-  connect(spinBox, SIGNAL(valueChanged(double)), crm->targetRespSpec(),
-          SLOT(setDamping(double)));
+  connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          crm->targetRespSpec(), &ResponseSpectrum::setDamping);
 
   layout->addRow(tr("Damping of target:"), spinBox);
 
   // Limit
   auto checkBox = new QCheckBox(tr("Limit shape of FAS"));
   checkBox->setChecked(crm->limitFas());
-  connect(checkBox, SIGNAL(toggled(bool)), _motion, SLOT(setLimitFas(bool)));
+  connect(checkBox, &QCheckBox::toggled, crm,
+          &CompatibleRvtMotion::setLimitFas);
 
   layout->addRow(checkBox);
 
@@ -103,8 +104,9 @@ void CompatibleRvtMotionDialog::calculate() {
   AbstractRvtMotionDialog::calculate();
 
   auto crm = qobject_cast<CompatibleRvtMotion *>(_motion);
-  _targetSaCurve->setSamples(crm->targetRespSpec()->period(),
-                             crm->targetRespSpec()->sa());
+  _targetSaCurve->setSamples(crm->targetRespSpec()->period().data(),
+                             crm->targetRespSpec()->sa().data(),
+                             crm->targetRespSpec()->period().size());
 
   _dataTabWidget->setCurrentIndex(1);
 }
@@ -139,8 +141,9 @@ void CompatibleRvtMotionDialog::addRespSpecCurves() {
                                           QBrush(Qt::transparent),
                                           QPen(Qt::red, 1.5), QSize(8, 8)));
 
-  _targetSaCurve->setSamples(crm->targetRespSpec()->period(),
-                             crm->targetRespSpec()->sa());
+  _targetSaCurve->setSamples(crm->targetRespSpec()->period().data(),
+                             crm->targetRespSpec()->sa().data(),
+                             crm->targetRespSpec()->period().size());
   _targetSaCurve->attach(_rsPlot);
 
   auto *legend = new QwtLegend;

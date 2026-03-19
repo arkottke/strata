@@ -55,32 +55,36 @@ SiteResponseModel::SiteResponseModel(QObject *parent)
   _okToContinue = true;
   _isLoaded = false;
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(setModified()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          [this]() { setModified(); });
 
   _randNumGen = new MyRandomNumGenerator(this);
-  connect(_randNumGen, SIGNAL(wasModified()), this, SLOT(setModified()));
+  connect(_randNumGen, &MyRandomNumGenerator::wasModified, this,
+          [this]() { setModified(); });
 
   _motionLibrary = new MotionLibrary(this);
   _motionLibrary->setReadOnly(_hasResults);
-  connect(_motionLibrary, SIGNAL(wasModified()), this, SLOT(setModified()));
-  connect(this, SIGNAL(hasResultsChanged(bool)), _motionLibrary,
-          SLOT(setReadOnly(bool)));
+  connect(_motionLibrary, &MotionLibrary::wasModified, this,
+          [this]() { setModified(); });
+  connect(this, &SiteResponseModel::hasResultsChanged, _motionLibrary,
+          &MotionLibrary::setReadOnly);
 
   _siteProfile = new SoilProfile(this);
   _siteProfile->setReadOnly(_hasResults);
-  connect(_siteProfile, SIGNAL(wasModified()), this, SLOT(setModified()));
-  connect(this, SIGNAL(hasResultsChanged(bool)), _siteProfile,
-          SLOT(setReadOnly(bool)));
+  connect(_siteProfile, &SoilProfile::wasModified, this,
+          [this]() { setModified(); });
+  connect(this, &SiteResponseModel::hasResultsChanged, _siteProfile,
+          &SoilProfile::setReadOnly);
 
   _outputCatalog = new OutputCatalog(this);
   _outputCatalog->setReadOnly(_hasResults);
-  connect(_motionLibrary, SIGNAL(wasModified()), this, SLOT(setModified()));
-  connect(this, SIGNAL(hasResultsChanged(bool)), _outputCatalog,
-          SLOT(setReadOnly(bool)));
-  connect(_outputCatalog, SIGNAL(wasModified()), this, SLOT(setModified()));
-  connect(this->motionLibrary(), SIGNAL(approachChanged(int)),
-          _outputCatalog->profilesCatalog(), SLOT(setApproach(int)));
+  connect(this, &SiteResponseModel::hasResultsChanged, _outputCatalog,
+          &OutputCatalog::setReadOnly);
+  connect(_outputCatalog, &OutputCatalog::wasModified, this,
+          [this]() { setModified(); });
+  connect(this->motionLibrary(), &MotionLibrary::approachChanged,
+          _outputCatalog->profilesCatalog(),
+          &ProfilesOutputCatalog::setApproach);
 
   // Associate the output soil types catalog with the input soil types catalog
   // Should these have a stronger link? As in be the same object?
@@ -90,7 +94,8 @@ SiteResponseModel::SiteResponseModel(QObject *parent)
   setCalculator(new EquivalentLinearCalculator(this));
 
   _notes = new QTextDocument(this);
-  connect(_notes, SIGNAL(contentsChanged()), this, SLOT(setModified()));
+  connect(_notes, &QTextDocument::contentsChanged, this,
+          [this]() { setModified(); });
 
   Units::instance()->reset();
 }
@@ -212,7 +217,9 @@ void SiteResponseModel::setCalculator(AbstractCalculator *calculator) {
     _calculator = calculator;
     _calculator->setTextLog(_outputCatalog->log());
 
-    connect(_calculator, SIGNAL(wasModified()), this, SLOT(setModified()));
+    // FIXME: Is this really the correct solution?
+    connect(_calculator, &AbstractCalculator::wasModified, this,
+            [this]() { setModified(); });
 
     emit calculatorChanged(_calculator);
   }
@@ -233,7 +240,6 @@ auto SiteResponseModel::loadBinary(const QString &fileName) -> bool {
   }
   // Open the data stream
   QDataStream inStream(&file);
-  inStream.setVersion(QDataStream::Qt_4_0);
 
   // Read and check the header
   quint32 magic;
@@ -242,6 +248,33 @@ auto SiteResponseModel::loadBinary(const QString &fileName) -> bool {
   if (magic != 0xA1B2) {
     qCritical() << "Bad file format!";
     return false;
+  }
+
+  // Attempt to read the QDataStream version used for serialization
+  // Files created with Qt6 Strata will have this version marker
+  // Legacy files (Qt5/Qt4) will not have this marker
+  quint32 datastreamFormatVersion;
+  qint64 checkpointPosition = file.pos();
+  inStream >> datastreamFormatVersion;
+
+  // Check if this looks like a valid QDataStream version number
+  // Valid versions are typically between 5 (Qt_4_2) and 30+ (future Qt
+  // versions) If the value is outside this range, it's likely actual data from
+  // a legacy file
+  bool isLegacyFormat =
+      (datastreamFormatVersion < 5 || datastreamFormatVersion > 50);
+
+  if (isLegacyFormat) {
+    // Rewind - this was actual data, not a version marker
+    file.seek(checkpointPosition);
+    inStream.setVersion(QDataStream::Qt_4_0);
+    qDebug() << "Loading legacy binary format (Qt_4_0)";
+  } else {
+    // Use the stored format version
+    inStream.setVersion(
+        static_cast<QDataStream::Version>(datastreamFormatVersion));
+    qDebug() << "Loading binary format with QDataStream version:"
+             << datastreamFormatVersion;
   }
 
   // Read the data
@@ -311,15 +344,17 @@ auto SiteResponseModel::saveBinary() -> bool {
   QFile file(_fileName);
   // If the file can't be opened halt
   if (!file.open(QIODevice::WriteOnly)) {
-    qCritical() << "Error opening file: %s" << qPrintable(_fileName);
+    qCritical() << "Error opening file:" << _fileName;
     return false;
   }
   // Open the data stream
   QDataStream outStream(&file);
-  outStream.setVersion(QDataStream::Qt_4_0);
+  outStream.setVersion(QDataStream::Qt_6_0);
 
-  // Write a header with a "magic number" and a version
+  // Write a header with a "magic number", QDataStream version, and data
   outStream << static_cast<quint32>(0xA1B2);
+  // Store the QDataStream version for backward compatibility detection
+  outStream << static_cast<quint32>(QDataStream::Qt_6_0);
   outStream << this;
 
   setModified(false);
@@ -580,10 +615,9 @@ auto SiteResponseModel::toHtml() -> QString {
          "<tr><th>Units System:</th><td>%4</td></tr>"
          "</table>"
          "</li>")
-          .arg(_outputCatalog->title())
-          .arg(_notes->toHtml())
-          .arg(_outputCatalog->filePrefix())
-          .arg(Units::instance()->systemList().at(Units::instance()->system()));
+          .arg(_outputCatalog->title(), _notes->toHtml(),
+               _outputCatalog->filePrefix(),
+               Units::instance()->systemList().at(Units::instance()->system()));
 
   // Type of Analysis
   html += tr("<li>Type of Analysis"
@@ -593,9 +627,9 @@ auto SiteResponseModel::toHtml() -> QString {
              "<tr><th>Properties Varied:</th><td>%3</td></tr>"
              "</table>"
              "</li>")
-              .arg(methodList().at(_method))
-              .arg(MotionLibrary::approachList().at(_motionLibrary->approach()))
-              .arg(boolToString(_siteProfile->isVaried()));
+              .arg(methodList().at(_method),
+                   MotionLibrary::approachList().at(_motionLibrary->approach()),
+                   boolToString(_siteProfile->isVaried()));
 
   // Site Variation
   if (_siteProfile->isVaried())
@@ -609,8 +643,8 @@ auto SiteResponseModel::toHtml() -> QString {
            "</li>")
             .arg(_siteProfile->profileCount())
             .arg(boolToString(
-                _siteProfile->nonlinearPropertyRandomizer()->enabled()))
-            .arg(boolToString(_siteProfile->profileRandomizer()->enabled()));
+                     _siteProfile->nonlinearPropertyRandomizer()->enabled()),
+                 boolToString(_siteProfile->profileRandomizer()->enabled()));
 
   // Layer Discretization
   html += tr("<li>Layer Discretization"
@@ -655,7 +689,8 @@ auto SiteResponseModel::toHtml() -> QString {
 
 auto operator<<(QDataStream &out, const SiteResponseModel *srm)
     -> QDataStream & {
-  out << static_cast<quint8>(2);
+  out << static_cast<quint8>(
+      3); // Version 3: Qt6 migration with QDataStream version tracking
 
   out << Units::instance() << srm->_notes->toPlainText()
       << (quint32)srm->_method << srm->_siteProfile << srm->_motionLibrary

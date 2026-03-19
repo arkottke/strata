@@ -33,8 +33,8 @@
 CrustalAmplification::CrustalAmplification(QObject *parent)
     : MyAbstractTableModel(parent), _source(Default) {
   _crustalModel = new CrustalModel;
-  connect(_crustalModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this,
-          SLOT(calculate()));
+  connect(_crustalModel, &CrustalModel::dataChanged, this,
+          &CrustalAmplification::calculate);
 
   _interpolator = 0;
   _accelerator = gsl_interp_accel_alloc();
@@ -161,7 +161,7 @@ auto CrustalAmplification::setData(const QModelIndex &index,
       _amp[index.row()] = d;
       break;
     }
-    dataChanged(index, index);
+    emit dataChanged(index, index);
     return true;
   } else {
     return false;
@@ -179,12 +179,12 @@ auto CrustalAmplification::flags(const QModelIndex &index) const
 
 auto CrustalAmplification::insertRows(int row, int count,
                                       const QModelIndex &parent) -> bool {
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   _freq.insert(row, count, 0);
   _amp.insert(row, count, 0);
 
-  emit endInsertRows();
+  endInsertRows();
 
   // Reset the interpolator
   clearInterp();
@@ -194,12 +194,12 @@ auto CrustalAmplification::insertRows(int row, int count,
 
 auto CrustalAmplification::removeRows(int row, int count,
                                       const QModelIndex &parent) -> bool {
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   _freq.remove(row, count);
   _amp.remove(row, count);
 
-  emit endRemoveRows();
+  endRemoveRows();
 
   // Reset the interpolator
   clearInterp();

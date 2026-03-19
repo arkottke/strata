@@ -55,23 +55,24 @@ SoilProfile::SoilProfile(SiteResponseModel *parent)
   MyRandomNumGenerator *randNumGen = _siteResponseModel->randNumGen();
 
   _bedrock = new RockLayer;
-  connect(_bedrock, SIGNAL(wasModified()), this, SIGNAL(wasModified()));
+  connect(_bedrock, &RockLayer::wasModified, this, &SoilProfile::wasModified);
 
   _profileRandomizer = new ProfileRandomizer(randNumGen->gsl_pointer(), this);
-  connect(_profileRandomizer, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_profileRandomizer, &ProfileRandomizer::wasModified, this,
+          &SoilProfile::wasModified);
 
   _nonlinearPropertyRandomizer =
       new NonlinearPropertyRandomizer(randNumGen->gsl_pointer(), this);
-  connect(_nonlinearPropertyRandomizer, SIGNAL(wasModified()), this,
-          SIGNAL(wasModified()));
+  connect(_nonlinearPropertyRandomizer,
+          &NonlinearPropertyRandomizer::wasModified, this,
+          &SoilProfile::wasModified);
 
   _soilTypeCatalog = new SoilTypeCatalog;
-  connect(_soilTypeCatalog, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this,
-          SIGNAL(wasModified()));
+  connect(_soilTypeCatalog, &SoilTypeCatalog::dataChanged, this,
+          &SoilProfile::wasModified);
 
-  connect(Units::instance(), SIGNAL(systemChanged(int)), this,
-          SLOT(updateUnits()));
+  connect(Units::instance(), &Units::systemChanged, this,
+          &SoilProfile::updateUnits);
 
   _isVaried = false;
   _profileCount = 100;
@@ -315,12 +316,12 @@ auto SoilProfile::insertRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i)
     _soilLayers.insert(row, new SoilLayer(this));
 
-  emit endInsertRows();
+  endInsertRows();
   return true;
 }
 
@@ -329,8 +330,7 @@ auto SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginRemoveRows(parent, row,
-                       qMin(row + count - 1, _soilLayers.size() - 1));
+  beginRemoveRows(parent, row, qMin(row + count - 1, _soilLayers.size() - 1));
 
   for (int i = 0; i < count; ++i) {
     if (_soilLayers.isEmpty())
@@ -338,7 +338,7 @@ auto SoilProfile::removeRows(int row, int count, const QModelIndex &parent)
 
     _soilLayers.takeAt(row)->deleteLater();
   }
-  emit endRemoveRows();
+  endRemoveRows();
 
   // Update the depths of the layers.
   updateDepths();
@@ -411,7 +411,7 @@ auto SoilProfile::depthToLocation(const double depth) const -> const Location {
     // Use the layer whose bottom depth is deeper
     index = 0;
 
-    while (index <= _subLayers.size() &&
+    while (index < _subLayers.size() &&
            _subLayers.at(index).depthToBase() <= depth)
       ++index;
 
@@ -832,14 +832,16 @@ auto SoilProfile::stressReducCoeffProfile(const double pga) const
 
     const double rigidStress = totalWeight * pga;
 
-    profile << sl.shearStress() / rigidStress;
+    profile << (rigidStress == 0. ? 0. : sl.shearStress() / rigidStress);
 
     // Add the half layer to the total weight
     totalWeight += sl.untWt() * sl.thickness() / 2.;
   }
 
   // Add the value at the base of the profile
-  profile << _subLayers.last().shearStress() / (totalWeight * pga);
+  const double baseStress = totalWeight * pga;
+  profile << (baseStress == 0. ? 0.
+                               : _subLayers.last().shearStress() / baseStress);
 
   return profile;
 }
@@ -918,18 +920,13 @@ auto SoilProfile::subLayerTable() const -> QString {
   html += QString("<tr><td>%1<td>%2<td>%3<td>%4<td>%5<td>%6<td>%7<td>%8<td>%9<"
                   "td>%10<td>%11<td>%12<td>%13<td>%14</tr>")
               .arg(_subLayers.size() + 1)
-              .arg(QObject::tr("Bedrock"))
-              .arg(_subLayers.last().depthToBase(), 0, 'f', 2)
-              .arg("--")
-              .arg("--")
-              .arg("--")
-              .arg("--")
-              .arg(_bedrock->damping(), 0, 'f', 2)
-              .arg("--")
-              .arg("--")
-              .arg(_bedrock->shearMod(), 0, 'f', 0)
-              .arg("--")
-              .arg("--")
+              .arg(QObject::tr("Bedrock"),
+                   QString::number(_subLayers.last().depthToBase(), 'f', 2),
+                   QString("--"), QString("--"))
+              .arg(QString("--"), QString("--"),
+                   QString::number(_bedrock->damping(), 'f', 2), QString("--"))
+              .arg(QString("--"), QString::number(_bedrock->shearMod(), 'f', 0),
+                   QString("--"), QString("--"))
               .arg("--");
 
   // Complete the table
@@ -972,8 +969,7 @@ auto SoilProfile::toHtml() const -> QString {
                      "<th>Thickness (%1)</th>"
                      "<th>Soil Type</th>"
                      "<th>Average Vs (%2)</th>"))
-              .arg(Units::instance()->length())
-              .arg(Units::instance()->vel());
+              .arg(Units::instance()->length(), Units::instance()->vel());
 
   if (_profileRandomizer->velocityVariation()->stdevIsLayerSpecific())
     html += tr("<th>Stdev.</th>");
@@ -1059,7 +1055,7 @@ auto SoilProfile::createRepresentativeSoilLayer(double top, double base)
     if (top > _soilLayers.last()->depthToBase())
       return new SoilLayer(_soilLayers.last());
 
-    for (SoilLayer *sl : _soilLayers) {
+    for (SoilLayer *sl : std::as_const(_soilLayers)) {
       // Skip the layer if it isn't in the depth range of interest
       if (sl->depthToBase() < top || sl->depth() > base)
         continue;
@@ -1099,7 +1095,7 @@ auto SoilProfile::createRepresentativeSoilLayer(double top, double base)
     SoilLayer *newLayer = nullptr;
 
     // Try each of the layers
-    for (SoilLayer *sl : _soilLayers) {
+    for (SoilLayer *sl : std::as_const(_soilLayers)) {
       if (sl->depth() < midDepth && midDepth <= sl->depthToBase()) {
         newLayer = new SoilLayer(sl);
       }
@@ -1147,7 +1143,8 @@ void SoilProfile::fromJson(const QJsonObject &json) {
   while (_soilLayers.size())
     _soilLayers.takeLast()->deleteLater();
 
-  for (const QJsonValue jv : json["soilLayers"].toArray()) {
+  const QJsonArray soilLayersArray = json["soilLayers"].toArray();
+  for (const QJsonValue &jv : soilLayersArray) {
     QJsonObject sljo = jv.toObject();
 
     auto *sl = new SoilLayer(this);
@@ -1234,7 +1231,7 @@ auto operator>>(QDataStream &in, SoilProfile *sp) -> QDataStream & {
   in >> count;
 
   for (int i = 0; i < count; ++i) {
-    quint32 row;
+    qint32 row;
     auto *sl = new SoilLayer(sp);
 
     in >> sl >> row;

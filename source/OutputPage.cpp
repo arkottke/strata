@@ -82,28 +82,28 @@ void OutputPage::setModel(SiteResponseModel *model) {
   _soilTypesTableView->setModel(oc->soilTypesCatalog());
 
   _respSpecGroupBox->setVisible(oc->periodIsNeeded());
-  connect(oc, SIGNAL(periodIsNeededChanged(bool)), _respSpecGroupBox,
-          SLOT(setVisible(bool)));
+  connect(oc, &OutputCatalog::periodIsNeededChanged, _respSpecGroupBox,
+          &QGroupBox::setVisible);
 
   _dampingSpinBox->setValue(oc->damping());
-  connect(_dampingSpinBox, SIGNAL(valueChanged(double)), oc,
-          SLOT(setDamping(double)));
+  connect(_dampingSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), oc,
+          &OutputCatalog::setDamping);
 
   _periodLayout->setModel(oc->period());
 
   _freqGroupBox->setVisible(oc->frequencyIsNeeded());
-  connect(oc, SIGNAL(frequencyIsNeededChanged(bool)), _freqGroupBox,
-          SLOT(setVisible(bool)));
+  connect(oc, &OutputCatalog::frequencyIsNeededChanged, _freqGroupBox,
+          &QGroupBox::setVisible);
 
   _frequencyLayout->setModel(oc->frequency());
 
   _logLevelComboBox->setCurrentIndex(oc->log()->level());
-  connect(_logLevelComboBox, SIGNAL(currentIndexChanged(int)), oc->log(),
-          SLOT(setLevel(int)));
+  connect(_logLevelComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+          oc->log(), qOverload<int>(&TextLog::setLevel));
 
   setApproach(model->motionLibrary()->approach());
-  connect(model->motionLibrary(), SIGNAL(approachChanged(int)), this,
-          SLOT(setApproach(int)));
+  connect(model->motionLibrary(), &MotionLibrary::approachChanged, this,
+          &OutputPage::setApproach);
 }
 
 void OutputPage::setReadOnly(bool readOnly) {

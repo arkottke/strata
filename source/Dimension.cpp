@@ -32,7 +32,7 @@ Dimension::Dimension(QObject *parent) : QObject(parent) {
   _size = 10;
   _spacing = Linear;
 
-  connect(this, SIGNAL(wasModified()), this, SLOT(clear()));
+  connect(this, &Dimension::wasModified, this, &Dimension::clear);
 }
 
 auto Dimension::spacingList() -> QStringList {

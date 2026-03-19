@@ -27,6 +27,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QMimeData>
+#include <QRegularExpression>
 #include <QtAlgorithms>
 
 MyTableView::MyTableView(QWidget *parent) : QTableView(parent) {}
@@ -93,14 +94,15 @@ void MyTableView::paste() {
 
   if (!hasHtml || !htmlValid) {
     // Grab the text from the clipboard and split it into lines
-    QStringList rows = QApplication::clipboard()->text().split(
-        QRegExp("\\n"), Qt::SkipEmptyParts);
+    static const QRegularExpression newlineRe("\\n");
+    QStringList rows =
+        QApplication::clipboard()->text().split(newlineRe, Qt::SkipEmptyParts);
 
     // Return if the row list is empty
     if (rows.isEmpty())
       return;
 
-    for (const QString &row : rows)
+    for (const QString &row : std::as_const(rows))
       data << row.split("\t", Qt::KeepEmptyParts);
   }
 
@@ -159,16 +161,16 @@ void MyTableView::contextMenuEvent(QContextMenuEvent *event) {
   // Create the context menu
   auto *contextMenu = new QMenu;
 
-  contextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"), this,
-                         SLOT(copy()), QKeySequence::Copy);
+  contextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"),
+                         QKeySequence::Copy, this, [this]() { copy(); });
 
   if (!_readOnly)
-    contextMenu->addAction(QIcon(":/images/edit-paste.svg"), tr("Paste"), this,
-                           SLOT(paste()), QKeySequence::Paste);
+    contextMenu->addAction(QIcon(":/images/edit-paste.svg"), tr("Paste"),
+                           QKeySequence::Paste, this, [this]() { paste(); });
 
   contextMenu->addSeparator();
-  contextMenu->addAction(tr("Select All"), this, SLOT(selectAll()),
-                         QKeySequence::SelectAll);
+  contextMenu->addAction(tr("Select All"), QKeySequence::SelectAll, this,
+                         [this]() { selectAll(); });
 
   contextMenu->popup(event->globalPos());
 }

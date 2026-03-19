@@ -35,8 +35,10 @@ DepthComboBox::DepthComboBox(QWidget *parent) : QComboBox(parent) {
   setValidator(new QDoubleValidator(this));
   setCurrentIndex(-1);
 
-  connect(this, SIGNAL(currentIndexChanged(int)), SLOT(updateEditable(int)));
-  connect(this, SIGNAL(editTextChanged(QString)), SLOT(toDouble(QString)));
+  connect(this, qOverload<int>(&DepthComboBox::currentIndexChanged), this,
+          &DepthComboBox::updateEditable);
+  connect(this, &DepthComboBox::editTextChanged, this,
+          &DepthComboBox::toDouble);
 }
 
 auto DepthComboBox::depth() const -> double {

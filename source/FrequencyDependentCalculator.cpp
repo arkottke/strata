@@ -53,8 +53,8 @@ void FrequencyDependentCalculator::setUseSmoothSpectrum(bool b) {
 auto FrequencyDependentCalculator::toHtml() const -> QString {
   return tr("<li>Frequency Dependent Equivalent Linear Parameters"
             "<table border=\"0\">"
-            "<tr><th>Error tolerance:</th><td>%2</td></tr>"
-            "<tr><th>Maximum number of iterations:</th><td>%3</td></tr>"
+            "<tr><th>Error tolerance:</th><td>%1</td></tr>"
+            "<tr><th>Maximum number of iterations:</th><td>%2</td></tr>"
             "</table>"
             "</li>")
       .arg(_errorTolerance)
@@ -192,7 +192,7 @@ void FrequencyDependentCalculator::estimateInitialStrains() {
         calcCompShearMod(_site->shearMod(i), _site->damping(i) / 100.));
   }
 
-  calc->deleteLater();
+  delete calc;
 }
 
 void FrequencyDependentCalculator::fromJson(const QJsonObject &json) {

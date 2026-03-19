@@ -286,11 +286,11 @@ auto AbstractOutput::intToMotion(int i) const -> int {
 }
 
 void AbstractOutput::clear() {
-  emit beginResetModel();
+  beginResetModel();
   _data.clear();
   _motionIndex = 0;
   _maxSize = 0;
-  emit endResetModel();
+  endResetModel();
 }
 
 auto AbstractOutput::seriesEnabled(int site, int motion) -> bool {
@@ -410,12 +410,14 @@ auto AbstractOutput::suffix() const -> const QString { return ""; }
 void AbstractOutput::fromJson(const QJsonObject &json) {
   _exportEnabled = json["exportEnabled"].toBool();
 
-  QJsonArray data = json["data"].toArray();
+  const QJsonArray data = json["data"].toArray();
   for (const QJsonValue &site : data) {
     QList<QVector<double>> l;
-    for (const QJsonValue &motion : site.toArray()) {
+    const QJsonArray siteArray = site.toArray();
+    for (const QJsonValue &motion : siteArray) {
       QVector<double> v;
-      for (const QJsonValue &qjv : motion.toArray()) {
+      const QJsonArray motionArray = motion.toArray();
+      for (const QJsonValue &qjv : motionArray) {
         v << qjv.toDouble();
       }
       l << v;
@@ -426,7 +428,7 @@ void AbstractOutput::fromJson(const QJsonObject &json) {
   }
 
   _maxSize = 0;
-  for (const QList<QVector<double>> &l : _data) {
+  for (const QList<QVector<double>> &l : std::as_const(_data)) {
     for (const QVector<double> &v : l) {
       if (_maxSize < v.size())
         _maxSize = v.size();
@@ -472,7 +474,7 @@ auto operator>>(QDataStream &in, AbstractOutput *ao) -> QDataStream & {
   in >> ao->_exportEnabled >> ao->_data;
 
   // Find the maximum length of all data vectors
-  for (const QList<QVector<double>> &l : ao->_data) {
+  for (const QList<QVector<double>> &l : std::as_const(ao->_data)) {
     for (const QVector<double> &v : l) {
       if (ao->_maxSize < v.size())
         ao->_maxSize = v.size();

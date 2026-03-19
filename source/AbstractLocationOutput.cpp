@@ -36,7 +36,7 @@ auto AbstractLocationOutput::needsOutputConditions() const -> bool {
 }
 
 auto AbstractLocationOutput::fullName() const -> QString {
-  return tr("Location -- %1 -- %2").arg(prefix()).arg(name());
+  return tr("Location -- %1 -- %2").arg(prefix(), name());
 }
 
 auto AbstractLocationOutput::depth() const -> double { return _depth; }
@@ -74,9 +74,8 @@ auto AbstractLocationOutput::fileName(int motion) const -> QString {
 }
 
 auto AbstractLocationOutput::prefix() const -> const QString {
-  return QString("%1 (%3)")
-      .arg(locationToString(_depth))
-      .arg(AbstractMotion::typeList().at(_type));
+  return QString("%1 (%2)").arg(locationToString(_depth),
+                                AbstractMotion::typeList().at(_type));
 }
 
 void AbstractLocationOutput::fromJson(const QJsonObject &json) {

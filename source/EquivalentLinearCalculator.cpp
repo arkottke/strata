@@ -35,7 +35,7 @@ EquivalentLinearCalculator::EquivalentLinearCalculator(QObject *parent)
 auto EquivalentLinearCalculator::toHtml() const -> QString {
   return tr("<li>Equivalent Linear Parameters"
             "<table border=\"0\">"
-            "<tr><th>Effective strain ratio:</th><td>%1 Hz</td></tr>"
+            "<tr><th>Effective strain ratio:</th><td>%1</td></tr>"
             "<tr><th>Error tolerance:</th><td>%2</td></tr>"
             "<tr><th>Maximum number of iterations:</th><td>%3</td></tr>"
             "</table>"
