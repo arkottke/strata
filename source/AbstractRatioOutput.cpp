@@ -40,7 +40,7 @@ AbstractRatioOutput::AbstractRatioOutput(OutputCatalog *catalog)
 }
 
 auto AbstractRatioOutput::fullName() const -> QString {
-  return tr("Ratio -- %1 -- %2").arg(prefix()).arg(name());
+  return tr("Ratio -- %1 -- %2").arg(prefix(), name());
 }
 
 auto AbstractRatioOutput::inDepth() const -> double { return _inDepth; }
@@ -107,10 +107,8 @@ auto AbstractRatioOutput::fileName(int motion) const -> QString {
 
 auto AbstractRatioOutput::prefix() const -> const QString {
   return QString("%1 (%2) from %3 (%4)")
-      .arg(locationToString(_outDepth))
-      .arg(AbstractMotion::typeList().at(_outType))
-      .arg(locationToString(_inDepth))
-      .arg(AbstractMotion::typeList().at(_inType));
+      .arg(locationToString(_outDepth), AbstractMotion::typeList().at(_outType),
+           locationToString(_inDepth), AbstractMotion::typeList().at(_inType));
 }
 
 void AbstractRatioOutput::fromJson(const QJsonObject &json) {

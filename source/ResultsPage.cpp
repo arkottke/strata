@@ -177,8 +177,8 @@ void ResultsPage::setSelectedSeries(const QModelIndex &current,
   _enableMotionPushButton->setChecked(enabled);
   _enableMotionPushButton->setText(
       QString(tr("%1 Motion: %2"))
-          .arg(enabled ? tr("Disable") : tr("Enable"))
-          .arg(_outputCatalog->motionNameAt(_selectedRow)));
+          .arg(enabled ? tr("Disable") : tr("Enable"),
+               _outputCatalog->motionNameAt(_selectedRow)));
 
   // Select the appropriate column
   if (_selectedOutput->needsTime()) {
@@ -307,8 +307,8 @@ void ResultsPage::setMotionEnabled(bool enabled) {
 
   _enableMotionPushButton->setText(
       QString(tr("%1 Motion: %2"))
-          .arg(enabled ? tr("Disable") : tr("Enable"))
-          .arg(_outputCatalog->motionNameAt(_selectedRow)));
+          .arg(enabled ? tr("Disable") : tr("Enable"),
+               _outputCatalog->motionNameAt(_selectedRow)));
 
   colorCurve(_selectedRow);
   _plot->replot();

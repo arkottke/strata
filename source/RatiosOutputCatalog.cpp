@@ -194,7 +194,7 @@ auto RatiosOutputCatalog::removeRows(int row, int count,
                                      const QModelIndex &parent) -> bool {
   if (!count)
     return false;
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     auto *aro = _outputs.takeAt(row);
@@ -202,7 +202,7 @@ auto RatiosOutputCatalog::removeRows(int row, int count,
     if (aro->needsFreq()) {
       // Check if remaining outputs needs frequencies
       bool needsFreq = false;
-      for (auto *_aro : _outputs) {
+      for (auto *_aro : std::as_const(_outputs)) {
         if (_aro->needsFreq()) {
           needsFreq = true;
           break;
@@ -215,7 +215,7 @@ auto RatiosOutputCatalog::removeRows(int row, int count,
     } else if (aro->needsPeriod()) {
       // Check if remaining outputs needs period
       bool needsPeriod = false;
-      for (AbstractRatioOutput *_aro : _outputs) {
+      for (AbstractRatioOutput *_aro : std::as_const(_outputs)) {
         if (_aro->needsPeriod()) {
           needsPeriod = true;
           break;
@@ -229,7 +229,7 @@ auto RatiosOutputCatalog::removeRows(int row, int count,
     aro->deleteLater();
   }
 
-  emit endRemoveRows();
+  endRemoveRows();
   emit wasModified();
 
   return true;
@@ -260,7 +260,7 @@ auto RatiosOutputCatalog::outputs() const -> QList<AbstractOutput *> {
 }
 
 auto RatiosOutputCatalog::factory(const QString &className,
-                                  OutputCatalog *parent) const
+                                  OutputCatalog *parent)
     -> AbstractRatioOutput * {
   AbstractRatioOutput *aro = 0;
 

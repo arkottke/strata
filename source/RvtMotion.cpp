@@ -52,7 +52,7 @@ auto RvtMotion::setData(const QModelIndex &index, const QVariant &value,
       _fourierAcc[index.row()] = d;
       break;
     }
-    dataChanged(index, index);
+    emit dataChanged(index, index);
     return true;
   } else {
     return false;
@@ -64,12 +64,12 @@ auto RvtMotion::insertRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   _freq.insert(row, count, 0);
   _fourierAcc.insert(row, count, 0);
 
-  emit endInsertRows();
+  endInsertRows();
 
   return true;
 }
@@ -79,12 +79,12 @@ auto RvtMotion::removeRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   _freq.remove(row, count);
   _fourierAcc.remove(row, count);
 
-  emit endRemoveRows();
+  endRemoveRows();
   return true;
 }
 
@@ -313,7 +313,8 @@ void RvtMotion::fromJson(const QJsonObject &json) {
   AbstractRvtMotion::fromJson(json);
 
   _freq.clear();
-  foreach (const QJsonValue &v, json["freq"].toArray())
+  const QJsonArray freqArray = json["freq"].toArray();
+  for (const QJsonValue &v : freqArray)
     _freq << v.toDouble();
 
   calculate();

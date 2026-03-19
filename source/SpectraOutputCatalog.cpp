@@ -157,7 +157,7 @@ auto SpectraOutputCatalog::removeRows(int row, int count,
                                       const QModelIndex &parent) -> bool {
   if (!count)
     return false;
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     AbstractLocationOutput *alo = _outputs.takeAt(row);
@@ -165,7 +165,7 @@ auto SpectraOutputCatalog::removeRows(int row, int count,
     if (alo->needsFreq()) {
       // Check if remaining outputs needs frequencies
       bool needsFreq = false;
-      foreach (AbstractLocationOutput *_alo, _outputs) {
+      for (AbstractLocationOutput *_alo : std::as_const(_outputs)) {
         if (_alo->needsFreq()) {
           needsFreq = true;
           break;
@@ -178,7 +178,7 @@ auto SpectraOutputCatalog::removeRows(int row, int count,
     } else if (alo->needsPeriod()) {
       // Check if remaining outputs needs period
       bool needsPeriod = false;
-      foreach (AbstractLocationOutput *_alo, _outputs) {
+      for (AbstractLocationOutput *_alo : std::as_const(_outputs)) {
         if (_alo->needsPeriod()) {
           needsPeriod = true;
           break;
@@ -192,7 +192,7 @@ auto SpectraOutputCatalog::removeRows(int row, int count,
     alo->deleteLater();
   }
 
-  emit endRemoveRows();
+  endRemoveRows();
   emit wasModified();
   return true;
 }
@@ -221,7 +221,7 @@ auto SpectraOutputCatalog::outputs() const -> QList<AbstractOutput *> {
 }
 
 auto SpectraOutputCatalog::factory(const QString &className,
-                                   OutputCatalog *parent) const
+                                   OutputCatalog *parent)
     -> AbstractLocationOutput * {
   AbstractLocationOutput *alo = 0;
 

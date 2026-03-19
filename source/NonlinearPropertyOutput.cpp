@@ -48,7 +48,7 @@ auto NonlinearPropertyOutput::name() const -> QString {
 }
 
 auto NonlinearPropertyOutput::fullName() const -> QString {
-  return tr("Nonlinear Curve -- %1 -- %2").arg(prefix()).arg(name());
+  return tr("Nonlinear Curve -- %1 -- %2").arg(prefix(), name());
 }
 
 auto NonlinearPropertyOutput::shortName() const -> QString {

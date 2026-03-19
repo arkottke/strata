@@ -33,7 +33,8 @@ auto toJsonArray(const QVector<double> &vector) -> QJsonArray {
 
 void toDoubleVector(const QJsonValue &object, QVector<double> &vector) {
   vector.clear();
-  for (const QJsonValue &qjv : object.toArray())
+  const QJsonArray array = object.toArray();
+  for (const QJsonValue &qjv : array)
     vector << qjv.toDouble();
 }
 

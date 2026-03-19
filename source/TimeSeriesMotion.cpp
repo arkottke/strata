@@ -351,11 +351,8 @@ auto TimeSeriesMotion::toHtml() const -> QString {
                   "<td>%4</td>"
                   "<td>%5</td>"
                   "</tr>")
-              .arg(name())
-              .arg(_description)
-              .arg(typeList().at(_type))
-              .arg(_scale)
-              .arg(_pga);
+              .arg(name(), _description, typeList().at(_type),
+                   QString::number(_scale), QString::number(_pga));
 
   return html;
 }
@@ -486,7 +483,7 @@ auto TimeSeriesMotion::load(const QString &fileName, bool defaults,
     }
 
     // Read the line and split the line
-    QRegularExpression rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
+    static const QRegularExpression rx("(-?[0-9.]+(?:[eE][+-]?\\d+)?)");
     QStringList row;
     QRegularExpressionMatchIterator it = rx.globalMatch(line);
     while (it.hasNext()) {

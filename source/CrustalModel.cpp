@@ -105,7 +105,7 @@ auto CrustalModel::setData(const QModelIndex &index, const QVariant &value,
       _density[index.row()] = d;
       break;
     }
-    dataChanged(index, index);
+    emit dataChanged(index, index);
     emit wasModified();
     return true;
   } else {
@@ -119,28 +119,28 @@ auto CrustalModel::flags(const QModelIndex &index) const -> Qt::ItemFlags {
 
 auto CrustalModel::insertRows(int row, int count, const QModelIndex &parent)
     -> bool {
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   _thickness.insert(row, count, 0);
   _velocity.insert(row, count, 0);
   _density.insert(row, count, 0);
 
   emit wasModified();
-  emit endInsertRows();
+  endInsertRows();
 
   return true;
 }
 
 auto CrustalModel::removeRows(int row, int count, const QModelIndex &parent)
     -> bool {
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   _thickness.remove(row, count);
   _velocity.remove(row, count);
   _density.remove(row, count);
 
   emit wasModified();
-  emit endRemoveRows();
+  endRemoveRows();
 
   return true;
 }

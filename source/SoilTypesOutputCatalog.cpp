@@ -153,7 +153,7 @@ void SoilTypesOutputCatalog::fromJson(const QJsonArray &array) {
   while (_outputs.size())
     _outputs.takeLast()->deleteLater();
 
-  foreach (const QJsonValue &v, array) {
+  for (const QJsonValue &v : array) {
     const QJsonObject &json = v.toObject();
     int row = json["row"].toInt();
     auto *sto =

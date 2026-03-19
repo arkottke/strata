@@ -62,8 +62,7 @@ auto StrainTransferFunctionOutput::xLabel() const -> const QString {
 
 auto StrainTransferFunctionOutput::yLabel() const -> const QString {
   return tr("FAS (strain) at %1 / FAS (accel) at %2")
-      .arg(locationToString(_outDepth))
-      .arg(locationToString(_inDepth));
+      .arg(locationToString(_outDepth), locationToString(_inDepth));
 }
 
 auto StrainTransferFunctionOutput::ref(int motion) const

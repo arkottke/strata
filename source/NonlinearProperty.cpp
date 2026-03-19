@@ -94,8 +94,8 @@ auto NonlinearProperty::toHtml() const -> QString {
          "<tr><th>Name:</th><td>%2</td></tr>"
          "</table>")
           .arg(_type == ModulusReduction ? tr("Shear Modulus Reduction")
-                                         : tr("Damping Ratio"))
-          .arg(_name);
+                                         : tr("Damping Ratio"),
+               _name);
 
   html += "<table border=\"1\"><tr>";
 
@@ -211,7 +211,7 @@ void NonlinearProperty::setVaried(const QVector<double> &varied) {
 
   // Compute log strains
   _lnStrain.clear();
-  for (double s : _strain) {
+  for (double s : std::as_const(_strain)) {
     _lnStrain << log(s);
   }
 

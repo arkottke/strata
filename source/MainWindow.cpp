@@ -301,7 +301,7 @@ void MainWindow::open(QString fileName) {
     }
   } else {
     // Check that the provided filename exists
-    if (!QFileInfo(fileName).exists()) {
+    if (!QFileInfo::exists(fileName)) {
       qWarning() << qPrintable(fileName) << "does not exist!";
       return;
     }
@@ -502,7 +502,7 @@ void MainWindow::updateTabs() {
 
 void MainWindow::setReadOnly(bool readOnly) {
   // Set all of the pages to be read only
-  for (auto *page : _pages)
+  for (auto *page : std::as_const(_pages))
     page->setReadOnly(readOnly);
 
   // Change the icon and label of the button
@@ -560,7 +560,7 @@ void MainWindow::setModel(SiteResponseModel *model) {
   _model = model;
 
   // Update all of the pages
-  for (auto *page : _pages)
+  for (auto *page : std::as_const(_pages))
     page->setModel(_model);
 
   updateTabs();
@@ -589,8 +589,8 @@ void MainWindow::setModel(SiteResponseModel *model) {
 
 void MainWindow::updateWindowTitle(const QString &fileName) {
   setWindowTitle(tr("%1[*] - %2")
-                     .arg(fileName.isEmpty() ? "untitled.strata" : fileName)
-                     .arg("Strata"));
+                     .arg(fileName.isEmpty() ? "untitled.strata" : fileName,
+                          QString("Strata")));
 }
 
 auto MainWindow::okToClose() -> bool {

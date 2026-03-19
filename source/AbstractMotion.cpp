@@ -73,7 +73,8 @@ auto AbstractMotion::variantToType(QVariant variant, bool *ok)
 
     // Need to split about the type because when advance options are turned on
     // the name includes the wave parts
-    for (const QString &possibleType : typeList()) {
+    const QStringList types = typeList();
+    for (const QString &possibleType : types) {
       if (possibleType.startsWith(s))
         break;
 

@@ -66,7 +66,7 @@ public:
   auto toJson() const -> QJsonArray;
 
 protected:
-  auto factory(const QString &className, OutputCatalog *parent) const
+  auto factory(const QString &className, OutputCatalog *parent)
       -> AbstractRatioOutput *;
 
   enum Columns {

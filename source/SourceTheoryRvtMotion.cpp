@@ -374,8 +374,8 @@ void SourceTheoryRvtMotion::calculate() {
         conv * pow(2 * M_PI * freqAt(i), 2) * sourceComp * pathComp * siteComp;
   }
 
-  dataChanged(index(0, AmplitudeColumn),
-              index(_fourierAcc.size(), AmplitudeColumn));
+  emit dataChanged(index(0, AmplitudeColumn),
+                   index(_fourierAcc.size(), AmplitudeColumn));
 
   AbstractRvtMotion::calculate();
 }

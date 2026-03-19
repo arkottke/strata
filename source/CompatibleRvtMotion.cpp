@@ -338,7 +338,6 @@ auto CompatibleRvtMotion::vanmarckeInversion() const -> QVector<double> {
   if (_targetRespSpec->sa().size() < 10) {
     // Loglog interpolate prior to performing the inversion
     QVector<double> targetPeriod = _targetRespSpec->period();
-    QVector<double> targetSa = _targetRespSpec->sa();
     const double decades = log10(targetPeriod.last() / targetPeriod.first());
 
     QVector<double> period = Dimension::logSpace(

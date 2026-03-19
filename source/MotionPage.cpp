@@ -243,7 +243,6 @@ void MotionPage::importSuite() {
 
   if (!fileName.isEmpty()) {
     QFileInfo fileInfo(fileName);
-    QDir dir = fileInfo.dir();
 
     // Save the path
     settings.setValue("suiteDirectory", fileInfo.filePath());

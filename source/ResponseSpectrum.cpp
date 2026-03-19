@@ -149,7 +149,7 @@ auto ResponseSpectrum::setData(const QModelIndex &index, const QVariant &value,
   } else
     return false;
 
-  dataChanged(index, index);
+  emit dataChanged(index, index);
   setModified(true);
 
   return true;
@@ -161,28 +161,28 @@ auto ResponseSpectrum::flags(const QModelIndex &index) const -> Qt::ItemFlags {
 
 auto ResponseSpectrum::insertRows(int row, int count, const QModelIndex &parent)
     -> bool {
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     _period.insert(row, 0);
     _sa.insert(row, 0);
   }
 
-  emit endInsertRows();
+  endInsertRows();
 
   return true;
 }
 
 auto ResponseSpectrum::removeRows(int row, int count, const QModelIndex &parent)
     -> bool {
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     _period.remove(row);
     _sa.remove(row);
   }
 
-  emit endRemoveRows();
+  endRemoveRows();
   return true;
 }
 

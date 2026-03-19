@@ -167,6 +167,6 @@ void TableGroupBox::setReadOnly(bool readOnly) {
   for (auto *button : {_addButton, _insertButton, _removeButton})
     button->setHidden(readOnly);
 
-  for (auto *button : _addedButtons)
+  for (auto *button : std::as_const(_addedButtons))
     button->setHidden(readOnly);
 }

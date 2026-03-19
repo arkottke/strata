@@ -94,14 +94,15 @@ void MyTableView::paste() {
 
   if (!hasHtml || !htmlValid) {
     // Grab the text from the clipboard and split it into lines
-    QStringList rows = QApplication::clipboard()->text().split(
-        QRegularExpression("\\n"), Qt::SkipEmptyParts);
+    static const QRegularExpression newlineRe("\\n");
+    QStringList rows =
+        QApplication::clipboard()->text().split(newlineRe, Qt::SkipEmptyParts);
 
     // Return if the row list is empty
     if (rows.isEmpty())
       return;
 
-    for (const QString &row : rows)
+    for (const QString &row : std::as_const(rows))
       data << row.split("\t", Qt::KeepEmptyParts);
   }
 

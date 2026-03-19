@@ -30,7 +30,7 @@ AbstractTimeSeriesOutput::AbstractTimeSeriesOutput(OutputCatalog *catalog)
     : AbstractLocationOutput(catalog) {}
 
 auto AbstractTimeSeriesOutput::fullName() const -> QString {
-  QString s = tr("Time Series -- %1 -- %2").arg(prefix()).arg(name());
+  QString s = tr("Time Series -- %1 -- %2").arg(prefix(), name());
 
   if (!suffix().isEmpty())
     s += " -- " + suffix();
