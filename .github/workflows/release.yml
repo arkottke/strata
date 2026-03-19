@@ -63,7 +63,7 @@ jobs:
             -DCMAKE_PREFIX_PATH="~/qwt-qt6-install" \
             -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
             -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.so" \
-            -DCMAKE_INSTALL_PREFIX=AppDir/usr
+            -DCMAKE_INSTALL_PREFIX=AppDir
           cmake --build . --parallel
           cmake --install .
 
