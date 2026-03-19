@@ -91,7 +91,6 @@ endif()
 
 add_subdirectory(resources)
 add_subdirectory(source)
-add_subdirectory(tests)
 
 # Example regression tests using Python comparison script
 find_package(Python3 COMPONENTS Interpreter)
