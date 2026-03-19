@@ -46,10 +46,8 @@ jobs:
           wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          # Remove all QWT_INSTALL_PREFIX lines and add our own
-          grep -v 'QWT_INSTALL_PREFIX' qwtconfig.pri > qwtconfig.pri.tmp
-          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri.tmp
-          mv qwtconfig.pri.tmp qwtconfig.pri
+          # Append our install prefix at end of file -- last assignment wins in qmake
+          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
           /usr/lib/qt6/bin/qmake qwt.pro
           make -j$(nproc)
           make install
@@ -150,10 +148,8 @@ jobs:
           cd deps
           git clone --depth 1 --branch qwt-6.3 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
-          # Remove all QWT_INSTALL_PREFIX lines and add our own
-          $lines = Get-Content qwtconfig.pri | Where-Object { $_ -notmatch 'QWT_INSTALL_PREFIX' }
-          $lines += 'QWT_INSTALL_PREFIX = C:/Qwt-6.3.0'
-          $lines | Set-Content qwtconfig.pri
+          # Append our install prefix at end of file -- last assignment wins in qmake
+          Add-Content qwtconfig.pri "QWT_INSTALL_PREFIX = C:/Qwt-6.3.0"
           qmake CONFIG+=release qwt.pro
           nmake
           nmake install
@@ -272,10 +268,8 @@ jobs:
           curl -L https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2 -o qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          # Remove all QWT_INSTALL_PREFIX lines and add our own
-          grep -v 'QWT_INSTALL_PREFIX' qwtconfig.pri > qwtconfig.pri.tmp
-          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri.tmp
-          mv qwtconfig.pri.tmp qwtconfig.pri
+          # Append our install prefix at end of file -- last assignment wins in qmake
+          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
           $(brew --prefix qt@6)/bin/qmake qwt.pro
           make -j$(sysctl -n hw.ncpu)
           make install
