@@ -265,7 +265,9 @@ jobs:
           curl -L https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2 -o qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          sed -i '' 's|^QWT_INSTALL_PREFIX.*|QWT_INSTALL_PREFIX = '"$HOME"'/qwt-qt6-install|' qwtconfig.pri
+          # Comment out existing prefix and append new one
+          sed -i '' 's|^QWT_INSTALL_PREFIX|#QWT_INSTALL_PREFIX|' qwtconfig.pri
+          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
           $(brew --prefix qt@6)/bin/qmake qwt.pro
           make -j$(sysctl -n hw.ncpu)
           make install
