@@ -46,11 +46,12 @@ jobs:
           wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          # Append our install prefix at end of file -- last assignment wins in qmake
-          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
           /usr/lib/qt6/bin/qmake qwt.pro
           make -j$(nproc)
-          make install
+          # Use INSTALL_ROOT to redirect install to a writable staging directory
+          make install INSTALL_ROOT=$HOME/qwt-staging
+          # Copy from staging to expected cache location
+          cp -a $HOME/qwt-staging/usr/local/qwt-6.3.0 $HOME/qwt-qt6-install
 
       - name: Build Strata
         run: |
@@ -146,10 +147,9 @@ jobs:
 
           # Build Qwt
           cd deps
-          git clone --depth 1 --branch qwt-6.3 https://git.code.sf.net/p/qwt/git qwt
-          cd qwt
-          # Append our install prefix at end of file -- last assignment wins in qmake
-          Add-Content qwtconfig.pri "QWT_INSTALL_PREFIX = C:/Qwt-6.3.0"
+          Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2" -OutFile qwt-6.3.0.tar.bz2
+          tar xjf qwt-6.3.0.tar.bz2
+          cd qwt-6.3.0
           qmake CONFIG+=release qwt.pro
           nmake
           nmake install
@@ -268,11 +268,12 @@ jobs:
           curl -L https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2 -o qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          # Append our install prefix at end of file -- last assignment wins in qmake
-          echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
           $(brew --prefix qt@6)/bin/qmake qwt.pro
           make -j$(sysctl -n hw.ncpu)
-          make install
+          # Use INSTALL_ROOT to redirect install to a writable staging directory
+          make install INSTALL_ROOT=$HOME/qwt-staging
+          # Copy from staging to expected cache location
+          cp -a $HOME/qwt-staging/usr/local/qwt-6.3.0 $HOME/qwt-qt6-install
 
       - name: Build Strata
         run: |
