@@ -243,7 +243,7 @@ void SpectraOutputCatalog::fromJson(const QJsonArray &array) {
   while (_outputs.size())
     _outputs.takeLast()->deleteLater();
 
-  foreach (const QJsonValue &v, array) {
+  for (const QJsonValue &v : array) {
     QJsonObject json = v.toObject();
     AbstractLocationOutput *alo =
         factory(json["className"].toString(), _outputCatalog);

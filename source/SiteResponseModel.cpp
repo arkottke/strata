@@ -615,10 +615,9 @@ auto SiteResponseModel::toHtml() -> QString {
          "<tr><th>Units System:</th><td>%4</td></tr>"
          "</table>"
          "</li>")
-          .arg(_outputCatalog->title())
-          .arg(_notes->toHtml())
-          .arg(_outputCatalog->filePrefix())
-          .arg(Units::instance()->systemList().at(Units::instance()->system()));
+          .arg(_outputCatalog->title(), _notes->toHtml(),
+               _outputCatalog->filePrefix(),
+               Units::instance()->systemList().at(Units::instance()->system()));
 
   // Type of Analysis
   html += tr("<li>Type of Analysis"
@@ -628,9 +627,9 @@ auto SiteResponseModel::toHtml() -> QString {
              "<tr><th>Properties Varied:</th><td>%3</td></tr>"
              "</table>"
              "</li>")
-              .arg(methodList().at(_method))
-              .arg(MotionLibrary::approachList().at(_motionLibrary->approach()))
-              .arg(boolToString(_siteProfile->isVaried()));
+              .arg(methodList().at(_method),
+                   MotionLibrary::approachList().at(_motionLibrary->approach()),
+                   boolToString(_siteProfile->isVaried()));
 
   // Site Variation
   if (_siteProfile->isVaried())
@@ -644,8 +643,8 @@ auto SiteResponseModel::toHtml() -> QString {
            "</li>")
             .arg(_siteProfile->profileCount())
             .arg(boolToString(
-                _siteProfile->nonlinearPropertyRandomizer()->enabled()))
-            .arg(boolToString(_siteProfile->profileRandomizer()->enabled()));
+                     _siteProfile->nonlinearPropertyRandomizer()->enabled()),
+                 boolToString(_siteProfile->profileRandomizer()->enabled()));
 
   // Layer Discretization
   html += tr("<li>Layer Discretization"

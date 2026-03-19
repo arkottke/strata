@@ -233,14 +233,14 @@ auto SoilTypeCatalog::insertRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     _soilTypes.insert(row, new SoilType(this));
     emit soilTypeAdded(_soilTypes.at(row));
   }
 
-  emit endInsertRows();
+  endInsertRows();
   return true;
 }
 
@@ -249,14 +249,14 @@ auto SoilTypeCatalog::removeRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i) {
     emit soilTypeRemoved(_soilTypes.at(row));
     _soilTypes.takeAt(row)->deleteLater();
   }
 
-  emit endRemoveRows();
+  endRemoveRows();
 
   return true;
 }
@@ -314,7 +314,7 @@ void SoilTypeCatalog::fromJson(const QJsonArray &json) {
   while (_soilTypes.size())
     _soilTypes.takeLast()->deleteLater();
 
-  foreach (const QJsonValue &v, json) {
+  for (const QJsonValue &v : json) {
     auto *st = new SoilType(this);
     st->fromJson(v.toObject());
     _soilTypes << st;

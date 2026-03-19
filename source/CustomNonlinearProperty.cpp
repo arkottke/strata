@@ -52,7 +52,7 @@ auto CustomNonlinearProperty::setData(const QModelIndex &index,
       gsl_interp_accel_reset(_acc);
       break;
     }
-    dataChanged(index, index);
+    emit dataChanged(index, index);
     return true;
   } else {
     return false;
@@ -69,13 +69,13 @@ auto CustomNonlinearProperty::insertRows(int row, int count,
   if (!count)
     return false;
 
-  emit beginInsertRows(parent, row, row + count - 1);
+  beginInsertRows(parent, row, row + count - 1);
 
   _strain.insert(row, count, 0);
   _average.insert(row, count, 0);
   _varied.insert(row, count, 0);
 
-  emit endInsertRows();
+  endInsertRows();
   return true;
 }
 
@@ -84,12 +84,12 @@ auto CustomNonlinearProperty::removeRows(int row, int count,
   if (!count)
     return false;
 
-  emit beginRemoveRows(parent, row, row + count - 1);
+  beginRemoveRows(parent, row, row + count - 1);
 
   _strain.remove(row, count);
   _average.remove(row, count);
   _varied.remove(row, count);
 
-  emit endRemoveRows();
+  endRemoveRows();
   return true;
 }

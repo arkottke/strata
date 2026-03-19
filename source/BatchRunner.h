@@ -23,8 +23,8 @@
 #define BATCHRUNNER_H
 
 #include <QElapsedTimer>
+#include <QStringList>
 #include <QTextStream>
-#include <QtCore>
 
 #include "SiteResponseModel.h"
 

@@ -38,7 +38,8 @@ void AbstractOutputCatalog::setApproach(int approach) {
 
   // Disable time series only outputs
   if (_approach == MotionLibrary::RandomVibrationTheory) {
-    for (auto *ao : outputs()) {
+    const auto outputList = outputs();
+    for (auto *ao : outputList) {
       auto *apo = qobject_cast<AbstractProfileOutput *>(ao);
       if (apo && apo->timeSeriesOnly())
         apo->setEnabled(false);

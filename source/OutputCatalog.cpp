@@ -370,8 +370,9 @@ auto OutputCatalog::motionNameAt(int row) const -> const QString {
 void OutputCatalog::initialize(int siteCount, MotionLibrary *motionLibrary) {
   // Create a list of all enabled outputs
   _outputs.clear();
-  for (auto *catalog : _catalogs) {
-    for (auto *output : catalog->outputs()) {
+  for (auto *catalog : std::as_const(_catalogs)) {
+    const auto catalogOutputs = catalog->outputs();
+    for (auto *output : catalogOutputs) {
       if (!output->needsTime() ||
           (output->needsTime() &&
            motionLibrary->approach() == MotionLibrary::TimeSeries)) {
@@ -420,8 +421,9 @@ void OutputCatalog::clear() {
 
   // Need to loop over the catalogs as _outputs my have previously deleted
   // pointers
-  for (auto *catalog : _catalogs) {
-    for (auto *output : catalog->outputs()) {
+  for (auto *catalog : std::as_const(_catalogs)) {
+    const auto catalogOutputs = catalog->outputs();
+    for (auto *output : catalogOutputs) {
       output->clear();
     }
   }
@@ -430,14 +432,14 @@ void OutputCatalog::clear() {
 }
 
 void OutputCatalog::finalize() {
-  for (AbstractOutput *output : _outputs)
+  for (AbstractOutput *output : std::as_const(_outputs))
     output->finalize();
 
   emit wasModified();
 }
 
 void OutputCatalog::setReadOnly(bool readOnly) {
-  for (AbstractOutputCatalog *catalog : _catalogs)
+  for (AbstractOutputCatalog *catalog : std::as_const(_catalogs))
     catalog->setReadOnly(readOnly);
 }
 
@@ -447,13 +449,13 @@ void OutputCatalog::saveResults(int motion,
   // sublayer. These depths are updated as the velocity profile is varied.
   populateDepthVector(calculator->site()->subLayers().last().depthToBase());
 
-  for (AbstractOutput *output : _outputs) {
+  for (AbstractOutput *output : std::as_const(_outputs)) {
     output->addData(motion, calculator);
   }
 }
 
 void OutputCatalog::removeLastSite() {
-  for (AbstractOutput *output : _outputs)
+  for (AbstractOutput *output : std::as_const(_outputs))
     output->removeLastSite();
 }
 
@@ -486,7 +488,7 @@ void OutputCatalog::setFrequencyIsNeeded(bool frequencyIsNeeded) {
 auto OutputCatalog::outputNames() const -> QStringList {
   QStringList list;
 
-  for (AbstractOutput *output : _outputs)
+  for (AbstractOutput *output : std::as_const(_outputs))
     list << output->fullName();
 
   return list;
@@ -498,7 +500,7 @@ auto OutputCatalog::outputs() const -> const QList<AbstractOutput *> & {
 
 void OutputCatalog::exportData(const QString &path, const QString &separator,
                                const QString &prefix) {
-  for (AbstractOutput *output : _outputs) {
+  for (AbstractOutput *output : std::as_const(_outputs)) {
     if (output->exportEnabled())
       output->exportData(path, separator, prefix);
   }
@@ -561,9 +563,11 @@ void OutputCatalog::fromJson(const QJsonObject &json) {
   }
 
   _enabled.clear();
-  for (const QJsonValue &value : json["enabled"].toArray()) {
+  const QJsonArray enabledArray = json["enabled"].toArray();
+  for (const QJsonValue &value : enabledArray) {
     QList<bool> l;
-    for (const QJsonValue &v : value.toArray())
+    const QJsonArray innerArray = value.toArray();
+    for (const QJsonValue &v : innerArray)
       l << v.toBool();
     _enabled << l;
   }
