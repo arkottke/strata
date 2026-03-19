@@ -46,7 +46,10 @@ jobs:
           wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
+          # Comment out existing QWT_INSTALL_PREFIX and add our own
+          sed -i 's|^\(QWT_INSTALL_PREFIX.*\)|#\1|' qwtconfig.pri
           echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
+          cat qwtconfig.pri | grep -i install_prefix
           /usr/lib/qt6/bin/qmake qwt.pro
           make -j$(nproc)
           make install
@@ -147,10 +150,16 @@ jobs:
           cd deps
           git clone --depth 1 --branch qwt-6.3 https://git.code.sf.net/p/qwt/git qwt
           cd qwt
-          Add-Content -Path qwtconfig.pri -Value "QWT_INSTALL_PREFIX = C:/Qwt-6.3.0"
+          # Replace the install prefix in qwtconfig.pri
+          $content = Get-Content qwtconfig.pri -Raw
+          $content = $content -replace 'QWT_INSTALL_PREFIX\s*=\s*C:/Qwt-\$\$QWT_VERSION', 'QWT_INSTALL_PREFIX = C:/Qwt-6.3.0'
+          Set-Content qwtconfig.pri -Value $content
           qmake CONFIG+=release qwt.pro
           nmake
           nmake install
+          # Verify installation
+          Write-Host "Qwt installed files:"
+          Get-ChildItem -Recurse C:/Qwt-6.3.0 | Select-Object FullName
 
       - name: Install dependencies
         shell: pwsh
@@ -266,7 +275,10 @@ jobs:
           curl -L https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2 -o qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
+          # Comment out existing QWT_INSTALL_PREFIX and add our own
+          sed -i '' 's|^\(QWT_INSTALL_PREFIX.*\)|#\1|' qwtconfig.pri
           echo "QWT_INSTALL_PREFIX = $HOME/qwt-qt6-install" >> qwtconfig.pri
+          cat qwtconfig.pri | grep -i install_prefix
           $(brew --prefix qt@6)/bin/qmake qwt.pro
           make -j$(sysctl -n hw.ncpu)
           make install
