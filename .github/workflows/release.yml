@@ -306,16 +306,14 @@ jobs:
           cd build
           export VERSION=$(git describe --tags --always)
 
-          # Create app structure
-          mkdir -p Strata.app/Contents/{MacOS,Resources,Frameworks}
-
-          # Copy executable
-          cp source/strata Strata.app/Contents/MacOS/
+          # CMake builds strata.app due to MACOSX_BUNDLE; rename to Strata.app
+          cp -a source/strata.app Strata.app
 
           # Deploy Qt dependencies
           $(brew --prefix qt@6)/bin/macdeployqt Strata.app -always-overwrite
 
           # Copy Qwt and GSL libraries
+          mkdir -p Strata.app/Contents/Frameworks
           cp ~/qwt-qt6-install/lib/libqwt.6.dylib Strata.app/Contents/Frameworks/
           cp $(brew --prefix gsl)/lib/libgsl*.dylib Strata.app/Contents/Frameworks/
 
@@ -323,30 +321,6 @@ jobs:
           install_name_tool -change ~/qwt-qt6-install/lib/libqwt.6.dylib \
             @executable_path/../Frameworks/libqwt.6.dylib \
             Strata.app/Contents/MacOS/strata
-
-          # Create Info.plist
-          cat > Strata.app/Contents/Info.plist << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>CFBundleExecutable</key>
-              <string>strata</string>
-              <key>CFBundleIdentifier</key>
-              <string>org.arkottke.strata</string>
-              <key>CFBundleName</key>
-              <string>Strata</string>
-              <key>CFBundlePackageType</key>
-              <string>APPL</string>
-              <key>CFBundleShortVersionString</key>
-              <string>$VERSION</string>
-              <key>CFBundleVersion</key>
-              <string>$VERSION</string>
-              <key>LSMinimumSystemVersion</key>
-              <string>11.0</string>
-          </dict>
-          </plist>
-          EOF
 
       - name: Create DMG
         run: |
