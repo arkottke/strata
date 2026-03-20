@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QString>
 #include <QStringList>
+#include <QStyleFactory>
 #include <QTextStream>
 #include <QThread>
 #include <QTimer>
@@ -109,6 +110,10 @@ auto main(int argc, char *argv[]) -> int {
     // GUI Version
 #ifndef DEBUG
     qInstallMessageHandler(myMessageOutput);
+#endif
+    // Use Fusion style on Windows for a consistent modern appearance
+#ifdef Q_OS_WIN
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
 #endif
     qobject_cast<QApplication *>(app.data())
         ->setWindowIcon(QIcon(":/images/application-icon.svg"));

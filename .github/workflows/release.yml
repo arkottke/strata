@@ -216,8 +216,8 @@ jobs:
           # Qwt may use QOpenGLWidget internally; windeployqt doesn't detect this
           Copy-Item "${{ env.QT_ROOT_DIR }}/bin/Qt6OpenGLWidgets.dll" -Destination "."
           # Ensure Windows style plugin is present for native appearance
-          if (-not (Test-Path "styles")) { New-Item -ItemType Directory -Path "styles" }
-          Copy-Item "${{ env.QT_ROOT_DIR }}/plugins/styles/*.dll" -Destination "styles/" -ErrorAction SilentlyContinue
+          if (-not (Test-Path "plugins/styles")) { New-Item -ItemType Directory -Path "plugins/styles" -Force }
+          Get-ChildItem "${{ env.QT_ROOT_DIR }}/plugins/styles/*.dll" -Exclude "*d.dll" | Copy-Item -Destination "plugins/styles/"
 
       - name: Create ZIP archive
         shell: pwsh

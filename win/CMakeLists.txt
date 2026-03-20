@@ -92,6 +92,7 @@ install(FILES
     )
 # Qt Style Plugins (required for native Windows appearance)
 file(GLOB QT_STYLE_PLUGINS "${QT_DLL_DIR}/../plugins/styles/*.dll")
+list(FILTER QT_STYLE_PLUGINS EXCLUDE REGEX "d\\.dll$")
 install(FILES
     ${QT_STYLE_PLUGINS}
     DESTINATION plugins/styles
