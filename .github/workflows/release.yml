@@ -206,6 +206,8 @@ jobs:
           cd build/install
           Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
           Copy-Item "C:/GSL/bin/*.dll" -Destination "."
+          # Qwt may use QOpenGLWidget internally; windeployqt doesn't detect this
+          Copy-Item "${{ env.QT_ROOT_DIR }}/bin/Qt6OpenGLWidgets.dll" -Destination "."
 
       - name: Create ZIP archive
         shell: pwsh
@@ -260,13 +262,17 @@ jobs:
         with:
           files: Strata-*-windows-x64.zip
 
-      - name: Upload artifacts
+      - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: strata-windows
-          path: |
-            Strata-*-windows-x64-installer.exe
-            Strata-*-windows-x64.zip
+          name: strata-windows-installer
+          path: Strata-*-windows-x64-installer.exe
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-windows-zip
+          path: Strata-*-windows-x64.zip
 
   build-macos:
     runs-on: macos-14
@@ -275,7 +281,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install qt@6 gsl
+          brew install qt@6 gsl cmake ninja
           brew link qt@6
 
       - name: Cache Qwt-Qt6
