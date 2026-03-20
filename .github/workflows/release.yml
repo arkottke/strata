@@ -152,7 +152,11 @@ jobs:
           cd qwt-6.3.0
           qmake CONFIG+=release qwt.pro
           nmake
-          nmake install
+          nmake install INSTALL_ROOT=C:\qwt-staging
+          # Find and copy the installed Qwt to expected location
+          $qwtDir = Get-ChildItem -Directory -Path "C:\qwt-staging" -Recurse -Filter "Qwt-*" | Select-Object -First 1
+          Write-Host "Found Qwt at: $($qwtDir.FullName)"
+          Copy-Item -Recurse $qwtDir.FullName "C:\Qwt-6.3.0"
 
       - name: Install dependencies
         shell: pwsh
