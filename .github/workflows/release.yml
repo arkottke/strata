@@ -90,11 +90,13 @@ jobs:
           tar czf Strata-${VERSION}-linux-x86_64.tar.gz -C AppDir/usr .
 
       - name: Upload AppImage to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: build/Strata-*-x86_64.AppImage
 
       - name: Upload tarball to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: build/Strata-*-linux-x86_64.tar.gz
@@ -239,11 +241,13 @@ jobs:
           & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
       - name: Upload installer to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: Strata-*-windows-x64-installer.exe
 
       - name: Upload archive to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: Strata-*-windows-x64.zip
@@ -362,11 +366,13 @@ jobs:
           tar czf "Strata-${VERSION}-macos.tar.gz" Strata.app
 
       - name: Upload DMG to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: build/Strata-*-macos.dmg
 
       - name: Upload tarball to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: build/Strata-*-macos.tar.gz

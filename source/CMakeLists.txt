@@ -60,7 +60,7 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE ON
 )
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION usr/bin
         COMPONENT executable
@@ -99,5 +99,8 @@ elseif (WIN32)
         COMPONENT example
         )
 elseif (APPLE)
-
+    install(TARGETS ${CMAKE_PROJECT_NAME}
+        BUNDLE DESTINATION .
+        COMPONENT executable
+        )
 endif ()
