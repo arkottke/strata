@@ -80,8 +80,8 @@ if (ADVANCED_FEATURES)
 endif()
 
 if(MSVC)
-    # Add GSL DLL definition for MSVC. Add define for math constants
-    add_definitions(-DGSL_DLL -D_USE_MATH_DEFINES)
+    # Add GSL and Qwt DLL definitions for MSVC. Add define for math constants
+    add_definitions(-DGSL_DLL -DQWT_DLL -D_USE_MATH_DEFINES)
     # Optimize for speed and link dynamically
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
 else()

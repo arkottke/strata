@@ -101,6 +101,14 @@ jobs:
         with:
           files: build/Strata-*-linux-x86_64.tar.gz
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-linux
+          path: |
+            build/Strata-*-x86_64.AppImage
+            build/Strata-*-linux-x86_64.tar.gz
+
   build-windows:
     runs-on: windows-2022
     steps:
@@ -252,6 +260,14 @@ jobs:
         with:
           files: Strata-*-windows-x64.zip
 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-windows
+          path: |
+            Strata-*-windows-x64-installer.exe
+            Strata-*-windows-x64.zip
+
   build-macos:
     runs-on: macos-14
     steps:
@@ -352,3 +368,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: build/Strata-*-macos.tar.gz
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-macos
+          path: |
+            build/Strata-*-macos.dmg
+            build/Strata-*-macos.tar.gz
