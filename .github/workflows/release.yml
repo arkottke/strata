@@ -68,6 +68,8 @@ jobs:
           cmake --install .
 
       - name: Create AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd build
           wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
@@ -80,7 +82,6 @@ jobs:
             -appimage \
             -bundle-non-qt-libs \
             -extra-plugins=iconengines,platformthemes/libqgtk3.so
-          mv Strata-*.AppImage Strata-${VERSION}-x86_64.AppImage
 
       - name: Create tarball
         run: |
@@ -153,11 +154,9 @@ jobs:
           cd qwt-6.3.0
           qmake CONFIG+=release qwt.pro
           nmake
-          nmake install INSTALL_ROOT=C:\qwt-staging
-          # Find and copy the installed Qwt to expected location
-          $qwtDir = Get-ChildItem -Directory -Path "C:\qwt-staging" -Recurse -Filter "Qwt-*" | Select-Object -First 1
-          Write-Host "Found Qwt at: $($qwtDir.FullName)"
-          Copy-Item -Recurse $qwtDir.FullName "C:\Qwt-6.3.0"
+          nmake install
+          # Rename from -dev suffix to expected path
+          Rename-Item "C:\Qwt-6.3.0-dev" "C:\Qwt-6.3.0"
 
       - name: Install dependencies
         shell: pwsh
