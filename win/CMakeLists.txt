@@ -90,6 +90,13 @@ install(FILES
     DESTINATION plugins/iconengines
     COMPONENT dependencies
     )
+# Qt Style Plugins (required for native Windows appearance)
+file(GLOB QT_STYLE_PLUGINS "${QT_DLL_DIR}/../plugins/styles/*.dll")
+install(FILES
+    ${QT_STYLE_PLUGINS}
+    DESTINATION plugins/styles
+    COMPONENT dependencies
+    )
 
 if (7Z_PATH)
     message(${CMAKE_BINARY_DIR})
