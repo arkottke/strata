@@ -173,6 +173,13 @@ jobs:
         run: |
           cd deps/gsl/build
           cmake --install . --prefix "C:/GSL"
+          # Re-install Qwt (nmake install puts it at C:\Qwt-6.3.0-dev)
+          cd ../../qwt-6.3.0
+          nmake install
+          if (Test-Path "C:\Qwt-6.3.0-dev") {
+            if (Test-Path "C:\Qwt-6.3.0") { Remove-Item -Recurse -Force "C:\Qwt-6.3.0" }
+            Rename-Item "C:\Qwt-6.3.0-dev" "C:\Qwt-6.3.0"
+          }
 
       - name: Build Strata
         shell: pwsh
