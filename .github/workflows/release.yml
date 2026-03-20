@@ -183,7 +183,7 @@ jobs:
           cmake .. `
             -G "Visual Studio 17 2022" `
             -A x64 `
-            -DQT_DIR="${{ env.Qt6_Dir }}" `
+            -DQT_DIR="${{ env.Qt6_DIR }}" `
             -DQWT_ROOT_DIR="C:/Qwt-6.3.0" `
             -DQWT_INCLUDE_DIR="C:/Qwt-6.3.0/include" `
             -DQWT_LIBRARY="C:/Qwt-6.3.0/lib/qwt.lib" `
@@ -197,7 +197,7 @@ jobs:
         shell: pwsh
         run: |
           cd build/install
-          & "${{ env.Qt6_Dir }}/bin/windeployqt.exe" --release --no-translations bin/strata.exe
+          & windeployqt.exe --release --no-translations bin/strata.exe
 
       - name: Copy runtime dependencies
         shell: pwsh
