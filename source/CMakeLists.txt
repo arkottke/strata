@@ -63,6 +63,7 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
 if (UNIX AND NOT APPLE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION usr/bin
+        BUNDLE DESTINATION usr/bin
         COMPONENT executable
         )
     install(FILES
@@ -84,6 +85,7 @@ if (UNIX AND NOT APPLE)
         )
 elseif (WIN32)
     install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION .
+        BUNDLE DESTINATION .
         COMPONENT executable
         )
     # Manual and example
