@@ -74,6 +74,7 @@ jobs:
           chmod +x linuxdeployqt-continuous-x86_64.AppImage
           export VERSION=$(git describe --tags --always)
           export PATH=/usr/lib/qt6/bin:$PATH
+          export LD_LIBRARY_PATH=$HOME/qwt-qt6-install/lib:$LD_LIBRARY_PATH
           ./linuxdeployqt-continuous-x86_64.AppImage \
             AppDir/usr/bin/strata \
             -appimage \
