@@ -197,15 +197,15 @@ jobs:
         shell: pwsh
         run: |
           cd build/install
-          & windeployqt.exe --release --no-translations bin/strata.exe
+          & windeployqt.exe --release --no-translations strata.exe
 
       - name: Copy runtime dependencies
         shell: pwsh
         run: |
           $VERSION = git describe --tags --always
           cd build/install
-          Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "bin/"
-          Copy-Item "C:/GSL/bin/*.dll" -Destination "bin/"
+          Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
+          Copy-Item "C:/GSL/bin/*.dll" -Destination "."
 
       - name: Create ZIP archive
         shell: pwsh
