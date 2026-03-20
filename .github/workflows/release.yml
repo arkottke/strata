@@ -34,7 +34,7 @@ jobs:
 
       - name: Cache Qwt-Qt6
         id: cache-qwt
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/qwt-qt6-install
           key: ${{ runner.os }}-qwt-qt6-6.3.0
@@ -91,13 +91,13 @@ jobs:
 
       - name: Upload AppImage to Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-x86_64.AppImage
 
       - name: Upload tarball to Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-linux-x86_64.tar.gz
 
@@ -250,13 +250,13 @@ jobs:
 
       - name: Upload installer to Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: Strata-*-windows-x64-installer.exe
 
       - name: Upload archive to Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: Strata-*-windows-x64.zip
 
@@ -275,7 +275,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install qt@6 gsl cmake ninja
+          brew install qt@6 gsl
           brew link qt@6
 
       - name: Cache Qwt-Qt6
@@ -359,13 +359,13 @@ jobs:
 
       - name: Upload DMG to Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-macos.dmg
 
       - name: Upload tarball to Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-macos.tar.gz
 
