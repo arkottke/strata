@@ -57,6 +57,8 @@ if(APPLE AND EXISTS /usr/local/opt/qt6)
 	# /usr/local/opt/qt6, ensure it can be found by CMake since
 	# it is not in the default /usr/local prefix.
 	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt6")
+elif (APPLE and EXISTS /opt/homebrew/opt/qt6)
+    list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt6")
 endif()
 
 # Enable the C++17 standard
@@ -88,10 +90,12 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-
-add_subdirectory(resources)
 add_subdirectory(source)
-add_subdirectory(tests)
+add_subdirectory(resources)
+
+
+# tests folder doesn't exist anympre
+# add_subdirectory(tests)
 
 # Example regression tests using Python comparison script
 find_package(Python3 COMPONENTS Interpreter)
