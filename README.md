@@ -176,7 +176,7 @@ cmake --build . --target install
 
 Now you installed the strata into your /Application folder. You can run it from searching 'strata' in spotline search.
 
-The manual and examples are packaged inside the strata.app. Right click on the strata.app in finder and choose **"Show Package Contents"**. 
+The manual and examples are packaged inside the strata.app. Right click on the `strata.app` in finder and choose **"Show Package Contents"**. 
 
 ## Testing
 
