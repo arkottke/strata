@@ -22,6 +22,9 @@ tags.temp
 *.un~
 .ccls-cache/
 
+# Ignore system generated Desktop Services Store files
+.DS_Store
+
 # Ignore deploy
 deploy/
 
