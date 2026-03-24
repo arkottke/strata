@@ -144,6 +144,38 @@ or in case of error control the version in the directory: /usr/local/Cellar/
 
 If you find a cleaner way to specific the library paths, please let me know.
 
+## Build on Apple Silicon
+
+For Apple Silicon (M-Series Chips), the brew installation location is moved to /opt/homebrew. So some installation instruction is different. 
+
+Make sure you have homebrew installed, then install the dependencies as normal. 
+'''bash
+brew install qt gsl qwt cmake
+'''
+
+Then clone the git repo, cd into the repo, make the build folder, and then cd into the build folder. 
+
+'''bash
+git clone https://github.com/arkottke/strata.git
+cd strata
+mkdir build
+cd build
+'''
+
+Then run the following to compile. 
+'''bash
+cmake .. \                      
+  -DQWT_ROOT_DIR=$(brew --prefix qwt) \
+  -DQWT_INCLUDE_DIR=$(brew --prefix qwt)/lib/qwt.framework/Headers \
+  -DGSL_ROOT_DIR=$(brew --prefix gsl) \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=dist
+
+cmake --build . --target install
+'''
+
+Now you installed the strata into your /Application folder. You can run it from searching 'strata' in spotline search. 
+
 ## Testing
 
 Examples for testing are located in the example/ directory.
