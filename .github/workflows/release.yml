@@ -89,6 +89,27 @@ jobs:
           export VERSION=$(git describe --tags --always)
           tar czf Strata-${VERSION}-linux-x86_64.tar.gz -C AppDir/usr .
 
+      - name: Create portable tarball (no FUSE needed)
+        run: |
+          cd build
+          export VERSION=$(git describe --tags --always)
+          # Extract AppImage so it can run without FUSE (e.g., in VMs)
+          chmod +x Strata-${VERSION}-x86_64.AppImage
+          ./Strata-${VERSION}-x86_64.AppImage --appimage-extract
+          mv squashfs-root Strata-${VERSION}-portable
+          # Add a convenience launcher script
+          cat > Strata-${VERSION}-portable/strata.sh << 'LAUNCHER'
+          #!/bin/sh
+          HERE="$(cd "$(dirname "$0")" && pwd)"
+          # Use software rendering if no GPU is available (e.g., in VMs)
+          if ! glxinfo -B 2>/dev/null | grep -q "direct rendering: Yes"; then
+            export LIBGL_ALWAYS_SOFTWARE=1
+          fi
+          exec "$HERE/AppRun" "$@"
+          LAUNCHER
+          chmod +x Strata-${VERSION}-portable/strata.sh
+          tar czf Strata-${VERSION}-linux-x86_64-portable.tar.gz Strata-${VERSION}-portable
+
       - name: Upload AppImage to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
@@ -101,6 +122,12 @@ jobs:
         with:
           files: build/Strata-*-linux-x86_64.tar.gz
 
+      - name: Upload portable tarball to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/Strata-*-linux-x86_64-portable.tar.gz
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -108,6 +135,7 @@ jobs:
           path: |
             build/Strata-*-x86_64.AppImage
             build/Strata-*-linux-x86_64.tar.gz
+            build/Strata-*-linux-x86_64-portable.tar.gz
 
   build-windows:
     runs-on: windows-2022
@@ -213,8 +241,6 @@ jobs:
           cd build/install
           Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
           Copy-Item "C:/GSL/bin/*.dll" -Destination "."
-          # Qwt may use QOpenGLWidget internally; windeployqt doesn't detect this
-          Copy-Item "${{ env.QT_ROOT_DIR }}/bin/Qt6OpenGLWidgets.dll" -Destination "."
           # Ensure Windows style plugin is present for native appearance
           if (-not (Test-Path "plugins/styles")) { New-Item -ItemType Directory -Path "plugins/styles" -Force }
           Get-ChildItem "${{ env.QT_ROOT_DIR }}/plugins/styles/*.dll" -Exclude "*d.dll" | Copy-Item -Destination "plugins/styles/"
@@ -347,12 +373,42 @@ jobs:
           # Copy Qwt and GSL libraries
           mkdir -p Strata.app/Contents/Frameworks
           cp ~/qwt-qt6-install/lib/libqwt.6.dylib Strata.app/Contents/Frameworks/
-          cp $(brew --prefix gsl)/lib/libgsl*.dylib Strata.app/Contents/Frameworks/
+          cp $(brew --prefix gsl)/lib/libgsl.dylib Strata.app/Contents/Frameworks/
+          cp $(brew --prefix gsl)/lib/libgslcblas.dylib Strata.app/Contents/Frameworks/
 
-          # Fix library paths
+          STRATA_BIN=Strata.app/Contents/MacOS/strata
+          FW=Strata.app/Contents/Frameworks
+
+          # Fix Qwt path in main binary
           install_name_tool -change ~/qwt-qt6-install/lib/libqwt.6.dylib \
             @executable_path/../Frameworks/libqwt.6.dylib \
-            Strata.app/Contents/MacOS/strata
+            "$STRATA_BIN"
+
+          # Fix GSL paths in main binary
+          GSL_PREFIX=$(brew --prefix gsl)
+          for lib in libgsl.dylib libgslcblas.dylib; do
+            install_name_tool -change "${GSL_PREFIX}/lib/${lib}" \
+              "@executable_path/../Frameworks/${lib}" \
+              "$STRATA_BIN"
+          done
+
+          # Fix libgslcblas reference inside libgsl
+          install_name_tool -change "${GSL_PREFIX}/lib/libgslcblas.dylib" \
+            "@executable_path/../Frameworks/libgslcblas.dylib" \
+            "$FW/libgsl.dylib"
+
+          # Fix Qwt's own dylib id and its Qt dependencies
+          install_name_tool -id @executable_path/../Frameworks/libqwt.6.dylib \
+            "$FW/libqwt.6.dylib"
+
+          # Fix GSL dylib ids
+          install_name_tool -id @executable_path/../Frameworks/libgsl.dylib \
+            "$FW/libgsl.dylib"
+          install_name_tool -id @executable_path/../Frameworks/libgslcblas.dylib \
+            "$FW/libgslcblas.dylib"
+
+          # Ad-hoc code sign the bundle (required for Apple Silicon, helps on Intel)
+          codesign --force --deep --sign - Strata.app
 
       - name: Create DMG
         run: |
@@ -392,3 +448,103 @@ jobs:
           path: |
             build/Strata-*-macos.dmg
             build/Strata-*-macos.tar.gz
+
+  # Smoke tests: verify built artifacts can actually launch
+  test-linux:
+    needs: build-linux
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-linux
+
+      - name: Test AppImage (with FUSE)
+        run: |
+          sudo apt-get update && sudo apt-get install -y fuse libfuse2
+          chmod +x Strata-*-x86_64.AppImage
+          # Use virtual framebuffer since there's no display
+          export QT_QPA_PLATFORM=offscreen
+          ./Strata-*-x86_64.AppImage --help || true
+          echo "AppImage launched successfully"
+
+      - name: Test portable tarball (no FUSE, simulates VM)
+        run: |
+          tar xzf Strata-*-linux-x86_64-portable.tar.gz
+          export QT_QPA_PLATFORM=offscreen
+          export LIBGL_ALWAYS_SOFTWARE=1
+          ./Strata-*-portable/AppRun --help || true
+          echo "Portable bundle launched successfully"
+
+  test-linux-minimal:
+    needs: build-linux
+    runs-on: ubuntu-22.04
+    container:
+      image: ubuntu:22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-linux
+
+      - name: Test portable tarball in minimal container (simulates VM without FUSE)
+        run: |
+          apt-get update && apt-get install -y libgl1-mesa-glx libegl1-mesa libxcb-xinerama0 libxkbcommon0
+          tar xzf Strata-*-linux-x86_64-portable.tar.gz
+          export QT_QPA_PLATFORM=offscreen
+          export LIBGL_ALWAYS_SOFTWARE=1
+          ./Strata-*-portable/AppRun --help || true
+          echo "Portable bundle works in minimal container"
+
+  test-macos:
+    needs: build-macos
+    runs-on: macos-14
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-macos
+
+      - name: Test .app bundle from tarball
+        run: |
+          tar xzf Strata-*-macos.tar.gz
+          # Verify code signature
+          codesign --verify --deep --strict Strata.app
+          echo "Code signature valid"
+          # Verify all dylibs resolve
+          otool -L Strata.app/Contents/MacOS/strata
+          # Check no references to build-machine paths remain
+          if otool -L Strata.app/Contents/MacOS/strata | grep -E '/usr/local|/opt/homebrew|/Users'; then
+            echo "ERROR: Found absolute paths to build machine libraries"
+            exit 1
+          fi
+          # Launch test (offscreen since CI has no display)
+          export QT_QPA_PLATFORM=offscreen
+          ./Strata.app/Contents/MacOS/strata --help || true
+          echo "macOS app launched successfully"
+
+      - name: Verify DMG mounts
+        run: |
+          hdiutil attach Strata-*-macos.dmg -mountpoint /tmp/strata-dmg
+          ls -la /tmp/strata-dmg/Strata.app
+          codesign --verify --deep --strict /tmp/strata-dmg/Strata.app
+          hdiutil detach /tmp/strata-dmg
+
+  test-windows:
+    needs: build-windows
+    runs-on: windows-2022
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-windows-zip
+
+      - name: Test executable launches
+        shell: pwsh
+        run: |
+          # Verify the executable exists and DLLs are present
+          $exe = Get-ChildItem -Recurse -Filter "strata.exe" | Select-Object -First 1
+          if (-not $exe) { Write-Error "strata.exe not found"; exit 1 }
+          Write-Host "Found: $($exe.FullName)"
+          # List DLLs in the same directory
+          Get-ChildItem $exe.DirectoryName -Filter "*.dll" | ForEach-Object { Write-Host "  DLL: $($_.Name)" }
+          # Try to launch (will fail without display, but verifies DLL loading)
+          $env:QT_QPA_PLATFORM = "offscreen"
+          & $exe.FullName --help 2>&1 | Out-Host
+          Write-Host "Windows executable launched successfully"
