@@ -69,7 +69,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context,
 }
 
 auto createApplication(int &argc, char *argv[]) -> QCoreApplication * {
-  QStringList coreArgs{"-v", "--version", "-b", "--batch"};
+  QStringList coreArgs{"-h", "--help", "-v", "--version", "-b", "--batch"};
 
   for (int i = 1; i < argc; ++i)
     for (const QString &arg : coreArgs) {
