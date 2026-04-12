@@ -426,12 +426,12 @@ jobs:
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
           # Sign frameworks and dylibs individually first, then the app bundle last
           find Strata.app/Contents/Frameworks -name '*.framework' -maxdepth 1 | while read fw; do
-            codesign --force --sign - "$fw"
+            codesign --force --deep --sign - "$fw"
           done
           find Strata.app/Contents/Frameworks -name '*.dylib' -maxdepth 1 | while read dl; do
             codesign --force --sign - "$dl"
           done
-          codesign --force --sign - Strata.app
+          codesign --force --deep --sign - Strata.app
 
       - name: Create DMG
         run: |
@@ -547,7 +547,7 @@ jobs:
         run: |
           hdiutil attach Strata-*-macos.dmg -mountpoint /tmp/strata-dmg
           ls -la /tmp/strata-dmg/Strata.app
-          codesign --verify --strict /tmp/strata-dmg/Strata.app
+          codesign --verify --deep /tmp/strata-dmg/Strata.app
           hdiutil detach /tmp/strata-dmg
 
   test-windows:
