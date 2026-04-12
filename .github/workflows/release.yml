@@ -77,6 +77,9 @@ jobs:
           export VERSION=$(git describe --tags --always)
           export PATH=/usr/lib/qt6/bin:$PATH
           export LD_LIBRARY_PATH=$HOME/qwt-qt6-install/lib:$LD_LIBRARY_PATH
+          # linuxdeployqt requires desktop file and icon at the AppDir root
+          cp AppDir/usr/strata.desktop AppDir/
+          cp AppDir/usr/strata.svg AppDir/
           ./linuxdeployqt-continuous-x86_64.AppImage \
             AppDir/usr/bin/strata \
             -appimage \
