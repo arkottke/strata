@@ -379,21 +379,64 @@ jobs:
           rm -rf strata.app/Contents/Resources/qml
 
           # Fix Qt framework layouts for codesign --verify --strict --deep.
-          # macdeployqt (called internally by the deploy script) creates flat
-          # layouts missing Versions/A/ symlinks. Restructure each framework
-          # into the proper versioned directory structure Apple requires.
+          # macdeployqt / qt_generate_deploy_app_script may create flat layouts
+          # or partially-versioned layouts missing proper symlinks.  Restructure
+          # each framework into the Apple-required versioned directory structure.
           for fw in strata.app/Contents/Frameworks/*.framework; do
             name=$(basename "$fw" .framework)
-            if [ -f "$fw/$name" ] && [ ! -d "$fw/Versions" ]; then
-              mkdir -p "$fw/Versions/A/Resources"
-              mv "$fw/$name" "$fw/Versions/A/$name"
-              if [ -d "$fw/Resources" ]; then
-                mv "$fw/Resources/"* "$fw/Versions/A/Resources/" 2>/dev/null || true
-                rm -rf "$fw/Resources"
-              fi
-              ln -sf A "$fw/Versions/Current"
-              ln -sf "Versions/Current/$name" "$fw/$name"
-              ln -sf "Versions/Current/Resources" "$fw/Resources"
+
+            # Skip if the framework already has a fully correct layout
+            if [ -f "$fw/Versions/A/$name" ] && \
+               [ "$(readlink "$fw/Versions/Current" 2>/dev/null)" = "A" ] && \
+               [ -L "$fw/$name" ] && [ -L "$fw/Resources" ]; then
+              continue
+            fi
+
+            # Locate the actual binary (may already be under Versions/A)
+            real_bin=""
+            if [ -f "$fw/Versions/A/$name" ]; then
+              real_bin="$fw/Versions/A/$name"
+            elif [ -f "$fw/$name" ] && [ ! -L "$fw/$name" ]; then
+              real_bin="$fw/$name"
+            fi
+            [ -z "$real_bin" ] && continue
+
+            mkdir -p "$fw/Versions/A/Resources"
+
+            # Move binary into versioned location if needed
+            if [ "$real_bin" != "$fw/Versions/A/$name" ]; then
+              mv "$real_bin" "$fw/Versions/A/$name"
+            fi
+
+            # Move Resources into versioned location if it is a real directory
+            if [ -d "$fw/Resources" ] && [ ! -L "$fw/Resources" ]; then
+              cp -a "$fw/Resources/"* "$fw/Versions/A/Resources/" 2>/dev/null || true
+              rm -rf "$fw/Resources"
+            fi
+
+            # (Re-)create symlinks
+            rm -f "$fw/Versions/Current" "$fw/$name" "$fw/Resources" 2>/dev/null || true
+            ln -sf A "$fw/Versions/Current"
+            ln -sf "Versions/Current/$name" "$fw/$name"
+            ln -sf "Versions/Current/Resources" "$fw/Resources"
+
+            # Ensure Info.plist exists (codesign --strict requires one)
+            if [ ! -f "$fw/Versions/A/Resources/Info.plist" ]; then
+              cat > "$fw/Versions/A/Resources/Info.plist" << PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleIdentifier</key>
+            <string>org.qt-project.${name}</string>
+            <key>CFBundleExecutable</key>
+            <string>${name}</string>
+            <key>CFBundlePackageType</key>
+            <string>FMWK</string>
+          </dict>
+          </plist>
+          PLIST
             fi
           done
 
@@ -435,23 +478,33 @@ jobs:
             "$FW/libgslcblas.dylib"
 
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
-          # Sign frameworks and dylibs individually first, then the app bundle last
-          find strata.app/Contents/Frameworks -name '*.framework' -maxdepth 1 | while read fw; do
+          # Sign inside-out: framework binaries, then frameworks, then dylibs,
+          # then the top-level app.  Avoid --deep on the final sign so that
+          # already-signed sub-components are not re-signed with mismatched flags.
+          for fw in strata.app/Contents/Frameworks/*.framework; do
+            name=$(basename "$fw" .framework)
+            if [ -f "$fw/Versions/A/$name" ]; then
+              codesign --force --sign - "$fw/Versions/A/$name"
+            fi
             codesign --force --sign - "$fw"
           done
           find strata.app/Contents/Frameworks -name '*.dylib' -maxdepth 1 | while read dl; do
             codesign --force --sign - "$dl"
           done
-          codesign --force --deep --sign - strata.app
+          codesign --force --sign - strata.app
+
+          # Quick verification before packaging
+          codesign --verify --strict --deep --verbose=2 strata.app
 
       - name: Create DMG
         run: |
           cd build
           export VERSION=$(git describe --tags --always)
 
-          # Create temporary DMG directory
+          # Create temporary DMG directory — use ditto to preserve
+          # code signatures, extended attributes, and resource forks
           mkdir dmg-temp
-          cp -r strata.app dmg-temp/
+          ditto strata.app dmg-temp/strata.app
           ln -s /Applications dmg-temp/Applications
 
           # Create DMG
@@ -565,7 +618,7 @@ jobs:
           # Verify the executable exists and is a valid Mach-O binary
           file /tmp/strata-dmg/strata.app/Contents/MacOS/strata
           # Verify ad-hoc signature on the full bundle
-          codesign --verify --strict --deep /tmp/strata-dmg/strata.app
+          codesign --verify --strict --deep --verbose=2 /tmp/strata-dmg/strata.app
           echo "Bundle signature verified"
           hdiutil detach /tmp/strata-dmg
 
