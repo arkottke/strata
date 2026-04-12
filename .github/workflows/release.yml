@@ -368,13 +368,31 @@ jobs:
           export VERSION=$(git describe --tags --always)
 
           # cmake --install deployed Qt frameworks via qt_generate_deploy_app_script
-          # which produces proper Versions/A/ symlink structure for codesign
           cp -a staging/strata.app strata.app
 
           # Remove QML frameworks that macdeployqt may pull in unnecessarily
           rm -rf strata.app/Contents/Frameworks/QtQml*.framework
           rm -rf strata.app/Contents/Frameworks/QtQuick*.framework
           rm -rf strata.app/Contents/Resources/qml
+
+          # Fix Qt framework layouts for codesign --verify --strict --deep.
+          # macdeployqt (called internally by the deploy script) creates flat
+          # layouts missing Versions/A/ symlinks. Restructure each framework
+          # into the proper versioned directory structure Apple requires.
+          for fw in strata.app/Contents/Frameworks/*.framework; do
+            name=$(basename "$fw" .framework)
+            if [ -f "$fw/$name" ] && [ ! -d "$fw/Versions" ]; then
+              mkdir -p "$fw/Versions/A/Resources"
+              mv "$fw/$name" "$fw/Versions/A/$name"
+              if [ -d "$fw/Resources" ]; then
+                mv "$fw/Resources/"* "$fw/Versions/A/Resources/" 2>/dev/null || true
+                rm -rf "$fw/Resources"
+              fi
+              ln -sf A "$fw/Versions/Current"
+              ln -sf "Versions/Current/$name" "$fw/$name"
+              ln -sf "Versions/Current/Resources" "$fw/Resources"
+            fi
+          done
 
           # Copy Qwt and GSL libraries
           mkdir -p strata.app/Contents/Frameworks
@@ -416,7 +434,7 @@ jobs:
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
           # Sign frameworks and dylibs individually first, then the app bundle last
           find strata.app/Contents/Frameworks -name '*.framework' -maxdepth 1 | while read fw; do
-            codesign --force --deep --sign - "$fw"
+            codesign --force --sign - "$fw"
           done
           find strata.app/Contents/Frameworks -name '*.dylib' -maxdepth 1 | while read dl; do
             codesign --force --sign - "$dl"
