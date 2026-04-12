@@ -63,7 +63,7 @@ jobs:
             -DCMAKE_PREFIX_PATH="~/qwt-qt6-install" \
             -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
             -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.so" \
-            -DCMAKE_INSTALL_PREFIX=AppDir
+            -DCMAKE_INSTALL_PREFIX=AppDir/usr
           cmake --build . --parallel
           cmake --install .
 
@@ -239,22 +239,12 @@ jobs:
           cmake --build . --config Release --parallel
           cmake --install . --config Release
 
-      - name: Deploy Qt dependencies
-        shell: pwsh
-        run: |
-          cd build/install
-          & windeployqt.exe --release --no-translations strata.exe
-
       - name: Copy runtime dependencies
         shell: pwsh
         run: |
-          $VERSION = git describe --tags --always
-          cd build/install
+          cd build/install/bin
           Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
           Copy-Item "C:/GSL/bin/*.dll" -Destination "."
-          # Ensure Windows style plugin is present for native appearance
-          if (-not (Test-Path "plugins/styles")) { New-Item -ItemType Directory -Path "plugins/styles" -Force }
-          Get-ChildItem "${{ env.QT_ROOT_DIR }}/plugins/styles/*.dll" -Exclude "*d.dll" | Copy-Item -Destination "plugins/styles/"
 
       - name: Create ZIP archive
         shell: pwsh
@@ -367,33 +357,33 @@ jobs:
             -DCMAKE_PREFIX_PATH="~/qwt-qt6-install;$(brew --prefix qt@6)" \
             -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
             -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.dylib" \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+            -DCMAKE_INSTALL_PREFIX=staging
           cmake --build . --parallel
+          cmake --install .
 
       - name: Create .app bundle
         run: |
           cd build
           export VERSION=$(git describe --tags --always)
 
-          # CMake builds strata.app due to MACOSX_BUNDLE; rename to Strata.app
-          cp -a source/strata.app Strata.app
+          # cmake --install deployed Qt frameworks via qt_generate_deploy_app_script
+          # which produces proper Versions/A/ symlink structure for codesign
+          cp -a staging/strata.app strata.app
 
-          # Deploy Qt dependencies (no QML — Strata is a pure Widgets app)
-          $(brew --prefix qt@6)/bin/macdeployqt Strata.app -always-overwrite
-
-          # Remove QML frameworks that macdeployqt pulls in unnecessarily
-          rm -rf Strata.app/Contents/Frameworks/QtQml*.framework
-          rm -rf Strata.app/Contents/Frameworks/QtQuick*.framework
-          rm -rf Strata.app/Contents/Resources/qml
+          # Remove QML frameworks that macdeployqt may pull in unnecessarily
+          rm -rf strata.app/Contents/Frameworks/QtQml*.framework
+          rm -rf strata.app/Contents/Frameworks/QtQuick*.framework
+          rm -rf strata.app/Contents/Resources/qml
 
           # Copy Qwt and GSL libraries
-          mkdir -p Strata.app/Contents/Frameworks
-          cp ~/qwt-qt6-install/lib/libqwt.6.dylib Strata.app/Contents/Frameworks/
-          cp $(brew --prefix gsl)/lib/libgsl.dylib Strata.app/Contents/Frameworks/
-          cp $(brew --prefix gsl)/lib/libgslcblas.dylib Strata.app/Contents/Frameworks/
+          mkdir -p strata.app/Contents/Frameworks
+          cp ~/qwt-qt6-install/lib/libqwt.6.dylib strata.app/Contents/Frameworks/
+          cp $(brew --prefix gsl)/lib/libgsl.dylib strata.app/Contents/Frameworks/
+          cp $(brew --prefix gsl)/lib/libgslcblas.dylib strata.app/Contents/Frameworks/
 
-          STRATA_BIN=Strata.app/Contents/MacOS/strata
-          FW=Strata.app/Contents/Frameworks
+          STRATA_BIN=strata.app/Contents/MacOS/strata
+          FW=strata.app/Contents/Frameworks
 
           # Fix Qwt path in main binary
           install_name_tool -change ~/qwt-qt6-install/lib/libqwt.6.dylib \
@@ -413,7 +403,7 @@ jobs:
             "@executable_path/../Frameworks/libgslcblas.dylib" \
             "$FW/libgsl.dylib"
 
-          # Fix Qwt's own dylib id and its Qt dependencies
+          # Fix Qwt's own dylib id
           install_name_tool -id @executable_path/../Frameworks/libqwt.6.dylib \
             "$FW/libqwt.6.dylib"
 
@@ -425,13 +415,13 @@ jobs:
 
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
           # Sign frameworks and dylibs individually first, then the app bundle last
-          find Strata.app/Contents/Frameworks -name '*.framework' -maxdepth 1 | while read fw; do
+          find strata.app/Contents/Frameworks -name '*.framework' -maxdepth 1 | while read fw; do
             codesign --force --deep --sign - "$fw"
           done
-          find Strata.app/Contents/Frameworks -name '*.dylib' -maxdepth 1 | while read dl; do
+          find strata.app/Contents/Frameworks -name '*.dylib' -maxdepth 1 | while read dl; do
             codesign --force --sign - "$dl"
           done
-          codesign --force --deep --sign - Strata.app
+          codesign --force --deep --sign - strata.app
 
       - name: Create DMG
         run: |
@@ -440,7 +430,7 @@ jobs:
 
           # Create temporary DMG directory
           mkdir dmg-temp
-          cp -r Strata.app dmg-temp/
+          cp -r strata.app dmg-temp/
           ln -s /Applications dmg-temp/Applications
 
           # Create DMG
@@ -450,7 +440,7 @@ jobs:
         run: |
           cd build
           export VERSION=$(git describe --tags --always)
-          tar czf "Strata-${VERSION}-macos.tar.gz" Strata.app
+          tar czf "Strata-${VERSION}-macos.tar.gz" strata.app
 
       - name: Upload DMG to Release
         if: github.event_name == 'release'
@@ -529,38 +519,33 @@ jobs:
         run: |
           tar xzf Strata-*-macos.tar.gz
 
-          # Verify ad-hoc code signature on the main binary
-          # Note: macdeployqt creates Qt frameworks with a flat layout (no
-          # Versions/A/ symlinks), so codesign --verify --strict/--deep on the
-          # whole .app bundle fails with "bundle format is ambiguous". We verify
-          # the binary instead and check dylib paths to ensure correctness.
-          codesign -dvv Strata.app/Contents/MacOS/strata 2>&1 | tee /tmp/codesign-info.txt
-          grep -q "Signature=adhoc" /tmp/codesign-info.txt
-          echo "Ad-hoc signature verified"
+          # Verify ad-hoc code signature on the full bundle
+          # qt_generate_deploy_app_script produces proper framework layouts
+          # (with Versions/A/ symlinks) that pass strict verification
+          codesign --verify --strict --deep strata.app
+          echo "Bundle signature verified"
 
           # Verify all dylibs resolve
-          otool -L Strata.app/Contents/MacOS/strata
+          otool -L strata.app/Contents/MacOS/strata
           # Check no references to build-machine paths remain
-          if otool -L Strata.app/Contents/MacOS/strata | grep -E '/usr/local|/opt/homebrew|/Users'; then
+          if otool -L strata.app/Contents/MacOS/strata | grep -E '/usr/local|/opt/homebrew|/Users'; then
             echo "ERROR: Found absolute paths to build machine libraries"
             exit 1
           fi
           # Launch test (offscreen since CI has no display)
           export QT_QPA_PLATFORM=offscreen
-          ./Strata.app/Contents/MacOS/strata --help || true
+          ./strata.app/Contents/MacOS/strata --help || true
           echo "macOS app launched successfully"
 
       - name: Verify DMG mounts
         run: |
           hdiutil attach Strata-*-macos.dmg -mountpoint /tmp/strata-dmg
-          ls -la /tmp/strata-dmg/Strata.app
+          ls -la /tmp/strata-dmg/strata.app
           # Verify the executable exists and is a valid Mach-O binary
-          file /tmp/strata-dmg/Strata.app/Contents/MacOS/strata
-          # Verify ad-hoc signature on the main binary only (macdeployqt
-          # produces Qt frameworks with flat layouts that codesign --verify
-          # cannot recurse into, so bundle-level verification is not possible)
-          codesign -dvv /tmp/strata-dmg/Strata.app/Contents/MacOS/strata 2>&1 | grep -q "Signature=adhoc"
-          echo "Ad-hoc signature verified"
+          file /tmp/strata-dmg/strata.app/Contents/MacOS/strata
+          # Verify ad-hoc signature on the full bundle
+          codesign --verify --strict --deep /tmp/strata-dmg/strata.app
+          echo "Bundle signature verified"
           hdiutil detach /tmp/strata-dmg
 
   test-windows:

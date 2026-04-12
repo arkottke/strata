@@ -20,50 +20,11 @@ if (NOT 7Z_PATH)
     message(WARNING "Unable to find 7z in the PATH. The zip archive will be disabled.")
 endif()
 
-# Paths to Qt DLLs
-get_target_property(QtCore_LOCATION Qt6::Core LOCATION)
-get_filename_component(QT_DLL_DIR ${QtCore_LOCATION} PATH)
-
-# Compiler Runtime DLLs
-if (MSVC)
-    # Visual Studio
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP true)
-    include(InstallRequiredSystemLibraries)
-    install(
-        FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-        DESTINATION .
-        COMPONENT dependencies
-        )
-else()
-    # MinGW
-    get_filename_component(MINGW_DLL_DIR ${CMAKE_CXX_COMPILER} PATH)
-    install(FILES
-        ${MINGW_DLL_DIR}/libgcc_s_dw2-1.dll
-        ${MINGW_DLL_DIR}/libstdc++-6.dll
-        ${QT_DLL_DIR}/libwinpthread-1.dll
-        DESTINATION .
-        COMPONENT dependencies
-        )
-endif()
-
-# Qt Libraries
-install(FILES
-    ${QT_DLL_DIR}/Qt6Core.dll
-    ${QT_DLL_DIR}/Qt6Gui.dll
-    ${QT_DLL_DIR}/Qt6OpenGL.dll
-    ${QT_DLL_DIR}/Qt6PrintSupport.dll
-    ${QT_DLL_DIR}/Qt6Svg.dll
-    ${QT_DLL_DIR}/Qt6Widgets.dll
-    ${QT_DLL_DIR}/Qt6Xml.dll
-    ${CMAKE_SOURCE_DIR}/win/qt.conf
-    DESTINATION .
-    COMPONENT dependencies
-    )
 # Qwt Library
 get_filename_component(QWT_DLL_DIR ${QWT_LIBRARY} PATH)
 install(FILES
     ${QWT_DLL_DIR}/qwt.dll
-    DESTINATION .
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT dependencies
     )
 # GSL Library
@@ -71,31 +32,7 @@ get_filename_component(GSL_DLL_DIR ${GSL_LIBRARY} PATH)
 install(FILES
     ${GSL_DLL_DIR}/../bin/gsl.dll
     ${GSL_DLL_DIR}/../bin/gslcblas.dll
-    DESTINATION .
-    COMPONENT dependencies
-    )
-# Qt Platform Plugin
-install(FILES
-    ${QT_DLL_DIR}/../plugins/platforms/qwindows.dll
-    DESTINATION plugins/platforms
-    COMPONENT dependencies
-    )
-install(FILES
-    ${QT_DLL_DIR}/../plugins/imageformats/qsvg.dll
-    DESTINATION plugins/imageformats
-    COMPONENT dependencies
-    )
-install(FILES
-    ${QT_DLL_DIR}/../plugins/iconengines/qsvgicon.dll
-    DESTINATION plugins/iconengines
-    COMPONENT dependencies
-    )
-# Qt Style Plugins (required for native Windows appearance)
-file(GLOB QT_STYLE_PLUGINS "${QT_DLL_DIR}/../plugins/styles/*.dll")
-list(FILTER QT_STYLE_PLUGINS EXCLUDE REGEX "d\\.dll$")
-install(FILES
-    ${QT_STYLE_PLUGINS}
-    DESTINATION plugins/styles
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT dependencies
     )
 

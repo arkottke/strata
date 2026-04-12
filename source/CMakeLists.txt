@@ -62,42 +62,41 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
 
 if (UNIX AND NOT APPLE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
-        RUNTIME DESTINATION usr/bin
-        BUNDLE DESTINATION usr/bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT executable
         )
     install(FILES
         ${CMAKE_BINARY_DIR}/resources/strata.desktop
-        DESTINATION usr/share/applications
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
         COMPONENT executable
         )
     # Manual and example
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-        DESTINATION usr/share/${CMAKE_PROJECT_NAME}/doc
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}/doc
         COMPONENT manual
         RENAME manual.pdf
         )
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
-        DESTINATION usr/share/${CMAKE_PROJECT_NAME}
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}
         COMPONENT example
         )
 elseif (WIN32)
-    install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION .
-        BUNDLE DESTINATION .
+    install(TARGETS ${CMAKE_PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT executable
         )
     # Manual and example
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-        DESTINATION doc
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}/doc
         COMPONENT manual
         RENAME manual.pdf
         )
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
-        DESTINATION .
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}
         COMPONENT example
         )
 elseif (APPLE)
@@ -106,3 +105,16 @@ elseif (APPLE)
         COMPONENT executable
         )
 endif ()
+
+# Deploy Qt runtime dependencies at install time (Qt 6.3+).
+# On older Qt (e.g., Ubuntu 22.04's Qt 6.2), this is a no-op and
+# platform-specific tools (linuxdeployqt) handle deployment instead.
+if(COMMAND qt_generate_deploy_app_script)
+    qt_generate_deploy_app_script(
+        TARGET ${CMAKE_PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_script
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        NO_TRANSLATIONS
+    )
+    install(SCRIPT ${deploy_script})
+endif()

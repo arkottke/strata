@@ -72,6 +72,8 @@ if(COMMAND qt_standard_project_setup)
     qt_standard_project_setup()
 endif()
 
+include(GNUInstallDirs)
+
 include_directories(${GSL_INCLUDE_DIRS} ${QWT_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
 
