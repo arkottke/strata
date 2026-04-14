@@ -39,7 +39,6 @@ SubLayer::SubLayer(double thickness, double depth, double vTotalStress,
 
 void SubLayer::reset() {
   _damping = _soilLayer->soilType()->damping();
-  _minDamping = _soilLayer->soilType()->minDamping();
 
   _effStrain = -1;
   _shearMod = initialShearMod();
@@ -109,8 +108,7 @@ bool SubLayer::interp(double strain, double *modulus, double *damping) const {
   }
 
   *modulus = initialShearMod() * soilType->modulusModel()->interp(strain);
-  // Limit the damping by the minimum strain
-  *damping = std::max(_minDamping, soilType->dampingModel()->interp(strain));
+  *damping = soilType->dampingModel()->interp(strain);
 
   return true;
 }

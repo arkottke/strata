@@ -39,7 +39,6 @@
 SoilType::SoilType(QObject *parent) : QObject(parent) {
   _untWt = -1;
   _damping = 5.;
-  _minDamping = 0.5;
 
   _isVaried = true;
   _saveData = false;
@@ -76,15 +75,6 @@ auto SoilType::damping() const -> double { return _damping; }
 void SoilType::setDamping(double damping) {
   if (fabs(_damping - damping) > 1E-4) {
     _damping = damping;
-    emit wasModified();
-  }
-}
-
-auto SoilType::minDamping() const -> double { return _minDamping; }
-
-void SoilType::setMinDamping(double minDamping) {
-  if (fabs(_minDamping - minDamping) > 1E-4) {
-    _minDamping = minDamping;
     emit wasModified();
   }
 }
@@ -292,7 +282,7 @@ void SoilType::fromJson(const QJsonObject &json) {
   setDampingModel(dnp);
 
   if (json.contains("minDamping")) {
-    _minDamping = json["minDamping"].toDouble();
+    // minDamping no longer used, skip for backward compatibility
   }
 }
 
@@ -316,8 +306,6 @@ auto SoilType::toJson() const -> QJsonObject {
   json["dampingType"] = _dampingModel->metaObject()->className();
   json["dampingModel"] = _dampingModel->toJson();
 
-  json["minDamping"] = _minDamping;
-
   return json;
 }
 
@@ -330,9 +318,6 @@ auto operator<<(QDataStream &out, const SoilType *st) -> QDataStream & {
       << st->_modulusModel
       << QString(st->_dampingModel->metaObject()->className())
       << st->_dampingModel;
-
-  // Added in version 2
-  out << st->_minDamping;
 
   return out;
 }
@@ -367,7 +352,9 @@ auto operator>>(QDataStream &in, SoilType *st) -> QDataStream & {
   }
 
   if (ver > 1) {
-    in >> st->_minDamping;
+    // minDamping no longer used, consume for backward compatibility
+    double unused;
+    in >> unused;
   }
 
   return in;

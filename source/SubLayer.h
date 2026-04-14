@@ -165,9 +165,6 @@ private:
   //! Damping of the layer
   double _damping;
 
-  //! Minimum damping of the layer
-  double _minDamping;
-
   //! Previous shear modulus value
   double _oldShearMod;
 

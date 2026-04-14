@@ -47,7 +47,6 @@ public:
     DampingColumn,
     ModulusModelColumn,
     DampingModelColumn,
-    DampLimitColumn,
     NotesColumn,
     IsVariedColumn
   };

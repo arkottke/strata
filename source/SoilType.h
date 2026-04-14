@@ -51,9 +51,6 @@ public:
   auto damping() const -> double;
   void setDamping(double damping);
 
-  auto minDamping() const -> double;
-  void setMinDamping(double minDamping);
-
   void setName(const QString &name);
   auto name() const -> const QString &;
 
@@ -110,9 +107,6 @@ private:
 
   //! Damping of the layer
   double _damping;
-
-  //! Minimum damping of the layer
-  double _minDamping;
 
   //! Name of the soil layer
   QString _name;

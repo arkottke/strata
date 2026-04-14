@@ -72,7 +72,7 @@ auto SoilTypeCatalog::rowCount(const QModelIndex &parent) const -> int {
 auto SoilTypeCatalog::columnCount(const QModelIndex &parent) const -> int {
   Q_UNUSED(parent);
 
-  return 7;
+  return 6;
 }
 
 auto SoilTypeCatalog::data(const QModelIndex &index, int role) const
@@ -94,8 +94,6 @@ auto SoilTypeCatalog::data(const QModelIndex &index, int role) const
       return st->modulusModel()->name();
     case DampingModelColumn:
       return st->dampingModel()->name();
-    case DampLimitColumn:
-      return st->minDamping();
     case NotesColumn:
       return st->notes();
     case IsVariedColumn:
@@ -159,17 +157,6 @@ auto SoilTypeCatalog::setData(const QModelIndex &index, const QVariant &value,
       } else {
         return false;
       }
-    case DampLimitColumn: {
-      bool success;
-      double d = value.toDouble(&success);
-
-      if (success) {
-        st->setMinDamping(d);
-        break;
-      } else {
-        return false;
-      }
-    }
     case NotesColumn:
       st->setNotes(value.toString());
       break;
@@ -205,8 +192,6 @@ auto SoilTypeCatalog::headerData(int section, Qt::Orientation orientation,
       return tr("G/G_max Model");
     case DampingModelColumn:
       return tr("Damping Model");
-    case DampLimitColumn:
-      return tr("Damp. Limit (%)");
     case NotesColumn:
       return tr("Notes");
     case IsVariedColumn:
