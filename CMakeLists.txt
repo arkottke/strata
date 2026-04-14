@@ -66,7 +66,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Configure libraries
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport OpenGLWidgets)
 find_package(GSL REQUIRED)
 find_package(Qwt REQUIRED)
 
