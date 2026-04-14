@@ -50,6 +50,7 @@ qt_add_executable(${CMAKE_PROJECT_NAME}
     )
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
+    Qt6::OpenGLWidgets
     Qt6::PrintSupport
     Qt6::Widgets
     Qt6::Xml
