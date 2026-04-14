@@ -645,3 +645,35 @@ jobs:
           # Reset exit code — a successful launch is sufficient proof
           $global:LASTEXITCODE = 0
           Write-Host "Windows executable launched successfully"
+
+  update-homebrew:
+    if: github.event_name == 'release'
+    needs: [build-macos, test-macos]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Update Homebrew cask
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          # Extract version from release tag (strip leading 'v')
+          VERSION="${GITHUB_REF_NAME#v}"
+          DMG_URL="https://github.com/arkottke/strata/releases/download/${GITHUB_REF_NAME}/Strata-${GITHUB_REF_NAME}-macos.dmg"
+
+          # Download DMG and compute sha256
+          curl -L -o strata.dmg "$DMG_URL"
+          SHA256=$(sha256sum strata.dmg | awk '{print $1}')
+
+          # Clone the tap repo
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/arkottke/homebrew-strata.git"
+          cd homebrew-strata
+
+          # Update the cask file
+          sed -i "s/version \".*\"/version \"${VERSION}\"/" Casks/strata.rb
+          sed -i "s/sha256 .*/sha256 \"${SHA256}\"/" Casks/strata.rb
+
+          # Commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/strata.rb
+          git commit -m "Update strata to ${VERSION}"
+          git push
