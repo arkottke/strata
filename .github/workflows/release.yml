@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -25,7 +25,7 @@ jobs:
             ninja-build \
             libgsl-dev \
             qt6-base-dev \
-            libqt6svg6-dev \
+            qt6-svg-dev \
             qt6-tools-dev \
             libgl1-mesa-dev \
             libxkbcommon-x11-0 \
@@ -76,19 +76,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd build
-          wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-          chmod +x linuxdeployqt-continuous-x86_64.AppImage
+          wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+          wget -c "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+          chmod +x linuxdeploy*.AppImage
           export VERSION=$(git describe --tags --always)
-          export PATH=/usr/lib/qt6/bin:$PATH
+          export QMAKE=/usr/lib/qt6/bin/qmake
           export LD_LIBRARY_PATH=$HOME/qwt-qt6-install/lib:$LD_LIBRARY_PATH
-          # linuxdeployqt requires desktop file and icon at the AppDir root
-          cp AppDir/usr/strata.desktop AppDir/
-          cp AppDir/usr/strata.svg AppDir/
-          ./linuxdeployqt-continuous-x86_64.AppImage \
-            AppDir/usr/bin/strata \
-            -appimage \
-            -bundle-non-qt-libs \
-            -extra-plugins=iconengines,platformthemes/libqgtk3.so
+          export EXTRA_QT_PLUGINS="iconengines;platformthemes"
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --plugin qt \
+            --output appimage
 
       - name: Create tarball
         run: |
