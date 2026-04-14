@@ -39,10 +39,12 @@ jobs:
           wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          sed -i 's|^QWT_INSTALL_PREFIX.*|QWT_INSTALL_PREFIX = $${HOME}/qwt-qt6-install|' qwtconfig.pri
           /usr/lib/qt6/bin/qmake qwt.pro
           make -j$(nproc)
-          make install
+          # Use INSTALL_ROOT to redirect install to a writable staging directory
+          make install INSTALL_ROOT=$HOME/qwt-staging
+          # Copy from staging to expected cache location
+          cp -a $HOME/qwt-staging/usr/local/qwt-6.3.0 $HOME/qwt-qt6-install
 
       - name: Build Strata
         run: |
