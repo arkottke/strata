@@ -25,6 +25,7 @@
 #include "SiteResponseModel.h"
 
 #include <QContextMenuEvent>
+#include <QKeyEvent>
 #include <QMenu>
 #include <QTableView>
 
@@ -41,6 +42,7 @@ public slots:
   void setReadOnly(bool readOnly);
 
 protected:
+  void keyPressEvent(QKeyEvent *event) override;
   void contextMenuEvent(QContextMenuEvent *event);
 
   bool _readOnly;

@@ -213,9 +213,11 @@ auto AbstractRvtMotionDialog::createRSPlotWidget() -> QWidget * {
 
   _saCurve = new QwtPlotCurve(tr("Calculated"));
   _saCurve->setPen(QPen(Qt::blue, 2));
-  _saCurve->setSamples(_motion->respSpec()->period().data(),
-                       _motion->respSpec()->sa().data(),
-                       _motion->respSpec()->period().size());
+  if (!_motion->respSpec()->sa().isEmpty()) {
+    _saCurve->setSamples(_motion->respSpec()->period().data(),
+                         _motion->respSpec()->sa().data(),
+                         _motion->respSpec()->sa().size());
+  }
   _saCurve->attach(_rsPlot);
 
   addRespSpecCurves();
@@ -257,8 +259,10 @@ auto AbstractRvtMotionDialog::createFSPlotWidget() -> QWidget * {
 
   _faCurve = new QwtPlotCurve;
   _faCurve->setPen(QPen(Qt::blue, 2));
-  _faCurve->setSamples(_motion->freq().data(), _motion->fourierAcc().data(),
-                       _motion->freq().size());
+  if (!_motion->freq().isEmpty()) {
+    _faCurve->setSamples(_motion->freq().data(), _motion->fourierAcc().data(),
+                         _motion->freq().size());
+  }
   _faCurve->attach(_fsPlot);
 
   auto scrollArea = new QScrollArea;
@@ -304,7 +308,7 @@ void AbstractRvtMotionDialog::calculate() {
                        _motion->freq().size());
   _saCurve->setSamples(_motion->respSpec()->period().data(),
                        _motion->respSpec()->sa().data(),
-                       _motion->respSpec()->period().size());
+                       _motion->respSpec()->sa().size());
 
   _dataTabWidget->setCurrentIndex(0);
 }

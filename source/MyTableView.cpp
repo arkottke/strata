@@ -30,7 +30,19 @@
 #include <QRegularExpression>
 #include <QtAlgorithms>
 
-MyTableView::MyTableView(QWidget *parent) : QTableView(parent) {}
+MyTableView::MyTableView(QWidget *parent)
+    : QTableView(parent), _readOnly(false) {}
+
+void MyTableView::keyPressEvent(QKeyEvent *event) {
+  if (event->matches(QKeySequence::Copy)) {
+    copy();
+    return;
+  } else if (event->matches(QKeySequence::Paste) && !_readOnly) {
+    paste();
+    return;
+  }
+  QTableView::keyPressEvent(event);
+}
 
 void MyTableView::copy() {
   QString data;
