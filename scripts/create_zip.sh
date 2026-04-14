@@ -32,6 +32,9 @@ cp LICENSE.txt deploy/
 # Copy Qt DLLs
 windeployqt deploy/strata.exe --compiler-runtime -opengl
 
+# Copy Qt DLLs that windeployqt may miss (transitive via Qwt)
+cp /mingw$bits/bin/Qt6OpenGLWidgets.dll deploy/
+
 # Copy other required DLLs
 for dll in libbz2-1.dll \
     libgcc_s_seh-1.dll \
