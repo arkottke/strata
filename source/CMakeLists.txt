@@ -107,15 +107,24 @@ elseif (APPLE)
         )
 endif ()
 
-# Deploy Qt runtime dependencies at install time (Qt 6.3+).
-# On older Qt (e.g., Ubuntu 22.04's Qt 6.2), this is a no-op and
-# platform-specific tools (linuxdeployqt) handle deployment instead.
+# Deploy Qt runtime dependencies at install time.
+# OUTPUT_SCRIPT and NO_TRANSLATIONS require Qt 6.5+; Qt 6.3-6.4 uses
+# FILENAME_VARIABLE. On older Qt (e.g., Ubuntu 22.04's Qt 6.2) the command
+# does not exist and platform-specific tools handle deployment instead.
 if(COMMAND qt_generate_deploy_app_script)
-    qt_generate_deploy_app_script(
-        TARGET ${CMAKE_PROJECT_NAME}
-        OUTPUT_SCRIPT deploy_script
-        NO_UNSUPPORTED_PLATFORM_ERROR
-        NO_TRANSLATIONS
-    )
+    if(Qt6_VERSION VERSION_GREATER_EQUAL "6.5")
+        qt_generate_deploy_app_script(
+            TARGET ${CMAKE_PROJECT_NAME}
+            OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+            NO_TRANSLATIONS
+        )
+    else()
+        qt_generate_deploy_app_script(
+            TARGET ${CMAKE_PROJECT_NAME}
+            FILENAME_VARIABLE deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+        )
+    endif()
     install(SCRIPT ${deploy_script})
 endif()
