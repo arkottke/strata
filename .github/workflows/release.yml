@@ -500,6 +500,10 @@ jobs:
           # Quick verification before packaging
           codesign --verify --strict --deep --verbose=2 strata.app
 
+      # The DMG is not code-signed/notarized, so direct downloads trigger
+      # Gatekeeper's "damaged" warning.  Install via Homebrew instead:
+      #   brew install --cask arkottke/strata/strata
+
       - name: Create DMG
         run: |
           cd build
@@ -525,12 +529,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-macos.dmg
-
-      - name: Upload tarball to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/Strata-*-macos.tar.gz
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
