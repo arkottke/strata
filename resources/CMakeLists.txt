@@ -19,11 +19,11 @@ if(APPLE)
 elseif(UNIX)
     install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/strata.desktop
-        DESTINATION .
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
         )
     install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/images/application-icon.svg
-        DESTINATION .
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
         RENAME strata.svg
         )
 endif()

@@ -70,6 +70,12 @@ if (UNIX AND NOT APPLE)
         DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
         COMPONENT executable
         )
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/resources/images/application-icon.svg
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
+        COMPONENT executable
+        RENAME strata.svg
+        )
     # Manual and example
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
