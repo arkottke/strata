@@ -21,6 +21,7 @@
 
 #include "GeneralPage.h"
 
+#include "AbstractCalculator.h"
 #include "MethodGroupBox.h"
 #include "MotionLibrary.h"
 #include "MyRandomNumGenerator.h"

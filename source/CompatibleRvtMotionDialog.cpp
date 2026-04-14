@@ -109,6 +109,7 @@ void CompatibleRvtMotionDialog::calculate() {
                              crm->targetRespSpec()->period().size());
 
   _dataTabWidget->setCurrentIndex(1);
+  _rsPlot->replot();
 }
 
 auto CompatibleRvtMotionDialog::createTabWidget() -> QTabWidget * {
@@ -136,10 +137,8 @@ void CompatibleRvtMotionDialog::addRespSpecCurves() {
   auto crm = qobject_cast<CompatibleRvtMotion *>(_motion);
 
   _targetSaCurve = new QwtPlotCurve(tr("Target"));
-  _targetSaCurve->setStyle(QwtPlotCurve::NoCurve);
-  _targetSaCurve->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
-                                          QBrush(Qt::transparent),
-                                          QPen(Qt::red, 1.5), QSize(8, 8)));
+  _targetSaCurve->setStyle(QwtPlotCurve::Dots);
+  _targetSaCurve->setPen(QPen(Qt::red, 8, Qt::SolidLine, Qt::RoundCap));
 
   _targetSaCurve->setSamples(crm->targetRespSpec()->period().data(),
                              crm->targetRespSpec()->sa().data(),

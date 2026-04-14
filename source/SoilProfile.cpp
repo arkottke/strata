@@ -316,6 +316,8 @@ auto SoilProfile::insertRows(int row, int count, const QModelIndex &parent)
   if (!count)
     return false;
 
+  row = qMin(row, _soilLayers.size());
+
   beginInsertRows(parent, row, row + count - 1);
 
   for (int i = 0; i < count; ++i)

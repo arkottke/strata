@@ -23,6 +23,8 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QMetaMethod>
+#include <QWidget>
 
 EditActions *EditActions::_instance = nullptr;
 
@@ -70,17 +72,20 @@ void EditActions::cut() {
   clear();
 }
 
-void EditActions::copy() {
-  // FIXME
-  // QMetaObject::invokeMethod(QApplication::focusWidget(), "copy");
+static void invokeSlot(QWidget *w, const char *slot) {
+  if (!w)
+    return;
+  int idx = w->metaObject()->indexOfSlot(slot);
+  if (idx >= 0)
+    w->metaObject()->method(idx).invoke(w);
 }
 
+void EditActions::copy() { invokeSlot(QApplication::focusWidget(), "copy()"); }
+
 void EditActions::paste() {
-  // FIXME
-  // QMetaObject::invokeMethod(QApplication::focusWidget(), "paste");
+  invokeSlot(QApplication::focusWidget(), "paste()");
 }
 
 void EditActions::clear() {
-  // FIXME
-  // QMetaObject::invokeMethod(QApplication::focusWidget(), "clear");
+  invokeSlot(QApplication::focusWidget(), "clear()");
 }

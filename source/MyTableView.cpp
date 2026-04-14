@@ -30,7 +30,19 @@
 #include <QRegularExpression>
 #include <QtAlgorithms>
 
-MyTableView::MyTableView(QWidget *parent) : QTableView(parent) {}
+MyTableView::MyTableView(QWidget *parent)
+    : QTableView(parent), _readOnly(false) {}
+
+void MyTableView::keyPressEvent(QKeyEvent *event) {
+  if (event->matches(QKeySequence::Copy)) {
+    copy();
+    return;
+  } else if (event->matches(QKeySequence::Paste) && !_readOnly) {
+    paste();
+    return;
+  }
+  QTableView::keyPressEvent(event);
+}
 
 void MyTableView::copy() {
   QString data;
@@ -161,16 +173,19 @@ void MyTableView::contextMenuEvent(QContextMenuEvent *event) {
   // Create the context menu
   auto *contextMenu = new QMenu;
 
-  contextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"),
-                         QKeySequence::Copy, this, [this]() { copy(); });
+  contextMenu->addAction(
+      QIcon(":/images/edit-copy.svg"), tr("Copy"), this, [this]() { copy(); },
+      QKeySequence::Copy);
 
   if (!_readOnly)
-    contextMenu->addAction(QIcon(":/images/edit-paste.svg"), tr("Paste"),
-                           QKeySequence::Paste, this, [this]() { paste(); });
+    contextMenu->addAction(
+        QIcon(":/images/edit-paste.svg"), tr("Paste"), this,
+        [this]() { paste(); }, QKeySequence::Paste);
 
   contextMenu->addSeparator();
-  contextMenu->addAction(tr("Select All"), QKeySequence::SelectAll, this,
-                         [this]() { selectAll(); });
+  contextMenu->addAction(
+      tr("Select All"), this, [this]() { selectAll(); },
+      QKeySequence::SelectAll);
 
   contextMenu->popup(event->globalPos());
 }

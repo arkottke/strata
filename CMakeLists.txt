@@ -14,7 +14,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 # Default configuration values. These must be before the project command or
 # they won't work in Windows.
@@ -70,7 +70,11 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport)
 find_package(GSL REQUIRED)
 find_package(Qwt REQUIRED)
 
-qt_standard_project_setup()
+if(COMMAND qt_standard_project_setup)
+    qt_standard_project_setup()
+endif()
+
+include(GNUInstallDirs)
 
 include_directories(${GSL_INCLUDE_DIRS} ${QWT_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
@@ -80,8 +84,8 @@ if (ADVANCED_FEATURES)
 endif()
 
 if(MSVC)
-    # Add GSL DLL definition for MSVC. Add define for math constants
-    add_definitions(-DGSL_DLL -D_USE_MATH_DEFINES)
+    # Add GSL and Qwt DLL definitions for MSVC. Add define for math constants
+    add_definitions(-DGSL_DLL -DQWT_DLL -D_USE_MATH_DEFINES)
     # Optimize for speed and link dynamically
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
 else()

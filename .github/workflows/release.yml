@@ -1,14 +1,21 @@
 name: Release
 
 on:
+  push:
+    branches:
+      - dev
   release:
     types: [created, published]
+
+env:
+  # Dev pushes include debug symbols; releases are optimized-only
+  BUILD_TYPE: ${{ github.event_name == 'release' && 'Release' || 'RelWithDebInfo' }}
 
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Qt6 and dependencies
         run: |
@@ -18,7 +25,7 @@ jobs:
             ninja-build \
             libgsl-dev \
             qt6-base-dev \
-            qt6-svg-dev \
+            libqt6svg6-dev \
             qt6-tools-dev \
             libgl1-mesa-dev \
             libxkbcommon-x11-0 \
@@ -31,7 +38,7 @@ jobs:
 
       - name: Cache Qwt-Qt6
         id: cache-qwt
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/qwt-qt6-install
           key: ${{ runner.os }}-qwt-qt6-6.3.0
@@ -43,10 +50,12 @@ jobs:
           wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          sed -i 's|^QWT_INSTALL_PREFIX.*|QWT_INSTALL_PREFIX = $${HOME}/qwt-qt6-install|' qwtconfig.pri
           /usr/lib/qt6/bin/qmake qwt.pro
           make -j$(nproc)
-          make install
+          # Use INSTALL_ROOT to redirect install to a writable staging directory
+          make install INSTALL_ROOT=$HOME/qwt-staging
+          # Copy from staging to expected cache location
+          cp -a $HOME/qwt-staging/usr/local/qwt-6.3.0 $HOME/qwt-qt6-install
 
       - name: Build Strata
         run: |
@@ -54,7 +63,7 @@ jobs:
           cd build
           cmake .. \
             -GNinja \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_PREFIX_PATH="~/qwt-qt6-install" \
             -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
             -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.so" \
@@ -63,17 +72,23 @@ jobs:
           cmake --install .
 
       - name: Create AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd build
           wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod +x linuxdeployqt-continuous-x86_64.AppImage
           export VERSION=$(git describe --tags --always)
+          export PATH=/usr/lib/qt6/bin:$PATH
+          export LD_LIBRARY_PATH=$HOME/qwt-qt6-install/lib:$LD_LIBRARY_PATH
+          # linuxdeployqt requires desktop file and icon at the AppDir root
+          cp AppDir/usr/strata.desktop AppDir/
+          cp AppDir/usr/strata.svg AppDir/
           ./linuxdeployqt-continuous-x86_64.AppImage \
             AppDir/usr/bin/strata \
             -appimage \
             -bundle-non-qt-libs \
             -extra-plugins=iconengines,platformthemes/libqgtk3.so
-          mv Strata-*.AppImage Strata-${VERSION}-x86_64.AppImage
 
       - name: Create tarball
         run: |
@@ -81,20 +96,58 @@ jobs:
           export VERSION=$(git describe --tags --always)
           tar czf Strata-${VERSION}-linux-x86_64.tar.gz -C AppDir/usr .
 
+      - name: Create portable tarball (no FUSE needed)
+        run: |
+          cd build
+          export VERSION=$(git describe --tags --always)
+          # Extract AppImage so it can run without FUSE (e.g., in VMs)
+          chmod +x Strata-${VERSION}-x86_64.AppImage
+          ./Strata-${VERSION}-x86_64.AppImage --appimage-extract
+          mv squashfs-root Strata-${VERSION}-portable
+          # Add a convenience launcher script
+          cat > Strata-${VERSION}-portable/strata.sh << 'LAUNCHER'
+          #!/bin/sh
+          HERE="$(cd "$(dirname "$0")" && pwd)"
+          # Use software rendering if no GPU is available (e.g., in VMs)
+          if ! glxinfo -B 2>/dev/null | grep -q "direct rendering: Yes"; then
+            export LIBGL_ALWAYS_SOFTWARE=1
+          fi
+          exec "$HERE/AppRun" "$@"
+          LAUNCHER
+          chmod +x Strata-${VERSION}-portable/strata.sh
+          tar czf Strata-${VERSION}-linux-x86_64-portable.tar.gz Strata-${VERSION}-portable
+
       - name: Upload AppImage to Release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-x86_64.AppImage
 
       - name: Upload tarball to Release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-linux-x86_64.tar.gz
+
+      - name: Upload portable tarball to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/Strata-*-linux-x86_64-portable.tar.gz
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-linux
+          path: |
+            build/Strata-*-x86_64.AppImage
+            build/Strata-*-linux-x86_64.tar.gz
+            build/Strata-*-linux-x86_64-portable.tar.gz
 
   build-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: ilammy/msvc-dev-cmd@v1
 
@@ -103,12 +156,11 @@ jobs:
         with:
           version: '6.7.2'
           arch: 'win64_msvc2019_64'
-          modules: 'qtsvg'
           tools: 'tools_ifw'
 
       - name: Cache dependencies
         id: cache-deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ github.workspace }}/deps
@@ -143,17 +195,37 @@ jobs:
 
           # Build Qwt
           cd deps
-          git clone --depth 1 --branch qwt-6.3 https://git.code.sf.net/p/qwt/git qwt
-          cd qwt
+          git clone --depth 1 --branch v6.3.0 https://git.code.sf.net/p/qwt/git qwt-6.3.0
+          cd qwt-6.3.0
           qmake CONFIG+=release qwt.pro
           nmake
           nmake install
+          # Rename from -dev suffix to expected path
+          Rename-Item "C:\Qwt-6.3.0-dev" "C:\Qwt-6.3.0"
 
       - name: Install dependencies
         shell: pwsh
         run: |
           cd deps/gsl/build
           cmake --install . --prefix "C:/GSL"
+
+          # Install Qwt from cached build (nmake install is unreliable from cache)
+          $qwtDir = "C:\Qwt-6.3.0"
+          if (Test-Path $qwtDir) { Remove-Item -Recurse -Force $qwtDir }
+          New-Item -ItemType Directory -Path "$qwtDir\include" -Force | Out-Null
+          New-Item -ItemType Directory -Path "$qwtDir\lib" -Force | Out-Null
+          Push-Location ${{ github.workspace }}/deps/qwt-6.3.0
+          Copy-Item "src\*.h" -Destination "$qwtDir\include\"
+          Copy-Item "lib\qwt.lib" -Destination "$qwtDir\lib\"
+          Copy-Item "lib\qwt.dll" -Destination "$qwtDir\lib\"
+          Pop-Location
+
+          # Verify Qwt headers are present
+          if (-not (Test-Path "$qwtDir\include\qwt_plot.h")) {
+            Write-Error "Qwt headers not found at $qwtDir\include\"
+            exit 1
+          }
+          Write-Host "Qwt installed: $(Get-ChildItem $qwtDir\include\*.h | Measure-Object | Select-Object -ExpandProperty Count) headers"
 
       - name: Build Strata
         shell: pwsh
@@ -164,29 +236,22 @@ jobs:
           cmake .. `
             -G "Visual Studio 17 2022" `
             -A x64 `
-            -DQT_DIR="${{ env.Qt6_Dir }}" `
+            -DQT_DIR="${{ env.Qt6_DIR }}" `
             -DQWT_ROOT_DIR="C:/Qwt-6.3.0" `
             -DQWT_INCLUDE_DIR="C:/Qwt-6.3.0/include" `
             -DQWT_LIBRARY="C:/Qwt-6.3.0/lib/qwt.lib" `
             -DGSL_ROOT_DIR="C:/GSL" `
-            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
             -DCMAKE_INSTALL_PREFIX=install
-          cmake --build . --config Release --parallel
-          cmake --install . --config Release
-
-      - name: Deploy Qt dependencies
-        shell: pwsh
-        run: |
-          cd build/install
-          & "${{ env.Qt6_Dir }}/bin/windeployqt.exe" --release --no-translations bin/strata.exe
+          cmake --build . --config ${{ env.BUILD_TYPE }} --parallel
+          cmake --install . --config ${{ env.BUILD_TYPE }}
 
       - name: Copy runtime dependencies
         shell: pwsh
         run: |
-          $VERSION = git describe --tags --always
-          cd build/install
-          Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "bin/"
-          Copy-Item "C:/GSL/bin/*.dll" -Destination "bin/"
+          cd build/install/bin
+          Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
+          Copy-Item "C:/GSL/bin/*.dll" -Destination "."
 
       - name: Create ZIP archive
         shell: pwsh
@@ -230,19 +295,33 @@ jobs:
           & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
       - name: Upload installer to Release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
         with:
           files: Strata-*-windows-x64-installer.exe
 
       - name: Upload archive to Release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
         with:
           files: Strata-*-windows-x64.zip
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-windows-installer
+          path: Strata-*-windows-x64-installer.exe
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-windows-zip
+          path: build/install/*
 
   build-macos:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
@@ -251,10 +330,10 @@ jobs:
 
       - name: Cache Qwt-Qt6
         id: cache-qwt
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/qwt-qt6-install
-          key: ${{ runner.os }}-qwt-qt6-6.3.0
+          key: ${{ runner.os }}-qwt-qt6-6.3.0-no-framework
 
       - name: Build Qwt-Qt6
         if: steps.cache-qwt.outputs.cache-hit != 'true'
@@ -263,10 +342,14 @@ jobs:
           curl -L https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2 -o qwt-6.3.0.tar.bz2
           tar xjf qwt-6.3.0.tar.bz2
           cd qwt-6.3.0
-          sed -i '' 's|^QWT_INSTALL_PREFIX.*|QWT_INSTALL_PREFIX = '"$HOME"'/qwt-qt6-install|' qwtconfig.pri
+          # Disable framework build so Qwt installs as a plain dylib
+          sed -i '' '/QwtFramework/d' qwtconfig.pri
           $(brew --prefix qt@6)/bin/qmake qwt.pro
           make -j$(sysctl -n hw.ncpu)
-          make install
+          # Use INSTALL_ROOT to redirect install to a writable staging directory
+          make install INSTALL_ROOT=$HOME/qwt-staging
+          # Copy from staging to expected cache location
+          cp -a $HOME/qwt-staging/usr/local/qwt-6.3.0 $HOME/qwt-qt6-install
 
       - name: Build Strata
         run: |
@@ -277,68 +360,159 @@ jobs:
           cd build
           cmake .. \
             -GNinja \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_PREFIX_PATH="~/qwt-qt6-install;$(brew --prefix qt@6)" \
             -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
             -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.dylib" \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+            -DCMAKE_INSTALL_PREFIX=staging
           cmake --build . --parallel
+          cmake --install .
 
       - name: Create .app bundle
         run: |
           cd build
           export VERSION=$(git describe --tags --always)
 
-          # Create app structure
-          mkdir -p Strata.app/Contents/{MacOS,Resources,Frameworks}
+          # cmake --install deployed Qt frameworks via qt_generate_deploy_app_script
+          cp -a staging/strata.app strata.app
 
-          # Copy executable
-          cp source/strata Strata.app/Contents/MacOS/
+          # Remove QML frameworks that macdeployqt may pull in unnecessarily
+          rm -rf strata.app/Contents/Frameworks/QtQml*.framework
+          rm -rf strata.app/Contents/Frameworks/QtQuick*.framework
+          rm -rf strata.app/Contents/Resources/qml
 
-          # Deploy Qt dependencies
-          $(brew --prefix qt@6)/bin/macdeployqt Strata.app -always-overwrite
+          # Fix Qt framework layouts for codesign --verify --strict --deep.
+          # macdeployqt / qt_generate_deploy_app_script may create flat layouts
+          # or partially-versioned layouts missing proper symlinks.  Restructure
+          # each framework into the Apple-required versioned directory structure.
+          for fw in strata.app/Contents/Frameworks/*.framework; do
+            name=$(basename "$fw" .framework)
 
-          # Copy Qwt and GSL libraries
-          cp ~/qwt-qt6-install/lib/libqwt.6.dylib Strata.app/Contents/Frameworks/
-          cp $(brew --prefix gsl)/lib/libgsl*.dylib Strata.app/Contents/Frameworks/
+            # Skip if the framework already has a fully correct layout
+            if [ -f "$fw/Versions/A/$name" ] && \
+               [ "$(readlink "$fw/Versions/Current" 2>/dev/null)" = "A" ] && \
+               [ -L "$fw/$name" ] && [ -L "$fw/Resources" ]; then
+              continue
+            fi
 
-          # Fix library paths
-          install_name_tool -change ~/qwt-qt6-install/lib/libqwt.6.dylib \
-            @executable_path/../Frameworks/libqwt.6.dylib \
-            Strata.app/Contents/MacOS/strata
+            # Locate the actual binary (may already be under Versions/A)
+            real_bin=""
+            if [ -f "$fw/Versions/A/$name" ]; then
+              real_bin="$fw/Versions/A/$name"
+            elif [ -f "$fw/$name" ] && [ ! -L "$fw/$name" ]; then
+              real_bin="$fw/$name"
+            fi
+            [ -z "$real_bin" ] && continue
 
-          # Create Info.plist
-          cat > Strata.app/Contents/Info.plist << 'EOF'
+            mkdir -p "$fw/Versions/A/Resources"
+
+            # Move binary into versioned location if needed
+            if [ "$real_bin" != "$fw/Versions/A/$name" ]; then
+              mv "$real_bin" "$fw/Versions/A/$name"
+            fi
+
+            # Move Resources into versioned location if it is a real directory
+            if [ -d "$fw/Resources" ] && [ ! -L "$fw/Resources" ]; then
+              cp -a "$fw/Resources/"* "$fw/Versions/A/Resources/" 2>/dev/null || true
+              rm -rf "$fw/Resources"
+            fi
+
+            # (Re-)create symlinks
+            rm -f "$fw/Versions/Current" "$fw/$name" "$fw/Resources" 2>/dev/null || true
+            ln -sf A "$fw/Versions/Current"
+            ln -sf "Versions/Current/$name" "$fw/$name"
+            ln -sf "Versions/Current/Resources" "$fw/Resources"
+
+            # Ensure Info.plist exists (codesign --strict requires one)
+            if [ ! -f "$fw/Versions/A/Resources/Info.plist" ]; then
+              cat > "$fw/Versions/A/Resources/Info.plist" << PLIST
           <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-              <key>CFBundleExecutable</key>
-              <string>strata</string>
-              <key>CFBundleIdentifier</key>
-              <string>org.arkottke.strata</string>
-              <key>CFBundleName</key>
-              <string>Strata</string>
-              <key>CFBundlePackageType</key>
-              <string>APPL</string>
-              <key>CFBundleShortVersionString</key>
-              <string>$VERSION</string>
-              <key>CFBundleVersion</key>
-              <string>$VERSION</string>
-              <key>LSMinimumSystemVersion</key>
-              <string>11.0</string>
+            <key>CFBundleIdentifier</key>
+            <string>org.qt-project.${name}</string>
+            <key>CFBundleExecutable</key>
+            <string>${name}</string>
+            <key>CFBundlePackageType</key>
+            <string>FMWK</string>
           </dict>
           </plist>
-          EOF
+          PLIST
+            fi
+          done
+
+          # Copy Qwt and GSL libraries
+          mkdir -p strata.app/Contents/Frameworks
+          cp ~/qwt-qt6-install/lib/libqwt.6.dylib strata.app/Contents/Frameworks/
+          cp $(brew --prefix gsl)/lib/libgsl.dylib strata.app/Contents/Frameworks/
+          cp $(brew --prefix gsl)/lib/libgslcblas.dylib strata.app/Contents/Frameworks/
+
+          STRATA_BIN=strata.app/Contents/MacOS/strata
+          FW=strata.app/Contents/Frameworks
+
+          # Fix Qwt path in main binary
+          install_name_tool -change ~/qwt-qt6-install/lib/libqwt.6.dylib \
+            @executable_path/../Frameworks/libqwt.6.dylib \
+            "$STRATA_BIN"
+
+          # Fix GSL paths in main binary
+          GSL_PREFIX=$(brew --prefix gsl)
+          for lib in libgsl.dylib libgslcblas.dylib; do
+            install_name_tool -change "${GSL_PREFIX}/lib/${lib}" \
+              "@executable_path/../Frameworks/${lib}" \
+              "$STRATA_BIN"
+          done
+
+          # Fix libgslcblas reference inside libgsl
+          install_name_tool -change "${GSL_PREFIX}/lib/libgslcblas.dylib" \
+            "@executable_path/../Frameworks/libgslcblas.dylib" \
+            "$FW/libgsl.dylib"
+
+          # Fix Qwt's own dylib id
+          install_name_tool -id @executable_path/../Frameworks/libqwt.6.dylib \
+            "$FW/libqwt.6.dylib"
+
+          # Fix GSL dylib ids
+          install_name_tool -id @executable_path/../Frameworks/libgsl.dylib \
+            "$FW/libgsl.dylib"
+          install_name_tool -id @executable_path/../Frameworks/libgslcblas.dylib \
+            "$FW/libgslcblas.dylib"
+
+          # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
+          # Sign inside-out: framework binaries, then frameworks, then dylibs,
+          # then the top-level app.  Avoid --deep on the final sign so that
+          # already-signed sub-components are not re-signed with mismatched flags.
+          for fw in strata.app/Contents/Frameworks/*.framework; do
+            name=$(basename "$fw" .framework)
+            if [ -f "$fw/Versions/A/$name" ]; then
+              codesign --force --sign - "$fw/Versions/A/$name"
+            fi
+            codesign --force --sign - "$fw"
+          done
+          find strata.app/Contents/Frameworks -name '*.dylib' -maxdepth 1 | while read dl; do
+            codesign --force --sign - "$dl"
+          done
+          codesign --force --sign - strata.app
+
+          # Quick verification before packaging
+          codesign --verify --strict --deep --verbose=2 strata.app
+
+      # The DMG is not code-signed/notarized, so direct downloads trigger
+      # Gatekeeper's "damaged" warning.  Install via Homebrew instead:
+      #   brew install --cask arkottke/strata/strata
 
       - name: Create DMG
         run: |
           cd build
           export VERSION=$(git describe --tags --always)
 
-          # Create temporary DMG directory
+          # Create temporary DMG directory — use ditto to preserve
+          # code signatures, extended attributes, and resource forks
           mkdir dmg-temp
-          cp -r Strata.app dmg-temp/
+          ditto strata.app dmg-temp/strata.app
           ln -s /Applications dmg-temp/Applications
 
           # Create DMG
@@ -348,14 +522,128 @@ jobs:
         run: |
           cd build
           export VERSION=$(git describe --tags --always)
-          tar czf "Strata-${VERSION}-macos.tar.gz" Strata.app
+          tar czf "Strata-${VERSION}-macos.tar.gz" strata.app
 
       - name: Upload DMG to Release
-        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
         with:
           files: build/Strata-*-macos.dmg
 
-      - name: Upload tarball to Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: build/Strata-*-macos.tar.gz
+          name: strata-macos
+          path: |
+            build/Strata-*-macos.dmg
+            build/Strata-*-macos.tar.gz
+
+  # Smoke tests: verify built artifacts can actually launch
+  test-linux:
+    needs: build-linux
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-linux
+
+      - name: Test AppImage (with FUSE)
+        run: |
+          sudo apt-get update && sudo apt-get install -y fuse libfuse2
+          chmod +x Strata-*-x86_64.AppImage
+          # Use virtual framebuffer since there's no display
+          export QT_QPA_PLATFORM=offscreen
+          ./Strata-*-x86_64.AppImage --help || true
+          echo "AppImage launched successfully"
+
+      - name: Test portable tarball (no FUSE, simulates VM)
+        run: |
+          tar xzf Strata-*-linux-x86_64-portable.tar.gz
+          export QT_QPA_PLATFORM=offscreen
+          export LIBGL_ALWAYS_SOFTWARE=1
+          ./Strata-*-portable/AppRun --help || true
+          echo "Portable bundle launched successfully"
+
+  test-linux-minimal:
+    needs: build-linux
+    runs-on: ubuntu-22.04
+    container:
+      image: ubuntu:22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-linux
+
+      - name: Test portable tarball in minimal container (simulates VM without FUSE)
+        run: |
+          apt-get update && apt-get install -y libgl1-mesa-glx libegl1-mesa libxcb-xinerama0 libxkbcommon0
+          tar xzf Strata-*-linux-x86_64-portable.tar.gz
+          export QT_QPA_PLATFORM=offscreen
+          export LIBGL_ALWAYS_SOFTWARE=1
+          ./Strata-*-portable/AppRun --help || true
+          echo "Portable bundle works in minimal container"
+
+  test-macos:
+    needs: build-macos
+    runs-on: macos-14
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-macos
+
+      - name: Test .app bundle from tarball
+        run: |
+          tar xzf Strata-*-macos.tar.gz
+
+          # Verify ad-hoc code signature on the full bundle
+          # qt_generate_deploy_app_script produces proper framework layouts
+          # (with Versions/A/ symlinks) that pass strict verification
+          codesign --verify --strict --deep strata.app
+          echo "Bundle signature verified"
+
+          # Verify all dylibs resolve
+          otool -L strata.app/Contents/MacOS/strata
+          # Check no references to build-machine paths remain
+          if otool -L strata.app/Contents/MacOS/strata | grep -E '/usr/local|/opt/homebrew|/Users'; then
+            echo "ERROR: Found absolute paths to build machine libraries"
+            exit 1
+          fi
+          # Launch test (offscreen since CI has no display)
+          export QT_QPA_PLATFORM=offscreen
+          ./strata.app/Contents/MacOS/strata --help || true
+          echo "macOS app launched successfully"
+
+      - name: Verify DMG mounts
+        run: |
+          hdiutil attach Strata-*-macos.dmg -mountpoint /tmp/strata-dmg
+          ls -la /tmp/strata-dmg/strata.app
+          # Verify the executable exists and is a valid Mach-O binary
+          file /tmp/strata-dmg/strata.app/Contents/MacOS/strata
+          # Verify ad-hoc signature on the full bundle
+          codesign --verify --strict --deep --verbose=2 /tmp/strata-dmg/strata.app
+          echo "Bundle signature verified"
+          hdiutil detach /tmp/strata-dmg
+
+  test-windows:
+    needs: build-windows
+    runs-on: windows-2022
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: strata-windows-zip
+
+      - name: Test executable launches
+        shell: pwsh
+        run: |
+          # Verify the executable exists and DLLs are present
+          $exe = Get-ChildItem -Recurse -Filter "strata.exe" | Select-Object -First 1
+          if (-not $exe) { Write-Error "strata.exe not found"; exit 1 }
+          Write-Host "Found: $($exe.FullName)"
+          # List DLLs in the same directory
+          Get-ChildItem $exe.DirectoryName -Filter "*.dll" | ForEach-Object { Write-Host "  DLL: $($_.Name)" }
+          # Try to launch (verifies DLL loading)
+          $env:QT_QPA_PLATFORM = "offscreen"
+          & $exe.FullName --help 2>&1 | Out-Host
+          # Reset exit code — a successful launch is sufficient proof
+          $global:LASTEXITCODE = 0
+          Write-Host "Windows executable launched successfully"

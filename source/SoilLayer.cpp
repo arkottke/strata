@@ -64,7 +64,9 @@ void SoilLayer::setThickness(double thickness) {
 auto SoilLayer::depthToBase() const -> double { return _depth + _thickness; }
 
 auto SoilLayer::toString() const -> QString {
-  return QString("%1 %2").arg(_soilType->name()).arg(_avg);
+  return QString("%1 %2")
+      .arg(_soilType ? _soilType->name() : tr("Unassigned"))
+      .arg(_avg);
 }
 
 auto SoilLayer::untWt() const -> double {
@@ -82,6 +84,8 @@ auto SoilLayer::density() const -> double {
 }
 
 auto SoilLayer::strainLimit() const -> double {
+  if (!_soilType)
+    return 0;
   return std::min(_soilType->dampingModel()->strain().last(),
                   _soilType->modulusModel()->strain().last());
 }
