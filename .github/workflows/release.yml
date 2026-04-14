@@ -250,6 +250,12 @@ jobs:
           cd build/install/bin
           Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
           Copy-Item "C:/GSL/bin/*.dll" -Destination "."
+          # Qt6OpenGLWidgets is a transitive dependency via Qwt's plot canvas.
+          # qt_generate_deploy_app_script should handle this, but copy manually as a fallback.
+          $openglWidgetsDll = Join-Path $env:Qt6_DIR "..\..\..\..\bin\Qt6OpenGLWidgets.dll"
+          if (Test-Path $openglWidgetsDll) {
+            Copy-Item $openglWidgetsDll -Destination "."
+          }
 
       - name: Create ZIP archive
         shell: pwsh
