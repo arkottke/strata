@@ -238,7 +238,7 @@ void CompatibleRvtMotion::calculate() {
     double logFreq0 = log(freq().at(offset));
     double logFas0 = log(_fourierAcc.at(offset));
 
-    // The theoretical slope at low frequenc
+    // The theoretical slope at low frequencies
     double slope =
         _limitFas ? 2
                   : (log(_fourierAcc.at(offset) / _fourierAcc.at(offset + 1)) /
@@ -248,38 +248,40 @@ void CompatibleRvtMotion::calculate() {
       _fourierAcc[i] = exp(slope * (log(freq().at(i)) - logFreq0) + logFas0);
     }
 
-    // Force down the high frequency tail
-
-    // Find the minimum slope
+    // Force down the high frequency tail above 10 Hz
+    // Enforce: always decreasing and concave down in log-log space
     if (_limitFas) {
-      double minSlope = 0;
-      int minSlopeIdx = 0;
-      int i = offset;
-
-      while (i < freq().size() - 1) {
-        slope = log(_fourierAcc.at(i) / _fourierAcc.at(i + 1)) /
-                log(freq().at(i) / freq().at(i + 1));
-        if (slope < minSlope) {
-          minSlope = slope;
-          minSlopeIdx = i;
+      // Find the start index at or just above 10 Hz
+      int startIdx = freq().size() - 1;
+      for (int i = offset; i < freq().size(); ++i) {
+        if (freq().at(i) >= 10.0) {
+          startIdx = i;
+          break;
         }
-        ++i;
       }
 
-      // Extrapolate from deviation
-      i = minSlopeIdx;
-      double x0 = log(freq().at(i));
-      double y0 = log(_fourierAcc.at(i));
-      // double kappa0 = exp( -M_PI * 0.01 * freq().at(idx) );
+      // Find first point where slope becomes flatter or positive
+      // (concave up), then extrapolate everything from there using the
+      // slope at the deviation point.
+      double prevSlope = 0.0;
 
-      ++i;
-      while (i < _fourierAcc.size()) {
-        // Extrapolate the value based, but reduce the value using a kappa
-        // filter
-        //_fourierAcc[idx] = exp( cutoff * (log(freq().at(idx)) - x0 ) + y0 ) *
-        // exp(-M_PI * 0.01 * freq().at(idx) ) / kappa0 ;
-        _fourierAcc[i] = exp(-slope * (log(freq().at(i)) - x0) + y0);
-        ++i;
+      for (int i = startIdx + 1; i < freq().size(); ++i) {
+        double logFreqRatio = log(freq().at(i) / freq().at(i - 1));
+        double logFasSlope =
+            log(_fourierAcc.at(i) / _fourierAcc.at(i - 1)) / logFreqRatio;
+
+        if (logFasSlope > prevSlope) {
+          // Slope became flatter or positive: extrapolate from here
+          // to the end using the previous slope
+          double logFreq0 = log(freq().at(i - 1));
+          double logFas0 = log(_fourierAcc.at(i - 1));
+          for (int j = i; j < freq().size(); ++j) {
+            _fourierAcc[j] =
+                exp(prevSlope * (log(freq().at(j)) - logFreq0) + logFas0);
+          }
+          break;
+        }
+        prevSlope = logFasSlope;
       }
     }
 

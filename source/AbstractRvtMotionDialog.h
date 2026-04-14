@@ -39,7 +39,7 @@ public:
                                    QWidget *parent = nullptr);
 
 protected slots:
-  void calculate();
+  virtual void calculate();
   void tryAccept();
 
   void openFrequencyDialog();
