@@ -16,14 +16,4 @@ if(APPLE)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_ICON_FILE "application-icon.icns"
     )
-elseif(UNIX)
-    install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/strata.desktop
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
-        )
-    install(FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/images/application-icon.svg
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
-        RENAME strata.svg
-        )
 endif()

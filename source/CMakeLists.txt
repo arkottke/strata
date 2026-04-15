@@ -112,6 +112,17 @@ elseif (APPLE)
         BUNDLE DESTINATION .
         COMPONENT executable
         )
+    # Manual and examples inside the .app bundle
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/manual/manual.pdf
+        DESTINATION strata.app/Contents/Resources/doc
+        COMPONENT manual
+        )
+    install(DIRECTORY
+        ${CMAKE_SOURCE_DIR}/example
+        DESTINATION strata.app/Contents/Resources
+        COMPONENT example
+        )
 endif ()
 
 # Deploy Qt runtime dependencies at install time.

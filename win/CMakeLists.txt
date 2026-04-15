@@ -14,12 +14,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ###
 
-# Ensure that 7z is in the path
-find_path(7Z_PATH 7z.exe)
-if (NOT 7Z_PATH)
-    message(WARNING "Unable to find 7z in the PATH. The zip archive will be disabled.")
-endif()
-
 # Qwt Library
 get_filename_component(QWT_DLL_DIR ${QWT_LIBRARY} PATH)
 install(FILES
@@ -35,18 +29,6 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT dependencies
     )
-
-if (7Z_PATH)
-    message(${CMAKE_BINARY_DIR})
-    message(${CMAKE_SOURCE_DIR})
-    message(${CMAKE_CURRENT_BINARY_DIR})
-    message(${CMAKE_CURRENT_SOURCE_DIR})
-    add_custom_target(archive
-        COMMAND 7z a ${CMAKE_BINARY_DIR}/Strata-$ENV{platform}-v${PROJECT_VERSION}-${PROJECT_GITHASH}.zip *
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/dist
-        VERBATIM
-        )
-endif()
 
 # Qt Installer Framework
 set(CPACK_PACKAGE_NAME Strata)

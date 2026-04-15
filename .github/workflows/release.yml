@@ -115,23 +115,14 @@ jobs:
           chmod +x Strata-${VERSION}-portable/strata.sh
           tar czf Strata-${VERSION}-linux-x86_64-portable.tar.gz Strata-${VERSION}-portable
 
-      - name: Upload AppImage to Release
+      - name: Upload to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: build/Strata-*-x86_64.AppImage
-
-      - name: Upload tarball to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/Strata-*-linux-x86_64.tar.gz
-
-      - name: Upload portable tarball to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/Strata-*-linux-x86_64-portable.tar.gz
+          files: |
+            build/Strata-*-x86_64.AppImage
+            build/Strata-*-linux-x86_64.tar.gz
+            build/Strata-*-linux-x86_64-portable.tar.gz
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -234,7 +225,7 @@ jobs:
           cmake .. `
             -G "Visual Studio 17 2022" `
             -A x64 `
-            -DQT_DIR="${{ env.Qt6_DIR }}" `
+            -DQT_DIR="${{ env.QT_ROOT_DIR }}/lib/cmake/Qt6" `
             -DQWT_ROOT_DIR="C:/Qwt-6.3.0" `
             -DQWT_INCLUDE_DIR="C:/Qwt-6.3.0/include" `
             -DQWT_LIBRARY="C:/Qwt-6.3.0/lib/qwt.lib" `
@@ -250,12 +241,6 @@ jobs:
           cd build/install/bin
           Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
           Copy-Item "C:/GSL/bin/*.dll" -Destination "."
-          # Qt6OpenGLWidgets is a transitive dependency via Qwt's plot canvas.
-          # qt_generate_deploy_app_script should handle this, but copy manually as a fallback.
-          $openglWidgetsDll = Join-Path $env:Qt6_DIR "..\..\..\..\bin\Qt6OpenGLWidgets.dll"
-          if (Test-Path $openglWidgetsDll) {
-            Copy-Item $openglWidgetsDll -Destination "."
-          }
 
       - name: Create ZIP archive
         shell: pwsh
@@ -298,29 +283,21 @@ jobs:
 
           & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
-      - name: Upload installer to Release
+      - name: Upload to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: Strata-*-windows-x64-installer.exe
+          files: |
+            Strata-*-windows-x64-installer.exe
+            Strata-*-windows-x64.zip
 
-      - name: Upload archive to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: Strata-*-windows-x64.zip
-
-      - name: Upload installer artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: strata-windows-installer
-          path: Strata-*-windows-x64-installer.exe
-
-      - name: Upload zip artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: strata-windows-zip
-          path: build/install/*
+          name: strata-windows
+          path: |
+            Strata-*-windows-x64-installer.exe
+            Strata-*-windows-x64.zip
 
   build-macos:
     runs-on: macos-14
@@ -386,67 +363,8 @@ jobs:
           rm -rf strata.app/Contents/Frameworks/QtQuick*.framework
           rm -rf strata.app/Contents/Resources/qml
 
-          # Fix Qt framework layouts for codesign --verify --strict --deep.
-          # macdeployqt / qt_generate_deploy_app_script may create flat layouts
-          # or partially-versioned layouts missing proper symlinks.  Restructure
-          # each framework into the Apple-required versioned directory structure.
-          for fw in strata.app/Contents/Frameworks/*.framework; do
-            name=$(basename "$fw" .framework)
-
-            # Skip if the framework already has a fully correct layout
-            if [ -f "$fw/Versions/A/$name" ] && \
-               [ "$(readlink "$fw/Versions/Current" 2>/dev/null)" = "A" ] && \
-               [ -L "$fw/$name" ] && [ -L "$fw/Resources" ]; then
-              continue
-            fi
-
-            # Locate the actual binary (may already be under Versions/A)
-            real_bin=""
-            if [ -f "$fw/Versions/A/$name" ]; then
-              real_bin="$fw/Versions/A/$name"
-            elif [ -f "$fw/$name" ] && [ ! -L "$fw/$name" ]; then
-              real_bin="$fw/$name"
-            fi
-            [ -z "$real_bin" ] && continue
-
-            mkdir -p "$fw/Versions/A/Resources"
-
-            # Move binary into versioned location if needed
-            if [ "$real_bin" != "$fw/Versions/A/$name" ]; then
-              mv "$real_bin" "$fw/Versions/A/$name"
-            fi
-
-            # Move Resources into versioned location if it is a real directory
-            if [ -d "$fw/Resources" ] && [ ! -L "$fw/Resources" ]; then
-              cp -a "$fw/Resources/"* "$fw/Versions/A/Resources/" 2>/dev/null || true
-              rm -rf "$fw/Resources"
-            fi
-
-            # (Re-)create symlinks
-            rm -f "$fw/Versions/Current" "$fw/$name" "$fw/Resources" 2>/dev/null || true
-            ln -sf A "$fw/Versions/Current"
-            ln -sf "Versions/Current/$name" "$fw/$name"
-            ln -sf "Versions/Current/Resources" "$fw/Resources"
-
-            # Ensure Info.plist exists (codesign --strict requires one)
-            if [ ! -f "$fw/Versions/A/Resources/Info.plist" ]; then
-              cat > "$fw/Versions/A/Resources/Info.plist" << PLIST
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>CFBundleIdentifier</key>
-            <string>org.qt-project.${name}</string>
-            <key>CFBundleExecutable</key>
-            <string>${name}</string>
-            <key>CFBundlePackageType</key>
-            <string>FMWK</string>
-          </dict>
-          </plist>
-          PLIST
-            fi
-          done
+          # Fix Qt framework layouts for codesign --verify --strict --deep
+          "${GITHUB_WORKSPACE}/scripts/fix_macos_frameworks.sh" strata.app
 
           # Copy Qwt and GSL libraries
           mkdir -p strata.app/Contents/Frameworks
@@ -528,11 +446,13 @@ jobs:
           export VERSION=$(git describe --tags --always)
           tar czf "Strata-${VERSION}-macos.tar.gz" strata.app
 
-      - name: Upload DMG to Release
+      - name: Upload to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: build/Strata-*-macos.dmg
+          files: |
+            build/Strata-*-macos.dmg
+            build/Strata-*-macos.tar.gz
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -634,13 +554,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: strata-windows-zip
+          name: strata-windows
 
       - name: Test executable launches
         shell: pwsh
         run: |
+          # Extract the ZIP archive
+          Expand-Archive -Path (Get-ChildItem "Strata-*-windows-x64.zip" | Select-Object -First 1).FullName -DestinationPath install
           # Verify the executable exists and DLLs are present
-          $exe = Get-ChildItem -Recurse -Filter "strata.exe" | Select-Object -First 1
+          $exe = Get-ChildItem -Path install -Recurse -Filter "strata.exe" | Select-Object -First 1
           if (-not $exe) { Write-Error "strata.exe not found"; exit 1 }
           Write-Host "Found: $($exe.FullName)"
           # List DLLs in the same directory

@@ -52,13 +52,18 @@ option(ADVANCED_FEATURES "Compile with advanced features" ON)
 add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
 
 
-if(APPLE AND EXISTS /usr/local/opt/qt6)
-	# Homebrew installs Qt6 (up to at least 5.9.1) in
-	# /usr/local/opt/qt6, ensure it can be found by CMake since
-	# it is not in the default /usr/local prefix.
-	list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt6")
-elif (APPLE and EXISTS /opt/homebrew/opt/qt6)
-    list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt6")
+if(APPLE)
+    # Detect Homebrew Qt6 prefix on both Intel and Apple Silicon Macs
+    execute_process(
+        COMMAND brew --prefix qt@6
+        OUTPUT_VARIABLE _QT6_BREW_PREFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+        RESULT_VARIABLE _QT6_BREW_RESULT
+    )
+    if(_QT6_BREW_RESULT EQUAL 0 AND EXISTS "${_QT6_BREW_PREFIX}")
+        list(APPEND CMAKE_PREFIX_PATH "${_QT6_BREW_PREFIX}")
+    endif()
 endif()
 
 # Enable the C++17 standard
