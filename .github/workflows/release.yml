@@ -241,6 +241,10 @@ jobs:
           cd build/install/bin
           Copy-Item "C:/Qwt-6.3.0/lib/qwt.dll" -Destination "."
           Copy-Item "C:/GSL/bin/*.dll" -Destination "."
+          # Deploy Qt dependencies using windeployqt
+          & "${{ env.QT_ROOT_DIR }}/bin/windeployqt.exe" strata.exe --release
+          # Copy Qt6OpenGLWidgets.dll that windeployqt may miss (transitive via Qwt)
+          Copy-Item "${{ env.QT_ROOT_DIR }}/bin/Qt6OpenGLWidgets.dll" -Destination "."
 
       - name: Create ZIP archive
         shell: pwsh
