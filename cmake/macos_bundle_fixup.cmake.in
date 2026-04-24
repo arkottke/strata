@@ -87,4 +87,59 @@ foreach(_name IN LISTS _names)
     _fixup_refs("${_fw_dir}/${_name}")
 endforeach()
 
+# ---- general fixup: rewrite ALL remaining absolute paths ----
+# The bundled third-party dylibs (e.g. libqwt) may reference Qt frameworks
+# or other transitive dependencies via absolute homebrew/system paths.
+# Qt's deploy script already placed those frameworks in Contents/Frameworks,
+# so rewrite the references to @rpath-relative paths.
+file(GLOB _bundled_dylibs "${_fw_dir}/*.dylib")
+foreach(_dylib IN LISTS _bundled_dylibs)
+    execute_process(COMMAND otool -L "${_dylib}" OUTPUT_VARIABLE _otool_out)
+    string(REPLACE "\n" ";" _otool_lines "${_otool_out}")
+    foreach(_line IN LISTS _otool_lines)
+        string(STRIP "${_line}" _trimmed)
+        # Skip lines that are already @rpath, @executable_path, @loader_path, or system libs
+        if("${_trimmed}" MATCHES "^(/usr/local|/opt/homebrew|/Users|/nix/store)")
+            string(REGEX REPLACE " \\(.*\\)$" "" _abs_path "${_trimmed}")
+            # Determine the @rpath-relative replacement path.
+            # For frameworks: /path/to/Foo.framework/Versions/A/Foo -> @rpath/Foo.framework/Versions/A/Foo
+            # For dylibs: /path/to/libfoo.dylib -> @rpath/libfoo.dylib
+            set(_rpath_replacement "")
+            if("${_abs_path}" MATCHES "\\.framework/")
+                string(REGEX REPLACE "^.*/([^/]+\\.framework/.+)$" "@rpath/\\1" _rpath_replacement "${_abs_path}")
+                # Check the framework exists in the bundle
+                string(REGEX REPLACE "^.*/([^/]+\\.framework).*$" "\\1" _fw_name "${_abs_path}")
+                if(NOT EXISTS "${_fw_dir}/${_fw_name}")
+                    set(_rpath_replacement "")
+                endif()
+            else()
+                get_filename_component(_dep_fname "${_abs_path}" NAME)
+                if(EXISTS "${_fw_dir}/${_dep_fname}")
+                    set(_rpath_replacement "@rpath/${_dep_fname}")
+                endif()
+            endif()
+            if(NOT "${_rpath_replacement}" STREQUAL "")
+                execute_process(
+                    COMMAND install_name_tool -change
+                        "${_abs_path}" "${_rpath_replacement}" "${_dylib}")
+            endif()
+        endif()
+    endforeach()
+
+    # Also fix the library's own id if it is still an absolute path
+    execute_process(COMMAND otool -D "${_dylib}"
+        OUTPUT_VARIABLE _id_out OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REPLACE "\n" ";" _id_lines "${_id_out}")
+    list(LENGTH _id_lines _id_len)
+    if(_id_len GREATER 1)
+        list(GET _id_lines 1 _cur_id)
+        string(STRIP "${_cur_id}" _cur_id)
+        if("${_cur_id}" MATCHES "^(/usr/local|/opt/homebrew|/Users|/nix/store)")
+            get_filename_component(_id_name "${_cur_id}" NAME)
+            execute_process(
+                COMMAND install_name_tool -id "@rpath/${_id_name}" "${_dylib}")
+        endif()
+    endif()
+endforeach()
+
 message(STATUS "Bundled non-Qt libraries: ${_names}")

@@ -312,7 +312,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install qt@6 gsl cmake ninja
+          brew install qt@6 gsl cmake ninja dylibbundler
           brew link qt@6
 
       - name: Cache Qwt-Qt6
@@ -372,8 +372,28 @@ jobs:
           # Fix Qt framework layouts for codesign --verify --strict --deep
           "${GITHUB_WORKSPACE}/scripts/fix_macos_frameworks.sh" strata.app
 
-          # Qwt and GSL are already bundled and relinked by the CMake install
-          # step (macos_bundle_fixup.cmake).  Only code signing remains.
+          # Bundle all non-system dylib dependencies (Qwt, GSL, and any
+          # transitive deps) into the .app.  dylibbundler recursively
+          # discovers, copies, and rewrites all references.
+          dylibbundler \
+            -od -b \
+            -x strata.app/Contents/MacOS/strata \
+            -d strata.app/Contents/Frameworks/ \
+            -p @executable_path/../Frameworks/ \
+            -s ~/qwt-qt6-install/lib \
+            -s $(brew --prefix gsl)/lib
+
+          # Also fix any bundled dylibs that reference other bundled dylibs
+          # (e.g. libqwt links to Qt frameworks with absolute homebrew paths)
+          for dylib in strata.app/Contents/Frameworks/*.dylib; do
+            dylibbundler \
+              -of -b \
+              -x "$dylib" \
+              -d strata.app/Contents/Frameworks/ \
+              -p @executable_path/../Frameworks/ \
+              -s ~/qwt-qt6-install/lib \
+              -s $(brew --prefix gsl)/lib 2>/dev/null || true
+          done
 
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
           # Sign inside-out: framework binaries, then frameworks, then dylibs,

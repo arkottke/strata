@@ -152,16 +152,3 @@ if(COMMAND qt_generate_deploy_app_script)
     endif()
     install(SCRIPT ${deploy_script})
 endif()
-
-# Bundle non-Qt third-party libraries on macOS (Qwt, GSL).
-# qt_generate_deploy_app_script only handles Qt dependencies.
-if(APPLE)
-    set(_MACOS_BUNDLE_LIBS ${QWT_LIBRARY} ${GSL_LIBRARIES})
-    list(REMOVE_DUPLICATES _MACOS_BUNDLE_LIBS)
-    configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake/macos_bundle_fixup.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/macos_bundle_fixup.cmake
-        @ONLY
-    )
-    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/macos_bundle_fixup.cmake")
-endif()
