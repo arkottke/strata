@@ -71,9 +71,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Configure libraries
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport OpenGLWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport OpenGLWidgets Svg)
 find_package(GSL REQUIRED)
-find_package(Qwt REQUIRED)
+find_package(qwt CONFIG REQUIRED)
 
 if(COMMAND qt_standard_project_setup)
     qt_standard_project_setup()
@@ -81,21 +81,19 @@ endif()
 
 include(GNUInstallDirs)
 
-include_directories(${GSL_INCLUDE_DIRS} ${QWT_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${GSL_LIBRARIES} ${QWT_LIBRARIES})
+set(LIBS ${LIBS} GSL::gsl qwt::qwt)
 
 if (ADVANCED_FEATURES)
     add_definitions(-DADVANCED_FEATURES)
 endif()
 
 if(MSVC)
-    # Add GSL and Qwt DLL definitions for MSVC. Add define for math constants
-    add_definitions(-DGSL_DLL -DQWT_DLL -D_USE_MATH_DEFINES)
+    # Add define for math constants
+    add_definitions(-D_USE_MATH_DEFINES)
     # Optimize for speed and link dynamically
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
 else()
     # Add optimization for GCC
-    # SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
@@ -115,11 +113,22 @@ if (Python3_FOUND)
     )
     set_tests_properties(example_regression PROPERTIES TIMEOUT 600)
 endif()
-find_program(PDFLATEX_PATH pdflatex)
-if (PDFLATEX_PATH)
-    add_subdirectory(manual)
+
+# CPack Configuration
+set(CPACK_PACKAGE_NAME "Strata")
+set(CPACK_PACKAGE_VENDOR "Albert Kottke")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Equivalent linear site response analysis")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/win/appicon.ico")
+elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+else()
+    set(CPACK_GENERATOR "TGZ")
 endif()
 
-if (WIN32)
-    add_subdirectory(win)
-endif()
+include(CPack)

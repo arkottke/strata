@@ -70,85 +70,60 @@ endif()
 if (UNIX AND NOT APPLE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT executable
-        )
+    )
     install(FILES
         ${CMAKE_BINARY_DIR}/resources/strata.desktop
         DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
-        COMPONENT executable
-        )
+    )
     install(FILES
         ${CMAKE_SOURCE_DIR}/resources/images/application-icon.svg
         DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
-        COMPONENT executable
         RENAME strata.svg
-        )
-    # Manual and example
+    )
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}/doc
-        COMPONENT manual
-        RENAME manual.pdf
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        OPTIONAL
     )
-
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
         DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}
-        COMPONENT example
     )
 elseif (WIN32)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT executable
-        )
-    # Manual and example
+    )
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}/doc
-        COMPONENT manual
-        RENAME manual.pdf
-        )
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        OPTIONAL
+    )
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
         DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}
-        COMPONENT example
-        )
+    )
 elseif (APPLE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         BUNDLE DESTINATION .
-        COMPONENT executable
-        )
-    # Manual and examples inside the .app bundle
+    )
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
-        DESTINATION strata.app/Contents/Resources/doc
-        COMPONENT manual
-        )
+        DESTINATION ${CMAKE_PROJECT_NAME}.app/Contents/Resources/doc
+        OPTIONAL
+    )
     install(DIRECTORY
         ${CMAKE_SOURCE_DIR}/example
-        DESTINATION strata.app/Contents/Resources
-        COMPONENT example
-        )
+        DESTINATION ${CMAKE_PROJECT_NAME}.app/Contents/Resources
+    )
 endif ()
 
 # Deploy Qt runtime dependencies at install time.
-# OUTPUT_SCRIPT and NO_TRANSLATIONS require Qt 6.5+; Qt 6.3-6.4 uses
-# FILENAME_VARIABLE. On older Qt (e.g., Ubuntu 22.04's Qt 6.2) the command
-# does not exist and platform-specific tools handle deployment instead.
 if(COMMAND qt_generate_deploy_app_script)
-    if(Qt6_VERSION VERSION_GREATER_EQUAL "6.5")
-        qt_generate_deploy_app_script(
-            TARGET ${CMAKE_PROJECT_NAME}
-            OUTPUT_SCRIPT deploy_script
-            NO_UNSUPPORTED_PLATFORM_ERROR
-            NO_TRANSLATIONS
-        )
-    else()
-        qt_generate_deploy_app_script(
-            TARGET ${CMAKE_PROJECT_NAME}
-            FILENAME_VARIABLE deploy_script
-            NO_UNSUPPORTED_PLATFORM_ERROR
-        )
-    endif()
+    qt_generate_deploy_app_script(
+        TARGET ${CMAKE_PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_script
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        NO_TRANSLATIONS
+    )
     install(SCRIPT ${deploy_script})
 endif()
