@@ -61,6 +61,12 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE ON
 )
 
+if(APPLE)
+    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+        INSTALL_RPATH "@executable_path/../Frameworks"
+    )
+endif()
+
 if (UNIX AND NOT APPLE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -145,4 +151,17 @@ if(COMMAND qt_generate_deploy_app_script)
         )
     endif()
     install(SCRIPT ${deploy_script})
+endif()
+
+# Bundle non-Qt third-party libraries on macOS (Qwt, GSL).
+# qt_generate_deploy_app_script only handles Qt dependencies.
+if(APPLE)
+    set(_MACOS_BUNDLE_LIBS ${QWT_LIBRARY} ${GSL_LIBRARIES})
+    list(REMOVE_DUPLICATES _MACOS_BUNDLE_LIBS)
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake/macos_bundle_fixup.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/macos_bundle_fixup.cmake
+        @ONLY
+    )
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/macos_bundle_fixup.cmake")
 endif()
