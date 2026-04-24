@@ -482,7 +482,7 @@ jobs:
           chmod +x Strata-*-x86_64.AppImage
           # Use virtual framebuffer since there's no display
           export QT_QPA_PLATFORM=offscreen
-          ./Strata-*-x86_64.AppImage --help || true
+          ./Strata-*-x86_64.AppImage --help
           echo "AppImage launched successfully"
 
       - name: Test portable tarball (no FUSE, simulates VM)
@@ -490,7 +490,18 @@ jobs:
           tar xzf Strata-*-linux-x86_64-portable.tar.gz
           export QT_QPA_PLATFORM=offscreen
           export LIBGL_ALWAYS_SOFTWARE=1
-          ./Strata-*-portable/AppRun --help || true
+
+          # Verify no missing shared libraries
+          APPDIR=$(ls -d Strata-*-portable)
+          MISSING=$(LD_LIBRARY_PATH="$APPDIR/usr/lib:$APPDIR/lib" ldd "$APPDIR/usr/bin/strata" 2>&1 | grep 'not found' || true)
+          if [ -n "$MISSING" ]; then
+            echo "ERROR: Missing shared libraries:"
+            echo "$MISSING"
+            exit 1
+          fi
+          echo "All shared libraries resolved"
+
+          ./Strata-*-portable/AppRun --help
           echo "Portable bundle launched successfully"
 
   test-linux-minimal:
@@ -509,7 +520,7 @@ jobs:
           tar xzf Strata-*-linux-x86_64-portable.tar.gz
           export QT_QPA_PLATFORM=offscreen
           export LIBGL_ALWAYS_SOFTWARE=1
-          ./Strata-*-portable/AppRun --help || true
+          ./Strata-*-portable/AppRun --help
           echo "Portable bundle works in minimal container"
 
   test-macos:
@@ -520,37 +531,85 @@ jobs:
         with:
           name: strata-macos
 
+      - name: Remove system libraries that could mask bundling problems
+        run: |
+          # Uninstall libraries that the build job used so they cannot
+          # silently satisfy missing references at runtime via DYLD fallback.
+          brew uninstall --ignore-dependencies gsl qwt qt@6 2>/dev/null || true
+          # Double-check nothing lingers
+          for lib in libqwt libgsl libgslcblas; do
+            if find /usr/local /opt/homebrew -name "${lib}*" 2>/dev/null | grep -q .; then
+              echo "WARNING: ${lib} still found on system after uninstall"
+            fi
+          done
+
       - name: Test .app bundle from tarball
         run: |
           tar xzf Strata-*-macos.tar.gz
 
-          # Verify ad-hoc code signature on the full bundle
-          # qt_generate_deploy_app_script produces proper framework layouts
-          # (with Versions/A/ symlinks) that pass strict verification
+          # --- 1. Verify code signature ---
           codesign --verify --strict --deep strata.app
           echo "Bundle signature verified"
 
-          # Verify all dylibs resolve
-          otool -L strata.app/Contents/MacOS/strata
-          # Check no references to build-machine paths remain
-          if otool -L strata.app/Contents/MacOS/strata | grep -E '/usr/local|/opt/homebrew|/Users'; then
-            echo "ERROR: Found absolute paths to build machine libraries"
-            exit 1
-          fi
-          # Launch test (offscreen since CI has no display)
+          # --- 2. Verify expected libraries are bundled ---
+          FW=strata.app/Contents/Frameworks
+          MISSING=0
+          for lib in libqwt.6.dylib libgsl.dylib libgslcblas.dylib; do
+            if [ ! -f "$FW/$lib" ]; then
+              echo "ERROR: $lib not found in Frameworks/"
+              MISSING=1
+            else
+              echo "OK: $FW/$lib"
+            fi
+          done
+          [ $MISSING -eq 0 ] || exit 1
+
+          # --- 3. Check ALL Mach-O binaries for absolute build-machine paths ---
+          ERRORS=0
+          # Collect every Mach-O binary in the bundle
+          while IFS= read -r bin; do
+            if otool -L "$bin" 2>/dev/null | tail -n +2 | grep -E '/usr/local|/opt/homebrew|/Users|/nix/store'; then
+              echo "ERROR: absolute library path in: $bin"
+              otool -L "$bin" | grep -E '/usr/local|/opt/homebrew|/Users|/nix/store'
+              ERRORS=1
+            fi
+          done < <(find strata.app -type f \( -name '*.dylib' -o -perm +111 \) | while read f; do
+            file "$f" | grep -q 'Mach-O' && echo "$f"
+          done)
+          [ $ERRORS -eq 0 ] || { echo "Absolute path check failed"; exit 1; }
+          echo "No absolute library paths found in any Mach-O binary"
+
+          # --- 4. Launch test with system fallback paths explicitly cleared ---
           export QT_QPA_PLATFORM=offscreen
-          ./strata.app/Contents/MacOS/strata --help || true
+          export DYLD_FALLBACK_LIBRARY_PATH=""
+          export DYLD_LIBRARY_PATH=""
+          # Trace loaded libraries to detect any unexpected system loads
+          DYLD_PRINT_LIBRARIES=1 ./strata.app/Contents/MacOS/strata --help 2>dyld_trace.log
           echo "macOS app launched successfully"
 
-      - name: Verify DMG mounts
+          # Verify no libraries were loaded from outside the bundle (except OS frameworks)
+          if grep -E '/usr/local|/opt/homebrew|/Users' dyld_trace.log; then
+            echo "ERROR: App loaded libraries from outside the bundle at runtime"
+            cat dyld_trace.log
+            exit 1
+          fi
+          echo "Runtime library check passed"
+
+      - name: Verify DMG mounts and launches
         run: |
           hdiutil attach Strata-*-macos.dmg -mountpoint /tmp/strata-dmg
           ls -la /tmp/strata-dmg/strata.app
-          # Verify the executable exists and is a valid Mach-O binary
           file /tmp/strata-dmg/strata.app/Contents/MacOS/strata
-          # Verify ad-hoc signature on the full bundle
           codesign --verify --strict --deep --verbose=2 /tmp/strata-dmg/strata.app
           echo "Bundle signature verified"
+
+          # Launch from the DMG to verify it works read-only
+          export QT_QPA_PLATFORM=offscreen
+          export DYLD_FALLBACK_LIBRARY_PATH=""
+          export DYLD_LIBRARY_PATH=""
+          /tmp/strata-dmg/strata.app/Contents/MacOS/strata --help
+          echo "DMG app launched successfully"
+
           hdiutil detach /tmp/strata-dmg
 
   test-windows:
@@ -561,22 +620,40 @@ jobs:
         with:
           name: strata-windows
 
-      - name: Test executable launches
+      - name: Verify required DLLs are bundled
         shell: pwsh
         run: |
-          # Extract the ZIP archive
           Expand-Archive -Path (Get-ChildItem "Strata-*-windows-x64.zip" | Select-Object -First 1).FullName -DestinationPath install
-          # Verify the executable exists and DLLs are present
           $exe = Get-ChildItem -Path install -Recurse -Filter "strata.exe" | Select-Object -First 1
           if (-not $exe) { Write-Error "strata.exe not found"; exit 1 }
           Write-Host "Found: $($exe.FullName)"
-          # List DLLs in the same directory
+
+          # Verify critical DLLs are present
+          $requiredDlls = @("qwt.dll", "gsl.dll", "gslcblas.dll", "Qt6Core.dll", "Qt6Widgets.dll")
+          $missingDlls = @()
+          foreach ($dll in $requiredDlls) {
+            if (-not (Test-Path (Join-Path $exe.DirectoryName $dll))) {
+              $missingDlls += $dll
+            }
+          }
+          if ($missingDlls.Count -gt 0) {
+            Write-Error "Missing required DLLs: $($missingDlls -join ', ')"
+            exit 1
+          }
+          Write-Host "All required DLLs present"
           Get-ChildItem $exe.DirectoryName -Filter "*.dll" | ForEach-Object { Write-Host "  DLL: $($_.Name)" }
-          # Try to launch (verifies DLL loading)
+
+      - name: Test executable launches
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path install -Recurse -Filter "strata.exe" | Select-Object -First 1
           $env:QT_QPA_PLATFORM = "offscreen"
-          & $exe.FullName --help 2>&1 | Out-Host
-          # Reset exit code — a successful launch is sufficient proof
-          $global:LASTEXITCODE = 0
+          # Run and capture exit code properly — do not mask failures
+          $proc = Start-Process -FilePath $exe.FullName -ArgumentList "--help" -Wait -PassThru -NoNewWindow
+          if ($proc.ExitCode -ne 0) {
+            Write-Error "strata.exe exited with code $($proc.ExitCode)"
+            exit 1
+          }
           Write-Host "Windows executable launched successfully"
 
   update-homebrew:
