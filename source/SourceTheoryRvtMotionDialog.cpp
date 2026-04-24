@@ -110,7 +110,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(tr("Geometric atten. coeff.:"), doubleSpinBox);
+  layout->addRow(tr("Geometric atten.:"), doubleSpinBox);
 
   // Path attenuation
   layout->addRow(new QLabel(
