@@ -312,7 +312,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install qt@6 gsl cmake ninja dylibbundler
+          brew install qt@6 gsl cmake ninja
           brew link qt@6
 
       - name: Cache Qwt-Qt6
@@ -372,27 +372,48 @@ jobs:
           # Fix Qt framework layouts for codesign --verify --strict --deep
           "${GITHUB_WORKSPACE}/scripts/fix_macos_frameworks.sh" strata.app
 
-          # Bundle all non-system dylib dependencies (Qwt, GSL, and any
-          # transitive deps) into the .app.  dylibbundler recursively
-          # discovers, copies, and rewrites all references.
-          dylibbundler \
-            -od -b \
-            -x strata.app/Contents/MacOS/strata \
-            -d strata.app/Contents/Frameworks/ \
-            -p @executable_path/../Frameworks/ \
-            -s ~/qwt-qt6-install/lib \
-            -s $(brew --prefix gsl)/lib
+          # Bundle Qwt and GSL into the .app (dylibbundler can't handle
+          # bare install names like "libqwt.6.dylib", so we do it manually).
+          FWDIR=strata.app/Contents/Frameworks
+          EXE=strata.app/Contents/MacOS/strata
+          QWT_DIR=~/qwt-qt6-install/lib
+          GSL_DIR=$(brew --prefix gsl)/lib
 
-          # Also fix any bundled dylibs that reference other bundled dylibs
-          # (e.g. libqwt links to Qt frameworks with absolute homebrew paths)
-          for dylib in strata.app/Contents/Frameworks/*.dylib; do
-            dylibbundler \
-              -of -b \
-              -x "$dylib" \
-              -d strata.app/Contents/Frameworks/ \
-              -p @executable_path/../Frameworks/ \
-              -s ~/qwt-qt6-install/lib \
-              -s $(brew --prefix gsl)/lib 2>/dev/null || true
+          bundle_lib() {
+            local lib_path="$1"
+            local real_path=$(realpath "$lib_path")
+            # Get the library's install name (soname) via otool -D
+            local install_name=$(otool -D "$real_path" | tail -1)
+            local soname=$(basename "$install_name")
+            cp "$real_path" "$FWDIR/$soname"
+            chmod 644 "$FWDIR/$soname"
+            install_name_tool -id "@rpath/$soname" "$FWDIR/$soname"
+            install_name_tool -change "$install_name" "@rpath/$soname" "$EXE"
+            echo "Bundled: $soname (from $real_path)"
+          }
+
+          bundle_lib "$QWT_DIR/libqwt.dylib"
+          bundle_lib "$GSL_DIR/libgsl.dylib"
+          bundle_lib "$GSL_DIR/libgslcblas.dylib"
+
+          # Fix cross-references between bundled dylibs and rewrite any
+          # remaining absolute homebrew/build-machine paths.
+          for dylib in "$FWDIR"/*.dylib; do
+            otool -L "$dylib" | tail -n +2 | awk '{print $1}' | while read ref; do
+              case "$ref" in
+                /usr/local/*|/opt/homebrew/*|/Users/*|/nix/store/*)
+                  fname=$(basename "$ref")
+                  if [[ "$ref" == *".framework/"* ]]; then
+                    fw_rel=$(echo "$ref" | sed 's|^.*/\([^/]*\.framework/.*\)$|\1|')
+                    if [ -d "$FWDIR/$(echo "$fw_rel" | cut -d/ -f1)" ]; then
+                      install_name_tool -change "$ref" "@rpath/$fw_rel" "$dylib"
+                    fi
+                  elif [ -f "$FWDIR/$fname" ]; then
+                    install_name_tool -change "$ref" "@rpath/$fname" "$dylib"
+                  fi
+                  ;;
+              esac
+            done
           done
 
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
@@ -466,7 +487,7 @@ jobs:
       - name: Test AppImage (with FUSE)
         run: |
           sudo apt-get update && sudo apt-get install -y fuse libfuse2 \
-            libegl1-mesa libgl1-mesa-glx libxkbcommon0
+            libegl1-mesa libgl1-mesa-glx libopengl0 libxkbcommon0
           chmod +x Strata-*-x86_64.AppImage
           # Use virtual framebuffer since there's no display
           export QT_QPA_PLATFORM=offscreen
@@ -504,7 +525,7 @@ jobs:
 
       - name: Test portable tarball in minimal container (simulates VM without FUSE)
         run: |
-          apt-get update && apt-get install -y libgl1-mesa-glx libegl1-mesa libxcb-xinerama0 libxkbcommon0 libfontconfig1
+          apt-get update && apt-get install -y libgl1-mesa-glx libegl1-mesa libopengl0 libxcb-xinerama0 libxkbcommon0 libfontconfig1
           tar xzf Strata-*-linux-x86_64-portable.tar.gz
           export QT_QPA_PLATFORM=offscreen
           export LIBGL_ALWAYS_SOFTWARE=1
