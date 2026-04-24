@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
 
@@ -466,7 +466,7 @@ jobs:
       - name: Test AppImage (with FUSE)
         run: |
           sudo apt-get update && sudo apt-get install -y fuse libfuse2 \
-            libegl1-mesa libgl1-mesa-glx libopengl0 libxkbcommon0
+            libegl1-mesa libgl1-mesa-glx libxkbcommon0
           chmod +x Strata-*-x86_64.AppImage
           # Use virtual framebuffer since there's no display
           export QT_QPA_PLATFORM=offscreen
@@ -504,7 +504,7 @@ jobs:
 
       - name: Test portable tarball in minimal container (simulates VM without FUSE)
         run: |
-          apt-get update && apt-get install -y libgl1-mesa-glx libegl1-mesa libopengl0 libxcb-xinerama0 libxkbcommon0
+          apt-get update && apt-get install -y libgl1-mesa-glx libegl1-mesa libxcb-xinerama0 libxkbcommon0 libfontconfig1
           tar xzf Strata-*-linux-x86_64-portable.tar.gz
           export QT_QPA_PLATFORM=offscreen
           export LIBGL_ALWAYS_SOFTWARE=1
