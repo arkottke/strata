@@ -43,10 +43,14 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install ninja
 
+      - name: Install Dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ninja
+
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: 3475b0f38e803e034e096746da5d833757030587
+          vcpkgGitCommitId: 0e011d3934ede4afa67ffbf509cfc061cae72b3e
           vcpkgJsonGlob: 'vcpkg.json'
 
       - name: Configure CMake
