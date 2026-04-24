@@ -371,42 +371,8 @@ jobs:
           # Fix Qt framework layouts for codesign --verify --strict --deep
           "${GITHUB_WORKSPACE}/scripts/fix_macos_frameworks.sh" strata.app
 
-          # Copy Qwt and GSL libraries
-          mkdir -p strata.app/Contents/Frameworks
-          cp ~/qwt-qt6-install/lib/libqwt.6.dylib strata.app/Contents/Frameworks/
-          cp $(brew --prefix gsl)/lib/libgsl.dylib strata.app/Contents/Frameworks/
-          cp $(brew --prefix gsl)/lib/libgslcblas.dylib strata.app/Contents/Frameworks/
-
-          STRATA_BIN=strata.app/Contents/MacOS/strata
-          FW=strata.app/Contents/Frameworks
-
-          # Fix Qwt path in main binary
-          install_name_tool -change ~/qwt-qt6-install/lib/libqwt.6.dylib \
-            @executable_path/../Frameworks/libqwt.6.dylib \
-            "$STRATA_BIN"
-
-          # Fix GSL paths in main binary
-          GSL_PREFIX=$(brew --prefix gsl)
-          for lib in libgsl.dylib libgslcblas.dylib; do
-            install_name_tool -change "${GSL_PREFIX}/lib/${lib}" \
-              "@executable_path/../Frameworks/${lib}" \
-              "$STRATA_BIN"
-          done
-
-          # Fix libgslcblas reference inside libgsl
-          install_name_tool -change "${GSL_PREFIX}/lib/libgslcblas.dylib" \
-            "@executable_path/../Frameworks/libgslcblas.dylib" \
-            "$FW/libgsl.dylib"
-
-          # Fix Qwt's own dylib id
-          install_name_tool -id @executable_path/../Frameworks/libqwt.6.dylib \
-            "$FW/libqwt.6.dylib"
-
-          # Fix GSL dylib ids
-          install_name_tool -id @executable_path/../Frameworks/libgsl.dylib \
-            "$FW/libgsl.dylib"
-          install_name_tool -id @executable_path/../Frameworks/libgslcblas.dylib \
-            "$FW/libgslcblas.dylib"
+          # Qwt and GSL are already bundled and relinked by the CMake install
+          # step (macos_bundle_fixup.cmake).  Only code signing remains.
 
           # Ad-hoc code sign (required for Apple Silicon, helps on Intel)
           # Sign inside-out: framework binaries, then frameworks, then dylibs,
@@ -478,7 +444,8 @@ jobs:
 
       - name: Test AppImage (with FUSE)
         run: |
-          sudo apt-get update && sudo apt-get install -y fuse libfuse2
+          sudo apt-get update && sudo apt-get install -y fuse libfuse2 \
+            libegl1-mesa libgl1-mesa-glx libxkbcommon0
           chmod +x Strata-*-x86_64.AppImage
           # Use virtual framebuffer since there's no display
           export QT_QPA_PLATFORM=offscreen
