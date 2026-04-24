@@ -35,149 +35,51 @@ this website.
 
 ## Building
 
-Compiling Strata from the source code requires the following dependencies prior
-to building:
+Strata uses a modernized build system based on **CMake Presets** and **vcpkg** for dependency management. This ensures a consistent, reproducible build environment across Windows, macOS, and Linux.
 
--   [CMake](https://cmake.org) (version 3.2 or later)
--   [Qt](http://doc.qt.io/) (version 5.5 or later)
--   GNU Scientific Library ([GSL](http://www.gnu.org/software/gsl/))
--   [Qwt](http://qwt.sourceforge.net/) (version 6.1 or later)
--   [FFTW](http://www.fftw.org/) (optional)
+### Prerequisites
+- [CMake](https://cmake.org) (version 3.21 or later)
+- A C++17 compatible compiler (MSVC 2022, GCC 11+, or Clang 13+)
+- [Ninja](https://ninja-build.org/) (recommended and used by default in presets)
 
-See [Building on Windows](#building-on-windows) for installing these
-dependencies on windows.  Once, these dependencies are installed the Strata can
-build checked out and built using the following commands:
+### Build Workflow
 
-    $> git clone https://github.com/arkottke/strata.git
-    $> cd strata
-    $> mkdir build
-    $> cd build
-    $> cmake .. -DCMAKE_BUILD_TYPE=Release
-    $> make -j2
+The following steps will automatically fetch and build all dependencies (GSL, Qwt, and Qt6) using the included `vcpkg` submodule.
 
-Strata executable is located in: `strata/build/source/strata`. If the build is
-unable to find header files and libraries for linking, paths to these files can
-be added by modifying the strata.pro text file, or by passing the INCLUDEPATH
-and LIBS environmental varibles. On Linux and OS X, the variabile
-LD_LIBRARY_PATH may need to be updated to include paths to Qwt and GSL library
-files. On Windows, PATH should include the paths to Qwt and GSL DLL files.
+1.  **Clone the repository with submodules:**
+    ```bash
+    git clone --recursive https://github.com/arkottke/strata.git
+    cd strata
+    ```
 
-### Building on Linux
+2.  **Bootstrap vcpkg (one-time setup):**
+    ```bash
+    # Linux/macOS
+    ./vcpkg/bootstrap-vcpkg.sh
+    # Windows
+    .\vcpkg\bootstrap-vcpkg.bat
+    ```
 
-Depending the distribution, the Qt binaries may or may not be in the package
-manager. On Ubuntu Trusty, Qt 5.6 is available from
-[ppa:beineri/opt-qt-5.10.1-trusty] [1], which can be installed with the following
-steps:
+3.  **Configure and Build:**
+    Choose the preset corresponding to your OS: `linux-release`, `macos-release`, or `windows-release`.
+    ```bash
+    cmake --preset <preset-name>
+    cmake --build --preset <preset-name>
+    ```
 
-    $> sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
-    $> sudo apt-get update -qq
-    $> sudo apt-get install -qq libgsl0-dev qt510base qt510tools qt510svg
+4.  **Create Installer (Optional):**
+    To generate a platform-native installer (NSIS on Windows, DMG on macOS, or Tarball on Linux), run:
+    ```bash
+    cmake --build --preset <preset-name> --target package
+    ```
 
-If Qwt 6.1 is not available in the package manager. Qwt can be built using the
-following commands:
-
-    $> source /opt/qt10/bin/qt10-env.sh
-    $> cd $HOME/..
-    $> svn checkout <svn://svn.code.sf.net/p/qwt/code/branches/qwt-6.1> qwt
-    $> cd qwt
-    $> qmake
-    $> make -j2
-    $> sudo make install
-
-Here is an example of passing adding paths for Qwt headers and shared
-libraries, and GSL to CMake:
-
-    $> QWT_ROOT_DIR=/usr/qwt-6.1.3/lib
-    $> GSL_ROOT_DIR=/usr/include/gsl
-    $> cmake .. -DQWT_ROOT_DIR=$QWT_ROOT_DIR -DGSL_ROOT_DIR=$GSL_ROOT_DIR -DCMAKE_BUILD_TYPE=Release
-
-### Building on Windows
-
-Building on Windows is greatly simplified by using
-[MSYS2](https://msys2.github.io/). After installing MSYS2, the required
-dependencies can be installed with the following commands:
-
-    $> pacman -Sy
-    $> pacman -S \
-        cmake \
-        mingw-w64-i686-qt5 \
-        mingw-w64-x86_64-qwt-qt5 \
-        mingw-w64-x86_64-gsl \
-        git
-
-Using a MinGW-w64 shell, execute the commands listed in [Building](#building).
-
-## Building on OS X
-
-Prior to building on OS X, install [homebrew](https://brew.sh/). Next install the dependencies:
-
-    $> brew install qt gsl qwt cmake
-
-Then compile:
-
-    $> git clone https://github.com/arkottke/strata.git
-    $> cd strata
-    $> mkdir build
-    $> cd build
-    $> QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.3_4"
-    $> QWT_INCLUDE_DIR="/usr/local/Cellar/qwt/6.1.3_4/lib/qwt.framework/Versions/6/Headers"
-    $> GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.5"
-    $> cmake .. \
-        -DQWT_ROOT_DIR=$QWT_ROOT_DIR \
-        -DQWT_INCLUDE_DIR=$QWT_INCLUDE_DIR \
-        -DGSL_ROOT_DIR=$GSL_ROOT_DIR \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX:STRING=dist
-    $> cmake --build . --target install
-
-After building, the executable can be run by issuing the following command from the `build` directory:
-
-    $> ./dist/usr/bin/strata
-
-Right now (12/15/2019) on macOS Mojave homebrew installs qwt version 6.1.4 and gls version 2.6, so change the relative lines
-
-    $> QWT_ROOT_DIR="/usr/local/Cellar/qwt/6.1.4"
-    $> QWT_INCLUDE_DIR="/usr/local/Cellar/qwt/6.1.4/lib/qwt.framework/Versions/6/Headers"
-    $> GSL_ROOT_DIR="/usr/local/Cellar/gsl/2.6"
-
-or in case of error control the version in the directory: /usr/local/Cellar/
-
-If you find a cleaner way to specific the library paths, please let me know.
-
-## Build on Apple Silicon
-
-For Apple Silicon (M-Series Chips), the brew installation location is moved to /opt/homebrew. So some installation instruction is different. 
-
-Make sure you have homebrew installed, then install the dependencies as normal. 
-'''bash
-brew install qt gsl qwt cmake
-'''
-
-Then clone the git repo, cd into the repo, make the build folder, and then cd into the build folder. 
-
-'''bash
-git clone https://github.com/arkottke/strata.git
-cd strata
-mkdir build
-cd build
-'''
-
-Then run the following to compile. 
-'''bash
-cmake .. \                      
-  -DQWT_ROOT_DIR=$(brew --prefix qwt) \
-  -DQWT_INCLUDE_DIR=$(brew --prefix qwt)/lib/qwt.framework/Headers \
-  -DGSL_ROOT_DIR=$(brew --prefix gsl) \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=dist
-
-cmake --build . --target install
-'''
-
-Now you installed the strata into your /Application folder. You can run it from searching 'strata' in spotline search. 
+The compiled executable will be located in `build/<preset-name>/source/strata`.
 
 ## Testing
 
-Examples for testing are located in the example/ directory.
+Examples for testing are located in the `example/` directory. Regression tests can be run via CMake:
 
-[1]: https://launchpad.net/~beineri/+archive/ubuntu/opt-qt562-trusty
+```bash
+cd build/<preset-name>
+ctest
+```
