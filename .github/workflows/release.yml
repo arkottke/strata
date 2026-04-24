@@ -47,6 +47,10 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install ninja
 
+      - name: Setup MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
