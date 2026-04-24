@@ -28,6 +28,7 @@ jobs:
             qt6-svg-dev \
             qt6-tools-dev \
             libgl1-mesa-dev \
+            libopengl0 \
             libxkbcommon-x11-0 \
             libxcb-cursor0 \
             libxcb-icccm4 \
@@ -521,12 +522,13 @@ jobs:
           # --- 2. Verify expected libraries are bundled ---
           FW=strata.app/Contents/Frameworks
           MISSING=0
-          for lib in libqwt.6.dylib libgsl.dylib libgslcblas.dylib; do
-            if [ ! -f "$FW/$lib" ]; then
-              echo "ERROR: $lib not found in Frameworks/"
+          for pattern in 'libqwt*dylib' 'libgsl.*dylib' 'libgslcblas*dylib'; do
+            # Use ls to check glob (handles versioned sonames like libqwt.6.dylib)
+            if ! ls $FW/$pattern 1>/dev/null 2>&1; then
+              echo "ERROR: no match for $pattern in Frameworks/"
               MISSING=1
             else
-              echo "OK: $FW/$lib"
+              ls $FW/$pattern
             fi
           done
           [ $MISSING -eq 0 ] || exit 1

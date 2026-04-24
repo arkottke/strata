@@ -12,6 +12,7 @@ file(MAKE_DIRECTORY "${_fw_dir}")
 
 set(_libs "@_MACOS_BUNDLE_LIBS@")
 set(_names)
+set(_old_ids)
 
 foreach(_lib IN LISTS _libs)
     if(NOT EXISTS "${_lib}")
@@ -19,41 +20,63 @@ foreach(_lib IN LISTS _libs)
         continue()
     endif()
 
-    get_filename_component(_name "${_lib}" NAME)
     get_filename_component(_real "${_lib}" REALPATH)
-    get_filename_component(_real_name "${_real}" NAME)
 
-    # Copy the actual file into Frameworks
-    file(COPY "${_real}" DESTINATION "${_fw_dir}")
-    if(NOT "${_real_name}" STREQUAL "${_name}")
-        file(RENAME "${_fw_dir}/${_real_name}" "${_fw_dir}/${_name}")
+    # Get the library's install name (soname) via otool -D.
+    # This is the string recorded in binaries that link against it,
+    # e.g. "/usr/local/qwt-6.3.0/lib/libqwt.6.dylib" — NOT the
+    # unversioned symlink name.
+    execute_process(
+        COMMAND otool -D "${_real}"
+        OUTPUT_VARIABLE _id_output
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # otool -D output: first line is the file path, second line is the id
+    string(REPLACE "\n" ";" _id_lines "${_id_output}")
+    list(LENGTH _id_lines _id_len)
+    if(_id_len GREATER 1)
+        list(GET _id_lines 1 _old_id)
+        string(STRIP "${_old_id}" _old_id)
+        get_filename_component(_bundle_name "${_old_id}" NAME)
+    else()
+        # Fallback: use the symlink name
+        get_filename_component(_bundle_name "${_lib}" NAME)
+        set(_old_id "")
     endif()
 
-    # Set the library's own install-name id to @rpath
-    execute_process(
-        COMMAND install_name_tool -id "@rpath/${_name}" "${_fw_dir}/${_name}")
+    # Copy the actual file into Frameworks under the soname
+    get_filename_component(_real_name "${_real}" NAME)
+    file(COPY "${_real}" DESTINATION "${_fw_dir}")
+    if(NOT "${_real_name}" STREQUAL "${_bundle_name}")
+        file(RENAME "${_fw_dir}/${_real_name}" "${_fw_dir}/${_bundle_name}")
+    endif()
 
-    list(APPEND _names "${_name}")
+    # Set the library's own install-name id to @rpath/<soname>
+    execute_process(
+        COMMAND install_name_tool -id "@rpath/${_bundle_name}"
+            "${_fw_dir}/${_bundle_name}")
+
+    list(APPEND _names "${_bundle_name}")
+    list(APPEND _old_ids "${_old_id}")
 endforeach()
 
 # ---- helper: rewrite references inside a Mach-O binary ----
+# Uses the exact old install-name id for each library so that versioned
+# sonames (e.g. libqwt.6.dylib) are matched correctly.
 macro(_fixup_refs _binary)
-    execute_process(COMMAND otool -L "${_binary}" OUTPUT_VARIABLE _otool)
-    string(REPLACE "\n" ";" _lines "${_otool}")
-    foreach(_dep_name IN LISTS _names)
-        foreach(_line IN LISTS _lines)
-            if("${_line}" MATCHES "${_dep_name}")
-                string(STRIP "${_line}" _trimmed)
-                string(REGEX REPLACE " \\(.*\\)$" "" _old "${_trimmed}")
-                if(NOT "${_old}" STREQUAL "@rpath/${_dep_name}")
-                    execute_process(
-                        COMMAND install_name_tool -change
-                            "${_old}" "@rpath/${_dep_name}" "${_binary}")
-                endif()
-                break()
+    list(LENGTH _names _count)
+    if(_count GREATER 0)
+        math(EXPR _last "${_count} - 1")
+        foreach(_i RANGE ${_last})
+            list(GET _names ${_i} _dep_name)
+            list(GET _old_ids ${_i} _dep_old_id)
+            if(NOT "${_dep_old_id}" STREQUAL ""
+               AND NOT "${_dep_old_id}" STREQUAL "@rpath/${_dep_name}")
+                execute_process(
+                    COMMAND install_name_tool -change
+                        "${_dep_old_id}" "@rpath/${_dep_name}" "${_binary}")
             endif()
         endforeach()
-    endforeach()
+    endif()
 endmacro()
 
 # Fix the main executable
