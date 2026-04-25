@@ -73,7 +73,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Configure libraries
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport OpenGLWidgets Svg)
 find_package(GSL REQUIRED)
-find_package(qwt CONFIG REQUIRED)
+find_package(unofficial-qwt CONFIG REQUIRED)
 
 if(COMMAND qt_standard_project_setup)
     qt_standard_project_setup()
@@ -81,7 +81,7 @@ endif()
 
 include(GNUInstallDirs)
 
-set(LIBS ${LIBS} GSL::gsl qwt::qwt)
+set(LIBS ${LIBS} GSL::gsl unofficial::qwt::qwt)
 
 if (ADVANCED_FEATURES)
     add_definitions(-DADVANCED_FEATURES)
