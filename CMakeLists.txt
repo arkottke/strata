@@ -75,6 +75,10 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml PrintSupport OpenGLWidgets
 find_package(GSL REQUIRED)
 find_package(unofficial-qwt CONFIG REQUIRED)
 
+# vcpkg's qwt port sometimes puts headers in include/qwt, but the target
+# only points to include/. We find the actual path to handle #include <qwt_plot.h>.
+find_path(QWT_INCLUDE_DIR NAMES qwt_plot.h PATH_SUFFIXES qwt qwt6)
+
 if(COMMAND qt_standard_project_setup)
     qt_standard_project_setup()
 endif()
@@ -82,6 +86,7 @@ endif()
 include(GNUInstallDirs)
 
 set(LIBS ${LIBS} GSL::gsl unofficial::qwt::qwt)
+include_directories(${QWT_INCLUDE_DIR})
 
 if (ADVANCED_FEATURES)
     add_definitions(-DADVANCED_FEATURES)
