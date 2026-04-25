@@ -8,7 +8,7 @@ on:
     types: [published]
 
 env:
-  VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
+  # No manual VCPKG_BINARY_SOURCES; run-vcpkg handles this.
 
 jobs:
   build:
@@ -56,8 +56,6 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgDirectory: ${{ github.workspace }}/vcpkg
-          doNotUpdateVcpkg: true
           vcpkgJsonGlob: 'vcpkg.json'
 
       - name: Configure CMake
