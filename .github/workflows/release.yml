@@ -7,9 +7,6 @@ on:
   release:
     types: [published]
 
-env:
-  # No manual VCPKG_BINARY_SOURCES; run-vcpkg handles this.
-
 jobs:
   build:
     name: ${{ matrix.preset }}
