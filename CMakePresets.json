@@ -52,7 +52,7 @@
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "VCPKG_TARGET_TRIPLET": "x64-osx",
+        "VCPKG_TARGET_TRIPLET": "arm64-osx",
         "CMAKE_OSX_DEPLOYMENT_TARGET": "11.0"
       }
     },
