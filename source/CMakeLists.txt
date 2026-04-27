@@ -93,6 +93,10 @@ elseif (WIN32)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
+    # Install non-Qt runtime DLLs (e.g., qwt, gsl, libpng, harfbuzz)
+    install(FILES $<TARGET_RUNTIME_DLLS:${CMAKE_PROJECT_NAME}>
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
         DESTINATION ${CMAKE_INSTALL_DOCDIR}
