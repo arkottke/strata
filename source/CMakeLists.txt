@@ -93,9 +93,12 @@ elseif (WIN32)
     install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
-    # Install non-Qt runtime DLLs (e.g., qwt, gsl, libpng, harfbuzz)
-    install(FILES $<TARGET_RUNTIME_DLLS:${CMAKE_PROJECT_NAME}>
+    # Install runtime DLLs from vcpkg (qwt, gsl, libpng, harfbuzz, etc.)
+    # qt_generate_deploy_app_script handles Qt's own DLLs and plugins separately,
+    # but misses non-Qt and transitive vcpkg dependencies.
+    install(DIRECTORY "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/"
         DESTINATION ${CMAKE_INSTALL_BINDIR}
+        FILES_MATCHING PATTERN "*.dll"
     )
     install(FILES
         ${CMAKE_SOURCE_DIR}/manual/manual.pdf
