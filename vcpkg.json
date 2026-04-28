@@ -1,7 +1,7 @@
 {
   "name": "strata",
   "version-string": "0.9.0",
-  "builtin-baseline": "0e011d3934ede4afa67ffbf509cfc061cae72b3e",
+  "builtin-baseline": "7a9071743140154391b0e18b77d46cc66c5f3663",
   "dependencies": [
     "gsl",
     "qwt",
