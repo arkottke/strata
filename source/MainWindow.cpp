@@ -353,9 +353,9 @@ auto MainWindow::saveAs() -> bool {
                              QStandardPaths::DocumentsLocation))
                  .toString()
            : _model->fileName()),
-      "Strata Files (*.strata *.json);;"
+      "Strata JSON File (*.json);;"
       "Strata Binary File (*.strata);;"
-      "Strata JSON File (*.json);;");
+      "Strata Files (*.strata *.json);;");
 
   if (!fileName.isEmpty()) {
     // Make sure that the file name ends with .strata or .stratahr
