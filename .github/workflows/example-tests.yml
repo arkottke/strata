@@ -11,53 +11,44 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
-      - name: Install Qt6 and dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            cmake \
             ninja-build \
-            libgsl-dev \
-            qt6-base-dev \
-            qt6-svg-dev \
-            qt6-tools-dev \
             libgl1-mesa-dev \
+            libxkbcommon-dev \
+            libxcb-cursor0 \
+            "^libxcb.*-dev" \
+            libx11-xcb-dev \
+            libglu1-mesa-dev \
+            libxrender-dev \
+            libxi-dev \
+            libxkbcommon-x11-dev \
+            libegl1-mesa-dev \
+            autoconf \
+            autoconf-archive \
+            automake \
+            libtool \
+            pkg-config \
             python3
 
-      - name: Cache Qwt-Qt6
-        id: cache-qwt
-        uses: actions/cache@v5
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
         with:
-          path: ~/qwt-qt6-install
-          key: ${{ runner.os }}-qwt-qt6-6.3.0
+          vcpkgJsonGlob: 'vcpkg.json'
 
-      - name: Build Qwt-Qt6
-        if: steps.cache-qwt.outputs.cache-hit != 'true'
-        run: |
-          cd ~
-          wget https://downloads.sourceforge.net/project/qwt/qwt/6.3.0/qwt-6.3.0.tar.bz2
-          tar xjf qwt-6.3.0.tar.bz2
-          cd qwt-6.3.0
-          /usr/lib/qt6/bin/qmake qwt.pro
-          make -j$(nproc)
-          # Use INSTALL_ROOT to redirect install to a writable staging directory
-          make install INSTALL_ROOT=$HOME/qwt-staging
-          # Copy from staging to expected cache location
-          cp -a $HOME/qwt-staging/usr/local/qwt-6.3.0 $HOME/qwt-qt6-install
+      - name: Configure CMake
+        run: cmake --preset linux-release
 
-      - name: Build Strata
-        run: |
-          mkdir build && cd build
-          cmake .. \
-            -GNinja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DQWT_INCLUDE_DIR="$HOME/qwt-qt6-install/include" \
-            -DQWT_LIBRARY="$HOME/qwt-qt6-install/lib/libqwt.so"
-          cmake --build . --parallel
+      - name: Build
+        run: cmake --build --preset linux-release
 
       - name: Run example tests
         run: |
           python3 scripts/compare_examples.py \
-            build/source/strata \
+            build/linux-release/source/strata \
             example/
