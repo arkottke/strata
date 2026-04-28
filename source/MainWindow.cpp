@@ -62,7 +62,7 @@ MainWindow::MainWindow(QMainWindow *parent)
   _helpDialog = new HelpDialog(this);
   _confiningStressDialog = nullptr;
 
-  _printer = new QPrinter;
+  _printer = nullptr;
 
   // Create the settings
   _settings = new QSettings(this);
@@ -378,6 +378,9 @@ auto MainWindow::saveAs() -> bool {
 void MainWindow::exportData() { _resultsPage->exportData(); }
 
 void MainWindow::print() {
+  if (!_printer)
+    _printer = new QPrinter;
+
   // Create a dialog to select the printer
   QPrintDialog printDialog(_printer);
 
@@ -406,6 +409,10 @@ void MainWindow::printToPdf() {
   if (!fileName.isEmpty()) {
     // Save the state
     _settings->setValue("exportDirectory", QFileInfo(fileName).filePath());
+
+    if (!_printer)
+      _printer = new QPrinter;
+
     _printer->setOutputFileName(fileName);
 
     if (_tabWidget->currentIndex() == RESULTS_PAGE) {
