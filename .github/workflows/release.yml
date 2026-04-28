@@ -34,9 +34,25 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libgl1-mesa-dev libxkbcommon-dev libxcb-cursor0 \
-            "^libxcb.*-dev" libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev \
-            libxkbcommon-x11-dev libegl1-mesa-dev autoconf autoconf-archive automake libtool libltdl-dev pkg-config
+          sudo apt-get install -y \
+            ninja-build \
+            libgl1-mesa-dev \
+            libxkbcommon-dev \
+            libxcb-cursor0 \
+            "^libxcb.*-dev" \
+            libx11-xcb-dev \
+            libglu1-mesa-dev \
+            libxrender-dev \
+            libxi-dev \
+            libxkbcommon-x11-dev \
+            libegl1-mesa-dev \
+            libsm-dev \
+            autoconf \
+            autoconf-archive \
+            automake \
+            libtool \
+            libltdl-dev \
+            pkg-config
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'

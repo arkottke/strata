@@ -29,6 +29,7 @@ jobs:
             libxi-dev \
             libxkbcommon-x11-dev \
             libegl1-mesa-dev \
+            libsm-dev \
             autoconf \
             autoconf-archive \
             automake \
