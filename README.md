@@ -22,6 +22,8 @@ understanding of the process.
 Pre-built binaries for Windows are available from the [Github releases
 page](https://github.com/arkottke/strata/releases).
 
+When installing from the Windows `.zip` archive, the executable is located at `bin/strata.exe`.
+
 ## Citation
 
 When citing Strata, refer to either the technical manual:
@@ -41,6 +43,32 @@ Strata uses a modernized build system based on **CMake Presets** and **vcpkg** f
 - [CMake](https://cmake.org) (version 3.21 or later)
 - A C++17 compatible compiler (MSVC 2022, GCC 11+, or Clang 13+)
 - [Ninja](https://ninja-build.org/) (recommended and used by default in presets)
+
+#### Linux System Dependencies
+
+On Ubuntu/Debian, install the required system packages:
+
+```bash
+sudo apt-get install -y \
+  ninja-build libgl1-mesa-dev libxkbcommon-dev libxcb-cursor0 \
+  "^libxcb.*-dev" libx11-xcb-dev libglu1-mesa-dev libxrender-dev \
+  libxi-dev libxkbcommon-x11-dev libegl1-mesa-dev libsm-dev \
+  autoconf autoconf-archive automake libtool libltdl-dev pkg-config
+```
+
+#### macOS System Dependencies
+
+```bash
+brew install ninja autoconf autoconf-archive automake libtool pkg-config
+```
+
+#### Windows System Dependencies
+
+```bash
+choco install ninja
+```
+
+MSVC must be available on the PATH (e.g., use the Visual Studio Developer Command Prompt).
 
 ### Build Workflow
 
