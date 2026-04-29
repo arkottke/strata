@@ -158,12 +158,15 @@ void CompatibleRvtMotion::calculate() {
   //
   const QVector<double> estimateFas = vanmarckeInversion();
 
-  // Interpolate the FAS using a cubic spline, extrapolate at low frequencies.
+  // Interpolate the FAS using a cubic spline, extrapolate at low and high
+  // frequencies.
   const double targetMinFreq = 1. / _targetRespSpec->period().last();
+  const double targetMaxFreq = 1. / _targetRespSpec->period().first();
 
   //    _freq = Dimension::logSpace( qMin(targetMinFreq / 2., 0.05),
   //    _maxEngFreq, 1024 ); _fourierAcc.resize(freq().size());
   int offset = 0;
+  int highOffset = freq().size();
 
   gsl_interp_accel *acc = gsl_interp_accel_alloc();
   gsl_spline *spline =
@@ -182,6 +185,16 @@ void CompatibleRvtMotion::calculate() {
       // estimate of the FAS.
       _fourierAcc[i] = exp(1.92 * log(freq().at(i) / freq0) + logFas0);
       offset = i;
+    } else if (freq().at(i) > targetMaxFreq) {
+      // High frequency: extrapolate using the slope at the high-freq end
+      if (highOffset == freq().size()) {
+        highOffset = i;
+      }
+      double logFreqHigh = log(targetMaxFreq);
+      double logFasHigh = log(_fourierAcc[highOffset - 1]);
+      // Use a decay slope of -2 in log-log space
+      _fourierAcc[i] =
+          exp(-2.0 * (log(freq().at(i)) - logFreqHigh) + logFasHigh);
     } else {
       _fourierAcc[i] = gsl_spline_eval(spline, 1. / freq().at(i), acc);
     }
@@ -230,7 +243,7 @@ void CompatibleRvtMotion::calculate() {
     gsl_spline_init(spline, _respSpec->period().data(), ratio.data(),
                     ratio.size());
 
-    for (int i = offset; i < freq().size(); ++i) {
+    for (int i = offset; i < highOffset; ++i) {
       _fourierAcc[i] *= gsl_spline_eval(spline, 1. / freq().at(i), acc);
     }
 
@@ -246,6 +259,26 @@ void CompatibleRvtMotion::calculate() {
 
     for (int i = 0; i < offset; ++i) {
       _fourierAcc[i] = exp(slope * (log(freq().at(i)) - logFreq0) + logFas0);
+    }
+
+    // Extrapolate the high frequency values beyond the target spectrum
+    if (highOffset < freq().size()) {
+      double logFreqHigh = log(freq().at(highOffset - 1));
+      double logFasHigh = log(_fourierAcc.at(highOffset - 1));
+      double highSlope =
+          (highOffset >= 2)
+              ? (log(_fourierAcc.at(highOffset - 1) /
+                     _fourierAcc.at(highOffset - 2)) /
+                 log(freq().at(highOffset - 1) / freq().at(highOffset - 2)))
+              : -2.0;
+      // Ensure the slope is negative (decaying)
+      if (highSlope > 0)
+        highSlope = -2.0;
+
+      for (int i = highOffset; i < freq().size(); ++i) {
+        _fourierAcc[i] =
+            exp(highSlope * (log(freq().at(i)) - logFreqHigh) + logFasHigh);
+      }
     }
 
     // Force down the high frequency tail above 10 Hz

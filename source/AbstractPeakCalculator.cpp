@@ -53,6 +53,9 @@ auto AbstractPeakCalculator::calcPeak(
     double duration, const QVector<double> &freqs,
     const QVector<double> &fourierAmps, double oscFreq, double oscDamping,
     const QVector<std::complex<double>> &siteTransFunc) -> double {
+  if (freqs.isEmpty() || fourierAmps.isEmpty()) {
+    return 0;
+  }
   initCache(freqs, fourierAmps);
   double peakFactor = calcPeakFactor(duration, oscFreq, oscDamping);
   double durationRms =
