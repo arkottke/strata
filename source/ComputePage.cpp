@@ -44,7 +44,8 @@ ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
   // Completion time
   _etaLineEdit = new QLineEdit;
   _etaLineEdit->setReadOnly(true);
-  _etaLineEdit->setFixedWidth(80);
+  _etaLineEdit->setMinimumWidth(150);
+  _etaLineEdit->setAlignment(Qt::AlignLeft);
 
   layout->addWidget(new QLabel(tr("ETC:")), 0, 1);
   layout->addWidget(_etaLineEdit, 0, 2);
@@ -141,5 +142,6 @@ void ComputePage::updateEta(int value) {
         int(avgRate * (_progressBar->maximum() - value)));
 
     _etaLineEdit->setText(QLocale::system().toString(eta));
+    _etaLineEdit->setCursorPosition(0);
   }
 }
