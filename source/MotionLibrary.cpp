@@ -233,7 +233,7 @@ auto MotionLibrary::setData(const QModelIndex &index, const QVariant &value,
     _motions[index.row()]->setEnabled(value.toBool());
     // Change entire row information
     emit dataChanged(index.sibling(index.row(), 0),
-                     index.sibling(index.row(), columnCount()));
+                     index.sibling(index.row(), columnCount() - 1));
   }
 
   return false;
@@ -282,7 +282,7 @@ auto MotionLibrary::motionAt(int row) -> AbstractMotion * {
 }
 
 void MotionLibrary::updateRow(int row) {
-  emit dataChanged(index(row, 0), index(row, columnCount()));
+  emit dataChanged(index(row, 0), index(row, columnCount() - 1));
 }
 
 auto MotionLibrary::approach() const -> MotionLibrary::Approach {

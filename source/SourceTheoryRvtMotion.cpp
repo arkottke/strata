@@ -375,7 +375,7 @@ void SourceTheoryRvtMotion::calculate() {
   }
 
   emit dataChanged(index(0, AmplitudeColumn),
-                   index(_fourierAcc.size(), AmplitudeColumn));
+                   index(_fourierAcc.size() - 1, AmplitudeColumn));
 
   AbstractRvtMotion::calculate();
 }
