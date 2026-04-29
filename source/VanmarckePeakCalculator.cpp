@@ -23,9 +23,11 @@
 
 #include <QDebug>
 
+#include <gsl/gsl_errno.h>
+
 VanmarckePeakCalculator::VanmarckePeakCalculator() {
   _name = "Vanmarcke (1975)";
-  _workspace = gsl_integration_workspace_alloc(1000);
+  _workspace = gsl_integration_workspace_alloc(4000);
 }
 
 VanmarckePeakCalculator::~VanmarckePeakCalculator() {
@@ -68,7 +70,18 @@ auto VanmarckePeakCalculator::calcPeakFactor(double duration, double oscFreq,
   F.function = &calcCCDF;
   F.params = &params;
 
-  gsl_integration_qagiu(&F, 0, 1e-4, 1e-4, 1000, _workspace, &peakFactor,
-                        &error);
+  // Disable the default GSL error handler to prevent abort on integration
+  // difficulties
+  gsl_error_handler_t *oldHandler = gsl_set_error_handler_off();
+
+  int status = gsl_integration_qagiu(&F, 0, 1e-4, 1e-4, 4000, _workspace,
+                                     &peakFactor, &error);
+
+  gsl_set_error_handler(oldHandler);
+
+  if (status && peakFactor <= 0) {
+    peakFactor = 2.5;
+  }
+
   return peakFactor;
 }
