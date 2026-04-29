@@ -307,7 +307,7 @@ auto operator<<(QDataStream &out, const RatiosOutputCatalog *roc)
     -> QDataStream & {
   out << (quint8)1;
 
-  out << roc->_outputs.size();
+  out << (qint32)roc->_outputs.size();
 
   for (auto *aro : roc->_outputs)
     out << QString(aro->metaObject()->className()) << aro;

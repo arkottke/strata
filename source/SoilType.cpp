@@ -351,7 +351,7 @@ auto operator>>(QDataStream &in, SoilType *st) -> QDataStream & {
     }
   }
 
-  if (ver > 1) {
+  if (ver < 2) {
     // minDamping no longer used, consume for backward compatibility
     double unused;
     in >> unused;
