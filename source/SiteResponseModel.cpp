@@ -493,47 +493,33 @@ void SiteResponseModel::run() {
       // Compute the site response
       bool calcOk = _calculator->run(_motionLibrary->motionAt(j), _siteProfile);
 
-      if (!calcOk) {
-        _okToContinue = false;
-        break;
+      if (!calcOk || (_siteProfile->onlyConverged() &&
+                      _calculator->status() == NoConvergence)) {
+        if (siteCount > 1) {
+          // Error in the calculation -- need to remove the site
+          _outputCatalog->log()->append(
+              tr("\tCalculation failed -- removing site."));
+          // Remove the results if they were saved
+          if (profileResultsSaved) {
+            _outputCatalog->removeLastSite();
+          }
+          // Reset site count and try once again
+          --i;
+          // Stop iterating over motions
+          break;
+        } else {
+          _okToContinue = false;
+          break;
+        }
       }
 
-      // if (siteCount > 1)
-      // {
-      //     if (!calcOk || (_siteProfile->onlyConverged() &&
-      //                     _calculator->status() ==
-      //                     CalculationStatus::WavePropagationError))
-      //     {
-      //         calcOk = false;
-      //         // Error in the calculation -- need to remove the site
-      //         _outputCatalog->log()->append(tr("\tWave propagation error --
-      //         removing site."));
-      //         // Remove the results if they were saved
-      //         if (profileResultsSaved) {
-      //             _outputCatalog->removeLastSite();
-      //         }
-      //         // Reset site count and try once again
-      //         --i;
-      //         // Stop iterating over motions
-      //         break;
-      //     }
-      // } else {
-      //     _okToContinue = false;
-      // }
+      // Generate the output
+      _outputCatalog->saveResults(j - motionCountOffset, _calculator);
+      profileResultsSaved = true;
+      // Increment the progress bar
+      ++count;
+      emit progressChanged(count);
 
-      if (!_okToContinue) {
-        // Break if not okay to continue
-        break;
-      }
-
-      if (calcOk) {
-        // Generate the output
-        _outputCatalog->saveResults(j - motionCountOffset, _calculator);
-        profileResultsSaved = true;
-        // Increment the progress bar
-        ++count;
-        emit progressChanged(count);
-      }
       // Reset the sublayers
       _siteProfile->resetSubLayers();
     }

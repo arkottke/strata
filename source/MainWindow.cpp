@@ -327,12 +327,14 @@ auto MainWindow::save() -> bool {
   if (_model->fileName().isEmpty())
     return saveAs();
 
-  const QString &fileName = _model->fileName();
+  // Always save as JSON, converting .strata filenames
+  QString fileName = _model->fileName();
+  if (fileName.endsWith(".strata", Qt::CaseInsensitive)) {
+    fileName.replace(fileName.length() - 7, 7, ".json");
+    _model->setFileName(fileName);
+  }
 
-  // Save the model
-  if (fileName.endsWith(".strata")) {
-    _model->saveBinary();
-  } else if (fileName.endsWith(".json")) {
+  if (fileName.endsWith(".json", Qt::CaseInsensitive)) {
     _model->saveJson();
   } else {
     showExtensionError(this);
@@ -343,24 +345,25 @@ auto MainWindow::save() -> bool {
 }
 
 auto MainWindow::saveAs() -> bool {
-  // Prompt for a fileName
+  // Prompt for a fileName -- only JSON format is supported for saving
+  QString defaultName = _model->fileName();
+  if (defaultName.endsWith(".strata", Qt::CaseInsensitive)) {
+    defaultName.replace(defaultName.length() - 7, 7, ".json");
+  }
   QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save file as..."),
-      (_model->fileName().isEmpty()
+      (defaultName.isEmpty()
            ? _settings
                  ->value("projectDirectory",
                          QStandardPaths::writableLocation(
                              QStandardPaths::DocumentsLocation))
                  .toString()
-           : _model->fileName()),
-      "Strata JSON File (*.json);;"
-      "Strata Binary File (*.strata);;"
-      "Strata Files (*.strata *.json);;");
+           : defaultName),
+      "Strata JSON File (*.json)");
 
   if (!fileName.isEmpty()) {
-    // Make sure that the file name ends with .strata or .stratahr
-    if (!fileName.endsWith(".strata", Qt::CaseInsensitive) &&
-        !fileName.endsWith(".json", Qt::CaseInsensitive)) {
+    // Ensure the file name ends with .json
+    if (!fileName.endsWith(".json", Qt::CaseInsensitive)) {
       fileName.append(".json");
     }
 
