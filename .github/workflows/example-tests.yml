@@ -16,7 +16,14 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/share/powershell
+          sudo rm -rf /imagegeneration
+          sudo swapoff -a
+          sudo rm -f /mnt/swapfile
           sudo docker image prune --all --force
+          df -h
 
       - uses: actions/checkout@v5
         with:
@@ -45,6 +52,8 @@ jobs:
             libltdl-dev \
             pkg-config \
             python3
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
