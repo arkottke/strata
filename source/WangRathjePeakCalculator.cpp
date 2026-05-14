@@ -102,23 +102,26 @@ auto WangRathjePeakCalculator::calcDurationRms(
         break;
       }
     }
-    // Amplitude / frequency ratio of the first mode
-    double afRatio = modeAmps.at(0) / modeFreqs.at(0);
 
-    double incrMax;
-    double c;
-    double m;
-    double incr = 0;
-    for (int i = 0; i < modeFreqs.size(); ++i) {
-      c = _coefs.at(i).a * afRatio + _coefs.at(i).b * std::pow(afRatio, 2);
-      m = _coefs.at(i).d * afRatio + _coefs.at(i).e * std::pow(afRatio, 2);
-      incrMax = c * std::exp(-duration / m);
-      incr += (incrMax *
-               std::exp(-std::pow(std::log(oscFreq / modeFreqs.at(i)), 2) /
-                        (2 * std::pow(_coefs.at(i).sd, 2))));
+    if (!modeAmps.isEmpty() && !modeFreqs.isEmpty()) {
+      // Amplitude / frequency ratio of the first mode
+      double afRatio = modeAmps.at(0) / modeFreqs.at(0);
+
+      double incrMax;
+      double c;
+      double m;
+      double incr = 0;
+      for (int i = 0; i < modeFreqs.size(); ++i) {
+        c = _coefs.at(i).a * afRatio + _coefs.at(i).b * std::pow(afRatio, 2);
+        m = _coefs.at(i).d * afRatio + _coefs.at(i).e * std::pow(afRatio, 2);
+        incrMax = c * std::exp(-duration / m);
+        incr += (incrMax *
+                 std::exp(-std::pow(std::log(oscFreq / modeFreqs.at(i)), 2) /
+                          (2 * std::pow(_coefs.at(i).sd, 2))));
+      }
+      const double durOscSoil = durOscRock + incr;
+      durationRms *= (durOscSoil / durOscRock);
     }
-    const double durOscSoil = durOscRock + incr;
-    durationRms *= (durOscSoil / durOscRock);
   }
   return durationRms;
 }
