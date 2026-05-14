@@ -31,6 +31,8 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 
@@ -43,6 +45,7 @@ SourceTheoryRvtMotionDialog::SourceTheoryRvtMotionDialog(
 auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   auto strm = qobject_cast<SourceTheoryRvtMotion *>(_motion);
   auto layout = AbstractRvtMotionDialog::createParametersLayout();
+  auto sourceParamsLayout = new QFormLayout;
 
   const bool isCustomized = strm->isCustomized();
 
@@ -71,7 +74,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(tr("Depth:"), doubleSpinBox);
+  sourceParamsLayout->addRow(tr("Depth:"), doubleSpinBox);
 
   // Stress drop
   doubleSpinBox = new QDoubleSpinBox;
@@ -90,7 +93,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(
+  sourceParamsLayout->addRow(
       QString(tr("Stress drop (%1%2)")).arg(QChar(0x0394)).arg(QChar(0x03c3)),
       doubleSpinBox);
 
@@ -110,10 +113,10 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(tr("Geometric atten.:"), doubleSpinBox);
+  sourceParamsLayout->addRow(tr("Geometric atten.:"), doubleSpinBox);
 
   // Path attenuation
-  layout->addRow(new QLabel(
+  sourceParamsLayout->addRow(new QLabel(
       tr("Path attenuation, Q(f) = <b>a</b> f <sup><b>b</b></sup>")));
 
   doubleSpinBox = new QDoubleSpinBox;
@@ -134,7 +137,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   auto label = new QLabel(tr("Coefficient (a):"));
   const int indent = 20;
   label->setIndent(indent);
-  layout->addRow(label, doubleSpinBox);
+  sourceParamsLayout->addRow(label, doubleSpinBox);
 
   doubleSpinBox = new QDoubleSpinBox;
   doubleSpinBox->setRange(0.0, 1.0);
@@ -153,7 +156,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
 
   label = new QLabel(tr("Power (b):"));
   label->setIndent(indent);
-  layout->addRow(label, doubleSpinBox);
+  sourceParamsLayout->addRow(label, doubleSpinBox);
 
   // Shear velocity
   doubleSpinBox = new QDoubleSpinBox;
@@ -172,7 +175,8 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(tr("Shear velocity (v<sub>s</sub>):"), doubleSpinBox);
+  sourceParamsLayout->addRow(tr("Shear velocity (v<sub>s</sub>):"),
+                             doubleSpinBox);
 
   // Density
   doubleSpinBox = new QDoubleSpinBox;
@@ -191,7 +195,8 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(QString(tr("Density (%1)")).arg(QChar(0x03c1)), doubleSpinBox);
+  sourceParamsLayout->addRow(QString(tr("Density (%1)")).arg(QChar(0x03c1)),
+                             doubleSpinBox);
 
   // Site Attenuation
   doubleSpinBox = new QDoubleSpinBox;
@@ -210,7 +215,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
           &QDoubleSpinBox::setEnabled);
 
-  layout->addRow(
+  sourceParamsLayout->addRow(
       QString(tr("Site attenuation (%1<sub>0</sub>)")).arg(QChar(0x03ba)),
       doubleSpinBox);
 
@@ -226,7 +231,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::durationChanged, doubleSpinBox,
           &QDoubleSpinBox::setValue);
 
-  layout->addRow(tr("Duration:"), doubleSpinBox);
+  sourceParamsLayout->addRow(tr("Duration:"), doubleSpinBox);
 
   // Path duration model
   auto comboBox = new QComboBox;
@@ -241,7 +246,7 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, comboBox,
           &QComboBox::setEnabled);
 
-  layout->addRow(tr("Path duration model:"), comboBox);
+  sourceParamsLayout->addRow(tr("Path duration model:"), comboBox);
 
   // Crustal amp model
   comboBox = new QComboBox;
@@ -256,12 +261,19 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, comboBox,
           &QComboBox::setEnabled);
 
-  layout->addRow(tr("Crustal amplification model:"), comboBox);
+  sourceParamsLayout->addRow(tr("Crustal amplification model:"), comboBox);
+
+  auto sourceParamsGroupBox = new QGroupBox(tr("Source Parameters"));
+  sourceParamsGroupBox->setLayout(sourceParamsLayout);
 
   // Add additional tabs
   _paramsTabWidget = new QTabWidget;
   auto frame = new QFrame;
-  frame->setLayout(layout);
+  auto hboxLayout = new QHBoxLayout;
+  hboxLayout->addLayout(layout);
+  hboxLayout->addWidget(sourceParamsGroupBox);
+  hboxLayout->setAlignment(sourceParamsGroupBox, Qt::AlignTop);
+  frame->setLayout(hboxLayout);
   _paramsTabWidget->addTab(frame, tr("Parameters"));
 
   // Path duration model
