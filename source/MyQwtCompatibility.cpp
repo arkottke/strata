@@ -21,10 +21,61 @@
 
 #include "MyQwtCompatibility.h"
 
-auto logScaleEngine() -> QwtScaleEngine * {
+#include <algorithm>
+#include <cmath>
+
+namespace {
+
+constexpr double MinPositiveLogLimit = 1e-12;
+constexpr double MaxLogDecades = 12.0;
+
+void sanitizeScaleBounds(double &x1, double &x2);
+
 #if QWT_VERSION < 0x060100
-  return new QwtLog10ScaleEngine;
+class SafeLogScaleEngine : public QwtLog10ScaleEngine {
+public:
+  void autoScale(int maxNumSteps, double &x1, double &x2,
+                 double &stepSize) const override {
+    QwtLog10ScaleEngine::autoScale(maxNumSteps, x1, x2, stepSize);
+    sanitizeScaleBounds(x1, x2);
+  }
+};
 #else
-  return new QwtLogScaleEngine(10);
+class SafeLogScaleEngine : public QwtLogScaleEngine {
+public:
+  SafeLogScaleEngine() : QwtLogScaleEngine(10) {}
+
+  void autoScale(int maxNumSteps, double &x1, double &x2,
+                 double &stepSize) const override {
+    QwtLogScaleEngine::autoScale(maxNumSteps, x1, x2, stepSize);
+    sanitizeScaleBounds(x1, x2);
+  }
+};
 #endif
+
+void sanitizeScaleBounds(double &x1, double &x2) {
+  if (!std::isfinite(x1) || !std::isfinite(x2)) {
+    x1 = MinPositiveLogLimit;
+    x2 = 1.0;
+    return;
+  }
+
+  if (x2 < x1)
+    std::swap(x1, x2);
+
+  if (x2 <= 0.0) {
+    x1 = MinPositiveLogLimit;
+    x2 = 1.0;
+    return;
+  }
+
+  const double minFromUpper = x2 / std::pow(10.0, MaxLogDecades);
+  x1 = std::max(x1, std::max(MinPositiveLogLimit, minFromUpper));
+
+  if (x2 <= x1)
+    x2 = x1 * 10.0;
 }
+
+} // namespace
+
+auto logScaleEngine() -> QwtScaleEngine * { return new SafeLogScaleEngine; }
