@@ -413,8 +413,8 @@ auto ResultsPage::createDataTabWidget() -> QTabWidget * {
                                    QwtPicker::ActiveOnly, _plot->canvas());
   picker->setStateMachine(new QwtPickerDragPointMachine());
 
-  connect(picker, &QwtPlotPicker::appended, this,
-          [this](const QPointF &point) { pointSelected(point.toPoint()); });
+  connect(picker, qOverload<const QPoint &>(&QwtPicker::appended), this,
+          &ResultsPage::pointSelected);
 
   // Legend
   auto *legend = new QwtLegend;
@@ -461,8 +461,8 @@ auto ResultsPage::createDataTabWidget() -> QTabWidget * {
 void ResultsPage::createContextMenu() {
   // Create the context menu
   _plotContextMenu = new QMenu;
-  _plotContextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"), this,
-                              &ResultsPage::copyPlot);
+  _plotContextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"),
+                              QKeySequence::Copy, this, &ResultsPage::copyPlot);
   _plotContextMenu->addSeparator();
   _plotContextMenu->addAction(tr("Plot Options"), this,
                               &ResultsPage::configurePlot);
