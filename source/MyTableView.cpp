@@ -173,19 +173,16 @@ void MyTableView::contextMenuEvent(QContextMenuEvent *event) {
   // Create the context menu
   auto *contextMenu = new QMenu;
 
-  contextMenu->addAction(
-      QIcon(":/images/edit-copy.svg"), tr("Copy"), this, [this]() { copy(); },
-      QKeySequence::Copy);
+  contextMenu->addAction(QIcon(":/images/edit-copy.svg"), tr("Copy"),
+                         QKeySequence::Copy, this, [this]() { copy(); });
 
   if (!_readOnly)
-    contextMenu->addAction(
-        QIcon(":/images/edit-paste.svg"), tr("Paste"), this,
-        [this]() { paste(); }, QKeySequence::Paste);
+    contextMenu->addAction(QIcon(":/images/edit-paste.svg"), tr("Paste"),
+                           QKeySequence::Paste, this, [this]() { paste(); });
 
   contextMenu->addSeparator();
-  contextMenu->addAction(
-      tr("Select All"), this, [this]() { selectAll(); },
-      QKeySequence::SelectAll);
+  contextMenu->addAction(tr("Select All"), QKeySequence::SelectAll, this,
+                         [this]() { selectAll(); });
 
   contextMenu->popup(event->globalPos());
 }
