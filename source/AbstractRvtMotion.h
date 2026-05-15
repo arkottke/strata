@@ -129,8 +129,8 @@ public slots:
   virtual void calculate();
 
   void setRegion(int region);
-  void setMagnitude(double magnitude);
-  void setDistance(double distance);
+  virtual void setMagnitude(double magnitude);
+  virtual void setDistance(double distance);
   void setName(const QString &name);
 
 signals:

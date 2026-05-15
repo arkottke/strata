@@ -45,7 +45,7 @@ public:
   SourceTheoryRvtMotion(QObject *parent = nullptr);
   virtual ~SourceTheoryRvtMotion();
 
-  virtual void setRegion(AbstractRvtMotion::Region region);
+  virtual void setRegion(AbstractRvtMotion::Region region) override;
 
   virtual auto freq() const -> const QVector<double> &;
   auto freqDimension() -> Dimension *;
@@ -90,15 +90,16 @@ signals:
 public slots:
   void setDensity(double density);
   void setDepth(double depth);
-  void setDistance(double dist);
+  void setDistance(double dist) override;
   void setGeoAtten(double geoAtten);
   void setIsCustomized(bool b);
-  void setMagnitude(double mag);
+  void setMagnitude(double mag) override;
   void setStressDrop(double stressDrop);
   void setPathAttenCoeff(double pathAttenCoeff);
   void setPathAttenPower(double pathAttenPower);
   void setShearVelocity(double shearVelocity);
   void setSiteAtten(double siteAtten);
+  void setDuration(double duration);
 
   //! Calculate the FAS and associated response spectrum
   virtual void calculate();
@@ -112,6 +113,9 @@ private:
 
   //! If the model is custom
   bool _isCustomized;
+
+  //! If the duration is manually specified in customized mode
+  bool _isDurationCustomized;
 
   /*! Seismic moment.
    * The seismic moment is calculated from the moment magnitude.

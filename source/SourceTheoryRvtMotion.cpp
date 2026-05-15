@@ -31,7 +31,7 @@ SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject *parent)
     : AbstractRvtMotion(parent), _isCustomized(false), _seismicMoment(0),
       _depth(0), _hypoDistance(0), _cornerFreq(0), _stressDrop(0), _geoAtten(0),
       _pathAttenCoeff(0), _pathAttenPower(0), _shearVelocity(0), _density(0),
-      _siteAtten(0) {
+      _siteAtten(0), _isDurationCustomized(false) {
   _freq = new Dimension(this);
   _freq->setMin(0.05);
   _freq->setMax(50);
@@ -49,6 +49,16 @@ SourceTheoryRvtMotion::SourceTheoryRvtMotion(QObject *parent)
   _pathDuration = new PathDurationModel;
   connect(_pathDuration, &PathDurationModel::wasModified, this,
           &SourceTheoryRvtMotion::wasModified);
+  connect(_pathDuration, &PathDurationModel::sourceChanged, this,
+          [this](int) { init(); });
+  connect(_pathDuration, &PathDurationModel::dataChanged, this,
+          [this](const QModelIndex &, const QModelIndex &) { init(); });
+  connect(_pathDuration, &PathDurationModel::modelReset, this,
+          [this]() { init(); });
+  connect(_pathDuration, &PathDurationModel::rowsInserted, this,
+          [this](const QModelIndex &, int, int) { init(); });
+  connect(_pathDuration, &PathDurationModel::rowsRemoved, this,
+          [this](const QModelIndex &, int, int) { init(); });
   connect(this, &SourceTheoryRvtMotion::regionChanged, _pathDuration,
           qOverload<int>(&PathDurationModel::setRegion));
 
@@ -185,6 +195,10 @@ auto SourceTheoryRvtMotion::isCustomized() const -> bool {
 void SourceTheoryRvtMotion::setIsCustomized(bool b) {
   if (_isCustomized != b) {
     _isCustomized = b;
+    if (!_isCustomized) {
+      _isDurationCustomized = false;
+      init();
+    }
     emit isCustomizedChanged(b);
     emit wasModified();
   }
@@ -286,6 +300,19 @@ void SourceTheoryRvtMotion::setSiteAtten(double siteAtten) {
   }
 }
 
+void SourceTheoryRvtMotion::setDuration(double duration) {
+  if (!_isCustomized) {
+    return;
+  }
+
+  if (abs(_duration - duration) > DBL_EPSILON) {
+    _duration = duration;
+    _isDurationCustomized = true;
+    emit durationChanged(_duration);
+    emit wasModified();
+  }
+}
+
 auto SourceTheoryRvtMotion::crustalAmp() -> CrustalAmplification * {
   return _crustalAmp;
 }
@@ -309,7 +336,9 @@ void SourceTheoryRvtMotion::init() {
   double sourceDur = 1 / _cornerFreq;
   double pathDur = _pathDuration->duration(_hypoDistance);
 
-  _duration = sourceDur + pathDur;
+  if (!_isCustomized || !_isDurationCustomized) {
+    _duration = sourceDur + pathDur;
+  }
   emit durationChanged(_duration);
 }
 
@@ -384,6 +413,7 @@ void SourceTheoryRvtMotion::fromJson(const QJsonObject &json) {
   AbstractRvtMotion::fromJson(json);
 
   _isCustomized = json["isCustomized"].toBool();
+  _isDurationCustomized = json["isDurationCustomized"].toBool(false);
   if (_isCustomized) {
     _depth = json["depth"].toDouble();
     _stressDrop = json["stressDrop"].toDouble();
@@ -406,6 +436,7 @@ auto SourceTheoryRvtMotion::toJson() const -> QJsonObject {
   json["depth"] = _depth;
   json["freq"] = _freq->toJson();
   json["isCustomized"] = _isCustomized;
+  json["isDurationCustomized"] = _isDurationCustomized;
 
   if (_isCustomized) {
     json["stresDrop"] = _stressDrop;
@@ -423,10 +454,11 @@ auto SourceTheoryRvtMotion::toJson() const -> QJsonObject {
 
 auto operator<<(QDataStream &out, const SourceTheoryRvtMotion *strm)
     -> QDataStream & {
-  out << static_cast<quint8>(4);
+  out << static_cast<quint8>(5);
   out << qobject_cast<const AbstractRvtMotion *>(strm);
   // Properties of SourceTheoryRvtMotion
-  out << strm->_depth << strm->_freq << strm->_isCustomized;
+  out << strm->_depth << strm->_freq << strm->_isCustomized
+      << strm->_isDurationCustomized;
   if (strm->_isCustomized) {
     out << strm->_stressDrop << strm->_geoAtten << strm->_pathAttenCoeff
         << strm->_pathAttenPower << strm->_shearVelocity << strm->_density
@@ -450,6 +482,10 @@ auto operator>>(QDataStream &in, SourceTheoryRvtMotion *strm) -> QDataStream & {
 
   if (ver > 3)
     in >> strm->_isCustomized;
+  if (ver > 4)
+    in >> strm->_isDurationCustomized;
+  else
+    strm->_isDurationCustomized = false;
 
   if (strm->_isCustomized) {
     in >> strm->_stressDrop >> strm->_geoAtten >> strm->_pathAttenCoeff >>

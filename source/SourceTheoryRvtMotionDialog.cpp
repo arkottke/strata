@@ -224,12 +224,17 @@ auto SourceTheoryRvtMotionDialog::createParametersLayout() -> QFormLayout * {
   doubleSpinBox->setRange(0, 1000);
   doubleSpinBox->setDecimals(2);
   doubleSpinBox->setSuffix(" sec");
-  doubleSpinBox->setReadOnly(true);
-  doubleSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+  doubleSpinBox->setReadOnly(_readOnly);
 
   doubleSpinBox->setValue(strm->duration());
+  doubleSpinBox->setEnabled(isCustomized);
+
+  connect(doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), strm,
+          &SourceTheoryRvtMotion::setDuration);
   connect(strm, &SourceTheoryRvtMotion::durationChanged, doubleSpinBox,
           &QDoubleSpinBox::setValue);
+  connect(strm, &SourceTheoryRvtMotion::isCustomizedChanged, doubleSpinBox,
+          &QDoubleSpinBox::setEnabled);
 
   sourceParamsLayout->addRow(tr("Duration:"), doubleSpinBox);
 
