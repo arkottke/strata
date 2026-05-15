@@ -1,7 +1,7 @@
 History
 =======
 
-v0.9.1 (2022-09-22)
+v0.9.2 (2022-09-22)
 -------------------
 - Fixed: Wang & Rathje peak factor formulation to work if no peak is found
 - Fixed: Selection of output via the plot
