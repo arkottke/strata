@@ -6,6 +6,7 @@ v0.9.2 (2022-09-22)
 - Fixed: Wang & Rathje peak factor formulation to work if no peak is found
 - Fixed: Selection of output via the plot
 - Fixed: Uniform depth distribution entry to allow min to be set first.
+- Fixed: SourceTheoryRvtMotionDialog now allows duration to be changed.
 - Changed: SourceTheoryRvtMotionDialog adjusted to be wider
 
 v0.9.0 (2022-09-22)
