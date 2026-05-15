@@ -1,6 +1,13 @@
 History
 =======
 
+v0.9.1 (2022-09-22)
+-------------------
+- Fixed: Wang & Rathje peak factor formulation to work if no peak is found
+- Fixed: Selection of output via the plot
+- Fixed: Uniform depth distribution entry to allow min to be set first.
+- Changed: SourceTheoryRvtMotionDialog adjusted to be wider
+
 v0.9.0 (2022-09-22)
 -------------------
 - Changed: Stopped iterations if strain exceeds nonlinear curves
