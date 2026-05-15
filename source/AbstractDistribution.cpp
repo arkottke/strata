@@ -34,7 +34,7 @@ AbstractDistribution::AbstractDistribution(QObject *parent) : QObject(parent) {
   _hasMin = false;
   _min = 0;
   _hasMax = false;
-  _max = 0;
+  _max = 10000;
 }
 
 auto AbstractDistribution::typeList() -> QStringList {
