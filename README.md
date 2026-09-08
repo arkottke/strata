@@ -19,10 +19,22 @@ understanding of the process.
 
 ## Binaries
 
-Pre-built binaries for Windows are available from the [Github releases
+Pre-built binaries for Windows, Mac OS (Darwin), and Linux are available from the [Github releases
 page](https://github.com/arkottke/strata/releases).
 
 When installing from the Windows `.zip` archive, the executable is located at `bin/strata.exe`.
+
+For Mac OS, you can install _Strata_ using [homebrew](https://brew.sh/):
+
+```
+brew install --cask arkottke/strata/strata
+```
+Or, as two steps:
+
+```
+brew tap arkottke/strata
+brew install --cask strata
+```
 
 ## Citation
 
