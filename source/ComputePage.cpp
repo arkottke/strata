@@ -29,6 +29,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLocale>
+#include <QMessageBox>
 #include <QTime>
 
 ComputePage::ComputePage(QWidget *parent, Qt::WindowFlags f)
@@ -114,6 +115,22 @@ void ComputePage::setReadOnly(bool b) {
 }
 
 void ComputePage::compute() {
+  const QStringList errors = _model->validationErrors();
+  if (!errors.isEmpty()) {
+    _logView->clear();
+    _model->outputCatalog()->log()->clear();
+    _model->outputCatalog()->log()->append(tr("<b>Calculation not started:</b>"));
+    for (const QString &error : errors)
+      _model->outputCatalog()->log()->append(tr(" - %1").arg(error));
+
+    QMessageBox::critical(
+        this, tr("Invalid calculation parameters"),
+        tr("The calculation was not started because the input contains %n "
+           "error(s).\n\nCorrect the listed parameters and try again.", "",
+           errors.size()));
+    return;
+  }
+
   emit saveRequested();
 
   _logView->clear();

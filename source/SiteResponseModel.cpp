@@ -22,20 +22,38 @@
 #include "SiteResponseModel.h"
 
 #include "AbstractCalculator.h"
+#include "AbstractDistribution.h"
+#include "AbstractIterativeCalculator.h"
 #include "Algorithms.h"
+#include "BedrockDepthVariation.h"
+#include "CompatibleRvtMotion.h"
+#include "Dimension.h"
 #include "EquivalentLinearCalculator.h"
 #include "FrequencyDependentCalculator.h"
+#include "LayerThicknessVariation.h"
 #include "LinearElasticCalculator.h"
 #include "MotionLibrary.h"
 #include "MyRandomNumGenerator.h"
+#include "NonlinearProperty.h"
 #include "NonlinearPropertyRandomizer.h"
+#include "NonlinearPropertyUncertainty.h"
 #include "OutputCatalog.h"
 #include "ProfileRandomizer.h"
 #include "ProfilesOutputCatalog.h"
+#include "ResponseSpectrum.h"
+#include "RockLayer.h"
+#include "RvtMotion.h"
+#include "SoilLayer.h"
 #include "SoilProfile.h"
+#include "SoilType.h"
+#include "SoilTypeCatalog.h"
+#include "SourceTheoryRvtMotion.h"
+#include "TimeSeriesMotion.h"
 #include "SoilTypesOutputCatalog.h"
 #include "TextLog.h"
 #include "Units.h"
+#include "VelocityVariation.h"
+#include "VelocityLayer.h"
 
 #include <QApplication>
 #include <QFile>
@@ -46,6 +64,117 @@
 #include <QTimer>
 
 #include <QDebug>
+
+#include <cmath>
+
+namespace {
+auto validNumber(double value) -> bool { return std::isfinite(value); }
+
+void addError(QStringList &errors, const QString &message) {
+  errors.append(message);
+}
+
+void validateDimension(QStringList &errors, const QString &name,
+                       Dimension *dimension, double minimum,
+                       double maximum) {
+  if (!validNumber(dimension->min()) || !validNumber(dimension->max()) ||
+      dimension->min() < minimum || dimension->max() > maximum ||
+      dimension->min() >= dimension->max()) {
+    addError(errors, QObject::tr("%1 must have increasing values between %2 "
+                                 "and %3.")
+                         .arg(name)
+                         .arg(minimum)
+                         .arg(maximum));
+  }
+  if (dimension->size() < 2 || dimension->size() > 16384) {
+    addError(errors, QObject::tr("%1 must contain 2 to 16384 points.")
+                         .arg(name));
+  }
+}
+
+void validateDistribution(QStringList &errors, const QString &name,
+                          AbstractDistribution *distribution,
+                          bool positive) {
+  if (!validNumber(distribution->avg()) ||
+      (positive && distribution->avg() <= 0.0)) {
+    addError(errors, QObject::tr("%1 average must be a finite positive value.")
+                         .arg(name));
+  }
+  if (distribution->type() < AbstractDistribution::Uniform ||
+      distribution->type() > AbstractDistribution::LogNormal) {
+    addError(errors, QObject::tr("%1 has an invalid distribution type.")
+                         .arg(name));
+  }
+  if (distribution->type() != AbstractDistribution::Uniform &&
+      (!validNumber(distribution->stdev()) || distribution->stdev() < 0.0)) {
+    addError(errors,
+             QObject::tr("%1 standard deviation must be finite and nonnegative.")
+                 .arg(name));
+  }
+  if (distribution->hasMin() &&
+      (!validNumber(distribution->min()) ||
+       (positive && distribution->min() <= 0.0))) {
+    addError(errors, QObject::tr("%1 minimum must be a finite positive value.")
+                         .arg(name));
+  }
+  if (distribution->hasMax() &&
+      (!validNumber(distribution->max()) ||
+       (positive && distribution->max() <= 0.0))) {
+    addError(errors, QObject::tr("%1 maximum must be a finite positive value.")
+                         .arg(name));
+  }
+  if (distribution->hasMin() && distribution->hasMax() &&
+      distribution->min() >= distribution->max()) {
+    addError(errors, QObject::tr("%1 minimum must be less than its maximum.")
+                         .arg(name));
+  }
+}
+
+void validateNonlinearProperty(QStringList &errors, const QString &name,
+                               NonlinearProperty *property) {
+  if (!property || property->strain().size() < 2 ||
+      property->strain().size() != property->average().size()) {
+    addError(errors, QObject::tr("%1 must define at least two strain-property "
+                                 "pairs.")
+                         .arg(name));
+    return;
+  }
+
+  for (int i = 0; i < property->strain().size(); ++i) {
+    if (!validNumber(property->strain().at(i)) ||
+        property->strain().at(i) <= 0.0 ||
+        !validNumber(property->average().at(i))) {
+      addError(errors, QObject::tr("%1 contains a non-finite or invalid value "
+                                   "at row %2.")
+                           .arg(name)
+                           .arg(i + 1));
+      return;
+    }
+    if (i > 0 && property->strain().at(i - 1) >= property->strain().at(i)) {
+      addError(errors,
+               QObject::tr("%1 strain values must be strictly increasing.")
+                   .arg(name));
+      return;
+    }
+  }
+}
+
+void validateUncertainty(QStringList &errors, const QString &name,
+                         NonlinearPropertyUncertainty *uncertainty) {
+  if (!validNumber(uncertainty->min()) || !validNumber(uncertainty->max()) ||
+      uncertainty->min() <= 0.0 || uncertainty->min() >= uncertainty->max()) {
+    addError(errors, QObject::tr("%1 bounds must be finite, positive, and "
+                                 "increasing.")
+                         .arg(name));
+  }
+  if (!validNumber(uncertainty->lnStdev()) || uncertainty->lnStdev() < 0.0 ||
+      uncertainty->lnStdev() > 1.0) {
+    addError(errors, QObject::tr("%1 logarithmic standard deviation must be "
+                                 "between 0 and 1.")
+                         .arg(name));
+  }
+}
+} // namespace
 
 SiteResponseModel::SiteResponseModel(QObject *parent)
     : QThread(parent), _calculator(nullptr) {
@@ -402,6 +531,275 @@ auto SiteResponseModel::saveJson() -> bool {
 
 auto SiteResponseModel::hasResults() const -> bool { return _hasResults; }
 
+auto SiteResponseModel::validationErrors() -> QStringList {
+  QStringList errors;
+
+  if (_siteProfile->soilLayers().isEmpty()) {
+    addError(errors, tr("Add at least one soil layer."));
+  }
+  if (_motionLibrary->motionCount() == 0) {
+    addError(errors, tr("Enable at least one input motion."));
+  }
+
+  if (!validNumber(_siteProfile->waterTableDepth()) ||
+      _siteProfile->waterTableDepth() < 0.0) {
+    addError(errors, tr("Water table depth must be finite and nonnegative."));
+  }
+  if (!validNumber(_siteProfile->maxFreq()) || _siteProfile->maxFreq() < 15.0 ||
+      _siteProfile->maxFreq() > 100.0) {
+    addError(errors, tr("Maximum frequency must be between 15 and 100 Hz."));
+  }
+  if (!validNumber(_siteProfile->waveFraction()) ||
+      _siteProfile->waveFraction() < 0.10 ||
+      _siteProfile->waveFraction() > 0.35) {
+    addError(errors, tr("Wavelength fraction must be between 0.10 and 0.35."));
+  }
+
+  validateDistribution(errors, tr("Bedrock shear-wave velocity"),
+                       _siteProfile->bedrock(), true);
+  if (!validNumber(_siteProfile->bedrock()->untWt()) ||
+      _siteProfile->bedrock()->untWt() < 10.0 ||
+      _siteProfile->bedrock()->untWt() > 200.0) {
+    addError(errors, tr("Bedrock unit weight must be between 10 and 200."));
+  }
+  if (!validNumber(_siteProfile->bedrock()->avgDamping()) ||
+      _siteProfile->bedrock()->avgDamping() < 0.1 ||
+      _siteProfile->bedrock()->avgDamping() > 5.0) {
+    addError(errors, tr("Bedrock damping must be between 0.1 and 5 percent."));
+  }
+
+  for (int i = 0; i < _siteProfile->soilLayers().size(); ++i) {
+    SoilLayer *layer = _siteProfile->soilLayers().at(i);
+    const QString name = tr("Soil layer %1").arg(i + 1);
+    if (!validNumber(layer->thickness()) || layer->thickness() <= 0.0) {
+      addError(errors, tr("%1 thickness must be a finite positive value.")
+                           .arg(name));
+    }
+    if (!layer->soilType()) {
+      addError(errors, tr("%1 must have an assigned soil type.").arg(name));
+    }
+    validateDistribution(errors, name + tr(" shear-wave velocity"), layer,
+                         true);
+  }
+
+  SoilTypeCatalog *soilTypes = _siteProfile->soilTypeCatalog();
+  for (int i = 0; i < soilTypes->rowCount(); ++i) {
+    SoilType *soilType = soilTypes->soilType(i);
+    const QString name = tr("Soil type %1").arg(i + 1);
+    if (!validNumber(soilType->untWt()) || soilType->untWt() <= 0.0) {
+      addError(errors, tr("%1 unit weight must be a finite positive value.")
+                           .arg(name));
+    }
+    if (!validNumber(soilType->damping()) || soilType->damping() < 0.0) {
+      addError(errors, tr("%1 initial damping must be finite and nonnegative.")
+                           .arg(name));
+    }
+    if (nonlinearPropertiesRequired()) {
+      validateNonlinearProperty(errors, name + tr(" modulus curve"),
+                                soilType->modulusModel());
+      validateNonlinearProperty(errors, name + tr(" damping curve"),
+                                soilType->dampingModel());
+    }
+  }
+
+  if (auto *iterative = qobject_cast<AbstractIterativeCalculator *>(_calculator)) {
+    if (iterative->maxIterations() < 2 || iterative->maxIterations() > 60) {
+      addError(errors, tr("Maximum iterations must be between 2 and 60."));
+    }
+    if (!validNumber(iterative->errorTolerance()) ||
+        iterative->errorTolerance() < 0.5 ||
+        iterative->errorTolerance() > 10.0) {
+      addError(errors, tr("Error tolerance must be between 0.5 and 10 percent."));
+    }
+  }
+  if (auto *equivalent = qobject_cast<EquivalentLinearCalculator *>(_calculator)) {
+    if (!validNumber(equivalent->strainRatio()) ||
+        equivalent->strainRatio() < 0.45 || equivalent->strainRatio() > 0.80) {
+      addError(errors,
+               tr("Effective strain ratio must be between 0.45 and 0.80."));
+    }
+  }
+
+  if (_siteProfile->isVaried() && _siteProfile->profileCount() < 1) {
+    addError(errors, tr("Number of realizations must be at least one."));
+  }
+  if (_siteProfile->profileRandomizer()->enabled()) {
+    ProfileRandomizer *randomizer = _siteProfile->profileRandomizer();
+    VelocityVariation *velocity = randomizer->velocityVariation();
+    if (velocity->enabled()) {
+      if (velocity->stdevModel() < VelocityVariation::Custom ||
+          velocity->stdevModel() > VelocityVariation::USGS_D ||
+          velocity->correlModel() < VelocityVariation::Custom ||
+          velocity->correlModel() > VelocityVariation::USGS_D) {
+        addError(errors, tr("Velocity variation has an invalid model."));
+      }
+      if (velocity->stdevCustomEnabled() &&
+          (!validNumber(velocity->stdev()) || velocity->stdev() < 0.0 ||
+           velocity->stdev() > 1.0)) {
+        addError(errors, tr("Velocity variation standard deviation must be "
+                            "between 0 and 1."));
+      }
+      if (velocity->correlCustomEnabled() &&
+          (!validNumber(velocity->correlInitial()) ||
+           !validNumber(velocity->correlFinal()) ||
+           !validNumber(velocity->correlDelta()) ||
+           !validNumber(velocity->correlIntercept()) ||
+           !validNumber(velocity->correlExponent()) ||
+           velocity->correlInitial() < -1.0 ||
+           velocity->correlInitial() > 1.0 ||
+           velocity->correlFinal() < -1.0 || velocity->correlFinal() > 1.0 ||
+           velocity->correlDelta() < 0.0 || velocity->correlDelta() > 10.0 ||
+           velocity->correlIntercept() < 0.0 ||
+           velocity->correlIntercept() > 100.0 ||
+           velocity->correlExponent() < 0.0 ||
+           velocity->correlExponent() > 1.0)) {
+        addError(errors, tr("Velocity variation correlation parameters are out "
+                            "of range."));
+      }
+    }
+
+    LayerThicknessVariation *layering = randomizer->layerThicknessVariation();
+    if (layering->enabled() && layering->customEnabled() &&
+        (!validNumber(layering->coeff()) || !validNumber(layering->initial()) ||
+         !validNumber(layering->exponent()) || layering->coeff() < 0.0 ||
+         layering->coeff() > 100.0 || layering->initial() < 0.0 ||
+         layering->initial() > 100.0 || layering->exponent() < -5.0 ||
+         layering->exponent() > 0.0)) {
+      addError(errors,
+               tr("Layer-thickness variation parameters are out of range."));
+    }
+    BedrockDepthVariation *bedrockDepth =
+        randomizer->bedrockDepthVariation();
+    if (bedrockDepth->enabled()) {
+      validateDistribution(errors, tr("Bedrock-depth variation"), bedrockDepth,
+                           true);
+    }
+  }
+
+  NonlinearPropertyRandomizer *nonlinearRandomizer =
+      _siteProfile->nonlinearPropertyRandomizer();
+  if (nonlinearRandomizer->enabled()) {
+    if (nonlinearRandomizer->model() < NonlinearPropertyRandomizer::SPID ||
+        nonlinearRandomizer->model() > NonlinearPropertyRandomizer::Darendeli) {
+      addError(errors, tr("Nonlinear-property variation has an invalid model."));
+    }
+    if (!validNumber(nonlinearRandomizer->correl()) ||
+        nonlinearRandomizer->correl() < -1.0 ||
+        nonlinearRandomizer->correl() > 1.0) {
+      addError(errors, tr("Nonlinear-property correlation must be between -1 and 1."));
+    }
+    if (nonlinearRandomizer->customEnabled()) {
+      validateUncertainty(errors, tr("Modulus uncertainty"),
+                          nonlinearRandomizer->modulusUncert());
+      validateUncertainty(errors, tr("Damping uncertainty"),
+                          nonlinearRandomizer->dampingUncert());
+    }
+  }
+
+  for (int i = 0; i < _motionLibrary->rowCount(); ++i) {
+    AbstractMotion *motion = _motionLibrary->motionAt(i);
+    if (!motion->enabled())
+      continue;
+    const QString name = tr("Motion %1").arg(i + 1);
+    if (auto *timeSeries = qobject_cast<TimeSeriesMotion *>(motion)) {
+      if (!timeSeries->isLoaded() || timeSeries->accel().size() < 2) {
+        addError(errors, tr("%1 must have loaded time-series data.").arg(name));
+      }
+      if (!validNumber(timeSeries->timeStep()) ||
+          timeSeries->timeStep() < 0.0001 || timeSeries->timeStep() > 0.05) {
+        addError(errors, tr("%1 time step must be between 0.0001 and 0.05 seconds.")
+                             .arg(name));
+      }
+      if (!validNumber(timeSeries->scale()) || timeSeries->scale() < 0.001 ||
+          timeSeries->scale() > 20.0) {
+        addError(errors, tr("%1 scale must be between 0.001 and 20.").arg(name));
+      }
+    } else if (auto *rvt = qobject_cast<RvtMotion *>(motion)) {
+      if (!validNumber(rvt->duration()) || rvt->duration() <= 0.0 ||
+          rvt->freq().size() < 2 ||
+          rvt->freq().size() != rvt->fourierAcc().size()) {
+        addError(errors, tr("%1 must define a positive duration and at least two "
+                             "frequency-amplitude pairs.")
+                             .arg(name));
+      } else {
+        for (int j = 0; j < rvt->freq().size(); ++j) {
+          if (!validNumber(rvt->freq().at(j)) || rvt->freq().at(j) <= 0.0 ||
+              !validNumber(rvt->fourierAcc().at(j)) ||
+              rvt->fourierAcc().at(j) <= 0.0 ||
+              (j > 0 && rvt->freq().at(j - 1) >= rvt->freq().at(j))) {
+            addError(errors, tr("%1 has invalid frequency-amplitude data.")
+                                 .arg(name));
+            break;
+          }
+        }
+      }
+    } else if (auto *compatible = qobject_cast<CompatibleRvtMotion *>(motion)) {
+      validateDimension(errors, name + tr(" frequency"), compatible->freqDimension(),
+                        0.001, 1000.0);
+      ResponseSpectrum *spectrum = compatible->targetRespSpec();
+      if (!validNumber(compatible->duration()) || compatible->duration() <= 0.0 ||
+          spectrum->period().size() < 2 ||
+          spectrum->period().size() != spectrum->sa().size()) {
+        addError(errors, tr("%1 must define a positive duration and target response "
+                             "spectrum.")
+                             .arg(name));
+      } else {
+        for (int j = 0; j < spectrum->period().size(); ++j) {
+          if (!validNumber(spectrum->period().at(j)) ||
+              spectrum->period().at(j) <= 0.0 ||
+              !validNumber(spectrum->sa().at(j)) || spectrum->sa().at(j) < 0.0 ||
+              (j > 0 && spectrum->period().at(j - 1) >=
+                            spectrum->period().at(j))) {
+            addError(errors, tr("%1 has invalid target response-spectrum data.")
+                                 .arg(name));
+            break;
+          }
+        }
+      }
+    } else if (auto *source = qobject_cast<SourceTheoryRvtMotion *>(motion)) {
+      validateDimension(errors, name + tr(" frequency"), source->freqDimension(),
+                        0.001, 1000.0);
+      if (!validNumber(source->magnitude()) || source->magnitude() < 4.0 ||
+          source->magnitude() > 9.0 || !validNumber(source->distance()) ||
+          source->distance() < 0.0 || source->distance() > 2000.0 ||
+          !validNumber(source->depth()) || source->depth() <= 0.0 ||
+          !validNumber(source->duration()) || source->duration() <= 0.0) {
+        addError(errors, tr("%1 has invalid source-theory scenario parameters.")
+                             .arg(name));
+      }
+      if (source->isCustomized() &&
+          (!validNumber(source->stressDrop()) || source->stressDrop() <= 0.0 ||
+           !validNumber(source->geoAtten()) || source->geoAtten() <= 0.0 ||
+           !validNumber(source->pathAttenCoeff()) ||
+           source->pathAttenCoeff() <= 0.0 ||
+           !validNumber(source->pathAttenPower()) ||
+           source->pathAttenPower() <= 0.0 ||
+           !validNumber(source->shearVelocity()) ||
+           source->shearVelocity() <= 0.0 ||
+           !validNumber(source->density()) || source->density() <= 0.0 ||
+           !validNumber(source->siteAtten()) || source->siteAtten() < 0.0)) {
+        addError(errors, tr("%1 has invalid customized source-theory parameters.")
+                             .arg(name));
+      }
+    }
+  }
+
+  if (_outputCatalog->periodIsNeeded()) {
+    if (!validNumber(_outputCatalog->damping()) ||
+        _outputCatalog->damping() < 1.0 || _outputCatalog->damping() > 50.0) {
+      addError(errors, tr("Response spectrum damping must be between 1 and 50 percent."));
+    }
+    validateDimension(errors, tr("Response spectrum periods"),
+                      _outputCatalog->period(), 0.001, 100.0);
+  }
+  if (_outputCatalog->frequencyIsNeeded()) {
+    validateDimension(errors, tr("Output frequencies"),
+                      _outputCatalog->frequency(), 0.001, 1000.0);
+  }
+
+  return errors;
+}
+
 void SiteResponseModel::setHasResults(bool hasResults) {
   if (_hasResults != hasResults) {
     _hasResults = hasResults;
@@ -414,19 +812,15 @@ void SiteResponseModel::run() {
   _okToContinue = true;
   setHasResults(false);
 
-  // Check the input -- FIMXE add more thorough checks
-  if (_siteProfile->rowCount() < 2) {
-    qCritical() << "Need at least one soil layer!";
+  const QStringList errors = validationErrors();
+  if (!errors.isEmpty()) {
+    _outputCatalog->clear();
+    _outputCatalog->log()->append(tr("<b>Calculation not started:</b>"));
+    for (const QString &error : errors)
+      _outputCatalog->log()->append(tr(" - %1").arg(error));
     _okToContinue = false;
-  }
-
-  if (!_motionLibrary->rowCount()) {
-    qCritical() << "Need at least one input motion!";
-    _okToContinue = false;
-  }
-
-  if (!_okToContinue)
     return;
+  }
 
   _outputCatalog->clear();
   _outputCatalog->log()->append(tr("<b>Starting Strata Calculation</b>"));

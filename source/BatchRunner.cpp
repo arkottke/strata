@@ -25,17 +25,21 @@
 #include "TextLog.h"
 
 #include <QLocale>
+#include <QCoreApplication>
 #include <QTextDocument>
+#include <QTimer>
 #include <QtDebug>
 
 BatchRunner::BatchRunner(const QStringList &fileNames)
-    : _fileNames(fileNames), _begin(0), _end(100) {
+    : _fileNames(fileNames), _begin(0), _end(100), _currentModelIsValid(false),
+      _hasFailures(false) {
   startNext();
 }
 
 void BatchRunner::startNext() {
   if (_fileNames.isEmpty()) {
-    exit(0);
+    QCoreApplication::exit(_hasFailures ? 1 : 0);
+    return;
   }
 
   const QString fileName = _fileNames.takeFirst();
@@ -58,6 +62,18 @@ void BatchRunner::startNext() {
   connect(_model, &SiteResponseModel::progressChanged, this,
           &BatchRunner::updateEtc);
   connect(_model, &SiteResponseModel::finished, this, &BatchRunner::finalize);
+
+  const QStringList errors = _model->validationErrors();
+  _currentModelIsValid = errors.isEmpty();
+  if (!_currentModelIsValid) {
+    _hasFailures = true;
+    _model->outputCatalog()->log()->append(
+        tr("<b>Calculation not started:</b>"));
+    for (const QString &error : errors)
+      _model->outputCatalog()->log()->append(tr(" - %1").arg(error));
+    QTimer::singleShot(0, this, &BatchRunner::finalize);
+    return;
+  }
 
   _model->start();
 }
@@ -97,13 +113,17 @@ void BatchRunner::rangeChanged(int begin, int end) {
 void BatchRunner::finalize() {
   const QString fileName = _model->fileName();
 
-  qInfo().noquote() << "[BATCH] Saving results to:" << fileName;
-  if (fileName.endsWith(".strata")) {
-    _model->saveBinary();
+  if (_currentModelIsValid && _model->hasResults()) {
+    qInfo().noquote() << "[BATCH] Saving results to:" << fileName;
+    if (fileName.endsWith(".strata")) {
+      _model->saveBinary();
+    } else {
+      _model->saveJson();
+    }
   } else {
-    _model->saveJson();
+    _hasFailures = true;
+    qCritical().noquote() << "[BATCH] Failed processing:" << fileName;
   }
-  qInfo().noquote() << "[BATCH] Completed processing:" << fileName;
 
   _model->deleteLater();
   startNext();
