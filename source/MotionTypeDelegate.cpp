@@ -33,13 +33,16 @@ auto MotionTypeDelegate::createEditor(QWidget *parent,
                                       const QModelIndex & /*index*/) const
     -> QWidget * {
   auto *editor = new QComboBox(parent);
+  // Populate the items once at editor creation; setEditorData() is called
+  // again whenever the model emits dataChanged() while the editor is still
+  // open, so adding the items there would duplicate them.
+  editor->addItems(AbstractMotion::typeList());
   return editor;
 }
 
 void MotionTypeDelegate::setEditorData(QWidget *editor,
                                        const QModelIndex &index) const {
   auto *comboBox = static_cast<QComboBox *>(editor);
-  comboBox->addItems(AbstractMotion::typeList());
   comboBox->setCurrentIndex(index.model()->data(index, Qt::EditRole).toInt());
 }
 
