@@ -20,6 +20,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "DepthComboBox.h"
+#include "Units.h"
+
 #include <QLineEdit>
 
 #include <QDebug>
@@ -39,12 +41,14 @@ DepthComboBox::DepthComboBox(QWidget *parent) : QComboBox(parent) {
           &DepthComboBox::updateEditable);
   connect(this, &DepthComboBox::editTextChanged, this,
           &DepthComboBox::toDouble);
+  connect(Units::instance(), &Units::systemChanged, this,
+          &DepthComboBox::updateUnits);
 }
 
 auto DepthComboBox::depth() const -> double {
   if (currentIndex() == 0)
     // Depth specified
-    return currentText().toDouble();
+    return parseDepth(currentText());
   else if (currentIndex() == 1)
     // Bedrock selected
     return -1;
@@ -59,7 +63,9 @@ void DepthComboBox::setDepth(double location) {
   else {
     // Depth specified
     setCurrentIndex(0);
-    setItemText(0, QString::number(location));
+    setItemText(0, QString("%1 %2")
+                       .arg(location, 0, 'f', 2)
+                       .arg(Units::instance()->length()));
   }
 }
 
@@ -79,11 +85,37 @@ void DepthComboBox::updateEditable(int index) {
 
 void DepthComboBox::toDouble(const QString &string) {
   bool ok = false;
-  double d = string.toDouble(&ok);
+  const double d = parseDepth(string, &ok);
 
   if (ok) {
     emit depthChanged(d);
   } else {
     emit depthChanged(-1);
   }
+}
+
+void DepthComboBox::updateUnits() {
+  if (currentIndex() == 0)
+    // Refresh the displayed suffix to match the current unit system
+    setDepth(parseDepth(currentText()));
+}
+
+auto DepthComboBox::parseDepth(const QString &text, bool *ok) -> double {
+  const QString trimmed = text.trimmed();
+
+  int i = 0;
+  if (i < trimmed.size() && (trimmed.at(i) == '-' || trimmed.at(i) == '+'))
+    ++i;
+
+  while (i < trimmed.size() &&
+         (trimmed.at(i).isDigit() || trimmed.at(i) == '.'))
+    ++i;
+
+  bool success = false;
+  const double d = trimmed.left(i).toDouble(&success);
+
+  if (ok)
+    *ok = success;
+
+  return success ? d : 0.0;
 }
