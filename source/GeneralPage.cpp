@@ -39,17 +39,23 @@ GeneralPage::GeneralPage(QWidget *parent, Qt::WindowFlags f)
     : AbstractPage(parent, f) {
   _methodGroupBox = new MethodGroupBox;
 
-  // Layout of the widget
+  // Layout of the widget -- three columns to reduce vertical space:
+  // col 0: Project; col 1: Type of Analysis / Site Property Variation;
+  // col 2: Calculation Parameters / Layer Discretization.
   auto *layout = new QGridLayout;
-  layout->addWidget(createProjectGroupBox(), 0, 0, 5, 1);
+  layout->addWidget(createProjectGroupBox(), 0, 0, 2, 1);
   layout->addWidget(createAnalysisGroupBox(), 0, 1);
   layout->addWidget(createVariationGroupBox(), 1, 1);
-  layout->addWidget(_methodGroupBox, 2, 1);
-  layout->addWidget(createDiscretizationGroupBox(), 3, 1);
+  layout->addWidget(_methodGroupBox, 0, 2);
+  layout->addWidget(createDiscretizationGroupBox(), 1, 2);
 
   // Add a row of stretching
-  layout->setRowStretch(4, 1);
-  layout->setColumnStretch(0, 1);
+  layout->setRowStretch(2, 1);
+
+  // Project column is wider to accommodate the Notes text edit
+  layout->setColumnStretch(0, 2);
+  layout->setColumnStretch(1, 1);
+  layout->setColumnStretch(2, 1);
 
   setLayout(layout);
 }
