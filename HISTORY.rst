@@ -1,6 +1,15 @@
 History
 =======
 
+v0.9.3 (2026-09-09)
+-------------------
+- Changed: Reflowed the General Settings page into three columns to reduce
+  vertical space on laptop screens.
+- Fixed: Duplicated entries (e.g. 6 instead of 3) in the "Type" drop-down of
+  the Input Motions table.
+- Added: Unit suffix (e.g. "ft") shown on the specified depth in the Motion
+  Input Location and other depth drop-downs.
+
 v0.9.2 (2022-09-22)
 -------------------
 - Fixed: Wang & Rathje peak factor formulation to work if no peak is found

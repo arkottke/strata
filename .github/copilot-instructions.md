@@ -48,20 +48,45 @@ while (maxError > tolerance && iterations < maxIterations)
 ## Development Workflows
 
 ### Building
-Use CMake (not qmake). Key dependencies: Qt6, GSL (GNU Scientific Library), Qwt (plotting).
+Uses CMake Presets + vcpkg (not qmake) for reproducible builds across platforms. Dependencies
+(Qt6, GSL, Qwt) are fetched/built by the vcpkg submodule — do not assume they're preinstalled.
 ```bash
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DADVANCED_FEATURES=ON
-make -j2
+git submodule update --init --recursive   # if vcpkg/ submodule is missing
+./vcpkg/bootstrap-vcpkg.sh                # one-time, Linux/macOS
+
+cmake --preset linux-release              # or macos-release / windows-release / linux-debug
+cmake --build --preset linux-release
 ```
+`ADVANCED_FEATURES` (frequency-dependent calculator) is a CMake option, `ON` by default.
+Compiled binary: `build/<preset-name>/source/strata`.
 
 ### Testing
-- Tests in `tests/` directory using custom CMake test framework
-- Examples in `example/` directory (`.strata`, `.json` files)
-- No comprehensive unit test suite - validation relies on comparison with SHAKE and analytical solutions
+- No unit test framework; regression tests compare full `strata -b <file>` runs against
+  reference outputs using `scripts/compare_examples.py`.
+- Registered as a single CTest test (`example_regression`) that runs the script over every
+  case in `example/`:
+  ```bash
+  cd build/linux-release
+  ctest -R example_regression --output-on-failure
+  ```
+- To test one example directly (faster iteration on a single case), invoke the script or the
+  binary yourself:
+  ```bash
+  python3 scripts/compare_examples.py build/linux-release/source/strata example/<case-dir>
+  # or run the batch mode directly and inspect output
+  build/linux-release/source/strata -b example/<case-dir>/example.json
+  ```
+- `test/` contains legacy SHAKE2000 comparison data (`test/shake2000b/`) and standalone
+  `.strata` fixtures, not part of the automated CTest suite.
 
 ### Code Formatting
-CI enforces clang-format. Run locally: `clang-format -i source/*.{cpp,h}`
+No `.clang-format` file is checked in, so formatting follows clang-format's default (LLVM)
+style. Enforced two ways — match whichever tool you have available:
+- `pre-commit` hook (`.pre-commit-config.yaml`, clang-format v22) run on `source/`.
+- CI workflow (`.github/workflows/clang-format.yml`) that auto-commits formatting fixes on push.
+```bash
+clang-format -i source/*.{cpp,h}
+```
 
 ## Project-Specific Conventions
 

@@ -41,5 +41,11 @@ signals:
 protected slots:
   void updateEditable(int index);
   void toDouble(const QString &string);
+  void updateUnits();
+
+private:
+  //! Extract the leading numeric portion of the text, ignoring any trailing
+  //! unit suffix (e.g. "10.00 ft" -> 10.00).
+  static auto parseDepth(const QString &text, bool *ok = nullptr) -> double;
 };
 #endif
