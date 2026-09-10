@@ -13,6 +13,11 @@ v0.9.3 (2026-09-10)
   the Input Motions table.
 - Added: Unit suffix (e.g. "ft") shown on the specified depth in the Motion
   Input Location and other depth drop-downs.
+- Fixed: example-08.json regression example failed the new preflight
+  validation because its RVT motion's frequency array was rounded to only
+  ~3 significant figures, producing non-increasing values. Regenerated the
+  frequency array from its exact log-spaced values and the corresponding
+  Fourier amplitudes with a smoothing fit, restoring full precision.
 
 v0.9.2 (2022-09-22)
 -------------------
