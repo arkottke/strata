@@ -123,3 +123,9 @@ Examples for testing are located in the `example/` directory. Regression tests c
 cd build/<preset-name>
 ctest
 ```
+
+## Contributing and Release Workflow
+
+- Branches and PRs should be merged into `dev` prior to `main` so that multi-platform binaries and installers are built and validated via CI artifacts (`.github/workflows/release.yml`).
+- After validating the build artifacts on `dev`, changes can be merged into `main` for release.
+

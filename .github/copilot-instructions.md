@@ -47,6 +47,11 @@ while (maxError > tolerance && iterations < maxIterations)
 
 ## Development Workflows
 
+### Branching and Release Workflow
+- Feature and bugfix branches should be merged into `dev` prior to merging into `main`.
+- Pushing to `dev` triggers the CI release workflow (`.github/workflows/release.yml`) which builds and packages platform-native installers (Windows, macOS, Linux) as downloadable workflow artifacts for verification.
+- Once verified on `dev`, changes can be merged into `main` and tagged/released.
+
 ### Building
 Uses CMake Presets + vcpkg (not qmake) for reproducible builds across platforms. Dependencies
 (Qt6, GSL, Qwt) are fetched/built by the vcpkg submodule — do not assume they're preinstalled.
