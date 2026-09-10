@@ -1,8 +1,12 @@
 History
 =======
 
-v0.9.3 (2026-09-09)
+v0.9.3 (2026-09-10)
 -------------------
+- Added: Comprehensive preflight input validation to check model parameters
+  and report actionable errors before calculations start in GUI and batch modes.
+- Fixed: Resolved NaN propagation in CompatibleRvtMotion when calculation
+  frequencies exceed target spectrum range.
 - Changed: Reflowed the General Settings page into three columns to reduce
   vertical space on laptop screens.
 - Fixed: Duplicated entries (e.g. 6 instead of 3) in the "Type" drop-down of
