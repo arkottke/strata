@@ -117,6 +117,15 @@ if (Python3_FOUND)
             ${CMAKE_SOURCE_DIR}/example
     )
     set_tests_properties(example_regression PROPERTIES TIMEOUT 600)
+
+    add_test(
+        NAME input_validation
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/scripts/test_validation.py
+            $<TARGET_FILE:strata>
+            ${CMAKE_SOURCE_DIR}/example/example-01.json
+    )
+    set_tests_properties(input_validation PROPERTIES TIMEOUT 60)
 endif()
 
 # CPack Configuration

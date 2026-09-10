@@ -54,6 +54,12 @@ private:
 
   // timer for updates
   QElapsedTimer _timer;
+
+  // Whether the current model passed preflight validation.
+  bool _currentModelIsValid;
+
+  // Whether any requested input failed validation or calculation.
+  bool _hasFailures;
 };
 
 #endif // BATCHRUNNER_H

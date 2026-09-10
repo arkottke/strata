@@ -24,6 +24,7 @@
 
 #include <QDataStream>
 #include <QJsonObject>
+#include <QStringList>
 #include <QThread>
 
 #include <atomic>
@@ -94,6 +95,9 @@ public:
 
   //! Create a html document containing the information of the model
   auto toHtml() -> QString;
+
+  //! Return all input problems that prevent a calculation from starting.
+  auto validationErrors() -> QStringList;
 
 public slots:
   void setFileName(const QString &fileName);
