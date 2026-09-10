@@ -30,6 +30,21 @@
 
 #include <QDebug>
 
+#include <cmath>
+
+namespace {
+//! Small positive floor used in place of non-positive/non-finite FAS values
+//! before taking their log(). A cubic-spline overshoot right at the target
+//! spectrum's boundary (or a degenerate frequency range) can otherwise
+//! produce a zero/negative/NaN FAS value that, once logged, poisons every
+//! subsequently extrapolated point with NaN.
+constexpr double kFasFloor = 1e-12;
+
+auto safeFasForLog(double value) -> double {
+  return (std::isfinite(value) && value > 0.0) ? value : kFasFloor;
+}
+} // namespace
+
 CompatibleRvtMotion::CompatibleRvtMotion(QObject *parent)
     : AbstractRvtMotion(parent) {
   _freq = new Dimension(this);
@@ -190,8 +205,15 @@ void CompatibleRvtMotion::calculate() {
       if (highOffset == freq().size()) {
         highOffset = i;
       }
-      double logFreqHigh = log(targetMaxFreq);
-      double logFasHigh = log(_fourierAcc[highOffset - 1]);
+      const double logFreqHigh = log(targetMaxFreq);
+      // Anchor to the last interpolated point, or (if the entire frequency
+      // range lies above the target spectrum's highest analyzed frequency,
+      // i.e. highOffset == 0) fall back to the FAS estimate at the target
+      // spectrum's shortest period. Guard against non-positive/non-finite
+      // values (e.g. a cubic-spline overshoot right at the boundary) so a
+      // single bad point cannot poison the whole extrapolated tail with NaN.
+      const double logFasHigh = log(safeFasForLog(
+          highOffset >= 1 ? _fourierAcc[highOffset - 1] : estimateFas.first()));
       // Use a decay slope of -2 in log-log space
       _fourierAcc[i] =
           exp(-2.0 * (log(freq().at(i)) - logFreqHigh) + logFasHigh);
@@ -201,6 +223,10 @@ void CompatibleRvtMotion::calculate() {
   }
 
   ++offset;
+
+  // Guard against any non-finite/non-positive values introduced by the
+  // interpolation/extrapolation above before they propagate further.
+  sanitizeFourierAcc();
 
   gsl_spline_free(spline);
   gsl_interp_accel_free(acc);
@@ -248,14 +274,19 @@ void CompatibleRvtMotion::calculate() {
     }
 
     // Extrapolate the low frequency values
-    double logFreq0 = log(freq().at(offset));
-    double logFas0 = log(_fourierAcc.at(offset));
+    const double logFreq0 = log(freq().at(offset));
+    const double logFas0 = log(safeFasForLog(_fourierAcc.at(offset)));
 
-    // The theoretical slope at low frequencies
-    double slope =
-        _limitFas ? 2
-                  : (log(_fourierAcc.at(offset) / _fourierAcc.at(offset + 1)) /
-                     log(freq().at(offset) / freq().at(offset + 1)));
+    // The theoretical slope at low frequencies. Guard the "offset + 1"
+    // index (used to estimate the local slope) against running past the
+    // last valid point, and sanitize the FAS values used in log().
+    const int slopeIdx = (offset + 1 < freq().size()) ? offset + 1 : offset;
+    double slope = _limitFas ? 2
+                             : (log(safeFasForLog(_fourierAcc.at(offset)) /
+                                    safeFasForLog(_fourierAcc.at(slopeIdx))) /
+                                log(freq().at(offset) / freq().at(slopeIdx)));
+    if (!std::isfinite(slope))
+      slope = 2;
 
     for (int i = 0; i < offset; ++i) {
       _fourierAcc[i] = exp(slope * (log(freq().at(i)) - logFreq0) + logFas0);
@@ -263,16 +294,26 @@ void CompatibleRvtMotion::calculate() {
 
     // Extrapolate the high frequency values beyond the target spectrum
     if (highOffset < freq().size()) {
-      double logFreqHigh = log(freq().at(highOffset - 1));
-      double logFasHigh = log(_fourierAcc.at(highOffset - 1));
+      // Anchor to the last ratio-corrected point, or (if highOffset == 0,
+      // meaning the whole frequency range lies above the target spectrum's
+      // highest analyzed frequency) fall back to the target spectrum's edge
+      // frequency/FAS estimate. Sanitize values used in log() to guard
+      // against a spline overshoot producing a non-positive/non-finite FAS.
+      const double logFreqHigh =
+          highOffset >= 1 ? log(freq().at(highOffset - 1)) : log(targetMaxFreq);
+      const double logFasHigh =
+          log(safeFasForLog(highOffset >= 1 ? _fourierAcc.at(highOffset - 1)
+                                            : estimateFas.first()));
       double highSlope =
           (highOffset >= 2)
-              ? (log(_fourierAcc.at(highOffset - 1) /
-                     _fourierAcc.at(highOffset - 2)) /
+              ? (log(safeFasForLog(_fourierAcc.at(highOffset - 1)) /
+                     safeFasForLog(_fourierAcc.at(highOffset - 2))) /
                  log(freq().at(highOffset - 1) / freq().at(highOffset - 2)))
               : -2.0;
-      // Ensure the slope is negative (decaying)
-      if (highSlope > 0)
+      // Ensure the slope is negative (decaying) and finite. Note that a
+      // plain "highSlope > 0" check does not catch NaN, since comparisons
+      // with NaN are always false.
+      if (!std::isfinite(highSlope) || highSlope > 0)
         highSlope = -2.0;
 
       for (int i = highOffset; i < freq().size(); ++i) {
@@ -300,14 +341,15 @@ void CompatibleRvtMotion::calculate() {
 
       for (int i = startIdx + 1; i < freq().size(); ++i) {
         double logFreqRatio = log(freq().at(i) / freq().at(i - 1));
-        double logFasSlope =
-            log(_fourierAcc.at(i) / _fourierAcc.at(i - 1)) / logFreqRatio;
+        double logFasSlope = log(safeFasForLog(_fourierAcc.at(i)) /
+                                 safeFasForLog(_fourierAcc.at(i - 1))) /
+                             logFreqRatio;
 
         if (logFasSlope > prevSlope) {
           // Slope became flatter or positive: extrapolate from here
           // to the end using the previous slope
           double logFreq0 = log(freq().at(i - 1));
-          double logFas0 = log(_fourierAcc.at(i - 1));
+          double logFas0 = log(safeFasForLog(_fourierAcc.at(i - 1)));
           for (int j = i; j < freq().size(); ++j) {
             _fourierAcc[j] =
                 exp(prevSlope * (log(freq().at(j)) - logFreq0) + logFas0);
@@ -317,6 +359,11 @@ void CompatibleRvtMotion::calculate() {
         prevSlope = logFasSlope;
       }
     }
+
+    // Guard against any non-finite/non-positive values introduced by the
+    // interpolation/extrapolation above before recomputing the response
+    // spectrum from them.
+    sanitizeFourierAcc();
 
     // Re-compute the Sa
     _respSpec->setSa(
@@ -367,6 +414,28 @@ void CompatibleRvtMotion::calculate() {
   endResetModel();
 
   AbstractRvtMotion::calculate();
+}
+
+auto CompatibleRvtMotion::sanitizeFourierAcc() -> bool {
+  bool replaced = false;
+
+  for (int i = 0; i < _fourierAcc.size(); ++i) {
+    const double value = _fourierAcc.at(i);
+    if (!std::isfinite(value) || value <= 0.0) {
+      _fourierAcc[i] = kFasFloor;
+      replaced = true;
+    }
+  }
+
+  if (replaced) {
+    qWarning() << tr("CompatibleRvtMotion: replaced non-finite or "
+                     "non-positive Fourier amplitude spectrum value(s). "
+                     "Check the target response spectrum and frequency "
+                     "range -- results may be unreliable near the affected "
+                     "frequencies.");
+  }
+
+  return replaced;
 }
 
 auto CompatibleRvtMotion::vanmarckeInversion() const -> QVector<double> {

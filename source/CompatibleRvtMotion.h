@@ -81,6 +81,12 @@ private:
    */
   auto vanmarckeInversion() const -> QVector<double>;
 
+  //! Replace non-positive/non-finite entries in _fourierAcc with a small
+  //! positive floor value so that later log() calls (used for log-log
+  //! extrapolation) cannot produce NaN/-inf and silently corrupt the whole
+  //! Fourier amplitude spectrum. Returns true if any entries were replaced.
+  auto sanitizeFourierAcc() -> bool;
+
   //! If the FAS should be corrected to better fit theory
   bool _limitFas;
 
