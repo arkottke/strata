@@ -47,13 +47,13 @@
 #include "SoilProfile.h"
 #include "SoilType.h"
 #include "SoilTypeCatalog.h"
-#include "SourceTheoryRvtMotion.h"
-#include "TimeSeriesMotion.h"
 #include "SoilTypesOutputCatalog.h"
+#include "SourceTheoryRvtMotion.h"
 #include "TextLog.h"
+#include "TimeSeriesMotion.h"
 #include "Units.h"
-#include "VelocityVariation.h"
 #include "VelocityLayer.h"
+#include "VelocityVariation.h"
 
 #include <QApplication>
 #include <QFile>
@@ -75,8 +75,7 @@ void addError(QStringList &errors, const QString &message) {
 }
 
 void validateDimension(QStringList &errors, const QString &name,
-                       Dimension *dimension, double minimum,
-                       double maximum) {
+                       Dimension *dimension, double minimum, double maximum) {
   if (!validNumber(dimension->min()) || !validNumber(dimension->max()) ||
       dimension->min() < minimum || dimension->max() > maximum ||
       dimension->min() >= dimension->max()) {
@@ -87,46 +86,48 @@ void validateDimension(QStringList &errors, const QString &name,
                          .arg(maximum));
   }
   if (dimension->size() < 2 || dimension->size() > 16384) {
-    addError(errors, QObject::tr("%1 must contain 2 to 16384 points.")
-                         .arg(name));
+    addError(errors,
+             QObject::tr("%1 must contain 2 to 16384 points.").arg(name));
   }
 }
 
 void validateDistribution(QStringList &errors, const QString &name,
-                          AbstractDistribution *distribution,
-                          bool positive) {
+                          AbstractDistribution *distribution, bool positive) {
   if (!validNumber(distribution->avg()) ||
       (positive && distribution->avg() <= 0.0)) {
-    addError(errors, QObject::tr("%1 average must be a finite positive value.")
-                         .arg(name));
+    addError(
+        errors,
+        QObject::tr("%1 average must be a finite positive value.").arg(name));
   }
   if (distribution->type() < AbstractDistribution::Uniform ||
       distribution->type() > AbstractDistribution::LogNormal) {
-    addError(errors, QObject::tr("%1 has an invalid distribution type.")
-                         .arg(name));
+    addError(errors,
+             QObject::tr("%1 has an invalid distribution type.").arg(name));
   }
   if (distribution->type() != AbstractDistribution::Uniform &&
       (!validNumber(distribution->stdev()) || distribution->stdev() < 0.0)) {
-    addError(errors,
-             QObject::tr("%1 standard deviation must be finite and nonnegative.")
-                 .arg(name));
+    addError(
+        errors,
+        QObject::tr("%1 standard deviation must be finite and nonnegative.")
+            .arg(name));
   }
-  if (distribution->hasMin() &&
-      (!validNumber(distribution->min()) ||
-       (positive && distribution->min() <= 0.0))) {
-    addError(errors, QObject::tr("%1 minimum must be a finite positive value.")
-                         .arg(name));
+  if (distribution->hasMin() && (!validNumber(distribution->min()) ||
+                                 (positive && distribution->min() <= 0.0))) {
+    addError(
+        errors,
+        QObject::tr("%1 minimum must be a finite positive value.").arg(name));
   }
-  if (distribution->hasMax() &&
-      (!validNumber(distribution->max()) ||
-       (positive && distribution->max() <= 0.0))) {
-    addError(errors, QObject::tr("%1 maximum must be a finite positive value.")
-                         .arg(name));
+  if (distribution->hasMax() && (!validNumber(distribution->max()) ||
+                                 (positive && distribution->max() <= 0.0))) {
+    addError(
+        errors,
+        QObject::tr("%1 maximum must be a finite positive value.").arg(name));
   }
   if (distribution->hasMin() && distribution->hasMax() &&
       distribution->min() >= distribution->max()) {
-    addError(errors, QObject::tr("%1 minimum must be less than its maximum.")
-                         .arg(name));
+    addError(
+        errors,
+        QObject::tr("%1 minimum must be less than its maximum.").arg(name));
   }
 }
 
@@ -572,8 +573,8 @@ auto SiteResponseModel::validationErrors() -> QStringList {
     SoilLayer *layer = _siteProfile->soilLayers().at(i);
     const QString name = tr("Soil layer %1").arg(i + 1);
     if (!validNumber(layer->thickness()) || layer->thickness() <= 0.0) {
-      addError(errors, tr("%1 thickness must be a finite positive value.")
-                           .arg(name));
+      addError(errors,
+               tr("%1 thickness must be a finite positive value.").arg(name));
     }
     if (!layer->soilType()) {
       addError(errors, tr("%1 must have an assigned soil type.").arg(name));
@@ -587,12 +588,13 @@ auto SiteResponseModel::validationErrors() -> QStringList {
     SoilType *soilType = soilTypes->soilType(i);
     const QString name = tr("Soil type %1").arg(i + 1);
     if (!validNumber(soilType->untWt()) || soilType->untWt() <= 0.0) {
-      addError(errors, tr("%1 unit weight must be a finite positive value.")
-                           .arg(name));
+      addError(errors,
+               tr("%1 unit weight must be a finite positive value.").arg(name));
     }
     if (!validNumber(soilType->damping()) || soilType->damping() < 0.0) {
-      addError(errors, tr("%1 initial damping must be finite and nonnegative.")
-                           .arg(name));
+      addError(
+          errors,
+          tr("%1 initial damping must be finite and nonnegative.").arg(name));
     }
     if (nonlinearPropertiesRequired()) {
       validateNonlinearProperty(errors, name + tr(" modulus curve"),
@@ -602,17 +604,20 @@ auto SiteResponseModel::validationErrors() -> QStringList {
     }
   }
 
-  if (auto *iterative = qobject_cast<AbstractIterativeCalculator *>(_calculator)) {
+  if (auto *iterative =
+          qobject_cast<AbstractIterativeCalculator *>(_calculator)) {
     if (iterative->maxIterations() < 2 || iterative->maxIterations() > 60) {
       addError(errors, tr("Maximum iterations must be between 2 and 60."));
     }
     if (!validNumber(iterative->errorTolerance()) ||
         iterative->errorTolerance() < 0.5 ||
         iterative->errorTolerance() > 10.0) {
-      addError(errors, tr("Error tolerance must be between 0.5 and 10 percent."));
+      addError(errors,
+               tr("Error tolerance must be between 0.5 and 10 percent."));
     }
   }
-  if (auto *equivalent = qobject_cast<EquivalentLinearCalculator *>(_calculator)) {
+  if (auto *equivalent =
+          qobject_cast<EquivalentLinearCalculator *>(_calculator)) {
     if (!validNumber(equivalent->strainRatio()) ||
         equivalent->strainRatio() < 0.45 || equivalent->strainRatio() > 0.80) {
       addError(errors,
@@ -646,9 +651,9 @@ auto SiteResponseModel::validationErrors() -> QStringList {
            !validNumber(velocity->correlIntercept()) ||
            !validNumber(velocity->correlExponent()) ||
            velocity->correlInitial() < -1.0 ||
-           velocity->correlInitial() > 1.0 ||
-           velocity->correlFinal() < -1.0 || velocity->correlFinal() > 1.0 ||
-           velocity->correlDelta() < 0.0 || velocity->correlDelta() > 10.0 ||
+           velocity->correlInitial() > 1.0 || velocity->correlFinal() < -1.0 ||
+           velocity->correlFinal() > 1.0 || velocity->correlDelta() < 0.0 ||
+           velocity->correlDelta() > 10.0 ||
            velocity->correlIntercept() < 0.0 ||
            velocity->correlIntercept() > 100.0 ||
            velocity->correlExponent() < 0.0 ||
@@ -668,8 +673,7 @@ auto SiteResponseModel::validationErrors() -> QStringList {
       addError(errors,
                tr("Layer-thickness variation parameters are out of range."));
     }
-    BedrockDepthVariation *bedrockDepth =
-        randomizer->bedrockDepthVariation();
+    BedrockDepthVariation *bedrockDepth = randomizer->bedrockDepthVariation();
     if (bedrockDepth->enabled()) {
       validateDistribution(errors, tr("Bedrock-depth variation"), bedrockDepth,
                            true);
@@ -681,12 +685,14 @@ auto SiteResponseModel::validationErrors() -> QStringList {
   if (nonlinearRandomizer->enabled()) {
     if (nonlinearRandomizer->model() < NonlinearPropertyRandomizer::SPID ||
         nonlinearRandomizer->model() > NonlinearPropertyRandomizer::Darendeli) {
-      addError(errors, tr("Nonlinear-property variation has an invalid model."));
+      addError(errors,
+               tr("Nonlinear-property variation has an invalid model."));
     }
     if (!validNumber(nonlinearRandomizer->correl()) ||
         nonlinearRandomizer->correl() < -1.0 ||
         nonlinearRandomizer->correl() > 1.0) {
-      addError(errors, tr("Nonlinear-property correlation must be between -1 and 1."));
+      addError(errors,
+               tr("Nonlinear-property correlation must be between -1 and 1."));
     }
     if (nonlinearRandomizer->customEnabled()) {
       validateUncertainty(errors, tr("Modulus uncertainty"),
@@ -707,65 +713,72 @@ auto SiteResponseModel::validationErrors() -> QStringList {
       }
       if (!validNumber(timeSeries->timeStep()) ||
           timeSeries->timeStep() < 0.0001 || timeSeries->timeStep() > 0.05) {
-        addError(errors, tr("%1 time step must be between 0.0001 and 0.05 seconds.")
-                             .arg(name));
+        addError(errors,
+                 tr("%1 time step must be between 0.0001 and 0.05 seconds.")
+                     .arg(name));
       }
       if (!validNumber(timeSeries->scale()) || timeSeries->scale() < 0.001 ||
           timeSeries->scale() > 20.0) {
-        addError(errors, tr("%1 scale must be between 0.001 and 20.").arg(name));
+        addError(errors,
+                 tr("%1 scale must be between 0.001 and 20.").arg(name));
       }
     } else if (auto *rvt = qobject_cast<RvtMotion *>(motion)) {
       if (!validNumber(rvt->duration()) || rvt->duration() <= 0.0 ||
           rvt->freq().size() < 2 ||
           rvt->freq().size() != rvt->fourierAcc().size()) {
-        addError(errors, tr("%1 must define a positive duration and at least two "
-                             "frequency-amplitude pairs.")
-                             .arg(name));
+        addError(errors,
+                 tr("%1 must define a positive duration and at least two "
+                    "frequency-amplitude pairs.")
+                     .arg(name));
       } else {
         for (int j = 0; j < rvt->freq().size(); ++j) {
           if (!validNumber(rvt->freq().at(j)) || rvt->freq().at(j) <= 0.0 ||
               !validNumber(rvt->fourierAcc().at(j)) ||
               rvt->fourierAcc().at(j) <= 0.0 ||
               (j > 0 && rvt->freq().at(j - 1) >= rvt->freq().at(j))) {
-            addError(errors, tr("%1 has invalid frequency-amplitude data.")
-                                 .arg(name));
+            addError(errors,
+                     tr("%1 has invalid frequency-amplitude data.").arg(name));
             break;
           }
         }
       }
     } else if (auto *compatible = qobject_cast<CompatibleRvtMotion *>(motion)) {
-      validateDimension(errors, name + tr(" frequency"), compatible->freqDimension(),
-                        0.001, 1000.0);
+      validateDimension(errors, name + tr(" frequency"),
+                        compatible->freqDimension(), 0.001, 1000.0);
       ResponseSpectrum *spectrum = compatible->targetRespSpec();
-      if (!validNumber(compatible->duration()) || compatible->duration() <= 0.0 ||
-          spectrum->period().size() < 2 ||
+      if (!validNumber(compatible->duration()) ||
+          compatible->duration() <= 0.0 || spectrum->period().size() < 2 ||
           spectrum->period().size() != spectrum->sa().size()) {
-        addError(errors, tr("%1 must define a positive duration and target response "
-                             "spectrum.")
-                             .arg(name));
+        addError(errors,
+                 tr("%1 must define a positive duration and target response "
+                    "spectrum.")
+                     .arg(name));
       } else {
         for (int j = 0; j < spectrum->period().size(); ++j) {
           if (!validNumber(spectrum->period().at(j)) ||
               spectrum->period().at(j) <= 0.0 ||
-              !validNumber(spectrum->sa().at(j)) || spectrum->sa().at(j) < 0.0 ||
-              (j > 0 && spectrum->period().at(j - 1) >=
-                            spectrum->period().at(j))) {
-            addError(errors, tr("%1 has invalid target response-spectrum data.")
-                                 .arg(name));
+              !validNumber(spectrum->sa().at(j)) ||
+              spectrum->sa().at(j) < 0.0 ||
+              (j > 0 &&
+               spectrum->period().at(j - 1) >= spectrum->period().at(j))) {
+            addError(
+                errors,
+                tr("%1 has invalid target response-spectrum data.").arg(name));
             break;
           }
         }
       }
     } else if (auto *source = qobject_cast<SourceTheoryRvtMotion *>(motion)) {
-      validateDimension(errors, name + tr(" frequency"), source->freqDimension(),
-                        0.001, 1000.0);
+      validateDimension(errors, name + tr(" frequency"),
+                        source->freqDimension(), 0.001, 1000.0);
       if (!validNumber(source->magnitude()) || source->magnitude() < 4.0 ||
           source->magnitude() > 9.0 || !validNumber(source->distance()) ||
           source->distance() < 0.0 || source->distance() > 2000.0 ||
           !validNumber(source->depth()) || source->depth() <= 0.0 ||
           !validNumber(source->duration()) || source->duration() <= 0.0) {
-        addError(errors, tr("%1 has invalid source-theory scenario parameters.")
-                             .arg(name));
+        addError(
+            errors,
+            tr("%1 has invalid source-theory scenario parameters.").arg(name));
       }
       if (source->isCustomized() &&
           (!validNumber(source->stressDrop()) || source->stressDrop() <= 0.0 ||
@@ -775,11 +788,12 @@ auto SiteResponseModel::validationErrors() -> QStringList {
            !validNumber(source->pathAttenPower()) ||
            source->pathAttenPower() <= 0.0 ||
            !validNumber(source->shearVelocity()) ||
-           source->shearVelocity() <= 0.0 ||
-           !validNumber(source->density()) || source->density() <= 0.0 ||
-           !validNumber(source->siteAtten()) || source->siteAtten() < 0.0)) {
-        addError(errors, tr("%1 has invalid customized source-theory parameters.")
-                             .arg(name));
+           source->shearVelocity() <= 0.0 || !validNumber(source->density()) ||
+           source->density() <= 0.0 || !validNumber(source->siteAtten()) ||
+           source->siteAtten() < 0.0)) {
+        addError(errors,
+                 tr("%1 has invalid customized source-theory parameters.")
+                     .arg(name));
       }
     }
   }
@@ -787,7 +801,9 @@ auto SiteResponseModel::validationErrors() -> QStringList {
   if (_outputCatalog->periodIsNeeded()) {
     if (!validNumber(_outputCatalog->damping()) ||
         _outputCatalog->damping() < 1.0 || _outputCatalog->damping() > 50.0) {
-      addError(errors, tr("Response spectrum damping must be between 1 and 50 percent."));
+      addError(
+          errors,
+          tr("Response spectrum damping must be between 1 and 50 percent."));
     }
     validateDimension(errors, tr("Response spectrum periods"),
                       _outputCatalog->period(), 0.001, 100.0);

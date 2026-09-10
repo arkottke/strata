@@ -24,8 +24,8 @@
 #include "OutputCatalog.h"
 #include "TextLog.h"
 
-#include <QLocale>
 #include <QCoreApplication>
+#include <QLocale>
 #include <QTextDocument>
 #include <QTimer>
 #include <QtDebug>
