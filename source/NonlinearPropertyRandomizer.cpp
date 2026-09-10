@@ -85,8 +85,13 @@ void NonlinearPropertyRandomizer::setModel(Model model) {
   if (_model != model) {
     _model = model;
     emit modelChanged(_model);
+    emit customEnabledChanged(customEnabled());
     emit wasModified();
   }
+}
+
+auto NonlinearPropertyRandomizer::customEnabled() const -> bool {
+  return _model == SPID;
 }
 
 auto NonlinearPropertyRandomizer::bedrockIsEnabled() const -> bool {
